@@ -10,3 +10,5 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 # SQLite is only for isolated HTTP/schema tests. Integration CI sets the flag below.
 if os.environ.get("LIWA_TEST_POSTGIS") != "1":
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
+    # GIS admin discovery imports GDAL even when the HTTP tests never touch geometry.
+    INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.gis"]  # noqa: F405
