@@ -4,11 +4,11 @@ Liwa Atlas : plateforme immobilière cartographique évolutive, avec dossiers so
 
 ## Documents de cadrage
 
-- [Étude produit](ETUDE_PRODUIT_LIWA_ATLAS.md)
-- [Approfondissement stratégique](STRATEGIE_PRODUIT_LIWA_ATLAS.md)
-- [Architecture actuelle — revue critique V2](REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md)
-- [Contre-audit : décision maintenue et conditions de validation](AUDIT_DECISION_STACK_LIWA_ATLAS.md)
-- [Proposition de stack précédente — historique](ARCHITECTURE_STACK_LIWA_ATLAS.md)
+- [Étude produit](docs/product/ETUDE_PRODUIT_LIWA_ATLAS.md)
+- [Approfondissement stratégique](docs/product/STRATEGIE_PRODUIT_LIWA_ATLAS.md)
+- [Architecture actuelle — revue critique V2](docs/architecture/REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md)
+- [Contre-audit : décision maintenue et conditions de validation](docs/architecture/AUDIT_DECISION_STACK_LIWA_ATLAS.md)
+- [Proposition de stack précédente — historique](docs/archive/ARCHITECTURE_STACK_LIWA_ATLAS.md)
 
 Le dépôt contient le cadrage et un premier socle exécutable : Next.js/TypeScript, Django/Django Ninja, contrats OpenAPI générés et configuration PostgreSQL/PostGIS. La carte, les modèles métier, l'authentification, le stockage et les workers seront intégrés avec le dossier pilote. Le budget de pilote et ses limites sont détaillés dans la revue V2 ; aucun déploiement public n'est effectué.
 
@@ -21,3 +21,5 @@ Le dépôt contient le cadrage et un premier socle exécutable : Next.js/TypeScr
 - `.github/workflows` : qualité, compilation, frontières de modules et intégration PostGIS.
 
 Lire [les règles de structure](docs/engineering/REPOSITORY.md) et [le guide de développement](docs/engineering/DEVELOPMENT.md). Les dépendances JavaScript et Python sont verrouillées ; les directions entre modules et la cohérence des contrats sont vérifiées automatiquement.
+
+L'interface utilise l'anglais par défaut, des routes par langue et des traductions séparées. Voir [la politique multilingue](docs/engineering/INTERNATIONALIZATION.md) et [la revue de structure](docs/engineering/STRUCTURE_REVIEW.md).

@@ -8,9 +8,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   web:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -22,10 +27,16 @@ jobs:
       - run: pnpm lint
       - run: pnpm contracts:check
       - run: pnpm typecheck
+      - run: pnpm test:web
+      - run: pnpm docs:check
       - run: pnpm build
+      - run: node scripts/prepare-web-runtime.mjs
+      - run: pnpm smoke:web
+      - run: docker build -t liwa-web-ci -f apps/web/Dockerfile .
 
   api:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     services:
       postgres:
         image: postgis/postgis:17-3.5
@@ -56,5 +67,8 @@ jobs:
       - run: uv run --project apps/api python apps/api/manage.py makemigrations --check --dry-run
       - run: uv run --project apps/api python apps/api/manage.py migrate --noinput
       - run: uv run --project apps/api pytest apps/api/tests -c apps/api/pyproject.toml
-      - run: uv run --project apps/api python -m liwa.export_openapi
+      - run: uv run --project apps/api python -m liwa.export_openapi --output packages/contracts/openapi.json
       - run: git diff --exit-code -- packages/contracts/openapi.json
+      - run: docker compose -f infra/local/compose.yaml config --quiet
+      - run: docker build -t liwa-api-ci -f apps/api/Dockerfile .
+      - run: docker run --rm -e DJANGO_SETTINGS_MODULE=liwa.config.settings.local liwa-api-ci python manage.py check

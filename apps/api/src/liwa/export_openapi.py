@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from pathlib import Path
@@ -11,7 +12,11 @@ django.setup()
 from liwa.api.router import api  # noqa: E402
 
 if __name__ == "__main__":
-    destination = Path(__file__).resolve().parents[4] / "packages/contracts/openapi.json"
+    parser = argparse.ArgumentParser(
+        description="Export the API contract to an explicit destination."
+    )
+    parser.add_argument("--output", type=Path, required=True)
+    destination = parser.parse_args().output
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(
         json.dumps(api.get_openapi_schema(path_prefix="/api/v1/"), indent=2) + "\n",

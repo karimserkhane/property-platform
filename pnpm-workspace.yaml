@@ -5,4 +5,8 @@ packages:
 saveExact: true
 engineStrict: true
 strictPeerDependencies: true
-storeDir: .cache/pnpm
+storeDir: .pnpm-store
+allowBuilds:
+  # Platform binaries are provided by optional dependencies; no lifecycle build is needed.
+  '@parcel/watcher': false
+  '@swc/core': false

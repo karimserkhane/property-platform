@@ -1,10 +1,14 @@
 # Structure et règles de dépendance
 
-Le dépôt conserve les choix de la revue V2 et du contre-audit. Un monorepo contient plusieurs applications, sans en faire des microservices. Les documents produit historiques restent à la racine pour préserver les liens existants.
+Le dépôt conserve les choix de la revue V2 et du contre-audit. Un monorepo contient plusieurs applications, sans en faire des microservices. Les études sont dans `docs/product`, les décisions actuelles dans `docs/architecture` et les propositions remplacées dans `docs/archive`. Seuls README et AGENTS restent des documents Markdown de racine.
 
 ```text
 apps/
   web/                     Next.js ; présentation et orchestration de l'interface
+    messages/              traductions de l'interface par langue
+    src/i18n/              langues, routage et configuration de traduction
+    src/app/[locale]/      pages et layout localisés
+    tests/                 contrats de traduction et routage
   api/
     src/liwa/
       config/              configuration Django, URL et démarrage
@@ -17,7 +21,8 @@ apps/
 packages/
   contracts/               OpenAPI exporté par Python et types TypeScript générés
 infra/local/               PostgreSQL/PostGIS et API locaux via Compose
-docs/engineering/          conventions, développement et décisions d'implémentation
+docs/                     produit, architecture, ingénierie et archives
+scripts/                  contrôles du dépôt et préparation de l'artefact web
 .github/workflows/         vérifications reproductibles
 ```
 
@@ -40,6 +45,7 @@ Les workers légers utiliseront le même paquet Python que l'API, avec un proces
 4. Toute évolution d'API conserve sa compatibilité ou documente une rupture. Les types générés ne sont jamais édités manuellement.
 5. Les migrations sont revues et exécutées explicitement, pas au démarrage concurrent de chaque processus. Les comptes base de migration/exécution seront séparés au déploiement.
 6. Les durées, montants et identifiants sont validés côté serveur. UTC en stockage ; fuseau et format d'affichage côté client.
+7. L'anglais est la langue par défaut. Les traductions d'interface restent séparées des traductions documentaires ; les preuves originales et identifiants restent stables. Les layouts utilisent des propriétés CSS logiques pour le RTL.
 
 ## Ce que le socle ne prétend pas fournir
 

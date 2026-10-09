@@ -12,6 +12,9 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "biome check .",
     "format": "biome format --write .",
+    "test:web": "pnpm --filter @liwa/web test",
+    "docs:check": "node scripts/check-doc-links.mjs",
+    "smoke:web": "node scripts/smoke-web.mjs",
     "contracts:generate": "pnpm --filter @liwa/contracts generate",
     "contracts:check": "pnpm --filter @liwa/contracts check"
   },

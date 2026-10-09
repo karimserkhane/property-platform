@@ -11,8 +11,10 @@ body {
 
 main {
   max-width: 52rem;
-  margin: 12vh auto;
+  margin-block: 10vh;
+  margin-inline: auto;
   padding: 2rem;
+  text-align: start;
 }
 
 h1 {
@@ -31,4 +33,46 @@ p {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  max-width: 52rem;
+  margin-inline: auto;
+  padding: 2rem;
+}
+
+.brand {
+  font-weight: 700;
+}
+
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+select {
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #b3c1ba;
+  border-radius: 0.4rem;
+  padding-block: 0.5rem;
+  padding-inline: 0.7rem;
+  max-width: 12rem;
+}
+
+select:focus-visible {
+  outline: 2px solid #193c38;
+  outline-offset: 3px;
+}
+
+html[dir="rtl"] h1 {
+  letter-spacing: normal;
+  line-height: 1.4;
 }
