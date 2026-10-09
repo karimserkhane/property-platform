@@ -1,0 +1,38 @@
+from typing import Literal
+
+from django.conf import settings
+from django.db import DatabaseError, connection
+from ninja import NinjaAPI, Schema, Status
+
+api = NinjaAPI(
+    title="Liwa Atlas API",
+    version="1.0.0",
+    docs_url="/docs" if settings.DEBUG else None,
+    openapi_url="/openapi.json" if settings.DEBUG else None,
+)
+
+
+class Health(Schema):
+    status: Literal["ok", "ready", "unavailable"]
+
+
+@api.get("/health/live", response=Health, operation_id="healthLive", tags=["health"])
+def live(request):
+    return {"status": "ok"}
+
+
+@api.get(
+    "/health/ready",
+    response={200: Health, 503: Health},
+    operation_id="healthReady",
+    tags=["health"],
+)
+def ready(request):
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT PostGIS_Version()")
+            if not cursor.fetchone():
+                return Status(503, {"status": "unavailable"})
+    except DatabaseError:
+        return Status(503, {"status": "unavailable"})
+    return Status(200, {"status": "ready"})

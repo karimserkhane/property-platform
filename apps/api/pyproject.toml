@@ -1,0 +1,49 @@
+[project]
+name = "liwa-api"
+version = "0.0.0"
+description = "Liwa Atlas domain API and worker runtime"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "django>=5.2,<5.3",
+  "django-ninja>=1.4,<2",
+  "dj-database-url>=3,<4",
+  "psycopg[binary]>=3.2,<4",
+  "gunicorn>=23,<24",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-django>=4.11,<5", "ruff>=0.12,<1", "import-linter>=2.3,<3"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/liwa"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "liwa.config.settings.testing"
+testpaths = ["tests"]
+addopts = "--strict-markers"
+markers = ["postgis: requires a real PostgreSQL/PostGIS database"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.importlinter]
+root_package = "liwa"
+
+[[tool.importlinter.contracts]]
+name = "Domain modules follow their dependency direction"
+type = "layers"
+layers = ["liwa.modules.publication", "liwa.modules.evidence", "liwa.modules.catalog"]
+
+[[tool.importlinter.contracts]]
+name = "Domain modules never import delivery or configuration"
+type = "forbidden"
+source_modules = ["liwa.modules"]
+forbidden_modules = ["liwa.api", "liwa.config"]

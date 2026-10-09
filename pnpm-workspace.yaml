@@ -1,0 +1,8 @@
+packages:
+  - apps/web
+  - packages/*
+
+saveExact: true
+engineStrict: true
+strictPeerDependencies: true
+storeDir: .cache/pnpm

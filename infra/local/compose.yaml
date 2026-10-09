@@ -1,0 +1,36 @@
+name: liwa-local
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_DB: liwa
+      POSTGRES_USER: liwa
+      POSTGRES_PASSWORD: liwa-local-only
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liwa -d liwa"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    environment:
+      DJANGO_SETTINGS_MODULE: liwa.config.settings.local
+      DJANGO_SECRET_KEY: local-development-key-never-use-in-production
+      DATABASE_URL: postgresql://liwa:liwa-local-only@db:5432/liwa
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+
+volumes:
+  postgres-data:

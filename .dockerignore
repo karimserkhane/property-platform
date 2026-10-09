@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/.next
+**/.venv
+.tools-env
+.cache
+.pnpm-store
+**/__pycache__
+**/.env
+**/.env.*
+!**/.env.example

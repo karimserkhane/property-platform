@@ -10,4 +10,14 @@ Liwa Atlas : plateforme immobilière cartographique évolutive, avec dossiers so
 - [Contre-audit : décision maintenue et conditions de validation](AUDIT_DECISION_STACK_LIWA_ATLAS.md)
 - [Proposition de stack précédente — historique](ARCHITECTURE_STACK_LIWA_ATLAS.md)
 
-Le dépôt contient actuellement le cadrage. La stack recommandée après revue est Next.js/TypeScript, Django/Django Ninja/GeoDjango, PostgreSQL/PostGIS et MapLibre, avec des workers Python séparés. Le web adaptatif précède l'application React Native/Expo. Les choix, le budget de pilote inférieur à 500 AED/mois et les essais nécessaires sont détaillés dans la revue V2 ; l'application n'est pas encore implémentée.
+Le dépôt contient le cadrage et un premier socle exécutable : Next.js/TypeScript, Django/Django Ninja, contrats OpenAPI générés et configuration PostgreSQL/PostGIS. La carte, les modèles métier, l'authentification, le stockage et les workers seront intégrés avec le dossier pilote. Le budget de pilote et ses limites sont détaillés dans la revue V2 ; aucun déploiement public n'est effectué.
+
+## Structure et démarrage
+
+- `apps/web` : interface Next.js.
+- `apps/api` : cœur Django/GeoDjango et modules catalogue, preuves, publication.
+- `packages/contracts` : schéma API et types TypeScript générés.
+- `infra/local` : environnement Docker Compose avec PostGIS.
+- `.github/workflows` : qualité, compilation, frontières de modules et intégration PostGIS.
+
+Lire [les règles de structure](docs/engineering/REPOSITORY.md) et [le guide de développement](docs/engineering/DEVELOPMENT.md). Les dépendances JavaScript et Python sont verrouillées ; les directions entre modules et la cohérence des contrats sont vérifiées automatiquement.
