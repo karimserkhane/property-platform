@@ -1,5 +1,7 @@
 # Liwa Atlas — stack et architecture recommandées
 
+> **Document historique, remplacé après revue critique.** La recommandation actuelle est [la revue d'architecture V2](REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md) : Next.js, Django/GeoDjango, PostgreSQL/PostGIS et workers Python. Le contenu ci-dessous conserve la proposition précédente pour rendre l'évolution des décisions traçable ; son budget et ses choix ne constituent plus la référence.
+
 Date : 10 octobre 2026. Budget demandé : moins de 500 AED/mois d’infrastructure au lancement, hors licences de données immobilières et génération de médias. Statut : recommandation documentée avant implémentation ; performances et coûts réels restent à mesurer. Aucun service payant n’a été souscrit.
 
 ## 1. Décision proposée

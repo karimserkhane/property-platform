@@ -6,6 +6,7 @@ Liwa Atlas : plateforme immobilière cartographique évolutive, avec dossiers so
 
 - [Étude produit](ETUDE_PRODUIT_LIWA_ATLAS.md)
 - [Approfondissement stratégique](STRATEGIE_PRODUIT_LIWA_ATLAS.md)
-- [Stack et architecture recommandées](ARCHITECTURE_STACK_LIWA_ATLAS.md)
+- [Architecture actuelle — revue critique V2](REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md)
+- [Proposition de stack précédente — historique](ARCHITECTURE_STACK_LIWA_ATLAS.md)
 
-Le dépôt contient actuellement le cadrage. La stack recommandée est Next.js, NestJS/Fastify, PostgreSQL/PostGIS et MapLibre, avec React Native/Expo pour le mobile. Les choix, leur budget et leurs critères de validation sont détaillés dans le document d’architecture ; l’application n’est pas encore implémentée.
+Le dépôt contient actuellement le cadrage. La stack recommandée après revue est Next.js/TypeScript, Django/Django Ninja/GeoDjango, PostgreSQL/PostGIS et MapLibre, avec des workers Python séparés. Le web adaptatif précède l'application React Native/Expo. Les choix, le budget de pilote inférieur à 500 AED/mois et les essais nécessaires sont détaillés dans la revue V2 ; l'application n'est pas encore implémentée.
