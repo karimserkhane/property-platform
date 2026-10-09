@@ -6,6 +6,7 @@
 - [Contre-audit de la stack](architecture/AUDIT_DECISION_STACK_LIWA_ATLAS.md)
 - [Structure et responsabilités](engineering/REPOSITORY.md)
 - [Démarrage et vérifications](engineering/DEVELOPMENT.md)
+- [Versions des outils et compatibilités](engineering/TOOLCHAIN.md)
 - [Multilingue et RTL](engineering/INTERNATIONALIZATION.md)
 - [Revue critique de structure](engineering/STRUCTURE_REVIEW.md)
 - [Architecture précédente, archivée](archive/ARCHITECTURE_STACK_LIWA_ATLAS.md)

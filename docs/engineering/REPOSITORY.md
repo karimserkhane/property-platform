@@ -2,6 +2,8 @@
 
 Le dépôt conserve les choix de la revue V2 et du contre-audit. Un monorepo contient plusieurs applications, sans en faire des microservices. Les études sont dans `docs/product`, les décisions actuelles dans `docs/architecture` et les propositions remplacées dans `docs/archive`. Seuls README et AGENTS restent des documents Markdown de racine.
 
+Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCHAIN.md) fait référence pour leurs versions et exceptions, tandis que les anciennes études conservent le contexte de leurs décisions.
+
 ```text
 apps/
   web/                     Next.js ; présentation et orchestration de l'interface

@@ -10,3 +10,5 @@ allowBuilds:
   # Platform binaries are provided by optional dependencies; no lifecycle build is needed.
   '@parcel/watcher': false
   '@swc/core': false
+minimumReleaseAgeExclude:
+  - '@types/node@26.6.5'

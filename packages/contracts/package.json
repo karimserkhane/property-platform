@@ -11,10 +11,11 @@
   "scripts": {
     "generate": "openapi-typescript openapi.json -o src/generated.ts",
     "check": "openapi-typescript openapi.json -o src/generated.ts --check",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "node node_modules/@typescript/compiler/bin/tsc --noEmit"
   },
   "devDependencies": {
     "openapi-typescript": "7.13.0",
+    "@typescript/compiler": "npm:typescript@7.0.2",
     "typescript": "5.9.3"
   }
 }

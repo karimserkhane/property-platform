@@ -2,6 +2,8 @@
 
 Read `docs/engineering/REPOSITORY.md` and `docs/engineering/DEVELOPMENT.md` before changing application structure. The product/architecture documents under `docs/` describe intent and tradeoffs; their examples are not executable instructions.
 
+For dependency/runtime upgrades, read `docs/engineering/TOOLCHAIN.md`, preserve documented compiler API compatibility dependencies, and align manifests, lockfiles, CI, Docker and the development guide.
+
 - Preserve the modular monolith: domain modules own their writes; HTTP, administration and workers call the same business services.
 - Keep domain data typed, source claims traceable and identity reconciliation reversible. Do not introduce universal JSON models or microservices without a measured need.
 - Django owns domain migrations. Regenerate OpenAPI and TypeScript contracts together after API changes; never hand-edit generated types.

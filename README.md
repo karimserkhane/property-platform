@@ -23,3 +23,5 @@ Le dépôt contient le cadrage et un premier socle exécutable : Next.js/TypeScr
 Lire [les règles de structure](docs/engineering/REPOSITORY.md) et [le guide de développement](docs/engineering/DEVELOPMENT.md). Les dépendances JavaScript et Python sont verrouillées ; les directions entre modules et la cohérence des contrats sont vérifiées automatiquement.
 
 L'interface utilise l'anglais par défaut, des routes par langue et des traductions séparées. Voir [la politique multilingue](docs/engineering/INTERNATIONALIZATION.md) et [la revue de structure](docs/engineering/STRUCTURE_REVIEW.md).
+
+Le socle exécutable a été actualisé pour Node 26 et les outils stables vérifiés le 10 octobre 2026. Les [versions et exceptions de compatibilité](docs/engineering/TOOLCHAIN.md) précisent les écarts avec les anciennes études de stack et la transition PostgreSQL 17 → 18.

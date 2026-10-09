@@ -4,13 +4,15 @@ Ce guide décrit le **socle actuel du dépôt** : page d'attente multilingue, AP
 
 Les commandes sont prévues pour **Windows et PowerShell**, depuis la racine du dépôt sauf indication contraire. Exécuter chaque commande séparément ; résoudre une erreur avant de poursuivre.
 
+Les versions courantes et les exceptions de compatibilité sont documentées dans [TOOLCHAIN.md](TOOLCHAIN.md). Les anciennes études de stack restent des documents historiques ; les manifestes et ce guide décrivent les versions exécutées.
+
 ## 1. Choisir le parcours
 
 | Objectif | Prérequis | Étapes |
 |---|---|---|
-| Voir et modifier le site | Git, Node.js 24, pnpm 11.25.0 | 2 à 4 |
+| Voir et modifier le site | Git, Node.js 26.11.1, pnpm 12.10.1 | 2 à 4 |
 | Lancer aussi l'API et PostGIS | Prérequis web + Docker Desktop avec Compose | 2 à 6 |
-| Exécuter les outils Python et tests isolés sur Windows | uv 0.13.0 et Python 3.12 géré par uv | 9 |
+| Exécuter les outils Python et tests isolés sur Windows | uv 0.13.0 et Python 3.14.8 géré par uv | 9 |
 
 Python et uv ne sont pas nécessaires sur Windows pour lancer l'API Docker : l'image contient leur environnement et les bibliothèques GIS. Le web actuel fonctionne seul, sans API ni compte Supabase, cartographique ou IA. Aucun service payant n'est requis pour ce lancement local.
 
@@ -18,7 +20,7 @@ Python et uv ne sont pas nécessaires sur Windows pour lancer l'API Docker : l'i
 
 ### 2.1. Git et Node.js
 
-Installer Git si nécessaire depuis [Git pour Windows](https://git-scm.com/download/win) et **Node.js de la branche 24** depuis [Node.js](https://nodejs.org/en/download). Le dépôt accepte Node.js `>=24 <25` : sélectionner 24 même si une version plus récente est proposée.
+Installer Git si nécessaire depuis [Git pour Windows](https://git-scm.com/download/win) et **Node.js 26.11.1** depuis [Node.js](https://nodejs.org/en/download). Le dépôt accepte Node.js `>=26.11.1 <27` ; la CI et les images web utilisent précisément 26.11.1.
 
 Fermer puis rouvrir PowerShell après installation pour actualiser le PATH. Vérifier :
 
@@ -28,18 +30,19 @@ node --version
 npm.cmd --version
 ```
 
-Git et npm doivent afficher leur version ; Node doit afficher **v24.x.x**. Corriger la version utilisée si elle vaut 22, 25 ou 26 avant d'installer les paquets.
+Git et npm doivent afficher leur version ; Node doit afficher **v26.11.1** (ou un correctif 26 plus récent autorisé). Une version 24/25 ou 26 antérieure à 26.11.1 ne satisfait pas les contraintes.
 
 ### 2.2. pnpm
 
 Installer la version fixée dans le dépôt :
 
 ```powershell
-npm.cmd install --global pnpm@11.25.0
+npm.cmd install --global npm@12.2.0
+npm.cmd install --global pnpm@12.10.1
 pnpm.cmd --version
 ```
 
-Résultat attendu : **11.25.0**. Les exemples utilisent `pnpm.cmd` pour éviter les blocages du wrapper PowerShell .ps1, sans changer la politique d'exécution Windows. Il s'agit du même outil que pnpm. Voir [son installation officielle](https://pnpm.io/installation).
+Résultat attendu : **12.10.1**. Les exemples utilisent `pnpm.cmd` pour éviter les blocages du wrapper PowerShell .ps1, sans changer la politique d'exécution Windows. Il s'agit du même outil que pnpm. Voir [son installation officielle](https://pnpm.io/installation).
 
 ### 2.3. Docker, pour l'API et PostGIS seulement
 
@@ -121,13 +124,17 @@ docker compose -f infra/local/compose.yaml up -d --build
 docker compose -f infra/local/compose.yaml ps
 ```
 
-La première commande valide le Compose. La deuxième télécharge PostGIS, construit l'image Python et démarre db et api en arrière-plan. Le premier lancement est plus long que les suivants.
+La première commande valide le Compose. La deuxième télécharge PostgreSQL 18/PostGIS 3.6, construit l'image Python et démarre db et api en arrière-plan. Le premier lancement est plus long que les suivants.
 
 Dans ps, attendre que **db soit healthy** et que **api soit en cours d'exécution**. En cas d'arrêt de l'API ou de base non saine, lire les journaux :
 
 ```powershell
 docker compose -f infra/local/compose.yaml logs --tail 100 db api
 ```
+
+### Changement depuis l'ancien socle PostgreSQL 17
+
+Le Compose utilise désormais le volume `liwa-local_postgres18-data`, monté sous `/var/lib/postgresql`, conformément à l'image PostgreSQL 18. L'ancien volume `liwa-local_postgres-data` est conservé mais **n'est pas migré automatiquement**. Le premier lancement en PostgreSQL 18 initialise une nouvelle base : recréer les migrations et le superutilisateur ci-dessous. Si l'ancien volume contient des données à conserver, préparer un export/restauration ou une migration validée avant de basculer les usages. Ne pas monter directement son répertoire PostgreSQL 17 dans PostgreSQL 18 et ne pas le supprimer. Aucun transfert ou effacement de base n'est exécuté par la mise à jour du dépôt.
 
 ### 5.1. Créer les tables Django
 
@@ -250,7 +257,9 @@ pnpm.cmd docs:check
 pnpm.cmd contracts:check
 ```
 
-Les commandes doivent terminer sans erreur. Elles contrôlent respectivement qualité/style, types, traductions, liens Markdown locaux et cohérence des types générés avec OpenAPI. Pour vérifier aussi le serveur compilé, suivre l'étape 8.
+Les commandes doivent terminer sans erreur. Le typage utilise le compilateur natif TypeScript 7.0.2 via un alias explicite. Next.js utilise le paquet de compatibilité TypeScript 6.0.2 (API embarquée 6.0.3) ; le générateur OpenAPI conserve l'API TypeScript 5.9.3 requise par ses peers. Voir [les versions et exceptions](TOOLCHAIN.md).
+
+Elles contrôlent respectivement qualité/style, types, traductions, liens Markdown locaux et cohérence des types générés avec OpenAPI. Pour vérifier aussi le serveur compilé, suivre l'étape 8.
 
 ### 9.2. Python sur Windows — installation facultative
 
@@ -264,11 +273,11 @@ Cette commande exécute l'installateur officiel dans un processus distinct. Ferm
 
 ```powershell
 uv --version
-uv python install 3.12
-uv sync --project apps/api --frozen --python 3.12
+uv python install 3.14.8
+uv sync --project apps/api --frozen --python 3.14.8
 ```
 
-Résultat attendu : uv **0.13.0** et un environnement Python **3.12** sous apps/api/.venv avec les dépendances de apps/api/uv.lock. uv run --project apps/api sélectionne cet environnement ; aucune activation manuelle n'est requise.
+Résultat attendu : uv **0.13.0** et un environnement Python **3.14.8** sous apps/api/.venv avec les dépendances de apps/api/uv.lock. uv run --project apps/api sélectionne cet environnement ; aucune activation manuelle n'est requise.
 
 Dans un terminal dédié aux tests isolés, retirer les éventuelles variables de configuration héritées :
 
@@ -304,7 +313,7 @@ Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas mod
 |---|---|
 | node, pnpm ou uv introuvable | Rouvrir PowerShell après installation ; vérifier Get-Command node, Get-Command pnpm.cmd ou Get-Command uv |
 | pnpm.ps1 bloqué | Utiliser pnpm.cmd comme dans ce guide |
-| Erreur de version/engine | Vérifier Node 24 et pnpm 11.25.0 ; ne pas contourner engineStrict |
+| Erreur de version/engine | Vérifier Node 26 et pnpm 12.10.1 ; ne pas contourner engineStrict |
 | ERR_PNPM_UNEXPECTED_STORE | Vérifier storeDir dans le dépôt ; réinstaller avec pnpm.cmd install --force --frozen-lockfile si les paquets locaux provenaient d'un autre store |
 | Docker ne joint pas son moteur | Ouvrir Docker Desktop, attendre son démarrage et vérifier les conteneurs Linux avec docker info |
 | Port 8000 ou 5432 occupé | Identifier le programme avec Get-NetTCPConnection -LocalPort 8000,5432 -ErrorAction SilentlyContinue ; arrêter seulement un service reconnu ou adapter les ports locaux dans Compose |
@@ -312,7 +321,7 @@ Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas mod
 | API inchangée après édition Python | Reconstruire l'image API comme à l'étape 7 |
 | Admin refuse la connexion | Vérifier migrations, création du superutilisateur et configuration locale |
 | CSS/JS absent en standalone | Reconstruire puis lancer node scripts/prepare-web-runtime.mjs, ou utiliser start qui fait cette préparation |
-| Erreur certificat TLS à l'installation | Vérifier les certificats du système/réseau ; Node 24 permet $env:NODE_OPTIONS='--use-system-ca', uv accepte --system-certs sur sa commande réseau ; ne pas désactiver la vérification TLS |
+| Erreur certificat TLS à l'installation | Vérifier les certificats du système/réseau ; Node 26 permet $env:NODE_OPTIONS='--use-system-ca', uv accepte --system-certs sur sa commande réseau ; ne pas désactiver la vérification TLS |
 
 ### Cas particulier : cache natif SWC sous Windows
 
