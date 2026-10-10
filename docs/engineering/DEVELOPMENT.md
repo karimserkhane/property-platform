@@ -6,6 +6,24 @@ Les commandes sont prévues pour **Windows et PowerShell**, depuis la racine du 
 
 Les versions courantes et les exceptions de compatibilité sont documentées dans [TOOLCHAIN.md](TOOLCHAIN.md). Les anciennes études de stack restent des documents historiques ; les manifestes et ce guide décrivent les versions exécutées.
 
+## Avant de commencer : où écrire les commandes ?
+
+Ce document est un mode d'emploi. Les blocs intitulés `powershell` contiennent des commandes à **copier dans un terminal**, puis exécuter avec la touche **Entrée**. Ne pas les écrire dans un fichier du projet, dans la barre d'adresse du navigateur ou sur GitHub.
+
+Pour ouvrir le bon terminal sur Windows :
+
+1. Appuyer sur **Windows + R** : une petite fenêtre « Exécuter » apparaît.
+2. Écrire `powershell` dans son champ, puis appuyer sur **Entrée**.
+3. Une fenêtre avec une ligne de saisie s'ouvre. C'est le terminal PowerShell ; garder cette fenêtre ouverte.
+4. Cliquer dans la fenêtre, coller une commande avec **Ctrl+V**, puis appuyer sur **Entrée**. Si Ctrl+V ne colle pas dans ce terminal, essayer un clic droit.
+5. Attendre la fin de la commande avant de coller la suivante. Pour une installation, la fin correspond au retour de la ligne de saisie. Pour un serveur web, le terminal reste occupé : c'est normal.
+
+Il n'est pas nécessaire d'ouvrir PowerShell en administrateur pour les commandes ordinaires du projet. Un terminal intégré à ton éditeur peut aussi convenir s'il utilise PowerShell, mais la procédure ci-dessus fonctionne sans éditeur.
+
+Une ligne telle que `PS C:\Users\Karim>` est une **invite affichée par le terminal**, pas une commande à recopier. Le chemin indique le dossier dans lequel les commandes vont agir. « Depuis la racine du dépôt » signifie depuis le dossier `property-platform`, pas depuis son sous-dossier `docs`.
+
+Les noms `.json`, `.yaml` et `.md` désignent des fichiers texte. Tu n'as pas besoin de les ouvrir ou de les modifier pour lancer le projet : les outils les lisent automatiquement.
+
 ## 1. Choisir le parcours
 
 | Objectif | Prérequis | Étapes |
@@ -82,23 +100,91 @@ Le dépôt privé nécessite les droits du compte GitHub. Utiliser le parcours d
 
 ### 3.3. Installer les paquets web
 
+Si tu es bloqué ici, suivre exactement les sous-étapes ci-dessous. **Tout se fait dans la fenêtre PowerShell**, pas dans un fichier YAML.
+
+#### 3.3.1. Ouvrir PowerShell
+
+Utiliser **Windows + R**, écrire `powershell`, puis appuyer sur **Entrée**. Si tu as déjà une fenêtre PowerShell libre, réutilise-la. Ne pas coller les commandes dans un terminal où un serveur est déjà en cours d'exécution.
+
+#### 3.3.2. Se placer dans le dossier du projet
+
+Copier cette ligne dans PowerShell et appuyer sur **Entrée** :
+
+```powershell
+Set-Location 'C:\Users\Karim\Repositories\property-platform'
+```
+
+Cette commande sélectionne le dossier de travail. Elle ne lance pas encore le site. Tu devrais ensuite voir une invite ressemblant à `PS C:\Users\Karim\Repositories\property-platform>`.
+
+Pour confirmer, exécuter :
+
+```powershell
+Get-Location
+```
+
+Le chemin affiché doit être **C:\Users\Karim\Repositories\property-platform**. Si Set-Location indique que le chemin n'existe pas, ouvrir l'Explorateur Windows avec **Windows + E**, retrouver le dossier réellement cloné et utiliser son chemin à la place. Sur la machine actuelle, le chemin ci-dessus est celui du dépôt.
+
+#### 3.3.3. Vérifier les fichiers et les outils
+
+Exécuter les quatre commandes suivantes **une par une**, en appuyant sur Entrée après chacune :
+
+```powershell
+Test-Path -LiteralPath '.\package.json'
+Test-Path -LiteralPath '.\pnpm-workspace.yaml'
+node --version
+pnpm.cmd --version
+```
+
+Résultats attendus : **True**, **True**, **v26.11.1** (ou correctif 26 ultérieur autorisé), puis **12.10.1**. Si un Test-Path répond False, vérifier le dossier sélectionné. Si node ou pnpm.cmd n'est pas reconnu, reprendre l'installation de l'étape 2, puis fermer et rouvrir PowerShell ; revenir ensuite au dossier du projet avec Set-Location.
+
+#### 3.3.4. Lancer l'installation
+
+Copier **cette commande seulement** dans PowerShell, puis appuyer sur **Entrée** :
+
 ```powershell
 pnpm.cmd install --frozen-lockfile
 ```
 
-Cette commande installe les dépendances JavaScript des applications/packages à partir de pnpm-lock.yaml, sans modifier ce verrouillage. Attendre sa fin sans erreur avant de démarrer.
+Laisser PowerShell ouvert et attendre : la première installation télécharge les bibliothèques nécessaires au site. Tu peux voir des lignes de progression, des nombres de paquets ou un message indiquant qu'ils sont déjà à jour. Si les dépendances sont déjà installées, la commande peut finir rapidement.
+
+L'installation est terminée quand le terminal rend la main et affiche de nouveau son invite, généralement après un message « Done ». Il ne faut pas poursuivre si un message indique une erreur. Cette étape **n'ouvre pas de page web** ; c'est attendu. Le site sera lancé à l'étape 4.
+
+Cette commande lit les fichiers du dépôt et installe les dépendances JavaScript à partir de pnpm-lock.yaml, sans modifier ce verrouillage. Elle crée ou actualise des dossiers locaux tels que node_modules et .pnpm-store, ignorés par Git.
+
+#### 3.3.5. Quel fichier YAML est concerné ?
+
+Voici les fichiers à distinguer ; **aucun n'est à modifier pour cette installation** :
+
+| Fichier | Où il se trouve | À quoi il sert |
+|---|---|---|
+| [package.json](../../package.json) | Directement dans property-platform | Déclare les outils/dépendances de racine et les commandes comme dev:web |
+| [pnpm-workspace.yaml](../../pnpm-workspace.yaml) | Directement dans property-platform | Indique à pnpm les applications/packages appartenant au même dépôt et sa configuration |
+| [pnpm-lock.yaml](../../pnpm-lock.yaml) | Directement dans property-platform | Fixe les versions précises des dépendances à installer |
+| [compose.yaml](../../infra/local/compose.yaml) | Dans property-platform/infra/local | Configure Docker pour l'API et PostGIS ; il intervient à l'étape 5, pas pour lancer le site seul |
+
+Tu peux voir ces fichiers dans l'Explorateur Windows : **Windows + E**, cliquer sur la barre d'adresse en haut, coller `C:\Users\Karim\Repositories\property-platform`, puis appuyer sur Entrée. Cette manipulation affiche les fichiers ; elle ne remplace pas l'exécution des commandes dans PowerShell.
+
+#### 3.3.6. Si l'installation échoue
+
+- **pnpm.cmd non reconnu** : reprendre l'étape 2.2, rouvrir PowerShell et refaire Set-Location.
+- **Erreur de version/engine** : vérifier node --version et pnpm.cmd --version avec les valeurs ci-dessus.
+- **package.json introuvable / aucun projet trouvé** : refaire Set-Location et les deux Test-Path ; ne pas lancer l'installation depuis docs ou Downloads.
+- **Erreur de certificat** : consulter l'étape 10 ; ne pas désactiver la vérification TLS.
+- **Autre erreur** : conserver le texte complet affiché et le partager pour diagnostiquer le problème avant de passer à l'étape suivante.
 
 Les scripts d'installation de Parcel/SWC sont désactivés explicitement dans pnpm-workspace.yaml ; leurs binaires de plateforme sont fournis par les dépendances optionnelles. **Ne pas ajouter --no-optional.** node_modules et .pnpm-store sont locaux et ignorés par Git.
 
 ## 4. Démarrer le site — terminal A
 
-Depuis la racine :
+Après la réussite de l'installation, rester dans **la même fenêtre PowerShell**, au dossier property-platform. Copier cette commande et appuyer sur **Entrée** :
 
 ```powershell
 pnpm.cmd dev:web
 ```
 
-Garder le terminal ouvert. Attendre que Next.js indique qu'il est prêt, puis ouvrir [le site local](http://localhost:3000).
+Garder le terminal ouvert : il fait tourner le site. Attendre que Next.js indique qu'il est prêt (« Ready »), puis ouvrir ton navigateur habituel, par exemple Edge ou Chrome. Cliquer dans sa barre d'adresse en haut, écrire **http://localhost:3000**, puis appuyer sur **Entrée**. Tu peux aussi cliquer sur [le site local](http://localhost:3000).
+
+L'adresse se saisit dans le **navigateur**, contrairement aux commandes précédentes qui se saisissent dans **PowerShell**. Il n'y a pas de fichier HTML à double-cliquer pour démarrer cette application.
 
 Résultat attendu :
 
