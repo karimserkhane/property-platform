@@ -8,6 +8,35 @@ Les versions courantes et les exceptions de compatibilité sont documentées dan
 
 **Repère pour retrouver les fichiers :** les chemins du dépôt sont écrits depuis sa racine `C:\Users\Karim\Repositories\property-platform`. Par exemple, `apps/api/src/liwa/config/settings/base.py` désigne sur ton PC `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\config\settings\base.py`. Les chemins commençant par `/app/` désignent au contraire des fichiers **dans le conteneur Linux**, pas dans l'explorateur Windows. Les noms courts dans une arborescence se lisent avec tous leurs dossiers parents.
 
+## Sommaire
+
+- [Mémo rapide : lancer, tester et tout arrêter](#memo-rapide)
+- [Avant de commencer : où écrire les commandes ?](#ecrire-les-commandes)
+- [1. Choisir le parcours et comprendre les outils](#choisir-le-parcours)
+- [2. Installer et vérifier les prérequis](#prerequis)
+- [3. Ouvrir le dépôt et installer les dépendances](#installer-les-dependances)
+- [4. Démarrer le site — terminal A](#demarrer-le-site)
+- [5. Démarrer PostGIS et l'API — terminal B](#demarrer-api-postgis)
+- [6. Créer un compte d'administration](#compte-administration)
+- [7. Routine quotidienne et arrêt](#routine-quotidienne)
+- [8. Vérifier le site compilé](#site-compile)
+- [9. Vérifier le code avant de le partager](#verifier-le-code)
+- [10. Résoudre les problèmes courants](#depannage)
+- [11. Du lancement local à la production](#production)
+
+**Accès directs aux explications et commandes souvent utilisées :**
+
+- [3.3. Installer les paquets web](#installer-paquets-web)
+- [Comprendre les noms des services, images et conteneurs](#noms-docker)
+- [5.1. Créer les tables Django](#migrations-django)
+- [Trouver les modèles et fichiers de migration](#fichiers-modeles-migrations)
+- [5.2. Vérifier les endpoints de l'API](#verifier-api)
+- [Premier import manuel des parcelles Onwani](#premier-import-manuel-des-parcelles-onwani)
+- [Prendre en compte une modification du backend](#modification-backend)
+- [Tout arrêter en conservant les données](#arreter-les-services)
+
+<a id="memo-rapide"></a>
+
 ## Mémo rapide : lancer, tester et tout arrêter
 
 **Après avoir installé les outils et dépendances du guide**, ouvrir Docker Desktop, puis deux terminaux PowerShell. Copier les commandes une par une. Pour une première installation, suivre les étapes détaillées plus bas.
@@ -42,6 +71,8 @@ docker compose -f infra/local/compose.yaml down
 
 Le serveur web, l'API et la base sont alors arrêtés. **Les données de PostgreSQL sont conservées** : ne pas ajouter `-v` à `down`, car cette option supprime le volume de données. Fermer le navigateur ne suffit pas à arrêter les services. Docker Desktop peut rester ouvert ou être quitté après cet arrêt.
 
+<a id="ecrire-les-commandes"></a>
+
 ## Avant de commencer : où écrire les commandes ?
 
 Ce document est un mode d'emploi. Les blocs intitulés `powershell` contiennent des commandes à **copier dans un terminal**, puis exécuter avec la touche **Entrée**. Ne pas les écrire dans un fichier du projet, dans la barre d'adresse du navigateur ou sur GitHub.
@@ -59,6 +90,8 @@ Il n'est pas nécessaire d'ouvrir PowerShell en administrateur pour les commande
 Une ligne telle que `PS C:\Users\Karim>` est une **invite affichée par le terminal**, pas une commande à recopier. Le chemin indique le dossier dans lequel les commandes vont agir. « Depuis la racine du dépôt » signifie depuis le dossier `property-platform`, pas depuis son sous-dossier `docs`.
 
 Les noms `.json`, `.yaml` et `.md` désignent des fichiers texte. Tu n'as pas besoin de les ouvrir ou de les modifier pour lancer le projet : les outils les lisent automatiquement.
+
+<a id="choisir-le-parcours"></a>
 
 ## 1. Choisir le parcours
 
@@ -117,6 +150,8 @@ Une **image Docker** est un environnement préparé avec les programmes nécessa
 
 Python et uv ne sont pas nécessaires sur Windows pour lancer l'API Docker : l'image contient leur environnement et les bibliothèques GIS. Le web actuel fonctionne seul, sans API ni compte Supabase, cartographique ou IA. Aucun service payant n'est requis pour ce lancement local.
 
+<a id="prerequis"></a>
+
 ## 2. Installer et vérifier les prérequis
 
 ### 2.1. Git et Node.js
@@ -174,6 +209,8 @@ docker info
 
 Les deux premières commandes doivent afficher une version et docker info les informations du serveur sans erreur de connexion. Docker Desktop doit rester démarré pendant l'utilisation de l'API et de la base.
 
+<a id="installer-les-dependances"></a>
+
 ## 3. Ouvrir le dépôt et installer les dépendances
 
 ### 3.1. Sur la machine actuelle
@@ -201,6 +238,8 @@ Set-Location property-platform
 ```
 
 Le dépôt privé nécessite les droits du compte GitHub. Utiliser le parcours d'authentification Git proposé, sans mettre de jeton dans l'URL ou un fichier du dépôt.
+
+<a id="installer-paquets-web"></a>
 
 ### 3.3. Installer les paquets web
 
@@ -280,6 +319,8 @@ Tu peux voir ces fichiers dans l'Explorateur Windows : **Windows + E**, cliquer 
 
 Les scripts d'installation de Parcel/SWC sont désactivés explicitement dans pnpm-workspace.yaml ; leurs binaires de plateforme sont fournis par les dépendances optionnelles. **Ne pas ajouter --no-optional.** node_modules et .pnpm-store sont locaux et ignorés par Git.
 
+<a id="demarrer-le-site"></a>
+
 ## 4. Démarrer le site — terminal A
 
 **Ce que cette étape fait :** elle lance un programme qui reste en marche pour servir le site depuis ton ordinateur. « Terminal A » est seulement le nom donné dans ce guide à ta première fenêtre PowerShell ; ce n'est ni un fichier ni un outil à installer.
@@ -320,6 +361,8 @@ Modifier par exemple apps/web/messages/en.json ou apps/web/src/app/[locale]/page
 **Ce qui est conservé après Ctrl+C :** le code, les bibliothèques installées et les fichiers générés sur disque. **Ce qui s'arrête :** le serveur web lancé dans cette fenêtre. Tu peux le relancer avec la même commande sans tout réinstaller. Fermer seulement l'onglet du navigateur n'arrête pas le serveur.
 
 Ce lancement est du développement local, pas une publication publique du site. Si Next affiche aussi une adresse « Network », elle correspond à un accès possible depuis ton réseau local selon la configuration ; elle ne signifie pas que le site a été déployé sur Internet.
+
+<a id="demarrer-api-postgis"></a>
 
 ## 5. Démarrer PostGIS et l'API — terminal B
 
@@ -364,6 +407,8 @@ docker compose -f infra/local/compose.yaml logs --tail 100 db api
 
 Le Compose utilise désormais le volume `liwa-local_postgres18-data`, monté sous `/var/lib/postgresql`, conformément à l'image PostgreSQL 18. L'ancien volume `liwa-local_postgres-data` est conservé mais **n'est pas migré automatiquement**. Le premier lancement en PostgreSQL 18 initialise une nouvelle base : recréer les migrations et le superutilisateur ci-dessous. Si l'ancien volume contient des données à conserver, préparer un export/restauration ou une migration validée avant de basculer les usages. Ne pas monter directement son répertoire PostgreSQL 17 dans PostgreSQL 18 et ne pas le supprimer. Aucun transfert ou effacement de base n'est exécuté par la mise à jour du dépôt.
 
+<a id="noms-docker"></a>
+
 ### D'où viennent les noms des services, images et conteneurs ?
 
 Compose lit [infra/local/compose.yaml](../../infra/local/compose.yaml) et démarre deux **conteneurs** à partir de deux **images**. Une image est le modèle préparé ; un conteneur est une instance exécutée à partir de ce modèle ; un service est la définition de ce que Compose doit lancer.
@@ -406,6 +451,8 @@ Si seuls nos deux conteneurs tournent, les deux tableaux montrent les mêmes ins
 
 **Voir `api` en cours d'exécution et `db` en état `healthy` ne prouve pas que les tables Django existent déjà.** C'est le rôle de l'étape 5.1.
 
+<a id="migrations-django"></a>
+
 ### 5.1. Créer les tables Django
 
 Une **migration** décrit une évolution de la structure de la base : créer une table, ajouter une colonne ou une contrainte. Le premier migrate crée les tables Django de comptes, permissions et sessions, ainsi que nos premières tables de parcelles, acquisitions et audit. Cette commande crée leur structure ; elle ne collecte aucune donnée immobilière.
@@ -424,6 +471,8 @@ Résultat attendu : migrations appliquées ou aucune migration restante, puis co
 Ici, `exec api` signifie « exécuter la suite de la commande dans le conteneur api déjà démarré ». `python manage.py` lance un outil Django du projet. `migrate --noinput` applique les migrations sans questions interactives ; `check` examine la configuration et ne crée pas de tables. Appliquer des migrations déjà appliquées ne les rejoue pas.
 
 Le chemin de cette opération est : **PowerShell → Django dans le conteneur `api` → création des tables dans PostgreSQL, dans le conteneur `db`**. La commande ne crée pas de nouveau conteneur. Django enregistre aussi les migrations appliquées dans la base afin de savoir lesquelles restent à exécuter. Les tables et ce suivi sont conservés dans le volume persistant de PostgreSQL après un arrêt ordinaire de Docker.
+
+<a id="fichiers-modeles-migrations"></a>
 
 #### Où sont les modèles et les fichiers de migration ?
 
@@ -474,6 +523,8 @@ On pourra répartir les modèles dans un paquet `apps/api/src/liwa/modules/catal
 Le cycle de développement est **modifier les modèles → générer les migrations avec `makemigrations` → relire et conserver ces fichiers dans Git → appliquer avec `migrate`**. `makemigrations` prépare des fichiers ; `migrate` modifie la base. **À cette étape du démarrage, utilise seulement `migrate` : les migrations du dépôt sont déjà générées.** Les bâtiments et logements restent à développer.
 
 Le Compose actuel copie le code dans l'image sans monter les fichiers Windows. Une migration générée uniquement dans le conteneur n'apparaît donc pas automatiquement dans ton dépôt et peut être perdue lors de sa recréation. Lors du développement des premiers modèles, il faudra générer les fichiers dans l'environnement local configuré ou les récupérer explicitement dans le dépôt avant de reconstruire l'image. Voir aussi [la structure des modules](REPOSITORY.md).
+
+<a id="verifier-api"></a>
 
 ### 5.2. Vérifier les endpoints
 
@@ -530,6 +581,8 @@ docker compose -f infra/local/compose.yaml exec api python manage.py shell -c "f
 
 Les dates de publication inconnues restent nulles ; les dates de réception, permis et mise à jour fournies par Onwani restent préservées dans leurs attributs originaux. Voir [DATA_PROVENANCE.md](DATA_PROVENANCE.md) pour les limites, la portée des identifiants et les responsabilités de chaque module. Utiliser les services métier et cette commande pour modifier le catalogue, pas des modifications manuelles de tables dans l'outil SQL.
 
+<a id="compte-administration"></a>
+
 ## 6. Créer un compte d'administration — facultatif
 
 **Ce que cette étape fait :** elle ajoute dans PostgreSQL un compte autorisé à utiliser l'administration Django. Ce compte reste dans le volume de base après un arrêt ordinaire. Il ne crée pas un compte GitHub, un compte Windows ou le système de connexion du futur site public.
@@ -543,6 +596,8 @@ docker compose -f infra/local/compose.yaml exec api python manage.py createsuper
 Répondre aux questions. Le mot de passe peut ne pas apparaître pendant la saisie : c'est normal. Il n'est pas enregistré dans Git.
 
 Ouvrir [l'administration Django](http://localhost:8000/admin/) et se connecter. Elle propose actuellement les écrans Django de base ; les modules immobiliers n'ont pas encore leurs modèles et écrans métier. Admin et docs interactives sont disponibles en configuration locale DEBUG ; ce parcours n'est pas prêt à publier.
+
+<a id="routine-quotidienne"></a>
 
 ## 7. Routine quotidienne et arrêt
 
@@ -564,6 +619,8 @@ pnpm.cmd dev:web
 ```
 
 Ne pas réinstaller les paquets ni recréer le compte à chaque lancement. Après une mise à jour du dépôt, réinstaller les paquets verrouillés si les dépendances JavaScript ont changé, reconstruire l'API si son code/dépendances ont changé et appliquer les nouvelles migrations.
+
+<a id="modification-backend"></a>
 
 ### Après une modification du backend
 
@@ -587,6 +644,8 @@ docker compose -f infra/local/compose.yaml logs -f --tail 100 api
 
 Ctrl+C arrête le suivi des journaux, sans arrêter les conteneurs.
 
+<a id="arreter-les-services"></a>
+
 ### Tout arrêter en conservant les données
 
 Arrêter Next.js avec Ctrl+C dans le terminal A, puis :
@@ -596,6 +655,8 @@ docker compose -f infra/local/compose.yaml down
 ```
 
 down retire les conteneurs/réseaux locaux mais conserve le volume de base. **Ne pas ajouter -v pour un arrêt ordinaire** : cela supprimerait les données PostgreSQL, notamment les comptes et futurs dossiers pilotes.
+
+<a id="site-compile"></a>
 
 ## 8. Vérifier le site compilé
 
@@ -622,6 +683,8 @@ pnpm.cmd smoke:web
 ```
 
 Le contrôle attend un build existant. Il démarre un serveur temporaire sur **3101**, vérifie les quinze routes, lang/dir, traductions, sélecteur, CSS, défaut anglais et route inexistante, puis arrête son serveur. Libérer le port 3101 avant de le lancer.
+
+<a id="verifier-le-code"></a>
 
 ## 9. Vérifier le code avant de le partager
 
@@ -693,6 +756,8 @@ git diff -- packages/contracts
 
 Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas modifier les types générés à la main. Le web connaît ce contrat, pas les tables Django.
 
+<a id="depannage"></a>
+
 ## 10. Résoudre les problèmes courants
 
 | Symptôme | Vérification et action |
@@ -725,6 +790,8 @@ pnpm.cmd dev:web
 Test-Path doit répondre **True**. La variable est propre au terminal ; la définir aussi dans celui qui exécute typecheck/build si nécessaire. Ce cache extérieur au dépôt ne doit pas être committé ; il est accessible au compte Karim, pas nécessairement au compte sandbox d'un outil.
 
 Sur une autre machine, le cache par défaut peut fonctionner sans configuration. En cas de problème, utiliser un répertoire privé dont les permissions et celles des parents sont compatibles avec SWC. Conserver les contrôles de sécurité et ne pas modifier les permissions de tout le profil. Voir [le fonctionnement officiel du cache SWC](https://github.com/swc-project/swc/blob/main/docs/native-addon-carriers.md).
+
+<a id="production"></a>
 
 ## 11. Du lancement local à la production
 
