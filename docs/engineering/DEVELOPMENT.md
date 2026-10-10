@@ -6,6 +6,40 @@ Les commandes sont prévues pour **Windows et PowerShell**, depuis la racine du 
 
 Les versions courantes et les exceptions de compatibilité sont documentées dans [TOOLCHAIN.md](TOOLCHAIN.md). Les anciennes études de stack restent des documents historiques ; les manifestes et ce guide décrivent les versions exécutées.
 
+## Mémo rapide : lancer, tester et tout arrêter
+
+**Après avoir installé les outils et dépendances du guide**, ouvrir Docker Desktop, puis deux terminaux PowerShell. Copier les commandes une par une. Pour une première installation, suivre les étapes détaillées plus bas.
+
+**Terminal A — lancer le site :**
+
+```powershell
+Set-Location 'C:\Users\Karim\Repositories\property-platform'
+pnpm.cmd dev:web
+```
+
+Garder ce terminal ouvert. Ouvrir [le site local](http://localhost:3000) dans le navigateur.
+
+**Terminal B — lancer la base et l'API, puis les vérifier :**
+
+```powershell
+Set-Location 'C:\Users\Karim\Repositories\property-platform'
+docker compose -f infra/local/compose.yaml up -d --build
+docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
+docker compose -f infra/local/compose.yaml ps
+Invoke-RestMethod 'http://localhost:8000/api/v1/health/live'
+Invoke-RestMethod 'http://localhost:8000/api/v1/health/ready'
+```
+
+Résultat attendu : site accessible, `api` en cours d'exécution, `db` en état `healthy`, réponses `ok` et `ready`. Tu peux aussi ouvrir [la documentation de l'API](http://localhost:8000/api/v1/docs). Il s'agit d'une vérification rapide du démarrage ; les contrôles de code et tests automatisés sont détaillés à l'étape 9. Si une commande échoue, résoudre l'erreur avant de continuer.
+
+**Tout arrêter :** appuyer sur **Ctrl+C dans le terminal A**, puis exécuter dans le terminal B :
+
+```powershell
+docker compose -f infra/local/compose.yaml down
+```
+
+Le serveur web, l'API et la base sont alors arrêtés. **Les données de PostgreSQL sont conservées** : ne pas ajouter `-v` à `down`, car cette option supprime le volume de données. Fermer le navigateur ne suffit pas à arrêter les services. Docker Desktop peut rester ouvert ou être quitté après cet arrêt.
+
 ## Avant de commencer : où écrire les commandes ?
 
 Ce document est un mode d'emploi. Les blocs intitulés `powershell` contiennent des commandes à **copier dans un terminal**, puis exécuter avec la touche **Entrée**. Ne pas les écrire dans un fichier du projet, dans la barre d'adresse du navigateur ou sur GitHub.
