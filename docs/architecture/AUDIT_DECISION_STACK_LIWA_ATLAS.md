@@ -2,6 +2,8 @@
 
 10 octobre 2026. Complément à `REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md`. **Le socle est conservé.** Cette analyse ne constitue pas une nouvelle version de stack ; elle examine les objections et précise les conditions d'implémentation.
 
+Ce contre-audit intervient **après** la [revue V2](REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md), qui avait remplacé la [proposition initiale archivée](../archive/ARCHITECTURE_STACK_LIWA_ATLAS.md). Il n'est pas à l'origine de V2. L'[historique documentaire](../README.md#enchaînement-des-décisions-darchitecture) explique cet enchaînement et distingue le document externe fourni de la V1 du dépôt.
+
 Méthode : lectures du cadrage produit et de V2, trois contre-revues indépendantes d'agents IA (backend, données/GIS, exploitation), confrontation aux documentations officielles et à un code source de connecteur. Aucun benchmark ni avis humain externe n'est revendiqué. La demande de réanalyse ne constitue pas, à elle seule, une raison de changer un composant.
 
 ## 1. Verdict

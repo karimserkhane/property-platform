@@ -2,6 +2,8 @@
 
 > **Document historique, remplacé après revue critique.** La recommandation actuelle est [la revue d'architecture V2](../architecture/REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md) : Next.js, Django/GeoDjango, PostgreSQL/PostGIS et workers Python. Le contenu ci-dessous conserve la proposition précédente pour rendre l'évolution des décisions traçable ; son budget et ses choix ne constituent plus la référence.
 
+Cette proposition constitue la **V1 du dépôt**. La revue critique a ensuite produit V2 ; un [contre-audit ultérieur](../architecture/AUDIT_DECISION_STACK_LIWA_ATLAS.md) a confirmé V2 et précisé ses conditions de validation. Voir [l'enchaînement complet](../README.md#enchaînement-des-décisions-darchitecture).
+
 Date : 10 octobre 2026. Budget demandé : moins de 500 AED/mois d’infrastructure au lancement, hors licences de données immobilières et génération de médias. Statut : recommandation documentée avant implémentation ; performances et coûts réels restent à mesurer. Aucun service payant n’a été souscrit.
 
 ## 1. Décision proposée

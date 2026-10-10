@@ -1,6 +1,6 @@
 # Liwa Atlas — architecture révisée après revue critique
 
-> Le [contre-audit de décision](AUDIT_DECISION_STACK_LIWA_ATLAS.md) confirme ce socle et précise les règles de schéma, administration, transactions, exposition Supabase et exploitation. Il complète cette architecture sans remplacer sa stack.
+> **Ordre des décisions : [proposition initiale archivée](../archive/ARCHITECTURE_STACK_LIWA_ATLAS.md) → cette revue V2 → [contre-audit de décision](AUDIT_DECISION_STACK_LIWA_ATLAS.md).** La revue critique a produit V2 ; le contre-audit ultérieur confirme ce socle et précise les règles de schéma, administration, transactions, exposition Supabase et exploitation. Il complète cette architecture sans remplacer sa stack. Voir [l'historique documentaire](../README.md#enchaînement-des-décisions-darchitecture).
 
 Date : 10 octobre 2026. **Recommandation de référence avant implémentation.** Cette revue remplace la recommandation NestJS du document `ARCHITECTURE_STACK_LIWA_ATLAS.md`. Elle confronte également le fichier fourni `Architecture_Proptech_Stack_V1.md`, dont le contenu porte déjà le titre « révision 2 » et propose Django/AWS.
 
