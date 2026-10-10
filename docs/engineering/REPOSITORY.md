@@ -11,7 +11,7 @@ La **racine** est le dossier `property-platform`. Un élément terminé par `/` 
 L'arborescence ci-dessous décrit les fichiers suivis par Git aujourd'hui. Les quinze fichiers de traduction sont regroupés pour la lisibilité ; les fichiers Python `__init__.py`, qui identifient les paquets, sont omis. Les dossiers générés par les outils sont expliqués séparément.
 
 ```text
-property-platform/
+property-platform/                   Racine du monorepo : code, outils et documentation de Liwa Atlas
 ├── README.md                         Présentation et liens pour démarrer
 ├── AGENTS.md                         Consignes pour les agents qui modifient le dépôt
 ├── package.json                      Commandes communes et outils JavaScript du dépôt
@@ -24,33 +24,33 @@ property-platform/
 ├── .gitattributes                    Règles Git, notamment les fins de ligne
 ├── .gitignore                        Fichiers locaux exclus de Git
 ├── .dockerignore                     Fichiers exclus du contexte de construction Docker
-├── .github/
-│   └── workflows/
+├── .github/                         Automatisation du travail et des vérifications sur GitHub
+│   └── workflows/                   Procédures de contrôle exécutées par GitHub Actions
 │       └── ci.yml                    Contrôles automatiques exécutés sur GitHub
-├── apps/
+├── apps/                            Applications exécutables : site et backend, puis futur mobile
 │   ├── web/                          Application web Next.js
 │   │   ├── package.json              Dépendances et commandes propres au site
 │   │   ├── next.config.ts            Configuration Next.js et intégration multilingue
 │   │   ├── tsconfig.json             Configuration du compilateur TypeScript
 │   │   ├── Dockerfile                Construction de l'image du site
-│   │   ├── messages/
+│   │   ├── messages/                Traductions des textes affichés aux utilisateurs
 │   │   │   └── en.json, ar.json…     Textes de l'interface dans les quinze langues
-│   │   ├── src/
-│   │   │   ├── app/
+│   │   ├── src/                     Code source de l'interface web
+│   │   │   ├── app/                 Pages, routes et structures de page Next.js
 │   │   │   │   ├── globals.css       Styles communs du site
 │   │   │   │   └── [locale]/         Routes associées à une langue, par exemple /en
 │   │   │   │       ├── layout.tsx    Structure de page, langue, direction et métadonnées
 │   │   │   │       └── page.tsx      Page d'accueil actuelle
-│   │   │   ├── components/
+│   │   │   ├── components/          Éléments d'interface réutilisables
 │   │   │   │   └── language-switcher.tsx   Sélecteur de langue interactif
-│   │   │   ├── i18n/
+│   │   │   ├── i18n/                Gestion commune des langues et de la navigation multilingue
 │   │   │   │   ├── locales.ts       Langues acceptées et direction LTR/RTL
 │   │   │   │   ├── routing.ts       Règles des URL et langue par défaut
 │   │   │   │   ├── request.ts       Chargement des traductions de la langue demandée
 │   │   │   │   ├── navigation.ts    Navigation tenant compte de la langue
 │   │   │   │   └── types.d.ts       Déclarations de types pour les traductions
 │   │   │   └── proxy.ts             Traitement du routage multilingue des requêtes
-│   │   └── tests/
+│   │   └── tests/                   Vérifications automatisées de l'interface web
 │   │       └── i18n.test.mjs        Contrôles des langues, textes et règles de routage
 │   └── api/                          Application backend Django
 │       ├── manage.py                 Entrée des commandes Django
@@ -59,19 +59,19 @@ property-platform/
 │       ├── .python-version           Version Python attendue pour cette application
 │       ├── .env.example              Exemple de variables d'environnement locales
 │       ├── Dockerfile                Image Python, Django et bibliothèques géographiques
-│       ├── src/
+│       ├── src/                     Code source du backend Python
 │       │   └── liwa/                 Paquet Python de notre backend
-│       │       ├── config/
+│       │       ├── config/          Assemblage et réglages techniques de Django
 │       │       │   ├── urls.py       Branchement des URL API et administration
 │       │       │   ├── wsgi.py       Entrée du serveur Python pour servir Django
-│       │       │   └── settings/
+│       │       │   └── settings/    Paramètres adaptés au développement, aux tests et à la production
 │       │       │       ├── base.py          Réglages communs
 │       │       │       ├── local.py         Réglages du développement local
 │       │       │       ├── testing.py       Réglages des tests
 │       │       │       └── production.py    Réglages et exigences de production
-│       │       ├── api/
+│       │       ├── api/             Réception des demandes HTTP et formats des réponses
 │       │       │   └── router.py     API HTTP et contrôles de santé actuels
-│       │       ├── modules/
+│       │       ├── modules/         Domaines métier séparés, chacun propriétaire de ses règles
 │       │       │   ├── catalog/      Identité des biens et relations acceptées
 │       │       │   │   ├── apps.py   Déclaration de l'application Django
 │       │       │   │   └── README.md Responsabilités et dépendances du module
@@ -82,35 +82,35 @@ property-platform/
 │       │       │       ├── apps.py
 │       │       │       └── README.md
 │       │       └── export_openapi.py Export de la description de l'API
-│       └── tests/
+│       └── tests/                   Vérifications HTTP et d'intégration du backend
 │           └── test_health.py        Contrôles HTTP et test de disponibilité PostGIS
-├── packages/
+├── packages/                        Paquets réutilisables, dont les contrats partagés avec les clients
 │   └── contracts/                    Contrat entre le backend et les clients TypeScript
 │       ├── package.json              Commandes de génération et de vérification
 │       ├── tsconfig.json             Réglages de vérification des types
 │       ├── openapi.json              Description exportée de l'API Django
-│       └── src/
+│       └── src/                     Types utilisables par le site et le futur mobile
 │           └── generated.ts          Types TypeScript générés depuis OpenAPI
-├── infra/
-│   └── local/
+├── infra/                           Configuration des environnements d'exécution de la plateforme
+│   └── local/                       Services et stockage nécessaires sur le poste de développement
 │       └── compose.yaml              Services API et PostGIS, réseau et volume local
-├── docs/
+├── docs/                            Cadrage produit, décisions d'architecture et guides de travail
 │   ├── README.md                     Index et enchaînement des décisions
-│   ├── product/
+│   ├── product/                     Besoins utilisateurs, marché et stratégie du produit
 │   │   ├── ETUDE_PRODUIT_LIWA_ATLAS.md       Besoins, marché et périmètre envisagé
 │   │   └── STRATEGIE_PRODUIT_LIWA_ATLAS.md   Approfondissement et différenciation
-│   ├── architecture/
+│   ├── architecture/                Choix techniques de référence et justification des décisions
 │   │   ├── REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md   Architecture de référence
 │   │   └── AUDIT_DECISION_STACK_LIWA_ATLAS.md    Contre-audit réalisé après V2
-│   ├── archive/
+│   ├── archive/                     Propositions remplacées, conservées pour leur historique
 │   │   └── ARCHITECTURE_STACK_LIWA_ATLAS.md     Proposition précédente remplacée
-│   └── engineering/
+│   └── engineering/                 Guides pour installer, développer et maintenir le projet
 │       ├── REPOSITORY.md              Ce guide de structure et de responsabilités
 │       ├── DEVELOPMENT.md             Commandes de démarrage et explications
 │       ├── TOOLCHAIN.md               Versions exécutables et compatibilités
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
 │       └── STRUCTURE_REVIEW.md        Revue critique de l'organisation
-└── scripts/
+└── scripts/                         Utilitaires pour vérifier le dépôt et préparer le site construit
     ├── check-doc-links.mjs            Vérification des liens locaux dans les documents
     ├── prepare-web-runtime.mjs        Préparation des ressources de l'artefact web autonome
     └── smoke-web.mjs                  Vérification du site construit et des routes de langue
