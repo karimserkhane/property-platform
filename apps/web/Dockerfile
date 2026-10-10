@@ -1,6 +1,7 @@
 FROM node:26.11.1-trixie-slim AS build
 WORKDIR /repo
-RUN npm install --global npm@12.2.0 pnpm@12.10.1
+RUN npm install --global npm@12.2.0
+RUN npm install --global pnpm@12.10.1 --allow-scripts=pnpm
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web ./apps/web
 COPY packages/contracts ./packages/contracts
