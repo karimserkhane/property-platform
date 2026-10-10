@@ -26,6 +26,53 @@ Les noms `.json`, `.yaml` et `.md` désignent des fichiers texte. Tu n'as pas be
 
 ## 1. Choisir le parcours
 
+### Comprendre les outils avant les commandes
+
+Une **dépendance**, ou bibliothèque, est du code déjà écrit par d'autres développeurs que le projet utilise. Par exemple, React aide à construire l'interface et Django aide à construire l'API. Installer les dépendances évite de devoir écrire ces outils nous-mêmes.
+
+| Nom | Explication simple | Son rôle ici |
+|---|---|---|
+| PowerShell / terminal | Fenêtre dans laquelle tu donnes des commandes à Windows | Ouvrir un dossier, installer les bibliothèques et démarrer les programmes |
+| Git | Outil qui conserve l'historique des fichiers et de leurs modifications | Récupérer et partager le code du dépôt |
+| GitHub | Service qui héberge le dépôt Git | Stocker le code et son historique en ligne ; cela ne publie pas automatiquement le site |
+| Node.js | Programme qui exécute du JavaScript sur l'ordinateur, en dehors du navigateur | Faire fonctionner les outils et le serveur web Next.js |
+| npm | Gestionnaire de paquets fourni avec Node.js | Installer ou actualiser les outils npm et pnpm dans ce guide |
+| pnpm | Autre gestionnaire de paquets JavaScript | Installer les bibliothèques de ce dépôt et lancer ses commandes nommées |
+| Next.js | Framework web : ensemble d'outils pour construire et servir le site | Préparer les pages et démarrer le serveur sur le port 3000 |
+| React | Bibliothèque utilisée par Next.js pour l'interface | Construire les composants visibles et leurs interactions |
+| TypeScript | JavaScript avec des types pour détecter certaines erreurs avant l'exécution | Vérifier le code ; les types ne sont pas une base de données |
+| Python / Django | Langage et framework utilisés pour le backend | Faire fonctionner l'API qui gérera les données et les règles métier |
+| API | Programme qui reçoit des demandes et renvoie des réponses structurées | Répondre aux contrôles de santé aujourd'hui, puis aux demandes immobilières |
+| PostgreSQL | Serveur de base de données | Conserver durablement les données de l'application |
+| PostGIS | Extension de PostgreSQL pour les données géographiques | Stocker/interroger les futurs bâtiments, parcelles et coordonnées |
+| Docker Desktop | Application qui fait tourner des environnements isolés sur Windows | Exécuter ici l'API et la base dans des conteneurs Linux |
+| Docker Compose | Outil Docker qui démarre plusieurs services à partir d'un fichier de configuration | Lire infra/local/compose.yaml et gérer les services api et db ensemble |
+| uv | Gestionnaire des outils et dépendances Python | Préparer l'environnement Python pour les tests natifs, à l'étape 9 |
+
+**npm et pnpm servent à des tâches similaires.** Nous utilisons npm pour installer pnpm, puis pnpm pour gérer le projet. Les deux noms dans le guide ne désignent pas deux sites à lancer. Le suffixe `.cmd` est simplement le lanceur Windows de ces outils.
+
+Un **serveur** est un programme qui reste en marche pour répondre aux demandes. Un **port** est le numéro qui distingue ses points d'accès sur une machine : 3000 pour le web, 8000 pour l'API, 5432 pour PostgreSQL. **localhost** signifie « cet ordinateur » : localhost:3000 ouvre le serveur web qui tourne sur ton PC.
+
+Une **image Docker** est un environnement préparé avec les programmes nécessaires. Un **conteneur** est une instance en cours d'exécution de cette image. Un **volume** est un stockage conservé séparément : la base garde ainsi ses données lorsqu'on arrête ou remplace un conteneur.
+
+### Ce que chaque étape change
+
+| Étape | Ce qu'elle fait | Ce qui reste après |
+|---|---|---|
+| 1 | Choisir le parcours | Rien n'est installé ou démarré par la lecture du guide |
+| 2 | Installer les outils sur Windows | Outils utilisables dans plusieurs projets ; leurs commandes de version ne font que vérifier |
+| 3 | Ouvrir/récupérer le code puis télécharger les bibliothèques web | Fichiers du dépôt, node_modules et cache de paquets ; aucun site encore démarré |
+| 4 | Démarrer Next.js | Serveur web tant que le terminal tourne, fichiers de travail générés sous apps/web/.next |
+| 5 | Démarrer l'API et PostGIS, puis appliquer les migrations | Images/conteneurs Docker et volume PostgreSQL avec ses tables |
+| 6 | Créer ton compte administrateur Django | Un compte dans la base locale, pas un compte utilisateur du futur site |
+| 7 | Redémarrer, reconstruire ou arrêter | Les données du volume sont conservées lors de l'arrêt ordinaire |
+| 8 | Préparer et essayer une version compilée du site | Un artefact local sous .next ; cela ne déploie rien sur Internet |
+| 9 | Vérifier le code et éventuellement régénérer les contrats | Résultats de tests ; l'export/génération peut modifier les fichiers de contrat à revoir |
+| 10 | Diagnostiquer les erreurs | Actions dépendant de l'erreur ; ce n'est pas une étape à exécuter systématiquement |
+| 11 | Expliquer ce qui restera à faire avant publication | Aucun déploiement automatique |
+
+À l'étape 4, si l'installation 3.3 et le démarrage ont réussi, **tu as préparé les bibliothèques puis lancé le serveur web**. L'API et PostgreSQL ne sont pas démarrés par pnpm dev:web. La page actuelle fonctionne sans eux ; elle n'appelle pas encore de catalogue immobilier.
+
 | Objectif | Prérequis | Étapes |
 |---|---|---|
 | Voir et modifier le site | Git, Node.js 26.11.1, pnpm 12.10.1 | 2 à 4 |
@@ -37,6 +84,8 @@ Python et uv ne sont pas nécessaires sur Windows pour lancer l'API Docker : l'i
 ## 2. Installer et vérifier les prérequis
 
 ### 2.1. Git et Node.js
+
+**Ce que cette étape fait :** elle installe les programmes Git et Node.js sur Windows. Node.js apporte aussi npm. Cela ne télécharge pas encore les bibliothèques du site et ne crée aucune base. Les commandes --version ci-dessous affichent seulement la version de chaque programme.
 
 Installer Git si nécessaire depuis [Git pour Windows](https://git-scm.com/download/win) et **Node.js 26.11.1** depuis [Node.js](https://nodejs.org/en/download). Le dépôt accepte Node.js `>=26.11.1 <27` ; la CI et les images web utilisent précisément 26.11.1.
 
@@ -51,6 +100,8 @@ npm.cmd --version
 Git et npm doivent afficher leur version ; Node doit afficher **v26.11.1** (ou un correctif 26 plus récent autorisé). Une version 24/25 ou 26 antérieure à 26.11.1 ne satisfait pas les contraintes.
 
 ### 2.2. pnpm
+
+**Ce que ces commandes font :** la première actualise l'outil npm ; la deuxième installe pnpm. `--global` signifie que l'outil est installé à un emplacement accessible depuis plusieurs projets, généralement dans ton profil Windows. Il ne s'agit pas de l'installation des dépendances immobilières de l'application. La troisième commande vérifie la version sans démarrer de serveur.
 
 Installer la version fixée dans le dépôt :
 
@@ -75,6 +126,8 @@ La première commande exécute les scripts manquants du paquet déjà installé 
 
 ### 2.3. Docker, pour l'API et PostGIS seulement
 
+**Ce que cette étape fait :** elle installe et démarre le moteur Docker, qui pourra ensuite exécuter les conteneurs. Ouvrir Docker Desktop ne démarre pas automatiquement les services de ce dépôt : c'est la commande Compose de l'étape 5 qui le fait. Les commandes ci-dessous vérifient les outils et l'état du moteur.
+
 Installer [Docker Desktop pour Windows](https://docs.docker.com/desktop/setup/install/windows-install/) et suivre ses prérequis Windows/WSL 2. Ouvrir Docker Desktop, utiliser les **conteneurs Linux** et attendre le démarrage du moteur.
 
 ```powershell
@@ -89,6 +142,8 @@ Les deux premières commandes doivent afficher une version et docker info les in
 
 ### 3.1. Sur la machine actuelle
 
+**Ce que ces commandes font :** Set-Location choisit le dossier dans lequel travailler ; git status affiche l'état des fichiers par rapport à Git. Elles ne téléchargent rien et ne démarrent rien.
+
 Le dépôt existe déjà :
 
 ```powershell
@@ -99,6 +154,8 @@ git status
 Ne pas le cloner à nouveau dans ce dossier. Les commandes suivantes partent de cette racine, où se trouvent package.json, pnpm-workspace.yaml, apps et docs.
 
 ### 3.2. Sur une nouvelle machine seulement
+
+**Ce que git clone fait :** il télécharge une copie des fichiers du dépôt et de son historique dans un nouveau dossier property-platform. Ce dossier contient du code et des configurations, pas toutes les bibliothèques nécessaires pour l'exécuter. L'installation de l'étape 3.3 reste nécessaire.
 
 Depuis le dossier où tu souhaites ranger tes projets :
 
@@ -162,6 +219,8 @@ L'installation est terminée quand le terminal rend la main et affiche de nouvea
 
 Cette commande lit les fichiers du dépôt et installe les dépendances JavaScript à partir de pnpm-lock.yaml, sans modifier ce verrouillage. Elle crée ou actualise des dossiers locaux tels que node_modules et .pnpm-store, ignorés par Git.
 
+**Ce qui se passe concrètement :** pnpm identifie les applications du dépôt, lit leurs package.json et le verrouillage, télécharge les paquets manquants puis les rend accessibles au code. Next.js et React font partie de ces bibliothèques. Le cache permet de réutiliser les téléchargements, et node_modules contient les paquets et liens nécessaires à leur utilisation. Ces fichiers ne sont pas des biens immobiliers et il n'est pas nécessaire de les éditer. Cette commande n'installe pas PostgreSQL et ne lance pas Docker Compose.
+
 #### 3.3.5. Quel fichier YAML est concerné ?
 
 Voici les fichiers à distinguer ; **aucun n'est à modifier pour cette installation** :
@@ -187,11 +246,23 @@ Les scripts d'installation de Parcel/SWC sont désactivés explicitement dans pn
 
 ## 4. Démarrer le site — terminal A
 
+**Ce que cette étape fait :** elle lance un programme qui reste en marche pour servir le site depuis ton ordinateur. « Terminal A » est seulement le nom donné dans ce guide à ta première fenêtre PowerShell ; ce n'est ni un fichier ni un outil à installer.
+
 Après la réussite de l'installation, rester dans **la même fenêtre PowerShell**, au dossier property-platform. Copier cette commande et appuyer sur **Entrée** :
 
 ```powershell
 pnpm.cmd dev:web
 ```
+
+### Ce qui se passe derrière cette commande
+
+1. pnpm lit la commande nommée dev:web dans le package.json de racine.
+2. Cette commande sélectionne l'application web, située dans apps/web, puis lance sa commande dev.
+3. La commande dev lance **Next.js**, exécuté grâce à Node.js. Next prépare les pages à partir du code ; JavaScript et CSS nécessaires à l'interface sont ensuite envoyés au navigateur.
+4. Next démarre son serveur de développement, généralement sur le port 3000, et crée des fichiers de travail sous apps/web/.next.
+5. Il surveille le code : lorsque tu enregistres un changement, il met à jour les pages concernées. C'est pourquoi le terminal reste occupé.
+
+Tu n'as donc pas « lancé npm, pnpm et Docker en même temps » : **pnpm a simplement lancé le serveur Next.js**. Les bibliothèques installées à l'étape 3.3 sont utilisées par ce serveur. Cette commande ne crée pas la base, ne collecte pas d'annonces et ne génère aucun média IA.
 
 Garder le terminal ouvert : il fait tourner le site. Attendre que Next.js indique qu'il est prêt (« Ready »), puis ouvrir ton navigateur habituel, par exemple Edge ou Chrome. Cliquer dans sa barre d'adresse en haut, écrire **http://localhost:3000**, puis appuyer sur **Entrée**. Tu peux aussi cliquer sur [le site local](http://localhost:3000).
 
@@ -210,7 +281,13 @@ Modifier par exemple apps/web/messages/en.json ou apps/web/src/app/[locale]/page
 
 **Ctrl+C** dans ce terminal arrête le site. Tant que le serveur tourne, utiliser un autre terminal pour les commandes suivantes.
 
+**Ce qui est conservé après Ctrl+C :** le code, les bibliothèques installées et les fichiers générés sur disque. **Ce qui s'arrête :** le serveur web lancé dans cette fenêtre. Tu peux le relancer avec la même commande sans tout réinstaller. Fermer seulement l'onglet du navigateur n'arrête pas le serveur.
+
+Ce lancement est du développement local, pas une publication publique du site. Si Next affiche aussi une adresse « Network », elle correspond à un accès possible depuis ton réseau local selon la configuration ; elle ne signifie pas que le site a été déployé sur Internet.
+
 ## 5. Démarrer PostGIS et l'API — terminal B
+
+**Ce que cette étape fait :** elle lance les deux autres services, indépendamment du serveur web : l'API Django et la base PostgreSQL/PostGIS. « Terminal B » est simplement une deuxième fenêtre PowerShell, utile parce que le terminal A reste occupé par Next.js.
 
 Ouvrir un deuxième PowerShell pendant que le site tourne :
 
@@ -222,6 +299,24 @@ docker compose -f infra/local/compose.yaml ps
 ```
 
 La première commande valide le Compose. La deuxième télécharge PostgreSQL 18/PostGIS 3.6, construit l'image Python et démarre db et api en arrière-plan. Le premier lancement est plus long que les suivants.
+
+### Lire cette commande sans jargon
+
+Dans `docker compose -f infra/local/compose.yaml up -d --build` :
+
+| Élément | Signification |
+|---|---|
+| docker compose | Utiliser Docker pour gérer ensemble les services du projet |
+| -f infra/local/compose.yaml | Lire ce fichier précis, qui décrit les services db et api, leurs ports et leur stockage |
+| up | Créer si nécessaire, puis démarrer les services |
+| -d | Les laisser tourner en arrière-plan ; PowerShell rend la main |
+| --build | Construire/reconstruire l'image de l'API à partir de son Dockerfile et du code du dépôt |
+
+Le service **db** utilise une image PostGIS déjà préparée et initialise une base lors de la première utilisation du volume vide. Le service **api** construit son image à partir de apps/api/Dockerfile : Python, Django et les bibliothèques GIS sont installés **dans l'environnement Docker**, puis le code API y est copié. Cela n'installe pas Python directement dans Windows.
+
+Compose crée aussi un réseau pour que l'API joigne la base par le nom db. Les ports publiés permettent de joindre l'API sur localhost:8000 et PostgreSQL sur localhost:5432. La commande ps affiche les services ; logs affiche leurs messages. Ces deux commandes ne créent pas de nouvelles données.
+
+Le web de l'étape 4 reste exécuté directement par Node.js sur Windows : **le Compose actuel ne démarre pas le web**. La future interface appellera l'API pour les fonctionnalités métier ; la page d'attente actuelle fonctionne encore indépendamment.
 
 Dans ps, attendre que **db soit healthy** et que **api soit en cours d'exécution**. En cas d'arrêt de l'API ou de base non saine, lire les journaux :
 
@@ -235,6 +330,8 @@ Le Compose utilise désormais le volume `liwa-local_postgres18-data`, monté sou
 
 ### 5.1. Créer les tables Django
 
+Une **migration** décrit une évolution de la structure de la base : créer une table, ajouter une colonne ou une contrainte. Le premier migrate crée notamment les tables Django de comptes, permissions et sessions. Les modèles immobiliers n'existent pas encore : cette commande ne remplit pas un catalogue de projets.
+
 Lorsque les services tournent :
 
 ```powershell
@@ -244,7 +341,11 @@ docker compose -f infra/local/compose.yaml exec api python manage.py check
 
 Résultat attendu : migrations appliquées ou aucune migration restante, puis contrôle Django sans erreur. Le démarrage de l'API **n'applique pas automatiquement les migrations**.
 
+Ici, `exec api` signifie « exécuter la suite de la commande dans le conteneur api déjà démarré ». `python manage.py` lance un outil Django du projet. `migrate --noinput` applique les migrations sans questions interactives ; `check` examine la configuration et ne crée pas de tables. Appliquer des migrations déjà appliquées ne les rejoue pas.
+
 ### 5.2. Vérifier les endpoints
+
+Un **endpoint** est une adresse précise de l'API à laquelle envoyer une demande. Invoke-RestMethod envoie ici une requête HTTP depuis PowerShell et affiche la réponse. Ces requêtes de santé ne créent pas d'utilisateur ou de bien immobilier.
 
 ```powershell
 Invoke-RestMethod 'http://localhost:8000/api/v1/health/live'
@@ -259,6 +360,8 @@ Les ports sont limités à la machine locale : web 3000, API 8000, base 5432. Co
 
 ## 6. Créer un compte d'administration — facultatif
 
+**Ce que cette étape fait :** elle ajoute dans PostgreSQL un compte autorisé à utiliser l'administration Django. Ce compte reste dans le volume de base après un arrêt ordinaire. Il ne crée pas un compte GitHub, un compte Windows ou le système de connexion du futur site public.
+
 Après les migrations :
 
 ```powershell
@@ -272,6 +375,8 @@ Ouvrir [l'administration Django](http://localhost:8000/admin/) et se connecter. 
 ## 7. Routine quotidienne et arrêt
 
 ### Au prochain lancement
+
+**Ce qui se passe :** Compose redémarre ou réutilise les conteneurs et retrouve le même volume de base. pnpm dev:web relance le serveur web à partir du code déjà présent. Installer, démarrer et arrêter sont trois opérations différentes ; une installation n'est pas à refaire chaque matin.
 
 Ouvrir Docker Desktop si l'API est nécessaire, puis depuis la racine :
 
@@ -289,6 +394,8 @@ pnpm.cmd dev:web
 Ne pas réinstaller les paquets ni recréer le compte à chaque lancement. Après une mise à jour du dépôt, réinstaller les paquets verrouillés si les dépendances JavaScript ont changé, reconstruire l'API si son code/dépendances ont changé et appliquer les nouvelles migrations.
 
 ### Après une modification du backend
+
+**Pourquoi reconstruire :** l'image API est une copie préparée du code à un instant donné. Changer le fichier Python sur Windows ne change pas cette copie. Le build crée une image actualisée et Compose peut remplacer le conteneur API en utilisant toujours le même volume de base.
 
 Le Compose actuel **ne monte pas le code Windows dans le conteneur** et utilise --noreload. Enregistrer un fichier Python ne change donc pas l'API qui tourne. Pour prendre en compte une modification :
 
@@ -320,6 +427,8 @@ down retire les conteneurs/réseaux locaux mais conserve le volume de base. **Ne
 
 ## 8. Vérifier le site compilé
 
+**Ce que cette étape fait :** elle transforme le code du web en fichiers préparés pour une exécution sans rechargement de développement. Ce travail s'appelle un build, ou compilation. Ce n'est pas encore un déploiement : les fichiers restent sur ton ordinateur.
+
 Arrêter le serveur de développement pour libérer le port 3000. Depuis la racine :
 
 ```powershell
@@ -331,6 +440,8 @@ Le build utilise **Webpack** : la copie standalone avec Turbopack a échoué dan
 
 Ouvrir [le site compilé](http://localhost:3000/en). Ce serveur ne recharge pas les modifications : arrêter, reconstruire et redémarrer pour les prendre en compte.
 
+`build` prépare les fichiers ; `start` démarre le serveur qui les utilise. À l'étape 4, `dev:web` prépare les pages au fil du développement et surveille les modifications. Ne pas lancer dev:web et start simultanément sur le même port.
+
 Pour vérifier automatiquement l'artefact, arrêter ce serveur puis exécuter :
 
 ```powershell
@@ -341,6 +452,8 @@ pnpm.cmd smoke:web
 Le contrôle attend un build existant. Il démarre un serveur temporaire sur **3101**, vérifie les quinze routes, lang/dir, traductions, sélecteur, CSS, défaut anglais et route inexistante, puis arrête son serveur. Libérer le port 3101 avant de le lancer.
 
 ## 9. Vérifier le code avant de le partager
+
+**Ce que cette étape fait :** elle cherche des erreurs avant de partager ou publier le code. Les vérifications ne remplacent pas un lancement du site et ne téléchargent pas de données immobilières. Les tests isolés utilisent un environnement de test, pas le volume PostgreSQL de développement.
 
 ### 9.1. Web et documentation
 
@@ -359,6 +472,8 @@ Les commandes doivent terminer sans erreur. Le typage utilise le compilateur nat
 Elles contrôlent respectivement qualité/style, types, traductions, liens Markdown locaux et cohérence des types générés avec OpenAPI. Pour vérifier aussi le serveur compilé, suivre l'étape 8.
 
 ### 9.2. Python sur Windows — installation facultative
+
+Cette option sert à travailler sur les outils Python directement depuis Windows. Elle est distincte du parcours Docker : uv télécharge ici l'interpréteur Python et prépare un environnement local au projet. Une **.venv** contient les bibliothèques Python isolées pour ce projet ; elle évite de les mélanger avec celles d'autres applications.
 
 Pour les outils de qualité, l'export OpenAPI et les tests HTTP isolés, installer [uv 0.13.0 avec son installateur officiel](https://docs.astral.sh/uv/getting-started/installation/) :
 
@@ -392,6 +507,8 @@ Ces retraits concernent seulement ce terminal. Les tests utilisent liwa.config.s
 Le serveur GeoDjango et les tests PostGIS exécutés nativement nécessitent aussi GDAL/GEOS/PROJ sur l'hôte : Python seul ne suffit pas. Le parcours Docker évite leur installation sur Windows pour lancer l'API. La CI utilise ces bibliothèques et une vraie base PostGIS avec LIWA_TEST_POSTGIS=1. L'image API locale est une image runtime sans pytest/Ruff ; ne pas tenter d'y exécuter les outils de développement.
 
 ### 9.3. Après une modification du contrat API
+
+Un **contrat API** décrit les adresses disponibles et les formes des demandes/réponses. L'export OpenAPI produit cette description depuis le code Python ; contracts:generate en déduit les types TypeScript pour le web. Cela permet aux deux applications de s'accorder sur les données échangées, sans partager directement leurs tables de base.
 
 Avec uv installé, dans le terminal des tests isolés et depuis la racine :
 
