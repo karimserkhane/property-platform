@@ -545,13 +545,35 @@ Les ports sont limités à la machine locale : web 3000, API 8000, base 5432. Co
 
 **Facultatif pour lancer le site, nécessaire pour alimenter le catalogue de parcelles.** Cette commande interroge directement DMT/Onwani ; elle n'utilise pas le HTML fourni. Elle reste manuelle, sans tâche planifiée.
 
-Après avoir récupéré la branche contenant cet import, depuis la racine du dépôt dans le terminal B :
+**1. Ouvrir Docker Desktop**, puis un terminal PowerShell (le terminal B si le site tourne déjà). Le site web n'a pas besoin de tourner pour importer les données.
+
+**2. Se placer à la racine du projet et vérifier la branche :**
+
+```powershell
+Set-Location 'C:\Users\Karim\Repositories\property-platform'
+git status --short
+git branch --show-current
+```
+
+L'import est actuellement disponible sur **`codex/onwani-import`**, pas sur `main`. Si tu dois récupérer cette branche ou sa dernière version :
+
+```powershell
+git fetch origin
+git switch codex/onwani-import
+git pull --ff-only
+```
+
+Ces commandes téléchargent le code et sélectionnent sa version ; elles n'importent pas de données. Si Git signale des modifications locales qui empêchent le changement de branche ou la mise à jour, les conserver avant de continuer : ne pas utiliser une commande de réinitialisation pour les effacer. Si tu es déjà sur cette branche avec la dernière version, ne change pas de branche.
+
+**3. Reconstruire l'API, créer les tables, puis lancer l'import**, toujours dans ce même terminal et depuis la racine :
 
 ```powershell
 docker compose -f infra/local/compose.yaml up -d --build api
 docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
 docker compose -f infra/local/compose.yaml exec api python manage.py import_onwani --actor Karim
 ```
+
+La première commande reconstruit le programme API avec le nouveau code et démarre aussi la base nécessaire. La deuxième applique les migrations du dépôt. **La troisième est celle qui récupère les parcelles auprès d'Onwani et les enregistre dans ta base locale.** Attendre le résultat de chaque commande avant de lancer la suivante. Si `Unknown command: 'import_onwani'` apparaît, vérifier la branche et refaire la reconstruction de l'API.
 
 `--actor Karim` identifie l'opérateur dans l'audit ; ce texte ne constitue pas une authentification. La commande de maintenance est réservée aux personnes ayant accès à l'environnement serveur. La collecte peut prendre quelques minutes. Le résultat affiche un identifiant d'acquisition et les compteurs `created`, `updated`, `unchanged`, `observed` et `quarantined`.
 
