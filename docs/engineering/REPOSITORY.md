@@ -76,16 +76,26 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       ├── modules/         Domaines métier séparés, chacun propriétaire de ses règles
 │       │       │   ├── catalog/      Identité des biens et relations acceptées
 │       │       │   │   ├── apps.py   Déclaration de l'application Django
+│       │       │   │   ├── models.py Parcelles typées avec géométrie PostGIS et identité interne
+│       │       │   │   ├── services.py  Conversion des géométries et mutations du catalogue
+│       │       │   │   ├── migrations/  Évolution du schéma du catalogue
 │       │       │   │   └── README.md Responsabilités et dépendances du module
 │       │       │   ├── evidence/     Sources, assertions et rapprochements
 │       │       │   │   ├── apps.py
+│       │       │   │   ├── models.py Sources, acquisitions, captures, observations et audit
+│       │       │   │   ├── onwani.py Protocole et validation des réponses officielles
+│       │       │   │   ├── services.py  Orchestration de l'import et de sa transaction
+│       │       │   │   ├── migrations/  Évolution du schéma des preuves
+│       │       │   │   ├── management/commands/import_onwani.py  Commande manuelle d'import
 │       │       │   │   └── README.md
 │       │       │   └── publication/  Validation et versions publiées
 │       │       │       ├── apps.py
 │       │       │       └── README.md
 │       │       └── export_openapi.py Export de la description de l'API
 │       └── tests/                   Vérifications HTTP et d'intégration du backend
-│           └── test_health.py        Contrôles HTTP et test de disponibilité PostGIS
+│           ├── test_health.py        Contrôles HTTP et test de disponibilité PostGIS
+│           ├── test_onwani_protocol.py  Contrôles des réponses, identifiants et territoire
+│           └── test_onwani_postgis.py   Transactions, géométries, audit et quarantaine
 ├── packages/                        Paquets réutilisables, dont les contrats partagés avec les clients
 │   └── contracts/                    Contrat entre le backend et les clients TypeScript
 │       ├── package.json              Commandes de génération et de vérification
@@ -137,7 +147,7 @@ Ce dossier possède les pages et interactions du site. `apps/web/src/app/` défi
 | [evidence](../../apps/api/src/liwa/modules/evidence/README.md) | Sources, acquisitions, assertions et décisions de rapprochement | Conserver qu'un document daté annonce une livraison, avec sa provenance |
 | [publication](../../apps/api/src/liwa/modules/publication/README.md) | Validation, projections et versions publiées | Publier une version validée du dossier en passant par les services des autres modules |
 
-**Ces modules sont actuellement des cadres de responsabilité : leurs modèles immobiliers ne sont pas encore implémentés.** Leurs `apps.py` les déclarent à Django ; leurs `README.md` précisent leurs frontières.
+**Le catalogue et les preuves possèdent maintenant les premiers modèles de parcelles et d'acquisition Onwani.** Le module publication reste un cadre sans modèle. Les bâtiments, logements, prix et dossiers publics ne sont pas encore implémentés. Les `apps.py` déclarent les modules à Django ; les `README.md` précisent leurs frontières.
 
 `apps/api/src/liwa/config/settings/base.py` est partagé, puis complété par `apps/api/src/liwa/config/settings/local.py`, `apps/api/src/liwa/config/settings/testing.py` ou `apps/api/src/liwa/config/settings/production.py`. La présence de ce dernier ne signifie pas que le site est déployé. `apps/api/manage.py` sert notamment à lancer les migrations ou à créer un administrateur ; ce n'est pas une page web.
 
@@ -192,8 +202,8 @@ Les caches de code ne sont pas le stockage de PostgreSQL. **Supprimer un volume 
 | Modifier la page d'accueil | `apps/web/src/app/[locale]/page.tsx` | Existe |
 | Ajouter une carte ou une fiche immobilière | `apps/web/src/features/map/` ou `apps/web/src/features/property/`, branchées depuis une route de `apps/web/src/app/` | À créer avec la fonctionnalité |
 | Ajouter un composant partagé entre plusieurs fonctionnalités | `apps/web/src/components/` | Dossier existant ; y placer seulement les composants réutilisables |
-| Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/liwa/modules/catalog/` | Module existant ; modèles et services à créer |
-| Ajouter les sources et preuves | `apps/api/src/liwa/modules/evidence/` | Module existant ; modèles et services à créer |
+| Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/liwa/modules/catalog/` | Modèle Parcel et services existants ; bâtiments et logements à ajouter |
+| Ajouter les sources et preuves | `apps/api/src/liwa/modules/evidence/` | Premiers modèles d'acquisition et observations Onwani existants |
 | Ajouter une route métier HTTP | `apps/api/src/liwa/api/`, branchée au routeur | À créer avec les services métier qu'elle appelle |
 | Ajouter des migrations Django | `migrations/` dans le module propriétaire | À générer avec Django lorsque les modèles arrivent |
 | Ajouter un domaine prix, avis ou documents | Module dédié sous `apps/api/src/liwa/modules/` | À créer quand ses responsabilités et dépendances sont définies |
@@ -227,4 +237,4 @@ Les workers légers utiliseront le même paquet Python que l'API, avec un proces
 
 ## Ce que le socle ne prétend pas fournir
 
-Les trois modules Django sont des limites de responsabilité, sans modèle métier inventé avant le dossier pilote. La page web est une page d'attente. Auth Supabase, stockage, carte, collecteurs, queue et génération ne sont pas encore intégrés. Les seuls endpoints sont liveness et readiness PostGIS. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier.
+Le premier import manuel Onwani alimente les parcelles et conserve captures, observations et audit. Il ne publie pas automatiquement un dossier. La page web reste une page d'attente. Auth Supabase, stockage objet, carte, autres collecteurs, queue et génération ne sont pas encore intégrés. Les seuls endpoints sont liveness et readiness PostGIS. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.

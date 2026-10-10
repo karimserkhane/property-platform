@@ -1,6 +1,6 @@
 # Lancer et développer Liwa Atlas, étape par étape
 
-Ce guide décrit le **socle actuel du dépôt** : page d'attente multilingue, API de contrôle de santé et base PostGIS. Carte, fiches immobilières, authentification, médias et traitements IA arriveront avec les fonctionnalités métier.
+Ce guide décrit le **socle actuel du dépôt** : page d'attente multilingue, API de contrôle de santé, base PostGIS et premier import manuel de parcelles Onwani avec provenance. Carte, fiches immobilières, authentification, médias et traitements IA arriveront avec les fonctionnalités suivantes.
 
 Les commandes sont prévues pour **Windows et PowerShell**, depuis la racine du dépôt sauf indication contraire. Exécuter chaque commande séparément ; résoudre une erreur avant de poursuivre.
 
@@ -408,7 +408,7 @@ Si seuls nos deux conteneurs tournent, les deux tableaux montrent les mêmes ins
 
 ### 5.1. Créer les tables Django
 
-Une **migration** décrit une évolution de la structure de la base : créer une table, ajouter une colonne ou une contrainte. Le premier migrate crée notamment les tables Django de comptes, permissions et sessions. Les modèles immobiliers n'existent pas encore : cette commande ne remplit pas un catalogue de projets.
+Une **migration** décrit une évolution de la structure de la base : créer une table, ajouter une colonne ou une contrainte. Le premier migrate crée les tables Django de comptes, permissions et sessions, ainsi que nos premières tables de parcelles, acquisitions et audit. Cette commande crée leur structure ; elle ne collecte aucune donnée immobilière.
 
 **Pourquoi cette étape après le démarrage Docker ?** PostgreSQL a initialisé une base disponible, mais il ne connaît pas les tables dont Django a besoin. Démarrer l'API et créer ces tables sont deux opérations distinctes : Django doit envoyer les instructions de création à PostgreSQL.
 
@@ -429,7 +429,7 @@ Le chemin de cette opération est : **PowerShell → Django dans le conteneur `a
 
 Un **modèle** est une classe Python décrivant les données de l'application, par exemple un bâtiment et ses champs. Une **migration** est un fichier Python décrivant une évolution de la base correspondant à ces modèles. Les fichiers Python ne contiennent pas les lignes de données : celles-ci sont enregistrées dans PostgreSQL.
 
-**Actuellement, les modèles et migrations utilisés à cette étape sont fournis par Django lui-même.** Ils sont installés dans les dépendances Python du conteneur API, pas dans nos dossiers de code métier. Les applications concernées sont déclarées dans `INSTALLED_APPS`, dans [apps/api/src/liwa/config/settings/base.py](../../apps/api/src/liwa/config/settings/base.py).
+**Une partie des modèles et migrations est fournie par Django lui-même.** Ces fichiers sont installés dans les dépendances Python du conteneur API, pas dans nos dossiers de code métier. Nos modèles de parcelles et de provenance, décrits ensuite, sont dans le dépôt. Les applications concernées sont déclarées dans `INSTALLED_APPS`, dans [apps/api/src/liwa/config/settings/base.py](../../apps/api/src/liwa/config/settings/base.py).
 
 | Fonction Django | Modèles fournis avec Django | Migrations fournies avec Django |
 |---|---|---|
@@ -454,24 +454,24 @@ docker compose -f infra/local/compose.yaml exec api python manage.py showmigrati
 
 `[X]` signifie « déjà appliquée » et `[ ]` « pas encore appliquée ». Ces deux commandes consultent des informations ; elles ne créent pas de tables. Django conserve le suivi des applications dans la table PostgreSQL `django_migrations`.
 
-**Nos futurs modèles et migrations immobilières seront dans le module propriétaire**, par exemple le catalogue. L'arborescence suivante montre un emplacement prévu ; ces fichiers n'existent pas encore :
+**Nos modèles et migrations sont dans le module propriétaire.** Le premier sous-ensemble de parcelles existe maintenant dans le catalogue :
 
 ```text
 apps/api/src/liwa/modules/catalog/
 ├── apps.py                     Existe : déclaration du module Django
 ├── README.md                   Existe : responsabilités du catalogue
-├── models.py                   Futur : modèles de bâtiments, parcelles, logements…
-└── migrations/                 Futur : historique de leur structure en base
+├── models.py                   Existe : modèle Parcel, géométrie et champs typés
+├── services.py                 Existe : mutations du catalogue et conversion des géométries
+└── migrations/                 Existe : historique de leur structure en base
     ├── __init__.py
-    ├── 0001_initial.py         Exemple : première création des tables du catalogue
-    └── 0002_….py              Exemple : évolution suivante
+    └── 0001_initial.py         Existe : première création de la table des parcelles
 ```
 
-Pour retrouver ces futurs fichiers sans lire l'arborescence : modèle `apps/api/src/liwa/modules/catalog/models.py`, dossier de migrations `apps/api/src/liwa/modules/catalog/migrations/`, première migration `apps/api/src/liwa/modules/catalog/migrations/0001_initial.py`.
+Pour retrouver ces fichiers sans lire l'arborescence : [apps/api/src/liwa/modules/catalog/models.py](../../apps/api/src/liwa/modules/catalog/models.py), dossier `apps/api/src/liwa/modules/catalog/migrations/`, première migration `apps/api/src/liwa/modules/catalog/migrations/0001_initial.py`. Les modèles de provenance sont dans [apps/api/src/liwa/modules/evidence/models.py](../../apps/api/src/liwa/modules/evidence/models.py), avec leurs migrations dans `apps/api/src/liwa/modules/evidence/migrations/`.
 
 On pourra répartir les modèles dans un paquet `apps/api/src/liwa/modules/catalog/models/` si leur taille le justifie. Les modules `apps/api/src/liwa/modules/evidence/` et `apps/api/src/liwa/modules/publication/` auront leurs propres modèles et migrations pour les données qu'ils possèdent ; tout ne sera pas regroupé dans le catalogue.
 
-Le cycle de développement sera **modifier les modèles → générer les migrations avec `makemigrations` → relire et conserver ces fichiers dans Git → appliquer avec `migrate`**. `makemigrations` prépare des fichiers ; `migrate` modifie la base. **À cette étape du démarrage, utilise seulement les commandes indiquées plus haut : il n'y a pas de nouveaux modèles immobiliers à générer.**
+Le cycle de développement est **modifier les modèles → générer les migrations avec `makemigrations` → relire et conserver ces fichiers dans Git → appliquer avec `migrate`**. `makemigrations` prépare des fichiers ; `migrate` modifie la base. **À cette étape du démarrage, utilise seulement `migrate` : les migrations du dépôt sont déjà générées.** Les bâtiments et logements restent à développer.
 
 Le Compose actuel copie le code dans l'image sans monter les fichiers Windows. Une migration générée uniquement dans le conteneur n'apparaît donc pas automatiquement dans ton dépôt et peut être perdue lors de sa recréation. Lors du développement des premiers modèles, il faudra générer les fichiers dans l'environnement local configuré ou les récupérer explicitement dans le dépôt avant de reconstruire l'image. Voir aussi [la structure des modules](REPOSITORY.md).
 
@@ -489,6 +489,46 @@ Le champ status doit valoir **ok** pour live et **ready** pour ready. live véri
 Ouvrir [la documentation interactive locale](http://localhost:8000/api/v1/docs) pour voir les endpoints. Les endpoints immobiliers ne sont pas encore implémentés.
 
 Les ports sont limités à la machine locale : web 3000, API 8000, base 5432. Compose fournit déjà ses variables et identifiants de développement : **aucun .env n'est requis pour ce parcours**. apps/api/.env.example illustre une exécution Python native ; Django ne charge pas automatiquement une copie .env dans la configuration actuelle.
+
+### Premier import manuel des parcelles Onwani
+
+**Facultatif pour lancer le site, nécessaire pour alimenter le catalogue de parcelles.** Cette commande interroge directement DMT/Onwani ; elle n'utilise pas le HTML fourni. Elle reste manuelle, sans tâche planifiée.
+
+Après avoir récupéré la branche contenant cet import, depuis la racine du dépôt dans le terminal B :
+
+```powershell
+docker compose -f infra/local/compose.yaml up -d --build api
+docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
+docker compose -f infra/local/compose.yaml exec api python manage.py import_onwani --actor Karim
+```
+
+`--actor Karim` identifie l'opérateur dans l'audit ; ce texte ne constitue pas une authentification. La commande de maintenance est réservée aux personnes ayant accès à l'environnement serveur. La collecte peut prendre quelques minutes. Le résultat affiche un identifiant d'acquisition et les compteurs `created`, `updated`, `unchanged`, `observed` et `quarantined`.
+
+- `created` : nouvelles parcelles du catalogue ; `updated` : versions typées ou géométries changées ; `unchanged` : parcelles déjà présentes et identiques.
+- `observed` : nombre d'enregistrements collectés ; `quarantined` : géométries invalides conservées pour examen, sans correction automatique ni remplacement d'une ancienne géométrie valide.
+- Un statut `quarantined` signale un lot à examiner, pas une carte entièrement validée. Une erreur de réseau, de territoire, de schéma ou de couverture laisse le catalogue précédent intact ; les captures déjà reçues et le statut de l'acquisition restent enregistrés.
+
+Tu peux relancer l'import : il crée une nouvelle acquisition, sans dupliquer les parcelles qui gardent le même identifiant de source. Les observations et captures successives sont conservées. Aucun enregistrement absent n'est supprimé automatiquement. Cela ne publie pas encore les parcelles sur le site, qui reste une page d'attente.
+
+Dans l'outil de base de données, les tables sont sous le schéma `public` :
+
+| Table | Ce qu'elle contient |
+|---|---|
+| `catalog_parcel` | Parcelles, géométries PostGIS, identité interne et révision |
+| `evidence_source` | Source officielle utilisée |
+| `evidence_ingestionrun` | Historique des imports, opérateur, statut et compteurs |
+| `evidence_capture` | Réponses JSON exactes, URL, horaires, empreinte SHA-256 et en-têtes disponibles |
+| `evidence_parcelobservation` | Attributs originaux, version de mapping et référence de capture par parcelle |
+| `evidence_auditevent` | Créations et changements du catalogue, auteur et justification |
+| `evidence_quarantinedobservation` | Enregistrements dont la géométrie doit être examinée |
+
+Pour vérifier les effectifs depuis le terminal, sans modifier les données :
+
+```powershell
+docker compose -f infra/local/compose.yaml exec api python manage.py shell -c "from liwa.modules.catalog.models import Parcel; from liwa.modules.evidence.models import IngestionRun; print('Parcelles:', Parcel.objects.count()); print('Acquisitions:', IngestionRun.objects.count())"
+```
+
+Les dates de publication inconnues restent nulles ; les dates de réception, permis et mise à jour fournies par Onwani restent préservées dans leurs attributs originaux. Voir [DATA_PROVENANCE.md](DATA_PROVENANCE.md) pour les limites, la portée des identifiants et les responsabilités de chaque module. Utiliser les services métier et cette commande pour modifier le catalogue, pas des modifications manuelles de tables dans l'outil SQL.
 
 ## 6. Créer un compte d'administration — facultatif
 

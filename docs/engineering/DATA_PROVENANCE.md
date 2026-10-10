@@ -1,6 +1,24 @@
 # Données de Reem : collecte directe, provenance et audit
 
-Décision du 10 octobre 2026 : la carte pilote couvre Al Reem Island. Les données sont acquises directement auprès de leurs sources ; le HTML fourni sert de référence visuelle, pas de jeu de données à importer. Ce document précise le modèle cible avant création des modèles Django et migrations. Les tables décrites ci-dessous ne sont pas encore implémentées.
+Décision du 10 octobre 2026 : la carte pilote couvre Al Reem Island. Les données sont acquises directement auprès de leurs sources ; le HTML fourni sert de référence visuelle, pas de jeu de données à importer. Ce document décrit la cible et son premier sous-ensemble implémenté : parcelles, acquisitions Onwani, captures, observations et événements d'audit. Les décisions éditoriales, les autres collecteurs et la publication restent à développer.
+
+## Import manuel implémenté
+
+Le connecteur `apps/api/src/liwa/modules/evidence/onwani.py` interroge la source officielle à chaque exécution, filtre `AL REEM ISLAND` **et** `ADM`, vérifie son schéma et collecte les identifiants puis les géométries par lots. Une seconde liste d'identifiants contrôle la couverture en fin de collecte ; elle ne garantit pas que tous les attributs sont restés figés pendant l'acquisition.
+
+`apps/api/src/liwa/modules/evidence/services.py` conserve les réponses exactes et leur empreinte, puis applique un lot complet dans une transaction qui conserve aussi observations et audit. Un verrou PostgreSQL de session empêche deux instances de ce connecteur de modifier le catalogue simultanément. Connexion directe requise ; ne pas utiliser de pooler de transaction pour cette commande.
+
+Une répétition crée une nouvelle acquisition et de nouvelles observations, mais pas de nouvelles parcelles pour les mêmes identifiants de source. Les changements typés ou géométriques augmentent la révision et produisent un audit. Les dates externes restent dans leurs champs bruts ; aucune date de publication n'est inventée. Les captures référencent exactement le champ `features[n]`, qui permet de retrouver chaque attribut et la géométrie d'origine.
+
+Limites explicites de ce premier sous-ensemble : les réponses JSON bornées sont stockées dans PostgreSQL, sans stockage objet ni déduplication physique des captures ; aucun document/photo/vidéo n'est acquis. L'OBJECTID reste un identifiant d'observation rattaché à la source, pas une garantie d'identité cadastrale permanente : un changement d'identifiant nécessite une réconciliation ultérieure. Une géométrie topologiquement invalide est conservée dans `evidence_quarantinedobservation`, sans réparation silencieuse ni remplacement d'une ancienne valeur valide ; les autres enregistrements complets sont appliqués et le statut du lot devient `quarantined`. Un mauvais territoire, un schéma inattendu ou un lot manquant font en revanche échouer toute l'acquisition. Aucune disparition n'efface une parcelle. Les erreurs réseau sont enregistrées sur l'acquisition, les réponses HTTP d'erreur bornées sont capturées. Il n'y a ni reprise à mi-lot, ni planification, ni publication automatique. Le journal n'est pas encore durci par des rôles SQL dédiés ; les opérations de cette commande restent transactionnelles et attribuées à son opérateur.
+
+Les captures exploratoires de la section suivante ne sont pas utilisées par cette commande. Voir [les commandes de développement](DEVELOPMENT.md#premier-import-manuel-des-parcelles-onwani).
+
+### Vérifications de ce premier import
+
+Les tests d'intégration ont été exécutés avec PostgreSQL 18.6/PostGIS 3.6 réel dans une base de test séparée : répétition sans doublon, changement de valeur avec historique, échec de collecte sans mutation du catalogue, rollback en cas d'échec d'audit, lot incomplet, trous et polygones disjoints, et quarantaine sans remplacement d'une valeur valide. Les tests de protocole vérifient aussi territoires, identifiants, coordonnées, schéma, troncature et conservation d'une réponse HTTP d'erreur.
+
+Deux acquisitions réelles successives ont ensuite été exécutées dans une autre base temporaire : première acquisition **2 432 observations, 2 431 créations et une quarantaine** ; seconde acquisition **0 création, 0 modification, 2 431 inchangées et une quarantaine**. La géométrie invalide observée correspond à l'OBJECTID `26032713`. Les 56 captures des deux acquisitions ont été conservées dans cette base pendant le test. La base temporaire a été supprimée après vérification ; la base locale de développement `liwa` n'a pas été alimentée par ces tests. Ces effectifs décrivent les acquisitions testées, pas une constante à imposer aux futures collectes.
 
 ## 1. Sources et état de la recherche
 

@@ -11,4 +11,8 @@ PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 if os.environ.get("LIWA_TEST_POSTGIS") != "1":
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
     # GIS admin discovery imports GDAL even when the HTTP tests never touch geometry.
-    INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.gis"]  # noqa: F405
+    INSTALLED_APPS = [
+        app
+        for app in INSTALLED_APPS  # noqa: F405
+        if app != "django.contrib.gis" and not app.startswith("liwa.modules.")
+    ]
