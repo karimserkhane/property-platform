@@ -389,6 +389,54 @@ Ici, `exec api` signifie « exécuter la suite de la commande dans le conteneur 
 
 Le chemin de cette opération est : **PowerShell → Django dans le conteneur `api` → création des tables dans PostgreSQL, dans le conteneur `db`**. La commande ne crée pas de nouveau conteneur. Django enregistre aussi les migrations appliquées dans la base afin de savoir lesquelles restent à exécuter. Les tables et ce suivi sont conservés dans le volume persistant de PostgreSQL après un arrêt ordinaire de Docker.
 
+#### Où sont les modèles et les fichiers de migration ?
+
+Un **modèle** est une classe Python décrivant les données de l'application, par exemple un bâtiment et ses champs. Une **migration** est un fichier Python décrivant une évolution de la base correspondant à ces modèles. Les fichiers Python ne contiennent pas les lignes de données : celles-ci sont enregistrées dans PostgreSQL.
+
+**Actuellement, les modèles et migrations utilisés à cette étape sont fournis par Django lui-même.** Ils sont installés dans les dépendances Python du conteneur API, pas dans nos dossiers de code métier. Les applications concernées sont déclarées dans `INSTALLED_APPS`, dans [settings/base.py](../../apps/api/src/liwa/config/settings/base.py).
+
+| Fonction Django | Modèles fournis avec Django | Migrations fournies avec Django |
+|---|---|---|
+| Comptes et permissions | `django/contrib/auth/models.py` | `django/contrib/auth/migrations/` |
+| Types de contenus utilisés notamment par les permissions | `django/contrib/contenttypes/models.py` | `django/contrib/contenttypes/migrations/` |
+| Sessions stockées en base | `django/contrib/sessions/models.py` | `django/contrib/sessions/migrations/` |
+| Journal de l'administration | `django/contrib/admin/models.py` | `django/contrib/admin/migrations/` |
+
+Dans l'image API actuelle, ces chemins sont sous `/app/.venv/lib/python3.14/site-packages/`. Si tu utilises le parcours Python natif sur Windows, ils sont sous `apps/api/.venv/Lib/site-packages/`. Ce sont les fichiers de la bibliothèque : **on ne les modifie pas pour développer notre produit**.
+
+Pour afficher le chemin réel d'un fichier de migration Django dans ton conteneur, depuis PowerShell à la racine du dépôt :
+
+```powershell
+docker compose -f infra/local/compose.yaml exec api python -c "import importlib; print(importlib.import_module('django.contrib.auth.migrations.0001_initial').__file__)"
+```
+
+Pour voir les migrations connues et savoir lesquelles ont été appliquées :
+
+```powershell
+docker compose -f infra/local/compose.yaml exec api python manage.py showmigrations
+```
+
+`[X]` signifie « déjà appliquée » et `[ ]` « pas encore appliquée ». Ces deux commandes consultent des informations ; elles ne créent pas de tables. Django conserve le suivi des applications dans la table PostgreSQL `django_migrations`.
+
+**Nos futurs modèles et migrations immobilières seront dans le module propriétaire**, par exemple le catalogue. L'arborescence suivante montre un emplacement prévu ; ces fichiers n'existent pas encore :
+
+```text
+apps/api/src/liwa/modules/catalog/
+├── apps.py                     Existe : déclaration du module Django
+├── README.md                   Existe : responsabilités du catalogue
+├── models.py                   Futur : modèles de bâtiments, parcelles, logements…
+└── migrations/                 Futur : historique de leur structure en base
+    ├── __init__.py
+    ├── 0001_initial.py         Exemple : première création des tables du catalogue
+    └── 0002_….py              Exemple : évolution suivante
+```
+
+On pourra répartir les modèles dans un paquet `models/` si leur taille le justifie. `evidence` et `publication` auront leurs propres modèles et migrations pour les données qu'ils possèdent ; tout ne sera pas regroupé dans le catalogue.
+
+Le cycle de développement sera **modifier les modèles → générer les migrations avec `makemigrations` → relire et conserver ces fichiers dans Git → appliquer avec `migrate`**. `makemigrations` prépare des fichiers ; `migrate` modifie la base. **À cette étape du démarrage, utilise seulement les commandes indiquées plus haut : il n'y a pas de nouveaux modèles immobiliers à générer.**
+
+Le Compose actuel copie le code dans l'image sans monter les fichiers Windows. Une migration générée uniquement dans le conteneur n'apparaît donc pas automatiquement dans ton dépôt et peut être perdue lors de sa recréation. Lors du développement des premiers modèles, il faudra générer les fichiers dans l'environnement local configuré ou les récupérer explicitement dans le dépôt avant de reconstruire l'image. Voir aussi [la structure des modules](REPOSITORY.md).
+
 ### 5.2. Vérifier les endpoints
 
 Un **endpoint** est une adresse précise de l'API à laquelle envoyer une demande. Invoke-RestMethod envoie ici une requête HTTP depuis PowerShell et affiche la réponse. Ces requêtes de santé ne créent pas d'utilisateur ou de bien immobilier.
