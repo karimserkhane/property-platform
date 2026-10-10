@@ -328,9 +328,53 @@ docker compose -f infra/local/compose.yaml logs --tail 100 db api
 
 Le Compose utilise désormais le volume `liwa-local_postgres18-data`, monté sous `/var/lib/postgresql`, conformément à l'image PostgreSQL 18. L'ancien volume `liwa-local_postgres-data` est conservé mais **n'est pas migré automatiquement**. Le premier lancement en PostgreSQL 18 initialise une nouvelle base : recréer les migrations et le superutilisateur ci-dessous. Si l'ancien volume contient des données à conserver, préparer un export/restauration ou une migration validée avant de basculer les usages. Ne pas monter directement son répertoire PostgreSQL 17 dans PostgreSQL 18 et ne pas le supprimer. Aucun transfert ou effacement de base n'est exécuté par la mise à jour du dépôt.
 
+### D'où viennent les noms des services, images et conteneurs ?
+
+Compose lit [infra/local/compose.yaml](../../infra/local/compose.yaml) et démarre deux **conteneurs** à partir de deux **images**. Une image est le modèle préparé ; un conteneur est une instance exécutée à partir de ce modèle ; un service est la définition de ce que Compose doit lancer.
+
+Voici un **extrait simplifié à lire**, pas une commande à exécuter ni un remplacement du fichier complet :
+
+```yaml
+name: liwa-local
+
+services:
+  db:
+    image: postgis/postgis:18-3.6
+
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+```
+
+| Élément | Base de données | Backend Django |
+|---|---|---|
+| Service défini sous `services:` | `db` | `api` |
+| Image utilisée | `postgis/postgis:18-3.6`, téléchargée si nécessaire | `liwa-local-api`, construite localement depuis notre Dockerfile |
+| Conteneur créé | `liwa-local-db-1` | `liwa-local-api-1` |
+
+`name: liwa-local` fixe le nom du projet Compose. Par défaut, le nom du conteneur suit **projet + service + numéro** : `liwa-local` + `api` + `1` donne `liwa-local-api-1`. Le numéro distingue les instances d'un service. Pour `api`, nous n'avons pas déclaré de champ `image:` : Compose attribue à l'image construite le nom `liwa-local-api`. Ces noms correspondent aux commandes de ce guide, sans option ni variable qui remplace le nom du projet.
+
+Dans les commandes Compose, on utilise le **service** : `exec api`, `logs api` ou `logs db`. Il n'est donc pas nécessaire d'écrire le nom complet du conteneur.
+
+### Pourquoi `docker compose … ps` et `docker ps` affichent-ils des tableaux différents ?
+
+Ces deux commandes consultent l'état des conteneurs ; elles ne les démarrent pas et ne modifient pas la base.
+
+| Commande | Ce qu'elle affiche |
+|---|---|
+| `docker compose -f infra/local/compose.yaml ps` | Les conteneurs du projet décrit par ce YAML, avec leur service `api` ou `db` |
+| `docker ps` | Tous les conteneurs actuellement démarrés sur le Docker auquel ton terminal est connecté, avec notamment leur identifiant |
+
+Si seuls nos deux conteneurs tournent, les deux tableaux montrent les mêmes instances, avec des colonnes différentes. `IMAGE` indique le modèle utilisé ; `NAME` ou `NAMES` indique le conteneur ; `SERVICE` indique le service Compose ; `CONTAINER ID` est l'identifiant technique du conteneur. `Up` indique qu'il tourne, et `healthy` que son contrôle de santé réussit. Les durées changent entre deux commandes exécutées à des moments différents.
+
+**Voir `api` en cours d'exécution et `db` en état `healthy` ne prouve pas que les tables Django existent déjà.** C'est le rôle de l'étape 5.1.
+
 ### 5.1. Créer les tables Django
 
 Une **migration** décrit une évolution de la structure de la base : créer une table, ajouter une colonne ou une contrainte. Le premier migrate crée notamment les tables Django de comptes, permissions et sessions. Les modèles immobiliers n'existent pas encore : cette commande ne remplit pas un catalogue de projets.
+
+**Pourquoi cette étape après le démarrage Docker ?** PostgreSQL a initialisé une base disponible, mais il ne connaît pas les tables dont Django a besoin. Démarrer l'API et créer ces tables sont deux opérations distinctes : Django doit envoyer les instructions de création à PostgreSQL.
 
 Lorsque les services tournent :
 
@@ -342,6 +386,8 @@ docker compose -f infra/local/compose.yaml exec api python manage.py check
 Résultat attendu : migrations appliquées ou aucune migration restante, puis contrôle Django sans erreur. Le démarrage de l'API **n'applique pas automatiquement les migrations**.
 
 Ici, `exec api` signifie « exécuter la suite de la commande dans le conteneur api déjà démarré ». `python manage.py` lance un outil Django du projet. `migrate --noinput` applique les migrations sans questions interactives ; `check` examine la configuration et ne crée pas de tables. Appliquer des migrations déjà appliquées ne les rejoue pas.
+
+Le chemin de cette opération est : **PowerShell → Django dans le conteneur `api` → création des tables dans PostgreSQL, dans le conteneur `db`**. La commande ne crée pas de nouveau conteneur. Django enregistre aussi les migrations appliquées dans la base afin de savoir lesquelles restent à exécuter. Les tables et ce suivi sont conservés dans le volume persistant de PostgreSQL après un arrêt ordinaire de Docker.
 
 ### 5.2. Vérifier les endpoints
 
