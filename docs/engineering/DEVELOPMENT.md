@@ -6,6 +6,8 @@ Les commandes sont prévues pour **Windows et PowerShell**, depuis la racine du 
 
 Les versions courantes et les exceptions de compatibilité sont documentées dans [TOOLCHAIN.md](TOOLCHAIN.md). Les anciennes études de stack restent des documents historiques ; les manifestes et ce guide décrivent les versions exécutées.
 
+**Repère pour retrouver les fichiers :** les chemins du dépôt sont écrits depuis sa racine `C:\Users\Karim\Repositories\property-platform`. Par exemple, `apps/api/src/liwa/config/settings/base.py` désigne sur ton PC `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\config\settings\base.py`. Les chemins commençant par `/app/` désignent au contraire des fichiers **dans le conteneur Linux**, pas dans l'explorateur Windows. Les noms courts dans une arborescence se lisent avec tous leurs dossiers parents.
+
 ## Mémo rapide : lancer, tester et tout arrêter
 
 **Après avoir installé les outils et dépendances du guide**, ouvrir Docker Desktop, puis deux terminaux PowerShell. Copier les commandes une par une. Pour une première installation, suivre les étapes détaillées plus bas.
@@ -427,16 +429,16 @@ Le chemin de cette opération est : **PowerShell → Django dans le conteneur `a
 
 Un **modèle** est une classe Python décrivant les données de l'application, par exemple un bâtiment et ses champs. Une **migration** est un fichier Python décrivant une évolution de la base correspondant à ces modèles. Les fichiers Python ne contiennent pas les lignes de données : celles-ci sont enregistrées dans PostgreSQL.
 
-**Actuellement, les modèles et migrations utilisés à cette étape sont fournis par Django lui-même.** Ils sont installés dans les dépendances Python du conteneur API, pas dans nos dossiers de code métier. Les applications concernées sont déclarées dans `INSTALLED_APPS`, dans [settings/base.py](../../apps/api/src/liwa/config/settings/base.py).
+**Actuellement, les modèles et migrations utilisés à cette étape sont fournis par Django lui-même.** Ils sont installés dans les dépendances Python du conteneur API, pas dans nos dossiers de code métier. Les applications concernées sont déclarées dans `INSTALLED_APPS`, dans [apps/api/src/liwa/config/settings/base.py](../../apps/api/src/liwa/config/settings/base.py).
 
 | Fonction Django | Modèles fournis avec Django | Migrations fournies avec Django |
 |---|---|---|
-| Comptes et permissions | `django/contrib/auth/models.py` | `django/contrib/auth/migrations/` |
-| Types de contenus utilisés notamment par les permissions | `django/contrib/contenttypes/models.py` | `django/contrib/contenttypes/migrations/` |
-| Sessions stockées en base | `django/contrib/sessions/models.py` | `django/contrib/sessions/migrations/` |
-| Journal de l'administration | `django/contrib/admin/models.py` | `django/contrib/admin/migrations/` |
+| Comptes et permissions | `/app/.venv/lib/python3.14/site-packages/django/contrib/auth/models.py` | `/app/.venv/lib/python3.14/site-packages/django/contrib/auth/migrations/` |
+| Types de contenus utilisés notamment par les permissions | `/app/.venv/lib/python3.14/site-packages/django/contrib/contenttypes/models.py` | `/app/.venv/lib/python3.14/site-packages/django/contrib/contenttypes/migrations/` |
+| Sessions stockées en base | `/app/.venv/lib/python3.14/site-packages/django/contrib/sessions/models.py` | `/app/.venv/lib/python3.14/site-packages/django/contrib/sessions/migrations/` |
+| Journal de l'administration | `/app/.venv/lib/python3.14/site-packages/django/contrib/admin/models.py` | `/app/.venv/lib/python3.14/site-packages/django/contrib/admin/migrations/` |
 
-Dans l'image API actuelle, ces chemins sont sous `/app/.venv/lib/python3.14/site-packages/`. Si tu utilises le parcours Python natif sur Windows, ils sont sous `apps/api/.venv/Lib/site-packages/`. Ce sont les fichiers de la bibliothèque : **on ne les modifie pas pour développer notre produit**.
+Le tableau donne les chemins complets **dans le conteneur API actuel**. Si tu utilises le parcours Python natif sur Windows, le préfixe `/app/.venv/lib/python3.14/site-packages/` est remplacé par `apps/api/.venv/Lib/site-packages/` depuis la racine du dépôt. Ce sont les fichiers de la bibliothèque : **on ne les modifie pas pour développer notre produit**.
 
 Pour afficher le chemin réel d'un fichier de migration Django dans ton conteneur, depuis PowerShell à la racine du dépôt :
 
@@ -465,7 +467,9 @@ apps/api/src/liwa/modules/catalog/
     └── 0002_….py              Exemple : évolution suivante
 ```
 
-On pourra répartir les modèles dans un paquet `models/` si leur taille le justifie. `evidence` et `publication` auront leurs propres modèles et migrations pour les données qu'ils possèdent ; tout ne sera pas regroupé dans le catalogue.
+Pour retrouver ces futurs fichiers sans lire l'arborescence : modèle `apps/api/src/liwa/modules/catalog/models.py`, dossier de migrations `apps/api/src/liwa/modules/catalog/migrations/`, première migration `apps/api/src/liwa/modules/catalog/migrations/0001_initial.py`.
+
+On pourra répartir les modèles dans un paquet `apps/api/src/liwa/modules/catalog/models/` si leur taille le justifie. Les modules `apps/api/src/liwa/modules/evidence/` et `apps/api/src/liwa/modules/publication/` auront leurs propres modèles et migrations pour les données qu'ils possèdent ; tout ne sera pas regroupé dans le catalogue.
 
 Le cycle de développement sera **modifier les modèles → générer les migrations avec `makemigrations` → relire et conserver ces fichiers dans Git → appliquer avec `migrate`**. `makemigrations` prépare des fichiers ; `migrate` modifie la base. **À cette étape du démarrage, utilise seulement les commandes indiquées plus haut : il n'y a pas de nouveaux modèles immobiliers à générer.**
 

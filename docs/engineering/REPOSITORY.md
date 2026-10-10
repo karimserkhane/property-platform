@@ -8,6 +8,8 @@ Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCH
 
 La **racine** est le dossier `property-platform`. Un élément terminé par `/` est un dossier ; les éléments indentés sont à l'intérieur de ce dossier. `src` contient le code source, `tests` les contrôles automatisés et `config` les réglages de l'application. Les noms qui commencent par un point, comme `.github`, sont aussi des fichiers ou dossiers ordinaires, parfois masqués par l'explorateur.
 
+Dans les explications, les chemins des fichiers sont donnés depuis la racine du dépôt. Sur ton poste, ajoute le préfixe `C:\Users\Karim\Repositories\property-platform\` pour obtenir leur chemin Windows absolu. Dans l'arborescence, lis chaque nom avec tous ses dossiers parents.
+
 L'arborescence ci-dessous décrit les fichiers suivis par Git aujourd'hui. Les quinze fichiers de traduction sont regroupés pour la lisibilité ; les fichiers Python `__init__.py`, qui identifient les paquets, sont omis. Les dossiers générés par les outils sont expliqués séparément.
 
 ```text
@@ -120,9 +122,9 @@ property-platform/                   Racine du monorepo : code, outils et docume
 
 ### `apps/web` : ce que l'utilisateur voit
 
-Ce dossier possède les pages et interactions du site. `src/app` définit les routes ; les crochets de `[locale]` indiquent un paramètre variable, pas un dossier à créer pour chaque langue. Le même `page.tsx` peut donc servir `/en`, `/ar` ou `/fr`, avec des textes différents dans `messages`.
+Ce dossier possède les pages et interactions du site. `apps/web/src/app/` définit les routes ; les crochets de `[locale]` indiquent un paramètre variable, pas un dossier à créer pour chaque langue. Le même `apps/web/src/app/[locale]/page.tsx` peut donc servir `/en`, `/ar` ou `/fr`, avec des textes différents dans `apps/web/messages/`.
 
-`src/components` accueille les composants réellement réutilisables. `src/i18n` centralise les règles de traduction et de navigation pour éviter que chaque page réinvente la gestion des langues. Le site ne doit pas accéder directement aux tables PostgreSQL : les demandes métier passent par l'API.
+`apps/web/src/components/` accueille les composants réellement réutilisables. `apps/web/src/i18n/` centralise les règles de traduction et de navigation pour éviter que chaque page réinvente la gestion des langues. Le site ne doit pas accéder directement aux tables PostgreSQL : les demandes métier passent par l'API.
 
 ### `apps/api` : les données et les règles métier
 
@@ -136,11 +138,11 @@ Ce dossier possède les pages et interactions du site. `src/app` définit les ro
 
 **Ces modules sont actuellement des cadres de responsabilité : leurs modèles immobiliers ne sont pas encore implémentés.** Leurs `apps.py` les déclarent à Django ; leurs `README.md` précisent leurs frontières.
 
-`settings/base.py` est partagé, puis complété par les réglages locaux, de test ou de production. La présence de `production.py` ne signifie pas que le site est déployé. `manage.py` sert notamment à lancer les migrations ou à créer un administrateur ; ce n'est pas une page web.
+`apps/api/src/liwa/config/settings/base.py` est partagé, puis complété par `apps/api/src/liwa/config/settings/local.py`, `apps/api/src/liwa/config/settings/testing.py` ou `apps/api/src/liwa/config/settings/production.py`. La présence de ce dernier ne signifie pas que le site est déployé. `apps/api/manage.py` sert notamment à lancer les migrations ou à créer un administrateur ; ce n'est pas une page web.
 
 ### `packages/contracts` : l'accord entre le site et l'API
 
-Le backend exporte ses routes et formats de réponse dans `openapi.json`. Le générateur produit ensuite `src/generated.ts`, utilisé pour vérifier les types côté TypeScript. Ces deux fichiers sont suivis par Git et mis à jour ensemble via les commandes documentées dans [DEVELOPMENT.md](DEVELOPMENT.md) ; ils ne se corrigent pas manuellement.
+Le backend exporte ses routes et formats de réponse dans `packages/contracts/openapi.json`. Le générateur produit ensuite `packages/contracts/src/generated.ts`, utilisé pour vérifier les types côté TypeScript. Ces deux fichiers sont suivis par Git et mis à jour ensemble via les commandes documentées dans [DEVELOPMENT.md](DEVELOPMENT.md) ; ils ne se corrigent pas manuellement.
 
 Ce paquet contient des descriptions de données, pas une copie des modèles Django ni des règles métier. Il pourra aussi être consommé par le futur mobile.
 
@@ -174,7 +176,7 @@ Tu peux voir ces éléments dans PyCharm après installation ou démarrage, mêm
 | `.git/` | Historique et métadonnées du dépôt | Non, utiliser les commandes ou l'interface Git |
 | `node_modules/` | Bibliothèques JavaScript installées par pnpm | Non, modifier le code dans `src` et les dépendances dans les manifestes |
 | `apps/web/.next/` | Cache et fichiers générés par Next.js | Non, le prochain lancement ou build peut les recréer |
-| `apps/api/.venv/` | Environnement Python local créé par uv si tu utilises ce parcours | Non, le code du projet reste dans `src/liwa` |
+| `apps/api/.venv/` | Environnement Python local créé par uv si tu utilises ce parcours | Non, le code du projet reste dans `apps/api/src/liwa/` |
 | `__pycache__/`, `.pytest_cache/`, `.ruff_cache/` | Caches des outils Python | Non, ils ne sont pas des sources |
 | `.cache/`, `.tools-env/` | Éventuels caches et outils locaux utilisés pendant la préparation | Non, leur présence dépend du poste et ils ne sont pas requis comme dossiers source |
 | `.idea/` | Réglages locaux de PyCharm | Ne pas y placer le code ; vérifier les exclusions Git avant tout partage de réglages |
@@ -187,7 +189,7 @@ Les caches de code ne sont pas le stockage de PostgreSQL. **Supprimer un volume 
 |---|---|---|
 | Modifier les textes d'accueil | `apps/web/messages/<langue>.json` | Existe |
 | Modifier la page d'accueil | `apps/web/src/app/[locale]/page.tsx` | Existe |
-| Ajouter une carte ou une fiche immobilière | `apps/web/src/features/map/` ou `src/features/property/`, branchées depuis une route de `src/app` | À créer avec la fonctionnalité |
+| Ajouter une carte ou une fiche immobilière | `apps/web/src/features/map/` ou `apps/web/src/features/property/`, branchées depuis une route de `apps/web/src/app/` | À créer avec la fonctionnalité |
 | Ajouter un composant partagé entre plusieurs fonctionnalités | `apps/web/src/components/` | Dossier existant ; y placer seulement les composants réutilisables |
 | Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/liwa/modules/catalog/` | Module existant ; modèles et services à créer |
 | Ajouter les sources et preuves | `apps/api/src/liwa/modules/evidence/` | Module existant ; modèles et services à créer |
