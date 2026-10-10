@@ -111,6 +111,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       ├── DEVELOPMENT.md             Commandes de démarrage et explications
 │       ├── TOOLCHAIN.md               Versions exécutables et compatibilités
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
+│       ├── DATA_PROVENANCE.md          Collecte directe, sources par information et audit
 │       └── STRUCTURE_REVIEW.md        Revue critique de l'organisation
 └── scripts/                         Utilitaires pour vérifier le dépôt et préparer le site construit
     ├── check-doc-links.mjs            Vérification des liens locaux dans les documents
@@ -217,6 +218,7 @@ Les workers légers utiliseront le même paquet Python que l'API, avec un proces
 
 1. Aucun secret ni original documentaire privé dans Git. Utiliser `.env.example` pour les noms et paramètres locaux ; les environnements réels utilisent leurs secrets propres.
 2. Les tables métier publiées restent typées ; propositions et preuves ne remplacent pas les contraintes du catalogue.
+   Voir [la collecte directe et la provenance](DATA_PROVENANCE.md) pour les acquisitions, les dates de chaque information et l'audit des décisions. Le HTML de référence n'est pas un jeu de données à importer.
 3. Une opération sensible conserve auteur, raison et version ; les permissions couvrent HTTP, administration, fichiers et futurs traitements.
 4. Toute évolution d'API conserve sa compatibilité ou documente une rupture. Les types générés ne sont jamais édités manuellement.
 5. Les migrations sont revues et exécutées explicitement, pas au démarrage concurrent de chaque processus. Les comptes base de migration/exécution seront séparés au déploiement.

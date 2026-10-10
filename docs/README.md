@@ -8,6 +8,7 @@
 - [Démarrage et vérifications](engineering/DEVELOPMENT.md)
 - [Versions des outils et compatibilités](engineering/TOOLCHAIN.md)
 - [Multilingue et RTL](engineering/INTERNATIONALIZATION.md)
+- [Collecte directe, provenance des données et audit](engineering/DATA_PROVENANCE.md)
 - [Revue critique de structure](engineering/STRUCTURE_REVIEW.md)
 - [Architecture précédente, archivée](archive/ARCHITECTURE_STACK_LIWA_ATLAS.md)
 
