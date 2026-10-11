@@ -2,10 +2,13 @@
 
 - [Étude produit](product/ETUDE_PRODUIT_LIWA_ATLAS.md)
 - [Stratégie produit](product/STRATEGIE_PRODUIT_LIWA_ATLAS.md)
+- [Benchmark concurrentiel actualisé](product/BENCHMARK_CONCURRENTIEL.md)
+- [Design de l'accueil et première expérience](product/DESIGN_ACCUEIL.md)
 - [Architecture de référence](architecture/REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md)
 - [Contre-audit de la stack](architecture/AUDIT_DECISION_STACK_LIWA_ATLAS.md)
 - [Structure et responsabilités](engineering/REPOSITORY.md)
 - [Démarrage et vérifications](engineering/DEVELOPMENT.md)
+- [Première exploration locale : livraison et validation](engineering/ATLAS_PREVIEW.md)
 - [Versions des outils et compatibilités](engineering/TOOLCHAIN.md)
 - [Multilingue et RTL](engineering/INTERNATIONALIZATION.md)
 - [Collecte directe, provenance des données et audit](engineering/DATA_PROVENANCE.md)

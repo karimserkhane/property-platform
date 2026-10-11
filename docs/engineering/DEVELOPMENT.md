@@ -1,12 +1,46 @@
 # Lancer et développer Liwa Atlas, étape par étape
 
-Ce guide décrit le **socle actuel du dépôt** : page d'attente multilingue, API de contrôle de santé, base PostGIS et premier import manuel de parcelles Onwani avec provenance. Carte, fiches immobilières, authentification, médias et traitements IA arriveront avec les fonctionnalités suivantes.
+Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, exploration locale des parcelles Onwani, API de contrôle de santé, base PostGIS et import manuel avec provenance. Bâtiments/unités, prix, dossiers publics approuvés, authentification, médias et traitements IA arriveront avec les fonctionnalités suivantes.
+
+### Essayer le nouvel accueil et la carte locale
+
+Après une mise à jour du backend, reconstruire son image depuis `C:\Users\Karim\Repositories\property-platform` :
+
+```powershell
+pnpm.cmd install --frozen-lockfile
+docker compose -f infra/local/compose.yaml up -d --build api
+pnpm.cmd dev:web
+```
+
+La première commande installe les dépendances verrouillées, dont MapLibre ; la deuxième prend le nouveau code API sans effacer les parcelles ; la troisième démarre le site dans ce terminal. Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore Al Reem**. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche utilise le début du code de parcelle ; elle ne recherche pas encore des appartements ou des prix.
+
+Si la base est vide, appliquer les migrations et l'import de la section 6 avant d'explorer. Un message d'indisponibilité indique de vérifier l'API ; une carte vide et une recherche sans résultat sont des états différents. Le fond est neutre : rues, images satellite et bâtiments 3D ne sont pas encore intégrés. Les coordonnées ne sont pas une certification de limites foncières.
+
+Pour changer l'adresse de l'API, copier `C:\Users\Karim\Repositories\property-platform\apps\web\.env.example` vers `C:\Users\Karim\Repositories\property-platform\apps\web\.env.local`, régler LIWA_API_ORIGIN, puis redémarrer Next.js. Ce réglage reste côté serveur. Le site en développement autorise le relais local ; pour essayer le **site compilé localement**, définir aussi LIWA_ENABLE_LOCAL_PREVIEW=1 dans ce fichier ou dans le terminal de lancement. Sans cet opt-in, le web compilé refuse l'aperçu. Django hors DEBUG le refuse dans tous les cas. Ce mécanisme n'est pas une procédure de mise en production.
 
 Les commandes sont prévues pour **Windows et PowerShell**, depuis la racine du dépôt sauf indication contraire. Exécuter chaque commande séparément ; résoudre une erreur avant de poursuivre.
 
 Les versions courantes et les exceptions de compatibilité sont documentées dans [TOOLCHAIN.md](TOOLCHAIN.md). Les anciennes études de stack restent des documents historiques ; les manifestes et ce guide décrivent les versions exécutées.
 
 **Repère pour retrouver les fichiers :** les chemins du dépôt sont écrits depuis sa racine `C:\Users\Karim\Repositories\property-platform`. Par exemple, `apps/api/src/liwa/config/settings/base.py` désigne sur ton PC `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\config\settings\base.py`. Les chemins commençant par `/app/` désignent au contraire des fichiers **dans le conteneur Linux**, pas dans l'explorateur Windows. Les noms courts dans une arborescence se lisent avec tous leurs dossiers parents.
+
+### Variante : prévisualisation entièrement dans Docker
+
+Si tu préfères essayer le site compilé sans lancer Node sur Windows, depuis `C:\Users\Karim\Repositories\property-platform` :
+
+```powershell
+docker compose -f infra/local/compose.yaml --profile web-preview up -d --build web
+```
+
+Compose construit le site, attend que l'API et PostGIS soient disponibles, puis expose [l'accueil](http://localhost:3102/en) et [l'exploration](http://localhost:3102/en/explore) sur **3102**, sans occuper le port 3000. C'est une prévisualisation locale compilée, sans rechargement automatique. Après modification du code web, relancer cette commande pour reconstruire. Le profil est facultatif : un lancement Compose habituel n'ajoute pas ce site Docker.
+
+Pour tout arrêter après avoir utilisé ce profil :
+
+```powershell
+docker compose -f infra/local/compose.yaml --profile web-preview down
+```
+
+Cette commande conserve le volume PostgreSQL. Ne pas ajouter `-v`. Le contrôle local du 11 octobre a validé cette variante ; le build natif Windows de l'agent a été bloqué par les permissions du cache SWC, sans désactiver ses protections. Cela ne prouve pas que le même problème existe dans ton terminal personnel.
 
 ## Sommaire
 

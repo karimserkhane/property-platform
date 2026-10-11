@@ -59,6 +59,151 @@
           "health"
         ]
       }
+    },
+    "/api/v1/preview/parcels": {
+      "get": {
+        "operationId": "previewParcels",
+        "summary": "Parcels",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "bbox",
+            "schema": {
+              "title": "Bbox",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 3000,
+              "title": "Limit",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/parcels/{parcel_id}": {
+      "get": {
+        "operationId": "previewParcel",
+        "summary": "Parcel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "parcel_id",
+            "schema": {
+              "format": "uuid",
+              "title": "Parcel Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Detail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
     }
   },
   "components": {
@@ -79,6 +224,212 @@
           "status"
         ],
         "title": "Health",
+        "type": "object"
+      },
+      "Collection": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/Feature"
+            },
+            "title": "Features",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "features",
+          "truncated"
+        ],
+        "title": "Collection",
+        "type": "object"
+      },
+      "Feature": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/Properties"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "Feature",
+        "type": "object"
+      },
+      "Geometry": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "title": "Coordinates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "Geometry",
+        "type": "object"
+      },
+      "Properties": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "community": {
+            "title": "Community",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "community"
+        ],
+        "title": "Properties",
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "Detail": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "district": {
+            "title": "District",
+            "type": "string"
+          },
+          "community": {
+            "title": "Community",
+            "type": "string"
+          },
+          "revision": {
+            "title": "Revision",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "publication_status": {
+            "title": "Publication Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "district",
+          "community",
+          "revision",
+          "source",
+          "publication_status"
+        ],
+        "title": "Detail",
+        "type": "object"
+      },
+      "Provenance": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "retrieved_at",
+          "published_at",
+          "ingested_at"
+        ],
+        "title": "Provenance",
         "type": "object"
       }
     }

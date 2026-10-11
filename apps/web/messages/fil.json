@@ -4,5 +4,33 @@
     "title": "Isang ari-arian, ang paligid nito, at ang mga ebidensya.",
     "description": "Inihahanda ang unang tala ng ari-arian. Pag-uugnayin nito ang lote, gusali, mga tirahan at mga pinagmulang dokumento."
   },
-  "LanguageSwitcher": { "label": "Wika" }
+  "LanguageSwitcher": {
+    "label": "Wika"
+  },
+  "Atlas": {
+    "explore": "Tuklasin ang Al Reem",
+    "sources": "Datos at mga sanggunian",
+    "pilot": "Lokal na preview ng pananaliksik",
+    "intro": "Tuklasin ang mga lote sa Al Reem. Buksan ang tala para makita ang pinagmulan ng impormasyon.",
+    "search": "Maghanap",
+    "reference": "Sanggunian ng lote",
+    "loading": "Naglo-load ng mga lote…",
+    "unavailable": "Hindi makuha ang datos. Tiyaking gumagana ang lokal na API.",
+    "retry": "Subukan muli",
+    "empty": "Walang tumugmang lote.",
+    "truncated": "May mga loteng hindi ipinakita. Limitahan ang paghahanap.",
+    "select": "Pumili ng lote",
+    "source": "Tingnan ang orihinal na sanggunian",
+    "retrieved": "Petsa ng pagkuha",
+    "published": "Petsa ng paglalathala ng sanggunian",
+    "unknown": "Hindi dokumentado",
+    "district": "Distrito",
+    "community": "Komunidad",
+    "limitations": "Lokal na preview mula DMT / Onwani. Ang mga lote ay hindi mga gusali o bahay. Hindi pinatutunayan ng petsa ng pagkuha ang bisa ng permit; maaaring hindi alam ang petsa ng paglalathala.",
+    "list": "Listahan ng lote",
+    "map": "Mapa ng lote",
+    "reset": "I-reset",
+    "count": "mga lote sa resultang ito",
+    "back": "Bumalik sa simula"
+  }
 }

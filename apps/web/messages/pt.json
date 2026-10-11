@@ -4,5 +4,33 @@
     "title": "Um imóvel, a sua envolvente e as suas evidências.",
     "description": "O primeiro perfil imobiliário está em preparação. Ligará o lote, o edifício, as habitações e os documentos de referência."
   },
-  "LanguageSwitcher": { "label": "Idioma" }
+  "LanguageSwitcher": {
+    "label": "Idioma"
+  },
+  "Atlas": {
+    "explore": "Explorar Al Reem",
+    "sources": "Dados e fontes",
+    "pilot": "Prévia de pesquisa local",
+    "intro": "Explore os terrenos de Al Reem. Abra um registro e veja a origem dos dados.",
+    "search": "Pesquisar",
+    "reference": "Referência do terreno",
+    "loading": "Carregando terrenos…",
+    "unavailable": "Dados indisponíveis. Verifique se a API local está funcionando.",
+    "retry": "Tentar novamente",
+    "empty": "Nenhum terreno encontrado.",
+    "truncated": "Alguns terrenos foram omitidos. Refine a pesquisa.",
+    "select": "Selecione um terreno",
+    "source": "Ver fonte original",
+    "retrieved": "Obtido em",
+    "published": "Data de publicação da fonte",
+    "unknown": "Não documentado",
+    "district": "Distrito",
+    "community": "Comunidade",
+    "limitations": "Prévia local DMT / Onwani. Terrenos não são edifícios ou moradias. A data de obtenção não comprova a validade de uma licença; a data de publicação pode ser desconhecida.",
+    "list": "Lista de terrenos",
+    "map": "Mapa de terrenos",
+    "reset": "Redefinir",
+    "count": "terrenos neste resultado",
+    "back": "Voltar ao início"
+  }
 }

@@ -4,5 +4,33 @@
     "title": "Un inmueble, su entorno y sus evidencias.",
     "description": "La primera ficha inmobiliaria está en preparación. Conectará la parcela, el edificio, las viviendas y los documentos de referencia."
   },
-  "LanguageSwitcher": { "label": "Idioma" }
+  "LanguageSwitcher": {
+    "label": "Idioma"
+  },
+  "Atlas": {
+    "explore": "Explorar Al Reem",
+    "sources": "Datos y fuentes",
+    "pilot": "Vista de investigación local",
+    "intro": "Explora las parcelas de Al Reem. Abre un registro y consulta el origen de sus datos.",
+    "search": "Buscar",
+    "reference": "Referencia de parcela",
+    "loading": "Cargando parcelas…",
+    "unavailable": "Datos no disponibles. Comprueba que la API local esté funcionando.",
+    "retry": "Reintentar",
+    "empty": "No hay parcelas coincidentes.",
+    "truncated": "Se han omitido algunas parcelas. Afina la búsqueda.",
+    "select": "Seleccionar parcela",
+    "source": "Ver fuente original",
+    "retrieved": "Recuperado el",
+    "published": "Fecha de publicación de la fuente",
+    "unknown": "No documentado",
+    "district": "Distrito",
+    "community": "Comunidad",
+    "limitations": "Vista local de DMT / Onwani. Las parcelas no son edificios ni viviendas. La fecha de recuperación no demuestra la validez de un permiso; la de publicación puede ser desconocida.",
+    "list": "Lista de parcelas",
+    "map": "Mapa de parcelas",
+    "reset": "Restablecer",
+    "count": "parcelas en este resultado",
+    "back": "Volver al inicio"
+  }
 }

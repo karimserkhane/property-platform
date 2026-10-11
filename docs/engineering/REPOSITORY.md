@@ -39,10 +39,13 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   └── en.json, ar.json…     Textes de l'interface dans les quinze langues
 │   │   ├── src/                     Code source de l'interface web
 │   │   │   ├── app/                 Pages, routes et structures de page Next.js
+│   │   │   │   ├── api/atlas/        Relais serveur borné des lectures de parcelles
 │   │   │   │   ├── globals.css       Styles communs du site
 │   │   │   │   └── [locale]/         Routes associées à une langue, par exemple /en
 │   │   │   │       ├── layout.tsx    Structure de page, langue, direction et métadonnées
-│   │   │   │       └── page.tsx      Page d'accueil actuelle
+│   │   │   │       ├── page.tsx      Page d'accueil actuelle
+│   │   │   │       └── explore/page.tsx   Exploration locale des parcelles
+│   │   │   ├── features/atlas/      Accueil, carte, liste, fiche et adaptateur API de l'atlas
 │   │   │   ├── components/          Éléments d'interface réutilisables
 │   │   │   │   └── language-switcher.tsx   Sélecteur de langue interactif
 │   │   │   ├── i18n/                Gestion commune des langues et de la navigation multilingue
@@ -78,6 +81,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── apps.py   Déclaration de l'application Django
 │       │       │   │   ├── models.py Parcelles typées avec géométrie PostGIS et identité interne
 │       │       │   │   ├── services.py  Conversion des géométries et mutations du catalogue
+│       │       │   │   ├── queries.py   Lectures spatiales bornées et identité
 │       │       │   │   ├── migrations/  Évolution du schéma du catalogue
 │       │       │   │   └── README.md Responsabilités et dépendances du module
 │       │       │   ├── evidence/     Sources, assertions et rapprochements
@@ -85,11 +89,13 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── models.py Sources, acquisitions, captures, observations et audit
 │       │       │   │   ├── onwani.py Protocole et validation des réponses officielles
 │       │       │   │   ├── services.py  Orchestration de l'import et de sa transaction
+│       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
 │       │       │   │   ├── migrations/  Évolution du schéma des preuves
 │       │       │   │   ├── management/commands/import_onwani.py  Commande manuelle d'import
 │       │       │   │   └── README.md
 │       │       │   └── publication/  Validation et versions publiées
 │       │       │       ├── apps.py
+│       │       │       ├── preview.py  Projection de recherche locale, sans publication automatique
 │       │       │       └── README.md
 │       │       └── export_openapi.py Export de la description de l'API
 │       └── tests/                   Vérifications HTTP et d'intégration du backend
@@ -207,7 +213,7 @@ Les caches de code ne sont pas le stockage de PostgreSQL. **Supprimer un volume 
 |---|---|---|
 | Modifier les textes d'accueil | `apps/web/messages/<langue>.json` | Existe |
 | Modifier la page d'accueil | `apps/web/src/app/[locale]/page.tsx` | Existe |
-| Ajouter une carte ou une fiche immobilière | `apps/web/src/features/map/` ou `apps/web/src/features/property/`, branchées depuis une route de `apps/web/src/app/` | À créer avec la fonctionnalité |
+| Modifier l'atlas ou ajouter une fiche immobilière | `apps/web/src/features/atlas/` pour le pilote parcellaire ; un module `property/` viendra avec les dossiers immobiliers | Atlas local créé, dossiers bâtiment/unité à créer |
 | Ajouter un composant partagé entre plusieurs fonctionnalités | `apps/web/src/components/` | Dossier existant ; y placer seulement les composants réutilisables |
 | Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/liwa/modules/catalog/` | Modèle Parcel et services existants ; bâtiments et logements à ajouter |
 | Ajouter les sources et preuves | `apps/api/src/liwa/modules/evidence/` | Premiers modèles d'acquisition et observations Onwani existants |
@@ -242,6 +248,16 @@ Les workers légers utiliseront le même paquet Python que l'API, avec un proces
 6. Les durées, montants et identifiants sont validés côté serveur. UTC en stockage ; fuseau et format d'affichage côté client.
 7. L'anglais est la langue par défaut. Les traductions d'interface restent séparées des traductions documentaires ; les preuves originales et identifiants restent stables. Les layouts utilisent des propriétés CSS logiques pour le RTL.
 
+## Première exploration locale — 11 octobre 2026
+
+`apps/web/src/features/atlas/` possède l'accueil, l'exploration, la carte et les types consommés depuis les contrats générés. Les routes localisées assemblent ces écrans ; `apps/web/src/app/api/atlas/` relaie uniquement les deux lectures prévues vers une origine configurée côté serveur, avec délai et budget de réponse. Aucune clé ni URL amont configurable par un visiteur n'est envoyée au client. MapLibre est chargé uniquement dans l'exploration ; l'accueil est rendu côté serveur sans ce moteur.
+
+`catalog/queries.py` possède les lectures géographiques bornées ; `evidence/queries.py` possède la projection de provenance autorisée ; `publication/preview.py` les assemble sans mutation. L'API `api/parcels.py` valide les entrées et expose un contrat limité. La direction reste publication → evidence/catalog ; aucun nouveau domaine ni migration n'est nécessaire. Les originaux, opérateurs, attributs bruts et historiques internes ne sont pas exposés.
+
+Les endpoints `/api/v1/preview/parcels` et `/api/v1/preview/parcels/{id}` sont un aperçu de recherche **local**, pas une publication approuvée. Django exige DEBUG et LIWA_PARCEL_PREVIEW ; hors DEBUG ils refusent même un flag activé. Un web compilé exige aussi l'opt-in LIWA_ENABLE_LOCAL_PREVIEW=1. Ce flag ne permet pas de contourner Django. Les droits de diffusion, rôles, authentification du personnel, limitation de trafic distribuée et CSP complète avec nonces restent à définir avant publication.
+
+La carte actuelle affiche les contours réels Onwani sur un fond neutre, sans fournisseur externe de tuiles, sans noms de rues ni volumes de bâtiments. La liste paginée fournit une alternative si WebGL ne fonctionne pas. La couverture d'une source, la validité de géométrie et l'approbation d'un dossier sont trois notions distinctes.
+
 ## Ce que le socle ne prétend pas fournir
 
-Le premier import manuel Onwani alimente les parcelles et conserve captures, observations et audit. Il ne publie pas automatiquement un dossier. La page web reste une page d'attente. Auth Supabase, stockage objet, carte, autres collecteurs, queue et génération ne sont pas encore intégrés. Les seuls endpoints sont liveness et readiness PostGIS. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.
+Le premier import manuel Onwani alimente les parcelles et conserve captures, observations et audit. Il ne publie pas automatiquement un dossier. L'accueil et la carte proposent désormais un aperçu local. Auth Supabase, stockage objet, autres collecteurs, queue et génération ne sont pas encore intégrés. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.

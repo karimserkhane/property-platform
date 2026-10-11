@@ -3,10 +3,12 @@ WORKDIR /repo
 RUN npm install --global npm@12.2.0
 RUN npm install --global pnpm@12.10.1 --allow-scripts=pnpm
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/package.json
+COPY packages/contracts/package.json ./packages/contracts/package.json
+RUN pnpm install --frozen-lockfile
 COPY apps/web ./apps/web
 COPY packages/contracts ./packages/contracts
 COPY scripts ./scripts
-RUN pnpm install --frozen-lockfile
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm --filter @liwa/web build && node scripts/prepare-web-runtime.mjs
 

@@ -2,6 +2,8 @@
 
 Recherche effectuée le 9 octobre 2026 ; document finalisé le 10 octobre 2026. Liwa Atlas reste un nom de travail.
 
+Actualisation du 11 octobre : consulter le [benchmark concurrentiel](BENCHMARK_CONCURRENTIEL.md) pour les offres revérifiées et le [design de l'accueil](DESIGN_ACCUEIL.md) pour la prochaine tranche. Le socle et l'import de parcelles existent désormais ; les formulations « avant développement » ci-dessous décrivent le contexte de l'étude initiale.
+
 ## 1. Direction proposée
 
 Créer un dossier vivant du bien et de son environnement, accessible par carte, recherche ou liste, depuis le site et le mobile. La carte relie des informations qui sont aujourd’hui dispersées ; le dossier permet de vérifier leur origine et de comprendre leurs conséquences pour un logement précis.
@@ -21,6 +23,8 @@ Les fonctionnalités concurrentes ci-dessous sont des offres présentées par le
 Une discussion publique sur Marina Blue demande des retours concernant refroidissement, maintenance, gestion, bruit, fuites et moisissures. Elle fournit des thèmes à explorer, sans prouver des défauts de ce bâtiment ni représenter les habitants de Reem. L’ouverture complète de cette page n’a pas abouti ; l’extrait indexé a été consulté. [Discussion Marina Blue](https://www.reddit.com/r/AlReemisland/comments/1w73knt/marina_blue_in_reem_need_your_honest_reviews/).
 
 ## 3. Top des concurrents à étudier en priorité
+
+Le tableau suivant conserve la comparaison des 9–10 octobre. **La revue du 11 octobre et ses limites sont dans [BENCHMARK_CONCURRENTIEL.md](BENCHMARK_CONCURRENTIEL.md)** ; elle actualise notamment Ask Robin, Rendr, les niveaux de recherche Knownable et les réserves sur la couverture des couches Ardhi.
 
 | Rang | Acteur et couverture annoncée | Fonctions publiques pertinentes | Ce que cela implique pour nous |
 |---|---|---|---|
@@ -191,6 +195,8 @@ L’extension ajoute un territoire et ses connecteurs, conventions, langues et r
 | Extension | Échantillon d’un autre quartier puis couverture élargie | Réutilisation du modèle sans prétendre à une profondeur de données identique |
 
 Les nombres sont des tailles de pilote proposées, pas des engagements ni des résultats acquis. The District et ses voisins sont un point de départ possible grâce au contexte du HTML ; il faut aussi inclure des bâtiments livrés pour tester les charges et retours d’expérience.
+
+Précision au 11 octobre : les petits échantillons ci-dessus concernent la profondeur de recherche et les essais utilisateurs, **pas la superficie de la carte**. La première exploration vise toutes les parcelles disponibles sur Reem. L'import local conserve actuellement 2 431 parcelles sur 2 432 observations Onwani, la géométrie restante étant en quarantaine ; cette couverture d'une source ne prouve pas l'exhaustivité de tous les biens de l'île. La prochaine tranche est détaillée dans [DESIGN_ACCUEIL.md](DESIGN_ACCUEIL.md).
 
 Les fonctions centrales de première version sont la carte/recherche/liste, l’identité correcte, les informations sourcées et datées, les plans disponibles, une comparaison limitée et le suivi. Les inconnues apparaissent dès cette version. La 3D peut accompagner une démonstration, sans conditionner tout le lancement.
 

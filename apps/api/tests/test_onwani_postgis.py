@@ -7,13 +7,14 @@ from unittest.mock import patch
 import psycopg
 import pytest
 from django.apps import apps
-from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.core.management import call_command
 from django.db import DatabaseError, IntegrityError, connection, transaction
 from django.db.migrations.executor import MigrationExecutor
 
 if os.environ.get("LIWA_TEST_POSTGIS") != "1":
     pytest.skip("Onwani integration requires real PostGIS", allow_module_level=True)
+
+from django.contrib.gis.geos import MultiPolygon, Polygon  # noqa: E402
 
 from liwa.modules.catalog.models import Parcel  # noqa: E402
 from liwa.modules.catalog.services import geometry_from_rings  # noqa: E402

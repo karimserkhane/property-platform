@@ -4,5 +4,33 @@
     "title": "A property, its surroundings, its evidence.",
     "description": "The first property profile is being prepared. It will connect the parcel, building, homes and source documents."
   },
-  "LanguageSwitcher": { "label": "Language" }
+  "LanguageSwitcher": {
+    "label": "Language"
+  },
+  "Atlas": {
+    "explore": "Explore Al Reem",
+    "sources": "Data & sources",
+    "pilot": "Local research preview",
+    "intro": "Explore parcels across Al Reem Island. Open a record and see where its information comes from.",
+    "search": "Search",
+    "reference": "Parcel reference",
+    "loading": "Loading parcels…",
+    "unavailable": "Data is unavailable. Check that the local API is running.",
+    "retry": "Try again",
+    "empty": "No matching parcels.",
+    "truncated": "Some parcels are omitted. Narrow your search.",
+    "select": "Select a parcel",
+    "source": "View original source",
+    "retrieved": "Retrieved on",
+    "published": "Source publication date",
+    "unknown": "Not documented",
+    "district": "District",
+    "community": "Community",
+    "limitations": "Local preview from DMT / Onwani. Parcels are not buildings or homes. Retrieval dates do not establish permit validity; publication dates may be unknown.",
+    "list": "Parcel list",
+    "map": "Parcel map",
+    "reset": "Reset",
+    "count": "parcels in this result",
+    "back": "Back to home"
+  }
 }

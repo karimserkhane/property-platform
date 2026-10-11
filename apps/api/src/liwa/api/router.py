@@ -4,12 +4,15 @@ from django.conf import settings
 from django.db import DatabaseError, connection
 from ninja import NinjaAPI, Schema, Status
 
+from .parcels import router as parcels_router
+
 api = NinjaAPI(
     title="Liwa Atlas API",
     version="1.0.0",
     docs_url="/docs" if settings.DEBUG else None,
     openapi_url="/openapi.json" if settings.DEBUG else None,
 )
+api.add_router("/preview", parcels_router)
 
 
 class Health(Schema):

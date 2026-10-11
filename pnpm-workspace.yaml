@@ -12,3 +12,4 @@ allowBuilds:
   '@swc/core': false
 minimumReleaseAgeExclude:
   - '@types/node@26.6.5'
+  - maplibre-gl@6.14.0

@@ -32,6 +32,27 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Optional compiled preview; the default workflow still uses pnpm on port 3000.
+  web:
+    profiles: [web-preview]
+    image: liwa-web-preview
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+    environment:
+      LIWA_API_ORIGIN: http://api:8000
+      LIWA_ENABLE_LOCAL_PREVIEW: "1"
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3102:3000"
 
 volumes:
   postgres18-data:

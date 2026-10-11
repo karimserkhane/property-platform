@@ -4,5 +4,33 @@
     "title": "Un bien, son environnement, ses preuves.",
     "description": "Le premier dossier immobilier est en préparation. Il reliera parcelle, bâtiment, logements et documents sourcés."
   },
-  "LanguageSwitcher": { "label": "Langue" }
+  "LanguageSwitcher": {
+    "label": "Langue"
+  },
+  "Atlas": {
+    "explore": "Explorer Al Reem",
+    "sources": "Données et sources",
+    "pilot": "Aperçu de recherche local",
+    "intro": "Explorez les parcelles de Reem. Ouvrez une fiche pour retrouver l’origine de ses informations.",
+    "search": "Rechercher",
+    "reference": "Référence de parcelle",
+    "loading": "Chargement des parcelles…",
+    "unavailable": "Données indisponibles. Vérifiez que l’API locale fonctionne.",
+    "retry": "Réessayer",
+    "empty": "Aucune parcelle correspondante.",
+    "truncated": "Certaines parcelles sont omises. Précisez la recherche.",
+    "select": "Sélectionner une parcelle",
+    "source": "Voir la source originale",
+    "retrieved": "Récupéré le",
+    "published": "Date de publication de la source",
+    "unknown": "Non documenté",
+    "district": "District",
+    "community": "Communauté",
+    "limitations": "Aperçu local DMT / Onwani. Les parcelles ne sont pas des bâtiments ou logements. La récupération ne prouve pas la validité d’un permis ; la date de publication peut être inconnue.",
+    "list": "Liste des parcelles",
+    "map": "Carte des parcelles",
+    "reset": "Réinitialiser",
+    "count": "parcelles dans ce résultat",
+    "back": "Retour à l’accueil"
+  }
 }

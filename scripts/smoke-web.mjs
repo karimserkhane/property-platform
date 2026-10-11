@@ -9,7 +9,12 @@ const server = spawn(
   process.execPath,
   ["apps/web/.next/standalone/apps/web/server.js"],
   {
-    env: { ...process.env, PORT: "3101", HOSTNAME: "127.0.0.1" },
+    env: {
+      ...process.env,
+      LIWA_ENABLE_LOCAL_PREVIEW: "",
+      PORT: "3101",
+      HOSTNAME: "127.0.0.1",
+    },
     stdio: "inherit",
   },
 );
@@ -44,6 +49,8 @@ try {
   for (const locale of locales) {
     const response = await fetch(`${origin}/${locale}`);
     assert.equal(response.status, 200, locale);
+    assert.equal(response.headers.get("x-content-type-options"), "nosniff");
+    assert.equal(response.headers.get("x-frame-options"), "DENY");
     const html = await response.text();
     const messages = JSON.parse(
       await readFile(`apps/web/messages/${locale}.json`, "utf8"),
@@ -55,7 +62,27 @@ try {
     const cssPath = html.match(/href="([^"\s]+\.css[^"\s]*)"/)?.[1];
     assert.ok(cssPath, `${locale}: stylesheet missing`);
     assert.equal((await fetch(new URL(cssPath, origin))).status, 200, locale);
+    const explore = await fetch(`${origin}/${locale}/explore`);
+    assert.equal(explore.status, 200, locale);
+    assert.ok((await explore.text()).includes(messages.Atlas.explore), locale);
   }
+  assert.equal(
+    (await fetch(`${origin}/api/atlas/parcels?bbox=54.4,24.4,54.5,24.5`))
+      .status,
+    403,
+  );
+  assert.equal(
+    (await fetch(`${origin}/api/atlas/parcels?url=https://example.com`)).status,
+    400,
+  );
+  assert.equal(
+    (await fetch(`${origin}/api/atlas/parcels/invalid-id`)).status,
+    404,
+  );
+  assert.equal(
+    (await fetch(`${origin}/api/atlas/parcels`, { method: "POST" })).status,
+    405,
+  );
   assert.equal((await fetch(`${origin}/xx`)).status, 404);
   console.log(`Standalone smoke checks passed for ${locales.length} locales.`);
 } finally {

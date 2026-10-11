@@ -45,6 +45,10 @@ Les versions npm proviennent du dist-tag latest du registre officiel ; les versi
 
 Le dépôt ne gère pas les installations système de Git, Docker Desktop ni l'éditeur. Les guides pointent vers leurs distributions officielles ; cette mise à jour ne les installe ou remplace pas sur la machine. Node 26 est la branche Current, pas encore le choix LTS 24 de l'ancien socle.
 
+## Ajout cartographique — 11 octobre 2026
+
+**MapLibre GL JS 6.14.0**, version stable du registre npm vérifiée lors de l'installation, est fixé dans `apps/web/package.json` et le lockfile. Il est chargé dans le seul module d'exploration ; les versions des compilateurs existants restent inchangées. Son ajout explicite a produit une exception de délai de publication pour cette version dans `pnpm-workspace.yaml` ; aucune désactivation générale des contrôles de dépendances ou de TLS n'a été faite. Le moteur fonctionne ici sans tuiles externes ; les droits et coûts d'un fournisseur de fond de carte seront une décision séparée. [Documentation MapLibre](https://maplibre.org/maplibre-gl-js/docs/).
+
 ## PostgreSQL : données existantes
 
 Le passage de 17 à 18 est une migration majeure, pas une simple mise à jour de fichiers. Le Compose crée un volume postgres18-data monté sous /var/lib/postgresql. L'ancien volume postgres-data n'est ni supprimé ni réutilisé directement. Les données existantes demandent un export/restauration ou pg_upgrade validé séparément. Voir [le lancement détaillé](DEVELOPMENT.md).

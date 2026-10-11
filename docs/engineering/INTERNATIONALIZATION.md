@@ -8,7 +8,7 @@ Cette liste est une sélection de couverture et de marché, **pas un classement 
 
 [Visit Dubai — langues](https://www.visitdubai.com/plan-your-trip/practical-information), [EDI — interprétation des tests, document historique](https://edi-uae.com/public/uploads/editor-images/files/RIS.pdf).
 
-Le texte de la page d'attente et son sélecteur sont traduits. Ce sont des traductions initiales à faire relire par des locuteurs compétents avant publication commerciale, notamment pour les termes immobiliers. Les tests vérifient cohérence et rendu, pas la qualité linguistique d'une traduction.
+Les textes de l'accueil, de l'exploration locale et du sélecteur sont traduits. Ce sont des traductions initiales à faire relire par des locuteurs compétents avant publication commerciale, notamment pour les termes immobiliers. Les tests vérifient cohérence et rendu, pas la qualité linguistique d'une traduction. Les codes de parcelles et noms officiels restent dans leur forme d'origine ; leur présence dans une interface arabe ne signifie pas qu'une traduction documentaire a été validée.
 
 ## Implémentation
 

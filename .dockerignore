@@ -4,6 +4,7 @@
 **/.venv
 .tools-env
 .cache
+.codex-remote-attachments
 .pnpm-store
 **/__pycache__
 **/.env

@@ -4,5 +4,33 @@
     "title": "Eine Immobilie, ihr Umfeld, ihre Belege.",
     "description": "Das erste Immobilienprofil wird vorbereitet. Es wird das Grundstück, das Gebäude, die Wohnungen und die Quelldokumente miteinander verknüpfen."
   },
-  "LanguageSwitcher": { "label": "Sprache" }
+  "LanguageSwitcher": {
+    "label": "Sprache"
+  },
+  "Atlas": {
+    "explore": "Al Reem erkunden",
+    "sources": "Daten und Quellen",
+    "pilot": "Lokale Forschungsvorschau",
+    "intro": "Erkunde die Grundstücke auf Al Reem. Öffne einen Datensatz und prüfe die Herkunft seiner Angaben.",
+    "search": "Suchen",
+    "reference": "Grundstücksreferenz",
+    "loading": "Grundstücke werden geladen…",
+    "unavailable": "Daten nicht verfügbar. Prüfe, ob die lokale API läuft.",
+    "retry": "Erneut versuchen",
+    "empty": "Keine passenden Grundstücke.",
+    "truncated": "Einige Grundstücke fehlen. Grenze die Suche ein.",
+    "select": "Grundstück auswählen",
+    "source": "Originalquelle ansehen",
+    "retrieved": "Abgerufen am",
+    "published": "Veröffentlichungsdatum der Quelle",
+    "unknown": "Nicht dokumentiert",
+    "district": "Bezirk",
+    "community": "Gemeinschaft",
+    "limitations": "Lokale Vorschau von DMT / Onwani. Grundstücke sind keine Gebäude oder Wohnungen. Das Abrufdatum belegt keine Genehmigungsgültigkeit; das Veröffentlichungsdatum kann unbekannt sein.",
+    "list": "Grundstücksliste",
+    "map": "Grundstückskarte",
+    "reset": "Zurücksetzen",
+    "count": "Grundstücke in diesem Ergebnis",
+    "back": "Zur Startseite"
+  }
 }
