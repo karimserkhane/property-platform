@@ -19,7 +19,7 @@ class Command(BaseCommand):
             run = import_onwani(actor=actor)
         except Exception as exc:
             raise CommandError(
-                f"Import failed ({type(exc).__name__}); inspect evidence_ingestionrun. "
+                f"Import failed ({type(exc).__name__}); inspect evidence.ingestion_run. "
                 "No partial catalogue acquisition is applied."
             ) from exc
         self.stdout.write(self.style.SUCCESS(f"Run {run.id}: {run.summary}"))

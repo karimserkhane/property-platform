@@ -23,6 +23,8 @@ class Parcel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        # Resolved in real_estate by the fixed PostgreSQL search_path.
+        db_table = "parcel"
         constraints = [
             models.UniqueConstraint(
                 fields=["source_namespace", "source_record_id"], name="parcel_source_identity"

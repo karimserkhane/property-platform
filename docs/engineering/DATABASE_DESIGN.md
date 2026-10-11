@@ -4,29 +4,29 @@ Revue du 11 octobre 2026, fondée sur les modèles, migrations, services, tests 
 
 ## 1. Décision de nommage
 
-Le nom retenu pour le **domaine immobilier et son futur schéma SQL** est `real_estate`. Il décrit durablement les parcelles, projets, bâtiments et logements, indépendamment de la marque Liwa Atlas et du territoire Reem. `catalog` reste pour le moment le nom du module Django installé et le préfixe de sa table : ce nom technique n'est pas encore migré.
+Le nom retenu pour le **domaine immobilier et son schéma SQL** est `real_estate`. Il décrit durablement les parcelles, projets, bâtiments et logements, indépendamment de la marque Liwa Atlas et du territoire Reem. `catalog` reste le nom du module Django installé pour préserver les identifiants des modèles et l'historique des migrations. La table est désormais `real_estate.parcel` après application des migrations.
 
 Un schéma regroupe des objets dans une base. Ce n'est ni un dossier du dépôt ni un serveur supplémentaire. PostgreSQL permet des schémas pour organiser les objets et contrôler leurs accès ; le schéma seul n'apporte pas un gain de vitesse. Voir [la documentation PostgreSQL 18](https://www.postgresql.org/docs/18/ddl-schemas.html).
 
-| Domaine cible | Contenu | Exemples de noms futurs | Quand le créer physiquement |
+| Domaine cible | Contenu | Tables ou exemples | État |
 |---|---|---|---|
-| `real_estate` | Biens, projets et relations acceptées | `parcel`, `building`, `unit`, `development_project` | Première migration de schémas validée avec Django |
-| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Avec cette même migration |
+| `real_estate` | Biens, projets et relations acceptées | `parcel`, `building`, `unit`, `development_project` | Schéma créé ; seule `parcel` est implémentée |
+| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Schéma créé avec les six tables de provenance |
 | `publication` | Dossiers validés et versions accessibles au public | `project_version`, `publication_decision` | Première fonctionnalité de publication |
 | `market` | Transactions, offres, prix et échéanciers | `transaction`, `listing`, `price_observation`, `payment_schedule` | Première fonctionnalité de prix ; responsabilités à documenter |
 | `media` | Métadonnées des documents, images, vidéos et dérivés | `asset`, `asset_version`, `processing_result` | Premier traitement documentaire ; fichiers dans un stockage adapté |
 
-Ces noms sont une cible, pas des schémas déjà créés. Les autres domaines, dont avis, lieux et rues, feront l'objet d'une décision avec leur première fonctionnalité. Aucun schéma par pays, île, langue ou source : les territoires et langues sont des données liées aux objets. Dev, test et production sont des bases/environnements séparés, pas des schémas d'une même base de production.
+`real_estate` et `evidence` sont implémentés ; `publication`, `market` et `media` restent des domaines futurs. Les autres domaines, dont avis, lieux et rues, feront l'objet d'une décision avec leur première fonctionnalité. Aucun schéma par pays, île, langue ou source : les territoires et langues sont des données liées aux objets. Dev, test et production sont des bases/environnements séparés, pas des schémas d'une même base de production.
 
 Conventions : anglais, minuscules, `snake_case`, noms de tables au singulier, noms de colonnes précis, clés étrangères `<objet>_id`. Éviter les noms de marque, `data`, `misc`, `table1` et les suffixes `v2` pour contourner les migrations. Les noms internes des contraintes existantes ne sont pas renommés pour l'apparence.
 
-Exemples cible : `liwa.real_estate.parcel` et `liwa.evidence.capture`. Dans une connexion PostgreSQL à `liwa`, on écrit habituellement `real_estate.parcel` et `evidence.capture`. Le qualificatif de base ne permet pas d'interroger une autre base depuis la même connexion.
+Noms actuels : `liwa.real_estate.parcel` et `liwa.evidence.capture`. Dans une connexion PostgreSQL à `liwa`, on écrit habituellement `real_estate.parcel` et `evidence.capture`. Le qualificatif de base ne permet pas d'interroger une autre base depuis la même connexion.
 
 ## 2. Ce qui existe réellement
 
-Aujourd'hui, les tables applicatives sont dans `public` :
+Après application des migrations, les tables métier sont réparties entre `real_estate` et `evidence`. Les anciens noms disparaissent sans créer de seconde copie :
 
-| Table actuelle | Propriétaire Django | Destination proposée |
+| Ancien nom | Propriétaire Django | Nom actuel |
 |---|---|---|
 | `public.catalog_parcel` | `catalog` | `real_estate.parcel` |
 | `public.evidence_source` | `evidence` | `evidence.source` |
@@ -40,13 +40,17 @@ Les tables techniques Django restent gérées par leurs migrations. Les extensio
 
 L'inspection locale a trouvé PostgreSQL 18.6 et PostGIS 3.6.4, 2 431 parcelles valides/non vides en EPSG:4326, une observation en quarantaine et aucun lien contradictoire entre les événements d'audit, observations et acquisitions existants. Ce sont des constats datés, pas des effectifs garantis pour les imports futurs. Les sept tables métier restent de petite taille ; rien ne justifie aujourd'hui partitionnement, réplication de lecture ou séparation en plusieurs bases.
 
-## 3. Pourquoi ne pas déplacer les tables à la main ?
+## 3. Migration et compatibilité Django
 
-Django doit connaître exactement les mêmes noms que PostgreSQL. Un `ALTER TABLE` exécuté uniquement dans une console SQL laisserait les modèles, migrations et outils en désaccord. Un nom qualifié dans `db_table` demande aussi de vérifier introspection, contraintes, séquences, création des bases de test et `flush` ; une requête ORM réussie n'est pas une validation suffisante.
+Les migrations [catalog/0003_real_estate_schema.py](../../apps/api/src/liwa/modules/catalog/migrations/0003_real_estate_schema.py) et [evidence/0004_evidence_schema.py](../../apps/api/src/liwa/modules/evidence/migrations/0004_evidence_schema.py) déplacent les tables avec des noms SQL qualifiés, puis synchronisent les modèles Django avec `SeparateDatabaseAndState`. Les migrations précédemment appliquées ne sont pas modifiées. Index, contraintes, clés étrangères et séquences associées restent liés aux tables déplacées.
 
-Le code installé de Django construit notamment une intersection entre les noms des tables des modèles et ceux obtenus par introspection pour certaines opérations. Des noms qualifiés doivent rester compatibles avec ce mécanisme. Il faut le démontrer dans notre environnement, et ne pas introduire un backend Django personnalisé uniquement pour un rangement esthétique.
+Les modèles utilisent des noms simples dans `db_table` : `parcel`, `capture`, etc. La connexion Django possède un `search_path` fixe `public,real_estate,evidence`, sans schéma dérivé du nom de l'utilisateur. Cette approche conserve le backend Django/PostGIS standard et la concordance des noms entre modèles et introspection, nécessaire notamment à `flush`. Aucun backend personnalisé n'a été ajouté. `public` en tête conserve les tables techniques et objets d'extension au bon endroit lors d'une installation fraîche ; il ne doit pas contenir de table homonyme masquant un domaine.
 
-La migration physique de schémas reste **à implémenter et valider**. La base actuelle conserve ses noms et ses données. Si les coûts de compatibilité dépassent le bénéfice, conserver les tables préfixées dans un seul schéma reste une option valable ; les frontières métier et les droits ne dépendent pas uniquement du nom du schéma.
+Les noms de tables doivent être uniques sur ce chemin. Les migrations refusent les collisions avec des tables homonymes dans les schémas prioritaires. Les SQL de maintenance utilisent des noms qualifiés, par exemple `evidence.capture`. Les rôles de production devront disposer de `USAGE` et des droits d'objets appropriés, sans droit de création arbitraire sur les schémas du chemin. Ajouter un domaine impose de revoir ce chemin, les noms et leurs permissions.
+
+Pour un nouveau modèle, `db_table` simple fixe le nom, pas le schéma de création. Une migration générée peut créer sa table dans `public` : sa migration doit donc prévoir explicitement son placement dans le schéma propriétaire. Le test PostGIS d'appartenance des tables contrôle cette règle pour tous les modèles gérés de `catalog` et `evidence`, ainsi que l'unicité de leurs noms. Les nouveaux domaines devront étendre ce contrôle.
+
+Chaque migration est transactionnelle et prend à l'aller le verrou de l'import Onwani ; une maintenance, y compris une annulation, doit malgré tout être faite sans commandes d'import concurrentes. Les deux migrations sont des étapes distinctes : en cas d'échec de la seconde, corriger la cause et relancer `migrate`, qui reprend les étapes non appliquées. Leur annulation remet les tables dans `public` sous leurs anciens noms et conserve les données. Les schémas alors vides sont laissés en place pour éviter de supprimer des objets ajoutés indépendamment. Lors d'une annulation, revenir aussi au code et aux modèles correspondant aux anciennes migrations.
 
 ## 4. Audit d'intégrité et corrections immédiates
 
@@ -133,21 +137,22 @@ Surveiller échecs/durée/ancienneté des imports, quarantaine, dérive de sché
 | Priorité | Travail | Condition de fin |
 |---|---|---|
 | Maintenant | Contraintes d'intégrité de la section 4 | Migrations fraîches et sur données existantes ; rejet SQL des écritures invalides ; import/rollback/quarantaine toujours corrects |
-| Avant migration des noms | Prototype `real_estate`/`evidence` compatible Django | ORM, introspection, migrations aller/retour, séquences, contraintes, `flush`, tests et restauration validés sur PostGIS |
+| Implémenté | Migration `real_estate`/`evidence` compatible Django | ORM, introspection, migrations aller/retour, séquences, contraintes, `flush`, tests et restauration validés sur PostGIS |
 | Avant plusieurs sources immobilières | Correspondances d'identité et rapprochements réversibles | Deux sources pour un bien sans fusion incontrôlée ; annulation d'un rapprochement testée |
 | Avec la carte et les fiches | Modèles bâtiments/logements, versions/publication et requêtes spatiales | Provenance visible, limites de lecture, contrats, tests de publication et plans de requêtes mesurés |
 | Avec la collecte automatique | Tâches durables, reprises, observations de qualité | Échec/reprise, concurrence et détection de tâches bloquées testés |
 | Avant accès public | Droits d'exécution, protection des preuves, sauvegarde/restauration et supervision | Tests avec les vrais rôles, accès refusés quand attendu et restauration vérifiée |
 
-La migration de noms devra conserver UUID, observations, audit, captures et relations. Préparer une sauvegarde vérifiée et un relevé des effectifs/identités ; appliquer en période contrôlée, comparer après migration et reconstruire les programmes utilisant les noms. Ne pas éditer les migrations déjà appliquées. [Opérations de migration Django](https://docs.djangoproject.com/en/6.1/ref/migration-operations/)
+La migration de noms conserve UUID, observations, audit, captures et relations. Préparer une sauvegarde vérifiée et un relevé des effectifs/identités ; appliquer en période contrôlée, comparer après migration et reconstruire les programmes utilisant les noms. Ne pas éditer les migrations déjà appliquées. [Opérations de migration Django](https://docs.djangoproject.com/en/6.1/ref/migration-operations/)
 
 La structure cible ne crée pas de nouveaux modules Python à elle seule. Les propriétaires actuels et dépendances restent ceux de [REPOSITORY.md](REPOSITORY.md). Toute création/renommage de module devra actualiser ce document, Import Linter, migrations, CI et guide de développement.
 
 ## 11. Vérifications de cette revue
 
-- 50 tests backend réussis dans une base PostGIS temporaire : HTTP, protocole, import, transactions, quarantaine et refus SQL de données invalides ; un test supplémentaire réussi vérifie migration aller/retour sur un import existant, soit 51 cas vérifiés sur deux exécutions.
+- 54 cas distincts vérifiés avec succès sur PostGIS temporaire : suite de 52 tests backend, puis contrôles ciblés de migrations/conflits et d'appartenance des tables. Ils couvrent HTTP, protocole, import, transactions, quarantaine, refus SQL, migrations aller/retour avec données, introspection, sérialisation, `flush`, séquences et reprise après collision de nom.
 - Ruff, formatage, frontières Import Linter, absence de migrations manquantes, liens locaux et vérification du diff réussis. Ces contrôles locaux ne constituent pas un résultat de CI distante.
 - Sauvegarde locale PostgreSQL au format personnalisé, exclue de Git, restaurée dans une base temporaire distincte. Effectifs et empreintes de contenu identiques pour les sept tables métier ; seule cette base temporaire a été supprimée après le contrôle.
-- Image API reconstruite et migrations d'intégrité appliquées à la base locale. Les dix nouvelles contraintes sont validées, les 2 431 parcelles sont conservées et l'API répond `ready`.
+- Image API reconstruite et migrations d'intégrité puis de schémas appliquées à la base locale. Comparaison avant/après du contenu complet, des effectifs et identités PostgreSQL des sept tables : identiques. Aucun ancien nom de table métier ne subsiste dans `public` ; tables techniques et extensions restent en place.
+- Import réel après déplacement : `created=0`, `updated=0`, `unchanged=2431`, `observed=2432`, `quarantined=1`. Une nouvelle acquisition conserve ses captures et observations dans `evidence`, sans doublon de parcelle dans `real_estate`. La quarantaine existante n'est pas une erreur de migration.
 
-Ce contrôle ponctuel de restauration n'est pas un service de sauvegarde automatique. La migration vers les schémas cibles, les rôles de production, les reprises de tâches et les versions métier complètes restent à réaliser aux étapes indiquées ci-dessus.
+Ce contrôle ponctuel de restauration n'est pas un service de sauvegarde automatique. Les rôles de production, les reprises de tâches et les versions métier complètes restent à réaliser aux étapes indiquées ci-dessus.

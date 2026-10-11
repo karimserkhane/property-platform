@@ -60,6 +60,11 @@ DATABASES = {
     )
 }
 DATABASES["default"]["ENGINE"] = "django.contrib.gis.db.backends.postgis"
+# Public first keeps Django's technical tables and extension objects there on fresh installs.
+# Domain table names are unique across this fixed, trusted search path (no user schema).
+DATABASES["default"].setdefault("OPTIONS", {})["options"] = (
+    "-c search_path=public,real_estate,evidence"
+)
 STATIC_URL = "/static/"
 STATIC_ROOT = "/app/staticfiles"
 SESSION_COOKIE_HTTPONLY = True

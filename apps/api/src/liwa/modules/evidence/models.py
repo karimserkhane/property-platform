@@ -9,6 +9,9 @@ class Source(models.Model):
     url = models.URLField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = "source"
+
 
 class IngestionRun(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -22,6 +25,7 @@ class IngestionRun(models.Model):
     summary = models.JSONField(default=dict)
 
     class Meta:
+        db_table = "ingestion_run"
         constraints = [
             models.CheckConstraint(
                 condition=(
@@ -56,6 +60,7 @@ class Capture(models.Model):
     ingested_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "capture"
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(http_status__gte=100, http_status__lte=599),
@@ -84,6 +89,7 @@ class ParcelObservation(models.Model):
     mapping_version = models.CharField(max_length=80)
 
     class Meta:
+        db_table = "parcel_observation"
         constraints = [
             models.UniqueConstraint(
                 fields=["capture", "source_record_id"], name="observation_capture_identity"
@@ -104,6 +110,7 @@ class AuditEvent(models.Model):
     after = models.JSONField(default=dict)
 
     class Meta:
+        db_table = "audit_event"
         constraints = [
             models.CheckConstraint(
                 condition=models.Q(action__in=["created", "updated"], parcel_revision__gte=1),
@@ -125,6 +132,7 @@ class QuarantinedObservation(models.Model):
     ingested_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "quarantined_observation"
         constraints = [
             models.UniqueConstraint(
                 fields=["capture", "source_record_id"], name="quarantine_capture_identity"

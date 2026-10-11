@@ -1,12 +1,15 @@
 import json
 import os
 from datetime import UTC, datetime, timedelta
+from io import StringIO
 from unittest.mock import patch
 
 import psycopg
 import pytest
+from django.apps import apps
 from django.contrib.gis.geos import MultiPolygon, Polygon
-from django.db import IntegrityError, connection, transaction
+from django.core.management import call_command
+from django.db import DatabaseError, IntegrityError, connection, transaction
 from django.db.migrations.executor import MigrationExecutor
 
 if os.environ.get("LIWA_TEST_POSTGIS") != "1":
@@ -21,6 +24,7 @@ from liwa.modules.evidence.models import (  # noqa: E402
     IngestionRun,
     ParcelObservation,
     QuarantinedObservation,
+    Source,
 )
 from liwa.modules.evidence.services import LOCK_KEY, import_onwani  # noqa: E402
 
@@ -229,22 +233,117 @@ def test_database_rejects_invalid_audit_metadata(changes):
 def test_integrity_migrations_preserve_existing_import_and_are_reversible():
     previous = [("catalog", "0001_initial"), ("evidence", "0002_quarantinedobservation")]
     current = [
-        ("catalog", "0002_enforce_data_integrity"),
-        ("evidence", "0003_enforce_data_integrity"),
+        ("catalog", "0003_real_estate_schema"),
+        ("evidence", "0004_evidence_schema"),
     ]
     try:
-        MigrationExecutor(connection).migrate(previous)
         acquisition = run([feature()])
         parcel = Parcel.objects.get()
         original_geometry = parcel.geometry.ewkb
         original_captures = list(Capture.objects.values_list("id", "content_sha256"))
-        for targets in (current, previous):
-            MigrationExecutor(connection).migrate(targets)
-            assert Parcel.objects.get().id == parcel.id
-            assert Parcel.objects.get().geometry.ewkb == original_geometry
-            assert IngestionRun.objects.get().id == acquisition.id
-            assert list(Capture.objects.values_list("id", "content_sha256")) == original_captures
-            assert ParcelObservation.objects.count() == 1
-            assert AuditEvent.objects.count() == 1
+        for targets in (previous, current, previous, current):
+            executor = MigrationExecutor(connection)
+            executor.migrate(targets)
+            historical = executor.loader.project_state(targets).apps
+            parcel_model = historical.get_model("catalog", "Parcel")
+            assert parcel_model.objects.get().id == parcel.id
+            assert parcel_model.objects.get().geometry.ewkb == original_geometry
+            assert (
+                historical.get_model("evidence", "IngestionRun").objects.get().id == acquisition.id
+            )
+            assert (
+                list(
+                    historical.get_model("evidence", "Capture").objects.values_list(
+                        "id", "content_sha256"
+                    )
+                )
+                == original_captures
+            )
+            assert historical.get_model("evidence", "ParcelObservation").objects.count() == 1
+            assert historical.get_model("evidence", "AuditEvent").objects.count() == 1
     finally:
         MigrationExecutor(connection).migrate(current)
+
+
+def test_schema_move_supports_introspection_serialization_flush_and_sequences():
+    run([feature()])
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT n.nspname, c.relname FROM pg_class c "
+            "JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE c.oid IN ('parcel'::regclass, 'capture'::regclass) ORDER BY c.relname"
+        )
+        assert cursor.fetchall() == [("evidence", "capture"), ("real_estate", "parcel")]
+        cursor.execute(
+            "SELECT to_regclass('public.catalog_parcel'), to_regclass('public.evidence_capture')"
+        )
+        assert cursor.fetchone() == (None, None)
+        assert "parcel" in connection.introspection.table_names(cursor)
+        assert "capture" in connection.introspection.table_names(cursor)
+        constraints = connection.introspection.get_constraints(cursor, "parcel_observation")
+        assert any(c["foreign_key"] == ("parcel", "id") for c in constraints.values())
+    assert Parcel.objects.filter(geometry__intersects=Parcel.objects.get().geometry).count() == 1
+    serialized = StringIO()
+    call_command("dumpdata", "catalog", "evidence", stdout=serialized)
+    assert any(obj["model"] == "catalog.parcel" for obj in json.loads(serialized.getvalue()))
+    inspected = StringIO()
+    call_command("inspectdb", "parcel", "capture", stdout=inspected)
+    assert "MultiPolygonField" in inspected.getvalue()
+    call_command("flush", interactive=False, verbosity=0)
+    assert Parcel.objects.count() == Capture.objects.count() == 0
+    assert run([feature()]).summary["created"] == 1
+    assert Source.objects.get().pk == 1
+    assert Capture.objects.first().pk == 1
+
+
+def test_schema_collision_rolls_back_evidence_move_and_can_be_resumed():
+    previous = [
+        ("catalog", "0002_enforce_data_integrity"),
+        ("evidence", "0003_enforce_data_integrity"),
+    ]
+    current = [("catalog", "0003_real_estate_schema"), ("evidence", "0004_evidence_schema")]
+    acquisition = run([feature()])
+    parcel_id = Parcel.objects.get().pk
+    blocker_created = False
+    try:
+        MigrationExecutor(connection).migrate(previous)
+        with connection.cursor() as cursor:
+            cursor.execute("CREATE TABLE public.capture (id bigint)")
+        blocker_created = True
+        with pytest.raises(DatabaseError, match="would be shadowed"):
+            MigrationExecutor(connection).migrate(current)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT count(*) FROM public.evidence_capture")
+            assert cursor.fetchone()[0] == 4
+            cursor.execute("SELECT to_regclass('evidence.source')")
+            assert cursor.fetchone()[0] is None
+            cursor.execute("DROP TABLE public.capture")
+        blocker_created = False
+        MigrationExecutor(connection).migrate(current)
+        assert Parcel.objects.get().pk == parcel_id
+        assert IngestionRun.objects.get().pk == acquisition.pk
+        assert Capture.objects.count() == 4
+    finally:
+        if blocker_created:
+            with connection.cursor() as cursor:
+                cursor.execute("DROP TABLE public.capture")
+        MigrationExecutor(connection).migrate(current)
+
+
+def test_domain_tables_have_unique_names_and_their_owned_schema():
+    names = []
+    with connection.cursor() as cursor:
+        for label, schema in [("catalog", "real_estate"), ("evidence", "evidence")]:
+            for model in apps.get_app_config(label).get_models():
+                if not model._meta.managed:
+                    continue
+                name = model._meta.db_table
+                names.append(name)
+                cursor.execute(
+                    "SELECT n.nspname FROM pg_class c "
+                    "JOIN pg_namespace n ON n.oid = c.relnamespace "
+                    "WHERE c.oid = to_regclass(%s)",
+                    [name],
+                )
+                assert cursor.fetchone() == (schema,), name
+    assert len(names) == len(set(names))

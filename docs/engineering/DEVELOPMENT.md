@@ -533,7 +533,8 @@ apps/api/src/liwa/modules/catalog/
 └── migrations/                 Existe : historique de leur structure en base
     ├── __init__.py
     ├── 0001_initial.py         Existe : première création de la table des parcelles
-    └── 0002_enforce_data_integrity.py  Existe : contraintes SQL d'intégrité
+    ├── 0002_enforce_data_integrity.py  Existe : contraintes SQL d'intégrité
+    └── 0003_real_estate_schema.py      Existe : déplacement vers real_estate.parcel
 ```
 
 Pour retrouver ces fichiers sans lire l'arborescence : [apps/api/src/liwa/modules/catalog/models.py](../../apps/api/src/liwa/modules/catalog/models.py), dossier `apps/api/src/liwa/modules/catalog/migrations/`, première migration `apps/api/src/liwa/modules/catalog/migrations/0001_initial.py`. Les modèles de provenance sont dans [apps/api/src/liwa/modules/evidence/models.py](../../apps/api/src/liwa/modules/evidence/models.py), avec leurs migrations dans `apps/api/src/liwa/modules/evidence/migrations/`.
@@ -603,7 +604,7 @@ docker compose -f infra/local/compose.yaml exec api python manage.py migrate --n
 docker compose -f infra/local/compose.yaml exec api python manage.py import_onwani --actor Karim
 ```
 
-La première commande reconstruit le programme API avec le nouveau code et démarre aussi la base nécessaire. La deuxième applique les migrations du dépôt. **La troisième est celle qui récupère les parcelles auprès d'Onwani et les enregistre dans ta base locale.** Attendre le résultat de chaque commande avant de lancer la suivante. Si `Unknown command: 'import_onwani'` apparaît, vérifier la branche et refaire la reconstruction de l'API.
+La première commande reconstruit le programme API avec le nouveau code et démarre aussi la base nécessaire. La deuxième applique les migrations Django du dépôt : création des tables, contraintes, puis déplacement vers les schémas `real_estate` et `evidence`. Si elles sont déjà appliquées, elle n'effectue aucun nouveau déplacement et ne duplique rien. **La troisième est celle qui récupère les parcelles auprès d'Onwani et les enregistre dans ta base locale.** Attendre le résultat de chaque commande avant de lancer la suivante. Si `Unknown command: 'import_onwani'` apparaît, vérifier la branche et refaire la reconstruction de l'API.
 
 `--actor Karim` identifie l'opérateur dans l'audit ; ce texte ne constitue pas une authentification. La commande de maintenance est réservée aux personnes ayant accès à l'environnement serveur. La collecte peut prendre quelques minutes. Le résultat affiche un identifiant d'acquisition et les compteurs `created`, `updated`, `unchanged`, `observed` et `quarantined`.
 
@@ -613,19 +614,21 @@ La première commande reconstruit le programme API avec le nouveau code et déma
 
 Tu peux relancer l'import : il crée une nouvelle acquisition, sans dupliquer les parcelles qui gardent le même identifiant de source. Les observations et captures successives sont conservées. Aucun enregistrement absent n'est supprimé automatiquement. Cela ne publie pas encore les parcelles sur le site, qui reste une page d'attente.
 
-Dans l'outil de base de données, les tables sont sous le schéma `public` :
+Dans l'outil de base de données, les tables métier sont sous les schémas `real_estate` et `evidence` :
 
-**Noms actuels et cible future :** `liwa` est la base, `public` le schéma et `catalog_parcel` une table, soit `liwa.public.catalog_parcel`. Le nom retenu pour le futur domaine immobilier est `real_estate`, avec une cible `real_estate.parcel`. Ce déplacement n'a pas encore été implémenté : utiliser les noms actuels ci-dessous. La [revue de base de données](DATABASE_DESIGN.md) explique les choix et les travaux restant à faire.
+**Noms actuels après migration :** `liwa` est la base, `real_estate` un schéma et `parcel` une table, soit `liwa.real_estate.parcel`. Les migrations déplacent et renomment les anciennes tables `public.catalog_parcel` et `public.evidence_*` ; elles ne les copient pas. UUID, données, index et relations sont conservés. Les tables techniques Django restent dans `public`. La [revue de base de données](DATABASE_DESIGN.md) explique les choix et validations.
+
+Sur le poste Karim, ce déplacement a été appliqué et vérifié après sauvegarde : il n'est pas nécessaire de réimporter les données pour les déplacer. Sur un autre poste déjà installé, reconstruire l'API et appliquer `migrate` comme ci-dessus effectue le déplacement ; sur une base neuve, ces mêmes migrations préparent directement la structure finale. Après migration, rafraîchir l'outil SQL et sélectionner les schémas `real_estate` et `evidence`. `migrate` ne collecte aucune donnée Onwani ; seul `import_onwani` le fait.
 
 | Table | Ce qu'elle contient |
 |---|---|
-| `catalog_parcel` | Parcelles, géométries PostGIS, identité interne et révision |
-| `evidence_source` | Source officielle utilisée |
-| `evidence_ingestionrun` | Historique des imports, opérateur, statut et compteurs |
-| `evidence_capture` | Réponses JSON exactes, URL, horaires, empreinte SHA-256 et en-têtes disponibles |
-| `evidence_parcelobservation` | Attributs originaux, version de mapping et référence de capture par parcelle |
-| `evidence_auditevent` | Créations et changements du catalogue, auteur et justification |
-| `evidence_quarantinedobservation` | Enregistrements dont la géométrie doit être examinée |
+| `real_estate.parcel` | Parcelles, géométries PostGIS, identité interne et révision |
+| `evidence.source` | Source officielle utilisée |
+| `evidence.ingestion_run` | Historique des imports, opérateur, statut et compteurs |
+| `evidence.capture` | Réponses JSON exactes, URL, horaires, empreinte SHA-256 et en-têtes disponibles |
+| `evidence.parcel_observation` | Attributs originaux, version de mapping et référence de capture par parcelle |
+| `evidence.audit_event` | Créations et changements du catalogue, auteur et justification |
+| `evidence.quarantined_observation` | Enregistrements dont la géométrie doit être examinée |
 
 Pour vérifier les effectifs depuis le terminal, sans modifier les données :
 
@@ -708,13 +711,13 @@ Une **provenance** permet de répondre à « d'où vient cette information ? ».
 
 | Champ ou information actuelle | Où la trouver | Ce qu'elle signifie |
 |---|---|---|
-| URL, `fetched_started_at`, `fetched_at` | `evidence_capture` | Requête précise et début/fin de récupération chez nous |
-| `content_sha256`, `payload` | `evidence_capture` | Empreinte et octets originaux de la réponse ; l'empreinte détecte des différences, elle ne prouve pas que la source est vraie |
+| URL, `fetched_started_at`, `fetched_at` | `evidence.capture` | Requête précise et début/fin de récupération chez nous |
+| `content_sha256`, `payload` | `evidence.capture` | Empreinte et octets originaux de la réponse ; l'empreinte détecte des différences, elle ne prouve pas que la source est vraie |
 | `ingested_at` | Captures, observations et quarantaine | Moment de l'enregistrement de cet objet dans notre base |
-| `raw_attributes`, `field_path`, `mapping_version` | `evidence_parcelobservation` | Valeurs originales, emplacement dans la capture et version de transformation |
+| `raw_attributes`, `field_path`, `mapping_version` | `evidence.parcel_observation` | Valeurs originales, emplacement dans la capture et version de transformation |
 | `source_published_at` | Captures et observations | Inconnue dans ce connecteur, donc laissée nulle |
-| `revision`, `created_at`, `updated_at` | `catalog_parcel` | Version et dates de création/modification du catalogue chez nous |
-| `actor`, `action`, `before`, `after`, `occurred_at` | `evidence_auditevent` | Opérateur et changement des attributs typés ; l'historique des géométries reste dans les captures/observations |
+| `revision`, `created_at`, `updated_at` | `real_estate.parcel` | Version et dates de création/modification du catalogue chez nous |
+| `actor`, `action`, `before`, `after`, `occurred_at` | `evidence.audit_event` | Opérateur et changement des attributs typés ; l'historique des géométries reste dans les captures/observations |
 
 Par exemple, `DataReceivedDate` est une donnée reçue de la source et reste dans les attributs originaux ; elle n'est pas transformée en `source_published_at`. Les instants de notre système sont stockés en UTC et peuvent être affichés à Dubai. Une source donnant seulement un jour ne permet pas d'inventer l'heure de publication.
 
@@ -738,22 +741,22 @@ La base Docker doit tourner. Dans **PyCharm Pro**, ouvrir **View → Tool Window
 | User | `liwa` |
 | Password de développement | `liwa-local-only` |
 
-Dans PyCharm, télécharger le pilote si demandé, cliquer sur **Test Connection**, puis **OK**. Dans les réglages de la connexion, sélectionner le schéma `public` si nécessaire. Déplier la connexion et les schémas jusqu'à **public → Tables**, puis ouvrir une table pour voir ses lignes. Après une migration ou un import, rafraîchir la connexion. Voir [le guide officiel PyCharm](https://www.jetbrains.com/help/pycharm/quick-start-with-database-functionality.html).
+Dans PyCharm, télécharger le pilote si demandé, cliquer sur **Test Connection**, puis **OK**. Dans les réglages de la connexion, sélectionner les schémas `real_estate`, `evidence` et `public` si nécessaire. Déplier la connexion jusqu'à **real_estate → Tables → parcel** ou **evidence → Tables**, puis ouvrir une table pour voir ses lignes. Après une migration ou un import, rafraîchir la connexion. Voir [le guide officiel PyCharm](https://www.jetbrains.com/help/pycharm/quick-start-with-database-functionality.html).
 
 Dans pgAdmin installé sur Windows, utiliser **Servers → Register → Server**, donner un nom à la connexion et renseigner ces mêmes paramètres dans l'onglet **Connection**. La création d'une connexion n'installe pas un second serveur PostgreSQL. Ce `localhost` convient à un outil lancé sur Windows ; un outil placé lui-même dans un conteneur nécessiterait une adresse réseau adaptée.
 
 Pour consulter le dernier bilan, ouvrir une console SQL de cette connexion et exécuter **ces lectures uniquement** : ce bloc va dans la console SQL, pas directement dans PowerShell.
 
 ```sql
-SELECT COUNT(*) AS parcelles FROM catalog_parcel;
+SELECT COUNT(*) AS parcelles FROM real_estate.parcel;
 
 SELECT id, status, actor, started_at, finished_at, summary, error
-FROM evidence_ingestionrun
+FROM evidence.ingestion_run
 ORDER BY started_at DESC
 LIMIT 10;
 
 SELECT source_record_id, reason, ingested_at
-FROM evidence_quarantinedobservation
+FROM evidence.quarantined_observation
 ORDER BY ingested_at DESC
 LIMIT 20;
 ```
@@ -962,9 +965,9 @@ Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas mod
 | API inchangée après édition Python | Reconstruire l'image API comme à l'étape 8 |
 | Admin refuse la connexion | Vérifier migrations, création du superutilisateur et configuration locale |
 | Unknown command: 'import_onwani' | Vérifier la branche `codex/onwani-import`, puis reconstruire l'API ; suivre la section 6.1 |
-| Table catalog_parcel ou evidence_ingestionrun introuvable | Appliquer les migrations de la branche avec `migrate --noinput`, puis rafraîchir la connexion SQL |
-| Import terminé avec le statut quarantined | Consulter le bilan et `evidence_quarantinedobservation` comme en section 6.6 ; conserver les preuves et examiner l'anomalie avant toute correction |
-| Import en échec | Consulter `evidence_ingestionrun.error` et les journaux API ; le catalogue précédent est conservé. Corriger la cause avant une nouvelle acquisition |
+| Table real_estate.parcel ou evidence.ingestion_run introuvable | Appliquer les migrations de la branche avec `migrate --noinput`, puis rafraîchir la connexion SQL |
+| Import terminé avec le statut quarantined | Consulter le bilan et `evidence.quarantined_observation` comme en section 6.6 ; conserver les preuves et examiner l'anomalie avant toute correction |
+| Import en échec | Consulter `evidence.ingestion_run.error` et les journaux API ; le catalogue précédent est conservé. Corriger la cause avant une nouvelle acquisition |
 | CSS/JS absent en standalone | Reconstruire puis lancer node scripts/prepare-web-runtime.mjs, ou utiliser start qui fait cette préparation |
 | Erreur certificat TLS à l'installation | Vérifier les certificats du système/réseau ; Node 26 permet $env:NODE_OPTIONS='--use-system-ca', uv accepte --system-certs sur sa commande réseau ; ne pas désactiver la vérification TLS |
 
