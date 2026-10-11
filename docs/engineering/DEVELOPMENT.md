@@ -10,30 +10,35 @@ Les versions courantes et les exceptions de compatibilité sont documentées dan
 
 ## Sommaire
 
-- [Mémo rapide : lancer, tester et tout arrêter](#memo-rapide)
-- [Avant de commencer : où écrire les commandes ?](#ecrire-les-commandes)
-- [1. Choisir le parcours et comprendre les outils](#choisir-le-parcours)
-- [2. Installer et vérifier les prérequis](#prerequis)
-- [3. Ouvrir le dépôt et installer les dépendances](#installer-les-dependances)
+- [Mémo rapide : lancer, vérifier et arrêter](#memo-rapide)
+- [1. Comprendre les outils et savoir où écrire les commandes](#choisir-le-parcours)
+- [2. Installer les outils Windows](#prerequis)
+- [3. Ouvrir le dépôt, choisir la branche et installer les dépendances](#installer-les-dependances)
 - [4. Démarrer le site — terminal A](#demarrer-le-site)
-- [5. Démarrer PostGIS et l'API — terminal B](#demarrer-api-postgis)
-- [6. Créer un compte d'administration](#compte-administration)
-- [7. Routine quotidienne et arrêt](#routine-quotidienne)
-- [8. Vérifier le site compilé](#site-compile)
-- [9. Vérifier le code avant de le partager](#verifier-le-code)
-- [10. Résoudre les problèmes courants](#depannage)
-- [11. Du lancement local à la production](#production)
+- [5. Démarrer l'API et la base, puis créer les tables — terminal B](#demarrer-api-postgis)
+- [6. Importer les données et comprendre le pipeline de data engineering](#data-engineering)
+- [7. Créer un compte d'administration — facultatif](#compte-administration)
+- [8. Routine quotidienne, modifications et arrêt](#routine-quotidienne)
+- [9. Construire et essayer le site compilé](#site-compile)
+- [10. Vérifier le code et les contrats](#verifier-le-code)
+- [11. Dépanner les erreurs](#depannage)
+- [12. Comprendre le passage en production](#production)
 
-**Accès directs aux explications et commandes souvent utilisées :**
+**Accès directs :**
 
-- [3.3. Installer les paquets web](#installer-paquets-web)
-- [Comprendre les noms des services, images et conteneurs](#noms-docker)
-- [5.1. Créer les tables Django](#migrations-django)
-- [Trouver les modèles et fichiers de migration](#fichiers-modeles-migrations)
-- [5.2. Vérifier les endpoints de l'API](#verifier-api)
-- [Premier import manuel des parcelles Onwani](#premier-import-manuel-des-parcelles-onwani)
-- [Prendre en compte une modification du backend](#modification-backend)
-- [Tout arrêter en conservant les données](#arreter-les-services)
+- [Ouvrir PowerShell et retrouver les fichiers](#ecrire-les-commandes)
+- [Installer les paquets web, étape par étape](#installer-paquets-web)
+- [Comprendre les noms Docker](#noms-docker)
+- [Créer les tables Django](#migrations-django)
+- [Retrouver modèles et migrations](#fichiers-modeles-migrations)
+- [Vérifier que l'API répond](#verifier-api)
+- [Lancer l'import Onwani](#premier-import-manuel-des-parcelles-onwani)
+- [Lire le code de collecte, contrôle et stockage](#code-import)
+- [Consulter les tables avec une interface graphique](#consulter-la-base)
+- [Reconstruire le backend après une modification](#modification-backend)
+- [Arrêter en conservant les données](#arreter-les-services)
+
+**Quel parcours suivre ?** Première installation : sections 1 à 5. Reprendre le travail sur un poste déjà prêt : mémo rapide ou section 8. Alimenter et examiner les parcelles : section 6, après la section 5. Modifier et vérifier le code : sections 8 à 10. Une erreur : section 11. Tu n'as pas besoin d'exécuter tous les blocs du document à chaque lancement.
 
 <a id="memo-rapide"></a>
 
@@ -61,7 +66,7 @@ Invoke-RestMethod 'http://localhost:8000/api/v1/health/live'
 Invoke-RestMethod 'http://localhost:8000/api/v1/health/ready'
 ```
 
-Résultat attendu : site accessible, `api` en cours d'exécution, `db` en état `healthy`, réponses `ok` et `ready`. Tu peux aussi ouvrir [la documentation de l'API](http://localhost:8000/api/v1/docs). Il s'agit d'une vérification rapide du démarrage ; les contrôles de code et tests automatisés sont détaillés à l'étape 9. Si une commande échoue, résoudre l'erreur avant de continuer.
+Résultat attendu : site accessible, `api` en cours d'exécution, `db` en état `healthy`, réponses `ok` et `ready`. Tu peux aussi ouvrir [la documentation de l'API](http://localhost:8000/api/v1/docs). Il s'agit d'une vérification rapide du démarrage ; les contrôles de code et tests automatisés sont détaillés à l'étape 10. Si une commande échoue, résoudre l'erreur avant de continuer.
 
 **Tout arrêter :** appuyer sur **Ctrl+C dans le terminal A**, puis exécuter dans le terminal B :
 
@@ -71,9 +76,13 @@ docker compose -f infra/local/compose.yaml down
 
 Le serveur web, l'API et la base sont alors arrêtés. **Les données de PostgreSQL sont conservées** : ne pas ajouter `-v` à `down`, car cette option supprime le volume de données. Fermer le navigateur ne suffit pas à arrêter les services. Docker Desktop peut rester ouvert ou être quitté après cet arrêt.
 
+<a id="choisir-le-parcours"></a>
+
+## 1. Comprendre les outils et le fonctionnement local
+
 <a id="ecrire-les-commandes"></a>
 
-## Avant de commencer : où écrire les commandes ?
+### 1.1. Où écrire les commandes et retrouver les fichiers ?
 
 Ce document est un mode d'emploi. Les blocs intitulés `powershell` contiennent des commandes à **copier dans un terminal**, puis exécuter avec la touche **Entrée**. Ne pas les écrire dans un fichier du projet, dans la barre d'adresse du navigateur ou sur GitHub.
 
@@ -91,11 +100,7 @@ Une ligne telle que `PS C:\Users\Karim>` est une **invite affichée par le termi
 
 Les noms `.json`, `.yaml` et `.md` désignent des fichiers texte. Tu n'as pas besoin de les ouvrir ou de les modifier pour lancer le projet : les outils les lisent automatiquement.
 
-<a id="choisir-le-parcours"></a>
-
-## 1. Choisir le parcours
-
-### Comprendre les outils avant les commandes
+### 1.2. Comprendre les outils avant les commandes
 
 Une **dépendance**, ou bibliothèque, est du code déjà écrit par d'autres développeurs que le projet utilise. Par exemple, React aide à construire l'interface et Django aide à construire l'API. Installer les dépendances évite de devoir écrire ces outils nous-mêmes.
 
@@ -113,10 +118,10 @@ Une **dépendance**, ou bibliothèque, est du code déjà écrit par d'autres d�
 | Python / Django | Langage et framework utilisés pour le backend | Faire fonctionner l'API qui gérera les données et les règles métier |
 | API | Programme qui reçoit des demandes et renvoie des réponses structurées | Répondre aux contrôles de santé aujourd'hui, puis aux demandes immobilières |
 | PostgreSQL | Serveur de base de données | Conserver durablement les données de l'application |
-| PostGIS | Extension de PostgreSQL pour les données géographiques | Stocker/interroger les futurs bâtiments, parcelles et coordonnées |
+| PostGIS | Extension de PostgreSQL pour les données géographiques | Stocker les parcelles importées et permettre les requêtes géographiques ; bâtiments à venir |
 | Docker Desktop | Application qui fait tourner des environnements isolés sur Windows | Exécuter ici l'API et la base dans des conteneurs Linux |
 | Docker Compose | Outil Docker qui démarre plusieurs services à partir d'un fichier de configuration | Lire infra/local/compose.yaml et gérer les services api et db ensemble |
-| uv | Gestionnaire des outils et dépendances Python | Préparer l'environnement Python pour les tests natifs, à l'étape 9 |
+| uv | Gestionnaire des outils et dépendances Python | Préparer l'environnement Python pour les tests natifs, à l'étape 10 |
 
 **npm et pnpm servent à des tâches similaires.** Nous utilisons npm pour installer pnpm, puis pnpm pour gérer le projet. Les deux noms dans le guide ne désignent pas deux sites à lancer. Le suffixe `.cmd` est simplement le lanceur Windows de ces outils.
 
@@ -124,29 +129,30 @@ Un **serveur** est un programme qui reste en marche pour répondre aux demandes.
 
 Une **image Docker** est un environnement préparé avec les programmes nécessaires. Un **conteneur** est une instance en cours d'exécution de cette image. Un **volume** est un stockage conservé séparément : la base garde ainsi ses données lorsqu'on arrête ou remplace un conteneur.
 
-### Ce que chaque étape change
+### 1.3. Ce que chaque étape change
 
-| Étape | Ce qu'elle fait | Ce qui reste après |
+| Section | Ce qu'elle fait | Ce qui reste après |
 |---|---|---|
-| 1 | Choisir le parcours | Rien n'est installé ou démarré par la lecture du guide |
-| 2 | Installer les outils sur Windows | Outils utilisables dans plusieurs projets ; leurs commandes de version ne font que vérifier |
-| 3 | Ouvrir/récupérer le code puis télécharger les bibliothèques web | Fichiers du dépôt, node_modules et cache de paquets ; aucun site encore démarré |
-| 4 | Démarrer Next.js | Serveur web tant que le terminal tourne, fichiers de travail générés sous apps/web/.next |
-| 5 | Démarrer l'API et PostGIS, puis appliquer les migrations | Images/conteneurs Docker et volume PostgreSQL avec ses tables |
-| 6 | Créer ton compte administrateur Django | Un compte dans la base locale, pas un compte utilisateur du futur site |
-| 7 | Redémarrer, reconstruire ou arrêter | Les données du volume sont conservées lors de l'arrêt ordinaire |
-| 8 | Préparer et essayer une version compilée du site | Un artefact local sous .next ; cela ne déploie rien sur Internet |
-| 9 | Vérifier le code et éventuellement régénérer les contrats | Résultats de tests ; l'export/génération peut modifier les fichiers de contrat à revoir |
-| 10 | Diagnostiquer les erreurs | Actions dépendant de l'erreur ; ce n'est pas une étape à exécuter systématiquement |
-| 11 | Expliquer ce qui restera à faire avant publication | Aucun déploiement automatique |
+| 1 | Comprendre les outils et le terminal | Rien n'est lancé par la lecture |
+| 2 | Installer les outils Windows | Git, Node/pnpm et Docker disponibles |
+| 3 | Récupérer le code et installer ses bibliothèques | Dépôt, dépendances et caches locaux |
+| 4 | Démarrer Next.js | Site disponible pendant que son serveur tourne |
+| 5 | Démarrer Django/PostGIS et appliquer les migrations | Services locaux et tables dans le volume persistant |
+| 6 | Collecter, contrôler et importer les parcelles | Données, captures, observations, audit et quarantaine dans PostgreSQL |
+| 7 | Créer un administrateur facultatif | Compte Django conservé dans la base |
+| 8 | Relancer, reconstruire ou arrêter | Données conservées à l'arrêt ordinaire |
+| 9 | Construire et essayer une version compilée du site | Artefact web local ; aucun déploiement |
+| 10 | Contrôler le code et les contrats | Résultats de tests et contrats éventuellement régénérés |
+| 11 | Diagnostiquer une erreur précise | Actions adaptées au problème |
+| 12 | Préparer les décisions de production | Aucun hébergement souscrit ni déploiement automatique |
 
 À l'étape 4, si l'installation 3.3 et le démarrage ont réussi, **tu as préparé les bibliothèques puis lancé le serveur web**. L'API et PostgreSQL ne sont pas démarrés par pnpm dev:web. La page actuelle fonctionne sans eux ; elle n'appelle pas encore de catalogue immobilier.
 
 | Objectif | Prérequis | Étapes |
 |---|---|---|
 | Voir et modifier le site | Git, Node.js 26.11.1, pnpm 12.10.1 | 2 à 4 |
-| Lancer aussi l'API et PostGIS | Prérequis web + Docker Desktop avec Compose | 2 à 6 |
-| Exécuter les outils Python et tests isolés sur Windows | uv 0.13.0 et Python 3.14.8 géré par uv | 9 |
+| Lancer aussi l'API et PostGIS | Prérequis web + Docker Desktop avec Compose | 2 à 5 ; compte facultatif en section 7 |
+| Exécuter les outils Python et tests isolés sur Windows | uv 0.13.0 et Python 3.14.8 géré par uv | 10 |
 
 Python et uv ne sont pas nécessaires sur Windows pour lancer l'API Docker : l'image contient leur environnement et les bibliothèques GIS. Le web actuel fonctionne seul, sans API ni compte Supabase, cartographique ou IA. Aucun service payant n'est requis pour ce lancement local.
 
@@ -239,6 +245,19 @@ Set-Location property-platform
 
 Le dépôt privé nécessite les droits du compte GitHub. Utiliser le parcours d'authentification Git proposé, sans mettre de jeton dans l'URL ou un fichier du dépôt.
 
+### 3.2.1. Choisir la version du code avant de lancer les commandes
+
+Une **branche Git** est une version de travail du code dans le même dépôt. Elle ne crée pas une base de données séparée. La branche actuelle du premier import est `codex/onwani-import` ; `main` conserve le socle précédent tant que cette fonctionnalité n'y est pas intégrée.
+
+Depuis la racine, dans PowerShell :
+
+```powershell
+git branch --show-current
+git status --short
+```
+
+La première commande donne le nom de la branche ; la seconde indique tes modifications locales. La section 6.1 explique comment récupérer la branche d'import. Ne pas effacer des modifications pour changer de branche. Après un changement de code backend, reconstruire son image : Git change les fichiers Windows, pas automatiquement le programme déjà copié dans Docker.
+
 <a id="installer-paquets-web"></a>
 
 ### 3.3. Installer les paquets web
@@ -314,7 +333,7 @@ Tu peux voir ces fichiers dans l'Explorateur Windows : **Windows + E**, cliquer 
 - **pnpm.cmd non reconnu** : reprendre l'étape 2.2, rouvrir PowerShell et refaire Set-Location.
 - **Erreur de version/engine** : vérifier node --version et pnpm.cmd --version avec les valeurs ci-dessus.
 - **package.json introuvable / aucun projet trouvé** : refaire Set-Location et les deux Test-Path ; ne pas lancer l'installation depuis docs ou Downloads.
-- **Erreur de certificat** : consulter l'étape 10 ; ne pas désactiver la vérification TLS.
+- **Erreur de certificat** : consulter l'étape 11 ; ne pas désactiver la vérification TLS.
 - **Autre erreur** : conserver le texte complet affiché et le partager pour diagnostiquer le problème avant de passer à l'étape suivante.
 
 Les scripts d'installation de Parcel/SWC sont désactivés explicitement dans pnpm-workspace.yaml ; leurs binaires de plateforme sont fournis par les dépendances optionnelles. **Ne pas ajouter --no-optional.** node_modules et .pnpm-store sont locaux et ignorés par Git.
@@ -541,7 +560,17 @@ Ouvrir [la documentation interactive locale](http://localhost:8000/api/v1/docs) 
 
 Les ports sont limités à la machine locale : web 3000, API 8000, base 5432. Compose fournit déjà ses variables et identifiants de développement : **aucun .env n'est requis pour ce parcours**. apps/api/.env.example illustre une exécution Python native ; Django ne charge pas automatiquement une copie .env dans la configuration actuelle.
 
-### Premier import manuel des parcelles Onwani
+<a id="data-engineering"></a>
+
+## 6. Importer les données et comprendre le pipeline de data engineering
+
+Le **data engineering** consiste à organiser la récupération, le contrôle, la transformation et le stockage des données, pour pouvoir refaire le travail et vérifier son origine. Ici, il alimente notre catalogue de parcelles à partir de DMT/Onwani. Il ne dessine pas encore la carte.
+
+Trois commandes répondent à trois besoins différents : **démarrer les services** les rend disponibles ; **migrate** prépare les tables ; **import_onwani** les alimente avec les données extérieures. Le navigateur et le serveur Next.js ne participent pas à l'import.
+
+<a id="premier-import-manuel-des-parcelles-onwani"></a>
+
+### 6.1. Lancer le premier import manuel des parcelles Onwani
 
 **Facultatif pour lancer le site, nécessaire pour alimenter le catalogue de parcelles.** Cette commande interroge directement DMT/Onwani ; elle n'utilise pas le HTML fourni. Elle reste manuelle, sans tâche planifiée.
 
@@ -603,9 +632,142 @@ docker compose -f infra/local/compose.yaml exec api python manage.py shell -c "f
 
 Les dates de publication inconnues restent nulles ; les dates de réception, permis et mise à jour fournies par Onwani restent préservées dans leurs attributs originaux. Voir [DATA_PROVENANCE.md](DATA_PROVENANCE.md) pour les limites, la portée des identifiants et les responsabilités de chaque module. Utiliser les services métier et cette commande pour modifier le catalogue, pas des modifications manuelles de tables dans l'outil SQL.
 
+### 6.2. Ce qui se passe pendant l'import, dans l'ordre
+
+Voici le trajet des données ; ce schéma est une explication, pas une commande à lancer :
+
+```text
+PowerShell : manage.py import_onwani --actor Karim
+    → Django exécute la commande dans le conteneur api
+    → le connecteur interroge l'API officielle DMT/Onwani
+    → PostgreSQL conserve chaque réponse originale et ses horaires
+    → le programme contrôle et prépare les parcelles
+    → les géométries invalides sont isolées en quarantaine
+    → une transaction applique les parcelles valides, observations et audit
+    → le terminal affiche le bilan ; aucune carte n'est encore publiée
+```
+
+1. **Réserver l'exécution.** Un verrou PostgreSQL empêche deux imports Onwani de modifier le catalogue simultanément. Une acquisition reçoit un identifiant, une version de connecteur, un opérateur et une heure de début.
+2. **Contrôler la source.** Le programme lit les métadonnées de la couche `PLOT`, vérifie les champs attendus, les polygones et le système de coordonnées WGS84/EPSG:4326. Un changement inattendu fait échouer le lot.
+3. **Délimiter Reem.** Il demande les identifiants des enregistrements où `DISTRICTENG = 'AL REEM ISLAND'` et `MUNICIPALITYENG = 'ADM'`. Un code de district seul ne suffit pas : la recherche initiale a révélé qu'il pouvait être réutilisé ailleurs.
+4. **Collecter par lots.** Il récupère jusqu'à 100 enregistrements à chaque requête. Cela évite une réponse trop longue ou tronquée. L'accès est en lecture seule : le programme ne modifie pas les données d'Onwani.
+5. **Conserver les originaux.** Chaque réponse reçue dans les limites prévues est enregistrée avec URL, horaires, statut HTTP, taille et empreinte SHA-256 avant d'être interprétée. Une capture est la réponse complète d'un lot ; une observation concerne une parcelle précise de cette capture.
+6. **Contrôler et transformer.** Il vérifie territoire, identifiants, types de champs, coordonnées et fermeture des contours. Il traduit les noms de champs externes vers ceux de nos modèles, et les anneaux géographiques vers une géométrie `MultiPolygon` pour PostGIS.
+7. **Isoler les anomalies.** Une géométrie qui se croise elle-même peut être conservée en quarantaine avec sa preuve. Elle n'est pas corrigée silencieusement et ne remplace pas une ancienne géométrie valide. Un mauvais territoire, un schéma inattendu ou un lot manquant fait échouer l'ensemble de l'acquisition.
+8. **Contrôler la couverture.** Il compare les enregistrements reçus aux identifiants demandés et relit la liste à la fin. Cela détecte les enregistrements manquants ou une liste qui a changé ; cela ne garantit pas que tous les attributs sont restés figés entre deux requêtes.
+9. **Enregistrer ensemble.** Dans une transaction, il ajoute ou actualise les parcelles, conserve leurs observations, enregistre les changements et termine le bilan. Si cette phase échoue, ces mutations sont annulées ensemble. Les captures déjà collectées et la trace d'échec restent disponibles.
+
+Une **transaction** signifie ici « tout ce groupe de modifications est validé ensemble, ou annulé ensemble ». Un **verrou** évite des imports concurrents sur cette source. Ces deux mécanismes ont des rôles différents.
+
+### 6.3. Que signifie « nettoyer » les données ?
+
+Le programme ne remplace pas un texte incertain par une vérité inventée. Il prépare les formats et rejette ou isole ce qu'il ne peut pas accepter.
+
+| Opération | Exemple actuel | Ce qui est conservé |
+|---|---|---|
+| Vérification de territoire | Refuser une parcelle de SWEIHAN dans notre import Reem | Capture reçue et échec de l'acquisition |
+| Mapping de champs | `SectorNumber_PlotID` devient `Parcel.code` | Nom et valeur originaux dans l'observation |
+| Valeur absente | Un champ texte facultatif nul devient une chaîne vide dans le catalogue | Le `null` original reste dans les attributs bruts |
+| Conversion géographique | Anneaux de coordonnées vers `MultiPolygon`, avec trous et parties disjointes | Contours originaux dans la capture |
+| Contrôle topologique | Détecter un contour qui se croise | Enregistrement de quarantaine et référence de capture |
+| Détection de changement | Comparer les attributs typés et la géométrie à la parcelle existante | Nouvelle observation ; audit et révision si le catalogue change |
+
+WGS84/EPSG:4326 décrit les coordonnées longitude/latitude utilisées ici. Une **topologie** décrit notamment la cohérence des contours et trous. PostGIS stocke la géométrie ; une bibliothèque cartographique affichera plus tard ces contours à l'écran.
+
+Une parcelle n'est pas un bâtiment ni un logement. L'usage cadastral ou le dernier permis disponible ne prouve pas à lui seul un prix, une date de livraison ou la disponibilité d'un appartement.
+
+<a id="code-import"></a>
+
+### 6.4. Où lire le code de collecte, contrôle et stockage ?
+
+Dans PyCharm, ouvrir les fichiers ci-dessous. Les libellés donnent le chemin complet depuis la racine du dépôt ; les liens ouvrent les fichiers correspondants.
+
+| Fichier | Fonction ou objet à regarder | Rôle |
+|---|---|---|
+| [apps/api/src/liwa/modules/evidence/management/commands/import_onwani.py](../../apps/api/src/liwa/modules/evidence/management/commands/import_onwani.py) | `Command.handle` | Reçoit `--actor`, déclenche l'import et affiche le bilan ou l'erreur |
+| [apps/api/src/liwa/modules/evidence/services.py](../../apps/api/src/liwa/modules/evidence/services.py) | `import_onwani` et sa fonction interne `acquire` | Organise le travail, conserve captures/observations et gère verrou, transaction, audit et quarantaine |
+| [apps/api/src/liwa/modules/evidence/onwani.py](../../apps/api/src/liwa/modules/evidence/onwani.py) | `fetch`, `decode`, `validate_metadata`, `object_ids`, `parse_feature` | Interroge l'API officielle, lit le JSON et contrôle les réponses/champs |
+| [apps/api/src/liwa/modules/catalog/services.py](../../apps/api/src/liwa/modules/catalog/services.py) | `geometry_from_rings`, `reconcile_parcel` | Convertit et valide les géométries ; crée ou met à jour les parcelles |
+| [apps/api/src/liwa/modules/catalog/models.py](../../apps/api/src/liwa/modules/catalog/models.py) | `Parcel` | Définit les données typées du catalogue et sa contrainte d'identité de source |
+| [apps/api/src/liwa/modules/evidence/models.py](../../apps/api/src/liwa/modules/evidence/models.py) | `Source`, `IngestionRun`, `Capture`, `ParcelObservation`, `AuditEvent`, `QuarantinedObservation` | Définit les tables de provenance, historique et anomalies |
+| [apps/api/tests/test_onwani_protocol.py](../../apps/api/tests/test_onwani_protocol.py) | Tests sans réseau | Vérifie les réponses malformées, mauvais territoires, doublons, coordonnées et erreurs HTTP |
+| [apps/api/tests/test_onwani_postgis.py](../../apps/api/tests/test_onwani_postgis.py) | Tests avec PostGIS réel | Vérifie géométries, répétition, rollback, quarantaine et imports concurrents |
+
+**Ordre conseillé pour comprendre :** commencer par `apps/api/src/liwa/modules/evidence/services.py`, puis ouvrir les fonctions qu'il appelle dans les deux fichiers de connecteur et de services catalogue. Les modèles expliquent ensuite les champs enregistrés. L'ORM Django traduit les opérations comme `objects.create()` en requêtes SQL vers PostgreSQL.
+
+Ici, la collecte utilise une API publique qui renvoie du JSON. Le **scraping de pages HTML**, l'OCR de documents et les traitements IA seront d'autres collecteurs ; ils ne sont pas implémentés dans cet import.
+
+### 6.5. Comprendre provenance, dates et changements
+
+Une **provenance** permet de répondre à « d'où vient cette information ? ». Un **audit** permet de répondre à « qui a changé quoi chez nous, quand et pourquoi ? ». L'heure de collecte ne remplace pas la date de publication de la source.
+
+| Champ ou information actuelle | Où la trouver | Ce qu'elle signifie |
+|---|---|---|
+| URL, `fetched_started_at`, `fetched_at` | `evidence_capture` | Requête précise et début/fin de récupération chez nous |
+| `content_sha256`, `payload` | `evidence_capture` | Empreinte et octets originaux de la réponse ; l'empreinte détecte des différences, elle ne prouve pas que la source est vraie |
+| `ingested_at` | Captures, observations et quarantaine | Moment de l'enregistrement de cet objet dans notre base |
+| `raw_attributes`, `field_path`, `mapping_version` | `evidence_parcelobservation` | Valeurs originales, emplacement dans la capture et version de transformation |
+| `source_published_at` | Captures et observations | Inconnue dans ce connecteur, donc laissée nulle |
+| `revision`, `created_at`, `updated_at` | `catalog_parcel` | Version et dates de création/modification du catalogue chez nous |
+| `actor`, `action`, `before`, `after`, `occurred_at` | `evidence_auditevent` | Opérateur et changement des attributs typés ; l'historique des géométries reste dans les captures/observations |
+
+Par exemple, `DataReceivedDate` est une donnée reçue de la source et reste dans les attributs originaux ; elle n'est pas transformée en `source_published_at`. Les instants de notre système sont stockés en UTC et peuvent être affichés à Dubai. Une source donnant seulement un jour ne permet pas d'inventer l'heure de publication.
+
+Si un code de parcelle change au prochain import, le catalogue est actualisé et sa révision augmente. La nouvelle observation conserve la preuve de cette acquisition ; l'ancienne observation n'est pas effacée. Si seuls des attributs bruts non projetés changent, la nouvelle observation les conserve sans nécessairement modifier la révision du catalogue.
+
+Le rapprochement initial utilise l'identifiant de l'enregistrement dans sa source, avec une identité UUID interne pour la parcelle. Si Onwani change ses identifiants, une réconciliation supplémentaire sera nécessaire : la commande ne fusionne pas des parcelles sur la seule proximité ou un nom ressemblant. Plusieurs imports créent volontairement plusieurs observations, mais pas plusieurs parcelles pour un même identifiant de source.
+
+<a id="consulter-la-base"></a>
+
+### 6.6. Voir schémas, tables et lignes avec une interface graphique
+
+Une **base** contient des **schémas**, qui regroupent les **tables**. Une table contient des lignes et colonnes. Le modèle Python décrit cette structure ; les fichiers de migration la créent ; PostgreSQL conserve les lignes. Les données immobilières ne sont pas stockées dans un fichier SQLite : SQLite sert uniquement aux tests isolés en mémoire.
+
+La base Docker doit tourner. Dans **PyCharm Pro**, ouvrir **View → Tool Windows → Database**, puis **+ → Data Source → PostgreSQL**. Ces fonctionnalités nécessitent Pro ; si elles ne sont pas disponibles, utiliser [pgAdmin](https://www.pgadmin.org/download/) pour se connecter au même serveur.
+
+| Paramètre local | Valeur |
+|---|---|
+| Host | `localhost` |
+| Port | `5432` |
+| Database | `liwa` |
+| User | `liwa` |
+| Password de développement | `liwa-local-only` |
+
+Dans PyCharm, télécharger le pilote si demandé, cliquer sur **Test Connection**, puis **OK**. Dans les réglages de la connexion, sélectionner le schéma `public` si nécessaire. Déplier la connexion et les schémas jusqu'à **public → Tables**, puis ouvrir une table pour voir ses lignes. Après une migration ou un import, rafraîchir la connexion. Voir [le guide officiel PyCharm](https://www.jetbrains.com/help/pycharm/quick-start-with-database-functionality.html).
+
+Dans pgAdmin installé sur Windows, utiliser **Servers → Register → Server**, donner un nom à la connexion et renseigner ces mêmes paramètres dans l'onglet **Connection**. La création d'une connexion n'installe pas un second serveur PostgreSQL. Ce `localhost` convient à un outil lancé sur Windows ; un outil placé lui-même dans un conteneur nécessiterait une adresse réseau adaptée.
+
+Pour consulter le dernier bilan, ouvrir une console SQL de cette connexion et exécuter **ces lectures uniquement** : ce bloc va dans la console SQL, pas directement dans PowerShell.
+
+```sql
+SELECT COUNT(*) AS parcelles FROM catalog_parcel;
+
+SELECT id, status, actor, started_at, finished_at, summary, error
+FROM evidence_ingestionrun
+ORDER BY started_at DESC
+LIMIT 10;
+
+SELECT source_record_id, reason, ingested_at
+FROM evidence_quarantinedobservation
+ORDER BY ingested_at DESC
+LIMIT 20;
+```
+
+L'identifiant `capture_id` d'une observation permet de retrouver sa capture et son URL ; `field_path` indique l'entrée de la réponse originale. L'identifiant `parcel_id` renvoie à la parcelle. Ces liens sont des **clés étrangères**, qui maintiennent les relations entre tables. Les octets `payload` sont une réponse JSON stockée comme binaire ; l'outil peut donc afficher un blob plutôt que le JSON lisible. Ne pas modifier ces preuves pour les rendre plus jolies.
+
+Docker Desktop → Volumes → `liwa-local_postgres18-data` montre les fichiers internes de PostgreSQL, pas un tableau des parcelles. Des fichiers numérotés et du texte illisible sont normaux. Pour lire les lignes, utiliser la connexion SQL ; pour faire évoluer les données métier, utiliser les services/imports prévus, plutôt qu'éditer directement les tables.
+
+### 6.7. Ce qui est manuel aujourd'hui et ce qui sera automatisé
+
+Aujourd'hui, une commande déclenche une acquisition de parcelles. Elle ne collecte ni toutes les rues, ni tous les bâtiments, ni les prix, forums, avis ou réseaux sociaux. Elle ne génère pas de vidéos, n'appelle pas d'IA et ne publie pas de carte. Les captures JSON bornées restent dans PostgreSQL ; stockage objet, déduplication physique des captures et politique de rétention viendront avec les volumes et autres formats.
+
+Le futur workflow sera **planification → tâche durable → worker Python → même service d'import → contrôles et validation → publication**. Un worker est un processus qui exécute des tâches ; un planificateur décide quand les déclencher. Le serveur web n'aura pas à attendre la collecte dans une requête de visiteur. Les fréquences dépendront de la source, de ses droits d'accès, de son rythme et de ses limites ; elles ne sont pas encore configurées.
+
+Automatiser la collecte ne signifie pas accepter ou publier toutes les informations automatiquement. Prix, noms rapprochés, permis, témoignages et suggestions IA demanderont leurs propres règles de validation et preuves. Les sources indisponibles et informations inconnues resteront signalées. Les principes et limites sont détaillés dans [docs/engineering/DATA_PROVENANCE.md](DATA_PROVENANCE.md).
+
 <a id="compte-administration"></a>
 
-## 6. Créer un compte d'administration — facultatif
+## 7. Créer un compte d'administration — facultatif
 
 **Ce que cette étape fait :** elle ajoute dans PostgreSQL un compte autorisé à utiliser l'administration Django. Ce compte reste dans le volume de base après un arrêt ordinaire. Il ne crée pas un compte GitHub, un compte Windows ou le système de connexion du futur site public.
 
@@ -617,11 +779,11 @@ docker compose -f infra/local/compose.yaml exec api python manage.py createsuper
 
 Répondre aux questions. Le mot de passe peut ne pas apparaître pendant la saisie : c'est normal. Il n'est pas enregistré dans Git.
 
-Ouvrir [l'administration Django](http://localhost:8000/admin/) et se connecter. Elle propose actuellement les écrans Django de base ; les modules immobiliers n'ont pas encore leurs modèles et écrans métier. Admin et docs interactives sont disponibles en configuration locale DEBUG ; ce parcours n'est pas prêt à publier.
+Ouvrir [l'administration Django](http://localhost:8000/admin/) et se connecter. Elle propose actuellement les écrans Django de base ; les tables de parcelles et de preuves existent après les migrations, mais aucun écran d'édition de ces modèles n'est enregistré dans l'administration. Admin et docs interactives sont disponibles en configuration locale DEBUG ; ce parcours n'est pas prêt à publier.
 
 <a id="routine-quotidienne"></a>
 
-## 7. Routine quotidienne et arrêt
+## 8. Routine quotidienne et arrêt
 
 ### Au prochain lancement
 
@@ -680,7 +842,7 @@ down retire les conteneurs/réseaux locaux mais conserve le volume de base. **Ne
 
 <a id="site-compile"></a>
 
-## 8. Vérifier le site compilé
+## 9. Vérifier le site compilé
 
 **Ce que cette étape fait :** elle transforme le code du web en fichiers préparés pour une exécution sans rechargement de développement. Ce travail s'appelle un build, ou compilation. Ce n'est pas encore un déploiement : les fichiers restent sur ton ordinateur.
 
@@ -708,11 +870,11 @@ Le contrôle attend un build existant. Il démarre un serveur temporaire sur **3
 
 <a id="verifier-le-code"></a>
 
-## 9. Vérifier le code avant de le partager
+## 10. Vérifier le code avant de le partager
 
 **Ce que cette étape fait :** elle cherche des erreurs avant de partager ou publier le code. Les vérifications ne remplacent pas un lancement du site et ne téléchargent pas de données immobilières. Les tests isolés utilisent un environnement de test, pas le volume PostgreSQL de développement.
 
-### 9.1. Web et documentation
+### 10.1. Web et documentation
 
 Avec les dépendances installées, depuis la racine :
 
@@ -726,9 +888,9 @@ pnpm.cmd contracts:check
 
 Les commandes doivent terminer sans erreur. Le typage utilise le compilateur natif TypeScript 7.0.2 via un alias explicite. Next.js utilise le paquet de compatibilité TypeScript 6.0.2 (API embarquée 6.0.3) ; le générateur OpenAPI conserve l'API TypeScript 5.9.3 requise par ses peers. Voir [les versions et exceptions](TOOLCHAIN.md).
 
-Elles contrôlent respectivement qualité/style, types, traductions, liens Markdown locaux et cohérence des types générés avec OpenAPI. Pour vérifier aussi le serveur compilé, suivre l'étape 8.
+Elles contrôlent respectivement qualité/style, types, traductions, liens Markdown locaux et cohérence des types générés avec OpenAPI. Pour vérifier aussi le serveur compilé, suivre l'étape 9.
 
-### 9.2. Python sur Windows — installation facultative
+### 10.2. Python sur Windows — installation facultative
 
 Cette option sert à travailler sur les outils Python directement depuis Windows. Elle est distincte du parcours Docker : uv télécharge ici l'interpréteur Python et prépare un environnement local au projet. Une **.venv** contient les bibliothèques Python isolées pour ce projet ; elle évite de les mélanger avec celles d'autres applications.
 
@@ -759,11 +921,11 @@ uv run --project apps/api lint-imports --config apps/api/pyproject.toml
 uv run --project apps/api pytest apps/api/tests -c apps/api/pyproject.toml
 ```
 
-Ces retraits concernent seulement ce terminal. Les tests utilisent liwa.config.settings.testing et SQLite en mémoire. Le test PostGIS est **ignoré volontairement** ; au stade actuel, attendre trois tests réussis et un ignoré. Cela valide HTTP, sans valider le SIG.
+Ces retraits concernent seulement ce terminal. Les tests utilisent `liwa.config.settings.testing` : SQLite en mémoire pour les besoins HTTP, et aucun stockage de données immobilières dans SQLite. Les modules métier GIS sont exclus de ce parcours. Les tests de protocole Onwani vérifient les réponses sans accès réseau ; les tests PostGIS sont ignorés volontairement. Des tests réussis et des tests ignorés sont donc attendus, sans figer ici leur nombre. Ce parcours ne valide ni les migrations GIS ni les transactions du catalogue : les tests d’intégration nécessitent PostgreSQL/PostGIS réel.
 
 Le serveur GeoDjango et les tests PostGIS exécutés nativement nécessitent aussi GDAL/GEOS/PROJ sur l'hôte : Python seul ne suffit pas. Le parcours Docker évite leur installation sur Windows pour lancer l'API. La CI utilise ces bibliothèques et une vraie base PostGIS avec LIWA_TEST_POSTGIS=1. L'image API locale est une image runtime sans pytest/Ruff ; ne pas tenter d'y exécuter les outils de développement.
 
-### 9.3. Après une modification du contrat API
+### 10.3. Après une modification du contrat API
 
 Un **contrat API** décrit les adresses disponibles et les formes des demandes/réponses. L'export OpenAPI produit cette description depuis le code Python ; contracts:generate en déduit les types TypeScript pour le web. Cela permet aux deux applications de s'accorder sur les données échangées, sans partager directement leurs tables de base.
 
@@ -780,7 +942,7 @@ Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas mod
 
 <a id="depannage"></a>
 
-## 10. Résoudre les problèmes courants
+## 11. Résoudre les problèmes courants
 
 | Symptôme | Vérification et action |
 |---|---|
@@ -792,8 +954,12 @@ Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas mod
 | Docker ne joint pas son moteur | Ouvrir Docker Desktop, attendre son démarrage et vérifier les conteneurs Linux avec docker info |
 | Port 8000 ou 5432 occupé | Identifier le programme avec Get-NetTCPConnection -LocalPort 8000,5432 -ErrorAction SilentlyContinue ; arrêter seulement un service reconnu ou adapter les ports locaux dans Compose |
 | ready répond 503 | Lire les logs db/api, vérifier db healthy et la connexion PostGIS ; ne pas supprimer le volume pour tenter une réparation |
-| API inchangée après édition Python | Reconstruire l'image API comme à l'étape 7 |
+| API inchangée après édition Python | Reconstruire l'image API comme à l'étape 8 |
 | Admin refuse la connexion | Vérifier migrations, création du superutilisateur et configuration locale |
+| Unknown command: 'import_onwani' | Vérifier la branche `codex/onwani-import`, puis reconstruire l'API ; suivre la section 6.1 |
+| Table catalog_parcel ou evidence_ingestionrun introuvable | Appliquer les migrations de la branche avec `migrate --noinput`, puis rafraîchir la connexion SQL |
+| Import terminé avec le statut quarantined | Consulter le bilan et `evidence_quarantinedobservation` comme en section 6.6 ; conserver les preuves et examiner l'anomalie avant toute correction |
+| Import en échec | Consulter `evidence_ingestionrun.error` et les journaux API ; le catalogue précédent est conservé. Corriger la cause avant une nouvelle acquisition |
 | CSS/JS absent en standalone | Reconstruire puis lancer node scripts/prepare-web-runtime.mjs, ou utiliser start qui fait cette préparation |
 | Erreur certificat TLS à l'installation | Vérifier les certificats du système/réseau ; Node 26 permet $env:NODE_OPTIONS='--use-system-ca', uv accepte --system-certs sur sa commande réseau ; ne pas désactiver la vérification TLS |
 
@@ -815,7 +981,7 @@ Sur une autre machine, le cache par défaut peut fonctionner sans configuration.
 
 <a id="production"></a>
 
-## 11. Du lancement local à la production
+## 12. Du lancement local à la production
 
 Ce guide démarre les services sur ta machine ; il ne publie rien sur Internet. Les clés et identifiants Compose sont exclusivement pour le développement.
 
