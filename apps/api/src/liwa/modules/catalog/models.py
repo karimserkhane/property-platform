@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.gis.db import models
+from django.contrib.gis.db.models.functions import IsEmpty, IsValid
 
 
 class Parcel(models.Model):
@@ -25,7 +26,18 @@ class Parcel(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["source_namespace", "source_record_id"], name="parcel_source_identity"
-            )
+            ),
+            models.CheckConstraint(
+                condition=IsValid("geometry") & ~IsEmpty("geometry"),
+                name="parcel_geometry_valid_nonempty",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(revision__gte=1), name="parcel_revision_positive"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(source_namespace__regex=r"\S", source_record_id__regex=r"\S"),
+                name="parcel_source_identity_nonblank",
+            ),
         ]
 
     def __str__(self):

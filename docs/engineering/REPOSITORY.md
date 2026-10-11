@@ -122,6 +122,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       ├── TOOLCHAIN.md               Versions exécutables et compatibilités
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
 │       ├── DATA_PROVENANCE.md          Collecte directe, sources par information et audit
+│       ├── DATABASE_DESIGN.md          Noms du domaine immobilier, audit SQL et trajectoire d'évolution
 │       └── STRUCTURE_REVIEW.md        Revue critique de l'organisation
 └── scripts/                         Utilitaires pour vérifier le dépôt et préparer le site construit
     ├── check-doc-links.mjs            Vérification des liens locaux dans les documents
@@ -148,6 +149,8 @@ Ce dossier possède les pages et interactions du site. `apps/web/src/app/` défi
 | [publication](../../apps/api/src/liwa/modules/publication/README.md) | Validation, projections et versions publiées | Publier une version validée du dossier en passant par les services des autres modules |
 
 **Le catalogue et les preuves possèdent maintenant les premiers modèles de parcelles et d'acquisition Onwani.** Le module publication reste un cadre sans modèle. Les bâtiments, logements, prix et dossiers publics ne sont pas encore implémentés. Les `apps.py` déclarent les modules à Django ; les `README.md` précisent leurs frontières.
+
+Le domaine immobilier et son futur schéma SQL portent le nom cible `real_estate`. Le module Django installé conserve pour le moment son nom `catalog` ; les tables restent dans `public` avec leurs préfixes existants. La migration physique vers plusieurs schémas n'est pas encore implémentée. [DATABASE_DESIGN.md](DATABASE_DESIGN.md) décrit cette décision, les contrôles d'intégrité actuels et les validations nécessaires avant tout déplacement. Les noms de schémas ne créent pas de nouveaux modules ou droits d'accès à eux seuls.
 
 `apps/api/src/liwa/config/settings/base.py` est partagé, puis complété par `apps/api/src/liwa/config/settings/local.py`, `apps/api/src/liwa/config/settings/testing.py` ou `apps/api/src/liwa/config/settings/production.py`. La présence de ce dernier ne signifie pas que le site est déployé. `apps/api/manage.py` sert notamment à lancer les migrations ou à créer un administrateur ; ce n'est pas une page web.
 

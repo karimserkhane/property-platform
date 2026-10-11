@@ -532,7 +532,8 @@ apps/api/src/liwa/modules/catalog/
 ├── services.py                 Existe : mutations du catalogue et conversion des géométries
 └── migrations/                 Existe : historique de leur structure en base
     ├── __init__.py
-    └── 0001_initial.py         Existe : première création de la table des parcelles
+    ├── 0001_initial.py         Existe : première création de la table des parcelles
+    └── 0002_enforce_data_integrity.py  Existe : contraintes SQL d'intégrité
 ```
 
 Pour retrouver ces fichiers sans lire l'arborescence : [apps/api/src/liwa/modules/catalog/models.py](../../apps/api/src/liwa/modules/catalog/models.py), dossier `apps/api/src/liwa/modules/catalog/migrations/`, première migration `apps/api/src/liwa/modules/catalog/migrations/0001_initial.py`. Les modèles de provenance sont dans [apps/api/src/liwa/modules/evidence/models.py](../../apps/api/src/liwa/modules/evidence/models.py), avec leurs migrations dans `apps/api/src/liwa/modules/evidence/migrations/`.
@@ -614,6 +615,8 @@ Tu peux relancer l'import : il crée une nouvelle acquisition, sans dupliquer le
 
 Dans l'outil de base de données, les tables sont sous le schéma `public` :
 
+**Noms actuels et cible future :** `liwa` est la base, `public` le schéma et `catalog_parcel` une table, soit `liwa.public.catalog_parcel`. Le nom retenu pour le futur domaine immobilier est `real_estate`, avec une cible `real_estate.parcel`. Ce déplacement n'a pas encore été implémenté : utiliser les noms actuels ci-dessous. La [revue de base de données](DATABASE_DESIGN.md) explique les choix et les travaux restant à faire.
+
 | Table | Ce qu'elle contient |
 |---|---|
 | `catalog_parcel` | Parcelles, géométries PostGIS, identité interne et révision |
@@ -631,6 +634,8 @@ docker compose -f infra/local/compose.yaml exec api python manage.py shell -c "f
 ```
 
 Les dates de publication inconnues restent nulles ; les dates de réception, permis et mise à jour fournies par Onwani restent préservées dans leurs attributs originaux. Voir [DATA_PROVENANCE.md](DATA_PROVENANCE.md) pour les limites, la portée des identifiants et les responsabilités de chaque module. Utiliser les services métier et cette commande pour modifier le catalogue, pas des modifications manuelles de tables dans l'outil SQL.
+
+Les migrations d'intégrité ajoutent aussi des protections **dans PostgreSQL** : géométrie valide et non vide, identité non blanche, révision au moins égale à 1, états/dates d'acquisition cohérents et métadonnées contrôlées. Le service continue de vérifier les réponses avant écriture ; les contraintes protègent également les écritures qui le contournent. Pour les appliquer après mise à jour du code, suivre la reconstruction API et `migrate` de la section 8. Un rejet de contrainte est une erreur à examiner, pas une raison de désactiver la protection. Ces règles ne constituent pas encore des permissions de production ni un journal inviolable.
 
 ### 6.2. Ce qui se passe pendant l'import, dans l'ordre
 

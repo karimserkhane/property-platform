@@ -1,11 +1,13 @@
 import json
 import os
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import psycopg
 import pytest
-from django.db import connection
+from django.contrib.gis.geos import MultiPolygon, Polygon
+from django.db import IntegrityError, connection, transaction
+from django.db.migrations.executor import MigrationExecutor
 
 if os.environ.get("LIWA_TEST_POSTGIS") != "1":
     pytest.skip("Onwani integration requires real PostGIS", allow_module_level=True)
@@ -155,3 +157,94 @@ def test_another_session_cannot_start_a_concurrent_import():
         with pytest.raises(ValueError, match="already running"):
             import_onwani(actor="integration-test")
         assert IngestionRun.objects.count() == 0
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"revision": 0},
+        {"source_namespace": "   "},
+        {"source_record_id": ""},
+        {"geometry": MultiPolygon(srid=4326)},
+        {"geometry": MultiPolygon(Polygon(((0, 0), (1, 1), (0, 1), (1, 0), (0, 0))), srid=4326)},
+    ],
+)
+def test_database_rejects_invalid_parcel_even_when_services_are_bypassed(changes):
+    run([feature()])
+    parcel = Parcel.objects.get()
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Parcel.objects.filter(pk=parcel.pk).update(**changes)
+    parcel.refresh_from_db()
+    assert parcel.revision == 1
+    assert parcel.geometry.valid and not parcel.geometry.empty
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"status": "unknown"},
+        {"status": "succeeded", "finished_at": None},
+        {"status": "running"},
+        {"finished_at": datetime(2000, 1, 1, tzinfo=UTC)},
+        {"actor": "   "},
+    ],
+)
+def test_database_rejects_invalid_ingestion_lifecycle(changes):
+    acquisition = run([feature()])
+    with pytest.raises(IntegrityError), transaction.atomic():
+        IngestionRun.objects.filter(pk=acquisition.pk).update(**changes)
+    acquisition.refresh_from_db()
+    assert acquisition.status == "succeeded"
+
+
+@pytest.mark.parametrize(
+    "field,value", [("http_status", 99), ("http_status", 600), ("content_sha256", "broken")]
+)
+def test_database_rejects_invalid_capture_metadata(field, value):
+    run([feature()])
+    capture = Capture.objects.first()
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Capture.objects.filter(pk=capture.pk).update(**{field: value})
+
+
+def test_database_rejects_reversed_capture_times():
+    run([feature()])
+    capture = Capture.objects.first()
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Capture.objects.filter(pk=capture.pk).update(
+            fetched_at=capture.fetched_started_at - timedelta(seconds=1)
+        )
+
+
+@pytest.mark.parametrize(
+    "changes", [{"action": "deleted"}, {"parcel_revision": 0}, {"actor": ""}, {"reason": "   "}]
+)
+def test_database_rejects_invalid_audit_metadata(changes):
+    run([feature()])
+    event = AuditEvent.objects.get()
+    with pytest.raises(IntegrityError), transaction.atomic():
+        AuditEvent.objects.filter(pk=event.pk).update(**changes)
+
+
+def test_integrity_migrations_preserve_existing_import_and_are_reversible():
+    previous = [("catalog", "0001_initial"), ("evidence", "0002_quarantinedobservation")]
+    current = [
+        ("catalog", "0002_enforce_data_integrity"),
+        ("evidence", "0003_enforce_data_integrity"),
+    ]
+    try:
+        MigrationExecutor(connection).migrate(previous)
+        acquisition = run([feature()])
+        parcel = Parcel.objects.get()
+        original_geometry = parcel.geometry.ewkb
+        original_captures = list(Capture.objects.values_list("id", "content_sha256"))
+        for targets in (current, previous):
+            MigrationExecutor(connection).migrate(targets)
+            assert Parcel.objects.get().id == parcel.id
+            assert Parcel.objects.get().geometry.ewkb == original_geometry
+            assert IngestionRun.objects.get().id == acquisition.id
+            assert list(Capture.objects.values_list("id", "content_sha256")) == original_captures
+            assert ParcelObservation.objects.count() == 1
+            assert AuditEvent.objects.count() == 1
+    finally:
+        MigrationExecutor(connection).migrate(current)

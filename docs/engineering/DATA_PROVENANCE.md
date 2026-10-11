@@ -114,3 +114,5 @@ L'IA peut proposer une extraction ou une appréciation motivée. Conserver fourn
 Tests essentiels : répétition d'un import sans doublon métier, échec puis reprise d'un lot, rejet d'un mauvais territoire, détection d'une réponse tronquée, date sans heure/fuseau, changement de valeur sans perte de la preuve précédente, contradictions entre sources, rollback simultané de mutation et audit, édition concurrente et annulation d'un rapprochement erroné. Les géométries et contraintes spatiales sont validées avec PostgreSQL/PostGIS réel.
 
 Le prototype vise une couverture cartographique de Reem ; les informations disponibles varient selon les parcelles et sources. Il ne promet pas un dossier complet pour chaque bien ni une actualisation instantanée de tous les sites.
+
+La [revue de base de données](DATABASE_DESIGN.md) précise les noms de domaines retenus, les contraintes SQL d'intégrité, les limites du premier modèle d'identité et les validations restantes pour permissions, versions, sauvegardes et migration des schémas. Les contraintes d'intégrité ne protègent pas à elles seules les preuves contre une modification autorisée par les droits SQL.

@@ -21,6 +21,25 @@ class IngestionRun(models.Model):
     error = models.CharField(max_length=500, blank=True)
     summary = models.JSONField(default=dict)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(status="running", finished_at__isnull=True)
+                    | models.Q(
+                        status__in=["succeeded", "quarantined", "failed"],
+                        finished_at__isnull=False,
+                        finished_at__gte=models.F("started_at"),
+                    )
+                ),
+                name="ingestion_run_lifecycle_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(actor__regex=r"\S", connector_version__regex=r"\S"),
+                name="ingestion_run_operator_version_present",
+            ),
+        ]
+
 
 class Capture(models.Model):
     run = models.ForeignKey(IngestionRun, on_delete=models.PROTECT, related_name="captures")
@@ -35,6 +54,22 @@ class Capture(models.Model):
     last_modified_raw = models.CharField(max_length=160, blank=True)
     source_published_at = models.DateTimeField(null=True)
     ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(http_status__gte=100, http_status__lte=599),
+                name="capture_http_status_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(fetched_at__gte=models.F("fetched_started_at")),
+                name="capture_fetch_times_ordered",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(content_sha256__regex=r"^[0-9a-f]{64}$"),
+                name="capture_sha256_format_valid",
+            ),
+        ]
 
 
 class ParcelObservation(models.Model):
@@ -67,6 +102,18 @@ class AuditEvent(models.Model):
     parcel_revision = models.PositiveIntegerField()
     before = models.JSONField(default=dict)
     after = models.JSONField(default=dict)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(action__in=["created", "updated"], parcel_revision__gte=1),
+                name="parcel_audit_action_revision_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(actor__regex=r"\S", reason__regex=r"\S"),
+                name="parcel_audit_operator_reason_present",
+            ),
+        ]
 
 
 class QuarantinedObservation(models.Model):
