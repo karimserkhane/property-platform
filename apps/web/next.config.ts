@@ -7,6 +7,7 @@ const config: NextConfig = {
   output: "standalone",
   transpilePackages: ["@property-platform/branding"],
   poweredByHeader: false,
+  devIndicators: false,
   async headers() {
     return [
       {

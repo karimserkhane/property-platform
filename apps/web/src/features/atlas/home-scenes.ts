@@ -25,14 +25,3 @@ export const HOME_SCENES = [
     position: "66% 58%",
   },
 ] as const;
-
-export type GalleryLabels = Record<
-  | "galleryLabel"
-  | "photoCredit"
-  | "night"
-  | "coast"
-  | "sunset"
-  | "pause"
-  | "play",
-  string
->;

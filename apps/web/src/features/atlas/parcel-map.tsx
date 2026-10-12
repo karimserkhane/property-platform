@@ -16,6 +16,7 @@ import {
   COLORS,
   download,
   geometryBounds,
+  selectMapHit,
 } from "./presentation";
 import type {
   ImageryScene,
@@ -186,12 +187,9 @@ export default function ParcelMap({
       for (const layer of mapLayers("en")) instance.addLayer(layer);
       instance.on("click", (event) => {
         const hits = instance.queryRenderedFeatures(event.point, {
-          layers: ["places", "buildings", "streets", "parcel-fill"],
+          layers: ["buildings", "parcel-fill", "places", "streets", "area-hit"],
         });
-        const hit =
-          hits.find((f) => f.layer.id === "places") ??
-          hits.find((f) => f.layer.id === "parcel-fill") ??
-          hits[0];
+        const hit = selectMapHit(hits);
         if (!hit) return;
         const id = String(hit.properties.id);
         if (hit.layer.id === "parcel-fill") callbacks.current.onSelect(id);
@@ -201,7 +199,9 @@ export default function ParcelMap({
               ? "place"
               : hit.layer.id === "buildings"
                 ? "building"
-                : "street";
+                : hit.layer.id === "area-hit"
+                  ? "administrative_area"
+                  : "street";
           const feature = contextRef.current?.[target].features.find(
             (f) => f.properties.id === id,
           );
@@ -345,6 +345,7 @@ export default function ParcelMap({
         "place-names": options.places && options.names,
         "parcel-codes": options.codes,
         areas: options.areas,
+        "area-hit": options.areas,
         "area-names": options.areas && options.names,
         satellite: options.satellite && options.scene === "esri",
         land: !options.satellite,

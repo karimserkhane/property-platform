@@ -82,6 +82,22 @@ try {
       asset.file,
     );
   }
+  const fontCredits = JSON.parse(
+    await readFile("apps/web/public/fonts/credits.json", "utf8"),
+  );
+  for (const asset of fontCredits.assets) {
+    const response = await fetch(`${origin}/fonts/${asset.file}`);
+    assert.equal(response.status, 200, asset.file);
+    assert.ok(
+      response.headers.get("content-type").includes("font/woff2"),
+      asset.file,
+    );
+    assert.equal(
+      (await response.arrayBuffer()).byteLength,
+      asset.bytes,
+      asset.file,
+    );
+  }
 
   for (const locale of locales) {
     const response = await fetch(`${origin}/${locale}`);
@@ -89,6 +105,25 @@ try {
     assert.equal(response.headers.get("x-content-type-options"), "nosniff");
     assert.equal(response.headers.get("x-frame-options"), "DENY");
     const html = await response.text();
+    const preloadedFonts = [
+      ...html.matchAll(/href="(\/fonts\/[^"\s]+\.woff2)"/g),
+    ].map((match) => match[1]);
+    const fontBytes = [...new Set(preloadedFonts)].reduce((total, path) => {
+      const asset = fontCredits.assets.find(
+        (font) => `/fonts/${font.file}` === path,
+      );
+      assert.ok(asset, `${locale}: known font preload`);
+      return total + asset.bytes;
+    }, 0);
+    assert.ok(
+      fontBytes > 0 && fontBytes < 200000,
+      `${locale}: bounded font preload budget`,
+    );
+    if (!["ar", "ur", "fa"].includes(locale))
+      assert.ok(
+        !preloadedFonts.some((path) => path.includes("noto-sans-arabic")),
+        `${locale}: Arabic is not preloaded`,
+      );
     assert.ok(
       html.includes(`<title>${escapedBrandName}</title>`),
       `${locale}: configured brand title`,
@@ -121,8 +156,8 @@ try {
     }
     assert.equal(
       (html.match(/<img\b/g) ?? []).length,
-      2,
-      `${locale}: one hero photograph and one lazy editorial photograph`,
+      3,
+      `${locale}: one hero photograph and two lazy editorial photographs`,
     );
     assert.equal(
       (html.match(/fetchPriority="high"/g) ?? []).length,
@@ -140,6 +175,11 @@ try {
     assert.ok(
       html.includes(messages.Home.scroll),
       `${locale}: translated discovery link`,
+    );
+    assert.ok(html.includes('href="#regions"'), `${locale}: regions anchor`);
+    assert.ok(
+      html.includes(messages.Home.invitationTitle),
+      `${locale}: invitation`,
     );
     assert.ok(html.includes("<select"), locale);
     const cssPath = html.match(/href="([^"\s]+\.css[^"\s]*)"/)?.[1];

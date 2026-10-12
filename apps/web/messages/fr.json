@@ -2,21 +2,16 @@
   "Home": {
     "location": "Émirats arabes unis",
     "title": "Voyez au-delà de l’horizon.",
-    "description": "Explorez les territoires des Émirats grâce aux cartes, aux données immobilières et aux sources originales.",
+    "description": "Découvrez les Émirats. Explorez les bâtiments, les rues et les quartiers sur la carte.",
     "eyebrow": "Émirats arabes unis",
     "navExplore": "Explorer",
-    "navSources": "Nos sources",
     "discoverTitle": "Chaque adresse raconte davantage.",
-    "discoverBody": "Lisez le territoire, comprenez son environnement et retrouvez l’origine de chaque information.",
+    "discoverBody": "Découvrez comment les bâtiments, les rues et les quartiers s’articulent, au même endroit.",
     "coverage": "Premier jeu de données · Al Reem. La couverture avance zone par zone.",
-    "galleryLabel": "Photographies des Émirats",
-    "photoCredit": "Photographie",
-    "night": "De nuit",
-    "coast": "Bord de mer",
-    "sunset": "Au couchant",
-    "pause": "Arrêter le diaporama",
-    "play": "Lancer le diaporama",
-    "scroll": "Défiler pour découvrir"
+    "scroll": "Défiler pour découvrir",
+    "navLocations": "Les Émirats",
+    "invitationTitle": "Votre prochaine découverte commence ici.",
+    "invitationBody": "Choisissez une zone et explorez ses alentours sur la carte."
   },
   "LanguageSwitcher": {
     "label": "Langue"

@@ -1,5 +1,41 @@
 import type { MapFeature, MapLabels } from "./types";
 
+type MapHit = {
+  layer: { id: string };
+  properties?: Record<string, unknown> | null;
+};
+
+// Rendering order is visual, not the specificity of the object under the pointer.
+// A ProjectLimits parcel (for example RT4_TMP_PL2) must not hide a real plot.
+export function selectMapHit<T extends MapHit>(hits: readonly T[]): T | null {
+  let selected: T | null = null;
+  let priority = Infinity;
+  for (const hit of hits) {
+    if (!hit.properties?.id) continue;
+    const rank =
+      hit.layer.id === "buildings"
+        ? 0
+        : hit.layer.id === "parcel-fill"
+          ? hit.properties.category === "overlay"
+            ? 4
+            : 1
+          : hit.layer.id === "places"
+            ? 2
+            : hit.layer.id === "streets"
+              ? 3
+              : hit.layer.id === "area-hit"
+                ? hit.properties.kind === "district"
+                  ? 6
+                  : 5
+                : Infinity;
+    if (rank < priority) {
+      selected = hit;
+      priority = rank;
+    }
+  }
+  return selected;
+}
+
 export function geometryBounds(
   geometry: MapFeature["geometry"],
 ): [[number, number], [number, number]] | null {

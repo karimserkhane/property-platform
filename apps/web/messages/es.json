@@ -2,21 +2,16 @@
   "Home": {
     "location": "Emiratos Árabes Unidos",
     "title": "Mira más allá del horizonte.",
-    "description": "Explora los Emiratos mediante mapas, datos inmobiliarios y fuentes originales.",
+    "description": "Descubre los Emiratos. Explora edificios, calles y barrios en el mapa.",
     "eyebrow": "Emiratos Árabes Unidos",
     "navExplore": "Explorar",
-    "navSources": "Nuestras fuentes",
     "discoverTitle": "Cada dirección tiene una historia más amplia.",
-    "discoverBody": "Conoce el terreno, comprende su entorno y sigue cada dato hasta su fuente.",
+    "discoverBody": "Descubre cómo se conectan edificios, calles y barrios, en un solo lugar.",
     "coverage": "Primer conjunto de datos · Al Reem. La cobertura se amplía por zonas.",
-    "galleryLabel": "Fotografías de los Emiratos",
-    "photoCredit": "Fotografía",
-    "night": "De noche",
-    "coast": "Junto al mar",
-    "sunset": "Al atardecer",
-    "pause": "Pausar las imágenes",
-    "play": "Reproducir las imágenes",
-    "scroll": "Desplázate para descubrir"
+    "scroll": "Desplázate para descubrir",
+    "navLocations": "Regiones",
+    "invitationTitle": "Tu próximo descubrimiento empieza aquí.",
+    "invitationBody": "Elige una zona y explora su entorno en el mapa."
   },
   "LanguageSwitcher": {
     "label": "Idioma"

@@ -1,6 +1,10 @@
+@import "../../public/fonts/fonts.css";
+
 :root {
   color-scheme: light;
-  font-family: system-ui, sans-serif;
+  --font-ui: "Manrope";
+  --font-display: "Cormorant Garamond";
+  font-family: var(--font-ui), system-ui, sans-serif;
   background: #f8f5ee;
   color: #0b2132;
   --accent: #173b55;
@@ -13,6 +17,10 @@
     0 1px 0 #ffffffd9 inset, 0 2px 4px #102e3610, 0 7px 16px #102e3609;
   --control-shadow-hover:
     0 1px 0 #ffffffef inset, 0 4px 8px #102e3612, 0 12px 24px #102e3612;
+}
+html[dir="rtl"] {
+  --font-ui: "Noto Sans Arabic", "Manrope";
+  --font-display: "Noto Sans Arabic";
 }
 * {
   box-sizing: border-box;
@@ -688,7 +696,7 @@ body:has([data-page="home"]) .site-header {
 }
 body:has([data-page="home"]) .brand {
   font-size: 1.15rem;
-  font-weight: 450;
+  font-weight: 600;
   letter-spacing: 0.025em;
 }
 body:has([data-page="home"]) .brand-mark {

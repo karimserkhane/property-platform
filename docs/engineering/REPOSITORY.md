@@ -38,6 +38,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── messages/                Traductions des textes affichés aux utilisateurs
 │   │   │   └── en.json, ar.json…     Textes de l'interface dans les quinze langues
 │   │   ├── public/images/uae/        Photographies éditoriales locales, variantes WebP et crédits
+│   │   ├── public/fonts/             Fontes WOFF2 locales, plages Unicode, licences et provenance
 │   │   ├── src/                     Code source de l'interface web
 │   │   │   ├── app/                 Pages, routes et structures de page Next.js
 │   │   │   │   ├── api/atlas/        Relais serveur borné des lectures de l’atlas
@@ -47,6 +48,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   │       ├── page.tsx      Page d'accueil actuelle
 │   │   │   │       └── explore/page.tsx   Exploration locale des parcelles
 │   │   │   ├── features/atlas/      Accueil, carte, liste, fiche et adaptateur API de l'atlas
+│   │   │   ├── theme/fonts.ts        Préchargements de typographie selon la langue, sans réseau tiers
 │   │   │   ├── components/          Éléments d'interface réutilisables
 │   │   │   │   ├── brand-mark.tsx         Rendu web du symbole public configuré
 │   │   │   │   └── language-switcher.tsx   Sélecteur de langue interactif
@@ -288,7 +290,9 @@ Les workers légers utiliseront le même paquet Python que l'API, avec un proces
 
 `apps/web/src/features/atlas/` possède l'accueil, l'exploration, la carte et les types consommés depuis les contrats générés. Les routes localisées assemblent ces écrans ; `apps/web/src/app/api/atlas/` relaie uniquement les lectures fixes de l’atlas vers une origine configurée côté serveur, avec délai et budget de réponse. Aucune clé ni URL amont configurable par un visiteur n'est envoyée au client. MapLibre est chargé uniquement dans l'exploration ; l'accueil est rendu côté serveur sans ce moteur.
 
-La composition `home.tsx` reste serveur. Elle passe son contenu à `home-experience.tsx`, un composant client appartenant à `atlas` qui gère les apparitions et la parallaxe, et à `home-gallery.tsx` pour le diaporama. La direction est expérience → calcul pur `home-motion.ts` / styles ; galerie → métadonnées `home-scenes.ts` / styles. Ces modules ne lisent pas l'API, ne modifient pas le catalogue et n'introduisent aucun moteur d'animation partagé. Le contenu est visible sans JavaScript ; les effets s'arrêtent avec la préférence de réduction des animations ou d'économie de données. Les photos restent éditoriales, séparées des preuves immobilières ; [VISUAL_DESIGN.md](VISUAL_DESIGN.md) décrit les références, crédits et réglages.
+La composition `home.tsx` et le visuel fixe `home-visual.tsx` restent serveur. Le contenu passe à `home-experience.tsx`, composant client d'`atlas` qui gère les apparitions et la parallaxe. Direction : expérience → calcul pur `home-motion.ts` / styles ; visuel → métadonnées `home-scenes.ts` / styles. Le diaporama et ses commandes ont été retirés. Ces modules ne lisent pas l'API, ne modifient pas le catalogue et n'introduisent aucun moteur d'animation partagé. Le contenu est visible sans JavaScript ; les effets s'arrêtent avec la réduction des animations ou l'économie de données. Les photos restent éditoriales, séparées des preuves immobilières ; [VISUAL_DESIGN.md](VISUAL_DESIGN.md) décrit références, droits et réglages.
+
+La typographie partagée appartient à `apps/web/src/theme/` : le layout serveur dépend de `theme/fonts.ts` pour sélectionner les préchargements, et le CSS partagé importe les déclarations de `public/fonts/fonts.css`. Direction : layout → theme → métadonnées statiques locales. `theme` ne dépend ni d'`atlas`, ni des contrats, ni de l'API. Les licences et identités des fichiers tiers restent dans `public/fonts/credits.json` ; aucune requête au fournisseur de fonte n'est effectuée pendant la navigation. Les fallbacks systèmes conservent les écritures non couvertes.
 
 `catalog/queries.py` possède les lectures géographiques bornées ; `evidence/queries.py` possède la projection de provenance autorisée ; `publication/preview.py` les assemble sans mutation. L'API `api/parcels.py` valide les entrées et expose un contrat limité. La direction reste publication → evidence/catalog. Les migrations ajoutent les objets cartographiques typés dans leurs schémas propriétaires. Les originaux, opérateurs, attributs bruts et historiques internes ne sont pas exposés.
 

@@ -2,21 +2,16 @@
   "Home": {
     "location": "United Arab Emirates",
     "title": "See beyond the skyline.",
-    "description": "Explore places across the Emirates through maps, property records and original sources.",
+    "description": "Discover the Emirates. Explore buildings, streets and neighbourhoods on the map.",
     "eyebrow": "United Arab Emirates",
     "navExplore": "Explore",
-    "navSources": "Our sources",
     "discoverTitle": "Every address has a bigger picture.",
-    "discoverBody": "Read the land, understand the surroundings and follow the information back to its source.",
+    "discoverBody": "See how buildings, streets and neighbourhoods fit together, all in one place.",
     "coverage": "First dataset · Al Reem Island. Coverage expands area by area.",
-    "galleryLabel": "UAE photographs",
-    "photoCredit": "Photography",
-    "night": "After dark",
-    "coast": "By the sea",
-    "sunset": "Golden hour",
-    "pause": "Pause slideshow",
-    "play": "Play slideshow",
-    "scroll": "Scroll to discover"
+    "scroll": "Scroll to discover",
+    "navLocations": "Regions",
+    "invitationTitle": "Your next discovery starts here.",
+    "invitationBody": "Choose an area and explore its surroundings on the map."
   },
   "LanguageSwitcher": {
     "label": "Language"

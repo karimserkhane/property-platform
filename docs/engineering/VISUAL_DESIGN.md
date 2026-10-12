@@ -1,72 +1,75 @@
 # Identité visuelle de Property Platform
 
-Refonte de l'accueil du 12 octobre 2026 : photographies plein écran, bleu encre, ivoire, sable et titres éditoriaux. Le défilement relie le paysage, la découverte des couches et les sept émirats. L'exploration garde des fonds clairs pour lire les données et la légende.
+Accueil épuré du 12 octobre 2026 : bleu encre, ivoire et sable, photographies des Émirats, titres éditoriaux et commandes d'exploration. L'accueil présente les régions et leurs alentours. Les preuves et sources immobilières restent dans la carte et les fiches ; le grand bandeau « Data & sources » de l'accueil a été retiré.
 
-## Photos et droits
+## Photographies et droits
 
-Les trois photographies montrent Dubai et Abu Dhabi. Elles servent d'ambiance éditoriale ; elles ne représentent pas une parcelle sélectionnée et ne prouvent ni l'état actuel d'un bâtiment ni une couverture de données hors Al Reem. L'accueil présente les sept émirats depuis le 12 octobre ; voir [la couverture nationale](UAE_COVERAGE.md).
+Les photos servent d'ambiance éditoriale. Elles ne représentent pas un bien sélectionné et ne prouvent pas une couverture de données hors du pilote Al Reem. Voir [UAE_COVERAGE.md](UAE_COVERAGE.md).
 
-| Fichier, sous `apps/web/public/images/uae/` | Photographe | Page source |
+| Usage | Fichiers sous `apps/web/public/images/uae/` | Auteur et page officielle |
 |---|---|---|
-| `dubai-night-768.webp`, `dubai-night-1920.webp` | Alla Rome | [Dubai JBR, lumières à la tombée du jour](https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8) |
-| `abu-dhabi-coast-768.webp`, `abu-dhabi-coast-1920.webp` | Hanks K | [Plage et palmiers à Abu Dhabi](https://unsplash.com/photos/beach-palm-trees-and-resort-under-a-hazy-sky-_c08bbHy-xg) |
-| `abu-dhabi-sunset-768.webp`, `abu-dhabi-sunset-1920.webp` | Yulia Evtushenko | [Palmiers au coucher du soleil, Corniche Beach](https://unsplash.com/photos/a-couple-of-palm-trees-sitting-next-to-each-other-MhpX3VgaG4U) |
+| Premier écran, Dubai | `dubai-night-768.webp`, `dubai-night-1920.webp` | [Alla Rome](https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8) |
+| Chapitre du littoral | `abu-dhabi-coast-768.webp`, `abu-dhabi-coast-1920.webp` | [Hanks K](https://unsplash.com/photos/beach-palm-trees-and-resort-under-a-hazy-sky-_c08bbHy-xg) |
+| Invitation finale | `abu-dhabi-sunset-768.webp`, `abu-dhabi-sunset-1920.webp` | [Yulia Evtushenko](https://unsplash.com/photos/a-couple-of-palm-trees-sitting-next-to-each-other-MhpX3VgaG4U) |
 
-Licence gratuite [Unsplash](https://unsplash.com/license), vérifiée sur les pages des trois photos le 12 octobre 2026. Les crédits cliquables restent visibles dans le bandeau. Les variantes WebP sont des exports optimisés du fournisseur ; les photos ne sont pas générées par IA. Les images et leur manifeste `credits.json` sont suivis dans Git pour rendre le site indépendant d'un serveur de photos tiers lors de la navigation.
+Les trois pages affichent la licence gratuite [Unsplash](https://unsplash.com/license), revérifiée le 12 octobre 2026. Elle permet l'usage commercial sans attribution obligatoire. Les crédits visibles ont été retirés à la demande de Karim ; auteurs, pages, droits, dates et empreintes restent dans `credits.json` et ce guide. Les photos restent des ressources locales, sans intégration API Unsplash. Les [conditions de l'API](https://unsplash.com/documentation) constituent un cas distinct et ne doivent pas être confondues avec ces téléchargements sous licence.
 
-## Où modifier le thème
+Une seule image est prioritaire : 71 904 octets sur mobile ou 381 392 sur ordinateur. Les deux autres portent `loading="lazy"` ; le navigateur décide quand les charger. La largeur 768 est choisie jusqu'à 700 pixels d'écran. Aucune vidéo ni rotation automatique n'est téléchargée ou lancée.
 
-Le nom affiché et le symbole sont indépendants des styles : [BRANDING.md](BRANDING.md) décrit leur configuration commune sous `packages/branding/` et le fichier `apps/web/public/brand/mark.svg`.
+## Typographie locale
 
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home.tsx` : contenu serveur, boutons vers la carte et section sources.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-gallery.tsx` : diaporama léger, sélection et pause.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-experience.tsx` : gestion du défilement, apparitions, préférences et nettoyage des écouteurs.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-motion.ts` : déplacements bornés des photos et du texte, avec amplitudes plus faibles sur téléphone.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-scenes.ts` : ordre des photos, cadrage, auteur et URL source.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home.module.css` : styles propres à l'accueil.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\globals.css` : en-tête et styles partagés avec la carte.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\messages\<langue>.json` : textes du namespace `Home` dans les quinze langues.
+L'interface utilise **Manrope**, les titres **Cormorant Garamond**, et les écritures arabe/ourdou/persan **Noto Sans Arabic**. Les autres écritures gardent un fallback système, sans modification du texte original des preuves.
 
-Le propriétaire reste la fonctionnalité web `atlas`. Ces médias décoratifs n'entrent pas dans les tables de preuves immobilières. Aucun nouveau service ou domaine backend n'est nécessaire.
+Les fichiers WOFF2 et les licences SIL Open Font License sont conservés sous `C:\Users\Karim\Repositories\property-platform\apps\web\public\fonts\`. Le manifeste `credits.json` y décrit les sources officielles, versions réelles, sous-ensembles Unicode, tailles et SHA-256. `fonts.css` contient les déclarations `@font-face`, importées dans le CSS partagé ; `font-display: swap` garde les textes visibles pendant le chargement. Les polices sont servies par le site, sans requête au fournisseur Google pendant la navigation.
 
-## Boutons et références de design
+`C:\Users\Karim\Repositories\property-platform\apps\web\src\theme\fonts.ts` possède la sélection des préchargements par langue. Le layout serveur émet les liens vers les mêmes URL publiques que le CSS, pour éviter de télécharger une seconde copie. Budget initial des fontes préchargées : 62 476 octets pour les langues latines, 60 504 pour le russe, 190 796 pour le RTL et 24 836 pour les autres écritures (marque/codes latins). Un contenu mêlant plusieurs écritures peut charger un autre sous-ensemble au besoin.
 
-Références visuelles consultées le 12 octobre 2026 : [Dubai Sotheby's International Realty](https://sothebysrealty.ae/) pour sa composition photographique, le contraste bleu/blanc et les titres serif ; [Aman Residences](https://www.aman.com/residences) pour les fonds ivoire, la typographie éditoriale et les espaces généreux. [Knight Frank](https://www.knightfrank.com/) a aussi été consulté comme référence de navigation immobilière internationale. Il s'agit d'observations de leurs sites officiels, sans classement prétendant établir lesquels seraient « les meilleurs du monde ». Nous ne reprenons ni leurs photos, ni leurs logos, ni leurs textes.
+Les variables `--font-ui` et `--font-display` de `globals.css` permettent de changer les familles. Le sens RTL est conservé, les lettres arabes ne sont pas espacées artificiellement et les photos ne sont pas retournées.
 
-Property Platform utilise une finition propre : bouton principal ivoire avec bord sable, petit médaillon pour la flèche, ombres superposées et action secondaire translucide. Les rayons plus courts et les traits fins remplacent les contours très arrondis de l'ancien accueil. Les commandes du diaporama montrent leur sélection avec un fond et un contour. Les boutons de la carte gardent un relief plus léger, adapté à la lecture des données ; sélectionner une fiche ne change pas son épaisseur de bordure et ne déplace donc pas les fiches voisines.
+## Boutons, couleurs et composition
 
-| Couleur | Variable de l'accueil | Usage |
+Références visuelles consultées : [Dubai Sotheby's International Realty](https://sothebysrealty.ae/) pour les compositions photographiques et les titres serif, [Aman Residences](https://www.aman.com/residences) pour l'ivoire et l'espace. Nous conservons une composition et des assets propres au projet.
+
+Le bouton principal associe une surface ivoire, une bordure lumineuse, des ombres superposées et une flèche dans un médaillon bleu encre. L'action secondaire permet de choisir un émirat. Le survol déplace légèrement les commandes sur pointeur précis ; le clic produit un enfoncement. Le focus clavier reste visible. Les couleurs sémantiques de la légende cartographique gardent leur signification métier.
+
+| Couleur | Variable | Usage |
 |---|---|---|
-| `#0B2132` | `--ink` | Texte, fonds bleu encre, carte du territoire pilote |
-| `#F8F5EE` | `--ivory` | Grandes surfaces de lecture |
-| `#D2B895` | `--sand` | Accents sur photos et contours |
-| `#59656C` | `--muted-ink` | Texte secondaire sur fond clair |
-| `#D9D3C9` | `--rule` | Séparateurs et bordures |
+| `#0B2132` | `--ink` | Texte et fonds bleu encre |
+| `#F8F5EE` | `--ivory` | Surfaces de lecture |
+| `#D2B895` | `--sand` | Accents et contours |
+| `#59656C` | `--muted-ink` | Texte secondaire |
+| `#D9D3C9` | `--rule` | Séparateurs |
 
-Ces variables sont regroupées au début de `home.module.css`. Le thème partagé utilise `--accent`, `--muted` et `--line` dans `globals.css`. Les couleurs sémantiques de la légende parcellaire conservent leur sens métier.
+Le rayon, la durée et les ombres partagés restent dans `--control-*` de `globals.css`. Les variantes de l'accueil sont dans `home.module.css`. Aucune bibliothèque d'animation n'est ajoutée.
 
-Les variables `--control-*` de `globals.css` centralisent le rayon, la durée, la courbe de transition et les ombres partagées. Les variantes propres à l'accueil restent dans `home.module.css`. Aucun paquet d'animation n'est ajouté. Le verre conserve un fond coloré lorsque le navigateur ne prend pas en charge le flou.
+## Défilement et accessibilité
 
-Les effets de survol qui déplacent les boutons sont réservés aux pointeurs précis disposant du survol. Le clic produit un léger enfoncement ; le focus clavier garde un contour visible, y compris sur les photos. Les contrôles désactivés ne prennent pas l'effet de survol. Avec `prefers-reduced-motion`, les déplacements sont supprimés et les transitions de contrôle deviennent immédiates. Les dimensions, espacements logiques et libellés traduits restent compatibles avec le mobile et le RTL.
+Les boutons After dark / By the sea / Golden hour et lecture/pause ont été supprimés. Le premier visuel est fixe ; les autres photos occupent les sections suivantes. Le diaporama et son zoom automatique de 14 secondes ont été retirés avec leurs timers et leur composant client. Une animation automatique prolongée sans commande de pause aurait nécessité un autre mécanisme selon [WCAG 2.2.2](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html).
 
-## Animation, accessibilité et transfert
+La parallaxe suit le défilement natif : paysage jusqu'à 150 pixels sur ordinateur, 80 sur téléphone, texte plus lent ; image du littoral jusqu'à 60 ou 28 pixels. Le cadre du littoral reste brièvement en place sur ordinateur avec `position: sticky` ; il défile normalement sur téléphone. Le cadrage fixe met en valeur la plage et les palmiers.
 
-Le bandeau ne monte que la photo de Dubai au départ, prioritaire : 71 904 octets sur mobile ou 381 392 octets sur ordinateur. Les autres scènes du diaporama sont montées à leur première sélection ou à leur premier passage automatique. La photo côtière de la section suivante est présente dans le HTML avec `loading="lazy"` ; le navigateur décide quand la charger et réutilise la même ressource si elle est sélectionnée dans le bandeau. La variante 768 pixels est choisie jusqu'à une largeur de 700 pixels. Il n'y a ni vidéo automatique, ni bibliothèque d'animation, ni téléchargement de police externe.
+Une tâche `requestAnimationFrame` déclenchée par scroll/resize lit les cadres puis écrit les variables CSS. Il n'y a pas de boucle JavaScript permanente ni de rendu React par pixel. Les apparitions utilisent Intersection Observer et cessent d'observer l'élément une fois visible. Les éléments atteints au clavier apparaissent immédiatement. La réduction des animations et l'économie de données arrêtent les effets ; les contenus restent visibles sans JavaScript.
 
-Le paysage du bandeau glisse jusqu'à 150 pixels sur ordinateur, 80 sur mobile ; le texte se déplace moins vite et s'atténue légèrement. La photo côtière a son propre déplacement, jusqu'à 60 pixels sur ordinateur et 28 sur téléphone. Sur ordinateur, son cadre utilise `position: sticky` pendant une partie de la section. Sur téléphone, le cadre reste dans le flux normal. Le zoom du diaporama va de 1,01 à 1,06 et se suspend avec la lecture, le survol, le focus ou un onglet masqué.
+Le « N » était le bouton d'outils de développement Next.js. `devIndicators: false` dans `C:\Users\Karim\Repositories\property-platform\apps\web\next.config.ts` le masque selon [la documentation officielle](https://nextjs.org/docs/app/api-reference/config/next-config-js/devIndicators). Les erreurs de compilation et journaux restent disponibles. Le badge n'est pas un élément de marque du site.
 
-Le défilement reste celui du navigateur. Le lien « Scroll to discover », traduit dans les quinze langues, utilise une ancre native ; le défilement fluide est désactivé avec la réduction des animations. Les apparitions utilisent [Intersection Observer](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API), puis cessent d'observer l'élément révélé. Un focus clavier révèle immédiatement le contenu concerné. Tous les contenus sont visibles dans le HTML initial ; seuls les éléments encore sous l'écran sont préparés pour une apparition après activation du script.
+## Fichiers à modifier
 
-Les déplacements sont calculés dans une seule tâche `requestAnimationFrame` déclenchée par un défilement ou redimensionnement, avec lecture des deux cadres avant écriture des variables CSS. Il n'y a pas de boucle JavaScript permanente ni de rendu React à chaque pixel. Les déplacements utilisent `transform` et l'atténuation `opacity`. Le calcul borne les valeurs pour garder les photos dans leurs cadres. La préférence de réduction des animations et, quand disponible, l'économie de données arrêtent la parallaxe et les apparitions. Un changement de préférence est appliqué immédiatement ; écouteurs et observateur sont retirés au démontage. Le rendu statique reste disponible sans Intersection Observer. Nous n'exigeons pas `animation-timeline` : sa [compatibilité reste limitée](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/animation-timeline).
+La marque reste configurée séparément dans [BRANDING.md](BRANDING.md).
 
-Le passage automatique attend le chargement de la photo et 8,5 secondes de lecture. Le visuel précédent reste affiché pendant le chargement suivant. Une sélection manuelle arrête la lecture automatique ; le bouton lecture permet de la reprendre. Le focus dans la galerie, son survol et un onglet masqué suspendent la rotation. `prefers-reduced-motion` et, lorsqu'il est disponible, le mode économie de données désactivent le démarrage automatique. Les changements de préférence et le retour d'une image déjà en cache sont pris en compte.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home.tsx` : sections serveur et destinations des boutons.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-visual.tsx` : photo fixe du premier écran.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-scenes.ts` : assets, cadrages et provenance photo.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-experience.tsx` et `home-motion.ts` : comportement du défilement et calculs bornés.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home.module.css` : composition et boutons de l'accueil.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\globals.css` : thème partagé et variables de typographie.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\messages\<langue>.json` : textes localisés.
 
-Les images de fond ont un texte alternatif vide, avec une légende et un crédit accessibles à côté. Les commandes sont de vrais boutons avec noms traduits et état de sélection. Les photos ne sont pas retournées en RTL. Les marges, contrôles et textes suivent le sens de lecture ; les noms des photographes sont isolés avec `bdi`.
+La composition et les photos restent sous la responsabilité de la fonctionnalité `atlas`. La typographie partagée appartient à `theme`, sans dépendance à l'API. Aucun média décoratif n'est importé comme preuve immobilière.
 
-La page reste précompilée. L'enveloppe d'effets, la galerie et le sélecteur de langue sont interactifs ; le texte et les sections viennent du serveur. Ouvrir l'accueil ne charge ni MapLibre ni les données géographiques. Tester téléphone, RTL, boutons, défilement, lien vers la carte et fichiers statiques après une modification. `apps/web/tests/home-motion.test.mjs` vérifie les limites de déplacement, les valeurs sur téléphone et les cadres de taille nulle ; le smoke test du site compilé vérifie les quinze langues, l'ancre et la seule image prioritaire. Les tests techniques ne remplacent pas la relecture linguistique ou une revue d'accessibilité complète.
+## Vérification
 
-## Vérification de cette refonte
+Les tests de priorité cartographique couvrent le conflit entre RT4_TMP_PL2 et une vraie parcelle, le bâtiment devant sa parcelle, puis les secteurs/île en repli. Voir [REEM_MAP.md](REEM_MAP.md). Les contrôles HTTP du web compilé couvrent les quinze langues, les trois images et les fontes incluses dans l'artefact, leurs tailles et le budget de préchargement. Les contrôles techniques ne remplacent pas une revue linguistique ou des mesures sur appareils physiques.
 
-Le 12 octobre 2026 : TypeScript, Biome et les huit tests web passent ; le site compilé passe le smoke test dans les quinze langues. La compilation Next a utilisé les dépendances verrouillées déjà installées dans le runtime local, sans téléchargement. Cela ne constitue pas une nouvelle validation de leur installation depuis zéro ; les limites de certificats du poste restent décrites dans [DEVELOPMENT.md](DEVELOPMENT.md).
+Vérification navigateur du 12 octobre 2026 : accueil anglais sur ordinateur, anglais/arabe à 390 × 844 sans débordement horizontal, lien vers les régions et polices réellement appliquées. Trois clics sur la carte connectée à PostGIS ouvrent respectivement la parcelle `RT4_C119`, le bâtiment `Leaf Tower` (OSM way 409874434), puis le secteur officiel `RT4` sur une zone sans bâtiment ni parcelle. Le périmètre `RT4_TMP_PL2` ne masque plus les objets précis.
 
-Dans le navigateur : accueil anglais sur ordinateur, changement de photo, ancre de découverte et déplacement effectif du fond ; arabe sur un écran de 390 × 844, image de 768 pixels et absence de débordement horizontal ; navigation vers Sharjah avec sa couverture en préparation et retour vers le pilote Al Reem avec 2 431 parcelles et sa légende. La réduction des animations est prévue dans le code et le CSS ; l'émulation de cette préférence et une mesure de fluidité sur téléphones physiques restent à faire. Les contrôles backend/GIS n'ont pas été relancés pour cette modification de présentation, qui ne change ni l'API ni la base.
+Les builds locaux utilisent les dépendances verrouillées déjà installées. Le certificat PyPI/npm de l'environnement de reconstruction reste une limite distincte décrite dans [DEVELOPMENT.md](DEVELOPMENT.md). Ni l'API ni la base ne changent pour cette évolution de présentation et de sélection.

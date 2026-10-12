@@ -8,7 +8,9 @@ Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte loc
 
 ### Essayer le nouvel accueil et la carte locale
 
-L'accueil présente les sept émirats et trois photographies locales de Dubai et Abu Dhabi. En faisant défiler la page, le paysage se déplace plus lentement que le texte : c'est la **parallaxe**. Sur ordinateur, la photo du littoral reste un instant en place pendant que le contenu passe à côté. Les commandes du bandeau changent la photo ou suspendent le diaporama et son zoom. Le réglage système « réduire les animations » désactive ces mouvements ; sur téléphone ils sont plus courts et la photo du littoral défile normalement. La plateforme vise tous les Émirats ; Al Reem reste le premier jeu de données. [Le guide de couverture nationale](UAE_COVERAGE.md) indique où configurer les territoires et comment en activer un nouveau. [Le guide du thème](VISUAL_DESIGN.md) explique où changer les images, le cadrage, les textes, les couleurs et les effets.
+L'accueil présente les sept émirats et trois photographies locales de Dubai et Abu Dhabi : une vue nocturne au premier écran, le littoral dans la section suivante et les palmiers au coucher du soleil à la fin. Chaque section garde sa photo ; il n'y a plus de diaporama, de boutons pour changer la photo ni de lecture/pause. Ces photographies sont utilisées sous la licence Unsplash ; leurs auteurs, pages et droits restent dans `C:\Users\Karim\Repositories\property-platform\apps\web\public\images\uae\credits.json`, sans crédit affiché sur l'accueil. Les sources immobilières restent consultables dans la carte et les fiches ; le bandeau « Data & sources » de l'accueil a été retiré.
+
+En faisant défiler la page, le paysage se déplace plus lentement que le texte : c'est la **parallaxe**. Sur ordinateur, la photo du littoral reste un instant en place pendant que le contenu passe à côté. Le réglage système « réduire les animations » désactive ces mouvements ; sur téléphone ils sont plus courts et la photo du littoral défile normalement. La plateforme vise tous les Émirats ; Al Reem reste le premier jeu de données. [Le guide de couverture nationale](UAE_COVERAGE.md) indique où configurer les territoires et comment en activer un nouveau. [Le guide du thème](VISUAL_DESIGN.md) détaille les droits des images, le cadrage, les textes, les nouvelles polices locales, les boutons, les couleurs et les effets.
 
 **Pour voir une modification du thème ou du code web**, la base et l'API peuvent rester démarrées. Depuis `C:\Users\Karim\Repositories\property-platform`, lancer :
 
@@ -19,6 +21,10 @@ pnpm.cmd dev:web
 Garder ce terminal ouvert. Next.js lit le code du dossier Windows et actualise les pages lors des modifications. La commande de racine est bien **`dev:web`**, pas `dev`. Si ce serveur tourne déjà, enregistrer le fichier suffit généralement ; après modification de `.env.local`, le redémarrer avec Ctrl+C puis cette commande. `pnpm.cmd install --frozen-lockfile` sert à la première installation ou après modification des dépendances/verrouillage, pas à chaque modification d'un titre ou d'une couleur.
 
 Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore the Emirates**. Les sélecteurs permettent de choisir l'émirat et la zone ; Abu Dhabi ouvre actuellement Al Reem. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Les autres émirats montrent une couverture en préparation. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
+
+**Si plusieurs objets se superposent sous ton clic**, la carte choisit d'abord une empreinte de bâtiment, puis une parcelle, un lieu, une rue, un périmètre de projet, un secteur et enfin l'île. Cette priorité s'applique aux objets des couches actives, affichés au niveau de zoom actuel. Elle empêche par exemple le grand périmètre `RT4_TMP_PL2` de masquer une parcelle située dedans. Le secteur RT4 reste sélectionnable dans les espaces où aucun objet plus précis n'est présent. Les règles sont dans `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\presentation.ts`, avec leurs détails dans [REEM_MAP.md](REEM_MAP.md). Sélectionner un bâtiment ne crée pas automatiquement une relation foncière avec sa parcelle.
+
+**Ces changements d'accueil et de priorité de clic concernent uniquement le web.** Ils ne modifient pas les tables ni les données : aucune migration ou nouvelle collecte n'est nécessaire. Le tableau suivant indique comment actualiser le serveur de développement ou la prévisualisation Docker.
 
 <a id="apres-maj"></a>
 
@@ -458,6 +464,8 @@ Résultat attendu :
 - [L'arabe](http://localhost:3000/ar), l'ourdou et le persan utilisent le sens de lecture de droite à gauche.
 
 Si le port 3000 est occupé, Next peut en choisir un autre : utiliser l'adresse affichée dans le terminal.
+
+**Le petit « N » que tu pouvais voir** était le bouton des outils de développement Next.js, ajouté par le framework pendant le développement. Il est maintenant masqué avec `devIndicators: false` dans `C:\Users\Karim\Repositories\property-platform\apps\web\next.config.ts`, conformément à [la documentation Next.js](https://nextjs.org/docs/app/api-reference/config/next-config-js/devIndicators). Les erreurs et les journaux restent accessibles dans le terminal. Après un changement de cette configuration, arrêter le serveur avec Ctrl+C puis relancer `pnpm.cmd dev:web` ; pour le site Docker compilé sur 3102, reconstruire le web comme indiqué au début du guide.
 
 Modifier par exemple apps/web/messages/en.json ou apps/web/src/app/[locale]/page.tsx puis enregistrer : le serveur de développement recharge les changements. Les textes visibles doivent rester dans les dictionnaires. Voir [la politique multilingue](INTERNATIONALIZATION.md).
 

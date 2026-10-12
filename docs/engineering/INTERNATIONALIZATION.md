@@ -12,18 +12,26 @@ Les textes de l'accueil, de l'exploration locale et du sélecteur sont traduits.
 
 ## Implémentation
 
-- `src/i18n/locales.ts` : registre des codes, noms dans leur langue, sens de lecture et langue par défaut.
-- `src/i18n/routing.ts` et `src/proxy.ts` : routes préfixées, par exemple `/en`, `/ar`, `/ru`.
-- `src/i18n/request.ts` : chargement serveur du seul dictionnaire nécessaire et fuseau d'affichage par défaut `Asia/Dubai`.
-- `messages/<locale>.json` : messages organisés par fonctionnalité. Aucun texte d'interface n'est dupliqué dans chaque page.
-- `src/app/[locale]` : layout et pages localisés, rendus statiquement lorsque possible.
-- `src/components/language-switcher.tsx` : sélection explicite, conservation du chemin, des paramètres de recherche et de l'ancre.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\i18n\locales.ts` : registre des codes, noms dans leur langue, sens de lecture et langue par défaut.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\i18n\routing.ts` et `C:\Users\Karim\Repositories\property-platform\apps\web\src\proxy.ts` : routes préfixées, par exemple `/en`, `/ar`, `/ru`.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\i18n\request.ts` : chargement serveur du seul dictionnaire nécessaire et fuseau d'affichage par défaut `Asia/Dubai`.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\messages\<locale>.json` : messages organisés par fonctionnalité. Aucun texte d'interface n'est dupliqué dans chaque page.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\[locale]\` : layout et pages localisés, rendus statiquement lorsque possible.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\components\language-switcher.tsx` : sélection explicite, conservation du chemin, des paramètres de recherche et de l'ancre.
 
 `/` redirige vers `/en`, même si le navigateur préfère une autre langue. Nous désactivons la détection automatique et le cookie de langue pour respecter ce défaut explicite. Une langue choisie reste portée par l'URL ; revenir à `/` revient à l'anglais. Une éventuelle préférence persistante de compte devra être décidée et testée séparément.
 
-Le routage et les traductions utilisent next-intl, compatible avec Next.js App Router. La configuration utilise `next/root-params`, disponible dans la version Next.js du dépôt, plutôt qu'une implémentation maison de négociation linguistique. Les messages utiles au serveur restent côté serveur ; le provider client reçoit seulement le namespace du sélecteur. La galerie de l'accueil reçoit séparément sept libellés traduits comme props, sans lui transmettre les dictionnaires complets.
+Le routage et les traductions utilisent next-intl, compatible avec Next.js App Router. La configuration utilise `next/root-params`, disponible dans la version Next.js du dépôt, plutôt qu'une implémentation maison de négociation linguistique. Les messages utiles au serveur restent côté serveur ; le provider client reçoit seulement le namespace du sélecteur. Les titres, textes et liens de l'accueil sont traduits lors du rendu serveur. Les trois photographies décoratives restent dans leurs sections respectives, sans galerie à commandes ni libellés de lecture/pause à envoyer au client. L'accueil privilégie l'exploration et les régions ; les sources immobilières restent traduites et consultables dans la carte et les fiches.
 
 [Routage next-intl](https://next-intl.dev/docs/routing/setup), [configuration de la détection](https://next-intl.dev/docs/routing/configuration).
+
+## Polices et couverture des écritures
+
+Les textes d'interface utilisent **Manrope**, les titres **Cormorant Garamond** et les interfaces arabe, ourdou et persan **Noto Sans Arabic**. Les autres écritures utilisent les polices de secours du système. Ce choix ne traduit pas le contenu immobilier : les codes et textes d'origine restent conservés.
+
+Les cinq fichiers WOFF2, les licences SIL Open Font License et leur provenance sont sous `C:\Users\Karim\Repositories\property-platform\apps\web\public\fonts\`. Le fichier `fonts.css` y définit les familles et leurs plages Unicode ; `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\globals.css` l'importe et expose les variables `--font-ui` et `--font-display`. `font-display: swap` permet de lire le texte avant que la police soit chargée. Les fichiers sont servis par le site : la navigation n'appelle pas Google Fonts.
+
+`C:\Users\Karim\Repositories\property-platform\apps\web\src\theme\fonts.ts` choisit les préchargements du layout selon la langue : sous-ensembles latins pour les langues latines, cyrilliques pour le russe, arabe pour `ar`, `ur` et `fa`. Les autres langues préchargent seulement Manrope latin pour la marque et les codes. Le CSS peut charger un autre sous-ensemble lorsque le texte affiché le nécessite ; un préchargement ne définit donc pas à lui seul toutes les polices utilisées dans la page. Le manifeste `credits.json` contient les versions, tailles et empreintes exactes ; le [guide du thème](VISUAL_DESIGN.md) donne les budgets initiaux.
 
 ## RTL et accessibilité
 

@@ -28,6 +28,13 @@ export function mapLayers(locale: string): LayerSpecification[] {
       paint: { "fill-color": "#f4f6f3" },
     },
     {
+      id: "area-hit",
+      type: "fill",
+      source: "administrative_area",
+      // Query the actual sector/island surface, without adding a visual overlay.
+      paint: { "fill-color": "#f4f6f3", "fill-opacity": 0 },
+    },
+    {
       id: "areas",
       type: "line",
       source: "administrative_area",

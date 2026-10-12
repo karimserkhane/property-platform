@@ -2,21 +2,16 @@
   "Home": {
     "location": "Vereinigte Arabische Emirate",
     "title": "Blick hinter die Skyline.",
-    "description": "Entdecke die Emirate anhand von Karten, Immobiliendaten und Originalquellen.",
+    "description": "Entdecken Sie die Emirate. Erkunden Sie Gebäude, Straßen und Viertel auf der Karte.",
     "eyebrow": "Vereinigte Arabische Emirate",
     "navExplore": "Entdecken",
-    "navSources": "Unsere Quellen",
     "discoverTitle": "Jede Adresse ist Teil eines größeren Bildes.",
-    "discoverBody": "Lerne das Grundstück und seine Umgebung kennen und verfolge jede Information bis zur Quelle.",
+    "discoverBody": "Sehen Sie, wie Gebäude, Straßen und Viertel zusammengehören – alles an einem Ort.",
     "coverage": "Erster Datensatz · Al Reem. Die Abdeckung wächst Gebiet für Gebiet.",
-    "galleryLabel": "Fotografien der Emirate",
-    "photoCredit": "Fotografie",
-    "night": "Bei Nacht",
-    "coast": "Am Meer",
-    "sunset": "Abendlicht",
-    "pause": "Bildwechsel pausieren",
-    "play": "Bildwechsel starten",
-    "scroll": "Scrollen und entdecken"
+    "scroll": "Scrollen und entdecken",
+    "navLocations": "Regionen",
+    "invitationTitle": "Ihre nächste Entdeckung beginnt hier.",
+    "invitationBody": "Wählen Sie ein Gebiet und erkunden Sie seine Umgebung auf der Karte."
   },
   "LanguageSwitcher": {
     "label": "Sprache"

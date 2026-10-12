@@ -2,21 +2,16 @@
   "Home": {
     "location": "阿拉伯联合酋长国",
     "title": "看见天际线之外。",
-    "description": "通过地图、房地产记录和原始来源探索阿联酋各地区。",
+    "description": "发现阿联酋。在地图上探索建筑、街道和社区。",
     "eyebrow": "阿拉伯联合酋长国",
     "navExplore": "探索",
-    "navSources": "我们的来源",
     "discoverTitle": "每个地址背后，都有更广阔的图景。",
-    "discoverBody": "了解地块与周边环境，并追溯每条信息的原始来源。",
+    "discoverBody": "在一个地方，了解建筑、街道和社区之间的联系。",
     "coverage": "首个数据集 · Al Reem。覆盖范围逐区扩展。",
-    "galleryLabel": "阿联酋照片",
-    "photoCredit": "摄影",
-    "night": "夜色",
-    "coast": "海滨",
-    "sunset": "日落时分",
-    "pause": "暂停图片轮播",
-    "play": "播放图片轮播",
-    "scroll": "向下滚动，探索更多"
+    "scroll": "向下滚动，探索更多",
+    "navLocations": "地区",
+    "invitationTitle": "您的下一次发现，从这里开始。",
+    "invitationBody": "选择一个地区，在地图上探索周边环境。"
   },
   "LanguageSwitcher": {
     "label": "语言"

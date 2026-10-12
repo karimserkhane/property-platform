@@ -8,6 +8,7 @@ import { BrandMark } from "@/components/brand-mark";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { getDirection, isLocale, locales } from "@/i18n/locales";
 import { Link } from "@/i18n/navigation";
+import { getFontPreloads } from "@/theme/fonts";
 import "../globals.css";
 
 type Props = {
@@ -49,6 +50,18 @@ export default async function LocaleLayout({ children, params }: Props) {
       dir={getDirection(locale)}
       data-scroll-behavior="smooth"
     >
+      <head>
+        {getFontPreloads(locale).map((font) => (
+          <link
+            key={font.href}
+            rel="preload"
+            href={font.href}
+            as="font"
+            type={font.type}
+            crossOrigin="anonymous"
+          />
+        ))}
+      </head>
       <body>
         <NextIntlClientProvider
           locale={locale}
@@ -63,7 +76,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <div className="header-tools">
               <nav className="header-nav">
                 <Link href="/explore">{home("navExplore")}</Link>
-                <Link href="/#sources">{home("navSources")}</Link>
+                <Link href="/#regions">{home("navLocations")}</Link>
               </nav>
               <LanguageSwitcher />
             </div>

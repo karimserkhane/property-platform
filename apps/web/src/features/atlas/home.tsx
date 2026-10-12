@@ -4,8 +4,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import styles from "./home.module.css";
 import { HomeExperience } from "./home-experience";
-import { HomeGallery } from "./home-gallery";
-import { type GalleryLabels, HOME_SCENES } from "./home-scenes";
+import { HOME_SCENES } from "./home-scenes";
+import { HomeVisual } from "./home-visual";
 
 export async function AtlasHome() {
   const t = await getTranslations("Atlas");
@@ -14,19 +14,7 @@ export async function AtlasHome() {
   const coverage = await getTranslations("Coverage");
   const locale = await getLocale();
   const coast = HOME_SCENES[1];
-  const galleryLabels = Object.fromEntries(
-    (
-      [
-        "galleryLabel",
-        "photoCredit",
-        "night",
-        "coast",
-        "sunset",
-        "pause",
-        "play",
-      ] as const
-    ).map((key) => [key, home(key)]),
-  ) as GalleryLabels;
+  const sunset = HOME_SCENES[2];
   return (
     <HomeExperience>
       <section
@@ -34,7 +22,7 @@ export async function AtlasHome() {
         data-scene="hero"
         aria-labelledby="home-title"
       >
-        <HomeGallery labels={galleryLabels} />
+        <HomeVisual />
         <div className={styles.heroCopy}>
           <p className={styles.eyebrow}>
             <span aria-hidden="true" /> {home("eyebrow")}
@@ -47,8 +35,8 @@ export async function AtlasHome() {
             <Link className={styles.primaryAction} href="/explore">
               {t("explore")} <span aria-hidden="true">↗</span>
             </Link>
-            <a className={styles.secondaryAction} href="#sources">
-              {t("sources")}
+            <a className={styles.secondaryAction} href="#regions">
+              {coverage("chooseEmirate")} <span aria-hidden="true">↓</span>
             </a>
           </div>
           <p className={styles.coverage}>{home("coverage")}</p>
@@ -75,7 +63,7 @@ export async function AtlasHome() {
               map("parcels"),
               map("streets"),
               map("buildings"),
-              t("sources"),
+              map("places"),
             ].map((label, index) => (
               <Link key={label} href="/explore" className={styles.layerLink}>
                 <span className={styles.layerIndex} aria-hidden="true">
@@ -105,18 +93,17 @@ export async function AtlasHome() {
                 decoding="async"
               />
             </picture>
-            <span className={styles.imageLabel}>{home("coast")}</span>
           </div>
           <figcaption>
             <span>{home("location")}</span>
-            <a href={coast.url} target="_blank" rel="noopener noreferrer">
-              {home("photoCredit")}: <bdi>{coast.photographer}</bdi> / Unsplash
-              ↗
-            </a>
           </figcaption>
         </figure>
       </section>
-      <section className={styles.regions} aria-labelledby="regions-title">
+      <section
+        id="regions"
+        className={styles.regions}
+        aria-labelledby="regions-title"
+      >
         <div className={styles.regionIntro} data-reveal="visible">
           <p className={styles.sectionEyebrow}>
             <span aria-hidden="true">02 /</span> {home("location")}
@@ -156,24 +143,29 @@ export async function AtlasHome() {
             })}
         </div>
       </section>
-      <section
-        className={styles.sources}
-        id="sources"
-        aria-labelledby="sources-title"
-      >
-        <div>
-          <p className={styles.sectionEyebrow}>DMT / ONWANI + OPENSTREETMAP</p>
-          <h2 id="sources-title">{t("sources")}</h2>
+      <section className={styles.invitation} aria-labelledby="invitation-title">
+        <picture className={styles.invitationPhoto}>
+          <source
+            media="(max-width: 700px)"
+            srcSet={`/images/uae/${sunset.image}-768.webp`}
+          />
+          <img
+            src={`/images/uae/${sunset.image}-1920.webp`}
+            alt=""
+            width="1920"
+            height={sunset.height}
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
+        <div className={styles.invitationCopy} data-reveal="visible">
+          <p className={styles.eyebrow}>{home("location")}</p>
+          <h2 id="invitation-title">{home("invitationTitle")}</h2>
+          <p>{home("invitationBody")}</p>
+          <Link href="/explore" className={styles.primaryAction}>
+            {t("explore")} <span aria-hidden="true">↗</span>
+          </Link>
         </div>
-        <p>{t("limitations")}</p>
-        <a
-          className={styles.sourceAction}
-          href="https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/0"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {t("source")} ↗
-        </a>
       </section>
       <footer className={styles.footer}>
         <bdi>{brand.displayName}</bdi>

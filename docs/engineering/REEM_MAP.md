@@ -16,6 +16,12 @@
 
 Les effectifs changent avec les sources et les imports. Une page de recherche n'est pas un projet distinct : plusieurs fournisseurs peuvent décrire le même projet. Les positions restent séparées par fournisseur ; les contradictions ne sont pas fusionnées automatiquement. Les anciennes observations et un repère retiré restent dans l'historique.
 
+## Priorité de sélection — 12 octobre 2026
+
+Un clic choisit parmi les objets actuellement rendus sous le curseur : **bâtiment → parcelle réelle → repère → rue → périmètre de projet → secteur → île**. Le contour Onwani `RT4_TMP_PL2` est une parcelle de type `ProjectLimits`, distincte du secteur officiel RT4 ; sa grande surface pouvait auparavant prendre le clic avant les vraies parcelles. Le choix ne dépend plus du seul ordre visuel des couches.
+
+Les secteurs et l'île utilisent une surface transparente sur leurs géométries officielles, activée avec la couche secteurs. [MapLibre](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#queryrenderedfeatures) interroge les surfaces d'opacité nulle, mais pas les couches masquées ou hors de leur plage de zoom. Un bâtiment caché ou non disponible dans les données n'est donc pas inventé. La sélection d'un bâtiment ne certifie pas son rattachement cadastral ; aucune nouvelle relation ou mutation SQL n'est déduite de ce clic. Les choix explicites dans les listes restent inchangés. La règle et ses tests résident dans `apps/web/src/features/atlas/presentation.ts`, `parcel-map.tsx`, `map-style.ts` et `apps/web/tests/atlas.test.mjs`.
+
 ## Correspondance avec le HTML
 
 | Fonction du HTML | Implémentation actuelle | Précision |
