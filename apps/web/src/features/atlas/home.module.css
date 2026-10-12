@@ -96,40 +96,77 @@
 }
 .primaryAction,
 .secondaryAction {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 2.5rem;
-  min-height: 3.5rem;
-  padding: 0.9rem 1.4rem;
-  border-radius: 3px;
+  min-height: 3.65rem;
+  padding: 0.7rem 1.45rem;
+  border-radius: var(--control-radius);
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
   transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
+    transform var(--control-duration) var(--control-ease),
+    box-shadow var(--control-duration) var(--control-ease),
+    border-color var(--control-duration) ease;
 }
 .primaryAction {
-  background: #efd5ae;
+  overflow: hidden;
+  padding-inline-end: 0.7rem;
+  background: linear-gradient(145deg, #ffedcc, #e3bd87);
   color: #1d302e;
-  border: 1px solid #efd5ae;
+  border: 1px solid #ffe6be;
+  box-shadow:
+    0 1px 0 #fff7e8cc inset,
+    0 -1px 0 #b78b493b inset,
+    0 3px 7px #030f1859,
+    0 12px 28px #030f1833;
 }
-.primaryAction:hover {
-  background: #fff0d9;
-  border-color: #fff0d9;
+.primaryAction::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -50% -70%;
+  background: linear-gradient(
+    110deg,
+    transparent 35%,
+    #ffffff54 50%,
+    transparent 65%
+  );
+  transform: translateX(-65%);
+  transition: transform 650ms var(--control-ease);
+  pointer-events: none;
 }
 .primaryAction span {
+  display: grid;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  flex-shrink: 0;
+  border: 1px solid #29413a14;
+  border-radius: 50%;
+  background: #29413a0d;
   font-size: 1.2rem;
+  transition: transform var(--control-duration) var(--control-ease);
 }
 .secondaryAction {
-  border: 1px solid #fffaf066;
+  border: 1px solid #fffaf05c;
   color: #fffaf0;
-  background: #071d2833;
+  background: linear-gradient(145deg, #ffffff14, #071d286b);
+  box-shadow:
+    0 1px 0 #ffffff21 inset,
+    0 5px 18px #030f182e;
+  backdrop-filter: blur(12px) saturate(120%);
 }
-.secondaryAction:hover {
-  border-color: #fffaf0;
-  background: #ffffff16;
+.primaryAction:active,
+.secondaryAction:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow:
+    0 2px 5px #030f1833 inset,
+    0 2px 5px #030f1826;
 }
 .coverage {
   margin-block-start: 1.1rem;
@@ -197,8 +234,23 @@
   align-items: flex-start;
   min-width: 3.5rem;
   min-height: 44px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: #ffffff05;
   font-size: 0.7rem;
   text-align: start;
+  transition:
+    background-color var(--control-duration) ease,
+    border-color var(--control-duration) ease,
+    box-shadow var(--control-duration) ease;
+}
+.sceneButton[aria-pressed="true"] {
+  background: #ffffff0a;
+  border-color: #e8c59040;
+  box-shadow:
+    0 1px 0 #ffffff0f inset,
+    0 3px 12px #030f1826;
 }
 .sceneLine {
   width: 100%;
@@ -220,6 +272,20 @@
   height: 44px;
   border: 1px solid #ffffff66;
   border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #ffffff1a, #071d2859);
+  box-shadow:
+    0 1px 0 #ffffff26 inset,
+    0 4px 14px #030f1833;
+  backdrop-filter: blur(8px);
+  transition:
+    transform var(--control-duration) var(--control-ease),
+    box-shadow var(--control-duration) var(--control-ease),
+    border-color var(--control-duration) ease;
+}
+.playButton:active {
+  transform: scale(0.93);
+  box-shadow: 0 2px 5px #030f1840 inset;
 }
 .playButton svg {
   width: 18px;
@@ -275,12 +341,25 @@
   font-variant-numeric: tabular-nums;
 }
 .layerArrow {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex-shrink: 0;
   margin-inline-start: auto;
+  border: 1px solid #cbbba45c;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fffdf8, #ece5d9);
   color: #896a45;
-  transition: transform 0.2s ease;
+  box-shadow:
+    0 1px 0 #ffffffcc inset,
+    0 2px 6px #3b372b0d;
+  transition:
+    transform var(--control-duration) var(--control-ease),
+    box-shadow var(--control-duration) var(--control-ease);
 }
-.layerLink:hover .layerArrow {
-  transform: translateY(-3px);
+.layerLink:active .layerArrow {
+  transform: scale(0.95);
 }
 .sources {
   display: grid;
@@ -319,6 +398,10 @@
 }
 .page :focus-visible {
   outline-color: #cd9d5b;
+}
+.hero :focus-visible {
+  outline: 2px solid #fff0d9;
+  outline-offset: 4px;
 }
 .title:where(html[dir="rtl"] *),
 .discovery h2:where(html[dir="rtl"] *) {
@@ -387,6 +470,8 @@
   }
   .sceneButton {
     flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
   .photoCaption {
     gap: 0.8rem;
@@ -405,12 +490,67 @@
     padding-inline: 1.4rem;
   }
 }
+@media (hover: hover) and (pointer: fine) {
+  .primaryAction:hover:not(:active) {
+    transform: translateY(-3px);
+    border-color: #fff0d9;
+    box-shadow:
+      0 1px 0 #fff7e8 inset,
+      0 -1px 0 #b78b493b inset,
+      0 6px 12px #030f1859,
+      0 18px 36px #030f1847;
+  }
+  .primaryAction:hover:not(:active)::before {
+    transform: translateX(65%);
+  }
+  .primaryAction:hover:not(:active) span {
+    transform: translate(2px, -2px);
+  }
+  .secondaryAction:hover:not(:active) {
+    transform: translateY(-2px);
+    border-color: #fffaf0b3;
+    box-shadow:
+      0 1px 0 #ffffff33 inset,
+      0 8px 24px #030f1847;
+  }
+  .sceneButton:hover:not(:disabled) {
+    background-color: #ffffff14;
+    border-color: #e8c59066;
+  }
+  .playButton:hover:not(:active) {
+    transform: scale(1.06);
+    border-color: #e8c590;
+    box-shadow:
+      0 1px 0 #ffffff33 inset,
+      0 6px 18px #030f1847;
+  }
+  .layerLink:hover:not(:active) .layerArrow {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 #ffffffcc inset,
+      0 5px 12px #3b372b1a;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .image,
   .primaryAction,
+  .primaryAction::before,
+  .primaryAction span,
   .secondaryAction,
+  .sceneButton,
   .sceneLine,
+  .playButton,
   .layerArrow {
     transition: none;
+  }
+  .primaryAction::before {
+    display: none;
+  }
+  .page .primaryAction:is(:hover, :active),
+  .page .primaryAction:is(:hover, :active) span,
+  .page .secondaryAction:is(:hover, :active),
+  .page .playButton:is(:hover, :active),
+  .page .layerLink:is(:hover, :active) .layerArrow {
+    transform: none;
   }
 }

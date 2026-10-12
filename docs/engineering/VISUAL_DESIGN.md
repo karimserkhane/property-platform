@@ -25,6 +25,16 @@ Licence gratuite [Unsplash](https://unsplash.com/license), vérifiée sur les pa
 
 Le propriétaire reste la fonctionnalité web `atlas`. Ces médias décoratifs n'entrent pas dans les tables de preuves immobilières. Aucun nouveau service ou domaine backend n'est nécessaire.
 
+## Boutons et références de design
+
+Références visuelles consultées le 12 octobre 2026 : [Apple](https://www.apple.com/), [Aman Residences](https://www.aman.com/residences) et [Emaar](https://www.emaar.com/en). Apple distingue ses actions principales pleines et secondaires à contour ; Aman privilégie des liens discrets et une composition aérée ; Emaar emploie notamment des surfaces translucides sur une photographie. Ces sites ne servent pas de modèles à copier. Le bouton principal observé chez Apple n'a pas d'ombre.
+
+Liwa utilise sa propre finition : dégradé sable et or, reflet ponctuel au survol, petit médaillon pour la flèche, ombres superposées et action secondaire en verre dépoli. Les commandes du diaporama montrent leur sélection avec un fond et un contour. Les boutons de la carte reprennent un relief plus léger, adapté à la lecture des données ; sélectionner une fiche ne change plus son épaisseur de bordure et ne déplace donc pas les fiches voisines.
+
+Les variables `--control-*` de `globals.css` centralisent le rayon, la durée, la courbe de transition et les ombres partagées. Les variantes propres à l'accueil restent dans `home.module.css`. Aucun paquet ou code JavaScript d'animation n'est ajouté. Le verre conserve un fond coloré lorsque le navigateur ne prend pas en charge le flou.
+
+Les effets de survol qui déplacent les boutons sont réservés aux pointeurs précis disposant du survol. Le clic produit un léger enfoncement ; le focus clavier garde un contour visible, y compris sur les photos. Les contrôles désactivés ne prennent pas l'effet de survol. Avec `prefers-reduced-motion`, le reflet et les déplacements sont supprimés, et les transitions de contrôle deviennent immédiates. Les dimensions, espacements logiques et libellés traduits restent compatibles avec le mobile et le RTL.
+
 ## Animation, accessibilité et transfert
 
 Le premier écran ne monte que la photo de nuit, prioritaire : 65 194 octets sur mobile ou 309 022 octets sur ordinateur. Les autres scènes sont chargées à leur première sélection ou à leur premier passage automatique ; la variante 768 pixels est choisie jusqu'à une largeur de 700 pixels. Les transitions changent l'opacité, sans bibliothèque d'animation, vidéo ou téléchargement de police externe.
