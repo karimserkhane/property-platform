@@ -36,6 +36,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── tsconfig.json             Configuration du compilateur TypeScript
 │   │   ├── Dockerfile                Construction de l'image du site
 │   │   ├── messages/                Traductions des textes affichés aux utilisateurs
+│   │   ├── public/images/uae/        Photographies éditoriales locales, variantes WebP et crédits
 │   │   │   └── en.json, ar.json…     Textes de l'interface dans les quinze langues
 │   │   ├── src/                     Code source de l'interface web
 │   │   │   ├── app/                 Pages, routes et structures de page Next.js
@@ -131,6 +132,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       ├── REPOSITORY.md              Ce guide de structure et de responsabilités
 │       ├── DEVELOPMENT.md             Commandes de démarrage et explications
 │       ├── REEM_MAP.md                Couverture, sources et correspondance avec le HTML
+│       ├── VISUAL_DESIGN.md           Thème de l'accueil, crédits photos et animation accessible
 │       ├── TOOLCHAIN.md               Versions exécutables et compatibilités
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
 │       ├── DATA_PROVENANCE.md          Collecte directe, sources par information et audit

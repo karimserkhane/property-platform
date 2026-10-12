@@ -1,8 +1,21 @@
 {
   "Home": {
     "location": "Île d’Al Reem",
-    "title": "Un bien, son environnement, ses preuves.",
-    "description": "Le premier dossier immobilier est en préparation. Il reliera parcelle, bâtiment, logements et documents sourcés."
+    "title": "Voyez au-delà de l’horizon.",
+    "description": "Explorez Al Reem à travers ses parcelles, ses rues, ses bâtiments et ses sources d’origine.",
+    "eyebrow": "Abu Dhabi · Émirats arabes unis",
+    "navExplore": "Explorer",
+    "navSources": "Nos sources",
+    "discoverTitle": "Chaque adresse raconte davantage.",
+    "discoverBody": "Lisez le territoire, comprenez son environnement et retrouvez l’origine de chaque information.",
+    "coverage": "Couverture pilote · Île d’Al Reem",
+    "galleryLabel": "Photographies d’Abu Dhabi",
+    "photoCredit": "Photographie",
+    "night": "De nuit",
+    "coast": "Bord de mer",
+    "sunset": "Au couchant",
+    "pause": "Arrêter le diaporama",
+    "play": "Lancer le diaporama"
   },
   "LanguageSwitcher": {
     "label": "Langue"

@@ -4,6 +4,8 @@ Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte loc
 
 ### Essayer le nouvel accueil et la carte locale
 
+L'accueil utilise désormais trois photographies locales d'Abu Dhabi avec des transitions et des commandes de pause. Aucun nouvel outil n'est à installer. [Le guide du thème](VISUAL_DESIGN.md) explique où changer les images, le cadrage, les textes et les couleurs.
+
 Après une mise à jour du backend, reconstruire son image depuis `C:\Users\Karim\Repositories\property-platform` :
 
 ```powershell

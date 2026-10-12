@@ -1,0 +1,416 @@
+.page {
+  background: #f6f2eb;
+  color: #203431;
+  --gold: #e8c590;
+}
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  min-height: max(680px, 94svh);
+  padding: 8rem max(4.5rem, calc((100vw - 82rem) / 2)) 9rem;
+  color: #fffaf0;
+  background: #0c262e;
+}
+.gallery,
+.image,
+.shade {
+  position: absolute;
+  inset: 0;
+}
+.shade:where(html[dir="rtl"] *) {
+  background:
+    linear-gradient(270deg, #071d28cc 0%, #071d2870 42%, #071d2810 78%),
+    linear-gradient(0deg, #081820e8 0%, transparent 37%, #08182070 100%);
+}
+.gallery {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.image {
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+.image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--photo-position);
+}
+.visible {
+  opacity: 1;
+}
+.shade {
+  background:
+    linear-gradient(90deg, #071d28cc 0%, #071d2870 42%, #071d2810 78%),
+    linear-gradient(0deg, #081820e8 0%, transparent 37%, #08182070 100%);
+}
+.heroCopy {
+  position: relative;
+  z-index: 2;
+  max-width: 46rem;
+}
+.eyebrow,
+.sectionEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.68rem;
+  font-weight: 550;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+.eyebrow {
+  color: #f0d9b3;
+}
+.eyebrow span {
+  width: 2.5rem;
+  height: 1px;
+  background: var(--gold);
+}
+.title {
+  max-width: 12ch;
+  margin-block: 1.4rem 1.7rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(4rem, 6.4vw, 6.3rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.description {
+  max-width: 31rem;
+  font-size: 1.05rem;
+  color: #f1f0e7;
+  line-height: 1.75;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-block-start: 2.2rem;
+}
+.primaryAction,
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.5rem;
+  min-height: 3.5rem;
+  padding: 0.9rem 1.4rem;
+  border-radius: 3px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+.primaryAction {
+  background: #efd5ae;
+  color: #1d302e;
+  border: 1px solid #efd5ae;
+}
+.primaryAction:hover {
+  background: #fff0d9;
+  border-color: #fff0d9;
+}
+.primaryAction span {
+  font-size: 1.2rem;
+}
+.secondaryAction {
+  border: 1px solid #fffaf066;
+  color: #fffaf0;
+  background: #071d2833;
+}
+.secondaryAction:hover {
+  border-color: #fffaf0;
+  background: #ffffff16;
+}
+.coverage {
+  margin-block-start: 1.1rem;
+  color: #e9e4d8;
+  font-size: 0.73rem;
+}
+.galleryFooter {
+  position: absolute;
+  z-index: 3;
+  inset-inline: max(4.5rem, calc((100vw - 82rem) / 2));
+  bottom: 2.7rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  border-block-start: 1px solid #fffaf039;
+  padding-block-start: 1.4rem;
+}
+.photoCaption {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.captionIndex {
+  color: #ecd2a9;
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+.captionTitle {
+  display: block;
+  font-size: 0.88rem;
+  margin-block-end: 0.35rem;
+}
+.photoCaption a {
+  display: block;
+  color: #e4e5df;
+  font-size: 0.64rem;
+  text-decoration: none;
+}
+.photoCaption a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+.galleryControls {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.sceneButton,
+.playButton {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fffaf0;
+}
+.sceneButton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: flex-start;
+  min-width: 3.5rem;
+  min-height: 44px;
+  font-size: 0.7rem;
+  text-align: start;
+}
+.sceneLine {
+  width: 100%;
+  height: 2px;
+  background: #ffffff59;
+  transition: background 0.3s ease;
+}
+.sceneButton[aria-pressed="true"] .sceneLine {
+  background: var(--gold);
+}
+.sceneButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.playButton {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #ffffff66;
+  border-radius: 50%;
+}
+.playButton svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  fill: none;
+}
+.discovery {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr;
+  gap: 7rem;
+  max-width: 90rem;
+  margin-inline: auto;
+  padding: 6rem 4.5rem;
+}
+.sectionEyebrow {
+  color: #795f40;
+}
+.discovery h2 {
+  max-width: 20ch;
+  margin-block: 1.5rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.3rem, 3.1vw, 3.4rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+.discoveryCopy p:last-child {
+  max-width: 29rem;
+  color: #596860;
+  font-size: 0.96rem;
+}
+.layerLinks {
+  align-self: center;
+}
+.layerLink {
+  display: flex;
+  align-items: center;
+  gap: 1.7rem;
+  border-block-end: 1px solid #d6d1c7;
+  padding-block: 1.5rem;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+.layerLink:first-child {
+  border-block-start: 1px solid #d6d1c7;
+}
+.layerIndex {
+  font-size: 0.65rem;
+  color: #896a45;
+  font-variant-numeric: tabular-nums;
+}
+.layerArrow {
+  margin-inline-start: auto;
+  color: #896a45;
+  transition: transform 0.2s ease;
+}
+.layerLink:hover .layerArrow {
+  transform: translateY(-3px);
+}
+.sources {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr auto;
+  align-items: center;
+  gap: 3rem;
+  padding: 3rem max(4.5rem, calc((100vw - 82rem) / 2));
+  background: #173a3f;
+  color: #fff9ef;
+  scroll-margin-top: 1rem;
+}
+.sources .sectionEyebrow {
+  color: #e8c590;
+}
+.sources h2 {
+  margin-block: 0.8rem;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.sources p {
+  font-size: 0.8rem;
+  color: #e5e8e0;
+}
+.sourceAction {
+  font-size: 0.8rem;
+  text-underline-offset: 0.35em;
+}
+.footer {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.8rem max(4.5rem, calc((100vw - 82rem) / 2));
+  font-size: 0.7rem;
+  color: #60716b;
+}
+.page :focus-visible {
+  outline-color: #cd9d5b;
+}
+.title:where(html[dir="rtl"] *),
+.discovery h2:where(html[dir="rtl"] *) {
+  font-family: system-ui, sans-serif;
+  letter-spacing: normal;
+  max-width: 15ch;
+  line-height: 1.3;
+}
+.eyebrow:where(html[dir="rtl"] *),
+.sectionEyebrow:where(html[dir="rtl"] *) {
+  letter-spacing: normal;
+}
+@media (max-width: 1000px) {
+  .hero {
+    padding-inline: 2.5rem;
+  }
+  .galleryFooter {
+    inset-inline: 2.5rem;
+  }
+  .discovery {
+    gap: 3rem;
+    padding: 4rem 2.5rem;
+  }
+  .sources {
+    grid-template-columns: 1fr 1fr;
+    padding-inline: 2.5rem;
+  }
+  .footer {
+    padding-inline: 2.5rem;
+  }
+}
+@media (max-width: 700px) {
+  .hero {
+    min-height: max(760px, 96svh);
+    padding: 9rem 1.4rem 14.5rem;
+    align-items: flex-start;
+  }
+  .title {
+    font-size: clamp(3rem, 12vw, 4.4rem);
+    max-width: 13ch;
+  }
+  .description {
+    font-size: 0.94rem;
+    max-width: 28rem;
+  }
+  .actions {
+    gap: 0.65rem;
+    margin-block-start: 1.7rem;
+  }
+  .primaryAction,
+  .secondaryAction {
+    font-size: 0.82rem;
+    padding: 0.85rem 1rem;
+    gap: 1rem;
+  }
+  .galleryFooter {
+    inset-inline: 1.4rem;
+    bottom: 1.8rem;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 1.2rem;
+    padding-block-start: 1.2rem;
+  }
+  .galleryControls {
+    gap: 1.2rem;
+  }
+  .sceneButton {
+    flex: 1;
+  }
+  .photoCaption {
+    gap: 0.8rem;
+  }
+  .discovery {
+    grid-template-columns: 1fr;
+    padding: 3rem 1.4rem;
+    gap: 1.5rem;
+  }
+  .sources {
+    grid-template-columns: 1fr;
+    padding: 2.5rem 1.4rem;
+    gap: 0.5rem;
+  }
+  .footer {
+    padding-inline: 1.4rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .image,
+  .primaryAction,
+  .secondaryAction,
+  .sceneLine,
+  .layerArrow {
+    transition: none;
+  }
+}

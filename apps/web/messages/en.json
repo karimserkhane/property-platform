@@ -1,8 +1,21 @@
 {
   "Home": {
     "location": "Al Reem Island",
-    "title": "A property, its surroundings, its evidence.",
-    "description": "The first property profile is being prepared. It will connect the parcel, building, homes and source documents."
+    "title": "See beyond the skyline.",
+    "description": "Explore Al Reem through its parcels, streets, buildings and original sources.",
+    "eyebrow": "Abu Dhabi · United Arab Emirates",
+    "navExplore": "Explore",
+    "navSources": "Our sources",
+    "discoverTitle": "Every address has a bigger picture.",
+    "discoverBody": "Read the land, understand the surroundings and follow the information back to its source.",
+    "coverage": "Pilot coverage · Al Reem Island",
+    "galleryLabel": "Abu Dhabi photographs",
+    "photoCredit": "Photography",
+    "night": "After dark",
+    "coast": "By the sea",
+    "sunset": "Golden hour",
+    "pause": "Pause slideshow",
+    "play": "Play slideshow"
   },
   "LanguageSwitcher": {
     "label": "Language"

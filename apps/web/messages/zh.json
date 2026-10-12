@@ -1,8 +1,21 @@
 {
   "Home": {
     "location": "阿尔雷姆岛",
-    "title": "房产、周边环境与相关依据。",
-    "description": "首份房产档案正在准备中。它将关联地块、建筑、住宅单元和来源文件的信息。"
+    "title": "看见天际线之外。",
+    "description": "通过地块、街道、建筑和原始来源，探索雷姆岛。",
+    "eyebrow": "阿布扎比 · 阿拉伯联合酋长国",
+    "navExplore": "探索",
+    "navSources": "我们的来源",
+    "discoverTitle": "每个地址背后，都有更广阔的图景。",
+    "discoverBody": "了解地块与周边环境，并追溯每条信息的原始来源。",
+    "coverage": "试点覆盖 · 雷姆岛",
+    "galleryLabel": "阿布扎比摄影",
+    "photoCredit": "摄影",
+    "night": "夜色",
+    "coast": "海滨",
+    "sunset": "日落时分",
+    "pause": "暂停图片轮播",
+    "play": "播放图片轮播"
   },
   "LanguageSwitcher": {
     "label": "语言"

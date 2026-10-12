@@ -1,8 +1,21 @@
 {
   "Home": {
     "location": "Al Reem Island",
-    "title": "Eine Immobilie, ihr Umfeld, ihre Belege.",
-    "description": "Das erste Immobilienprofil wird vorbereitet. Es wird das Grundstück, das Gebäude, die Wohnungen und die Quelldokumente miteinander verknüpfen."
+    "title": "Blick hinter die Skyline.",
+    "description": "Entdecke Al Reem anhand von Grundstücken, Straßen, Gebäuden und Originalquellen.",
+    "eyebrow": "Abu Dhabi · Vereinigte Arabische Emirate",
+    "navExplore": "Entdecken",
+    "navSources": "Unsere Quellen",
+    "discoverTitle": "Jede Adresse ist Teil eines größeren Bildes.",
+    "discoverBody": "Lerne das Grundstück und seine Umgebung kennen und verfolge jede Information bis zur Quelle.",
+    "coverage": "Pilotgebiet · Al Reem Island",
+    "galleryLabel": "Fotografien von Abu Dhabi",
+    "photoCredit": "Fotografie",
+    "night": "Bei Nacht",
+    "coast": "Am Meer",
+    "sunset": "Abendlicht",
+    "pause": "Bildwechsel pausieren",
+    "play": "Bildwechsel starten"
   },
   "LanguageSwitcher": {
     "label": "Sprache"

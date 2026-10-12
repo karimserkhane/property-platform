@@ -2,6 +2,8 @@
 
 Proposition de design du 11 octobre 2026, fondée sur le [benchmark](BENCHMARK_CONCURRENTIEL.md). C'est une direction à prototyper et tester, pas une interface déjà implémentée ni une garantie de conversion.
 
+**Actualisation du 12 octobre :** le parcours local carte → parcelle → source est désormais implémenté. À la demande de Karim, l'accueil adopte une variante immersive avec de vraies photographies d'Abu Dhabi et un diaporama léger. Voir [le thème actuel et ses crédits](../engineering/VISUAL_DESIGN.md) ; la proposition ci-dessous conserve le contexte initial.
+
 ## Sommaire
 
 - [Décision et état actuel](#décision-et-état-actuel)

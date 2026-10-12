@@ -1,8 +1,21 @@
 {
   "Home": {
     "location": "Isla ng Al Reem",
-    "title": "Isang ari-arian, ang paligid nito, at ang mga ebidensya.",
-    "description": "Inihahanda ang unang tala ng ari-arian. Pag-uugnayin nito ang lote, gusali, mga tirahan at mga pinagmulang dokumento."
+    "title": "Tumingin lampas sa skyline.",
+    "description": "Tuklasin ang Al Reem sa pamamagitan ng mga lote, kalsada, gusali at orihinal na sanggunian.",
+    "eyebrow": "Abu Dhabi · United Arab Emirates",
+    "navExplore": "Tuklasin",
+    "navSources": "Mga sanggunian",
+    "discoverTitle": "May mas malawak na kuwento ang bawat address.",
+    "discoverBody": "Kilalanin ang lote at paligid nito, at sundan ang bawat impormasyon hanggang sa pinagmulan.",
+    "coverage": "Saklaw ng pilot · Al Reem Island",
+    "galleryLabel": "Mga larawan ng Abu Dhabi",
+    "photoCredit": "Larawan",
+    "night": "Sa gabi",
+    "coast": "Sa tabing-dagat",
+    "sunset": "Sa paglubog ng araw",
+    "pause": "I-pause ang mga larawan",
+    "play": "I-play ang mga larawan"
   },
   "LanguageSwitcher": {
     "label": "Wika"

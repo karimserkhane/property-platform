@@ -4,6 +4,7 @@
 - [Stratégie produit](product/STRATEGIE_PRODUIT_LIWA_ATLAS.md)
 - [Benchmark concurrentiel actualisé](product/BENCHMARK_CONCURRENTIEL.md)
 - [Design de l'accueil et première expérience](product/DESIGN_ACCUEIL.md)
+- [Identité visuelle et crédits photos](engineering/VISUAL_DESIGN.md)
 - [Architecture de référence](architecture/REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md)
 - [Contre-audit de la stack](architecture/AUDIT_DECISION_STACK_LIWA_ATLAS.md)
 - [Structure et responsabilités](engineering/REPOSITORY.md)

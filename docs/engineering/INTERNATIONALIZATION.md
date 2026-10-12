@@ -21,7 +21,7 @@ Les textes de l'accueil, de l'exploration locale et du sélecteur sont traduits.
 
 `/` redirige vers `/en`, même si le navigateur préfère une autre langue. Nous désactivons la détection automatique et le cookie de langue pour respecter ce défaut explicite. Une langue choisie reste portée par l'URL ; revenir à `/` revient à l'anglais. Une éventuelle préférence persistante de compte devra être décidée et testée séparément.
 
-Le routage et les traductions utilisent next-intl, compatible avec Next.js App Router. La configuration utilise `next/root-params`, disponible dans la version Next.js du dépôt, plutôt qu'une implémentation maison de négociation linguistique. Les messages utiles au serveur restent côté serveur ; seul le namespace du sélecteur est envoyé au client.
+Le routage et les traductions utilisent next-intl, compatible avec Next.js App Router. La configuration utilise `next/root-params`, disponible dans la version Next.js du dépôt, plutôt qu'une implémentation maison de négociation linguistique. Les messages utiles au serveur restent côté serveur ; le provider client reçoit seulement le namespace du sélecteur. La galerie de l'accueil reçoit séparément sept libellés traduits comme props, sans lui transmettre les dictionnaires complets.
 
 [Routage next-intl](https://next-intl.dev/docs/routing/setup), [configuration de la détection](https://next-intl.dev/docs/routing/configuration).
 

@@ -46,6 +46,23 @@ try {
   assert.ok([307, 308].includes(root.status));
   assert.equal(new URL(root.headers.get("location"), origin).pathname, "/en");
 
+  const photoCredits = JSON.parse(
+    await readFile("apps/web/public/images/uae/credits.json", "utf8"),
+  );
+  for (const asset of photoCredits.assets) {
+    const photo = await fetch(`${origin}/images/uae/${asset.file}`);
+    assert.equal(photo.status, 200, asset.file);
+    assert.ok(
+      photo.headers.get("content-type").includes("image/webp"),
+      asset.file,
+    );
+    assert.equal(
+      (await photo.arrayBuffer()).byteLength,
+      asset.byte_length,
+      asset.file,
+    );
+  }
+
   for (const locale of locales) {
     const response = await fetch(`${origin}/${locale}`);
     assert.equal(response.status, 200, locale);
@@ -58,6 +75,12 @@ try {
     assert.ok(html.includes(`lang="${locale}"`), locale);
     assert.ok(html.includes(`dir="${getDirection(locale)}"`), locale);
     assert.ok(html.includes(messages.Home.title), locale);
+    assert.ok(html.includes("abu-dhabi-night-1920.webp"), locale);
+    assert.equal(
+      (html.match(/<img\b/g) ?? []).length,
+      1,
+      `${locale}: only the first photograph is mounted`,
+    );
     assert.ok(html.includes("<select"), locale);
     const cssPath = html.match(/href="([^"\s]+\.css[^"\s]*)"/)?.[1];
     assert.ok(cssPath, `${locale}: stylesheet missing`);

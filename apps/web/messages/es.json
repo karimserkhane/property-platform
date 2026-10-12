@@ -1,8 +1,21 @@
 {
   "Home": {
     "location": "Isla de Al Reem",
-    "title": "Un inmueble, su entorno y sus evidencias.",
-    "description": "La primera ficha inmobiliaria está en preparación. Conectará la parcela, el edificio, las viviendas y los documentos de referencia."
+    "title": "Mira más allá del horizonte.",
+    "description": "Explora Al Reem a través de sus parcelas, calles, edificios y fuentes originales.",
+    "eyebrow": "Abu Dabi · Emiratos Árabes Unidos",
+    "navExplore": "Explorar",
+    "navSources": "Nuestras fuentes",
+    "discoverTitle": "Cada dirección tiene una historia más amplia.",
+    "discoverBody": "Conoce el terreno, comprende su entorno y sigue cada dato hasta su fuente.",
+    "coverage": "Cobertura piloto · Isla de Al Reem",
+    "galleryLabel": "Fotografías de Abu Dabi",
+    "photoCredit": "Fotografía",
+    "night": "De noche",
+    "coast": "Junto al mar",
+    "sunset": "Al atardecer",
+    "pause": "Pausar las imágenes",
+    "play": "Reproducir las imágenes"
   },
   "LanguageSwitcher": {
     "label": "Idioma"
