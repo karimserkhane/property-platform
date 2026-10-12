@@ -1,4 +1,22 @@
-import type { MapFeature, MapLabels } from "./types";
+import type { MapContext, MapFeature, MapLabels } from "./types";
+
+export function propertyFeatures(context: MapContext | null): MapFeature[] {
+  return [
+    ...(context?.building.features ?? []),
+    ...(context?.place.features.filter((feature) =>
+      feature.properties.kind.endsWith("_project_marker"),
+    ) ?? []),
+  ].sort(
+    (a, b) =>
+      Number(Boolean(b.properties.presentation)) -
+        Number(Boolean(a.properties.presentation)) ||
+      Number(Boolean(b.properties.presentation?.media?.length)) -
+        Number(Boolean(a.properties.presentation?.media?.length)) ||
+      Number(Boolean(b.properties.name || b.properties.name_ar)) -
+        Number(Boolean(a.properties.name || a.properties.name_ar)) ||
+      a.properties.name.localeCompare(b.properties.name),
+  );
+}
 
 type MapHit = {
   layer: { id: string };
@@ -6,7 +24,7 @@ type MapHit = {
 };
 
 // Rendering order is visual, not the specificity of the object under the pointer.
-// A ProjectLimits parcel (for example RT4_TMP_PL2) must not hide a real plot.
+// Project perimeters and administrative areas are context, never click targets.
 export function selectMapHit<T extends MapHit>(hits: readonly T[]): T | null {
   let selected: T | null = null;
   let priority = Infinity;
@@ -15,18 +33,18 @@ export function selectMapHit<T extends MapHit>(hits: readonly T[]): T | null {
     const rank =
       hit.layer.id === "buildings"
         ? 0
-        : hit.layer.id === "parcel-fill"
-          ? hit.properties.category === "overlay"
-            ? 4
-            : 1
-          : hit.layer.id === "places"
-            ? 2
-            : hit.layer.id === "streets"
+        : hit.layer.id === "places" &&
+            typeof hit.properties.kind === "string" &&
+            hit.properties.kind.endsWith("_project_marker")
+          ? 1
+          : hit.layer.id === "parcel-fill"
+            ? hit.properties.category === "overlay"
+              ? Infinity
+              : 2
+            : hit.layer.id === "places"
               ? 3
-              : hit.layer.id === "area-hit"
-                ? hit.properties.kind === "district"
-                  ? 6
-                  : 5
+              : hit.layer.id === "streets"
+                ? 4
                 : Infinity;
     if (rank < priority) {
       selected = hit;

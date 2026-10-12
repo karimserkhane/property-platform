@@ -61,6 +61,7 @@ export default function ParcelMap({
   data,
   context,
   selected,
+  activeFeature,
   onSelect,
   onFeature,
   onError,
@@ -76,6 +77,7 @@ export default function ParcelMap({
   data: ParcelCollection;
   context: MapContext | null;
   selected: string | null;
+  activeFeature: MapFeature | null;
   onSelect: (id: string) => void;
   onFeature: (feature: MapFeature) => void;
   onError: () => void;
@@ -91,6 +93,7 @@ export default function ParcelMap({
   const element = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
   const consumedView = useRef(0);
+  const initialFrame = useRef(false);
   const coordinates = useRef<HTMLOutputElement>(null);
   const callbacks = useRef({ onSelect, onFeature, onError });
   callbacks.current = { onSelect, onFeature, onError };
@@ -187,7 +190,7 @@ export default function ParcelMap({
       for (const layer of mapLayers("en")) instance.addLayer(layer);
       instance.on("click", (event) => {
         const hits = instance.queryRenderedFeatures(event.point, {
-          layers: ["buildings", "parcel-fill", "places", "streets", "area-hit"],
+          layers: ["buildings", "parcel-fill", "places", "streets"],
         });
         const hit = selectMapHit(hits);
         if (!hit) return;
@@ -199,9 +202,7 @@ export default function ParcelMap({
               ? "place"
               : hit.layer.id === "buildings"
                 ? "building"
-                : hit.layer.id === "area-hit"
-                  ? "administrative_area"
-                  : "street";
+                : "street";
           const feature = contextRef.current?.[target].features.find(
             (f) => f.properties.id === id,
           );
@@ -275,12 +276,15 @@ export default function ParcelMap({
           collection as unknown as Parameters<GeoJSONSource["setData"]>[0],
         );
       }
-      if (!consumedView.current) {
+      if (!consumedView.current && !initialFrame.current) {
         const district = context?.administrative_area.features.find(
           (f) => f.properties.kind === "district",
         );
         const bounds = district && geometryBounds(district.geometry);
-        if (bounds) instance.fitBounds(bounds, { padding: 30, duration: 0 });
+        if (bounds) {
+          instance.fitBounds(bounds, { padding: 30, duration: 0 });
+          initialFrame.current = true;
+        }
       }
     };
     if (instance.getSource("parcels")) update();
@@ -296,13 +300,25 @@ export default function ParcelMap({
     const update = () => {
       if (instance.getLayer("selection"))
         instance.setFilter("selection", ["==", ["get", "id"], selected ?? ""]);
+      for (const [id, type] of [
+        ["building-selection", "MultiPolygon"],
+        ["place-selection", "Point"],
+        ["street-selection", "MultiLineString"],
+      ] as const) {
+        if (instance.getLayer(id))
+          instance.setFilter(id, [
+            "==",
+            ["get", "id"],
+            activeFeature?.geometry.type === type ? activeFeature.id : "",
+          ]);
+      }
     };
     if (instance.getSource("parcels")) update();
     else instance.once("load", update);
     return () => {
       instance.off("load", update);
     };
-  }, [selected]);
+  }, [selected, activeFeature]);
 
   useEffect(() => {
     const instance = map.current;
@@ -341,11 +357,13 @@ export default function ParcelMap({
         "street-casing": options.streets,
         "street-names": options.streets && options.names,
         buildings: options.buildings,
+        "building-selection": options.buildings,
         places: options.places,
+        "place-selection": options.places,
+        "street-selection": options.streets,
         "place-names": options.places && options.names,
         "parcel-codes": options.codes,
         areas: options.areas,
-        "area-hit": options.areas,
         "area-names": options.areas && options.names,
         satellite: options.satellite && options.scene === "esri",
         land: !options.satellite,

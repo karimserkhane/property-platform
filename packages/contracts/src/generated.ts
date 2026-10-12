@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/property-media/{media_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Property Media */
+        get: operations["previewPropertyMedia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/map-context": {
         parameters: {
             query?: never;
@@ -270,6 +287,7 @@ export interface components {
              */
             parcel_ids: string[];
             source: components["schemas"]["MapProvenance"];
+            presentation?: components["schemas"]["PropertyPresentationResponse"] | null;
         };
         /** MapProvenance */
         MapProvenance: {
@@ -302,6 +320,54 @@ export interface components {
             type: string;
             /** Coordinates */
             coordinates: number[];
+        };
+        /** PropertyPhoto */
+        PropertyPhoto: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Caption */
+            caption: string;
+            /** Language */
+            language: string;
+            /** Author */
+            author: string;
+            /** Licence Code */
+            licence_code: string;
+            /** Licence Url */
+            licence_url: string;
+            /** Source Url */
+            source_url: string;
+            /** Taken On */
+            taken_on: string | null;
+        };
+        /** PropertyPresentationResponse */
+        PropertyPresentationResponse: {
+            /** Name */
+            name: string;
+            /** Publisher */
+            publisher: string;
+            /** Developer */
+            developer: string;
+            /** Website Url */
+            website_url: string;
+            /** Summary */
+            summary: string;
+            /** Language */
+            language: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /** Media */
+            media: components["schemas"]["PropertyPhoto"][];
         };
         /** Collection */
         Collection: {
@@ -640,6 +706,55 @@ export interface operations {
             };
             /** @description Conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewPropertyMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reviewed licensed JPEG; local preview only */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

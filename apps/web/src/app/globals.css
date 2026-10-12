@@ -593,6 +593,90 @@ h2:where(html[dir="rtl"] *),
   font-size: 12px;
   margin-block-start: 16px;
 }
+.property-card h2 {
+  font-size: 23px;
+  margin-block: 4px 16px;
+  letter-spacing: -0.025em;
+}
+.property-kicker {
+  color: #735b3f;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.property-photo {
+  margin: 0 0 16px;
+}
+.property-photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #e8edf0;
+}
+.property-photo figcaption {
+  display: grid;
+  gap: 5px;
+  margin-block-start: 7px;
+  font-size: 10px;
+  color: #59656c;
+}
+.property-card .property-description {
+  font-size: 13px;
+  line-height: 1.8;
+}
+.property-facts dd {
+  font-weight: 650;
+}
+.property-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 16px;
+}
+.property-actions .property-website {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: var(--control-radius);
+  background: #0b2132;
+  color: #fffdf7;
+  font-size: 12px;
+  text-decoration: none;
+  box-shadow: var(--control-shadow);
+}
+.property-reference {
+  display: block;
+  margin-block: 8px;
+}
+.atlas-panel {
+  overflow-anchor: none;
+}
+.property-inspector-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+.property-inspector-controls button {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 3px 9px;
+  font-size: 20px;
+}
+.property-proof {
+  border-block-start: 1px solid #eaded5;
+  padding-block-start: 12px;
+  margin-block-start: 12px;
+}
+.property-proof summary {
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 650;
+}
+html[dir="rtl"] .property-kicker,
+html[dir="rtl"] .property-card h2 {
+  letter-spacing: normal;
+}
 .parcel-inspector dl {
   display: grid;
   grid-template-columns: 1fr 1.5fr;

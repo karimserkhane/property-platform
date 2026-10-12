@@ -13,6 +13,77 @@ class Source(models.Model):
         db_table = "source"
 
 
+class PropertyPresentation(models.Model):
+    """Immutable, manually reviewed presentation of one existing provider identity."""
+
+    building = models.ForeignKey("catalog.Building", null=True, on_delete=models.PROTECT)
+    place = models.ForeignKey("catalog.Place", null=True, on_delete=models.PROTECT)
+    capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)
+    display_name = models.CharField(max_length=255)
+    publisher_name = models.CharField(max_length=255)
+    developer_name = models.CharField(max_length=255, blank=True)
+    website_url = models.URLField(max_length=1000)
+    summary = models.CharField(max_length=800, blank=True)
+    language = models.CharField(max_length=20, default="en")
+    review_version = models.CharField(max_length=80)
+    ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "property_presentation"
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(building__isnull=False, place__isnull=True)
+                    | models.Q(building__isnull=True, place__isnull=False)
+                ),
+                name="property_presentation_one_identity",
+            ),
+            models.UniqueConstraint(
+                fields=["capture", "building"], name="property_presentation_building_capture"
+            ),
+            models.UniqueConstraint(
+                fields=["capture", "place"], name="property_presentation_place_capture"
+            ),
+        ]
+
+
+class PropertyMedia(models.Model):
+    """Reviewed image and licence receipt; deliberately separate from marketing facts."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    presentation = models.ForeignKey(PropertyPresentation, on_delete=models.PROTECT)
+    capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)
+    licence_capture = models.ForeignKey(
+        "evidence.Capture", on_delete=models.PROTECT, related_name="licensed_property_media"
+    )
+    source_url = models.URLField(max_length=4000)
+    author = models.CharField(max_length=255)
+    licence_code = models.CharField(max_length=40)
+    licence_url = models.URLField(max_length=1000)
+    caption = models.CharField(max_length=500)
+    language = models.CharField(max_length=20, default="en")
+    taken_on = models.DateField(null=True)
+    mime_type = models.CharField(max_length=40)
+    display_allowed = models.BooleanField(default=True)
+    ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "property_media"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["presentation", "capture"], name="property_media_presentation_capture"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(licence_code__in=["CC-BY-3.0", "CC-BY-4.0", "CC0-1.0"]),
+                name="property_media_licence_allowed",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(mime_type__in=["image/jpeg", "image/png", "image/webp"]),
+                name="property_media_mime_allowed",
+            ),
+        ]
+
+
 class IngestionRun(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     source = models.ForeignKey(Source, on_delete=models.PROTECT)

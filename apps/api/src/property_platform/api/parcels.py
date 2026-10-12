@@ -1,5 +1,5 @@
 import math
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 
 from django.conf import settings
@@ -167,6 +167,63 @@ def imagery(request, territory: str | None = None):
         return Status(503, {"code": "data_unavailable"})
 
 
+class PropertyPhoto(Schema):
+    id: UUID
+    caption: str
+    language: str
+    author: str
+    licence_code: str
+    licence_url: str
+    source_url: str
+    taken_on: date | None
+
+
+class PropertyPresentationResponse(Schema):
+    name: str
+    publisher: str
+    developer: str
+    website_url: str
+    summary: str
+    language: str
+    source_url: str
+    retrieved_at: datetime
+    published_at: datetime | None
+    media: list[PropertyPhoto]
+
+
+@router.get(
+    "/property-media/{media_id}",
+    response={403: Error, 404: Error, 503: Error},
+    operation_id="previewPropertyMedia",
+    openapi_extra={
+        "responses": {
+            "200": {
+                "description": "Reviewed licensed JPEG; local preview only",
+                "content": {"image/jpeg": {"schema": {"type": "string", "format": "binary"}}},
+            }
+        }
+    },
+)
+def property_media(request, media_id: UUID):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from django.http import HttpResponse
+
+    from property_platform.modules.evidence.queries import property_media_asset
+
+    try:
+        media = property_media_asset(media_id)
+        if media is None:
+            return Status(404, {"code": "not_found"})
+        payload, mime_type = media
+        response = HttpResponse(payload, content_type=mime_type)
+        response["Cache-Control"] = "no-store"
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
+    except DatabaseError, ValueError:
+        return Status(503, {"code": "data_unavailable"})
+
+
 class MapProperties(Schema):
     id: UUID
     name: str
@@ -176,6 +233,7 @@ class MapProperties(Schema):
     levels: int | None = None
     parcel_ids: list[UUID] = []
     source: MapProvenance
+    presentation: PropertyPresentationResponse | None = None
 
 
 class LineGeometry(Schema):

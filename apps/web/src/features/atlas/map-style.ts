@@ -28,13 +28,6 @@ export function mapLayers(locale: string): LayerSpecification[] {
       paint: { "fill-color": "#f4f6f3" },
     },
     {
-      id: "area-hit",
-      type: "fill",
-      source: "administrative_area",
-      // Query the actual sector/island surface, without adding a visual overlay.
-      paint: { "fill-color": "#f4f6f3", "fill-opacity": 0 },
-    },
-    {
       id: "areas",
       type: "line",
       source: "administrative_area",
@@ -199,6 +192,32 @@ export function mapLayers(locale: string): LayerSpecification[] {
       source: "parcels",
       filter: ["==", ["get", "id"], ""],
       paint: { "line-color": "#eb7939", "line-width": 3 },
+    },
+    {
+      id: "building-selection",
+      type: "line",
+      source: "building",
+      filter: ["==", ["get", "id"], ""],
+      paint: { "line-color": "#eb7939", "line-width": 4 },
+    },
+    {
+      id: "place-selection",
+      type: "circle",
+      source: "place",
+      filter: ["==", ["get", "id"], ""],
+      paint: {
+        "circle-radius": 10,
+        "circle-color": "#eb793922",
+        "circle-stroke-color": "#eb7939",
+        "circle-stroke-width": 3,
+      },
+    },
+    {
+      id: "street-selection",
+      type: "line",
+      source: "street",
+      filter: ["==", ["get", "id"], ""],
+      paint: { "line-color": "#eb7939", "line-width": 4 },
     },
   ];
 }

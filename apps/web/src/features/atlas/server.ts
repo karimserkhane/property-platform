@@ -55,3 +55,42 @@ export async function readPreview(path: string, search = "") {
   const bytes = Buffer.concat(chunks);
   return { status: 200, data: JSON.parse(bytes.toString("utf8")) as unknown };
 }
+
+// A fixed, licensed-media endpoint only; no visitor-selected remote image URL.
+export async function readPropertyMedia(id: string) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW !== "1"
+  )
+    return { status: 403, bytes: null, mime: "" };
+  const origin =
+    process.env.PROPERTY_PLATFORM_API_ORIGIN ?? "http://127.0.0.1:8000";
+  const response = await fetch(
+    new URL(`/api/v1/preview/property-media/${id}`, origin),
+    {
+      signal: AbortSignal.timeout(5000),
+      cache: "no-store",
+      redirect: "error",
+    },
+  );
+  if (!response.ok || !response.body)
+    return { status: response.status, bytes: null, mime: "" };
+  const mime = response.headers.get("content-type") ?? "";
+  if (mime !== "image/jpeg") throw new Error("Unexpected property media type");
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > 2 * 1024 * 1024)
+        throw new Error("Property image exceeds budget");
+      chunks.push(value);
+    }
+  } finally {
+    await reader.cancel();
+  }
+  return { status: 200, bytes: Buffer.concat(chunks), mime };
+}

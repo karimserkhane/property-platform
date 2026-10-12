@@ -97,6 +97,8 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── map_sources.py, map_import.py  Couches officielles et OSM
 │       │       │   │   ├── research_sources.py, research_import.py  Pages et repères déclarés
 │       │       │   │   ├── project_sources.json  Registre de références à collecter
+│       │       │   │   ├── property_protocol.py, property_import.py  Reçus validés et premières présentations de biens
+│       │       │   │   ├── property_presentations.json, property_media.json  Identités examinées et médias autorisés
 │       │       │   │   ├── services.py  Orchestration de l'import et de sa transaction
 │       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
 │       │       │   │   ├── migrations/  Évolution du schéma des preuves
@@ -303,3 +305,9 @@ La carte affiche les usages colorés, secteurs, rues et noms, empreintes 2D, lie
 ## Ce que le socle ne prétend pas fournir
 
 Le premier import manuel Onwani alimente les parcelles et conserve captures, observations et audit. Il ne publie pas automatiquement un dossier. L'accueil et la carte proposent désormais un aperçu local. Auth Supabase, stockage objet, queue et génération ne sont pas encore intégrés. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.
+
+## Présentations immobilières — 12 octobre 2026
+
+Le module `evidence` possède `PropertyPresentation` et `PropertyMedia`, leurs captures et le protocole de revue/import. Direction : import → protocoles / catalogue / modèles evidence ; queries → modèles evidence ; publication → queries ; API → projection et réponses HTTP. Les nouvelles tables restent dans `evidence`, sans nouvelle identité catalogue ni schéma par île. Leur migration est additive. Les registres examinés ne sont pas des données UI : ils alimentent les preuves par un import atomique avec reçus.
+
+`features/atlas/property-card.tsx` possède la présentation des biens sélectionnés à partir du contrat généré ; `Inspector` conserve les informations secondaires. Les résumés, liens de promoteurs et photos ne viennent pas de constantes du composant. Les médias passent par une route fixe de l’API avec les mêmes restrictions locales et un budget de taille ; aucun service de rendu/OCR ni dépendance lourde n’est ajouté. Les imports ne fusionnent pas des objets par nom ou proximité. Voir [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md).

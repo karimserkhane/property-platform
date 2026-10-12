@@ -200,6 +200,7 @@ try {
     "references",
     "imagery",
     "territories",
+    "property-media/00000000-0000-0000-0000-000000000000",
   ]) {
     assert.equal(
       (await fetch(`${origin}/api/atlas/${path}`)).status,

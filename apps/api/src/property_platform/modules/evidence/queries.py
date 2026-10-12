@@ -3,9 +3,16 @@
 import base64
 from urllib.parse import urlparse
 
-from django.db.models import F
+from django.db.models import F, Prefetch
 
-from .models import ImageryScene, MapObservation, ParcelObservation, ResearchReference
+from .models import (
+    ImageryScene,
+    MapObservation,
+    ParcelObservation,
+    PropertyMedia,
+    PropertyPresentation,
+    ResearchReference,
+)
 
 
 def imagery_scenes(scene_ids=None):
@@ -177,3 +184,82 @@ def parcel_sources(parcel_ids):
         str(identity): {"url": url if urlparse(url).scheme == "https" else None, "name": name}
         for identity, url, name in rows
     }
+
+
+def property_presentations(target, ids):
+    """Bounded typed presentation; raw captures and reviewer identities remain private."""
+    if target not in ("building", "place"):
+        return {}
+    rows = (
+        PropertyPresentation.objects.filter(
+            **{f"{target}_id__in": ids}, capture__run__status="succeeded"
+        )
+        .select_related("capture")
+        .defer("capture__payload")
+        .prefetch_related(
+            Prefetch(
+                "propertymedia_set",
+                queryset=PropertyMedia.objects.filter(
+                    display_allowed=True,
+                    capture__parent_capture_id=F("licence_capture_id"),
+                    capture__run__status="succeeded",
+                    licence_capture__run__status="succeeded",
+                ).order_by("id"),
+            )
+        )
+        .order_by(f"{target}_id", "-capture__fetched_at", "-id")
+        .distinct(f"{target}_id")
+    )
+    result = {}
+    for row in rows:
+        result[str(getattr(row, f"{target}_id"))] = {
+            "name": row.display_name,
+            "publisher": row.publisher_name,
+            "developer": row.developer_name,
+            "website_url": row.website_url,
+            "summary": row.summary,
+            "language": row.language,
+            "source_url": row.capture.url,
+            "retrieved_at": row.capture.fetched_at,
+            "published_at": row.capture.source_published_at,
+            "media": [
+                {
+                    "id": photo.id,
+                    "caption": photo.caption,
+                    "language": photo.language,
+                    "author": photo.author,
+                    "licence_code": photo.licence_code,
+                    "licence_url": photo.licence_url,
+                    "source_url": photo.source_url,
+                    "taken_on": photo.taken_on,
+                }
+                for photo in row.propertymedia_set.all()
+            ][:4],
+        }
+    return result
+
+
+def property_media_asset(identity):
+    media = (
+        PropertyMedia.objects.select_related("capture")
+        .filter(
+            id=identity,
+            display_allowed=True,
+            capture__run__status="succeeded",
+            capture__http_status=200,
+            capture__parent_capture_id=F("licence_capture_id"),
+            licence_capture__run__status="succeeded",
+            licence_capture__http_status=200,
+        )
+        .first()
+    )
+    if media is None:
+        return None
+    payload = bytes(media.capture.payload)
+    if (
+        len(payload) > 2 * 1024 * 1024
+        or media.mime_type != "image/jpeg"
+        or not payload.startswith(b"\xff\xd8\xff")
+    ):
+        raise ValueError("Invalid stored property image")
+    return payload, media.mime_type

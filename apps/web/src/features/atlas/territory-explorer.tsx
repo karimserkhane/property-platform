@@ -147,11 +147,7 @@ export function TerritoryExplorer({
           </select>
         </label>
       )}
-      <p>
-        {territory.queryable
-          ? `${name(territory)} · ${new Intl.NumberFormat(locale).format(territory.parcel_count)} ${mapLabels.parcels}`
-          : coverage.preparing}
-      </p>
+      <p>{territory.queryable ? name(territory) : coverage.preparing}</p>
     </div>
   );
   if (!territory.queryable)

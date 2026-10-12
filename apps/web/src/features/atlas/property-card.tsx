@@ -1,0 +1,195 @@
+import { useState } from "react";
+import { sourceLabel } from "./presentation";
+import type { MapFeature, MapLabels, ResearchReference } from "./types";
+
+export function PropertyCard({
+  feature,
+  references,
+  m,
+  locale,
+  locate,
+}: {
+  feature: MapFeature;
+  references: ResearchReference[];
+  m: MapLabels;
+  locale: string;
+  locate: () => void;
+}) {
+  const p = feature.properties;
+  const profile = p.presentation;
+  const isProject = p.kind.endsWith("_project_marker");
+  const typeLabel = isProject
+    ? m.project
+    : feature.geometry.type === "Point"
+      ? m.places
+      : m.building;
+  const links = references.filter(
+    (item) => item.place_id === feature.id && item.available,
+  );
+  const [failedImage, setFailedImage] = useState<string | null>(null);
+  const photo = profile?.media[0];
+  const website =
+    profile?.website_url ??
+    links.find((link) => link.source_kind === "developer")?.url;
+  const title =
+    (locale === "ar" && p.name_ar) ||
+    profile?.name ||
+    p.name ||
+    (isProject ? m.project : m.building);
+  return (
+    <div className="property-card">
+      <p className="property-kicker">{typeLabel}</p>
+      <h2>
+        <bdi>{title}</bdi>
+      </h2>
+      {isProject && <span className="evidence-chip">{m.unverified}</span>}
+      {profile && (
+        <dl className="property-facts">
+          {profile?.developer && (
+            <>
+              <dt>{m.developer}</dt>
+              <dd>
+                <bdi>{profile.developer}</bdi>
+              </dd>
+            </>
+          )}
+          {profile?.publisher && !profile.developer && (
+            <>
+              <dt>{m.providedBy}</dt>
+              <dd>
+                <bdi>{profile.publisher}</bdi>
+              </dd>
+            </>
+          )}
+        </dl>
+      )}
+      <div className="property-actions">
+        {website && (
+          <a
+            className="property-website"
+            href={website}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {website.split("?")[0].toLowerCase().endsWith(".pdf")
+              ? m.propertyInformation
+              : m.visitWebsite}{" "}
+            ↗
+          </a>
+        )}
+        <button type="button" onClick={locate}>
+          {m.locate}
+        </button>
+      </div>
+      {photo && (
+        <figure className="property-photo">
+          {failedImage === photo.id ? (
+            <p role="status">{m.mediaUnavailable}</p>
+          ) : (
+            // biome-ignore lint/performance/noImgElement: bounded JPEG is already resized during acquisition; retain the guarded local media endpoint without a separate optimizer cache.
+            <img
+              src={`/api/atlas/property-media/${photo.id}`}
+              alt={photo.caption}
+              lang={photo.language}
+              loading="lazy"
+              decoding="async"
+              onError={() => setFailedImage(photo.id)}
+            />
+          )}
+          <figcaption>
+            <span lang={photo.language} dir="auto">
+              {photo.caption}
+            </span>
+            <span>
+              <a
+                href={photo.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <bdi>{photo.author}</bdi>
+              </a>
+              {" · "}
+              <a
+                href={photo.licence_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {photo.licence_code}
+              </a>
+              {photo.taken_on && (
+                <>
+                  {" "}
+                  ·{" "}
+                  {new Intl.DateTimeFormat(locale, {
+                    dateStyle: "medium",
+                    timeZone: "UTC",
+                  }).format(new Date(photo.taken_on))}
+                </>
+              )}
+            </span>
+          </figcaption>
+        </figure>
+      )}
+      {profile?.summary && (
+        <p className="property-description" lang={profile.language} dir="auto">
+          {profile.summary}
+        </p>
+      )}
+      {(p.levels != null || p.height_m != null) && (
+        <dl className="property-facts">
+          {p.levels != null && (
+            <>
+              <dt>{m.levels}</dt>
+              <dd>{new Intl.NumberFormat(locale).format(p.levels)}</dd>
+            </>
+          )}
+          {p.height_m != null && (
+            <>
+              <dt>{m.height}</dt>
+              <dd>{new Intl.NumberFormat(locale).format(p.height_m)} m</dd>
+            </>
+          )}
+        </dl>
+      )}
+      {(p.levels != null || p.height_m != null) && (
+        <p className="small-text">
+          <a href={p.source.url} target="_blank" rel="noopener noreferrer">
+            {sourceLabel(p.source.reliability, m)} ↗
+          </a>
+        </p>
+      )}
+      {links
+        .filter((link) => link.url !== website)
+        .map((link) => (
+          <a
+            className="property-reference"
+            href={link.url}
+            key={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <bdi>{link.label}</bdi> ↗
+          </a>
+        ))}
+      {profile && (
+        <details className="property-proof">
+          <summary>{m.propertyInformation}</summary>
+          <p>
+            <bdi>{profile.publisher}</bdi> ·{" "}
+            {new Intl.DateTimeFormat(locale, {
+              dateStyle: "medium",
+              timeZone: "Asia/Dubai",
+            }).format(new Date(profile.retrieved_at))}
+          </p>
+          <a
+            href={profile.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {m.reference} ↗
+          </a>
+        </details>
+      )}
+    </div>
+  );
+}

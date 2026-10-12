@@ -11,6 +11,7 @@ import {
   csv,
   download,
   normalized,
+  propertyFeatures,
   sourceLabel,
 } from "./presentation";
 import { References } from "./references";
@@ -28,6 +29,7 @@ import type {
 
 const ParcelMap = dynamic(() => import("./parcel-map"), { ssr: false });
 type Tab =
+  | "properties"
   | "parcels"
   | "places"
   | "streets"
@@ -35,6 +37,7 @@ type Tab =
   | "future"
   | "sources";
 const TABS: Tab[] = [
+  "properties",
   "parcels",
   "places",
   "streets",
@@ -73,7 +76,7 @@ export function Explorer({
   const [sector, setSector] = useState("");
   const [use, setUse] = useState("");
   const [temps, setTemps] = useState(true);
-  const [tab, setTab] = useState<Tab>("parcels");
+  const [tab, setTab] = useState<Tab>("properties");
   const [page, setPage] = useState(0);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -94,6 +97,17 @@ export function Explorer({
   const [view, setView] = useState<MapView>({ kind: "area", token: 0 });
   const requestId = useRef(0);
   const detailRequest = useRef<AbortController | null>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const inspection = useRef<HTMLElement>(null);
+  const mapSection = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (feature?.id || selected) {
+      inspection.current?.focus({
+        preventScroll: !window.matchMedia("(max-width: 900px)").matches,
+      });
+      panel.current?.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [feature?.id, selected]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt retries the same bounded read.
   useEffect(() => {
     const controller = new AbortController();
@@ -158,13 +172,6 @@ export function Explorer({
     detailRequest.current = new AbortController();
     const current = ++requestId.current;
     setSelected(id);
-    const parcelFeature = collection?.features.find((f) => f.id === id);
-    if (parcelFeature)
-      setView((v) => ({
-        kind: "feature",
-        token: v.token + 1,
-        feature: parcelFeature,
-      }));
     setFeature(null);
     setDetail(null);
     setDetailState("loading");
@@ -201,7 +208,6 @@ export function Explorer({
     const url = new URL(window.location.href);
     url.searchParams.delete("parcel");
     window.history.replaceState(null, "", url);
-    setView((v) => ({ kind: "feature", token: v.token + 1, feature: f }));
   }
   const initialSelection = useRef(false);
   useEffect(() => {
@@ -257,7 +263,11 @@ export function Explorer({
   );
   const target =
     tab === "streets" ? "street" : tab === "buildings" ? "building" : "place";
-  const mapItems = (context?.[target].features ?? []).filter(
+  const mapItems = (
+    tab === "properties"
+      ? propertyFeatures(context)
+      : (context?.[target].features ?? [])
+  ).filter(
     (f) =>
       !query ||
       normalized(
@@ -297,6 +307,37 @@ export function Explorer({
   function frame(kind: MapView["kind"]) {
     setView((v) => ({ kind, token: v.token + 1 }));
   }
+  function locate() {
+    const target =
+      feature ?? collection?.features.find((f) => f.id === selected);
+    if (target)
+      setView((v) => ({
+        kind: "feature",
+        token: v.token + 1,
+        feature: target,
+      }));
+    if (window.matchMedia("(max-width: 900px)").matches)
+      mapSection.current?.scrollIntoView({
+        block: "start",
+        behavior: "instant",
+      });
+  }
+  function closeDetails() {
+    detailRequest.current?.abort();
+    ++requestId.current;
+    setFeature(null);
+    setDetail(null);
+    setSelected(null);
+    setDetailState("ready");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("parcel");
+    window.history.replaceState(null, "", url);
+    if (window.matchMedia("(max-width: 900px)").matches)
+      mapSection.current?.scrollIntoView({
+        block: "start",
+        behavior: "instant",
+      });
+  }
   function exportCSV() {
     const rows = [
       [m.parcels, m.areas, m.landUse, m.construction, labels.source],
@@ -326,7 +367,11 @@ export function Explorer({
       </div>
       {navigation}
       <div className="atlas-workspace">
-        <section className="map-column" aria-label={labels.map}>
+        <section
+          ref={mapSection}
+          className="map-column"
+          aria-label={labels.map}
+        >
           <fieldset className="atlas-toolbar" aria-label={m.layers}>
             {(["area", "focus", "near"] as const)
               .filter(
@@ -437,6 +482,7 @@ export function Explorer({
                 data={filtered}
                 context={context}
                 selected={selected}
+                activeFeature={feature}
                 onSelect={select}
                 onFeature={choose}
                 onError={() => setMapFailed(true)}
@@ -467,7 +513,7 @@ export function Explorer({
                 </button>
               </div>
             )}
-            <details className="map-legend" open>
+            <details className="map-legend" open={tab !== "properties"}>
               <summary>{m.legend}</summary>
               <p className="small-text">
                 <i style={{ backgroundColor: "#eb7939" }} />{" "}
@@ -549,63 +595,27 @@ export function Explorer({
           </div>
           <div
             id="atlas-panel"
+            ref={panel}
             role="tabpanel"
             aria-labelledby={`tab-${tab}`}
             className="atlas-panel"
           >
-            <label className="atlas-search">
-              <span>{m.searchPrompt}</span>
-              <input
-                type="search"
-                value={query}
-                maxLength={80}
-                dir="auto"
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setPage(0);
-                }}
-              />
-            </label>
-            <div className="atlas-filters">
-              <select
-                aria-label={m.allSectors}
-                value={sector}
-                onChange={(e) => {
-                  setSector(e.target.value);
-                  setPage(0);
-                }}
-              >
-                <option value="">{m.allSectors}</option>
-                {sectors.map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-              <select
-                aria-label={m.allUses}
-                value={use}
-                onChange={(e) => {
-                  setUse(e.target.value);
-                  setPage(0);
-                }}
-              >
-                <option value="">{m.allUses}</option>
-                {Object.keys(COLORS).map((c) => (
-                  <option key={c} value={c}>
-                    {m[c as Category]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <label className="atlas-checkbox">
-              <input
-                type="checkbox"
-                checked={temps}
-                onChange={(e) => setTemps(e.target.checked)}
-              />
-              {m.temporary}
-            </label>
             {(detail || feature || detailState !== "ready") && (
-              <section className="parcel-inspector" aria-live="polite">
+              <section
+                ref={inspection}
+                tabIndex={-1}
+                className="parcel-inspector"
+                aria-live="polite"
+              >
+                <div className="property-inspector-controls">
+                  <button
+                    type="button"
+                    aria-label={m.closeDetails}
+                    onClick={closeDetails}
+                  >
+                    ×
+                  </button>
+                </div>
                 {detailState !== "ready" ? (
                   <p>
                     {detailState === "loading"
@@ -622,9 +632,67 @@ export function Explorer({
                     locale={locale}
                     select={select}
                     parcelCodes={parcelCodes}
+                    references={references}
+                    locate={locate}
+                    choose={choose}
                   />
                 )}
               </section>
+            )}
+            <label className="atlas-search">
+              <span>{m.searchPrompt}</span>
+              <input
+                type="search"
+                value={query}
+                maxLength={80}
+                dir="auto"
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setPage(0);
+                }}
+              />
+            </label>
+            {tab === "parcels" && (
+              <>
+                <div className="atlas-filters">
+                  <select
+                    aria-label={m.allSectors}
+                    value={sector}
+                    onChange={(e) => {
+                      setSector(e.target.value);
+                      setPage(0);
+                    }}
+                  >
+                    <option value="">{m.allSectors}</option>
+                    {sectors.map((s) => (
+                      <option key={s}>{s}</option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label={m.allUses}
+                    value={use}
+                    onChange={(e) => {
+                      setUse(e.target.value);
+                      setPage(0);
+                    }}
+                  >
+                    <option value="">{m.allUses}</option>
+                    {Object.keys(COLORS).map((c) => (
+                      <option key={c} value={c}>
+                        {m[c as Category]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <label className="atlas-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={temps}
+                    onChange={(e) => setTemps(e.target.checked)}
+                  />
+                  {m.temporary}
+                </label>
+              </>
             )}
             {(tab === "future" || tab === "sources") && (
               <>
@@ -654,6 +722,12 @@ export function Explorer({
                   choose={(id) => {
                     const f = context?.place.features.find((f) => f.id === id);
                     if (f) choose(f);
+                    if (f)
+                      setView((v) => ({
+                        kind: "feature",
+                        token: v.token + 1,
+                        feature: f,
+                      }));
                   }}
                 />
                 <nav className="atlas-pagination" aria-label={labels.sources}>
@@ -781,8 +855,40 @@ export function Explorer({
                             </bdi>
                           </strong>
                           <small>
-                            <bdi>{f.properties.kind}</bdi> ·{" "}
-                            {sourceLabel(f.properties.source.reliability, m)}
+                            {tab === "properties" ? (
+                              <>
+                                {f.properties.kind.endsWith("_project_marker")
+                                  ? m.project
+                                  : m.building}
+                                {f.properties.presentation?.developer && (
+                                  <>
+                                    {" "}
+                                    ·{" "}
+                                    <bdi>
+                                      {f.properties.presentation.developer}
+                                    </bdi>
+                                  </>
+                                )}
+                                {f.properties.levels != null && (
+                                  <>
+                                    {" "}
+                                    ·{" "}
+                                    {new Intl.NumberFormat(locale).format(
+                                      f.properties.levels,
+                                    )}{" "}
+                                    {m.levels}
+                                  </>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <bdi>{f.properties.kind}</bdi> ·{" "}
+                                {sourceLabel(
+                                  f.properties.source.reliability,
+                                  m,
+                                )}
+                              </>
+                            )}
                           </small>
                         </button>
                       ))}

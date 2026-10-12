@@ -1,10 +1,12 @@
 import { sourceLabel } from "./presentation";
+import { PropertyCard } from "./property-card";
 import type {
   AtlasLabels,
   MapContext,
   MapFeature,
   MapLabels,
   ParcelDetail,
+  ResearchReference,
 } from "./types";
 
 export function Inspector({
@@ -16,6 +18,9 @@ export function Inspector({
   locale,
   select,
   parcelCodes,
+  references,
+  locate,
+  choose,
 }: {
   detail: ParcelDetail | null;
   feature: MapFeature | null;
@@ -25,6 +30,9 @@ export function Inspector({
   locale: string;
   select: (id: string) => void;
   parcelCodes: Record<string, string>;
+  references: ResearchReference[];
+  locate: () => void;
+  choose: (feature: MapFeature) => void;
 }) {
   const date = (value: string | null | undefined) =>
     value
@@ -41,17 +49,26 @@ export function Inspector({
     : detail?.code;
   return (
     <>
-      <h2>
-        <bdi>{title || labels.select}</bdi>
-      </h2>
+      {feature && feature.geometry.type !== "MultiLineString" ? (
+        <PropertyCard
+          key={feature.id}
+          feature={feature}
+          references={references}
+          m={m}
+          locale={locale}
+          locate={locate}
+        />
+      ) : (
+        <h2>
+          <bdi>{title || labels.select}</bdi>
+        </h2>
+      )}
       {feature && (
-        <>
+        <details className="property-proof">
+          <summary>{m.mapDetails}</summary>
           <span className="evidence-chip">
             {sourceLabel(feature.properties.source.reliability, m)}
           </span>
-          <p className="small-text">
-            <bdi>{feature.properties.kind}</bdi>
-          </p>
           <p className="small-text">{m.spatial}</p>
           {feature.properties.parcel_ids.map((id) => (
             <button
@@ -73,67 +90,73 @@ export function Inspector({
               </bdi>
             </p>
           )}
-        </>
+        </details>
       )}
       {detail && (
         <>
           <span className="evidence-chip">{m.official}</span>
-          <dl>
-            <dt>{m.landUse}</dt>
-            <dd>
-              <bdi>{detail.land_use || labels.unknown}</bdi>
-            </dd>
-            <dt>{m.area}</dt>
-            <dd>{new Intl.NumberFormat(locale).format(detail.area_m2)}</dd>
-            <dt>{m.construction}</dt>
-            <dd>
-              <bdi>{detail.construction_status || labels.unknown}</bdi>
-            </dd>
-            <dt>{labels.community}</dt>
-            <dd>
-              <bdi>{detail.community}</bdi>
-            </dd>
-            {a && (
-              <>
-                <dt>{m.planning}</dt>
-                <dd>
-                  <bdi>{a.planning || labels.unknown}</bdi>
-                </dd>
-                <dt>{m.ownership}</dt>
-                <dd>
-                  <bdi>{a.ownership || labels.unknown}</bdi>
-                </dd>
-                <dt>{m.allocation}</dt>
-                <dd>
-                  <bdi>{a.allocation || labels.unknown}</bdi>
-                </dd>
-                <dt>{m.approval}</dt>
-                <dd>{date(a.approval_date)}</dd>
-                <dt>{m.received}</dt>
-                <dd>{date(a.received_date)}</dd>
-                <dt>{m.permit}</dt>
-                <dd>
-                  {date(a.permit_date)} <bdi>{a.permit_type}</bdi>
-                </dd>
-                <dt>{m.meps}</dt>
-                <dd>
-                  <bdi>
-                    {a.meps || labels.unknown} {a.meps_updated}
-                  </bdi>
-                </dd>
-              </>
+          <button type="button" onClick={locate}>
+            {m.locate}
+          </button>
+          <details className="property-proof">
+            <summary>{m.parcelDetails}</summary>
+            <dl>
+              <dt>{m.landUse}</dt>
+              <dd>
+                <bdi>{detail.land_use || labels.unknown}</bdi>
+              </dd>
+              <dt>{m.area}</dt>
+              <dd>{new Intl.NumberFormat(locale).format(detail.area_m2)}</dd>
+              <dt>{m.construction}</dt>
+              <dd>
+                <bdi>{detail.construction_status || labels.unknown}</bdi>
+              </dd>
+              <dt>{labels.community}</dt>
+              <dd>
+                <bdi>{detail.community}</bdi>
+              </dd>
+              {a && (
+                <>
+                  <dt>{m.planning}</dt>
+                  <dd>
+                    <bdi>{a.planning || labels.unknown}</bdi>
+                  </dd>
+                  <dt>{m.ownership}</dt>
+                  <dd>
+                    <bdi>{a.ownership || labels.unknown}</bdi>
+                  </dd>
+                  <dt>{m.allocation}</dt>
+                  <dd>
+                    <bdi>{a.allocation || labels.unknown}</bdi>
+                  </dd>
+                  <dt>{m.approval}</dt>
+                  <dd>{date(a.approval_date)}</dd>
+                  <dt>{m.received}</dt>
+                  <dd>{date(a.received_date)}</dd>
+                  <dt>{m.permit}</dt>
+                  <dd>
+                    {date(a.permit_date)} <bdi>{a.permit_type}</bdi>
+                  </dd>
+                  <dt>{m.meps}</dt>
+                  <dd>
+                    <bdi>
+                      {a.meps || labels.unknown} {a.meps_updated}
+                    </bdi>
+                  </dd>
+                </>
+              )}
+            </dl>
+            {a?.dcr_url && (
+              <p>
+                <a href={a.dcr_url} target="_blank" rel="noopener noreferrer">
+                  {m.dcr} ↗
+                </a>
+              </p>
             )}
-          </dl>
-          {a?.dcr_url && (
-            <p>
-              <a href={a.dcr_url} target="_blank" rel="noopener noreferrer">
-                {m.dcr} ↗
-              </a>
-            </p>
-          )}
+          </details>
           {!!detail.places.length && (
             <>
-              <h3>{m.places}</h3>
+              <h3>{m.relatedProperties}</h3>
               <p className="small-text">{m.spatial}</p>
               {detail.places.map((place) => {
                 const original = context?.place.features.find(
@@ -141,7 +164,17 @@ export function Inspector({
                 );
                 return (
                   <p key={place.id}>
-                    <bdi>{place.name}</bdi>
+                    {original ? (
+                      <button
+                        type="button"
+                        className="candidate-button"
+                        onClick={() => choose(original)}
+                      >
+                        <bdi>{place.name}</bdi> →
+                      </button>
+                    ) : (
+                      <bdi>{place.name}</bdi>
+                    )}
                     {original && (
                       <>
                         {" "}
@@ -175,7 +208,7 @@ export function Inspector({
         </>
       )}
       {source && (
-        <details open className="source-detail">
+        <details className="source-detail">
           <summary>{m.sourceDate}</summary>
           <dl>
             <dt>{labels.retrieved}</dt>

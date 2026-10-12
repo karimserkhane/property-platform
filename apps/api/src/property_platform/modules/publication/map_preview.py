@@ -1,5 +1,5 @@
 from property_platform.modules.catalog.map_queries import map_rows
-from property_platform.modules.evidence.queries import map_provenances
+from property_platform.modules.evidence.queries import map_provenances, property_presentations
 
 
 def map_context(bbox):
@@ -7,6 +7,7 @@ def map_context(bbox):
     for target in ("street", "building", "place", "administrative_area"):
         rows, truncated = map_rows(target, bbox)
         sources = map_provenances(target, [row["id"] for row in rows])
+        presentations = property_presentations(target, [row["id"] for row in rows])
         result[target] = {"type": "FeatureCollection", "truncated": truncated, "features": []}
         for row in rows:
             identity = str(row.pop("id"))
@@ -20,7 +21,12 @@ def map_context(bbox):
                     "type": "Feature",
                     "id": identity,
                     "geometry": geometry,
-                    "properties": {"id": identity, **row, "source": source},
+                    "properties": {
+                        "id": identity,
+                        **row,
+                        "source": source,
+                        "presentation": presentations.get(identity),
+                    },
                 }
             )
     return result

@@ -30,3 +30,5 @@ Les décisions actuelles et les archives sont séparées. Les documents historiq
 4. **Mise en œuvre du socle** : [structure du dépôt](engineering/REPOSITORY.md), puis [versions exécutables et compatibilités](engineering/TOOLCHAIN.md). Ces documents décrivent l'organisation effectivement créée et les versions retenues ; les versions évoquées dans les études historiques ne doivent pas servir de consignes d'installation.
 
 Pour comprendre les choix actuels, lire **V2 → contre-audit → structure → versions → guide de développement**. La V1 archivée sert à comprendre les choix précédents et leur évolution.
+
+Les [premières fiches immobilières](engineering/PROPERTY_EXPLORATION.md) décrivent l’exploration centrée sur les biens, les présentations documentées et les photos sous licence du pilote.

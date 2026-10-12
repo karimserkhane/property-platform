@@ -11,7 +11,7 @@ Un schéma regroupe des objets dans une base. Ce n'est ni un dossier du dépôt 
 | Domaine cible | Contenu | Tables ou exemples | État |
 |---|---|---|---|
 | `real_estate` | Biens, projets et relations acceptées | `parcel`, `building`, `unit`, `development_project` | Schéma créé : parcel, street, building, place, administrative_area ; unités/projets acceptés à créer |
-| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Schéma créé avec neuf tables, dont map_observation, research_reference, imagery_scene |
+| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Schéma créé avec onze tables, dont map_observation, research_reference, imagery_scene, property_presentation et property_media |
 | `publication` | Dossiers validés et versions accessibles au public | `project_version`, `publication_decision` | Première fonctionnalité de publication |
 | `market` | Transactions, offres, prix et échéanciers | `transaction`, `listing`, `price_observation`, `payment_schedule` | Première fonctionnalité de prix ; responsabilités à documenter |
 | `media` | Métadonnées des documents, images, vidéos et dérivés | `asset`, `asset_version`, `processing_result` | Premier traitement documentaire ; fichiers dans un stockage adapté |
@@ -168,3 +168,7 @@ Le nom de la base et du rôle locaux est devenu `property_platform`. Les référ
 Le script [migrate-local-identity.mjs](../../scripts/migrate-local-identity.mjs) a sauvegardé la base existante, restauré son contenu dans un volume cible neuf `property-platform-local_postgres18-data`, puis comparé les effectifs et empreintes du contenu de **25 tables**, couvrant `public`, `real_estate` et `evidence` : identiques. La sauvegarde, son SHA-256 et les rapports sont sous `.cache/backups/`, exclus de Git. La source est conservée arrêtée pour récupération ; aucune capture ou observation n'a été réécrite pour changer la marque.
 
 Les paramètres de l'installation active et le parcours de reprise sont dans [BRANDING.md](BRANDING.md). Un changement ultérieur du nom affiché sur le site ne change ni cette base, ni ses tables, ni ses rôles.
+
+## Premières présentations et images documentées
+
+La migration evidence 0010 ajoute `property_platform.evidence.property_presentation` et `property_platform.evidence.property_media`, sans modifier les identités ou déplacer les données existantes. Présentation typée, cible exclusive bâtiment/lieu, captures de source et de licence protégées par FK, version de revue, dates et contrôle de diffusion sont décrits dans [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md). Ces petites captures photo de pilote ne remplacent pas le futur domaine média, son stockage objet et ses workflows de droits/administration.

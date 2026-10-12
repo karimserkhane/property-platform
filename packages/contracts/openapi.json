@@ -206,6 +206,70 @@
         ]
       }
     },
+    "/api/v1/preview/property-media/{media_id}": {
+      "get": {
+        "operationId": "previewPropertyMedia",
+        "summary": "Property Media",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "media_id",
+            "schema": {
+              "format": "uuid",
+              "title": "Media Id",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Reviewed licensed JPEG; local preview only",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
     "/api/v1/preview/map-context": {
       "get": {
         "operationId": "previewMapContext",
@@ -885,6 +949,16 @@
           },
           "source": {
             "$ref": "#/components/schemas/MapProvenance"
+          },
+          "presentation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PropertyPresentationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -974,6 +1048,133 @@
           "coordinates"
         ],
         "title": "PointGeometry",
+        "type": "object"
+      },
+      "PropertyPhoto": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "caption": {
+            "title": "Caption",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "author": {
+            "title": "Author",
+            "type": "string"
+          },
+          "licence_code": {
+            "title": "Licence Code",
+            "type": "string"
+          },
+          "licence_url": {
+            "title": "Licence Url",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "taken_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taken On"
+          }
+        },
+        "required": [
+          "id",
+          "caption",
+          "language",
+          "author",
+          "licence_code",
+          "licence_url",
+          "source_url",
+          "taken_on"
+        ],
+        "title": "PropertyPhoto",
+        "type": "object"
+      },
+      "PropertyPresentationResponse": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "developer": {
+            "title": "Developer",
+            "type": "string"
+          },
+          "website_url": {
+            "title": "Website Url",
+            "type": "string"
+          },
+          "summary": {
+            "title": "Summary",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "media": {
+            "items": {
+              "$ref": "#/components/schemas/PropertyPhoto"
+            },
+            "title": "Media",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "publisher",
+          "developer",
+          "website_url",
+          "summary",
+          "language",
+          "source_url",
+          "retrieved_at",
+          "published_at",
+          "media"
+        ],
+        "title": "PropertyPresentationResponse",
         "type": "object"
       },
       "Collection": {
