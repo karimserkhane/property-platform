@@ -5,12 +5,14 @@ RUN npm install --global pnpm@12.10.1 --allow-scripts=pnpm
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
+COPY packages/branding/package.json ./packages/branding/package.json
 RUN pnpm install --frozen-lockfile
 COPY apps/web ./apps/web
 COPY packages/contracts ./packages/contracts
+COPY packages/branding ./packages/branding
 COPY scripts ./scripts
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm --filter @liwa/web build && node scripts/prepare-web-runtime.mjs
+RUN pnpm --filter @property-platform/web build && node scripts/prepare-web-runtime.mjs
 
 FROM node:26.11.1-trixie-slim AS runtime
 WORKDIR /app

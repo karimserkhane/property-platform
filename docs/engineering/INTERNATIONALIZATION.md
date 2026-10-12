@@ -35,6 +35,8 @@ Les contrôles techniques actuels vérifient toutes les routes, le sens de lectu
 
 ## Interface et contenu immobilier sont deux problèmes distincts
 
+La marque affichée est une valeur publique de `packages/branding/src/brand.ts`, isolée avec `bdi` et commune aux langues. Les textes d'interface et les noms de lieux restent traduits dans les dictionnaires ; aucune copie du nom commercial dans les quinze fichiers n'est nécessaire. Un éventuel nom commercial différent par langue nécessitera une configuration explicite, sans modifier les identités métier.
+
 Traduire l'interface ne traduit pas automatiquement les brochures, plans, avis ou preuves. Conserver le texte original, son code de langue BCP 47, sa version et ses droits. Une traduction dérivée référence le document ou l'assertion d'origine, sa méthode/modèle, sa date, son statut de revue et la version traduite. Une nouvelle source invalide les traductions qui ne correspondent plus à sa version.
 
 Les identifiants de projet/bâtiment/unité restent communs à toutes les langues. Les noms officiels sont conservés ; alias et noms d'affichage validés facilitent la recherche. Les résumés IA indiquent leur langue et leur provenance. Un texte original peut être présenté avec `lang` et `dir="auto"` sans inventer une traduction manquante.

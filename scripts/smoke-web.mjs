@@ -3,7 +3,19 @@ import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 import { getDirection, locales } from "../apps/web/src/i18n/locales.ts";
+import { brand } from "../packages/branding/src/brand.ts";
 
+const escapedBrandName = brand.displayName.replace(
+  /[&<>"']/g,
+  (character) =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#x27;",
+    })[character],
+);
 const origin = "http://127.0.0.1:3101";
 const server = spawn(
   process.execPath,
@@ -11,7 +23,7 @@ const server = spawn(
   {
     env: {
       ...process.env,
-      LIWA_ENABLE_LOCAL_PREVIEW: "",
+      PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW: "",
       PORT: "3101",
       HOSTNAME: "127.0.0.1",
     },
@@ -45,6 +57,13 @@ try {
   });
   assert.ok([307, 308].includes(root.status));
   assert.equal(new URL(root.headers.get("location"), origin).pathname, "/en");
+  const mark = await fetch(new URL(brand.webMarkPath, origin));
+  assert.equal(
+    mark.status,
+    200,
+    "Brand mark must be part of the standalone artifact",
+  );
+  assert.ok(mark.headers.get("content-type").includes("image/svg+xml"));
 
   const photoCredits = JSON.parse(
     await readFile("apps/web/public/images/uae/credits.json", "utf8"),
@@ -69,6 +88,14 @@ try {
     assert.equal(response.headers.get("x-content-type-options"), "nosniff");
     assert.equal(response.headers.get("x-frame-options"), "DENY");
     const html = await response.text();
+    assert.ok(
+      html.includes(`<title>${escapedBrandName}</title>`),
+      `${locale}: configured brand title`,
+    );
+    assert.ok(
+      html.includes(`aria-label="${escapedBrandName}"`),
+      `${locale}: configured brand navigation`,
+    );
     const messages = JSON.parse(
       await readFile(`apps/web/messages/${locale}.json`, "utf8"),
     );
@@ -87,7 +114,12 @@ try {
     assert.equal((await fetch(new URL(cssPath, origin))).status, 200, locale);
     const explore = await fetch(`${origin}/${locale}/explore`);
     assert.equal(explore.status, 200, locale);
-    assert.ok((await explore.text()).includes(messages.Atlas.explore), locale);
+    const exploreHtml = await explore.text();
+    assert.ok(exploreHtml.includes(messages.Atlas.explore), locale);
+    assert.ok(
+      exploreHtml.includes(`<title>${escapedBrandName}</title>`),
+      `${locale}: configured atlas title`,
+    );
   }
   for (const path of [
     "parcels?bbox=54.4,24.4,54.5,24.5",

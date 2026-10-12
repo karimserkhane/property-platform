@@ -1,4 +1,4 @@
-import type { components } from "@liwa/contracts";
+import type { components } from "@property-platform/contracts";
 
 export type ParcelCollection = components["schemas"]["Collection"];
 export type ParcelDetail = components["schemas"]["Detail"];

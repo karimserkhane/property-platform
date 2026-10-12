@@ -1,3 +1,4 @@
+import { brand } from "@property-platform/branding";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import styles from "./home.module.css";
@@ -47,7 +48,7 @@ export async function AtlasHome() {
       <section className={styles.discovery} aria-labelledby="discovery-title">
         <div className={styles.discoveryCopy}>
           <p className={styles.sectionEyebrow}>
-            LIWA ATLAS / <bdi>AL REEM</bdi>
+            <bdi>{brand.displayName}</bdi> / <bdi>{home("location")}</bdi>
           </p>
           <h2 id="discovery-title">{home("discoverTitle")}</h2>
           <p>{home("discoverBody")}</p>
@@ -88,7 +89,7 @@ export async function AtlasHome() {
         </a>
       </section>
       <footer className={styles.footer}>
-        <bdi>Liwa Atlas</bdi>
+        <bdi>{brand.displayName}</bdi>
         <span>{t("pilot")}</span>
       </footer>
     </main>

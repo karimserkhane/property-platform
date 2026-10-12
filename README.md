@@ -1,14 +1,14 @@
 # property-platform
 
-Liwa Atlas : plateforme immobilière cartographique évolutive, avec dossiers sourcés, plans, comparaison et suivi des changements. Première zone envisagée : Al Reem Island.
+Property Platform : plateforme immobilière cartographique évolutive, avec dossiers sourcés, plans, comparaison et suivi des changements. Première zone envisagée : Al Reem Island.
 
 ## Documents de cadrage
 
-- [Étude produit](docs/product/ETUDE_PRODUIT_LIWA_ATLAS.md)
-- [Approfondissement stratégique](docs/product/STRATEGIE_PRODUIT_LIWA_ATLAS.md)
-- [Architecture actuelle — revue critique V2](docs/architecture/REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md)
-- [Contre-audit : décision maintenue et conditions de validation](docs/architecture/AUDIT_DECISION_STACK_LIWA_ATLAS.md)
-- [Proposition de stack précédente — historique](docs/archive/ARCHITECTURE_STACK_LIWA_ATLAS.md)
+- [Étude produit](docs/product/ETUDE_PRODUIT_PROPERTY_PLATFORM.md)
+- [Approfondissement stratégique](docs/product/STRATEGIE_PRODUIT_PROPERTY_PLATFORM.md)
+- [Architecture actuelle — revue critique V2](docs/architecture/REVUE_ARCHITECTURE_PROPERTY_PLATFORM_V2.md)
+- [Contre-audit : décision maintenue et conditions de validation](docs/architecture/AUDIT_DECISION_STACK_PROPERTY_PLATFORM.md)
+- [Proposition de stack précédente — historique](docs/archive/ARCHITECTURE_STACK_PROPERTY_PLATFORM.md)
 
 Le dépôt contient Next.js/TypeScript, Django/Django Ninja, contrats OpenAPI générés et PostgreSQL/PostGIS. L'atlas local affiche les parcelles colorées, secteurs, rues, empreintes de bâtiments, lieux, références de projets et vues satellite, avec recherches, filtres et provenance. Les imports manuels conservent captures, observations et audit ; voir [les commandes expliquées](docs/engineering/DEVELOPMENT.md#couches-reem) et [la couverture réelle comparée au HTML](docs/engineering/REEM_MAP.md). Logements, prix structurés, dossiers publics approuvés, authentification, stockage objet et orchestration automatique restent à développer. Aucun déploiement public n'est effectué.
 
@@ -17,10 +17,13 @@ Le dépôt contient Next.js/TypeScript, Django/Django Ninja, contrats OpenAPI g�
 - `apps/web` : interface Next.js.
 - `apps/api` : cœur Django/GeoDjango et modules catalogue, preuves, publication.
 - `packages/contracts` : schéma API et types TypeScript générés.
+- `packages/branding` : nom affiché et symbole configurables, indépendants des noms techniques.
 - `infra/local` : environnement Docker Compose avec PostGIS.
 - `.github/workflows` : qualité, compilation, frontières de modules et intégration PostGIS.
 
 Lire [les règles de structure](docs/engineering/REPOSITORY.md) et [le guide de développement](docs/engineering/DEVELOPMENT.md). Les dépendances JavaScript et Python sont verrouillées ; les directions entre modules et la cohérence des contrats sont vérifiées automatiquement.
+
+Pour changer le nom commercial sans renommer le code, modifier `packages/branding/src/brand.ts` ; voir [la configuration de marque et la reprise de l'ancienne base locale](docs/engineering/BRANDING.md).
 
 L'interface utilise l'anglais par défaut, des routes par langue et des traductions séparées. Voir [la politique multilingue](docs/engineering/INTERNATIONALIZATION.md) et [la revue de structure](docs/engineering/STRUCTURE_REVIEW.md).
 

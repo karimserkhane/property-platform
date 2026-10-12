@@ -490,6 +490,15 @@
     padding-inline: 1.4rem;
   }
 }
+@media (max-width: 360px) {
+  .galleryControls {
+    gap: 0.5rem;
+  }
+  .sceneButton {
+    padding-inline: 0.45rem;
+    font-size: 0.65rem;
+  }
+}
 @media (hover: hover) and (pointer: fine) {
   .primaryAction:hover:not(:active) {
     transform: translateY(-3px);

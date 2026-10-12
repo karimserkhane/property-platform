@@ -1,10 +1,10 @@
 # Base de données : décisions, audit et évolution
 
-Revue du 11 octobre 2026, fondée sur les modèles, migrations, services, tests et une inspection en lecture seule de la base locale `liwa`. Ce document couvre organisation métier, intégrité, géographie, acquisition, sécurité et exploitation. Il ne constitue pas une certification de production et ne prouve pas qu'un mécanisme prévu existe déjà.
+Revue du 11 octobre 2026, fondée sur les modèles, migrations, services, tests et une inspection en lecture seule de la base locale `property_platform`. Ce document couvre organisation métier, intégrité, géographie, acquisition, sécurité et exploitation. Il ne constitue pas une certification de production et ne prouve pas qu'un mécanisme prévu existe déjà.
 
 ## 1. Décision de nommage
 
-Le nom retenu pour le **domaine immobilier et son schéma SQL** est `real_estate`. Il décrit durablement les parcelles, projets, bâtiments et logements, indépendamment de la marque Liwa Atlas et du territoire Reem. `catalog` reste le nom du module Django installé pour préserver les identifiants des modèles et l'historique des migrations. La table est désormais `real_estate.parcel` après application des migrations.
+Le nom retenu pour le **domaine immobilier et son schéma SQL** est `real_estate`. Il décrit durablement les parcelles, projets, bâtiments et logements, indépendamment de la marque Property Platform et du territoire Reem. `catalog` reste le nom du module Django installé pour préserver les identifiants des modèles et l'historique des migrations. La table est désormais `real_estate.parcel` après application des migrations.
 
 Un schéma regroupe des objets dans une base. Ce n'est ni un dossier du dépôt ni un serveur supplémentaire. PostgreSQL permet des schémas pour organiser les objets et contrôler leurs accès ; le schéma seul n'apporte pas un gain de vitesse. Voir [la documentation PostgreSQL 18](https://www.postgresql.org/docs/18/ddl-schemas.html).
 
@@ -20,7 +20,7 @@ Un schéma regroupe des objets dans une base. Ce n'est ni un dossier du dépôt 
 
 Conventions : anglais, minuscules, `snake_case`, noms de tables au singulier, noms de colonnes précis, clés étrangères `<objet>_id`. Éviter les noms de marque, `data`, `misc`, `table1` et les suffixes `v2` pour contourner les migrations. Les noms internes des contraintes existantes ne sont pas renommés pour l'apparence.
 
-Noms actuels : `liwa.real_estate.parcel` et `liwa.evidence.capture`. Dans une connexion PostgreSQL à `liwa`, on écrit habituellement `real_estate.parcel` et `evidence.capture`. Le qualificatif de base ne permet pas d'interroger une autre base depuis la même connexion.
+Noms actuels : `property_platform.real_estate.parcel` et `property_platform.evidence.capture`. Dans une connexion PostgreSQL à `property_platform`, on écrit habituellement `real_estate.parcel` et `evidence.capture`. Le qualificatif de base ne permet pas d'interroger une autre base depuis la même connexion.
 
 ## 2. Ce qui existe réellement
 
@@ -44,7 +44,7 @@ Les couches supplémentaires et leur provenance sont décrites dans [REEM_MAP.md
 
 ## 3. Migration et compatibilité Django
 
-Les migrations [catalog/0003_real_estate_schema.py](../../apps/api/src/liwa/modules/catalog/migrations/0003_real_estate_schema.py) et [evidence/0004_evidence_schema.py](../../apps/api/src/liwa/modules/evidence/migrations/0004_evidence_schema.py) déplacent les tables avec des noms SQL qualifiés, puis synchronisent les modèles Django avec `SeparateDatabaseAndState`. Les migrations précédemment appliquées ne sont pas modifiées. Index, contraintes, clés étrangères et séquences associées restent liés aux tables déplacées.
+Les migrations [catalog/0003_real_estate_schema.py](../../apps/api/src/property_platform/modules/catalog/migrations/0003_real_estate_schema.py) et [evidence/0004_evidence_schema.py](../../apps/api/src/property_platform/modules/evidence/migrations/0004_evidence_schema.py) déplacent les tables avec des noms SQL qualifiés, puis synchronisent les modèles Django avec `SeparateDatabaseAndState`. Les migrations précédemment appliquées ne sont pas modifiées. Index, contraintes, clés étrangères et séquences associées restent liés aux tables déplacées.
 
 Les modèles utilisent des noms simples dans `db_table` : `parcel`, `capture`, etc. La connexion Django possède un `search_path` fixe `public,real_estate,evidence`, sans schéma dérivé du nom de l'utilisateur. Cette approche conserve le backend Django/PostGIS standard et la concordance des noms entre modèles et introspection, nécessaire notamment à `flush`. Aucun backend personnalisé n'a été ajouté. `public` en tête conserve les tables techniques et objets d'extension au bon endroit lors d'une installation fraîche ; il ne doit pas contenir de table homonyme masquant un domaine.
 
@@ -70,10 +70,10 @@ Un contrôle Python protège le chemin d'import. Une contrainte SQL protège aus
 
 Les corrections sont dans les modèles et migrations suivantes :
 
-- [apps/api/src/liwa/modules/catalog/models.py](../../apps/api/src/liwa/modules/catalog/models.py)
-- [apps/api/src/liwa/modules/catalog/migrations/0002_enforce_data_integrity.py](../../apps/api/src/liwa/modules/catalog/migrations/0002_enforce_data_integrity.py)
-- [apps/api/src/liwa/modules/evidence/models.py](../../apps/api/src/liwa/modules/evidence/models.py)
-- [apps/api/src/liwa/modules/evidence/migrations/0003_enforce_data_integrity.py](../../apps/api/src/liwa/modules/evidence/migrations/0003_enforce_data_integrity.py)
+- [apps/api/src/property_platform/modules/catalog/models.py](../../apps/api/src/property_platform/modules/catalog/models.py)
+- [apps/api/src/property_platform/modules/catalog/migrations/0002_enforce_data_integrity.py](../../apps/api/src/property_platform/modules/catalog/migrations/0002_enforce_data_integrity.py)
+- [apps/api/src/property_platform/modules/evidence/models.py](../../apps/api/src/property_platform/modules/evidence/models.py)
+- [apps/api/src/property_platform/modules/evidence/migrations/0003_enforce_data_integrity.py](../../apps/api/src/property_platform/modules/evidence/migrations/0003_enforce_data_integrity.py)
 - [apps/api/tests/test_onwani_postgis.py](../../apps/api/tests/test_onwani_postgis.py)
 
 Une acquisition `running` n'a pas de date de fin ; `succeeded`, `quarantined` ou `failed` ont une date de fin au moins égale à celle du début. Un processus interrompu peut laisser `running` : une future réconciliation de tâches devra traiter ce cas, plutôt que d'inventer une réussite. Les états d'audit actuels sont `created` et `updated` ; de nouveaux types d'opérations nécessiteront une migration explicite.
@@ -122,7 +122,7 @@ Automatisation future : identifiants durables de tâches, états, reprises born�
 
 ## 9. Permissions, données personnelles et exploitation
 
-Le rôle local `liwa` est superutilisateur, comme créé par l'image PostgreSQL avec ses paramètres de développement. Ce rôle ne doit pas devenir le rôle d'exécution en production. L'inspection du schéma `public` n'a pas montré un droit `CREATE` pour tous les rôles : le nom « public » ne signifie pas « accessible sur Internet ».
+Le rôle local `property_platform` est superutilisateur, comme créé par l'image PostgreSQL avec ses paramètres de développement. Ce rôle ne doit pas devenir le rôle d'exécution en production. L'inspection du schéma `public` n'a pas montré un droit `CREATE` pour tous les rôles : le nom « public » ne signifie pas « accessible sur Internet ».
 
 Avant production : rôle propriétaire/migrations distinct du rôle API ; collecteur et lecteur avec droits adaptés ; accès réseau limité ; secrets propres à l'environnement ; `search_path` maîtrisé. Les schémas ne sont une frontière d'accès que si les droits des schémas **et des objets** le prévoient. Les droits par défaut des nouveaux objets doivent être traités aussi. Aucun rôle d'exécution ne doit pouvoir créer/remplacer arbitrairement les fonctions qu'il utilise. [Schémas et permissions PostgreSQL](https://www.postgresql.org/docs/18/ddl-schemas.html)
 
@@ -158,3 +158,11 @@ La structure cible ne crée pas de nouveaux modules Python à elle seule. Les pr
 - Import réel après déplacement : `created=0`, `updated=0`, `unchanged=2431`, `observed=2432`, `quarantined=1`. Une nouvelle acquisition conserve ses captures et observations dans `evidence`, sans doublon de parcelle dans `real_estate`. La quarantaine existante n'est pas une erreur de migration.
 
 Ce contrôle ponctuel de restauration n'est pas un service de sauvegarde automatique. Les rôles de production, les reprises de tâches et les versions métier complètes restent à réaliser aux étapes indiquées ci-dessus.
+
+## 12. Identité technique générique — 12 octobre 2026
+
+Le nom de la base et du rôle locaux est devenu `property_platform`. Les références techniques et chemins de ce document ont été actualisés ; le contexte et les résultats de la revue précédente restent historiques. Les labels Django et les schémas métier conservent leur identité.
+
+Le script [migrate-local-identity.mjs](../../scripts/migrate-local-identity.mjs) a sauvegardé la base existante, restauré son contenu dans un volume cible neuf `property-platform-local_postgres18-data`, puis comparé les effectifs et empreintes du contenu de **25 tables**, couvrant `public`, `real_estate` et `evidence` : identiques. La sauvegarde, son SHA-256 et les rapports sont sous `.cache/backups/`, exclus de Git. La source est conservée arrêtée pour récupération ; aucune capture ou observation n'a été réécrite pour changer la marque.
+
+Les paramètres de l'installation active et le parcours de reprise sont dans [BRANDING.md](BRANDING.md). Un changement ultérieur du nom affiché sur le site ne change ni cette base, ni ses tables, ni ses rôles.

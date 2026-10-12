@@ -1,6 +1,10 @@
-# Lancer et développer Liwa Atlas, étape par étape
+# Lancer et développer Property Platform, étape par étape
 
 Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte locale des parcelles, rues, secteurs, empreintes de bâtiments et lieux, sources consultables, deux aperçus satellite, API de contrôle de santé, base PostGIS et imports manuels avec provenance. Unités, prix, dossiers publics approuvés, authentification, bibliothèque de médias et traitements IA arriveront avec les fonctionnalités suivantes.
+
+**Identité technique actualisée le 12 octobre 2026 :** le paquet Python est `property_platform`, les paquets JavaScript utilisent `@property-platform/*`, et la base locale s'appelle `property_platform`. Si ton ancienne installation utilise encore d'autres noms, suivre d'abord [la reprise contrôlée de la base](BRANDING.md#reprendre-une-ancienne-base-locale-sous-le-nouveau-nom). Modifier seulement les variables PostgreSQL ne renomme pas une base déjà stockée. Sur le poste où la reprise a déjà été vérifiée, suivre les commandes ordinaires ci-dessous sans la refaire.
+
+**Pour changer le nom affiché :** ouvrir `C:\Users\Karim\Repositories\property-platform\packages\branding\src\brand.ts` et modifier `displayName`. Le [guide de marque](BRANDING.md) explique le nom, le symbole, la reconstruction et les identités métier à conserver.
 
 ### Essayer le nouvel accueil et la carte locale
 
@@ -19,13 +23,13 @@ La première commande installe les dépendances verrouillées, dont MapLibre ; l
 
 Si la base est vide, appliquer les migrations et l'import de la section 6 avant d'explorer. Un message d'indisponibilité indique de vérifier l'API ; une carte vide et une recherche sans résultat sont des états différents. Les couches rues, secteurs, empreintes 2D, lieux et satellite sont disponibles après les imports de la section 6.8. La 3D n'est pas encore livrée. Les coordonnées ne sont pas une certification de limites foncières.
 
-Pour changer l'adresse de l'API, copier `C:\Users\Karim\Repositories\property-platform\apps\web\.env.example` vers `C:\Users\Karim\Repositories\property-platform\apps\web\.env.local`, régler LIWA_API_ORIGIN, puis redémarrer Next.js. Ce réglage reste côté serveur. Le site en développement autorise le relais local ; pour essayer le **site compilé localement**, définir aussi LIWA_ENABLE_LOCAL_PREVIEW=1 dans ce fichier ou dans le terminal de lancement. Sans cet opt-in, le web compilé refuse l'aperçu. Django hors DEBUG le refuse dans tous les cas. Ce mécanisme n'est pas une procédure de mise en production.
+Pour changer l'adresse de l'API, copier `C:\Users\Karim\Repositories\property-platform\apps\web\.env.example` vers `C:\Users\Karim\Repositories\property-platform\apps\web\.env.local`, régler PROPERTY_PLATFORM_API_ORIGIN, puis redémarrer Next.js. Ce réglage reste côté serveur. Le site en développement autorise le relais local ; pour essayer le **site compilé localement**, définir aussi PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW=1 dans ce fichier ou dans le terminal de lancement. Sans cet opt-in, le web compilé refuse l'aperçu. Django hors DEBUG le refuse dans tous les cas. Ce mécanisme n'est pas une procédure de mise en production.
 
 Les commandes sont prévues pour **Windows et PowerShell**, depuis la racine du dépôt sauf indication contraire. Exécuter chaque commande séparément ; résoudre une erreur avant de poursuivre.
 
 Les versions courantes et les exceptions de compatibilité sont documentées dans [TOOLCHAIN.md](TOOLCHAIN.md). Les anciennes études de stack restent des documents historiques ; les manifestes et ce guide décrivent les versions exécutées.
 
-**Repère pour retrouver les fichiers :** les chemins du dépôt sont écrits depuis sa racine `C:\Users\Karim\Repositories\property-platform`. Par exemple, `apps/api/src/liwa/config/settings/base.py` désigne sur ton PC `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\config\settings\base.py`. Les chemins commençant par `/app/` désignent au contraire des fichiers **dans le conteneur Linux**, pas dans l'explorateur Windows. Les noms courts dans une arborescence se lisent avec tous leurs dossiers parents.
+**Repère pour retrouver les fichiers :** les chemins du dépôt sont écrits depuis sa racine `C:\Users\Karim\Repositories\property-platform`. Par exemple, `apps/api/src/property_platform/config/settings/base.py` désigne sur ton PC `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\config\settings\base.py`. Les chemins commençant par `/app/` désignent au contraire des fichiers **dans le conteneur Linux**, pas dans l'explorateur Windows. Les noms courts dans une arborescence se lisent avec tous leurs dossiers parents.
 
 ### Variante : prévisualisation entièrement dans Docker
 
@@ -405,7 +409,7 @@ L'adresse se saisit dans le **navigateur**, contrairement aux commandes précéd
 Résultat attendu :
 
 - La racine redirige vers /en, même si le navigateur préfère une autre langue.
-- La page affiche Liwa Atlas, Al Reem Island et le texte d'attente en anglais.
+- La page affiche Property Platform, Al Reem Island et le texte d'attente en anglais.
 - Le sélecteur propose les quinze langues configurées.
 - [L'arabe](http://localhost:3000/ar), l'ourdou et le persan utilisent le sens de lecture de droite à gauche.
 
@@ -462,7 +466,7 @@ docker compose -f infra/local/compose.yaml logs --tail 100 db api
 
 ### Changement depuis l'ancien socle PostgreSQL 17
 
-Le Compose utilise désormais le volume `liwa-local_postgres18-data`, monté sous `/var/lib/postgresql`, conformément à l'image PostgreSQL 18. L'ancien volume `liwa-local_postgres-data` est conservé mais **n'est pas migré automatiquement**. Le premier lancement en PostgreSQL 18 initialise une nouvelle base : recréer les migrations et le superutilisateur ci-dessous. Si l'ancien volume contient des données à conserver, préparer un export/restauration ou une migration validée avant de basculer les usages. Ne pas monter directement son répertoire PostgreSQL 17 dans PostgreSQL 18 et ne pas le supprimer. Aucun transfert ou effacement de base n'est exécuté par la mise à jour du dépôt.
+Le Compose utilise désormais le volume `property-platform-local_postgres18-data`, monté sous `/var/lib/postgresql`, conformément à l'image PostgreSQL 18. L'ancien volume `property-platform-local_postgres-data` est conservé mais **n'est pas migré automatiquement**. Le premier lancement en PostgreSQL 18 initialise une nouvelle base : recréer les migrations et le superutilisateur ci-dessous. Si l'ancien volume contient des données à conserver, préparer un export/restauration ou une migration validée avant de basculer les usages. Ne pas monter directement son répertoire PostgreSQL 17 dans PostgreSQL 18 et ne pas le supprimer. Aucun transfert ou effacement de base n'est exécuté par la mise à jour du dépôt.
 
 <a id="noms-docker"></a>
 
@@ -473,7 +477,7 @@ Compose lit [infra/local/compose.yaml](../../infra/local/compose.yaml) et démar
 Voici un **extrait simplifié à lire**, pas une commande à exécuter ni un remplacement du fichier complet :
 
 ```yaml
-name: liwa-local
+name: property-platform-local
 
 services:
   db:
@@ -488,10 +492,10 @@ services:
 | Élément | Base de données | Backend Django |
 |---|---|---|
 | Service défini sous `services:` | `db` | `api` |
-| Image utilisée | `postgis/postgis:18-3.6`, téléchargée si nécessaire | `liwa-local-api`, construite localement depuis notre Dockerfile |
-| Conteneur créé | `liwa-local-db-1` | `liwa-local-api-1` |
+| Image utilisée | `postgis/postgis:18-3.6`, téléchargée si nécessaire | `property-platform-local-api`, construite localement depuis notre Dockerfile |
+| Conteneur créé | `property-platform-local-db-1` | `property-platform-local-api-1` |
 
-`name: liwa-local` fixe le nom du projet Compose. Par défaut, le nom du conteneur suit **projet + service + numéro** : `liwa-local` + `api` + `1` donne `liwa-local-api-1`. Le numéro distingue les instances d'un service. Pour `api`, nous n'avons pas déclaré de champ `image:` : Compose attribue à l'image construite le nom `liwa-local-api`. Ces noms correspondent aux commandes de ce guide, sans option ni variable qui remplace le nom du projet.
+`name: property-platform-local` fixe le nom du projet Compose. Par défaut, le nom du conteneur suit **projet + service + numéro** : `property-platform-local` + `api` + `1` donne `property-platform-local-api-1`. Le numéro distingue les instances d'un service. Pour `api`, nous n'avons pas déclaré de champ `image:` : Compose attribue à l'image construite le nom `property-platform-local-api`. Ces noms correspondent aux commandes de ce guide, sans option ni variable qui remplace le nom du projet.
 
 Dans les commandes Compose, on utilise le **service** : `exec api`, `logs api` ou `logs db`. Il n'est donc pas nécessaire d'écrire le nom complet du conteneur.
 
@@ -535,7 +539,7 @@ Le chemin de cette opération est : **PowerShell → Django dans le conteneur `a
 
 Un **modèle** est une classe Python décrivant les données de l'application, par exemple un bâtiment et ses champs. Une **migration** est un fichier Python décrivant une évolution de la base correspondant à ces modèles. Les fichiers Python ne contiennent pas les lignes de données : celles-ci sont enregistrées dans PostgreSQL.
 
-**Une partie des modèles et migrations est fournie par Django lui-même.** Ces fichiers sont installés dans les dépendances Python du conteneur API, pas dans nos dossiers de code métier. Nos modèles de parcelles et de provenance, décrits ensuite, sont dans le dépôt. Les applications concernées sont déclarées dans `INSTALLED_APPS`, dans [apps/api/src/liwa/config/settings/base.py](../../apps/api/src/liwa/config/settings/base.py).
+**Une partie des modèles et migrations est fournie par Django lui-même.** Ces fichiers sont installés dans les dépendances Python du conteneur API, pas dans nos dossiers de code métier. Nos modèles de parcelles et de provenance, décrits ensuite, sont dans le dépôt. Les applications concernées sont déclarées dans `INSTALLED_APPS`, dans [apps/api/src/property_platform/config/settings/base.py](../../apps/api/src/property_platform/config/settings/base.py).
 
 | Fonction Django | Modèles fournis avec Django | Migrations fournies avec Django |
 |---|---|---|
@@ -563,7 +567,7 @@ docker compose -f infra/local/compose.yaml exec api python manage.py showmigrati
 **Nos modèles et migrations sont dans le module propriétaire.** Le premier sous-ensemble de parcelles existe maintenant dans le catalogue :
 
 ```text
-apps/api/src/liwa/modules/catalog/
+apps/api/src/property_platform/modules/catalog/
 ├── apps.py                     Existe : déclaration du module Django
 ├── README.md                   Existe : responsabilités du catalogue
 ├── models.py                   Existe : modèle Parcel, géométrie et champs typés
@@ -575,9 +579,9 @@ apps/api/src/liwa/modules/catalog/
     └── 0003_real_estate_schema.py      Existe : déplacement vers real_estate.parcel
 ```
 
-Pour retrouver ces fichiers sans lire l'arborescence : [apps/api/src/liwa/modules/catalog/models.py](../../apps/api/src/liwa/modules/catalog/models.py), dossier `apps/api/src/liwa/modules/catalog/migrations/`, première migration `apps/api/src/liwa/modules/catalog/migrations/0001_initial.py`. Les modèles de provenance sont dans [apps/api/src/liwa/modules/evidence/models.py](../../apps/api/src/liwa/modules/evidence/models.py), avec leurs migrations dans `apps/api/src/liwa/modules/evidence/migrations/`.
+Pour retrouver ces fichiers sans lire l'arborescence : [apps/api/src/property_platform/modules/catalog/models.py](../../apps/api/src/property_platform/modules/catalog/models.py), dossier `apps/api/src/property_platform/modules/catalog/migrations/`, première migration `apps/api/src/property_platform/modules/catalog/migrations/0001_initial.py`. Les modèles de provenance sont dans [apps/api/src/property_platform/modules/evidence/models.py](../../apps/api/src/property_platform/modules/evidence/models.py), avec leurs migrations dans `apps/api/src/property_platform/modules/evidence/migrations/`.
 
-On pourra répartir les modèles dans un paquet `apps/api/src/liwa/modules/catalog/models/` si leur taille le justifie. Les modules `apps/api/src/liwa/modules/evidence/` et `apps/api/src/liwa/modules/publication/` auront leurs propres modèles et migrations pour les données qu'ils possèdent ; tout ne sera pas regroupé dans le catalogue.
+On pourra répartir les modèles dans un paquet `apps/api/src/property_platform/modules/catalog/models/` si leur taille le justifie. Les modules `apps/api/src/property_platform/modules/evidence/` et `apps/api/src/property_platform/modules/publication/` auront leurs propres modèles et migrations pour les données qu'ils possèdent ; tout ne sera pas regroupé dans le catalogue.
 
 Le cycle de développement est **modifier les modèles → générer les migrations avec `makemigrations` → relire et conserver ces fichiers dans Git → appliquer avec `migrate`**. `makemigrations` prépare des fichiers ; `migrate` modifie la base. **À cette étape du démarrage, utilise seulement `migrate` : les migrations du dépôt sont déjà générées.** Les bâtiments et logements restent à développer.
 
@@ -654,7 +658,7 @@ Tu peux relancer l'import : il crée une nouvelle acquisition, sans dupliquer le
 
 Dans l'outil de base de données, les tables métier sont sous les schémas `real_estate` et `evidence` :
 
-**Noms actuels après migration :** `liwa` est la base, `real_estate` un schéma et `parcel` une table, soit `liwa.real_estate.parcel`. Les migrations déplacent et renomment les anciennes tables `public.catalog_parcel` et `public.evidence_*` ; elles ne les copient pas. UUID, données, index et relations sont conservés. Les tables techniques Django restent dans `public`. La [revue de base de données](DATABASE_DESIGN.md) explique les choix et validations.
+**Noms actuels après migration :** `property_platform` est la base, `real_estate` un schéma et `parcel` une table, soit `property_platform.real_estate.parcel`. Les migrations déplacent et renomment les anciennes tables `public.catalog_parcel` et `public.evidence_*` ; elles ne les copient pas. UUID, données, index et relations sont conservés. Les tables techniques Django restent dans `public`. La [revue de base de données](DATABASE_DESIGN.md) explique les choix et validations.
 
 Sur le poste Karim, ce déplacement a été appliqué et vérifié après sauvegarde : il n'est pas nécessaire de réimporter les données pour les déplacer. Sur un autre poste déjà installé, reconstruire l'API et appliquer `migrate` comme ci-dessus effectue le déplacement ; sur une base neuve, ces mêmes migrations préparent directement la structure finale. Après migration, rafraîchir l'outil SQL et sélectionner les schémas `real_estate` et `evidence`. `migrate` ne collecte aucune donnée Onwani ; seul `import_onwani` le fait.
 
@@ -671,7 +675,7 @@ Sur le poste Karim, ce déplacement a été appliqué et vérifié après sauveg
 Pour vérifier les effectifs depuis le terminal, sans modifier les données :
 
 ```powershell
-docker compose -f infra/local/compose.yaml exec api python manage.py shell -c "from liwa.modules.catalog.models import Parcel; from liwa.modules.evidence.models import IngestionRun; print('Parcelles:', Parcel.objects.count()); print('Acquisitions:', IngestionRun.objects.count())"
+docker compose -f infra/local/compose.yaml exec api python manage.py shell -c "from property_platform.modules.catalog.models import Parcel; from property_platform.modules.evidence.models import IngestionRun; print('Parcelles:', Parcel.objects.count()); print('Acquisitions:', IngestionRun.objects.count())"
 ```
 
 Les dates de publication inconnues restent nulles ; les dates de réception, permis et mise à jour fournies par Onwani restent préservées dans leurs attributs originaux. Voir [DATA_PROVENANCE.md](DATA_PROVENANCE.md) pour les limites, la portée des identifiants et les responsabilités de chaque module. Utiliser les services métier et cette commande pour modifier le catalogue, pas des modifications manuelles de tables dans l'outil SQL.
@@ -730,16 +734,16 @@ Dans PyCharm, ouvrir les fichiers ci-dessous. Les libellés donnent le chemin co
 
 | Fichier | Fonction ou objet à regarder | Rôle |
 |---|---|---|
-| [apps/api/src/liwa/modules/evidence/management/commands/import_onwani.py](../../apps/api/src/liwa/modules/evidence/management/commands/import_onwani.py) | `Command.handle` | Reçoit `--actor`, déclenche l'import et affiche le bilan ou l'erreur |
-| [apps/api/src/liwa/modules/evidence/services.py](../../apps/api/src/liwa/modules/evidence/services.py) | `import_onwani` et sa fonction interne `acquire` | Organise le travail, conserve captures/observations et gère verrou, transaction, audit et quarantaine |
-| [apps/api/src/liwa/modules/evidence/onwani.py](../../apps/api/src/liwa/modules/evidence/onwani.py) | `fetch`, `decode`, `validate_metadata`, `object_ids`, `parse_feature` | Interroge l'API officielle, lit le JSON et contrôle les réponses/champs |
-| [apps/api/src/liwa/modules/catalog/services.py](../../apps/api/src/liwa/modules/catalog/services.py) | `geometry_from_rings`, `reconcile_parcel` | Convertit et valide les géométries ; crée ou met à jour les parcelles |
-| [apps/api/src/liwa/modules/catalog/models.py](../../apps/api/src/liwa/modules/catalog/models.py) | `Parcel` | Définit les données typées du catalogue et sa contrainte d'identité de source |
-| [apps/api/src/liwa/modules/evidence/models.py](../../apps/api/src/liwa/modules/evidence/models.py) | `Source`, `IngestionRun`, `Capture`, `ParcelObservation`, `AuditEvent`, `QuarantinedObservation` | Définit les tables de provenance, historique et anomalies |
+| [apps/api/src/property_platform/modules/evidence/management/commands/import_onwani.py](../../apps/api/src/property_platform/modules/evidence/management/commands/import_onwani.py) | `Command.handle` | Reçoit `--actor`, déclenche l'import et affiche le bilan ou l'erreur |
+| [apps/api/src/property_platform/modules/evidence/services.py](../../apps/api/src/property_platform/modules/evidence/services.py) | `import_onwani` et sa fonction interne `acquire` | Organise le travail, conserve captures/observations et gère verrou, transaction, audit et quarantaine |
+| [apps/api/src/property_platform/modules/evidence/onwani.py](../../apps/api/src/property_platform/modules/evidence/onwani.py) | `fetch`, `decode`, `validate_metadata`, `object_ids`, `parse_feature` | Interroge l'API officielle, lit le JSON et contrôle les réponses/champs |
+| [apps/api/src/property_platform/modules/catalog/services.py](../../apps/api/src/property_platform/modules/catalog/services.py) | `geometry_from_rings`, `reconcile_parcel` | Convertit et valide les géométries ; crée ou met à jour les parcelles |
+| [apps/api/src/property_platform/modules/catalog/models.py](../../apps/api/src/property_platform/modules/catalog/models.py) | `Parcel` | Définit les données typées du catalogue et sa contrainte d'identité de source |
+| [apps/api/src/property_platform/modules/evidence/models.py](../../apps/api/src/property_platform/modules/evidence/models.py) | `Source`, `IngestionRun`, `Capture`, `ParcelObservation`, `AuditEvent`, `QuarantinedObservation` | Définit les tables de provenance, historique et anomalies |
 | [apps/api/tests/test_onwani_protocol.py](../../apps/api/tests/test_onwani_protocol.py) | Tests sans réseau | Vérifie les réponses malformées, mauvais territoires, doublons, coordonnées et erreurs HTTP |
 | [apps/api/tests/test_onwani_postgis.py](../../apps/api/tests/test_onwani_postgis.py) | Tests avec PostGIS réel | Vérifie géométries, répétition, rollback, quarantaine et imports concurrents |
 
-**Ordre conseillé pour comprendre :** commencer par `apps/api/src/liwa/modules/evidence/services.py`, puis ouvrir les fonctions qu'il appelle dans les deux fichiers de connecteur et de services catalogue. Les modèles expliquent ensuite les champs enregistrés. L'ORM Django traduit les opérations comme `objects.create()` en requêtes SQL vers PostgreSQL.
+**Ordre conseillé pour comprendre :** commencer par `apps/api/src/property_platform/modules/evidence/services.py`, puis ouvrir les fonctions qu'il appelle dans les deux fichiers de connecteur et de services catalogue. Les modèles expliquent ensuite les champs enregistrés. L'ORM Django traduit les opérations comme `objects.create()` en requêtes SQL vers PostgreSQL.
 
 Ici, la collecte utilise une API publique qui renvoie du JSON. Le **scraping de pages HTML**, l'OCR de documents et les traitements IA seront d'autres collecteurs ; ils ne sont pas implémentés dans cet import.
 
@@ -775,9 +779,9 @@ La base Docker doit tourner. Dans **PyCharm Pro**, ouvrir **View → Tool Window
 |---|---|
 | Host | `localhost` |
 | Port | `5432` |
-| Database | `liwa` |
-| User | `liwa` |
-| Password de développement | `liwa-local-only` |
+| Database | `property_platform` |
+| User | `property_platform` |
+| Password de développement | `property-platform-local-only` |
 
 Dans PyCharm, télécharger le pilote si demandé, cliquer sur **Test Connection**, puis **OK**. Dans les réglages de la connexion, sélectionner les schémas `real_estate`, `evidence` et `public` si nécessaire. Déplier la connexion jusqu'à **real_estate → Tables → parcel** ou **evidence → Tables**, puis ouvrir une table pour voir ses lignes. Après une migration ou un import, rafraîchir la connexion. Voir [le guide officiel PyCharm](https://www.jetbrains.com/help/pycharm/quick-start-with-database-functionality.html).
 
@@ -801,7 +805,7 @@ LIMIT 20;
 
 L'identifiant `capture_id` d'une observation permet de retrouver sa capture et son URL ; `field_path` indique l'entrée de la réponse originale. L'identifiant `parcel_id` renvoie à la parcelle. Ces liens sont des **clés étrangères**, qui maintiennent les relations entre tables. Les octets `payload` sont une réponse JSON stockée comme binaire ; l'outil peut donc afficher un blob plutôt que le JSON lisible. Ne pas modifier ces preuves pour les rendre plus jolies.
 
-Docker Desktop → Volumes → `liwa-local_postgres18-data` montre les fichiers internes de PostgreSQL, pas un tableau des parcelles. Des fichiers numérotés et du texte illisible sont normaux. Pour lire les lignes, utiliser la connexion SQL ; pour faire évoluer les données métier, utiliser les services/imports prévus, plutôt qu'éditer directement les tables.
+Docker Desktop → Volumes → `property-platform-local_postgres18-data` montre les fichiers internes de PostgreSQL, pas un tableau des parcelles. Des fichiers numérotés et du texte illisible sont normaux. Pour lire les lignes, utiliser la connexion SQL ; pour faire évoluer les données métier, utiliser les services/imports prévus, plutôt qu'éditer directement les tables.
 
 ### 6.7. Ce qui est manuel aujourd'hui et ce qui sera automatisé
 
@@ -851,18 +855,18 @@ Ce retraitement ajoute son propre historique, conserve la date de collecte origi
 
 | Code sur ton PC | Ce qu'il fait |
 |---|---|
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\map_sources.py` | URL fixes, requêtes bornées, contrôle des réponses/coordonnées |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\map_import.py` | Préparation, filtrage de Reem, réconciliation et observations typées |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\research_sources.py` | Extraction inerte et contrôlée des titres et repères par fournisseur |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\research_import.py` | Collecte/retraitement des pages et audit |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\project_sources.json` | Registre de liens publics à relire ; pas une liste de périmètres certifiés |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\catalog\models.py` | Modèles Parcel, Street, Building, Place, AdministrativeArea |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\catalog\map_queries.py` | Lectures spatiales et distances/surfaces calculées dans PostGIS |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\models.py` | Captures, observations, références et aperçus satellite |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\publication\land_use.py` | Couleurs/catégories ; l'usage source original reste conservé |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_sources.py` | URL fixes, requêtes bornées, contrôle des réponses/coordonnées |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_import.py` | Préparation, filtrage de Reem, réconciliation et observations typées |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\research_sources.py` | Extraction inerte et contrôlée des titres et repères par fournisseur |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\research_import.py` | Collecte/retraitement des pages et audit |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\project_sources.json` | Registre de liens publics à relire ; pas une liste de périmètres certifiés |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\catalog\models.py` | Modèles Parcel, Street, Building, Place, AdministrativeArea |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\catalog\map_queries.py` | Lectures spatiales et distances/surfaces calculées dans PostGIS |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\models.py` | Captures, observations, références et aperçus satellite |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\publication\land_use.py` | Couleurs/catégories ; l'usage source original reste conservé |
 | `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\` | Carte, filtres, listes, fiches, sources et exports |
 
-Dans ton outil SQL, actualiser l'arborescence après `migrate`. Tu trouveras `liwa.real_estate.street`, `building`, `place`, `administrative_area` et les tables `liwa.evidence.map_observation`, `research_reference`, `imagery_scene`. Les captures et historiques ont leurs tables propres. Le [dossier de couverture](REEM_MAP.md) détaille les effectifs, sources, écarts avec le HTML et règles de rapprochement.
+Dans ton outil SQL, actualiser l'arborescence après `migrate`. Tu trouveras `property_platform.real_estate.street`, `building`, `place`, `administrative_area` et les tables `property_platform.evidence.map_observation`, `research_reference`, `imagery_scene`. Les captures et historiques ont leurs tables propres. Le [dossier de couverture](REEM_MAP.md) détaille les effectifs, sources, écarts avec le HTML et règles de rapprochement.
 
 #### Satellite : parcours facultatif de collecte, séparé du serveur
 
@@ -969,7 +973,7 @@ Arrêter le serveur de développement pour libérer le port 3000. Depuis la raci
 
 ```powershell
 pnpm.cmd build
-pnpm.cmd --filter @liwa/web start
+pnpm.cmd --filter @property-platform/web start
 ```
 
 Le build utilise **Webpack** : la copie standalone avec Turbopack a échoué dans l'environnement Windows vérifié. Le développement conserve le compilateur par défaut de Next.js. Le script de pré-démarrage prépare les fichiers CSS/JS et les éventuels fichiers public du standalone.
@@ -1033,16 +1037,16 @@ Dans un terminal dédié aux tests isolés, retirer les éventuelles variables d
 
 ```powershell
 Remove-Item Env:DJANGO_SETTINGS_MODULE -ErrorAction SilentlyContinue
-Remove-Item Env:LIWA_TEST_POSTGIS -ErrorAction SilentlyContinue
+Remove-Item Env:PROPERTY_PLATFORM_TEST_POSTGIS -ErrorAction SilentlyContinue
 uv run --project apps/api ruff check apps/api
 uv run --project apps/api ruff format --check apps/api
 uv run --project apps/api lint-imports --config apps/api/pyproject.toml
 uv run --project apps/api pytest apps/api/tests -c apps/api/pyproject.toml
 ```
 
-Ces retraits concernent seulement ce terminal. Les tests utilisent `liwa.config.settings.testing` : SQLite en mémoire pour les besoins HTTP, et aucun stockage de données immobilières dans SQLite. Les modules métier GIS sont exclus de ce parcours. Les tests de protocole Onwani vérifient les réponses sans accès réseau ; les tests PostGIS sont ignorés volontairement. Des tests réussis et des tests ignorés sont donc attendus, sans figer ici leur nombre. Ce parcours ne valide ni les migrations GIS ni les transactions du catalogue : les tests d’intégration nécessitent PostgreSQL/PostGIS réel.
+Ces retraits concernent seulement ce terminal. Les tests utilisent `property_platform.config.settings.testing` : SQLite en mémoire pour les besoins HTTP, et aucun stockage de données immobilières dans SQLite. Les modules métier GIS sont exclus de ce parcours. Les tests de protocole Onwani vérifient les réponses sans accès réseau ; les tests PostGIS sont ignorés volontairement. Des tests réussis et des tests ignorés sont donc attendus, sans figer ici leur nombre. Ce parcours ne valide ni les migrations GIS ni les transactions du catalogue : les tests d’intégration nécessitent PostgreSQL/PostGIS réel.
 
-Le serveur GeoDjango et les tests PostGIS exécutés nativement nécessitent aussi GDAL/GEOS/PROJ sur l'hôte : Python seul ne suffit pas. Le parcours Docker évite leur installation sur Windows pour lancer l'API. La CI utilise ces bibliothèques et une vraie base PostGIS avec LIWA_TEST_POSTGIS=1. L'image API locale est une image runtime sans pytest/Ruff ; ne pas tenter d'y exécuter les outils de développement.
+Le serveur GeoDjango et les tests PostGIS exécutés nativement nécessitent aussi GDAL/GEOS/PROJ sur l'hôte : Python seul ne suffit pas. Le parcours Docker évite leur installation sur Windows pour lancer l'API. La CI utilise ces bibliothèques et une vraie base PostGIS avec PROPERTY_PLATFORM_TEST_POSTGIS=1. L'image API locale est une image runtime sans pytest/Ruff ; ne pas tenter d'y exécuter les outils de développement.
 
 ### 10.3. Après une modification du contrat API
 
@@ -1051,7 +1055,7 @@ Un **contrat API** décrit les adresses disponibles et les formes des demandes/r
 Avec uv installé, dans le terminal des tests isolés et depuis la racine :
 
 ```powershell
-uv run --project apps/api python -m liwa.export_openapi --output packages/contracts/openapi.json
+uv run --project apps/api python -m property_platform.export_openapi --output packages/contracts/openapi.json
 pnpm.cmd contracts:generate
 pnpm.cmd contracts:check
 git diff -- packages/contracts
@@ -1086,10 +1090,10 @@ Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas mod
 
 Si l'erreur cite ERR_SWC_NATIVE_CACHE, un propriétaire non fiable ou des permissions de remplacement, le chargeur refuse le cache Windows. Ce n'est pas une erreur de traduction.
 
-Un cache privé a été créé et vérifié sur la machine Karim pendant la mise en place. Depuis **le PowerShell du compte Karim**, si ce dossier existe encore, le sélectionner avant les commandes web :
+Un cache privé peut être sélectionné s'il a déjà été créé et vérifié sous ce nom. Les caches extérieurs au dépôt ne sont pas renommés automatiquement avec les sources. Depuis **le PowerShell du compte Karim**, vérifier le dossier avant les commandes web :
 
 ```powershell
-$env:SWC_NATIVE_BINDING_CACHE = Join-Path $env:USERPROFILE '.cache\liwa-swc-private'
+$env:SWC_NATIVE_BINDING_CACHE = Join-Path $env:USERPROFILE '.cache\property-platform-swc-private'
 Test-Path -LiteralPath $env:SWC_NATIVE_BINDING_CACHE
 pnpm.cmd dev:web
 ```

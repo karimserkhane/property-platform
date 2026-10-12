@@ -172,7 +172,10 @@ importers:
 
   apps/web:
     dependencies:
-      '@liwa/contracts':
+      '@property-platform/branding':
+        specifier: workspace:*
+        version: link:../../packages/branding
+      '@property-platform/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       maplibre-gl:
@@ -206,6 +209,8 @@ importers:
       typescript:
         specifier: npm:@typescript/typescript6@6.0.2
         version: '@typescript/typescript6@6.0.2'
+
+  packages/branding: {}
 
   packages/contracts:
     devDependencies:

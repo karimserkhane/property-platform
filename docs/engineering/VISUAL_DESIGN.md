@@ -1,4 +1,4 @@
-# Identité visuelle de Liwa Atlas
+# Identité visuelle de Property Platform
 
 Refonte de l'accueil du 12 octobre 2026 : photographies plein écran, bleu profond, sable, accents dorés et titres éditoriaux. L'exploration garde des fonds clairs pour lire les données et la légende.
 
@@ -16,6 +16,8 @@ Licence gratuite [Unsplash](https://unsplash.com/license), vérifiée sur les pa
 
 ## Où modifier le thème
 
+Le nom affiché et le symbole sont indépendants des styles : [BRANDING.md](BRANDING.md) décrit leur configuration commune sous `packages/branding/` et le fichier `apps/web/public/brand/mark.svg`.
+
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home.tsx` : contenu serveur, boutons vers la carte et section sources.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-gallery.tsx` : diaporama léger, sélection et pause.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-scenes.ts` : ordre des photos, cadrage, auteur et URL source.
@@ -29,7 +31,7 @@ Le propriétaire reste la fonctionnalité web `atlas`. Ces médias décoratifs n
 
 Références visuelles consultées le 12 octobre 2026 : [Apple](https://www.apple.com/), [Aman Residences](https://www.aman.com/residences) et [Emaar](https://www.emaar.com/en). Apple distingue ses actions principales pleines et secondaires à contour ; Aman privilégie des liens discrets et une composition aérée ; Emaar emploie notamment des surfaces translucides sur une photographie. Ces sites ne servent pas de modèles à copier. Le bouton principal observé chez Apple n'a pas d'ombre.
 
-Liwa utilise sa propre finition : dégradé sable et or, reflet ponctuel au survol, petit médaillon pour la flèche, ombres superposées et action secondaire en verre dépoli. Les commandes du diaporama montrent leur sélection avec un fond et un contour. Les boutons de la carte reprennent un relief plus léger, adapté à la lecture des données ; sélectionner une fiche ne change plus son épaisseur de bordure et ne déplace donc pas les fiches voisines.
+Property Platform utilise sa propre finition : dégradé sable et or, reflet ponctuel au survol, petit médaillon pour la flèche, ombres superposées et action secondaire en verre dépoli. Les commandes du diaporama montrent leur sélection avec un fond et un contour. Les boutons de la carte reprennent un relief plus léger, adapté à la lecture des données ; sélectionner une fiche ne change plus son épaisseur de bordure et ne déplace donc pas les fiches voisines.
 
 Les variables `--control-*` de `globals.css` centralisent le rayon, la durée, la courbe de transition et les ombres partagées. Les variantes propres à l'accueil restent dans `home.module.css`. Aucun paquet ou code JavaScript d'animation n'est ajouté. Le verre conserve un fond coloré lorsque le navigateur ne prend pas en charge le flou.
 

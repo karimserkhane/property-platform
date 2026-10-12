@@ -11,15 +11,15 @@ from django.core.management import call_command
 from django.db import DatabaseError, IntegrityError, connection, transaction
 from django.db.migrations.executor import MigrationExecutor
 
-if os.environ.get("LIWA_TEST_POSTGIS") != "1":
+if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Onwani integration requires real PostGIS", allow_module_level=True)
 
 from django.contrib.gis.geos import MultiPolygon, Polygon  # noqa: E402
 
-from liwa.modules.catalog.models import Parcel  # noqa: E402
-from liwa.modules.catalog.services import geometry_from_rings  # noqa: E402
-from liwa.modules.evidence import onwani  # noqa: E402
-from liwa.modules.evidence.models import (  # noqa: E402
+from property_platform.modules.catalog.models import Parcel  # noqa: E402
+from property_platform.modules.catalog.services import geometry_from_rings  # noqa: E402
+from property_platform.modules.evidence import onwani  # noqa: E402
+from property_platform.modules.evidence.models import (  # noqa: E402
     AuditEvent,
     Capture,
     IngestionRun,
@@ -27,7 +27,7 @@ from liwa.modules.evidence.models import (  # noqa: E402
     QuarantinedObservation,
     Source,
 )
-from liwa.modules.evidence.services import LOCK_KEY, import_onwani  # noqa: E402
+from property_platform.modules.evidence.services import LOCK_KEY, import_onwani  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -66,7 +66,7 @@ def responses(features):
 
 
 def run(features):
-    with patch("liwa.modules.evidence.onwani.fetch", side_effect=responses(features)):
+    with patch("property_platform.modules.evidence.onwani.fetch", side_effect=responses(features)):
         return import_onwani(actor="integration-test")
 
 
@@ -97,7 +97,7 @@ def test_failed_collection_preserves_existing_catalogue_and_captures_error():
     bad["attributes"]["DISTRICTENG"] = "SWEIHAN"
     with (
         pytest.raises(onwani.SourceError),
-        patch("liwa.modules.evidence.onwani.fetch", side_effect=responses([bad])),
+        patch("property_platform.modules.evidence.onwani.fetch", side_effect=responses([bad])),
     ):
         import_onwani(actor="integration-test")
     assert Parcel.objects.get().revision == 1
@@ -108,8 +108,13 @@ def test_failed_collection_preserves_existing_catalogue_and_captures_error():
 
 def test_audit_failure_rolls_back_catalogue_and_observations_but_keeps_captures():
     with (
-        patch("liwa.modules.evidence.onwani.fetch", side_effect=responses([feature()])),
-        patch("liwa.modules.evidence.services.AuditEvent.objects.create", side_effect=RuntimeError),
+        patch(
+            "property_platform.modules.evidence.onwani.fetch", side_effect=responses([feature()])
+        ),
+        patch(
+            "property_platform.modules.evidence.services.AuditEvent.objects.create",
+            side_effect=RuntimeError,
+        ),
         pytest.raises(RuntimeError),
     ):
         import_onwani(actor="integration-test")
@@ -125,7 +130,7 @@ def test_missing_records_are_not_silently_applied():
     data["features"] = [feature(1)]
     items[2] = (json.dumps(data).encode(), items[2][1])
     with (
-        patch("liwa.modules.evidence.onwani.fetch", side_effect=items),
+        patch("property_platform.modules.evidence.onwani.fetch", side_effect=items),
         pytest.raises(onwani.SourceError),
     ):
         import_onwani(actor="integration-test")

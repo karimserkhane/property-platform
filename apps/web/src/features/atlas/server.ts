@@ -6,11 +6,12 @@ const MAX_BYTES = 8 * 1024 * 1024;
 export async function readPreview(path: string, search = "") {
   if (
     process.env.NODE_ENV === "production" &&
-    process.env.LIWA_ENABLE_LOCAL_PREVIEW !== "1"
+    process.env.PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW !== "1"
   ) {
     return { status: 403, data: null };
   }
-  const origin = process.env.LIWA_API_ORIGIN ?? "http://127.0.0.1:8000";
+  const origin =
+    process.env.PROPERTY_PLATFORM_API_ORIGIN ?? "http://127.0.0.1:8000";
   const response = await fetch(
     new URL(`/api/v1/preview/${path}${search}`, origin),
     {

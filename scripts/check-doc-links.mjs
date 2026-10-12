@@ -15,9 +15,18 @@ const files = [
   ),
 ];
 const failures = [];
+let checkedFiles = 0;
 
 for (const file of files) {
-  const contents = await readFile(file, "utf8");
+  let contents;
+  try {
+    contents = await readFile(file, "utf8");
+  } catch (error) {
+    // Git still lists removed paths until a rename/deletion is staged.
+    if (error.code === "ENOENT") continue;
+    throw error;
+  }
+  checkedFiles++;
   for (const match of contents.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
     const target = match[1].replace(/^<|>$/g, "").split("#")[0];
     if (
@@ -37,4 +46,4 @@ for (const file of files) {
 
 if (failures.length)
   throw new Error(`Broken local links:\n${failures.join("\n")}`);
-console.log(`Checked local links in ${files.length} Markdown files.`);
+console.log(`Checked local links in ${checkedFiles} Markdown files.`);

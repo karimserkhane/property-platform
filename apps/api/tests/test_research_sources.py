@@ -1,6 +1,6 @@
 import json
 
-from liwa.modules.evidence.research_sources import project_marker
+from property_platform.modules.evidence.research_sources import project_marker
 
 
 def test_only_project_jsonld_with_matching_name_and_url_becomes_declared_point():

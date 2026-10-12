@@ -6,15 +6,15 @@ from unittest.mock import patch
 import pytest
 from django.test import override_settings
 
-if os.environ.get("LIWA_TEST_POSTGIS") != "1":
+if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Map integration requires real PostGIS", allow_module_level=True)
 
 from django.contrib.gis.geos import LineString, MultiLineString, MultiPolygon, Polygon  # noqa: E402
 
-from liwa.modules.catalog.models import AdministrativeArea, Building, Place, Street  # noqa: E402
-from liwa.modules.evidence import map_sources as protocol  # noqa: E402
-from liwa.modules.evidence.map_import import import_map_layer  # noqa: E402
-from liwa.modules.evidence.models import Capture, IngestionRun, MapObservation  # noqa: E402
+from property_platform.modules.catalog.models import AdministrativeArea, Building, Place, Street  # noqa: E402
+from property_platform.modules.evidence import map_sources as protocol  # noqa: E402
+from property_platform.modules.evidence.map_import import import_map_layer  # noqa: E402
+from property_platform.modules.evidence.models import Capture, IngestionRun, MapObservation  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -96,7 +96,7 @@ def test_osm_centroid_repeat_reconciliation_and_geometry_audit(client):
     collect(changed)
     assert Building.objects.get().revision == 2
     assert MapObservation.objects.filter(building=building).latest("id").record_sha256 != original
-    with override_settings(DEBUG=True, LIWA_PARCEL_PREVIEW=True):
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         result = client.get("/api/v1/preview/map-context", {"bbox": "54.39,24.49,54.42,24.52"})
     assert result.status_code == 200
     assert len(result.json()["place"]["features"]) == 2
@@ -108,7 +108,7 @@ def test_osm_centroid_repeat_reconciliation_and_geometry_audit(client):
 def test_truncated_replay_never_falls_back_or_replaces_existing():
     district()
     collect(osm())
-    with patch("liwa.modules.evidence.map_sources.fetch_url") as fetch:
+    with patch("property_platform.modules.evidence.map_sources.fetch_url") as fetch:
         with pytest.raises(ValueError):
             collect({**osm(), "remark": "timeout"})
         fetch.assert_not_called()
@@ -120,7 +120,8 @@ def test_truncated_replay_never_falls_back_or_replaces_existing():
 def test_audit_failure_rolls_back_geometry_but_keeps_capture():
     district()
     with patch(
-        "liwa.modules.evidence.map_import.MapObservation.objects.create", side_effect=RuntimeError
+        "property_platform.modules.evidence.map_import.MapObservation.objects.create",
+        side_effect=RuntimeError,
     ):
         with pytest.raises(RuntimeError):
             collect(osm())
@@ -135,7 +136,7 @@ def test_spatial_candidates_preserve_overlap_without_assigning_project_identity(
     district()
     run([feature(1, "RT1_C1"), feature(2, "RT1_C2")])
     collect(osm())
-    with override_settings(DEBUG=True, LIWA_PARCEL_PREVIEW=True):
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         result = client.get(
             "/api/v1/preview/map-context", {"bbox": "54.39,24.49,54.42,24.52"}
         ).json()
@@ -149,7 +150,7 @@ def test_spatial_candidates_preserve_overlap_without_assigning_project_identity(
 def test_parcel_areas_and_nearby_distances_are_computed_by_postgis(client):
     from test_onwani_postgis import feature, run
 
-    from liwa.modules.catalog.models import Parcel
+    from property_platform.modules.catalog.models import Parcel
 
     run([feature()])
     Street.objects.create(
@@ -158,7 +159,7 @@ def test_parcel_areas_and_nearby_distances_are_computed_by_postgis(client):
         name="Nearby road",
         geometry=MultiLineString(LineString((54.39, 24.50333), (54.42, 24.50333)), srid=4326),
     )
-    with override_settings(DEBUG=True, LIWA_PARCEL_PREVIEW=True):
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         result = client.get(f"/api/v1/preview/parcels/{Parcel.objects.get().pk}")
     assert result.status_code == 200
     assert result.json()["area_m2"] > 100

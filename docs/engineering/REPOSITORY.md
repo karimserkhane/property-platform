@@ -13,7 +13,7 @@ Dans les explications, les chemins des fichiers sont donnés depuis la racine du
 L'arborescence ci-dessous décrit les fichiers suivis par Git aujourd'hui. Les quinze fichiers de traduction sont regroupés pour la lisibilité ; les fichiers Python `__init__.py`, qui identifient les paquets, sont omis. Les dossiers générés par les outils sont expliqués séparément.
 
 ```text
-property-platform/                   Racine du monorepo : code, outils et documentation de Liwa Atlas
+property-platform/                   Racine du monorepo : code, outils et documentation de Property Platform
 ├── README.md                         Présentation et liens pour démarrer
 ├── AGENTS.md                         Consignes pour les agents qui modifient le dépôt
 ├── package.json                      Commandes communes et outils JavaScript du dépôt
@@ -48,6 +48,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   │       └── explore/page.tsx   Exploration locale des parcelles
 │   │   │   ├── features/atlas/      Accueil, carte, liste, fiche et adaptateur API de l'atlas
 │   │   │   ├── components/          Éléments d'interface réutilisables
+│   │   │   │   ├── brand-mark.tsx         Rendu web du symbole public configuré
 │   │   │   │   └── language-switcher.tsx   Sélecteur de langue interactif
 │   │   │   ├── i18n/                Gestion commune des langues et de la navigation multilingue
 │   │   │   │   ├── locales.ts       Langues acceptées et direction LTR/RTL
@@ -66,7 +67,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       ├── .env.example              Exemple de variables d'environnement locales
 │       ├── Dockerfile                Image Python, Django et bibliothèques géographiques
 │       ├── src/                     Code source du backend Python
-│       │   └── liwa/                 Paquet Python de notre backend
+│       │   └── property_platform/                 Paquet Python de notre backend
 │       │       ├── config/          Assemblage et réglages techniques de Django
 │       │       │   ├── urls.py       Branchement des URL API et administration
 │       │       │   ├── wsgi.py       Entrée du serveur Python pour servir Django
@@ -109,30 +110,34 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │           ├── test_onwani_protocol.py  Contrôles des réponses, identifiants et territoire
 │           └── test_onwani_postgis.py   Transactions, géométries, audit et quarantaine
 ├── packages/                        Paquets réutilisables, dont les contrats partagés avec les clients
-│   └── contracts/                    Contrat entre le backend et les clients TypeScript
-│       ├── package.json              Commandes de génération et de vérification
-│       ├── tsconfig.json             Réglages de vérification des types
-│       ├── openapi.json              Description exportée de l'API Django
-│       └── src/                     Types utilisables par le site et le futur mobile
-│           └── generated.ts          Types TypeScript générés depuis OpenAPI
+│   ├── contracts/                    Contrat entre le backend et les clients TypeScript
+│   │   ├── package.json              Commandes de génération et de vérification
+│   │   ├── tsconfig.json             Réglages de vérification des types
+│   │   ├── openapi.json              Description exportée de l'API Django
+│   │   └── src/                     Types utilisables par le site et le futur mobile
+│   │       └── generated.ts          Types TypeScript générés depuis OpenAPI
+│   └── branding/                     Configuration publique de marque, partagée par les clients
+│       ├── package.json              Paquet @property-platform/branding, sans dépendance runtime
+│       └── src/brand.ts              Nom affiché et chemin du symbole web
 ├── infra/                           Configuration des environnements d'exécution de la plateforme
 │   └── local/                       Services et stockage nécessaires sur le poste de développement
 │       └── compose.yaml              Services API et PostGIS, réseau et volume local
 ├── docs/                            Cadrage produit, décisions d'architecture et guides de travail
 │   ├── README.md                     Index et enchaînement des décisions
 │   ├── product/                     Besoins utilisateurs, marché et stratégie du produit
-│   │   ├── ETUDE_PRODUIT_LIWA_ATLAS.md       Besoins, marché et périmètre envisagé
-│   │   └── STRATEGIE_PRODUIT_LIWA_ATLAS.md   Approfondissement et différenciation
+│   │   ├── ETUDE_PRODUIT_PROPERTY_PLATFORM.md       Besoins, marché et périmètre envisagé
+│   │   └── STRATEGIE_PRODUIT_PROPERTY_PLATFORM.md   Approfondissement et différenciation
 │   ├── architecture/                Choix techniques de référence et justification des décisions
-│   │   ├── REVUE_ARCHITECTURE_LIWA_ATLAS_V2.md   Architecture de référence
-│   │   └── AUDIT_DECISION_STACK_LIWA_ATLAS.md    Contre-audit réalisé après V2
+│   │   ├── REVUE_ARCHITECTURE_PROPERTY_PLATFORM_V2.md   Architecture de référence
+│   │   └── AUDIT_DECISION_STACK_PROPERTY_PLATFORM.md    Contre-audit réalisé après V2
 │   ├── archive/                     Propositions remplacées, conservées pour leur historique
-│   │   └── ARCHITECTURE_STACK_LIWA_ATLAS.md     Proposition précédente remplacée
+│   │   └── ARCHITECTURE_STACK_PROPERTY_PLATFORM.md     Proposition précédente remplacée
 │   └── engineering/                 Guides pour installer, développer et maintenir le projet
 │       ├── REPOSITORY.md              Ce guide de structure et de responsabilités
 │       ├── DEVELOPMENT.md             Commandes de démarrage et explications
 │       ├── REEM_MAP.md                Couverture, sources et correspondance avec le HTML
 │       ├── VISUAL_DESIGN.md           Thème de l'accueil, crédits photos et animation accessible
+│       ├── BRANDING.md               Identité technique stable, marque configurable et reprise locale
 │       ├── TOOLCHAIN.md               Versions exécutables et compatibilités
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
 │       ├── DATA_PROVENANCE.md          Collecte directe, sources par information et audit
@@ -143,6 +148,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
     ├── imagery-requirements.txt      Dépendances verrouillées de cet environnement raster isolé
     ├── check-doc-links.mjs            Vérification des liens locaux dans les documents
     ├── prepare-web-runtime.mjs        Préparation des ressources de l'artefact web autonome
+    ├── migrate-local-identity.mjs     Sauvegarde et reprise vérifiée vers une nouvelle identité locale
     └── smoke-web.mjs                  Vérification du site construit et des routes de langue
 ```
 
@@ -164,11 +170,11 @@ Ce dossier possède les pages et interactions du site. `apps/web/src/app/` défi
 
 | Module | Ce qu'il possédera | Exemple dans notre produit |
 |---|---|---|
-| [catalog](../../apps/api/src/liwa/modules/catalog/README.md) | Identité des territoires, parcelles, bâtiments et logements, relations acceptées | Déterminer à quel bâtiment appartient un logement |
-| [evidence](../../apps/api/src/liwa/modules/evidence/README.md) | Sources, acquisitions, assertions et décisions de rapprochement | Conserver qu'un document daté annonce une livraison, avec sa provenance |
-| [publication](../../apps/api/src/liwa/modules/publication/README.md) | Validation, projections et versions publiées | Publier une version validée du dossier en passant par les services des autres modules |
+| [catalog](../../apps/api/src/property_platform/modules/catalog/README.md) | Identité des territoires, parcelles, bâtiments et logements, relations acceptées | Déterminer à quel bâtiment appartient un logement |
+| [evidence](../../apps/api/src/property_platform/modules/evidence/README.md) | Sources, acquisitions, assertions et décisions de rapprochement | Conserver qu'un document daté annonce une livraison, avec sa provenance |
+| [publication](../../apps/api/src/property_platform/modules/publication/README.md) | Validation, projections et versions publiées | Publier une version validée du dossier en passant par les services des autres modules |
 
-**Le catalogue et les preuves possèdent maintenant les premiers modèles de parcelles et d'acquisition Onwani.** Le module publication reste un cadre sans modèle. Les bâtiments, logements, prix et dossiers publics ne sont pas encore implémentés. Les `apps.py` déclarent les modules à Django ; les `README.md` précisent leurs frontières.
+**Le catalogue et les preuves possèdent les modèles de parcelles, empreintes de bâtiments, rues, lieux et acquisitions.** Le module publication assemble les projections de lecture sans modèle propre. Les logements, prix et dossiers publics approuvés restent à implémenter. Les `apps.py` déclarent les modules à Django ; les `README.md` précisent leurs frontières.
 
 Le domaine immobilier utilise le schéma SQL `real_estate` et la table `real_estate.parcel` ; les preuves utilisent `evidence.source`, `evidence.ingestion_run`, `evidence.capture`, `evidence.parcel_observation`, `evidence.audit_event` et `evidence.quarantined_observation`. Les tables techniques Django et fonctions PostGIS restent dans `public`. Les migrations déplacent les tables existantes et leurs relations, sans recopier les données. Le module Django installé conserve son nom `catalog`, pour préserver ses identifiants de migrations et de modèles. [DATABASE_DESIGN.md](DATABASE_DESIGN.md) décrit ce choix et les contrôles d'intégrité.
 
@@ -176,13 +182,19 @@ Le `search_path` de la connexion Django est fixe : `public,real_estate,evidence`
 
 Lors de l'ajout d'un modèle métier, une migration générée peut créer sa table dans `public`, premier schéma du chemin : prévoir explicitement son placement dans le schéma propriétaire avec des opérations SQL et un état Django cohérent. Le test PostGIS `test_domain_tables_have_unique_names_and_their_owned_schema` contrôle l'emplacement effectif des modèles gérés de `catalog` et `evidence` et l'unicité de leurs noms. Une nouvelle table ou un nouveau domaine doit étendre ces contrôles ; ne pas supposer que `db_table` simple choisit son schéma de création.
 
-`apps/api/src/liwa/config/settings/base.py` est partagé, puis complété par `apps/api/src/liwa/config/settings/local.py`, `apps/api/src/liwa/config/settings/testing.py` ou `apps/api/src/liwa/config/settings/production.py`. La présence de ce dernier ne signifie pas que le site est déployé. `apps/api/manage.py` sert notamment à lancer les migrations ou à créer un administrateur ; ce n'est pas une page web.
+`apps/api/src/property_platform/config/settings/base.py` est partagé, puis complété par `apps/api/src/property_platform/config/settings/local.py`, `apps/api/src/property_platform/config/settings/testing.py` ou `apps/api/src/property_platform/config/settings/production.py`. La présence de ce dernier ne signifie pas que le site est déployé. `apps/api/manage.py` sert notamment à lancer les migrations ou à créer un administrateur ; ce n'est pas une page web.
 
 ### `packages/contracts` : l'accord entre le site et l'API
 
 Le backend exporte ses routes et formats de réponse dans `packages/contracts/openapi.json`. Le générateur produit ensuite `packages/contracts/src/generated.ts`, utilisé pour vérifier les types côté TypeScript. Ces deux fichiers sont suivis par Git et mis à jour ensemble via les commandes documentées dans [DEVELOPMENT.md](DEVELOPMENT.md) ; ils ne se corrigent pas manuellement.
 
 Ce paquet contient des descriptions de données, pas une copie des modèles Django ni des règles métier. Il pourra aussi être consommé par le futur mobile.
+
+### `packages/branding` : présentation publique indépendante du métier
+
+Ce paquet possède le nom commercial affiché et le chemin du symbole web. L'en-tête, les titres, l'accueil et les signatures PNG le consomment ; le futur mobile pourra réutiliser le nom. Il ne contient ni secret, ni territoire, ni fournisseur, ni identité d'infrastructure. La direction est `web → branding` et, plus tard, `mobile → branding` ; `branding` ne dépend d'aucun autre module. L'adaptateur `apps/web/src/components/brand-mark.tsx` possède le rendu web du symbole, dont le fichier et l'icône d'onglet sont sous `apps/web/public/brand/`.
+
+Les identités techniques restent `property-platform`, `property_platform`, `@property-platform/*` et `PROPERTY_PLATFORM_*` lors d'un changement commercial. Les labels Django `catalog`, `evidence`, `publication`, les schémas SQL et les preuves gardent leur identité. Voir [BRANDING.md](BRANDING.md) pour les fichiers à modifier et la reprise contrôlée d'une installation locale précédente. `scripts/migrate-local-identity.mjs` est un outil de maintenance explicite : il ne s'exécute jamais au démarrage, refuse une cible préexistante et conserve la source pour récupération.
 
 ### `infra`, `.github` et `scripts` : lancer et vérifier
 
@@ -214,7 +226,7 @@ Tu peux voir ces éléments dans PyCharm après installation ou démarrage, mêm
 | `.git/` | Historique et métadonnées du dépôt | Non, utiliser les commandes ou l'interface Git |
 | `node_modules/` | Bibliothèques JavaScript installées par pnpm | Non, modifier le code dans `src` et les dépendances dans les manifestes |
 | `apps/web/.next/` | Cache et fichiers générés par Next.js | Non, le prochain lancement ou build peut les recréer |
-| `apps/api/.venv/` | Environnement Python local créé par uv si tu utilises ce parcours | Non, le code du projet reste dans `apps/api/src/liwa/` |
+| `apps/api/.venv/` | Environnement Python local créé par uv si tu utilises ce parcours | Non, le code du projet reste dans `apps/api/src/property_platform/` |
 | `__pycache__/`, `.pytest_cache/`, `.ruff_cache/` | Caches des outils Python | Non, ils ne sont pas des sources |
 | `.cache/`, `.tools-env/` | Éventuels caches et outils locaux utilisés pendant la préparation | Non, leur présence dépend du poste et ils ne sont pas requis comme dossiers source |
 | `.idea/` | Réglages locaux de PyCharm | Ne pas y placer le code ; vérifier les exclusions Git avant tout partage de réglages |
@@ -229,11 +241,11 @@ Les caches de code ne sont pas le stockage de PostgreSQL. **Supprimer un volume 
 | Modifier la page d'accueil | `apps/web/src/app/[locale]/page.tsx` | Existe |
 | Modifier l'atlas ou ajouter une fiche immobilière | `apps/web/src/features/atlas/` pour le pilote parcellaire ; un module `property/` viendra avec les dossiers immobiliers | Atlas local créé, dossiers bâtiment/unité à créer |
 | Ajouter un composant partagé entre plusieurs fonctionnalités | `apps/web/src/components/` | Dossier existant ; y placer seulement les composants réutilisables |
-| Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/liwa/modules/catalog/` | Parcel, Street, Building, Place, AdministrativeArea existants ; logements à ajouter |
-| Ajouter les sources et preuves | `apps/api/src/liwa/modules/evidence/` | Premiers modèles d'acquisition et observations Onwani existants |
-| Ajouter une route métier HTTP | `apps/api/src/liwa/api/`, branchée au routeur | À créer avec les services métier qu'elle appelle |
+| Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/property_platform/modules/catalog/` | Parcel, Street, Building, Place, AdministrativeArea existants ; logements à ajouter |
+| Ajouter les sources et preuves | `apps/api/src/property_platform/modules/evidence/` | Premiers modèles d'acquisition et observations Onwani existants |
+| Ajouter une route métier HTTP | `apps/api/src/property_platform/api/`, branchée au routeur | À créer avec les services métier qu'elle appelle |
 | Ajouter des migrations Django | `migrations/` dans le module propriétaire | À générer avec Django lorsque les modèles arrivent |
-| Ajouter un domaine prix, avis ou documents | Module dédié sous `apps/api/src/liwa/modules/` | À créer quand ses responsabilités et dépendances sont définies |
+| Ajouter un domaine prix, avis ou documents | Module dédié sous `apps/api/src/property_platform/modules/` | À créer quand ses responsabilités et dépendances sont définies |
 | Ajouter des contrôles de fonctionnalité | Tests proches du module concerné ; tests d'intégration transversaux dans `apps/api/tests/` | À ajouter avec les comportements concernés |
 | Ajouter l'application mobile | `apps/mobile/`, consommant la même API | Non créé ; le pilote web vient d'abord |
 | Ajouter des workers | Entrées d'exécution Python séparées, réutilisant les services métier ; image distincte pour les traitements lourds | Non implémenté ; emplacement précis à fixer avec le premier traitement |
@@ -268,7 +280,7 @@ Les workers légers utiliseront le même paquet Python que l'API, avec un proces
 
 `catalog/queries.py` possède les lectures géographiques bornées ; `evidence/queries.py` possède la projection de provenance autorisée ; `publication/preview.py` les assemble sans mutation. L'API `api/parcels.py` valide les entrées et expose un contrat limité. La direction reste publication → evidence/catalog. Les migrations ajoutent les objets cartographiques typés dans leurs schémas propriétaires. Les originaux, opérateurs, attributs bruts et historiques internes ne sont pas exposés.
 
-Les endpoints `/api/v1/preview/parcels` et `/api/v1/preview/parcels/{id}` sont un aperçu de recherche **local**, pas une publication approuvée. Django exige DEBUG et LIWA_PARCEL_PREVIEW ; hors DEBUG ils refusent même un flag activé. Un web compilé exige aussi l'opt-in LIWA_ENABLE_LOCAL_PREVIEW=1. Ce flag ne permet pas de contourner Django. Les droits de diffusion, rôles, authentification du personnel, limitation de trafic distribuée et CSP complète avec nonces restent à définir avant publication.
+Les endpoints `/api/v1/preview/parcels` et `/api/v1/preview/parcels/{id}` sont un aperçu de recherche **local**, pas une publication approuvée. Django exige DEBUG et PROPERTY_PLATFORM_PARCEL_PREVIEW ; hors DEBUG ils refusent même un flag activé. Un web compilé exige aussi l'opt-in PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW=1. Ce flag ne permet pas de contourner Django. Les droits de diffusion, rôles, authentification du personnel, limitation de trafic distribuée et CSP complète avec nonces restent à définir avant publication.
 
 La carte affiche les usages colorés, secteurs, rues et noms, empreintes 2D, lieux, références et vues satellite ; voir [la couverture et les limites](REEM_MAP.md). Les volumes 3D ne sont pas générés. La liste paginée fournit une alternative si WebGL ne fonctionne pas. La couverture d'une source, la validité de géométrie et l'approbation d'un dossier sont trois notions distinctes.
 

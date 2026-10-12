@@ -1,4 +1,4 @@
-# Accueil et première expérience de Liwa Atlas
+# Accueil et première expérience de Property Platform
 
 Proposition de design du 11 octobre 2026, fondée sur le [benchmark](BENCHMARK_CONCURRENTIEL.md). C'est une direction à prototyper et tester, pas une interface déjà implémentée ni une garantie de conversion.
 
@@ -45,7 +45,7 @@ Pas de vidéo 3D automatique dans le premier écran : la carte porte déjà le p
 
 ### Premier écran sur ordinateur
 
-En-tête compact : marque Liwa Atlas, liens **Explore / Data & sources**, sélecteur de langue. Ces destinations sont proposées, à créer ; ne pas afficher des boutons inactifs de comparaison, compte ou favoris.
+En-tête compact : marque Property Platform, liens **Explore / Data & sources**, sélecteur de langue. Ces destinations sont proposées, à créer ; ne pas afficher des boutons inactifs de comparaison, compte ou favoris.
 
 Grille de douze colonnes : cinq pour le texte, sept pour l'aperçu cartographique. Largeur de contenu indicative 1 280 px ; marges adaptées à l'écran. Le titre et le bouton doivent rester visibles sur une hauteur d'ordinateur courante, sans dépendre d'un écran géant.
 
@@ -62,7 +62,7 @@ Ces textes décrivent ce que la première tranche devra réellement livrer. La p
 L'aperçu représente la vraie géographie disponible de Reem, avec une parcelle sélectionnée et une petite fiche donnant code, source et date de récupération. Il peut être une image statique dérivée de nos géométries et autorisée, puis charger la carte à l'interaction. Un schéma inventé ne doit pas être présenté comme géographie réelle.
 
 ```text
-LIWA ATLAS                 Explore   Data & sources    English ▾
+PROPERTY PLATFORM                 Explore   Data & sources    English ▾
 
 AL REEM ISLAND · PILOT      ┌──────────────────────────────────┐
 See Al Reem,               │ Aperçu de la carte réelle        │

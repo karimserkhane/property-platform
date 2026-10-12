@@ -81,7 +81,7 @@ def main():
     for identity in SCENES:
         started = datetime.now(UTC).isoformat()
         with urlopen(
-            Request(BASE + identity, headers={"User-Agent": "LiwaAtlas/0.1"}),
+            Request(BASE + identity, headers={"User-Agent": "PropertyPlatform/0.1"}),
             timeout=45,
         ) as r:
             payload = r.read(1024 * 1024 + 1)

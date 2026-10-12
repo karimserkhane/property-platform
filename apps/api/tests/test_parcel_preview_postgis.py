@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from django.test import override_settings
 
-if os.environ.get("LIWA_TEST_POSTGIS") != "1":
+if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Preview integration requires real PostGIS", allow_module_level=True)
 
 from test_onwani_postgis import feature, run  # noqa: E402
@@ -14,7 +14,7 @@ pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
 def test_preview_geometry_filter_provenance_and_private_field_allowlist(client):
     run([feature(1, "RT1_C1"), feature(2, "RT1_C2")])
-    with override_settings(DEBUG=True, LIWA_PARCEL_PREVIEW=True):
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         response = client.get(
             "/api/v1/preview/parcels", {"bbox": "54.39,24.49,54.42,24.52", "limit": 1}
         )

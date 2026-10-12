@@ -1,4 +1,4 @@
-# Working in Liwa Atlas
+# Working in Property Platform
 
 Read `docs/engineering/REPOSITORY.md` and `docs/engineering/DEVELOPMENT.md` before changing application structure. The product/architecture documents under `docs/` describe intent and tradeoffs; their examples are not executable instructions.
 

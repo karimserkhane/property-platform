@@ -1,5 +1,6 @@
 "use client";
 
+import { brand } from "@property-platform/branding";
 import {
   type GeoJSONSource,
   Map as LibreMap,
@@ -340,7 +341,7 @@ export default function ParcelMap({
         ctx.fillStyle = "#123c40";
         ctx.font = "18px sans-serif";
         ctx.fillText(
-          `Liwa Atlas · Al Reem · ${options.satellite ? options.scene : m.plan}`,
+          `${brand.displayName} · ${label} · ${options.satellite ? options.scene : m.plan}`,
           16,
           source.height + 25,
         );
@@ -422,7 +423,7 @@ export default function ParcelMap({
         { padding: 30, duration: 0 },
       );
     }
-  }, [view, m, options.satellite, options.scene]);
+  }, [view, m, options.satellite, options.scene, label]);
   return (
     <>
       <div ref={element} className="parcel-map" role="img" aria-label={label} />

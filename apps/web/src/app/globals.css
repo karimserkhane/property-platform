@@ -52,6 +52,7 @@ button {
   border-block-end: 1px solid var(--line);
 }
 .brand {
+  min-width: 0;
   font-size: 1.15rem;
   font-weight: 750;
   letter-spacing: -0.04em;
@@ -60,18 +61,25 @@ button {
   gap: 0.8rem;
   text-decoration: none;
 }
+.brand bdi {
+  overflow-wrap: anywhere;
+}
 .brand-mark {
+  display: inline-block;
   width: 32px;
   height: 32px;
-  stroke: #a07843;
-  stroke-width: 1.25;
-  fill: none;
+  flex-shrink: 0;
+  background-color: #a07843;
+  mask: var(--brand-mark) center / contain no-repeat;
 }
 .header-tools,
 .header-nav {
   display: flex;
   align-items: center;
   gap: 2rem;
+}
+.header-tools {
+  flex-shrink: 0;
 }
 .header-nav a {
   font-size: 0.8rem;
@@ -651,7 +659,7 @@ body:has([data-page="home"]) .brand {
   letter-spacing: 0.06em;
 }
 body:has([data-page="home"]) .brand-mark {
-  stroke: #efd5ae;
+  background-color: #efd5ae;
 }
 body:has([data-page="home"]) .language-switcher select {
   background: #102d3790;

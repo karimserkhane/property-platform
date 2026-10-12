@@ -1,8 +1,8 @@
 import pytest
 
-from liwa.modules.evidence.map_sources import coordinates, decode
-from liwa.modules.evidence.onwani import SourceError
-from liwa.modules.publication.land_use import category
+from property_platform.modules.evidence.map_sources import coordinates, decode
+from property_platform.modules.evidence.onwani import SourceError
+from property_platform.modules.publication.land_use import category
 
 
 @pytest.mark.parametrize(

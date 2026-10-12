@@ -6,13 +6,13 @@
 
 | Couche | Base et source | Effectif actuel |
 |---|---|---|
-| Parcelles | `liwa.real_estate.parcel`, service PLOT de DMT/Onwani | 2 431 géométries valides ; une identité source invalide reste en quarantaine |
-| Île et secteurs | `liwa.real_estate.administrative_area`, couches DMT/Onwani | 1 district + 26 secteurs |
-| Rues | `liwa.real_estate.street` | 64 objets officiels + 601 tronçons OSM ; ces tronçons ne représentent pas 665 rues distinctes |
-| Empreintes de bâtiments | `liwa.real_estate.building`, OpenStreetMap | 188 ; couverture communautaire partielle |
-| Lieux et repères | `liwa.real_estate.place` | 196 actifs : 167 OSM, 3 repères de promoteurs, 26 repères de courtiers |
-| Pages de recherche | `liwa.evidence.research_reference` | 110 URL avec capture conservée, dont une réponse HTTP non disponible ; trois autres collectes ont échoué avant capture |
-| Aperçus satellite | `liwa.evidence.imagery_scene` | Sentinel-2 du 29 juin et du 4 octobre 2026 |
+| Parcelles | `property_platform.real_estate.parcel`, service PLOT de DMT/Onwani | 2 431 géométries valides ; une identité source invalide reste en quarantaine |
+| Île et secteurs | `property_platform.real_estate.administrative_area`, couches DMT/Onwani | 1 district + 26 secteurs |
+| Rues | `property_platform.real_estate.street` | 64 objets officiels + 601 tronçons OSM ; ces tronçons ne représentent pas 665 rues distinctes |
+| Empreintes de bâtiments | `property_platform.real_estate.building`, OpenStreetMap | 188 ; couverture communautaire partielle |
+| Lieux et repères | `property_platform.real_estate.place` | 196 actifs : 167 OSM, 3 repères de promoteurs, 26 repères de courtiers |
+| Pages de recherche | `property_platform.evidence.research_reference` | 110 URL avec capture conservée, dont une réponse HTTP non disponible ; trois autres collectes ont échoué avant capture |
+| Aperçus satellite | `property_platform.evidence.imagery_scene` | Sentinel-2 du 29 juin et du 4 octobre 2026 |
 
 Les effectifs changent avec les sources et les imports. Une page de recherche n'est pas un projet distinct : plusieurs fournisseurs peuvent décrire le même projet. Les positions restent séparées par fournisseur ; les contradictions ne sont pas fusionnées automatiquement. Les anciennes observations et un repère retiré restent dans l'historique.
 

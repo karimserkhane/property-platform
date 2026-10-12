@@ -9,12 +9,16 @@ import pytest
 from django.core.management import call_command
 from django.test import override_settings
 
-if os.environ.get("LIWA_TEST_POSTGIS") != "1":
+if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Evidence integration requires real PostGIS", allow_module_level=True)
 
-from liwa.modules.evidence.management.commands.import_reem_imagery import BASE, BBOX, SCENES  # noqa: E402
-from liwa.modules.evidence.models import ImageryScene, IngestionRun, ResearchReference  # noqa: E402
-from liwa.modules.evidence.research_import import import_reference, page_metadata  # noqa: E402
+from property_platform.modules.evidence.management.commands.import_reem_imagery import (  # noqa: E402
+    BASE,
+    BBOX,
+    SCENES,
+)
+from property_platform.modules.evidence.models import ImageryScene, IngestionRun, ResearchReference  # noqa: E402
+from property_platform.modules.evidence.research_import import import_reference, page_metadata  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -58,7 +62,7 @@ def test_immutable_imagery_repeat_and_safe_projection(tmp_path, client):
         call_command("import_reem_imagery", actor="test", receipt=str(path))
     assert ImageryScene.objects.count() == 2
     assert IngestionRun.objects.count() == 4
-    with override_settings(DEBUG=True, LIWA_PARCEL_PREVIEW=True):
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         response = client.get("/api/v1/preview/imagery")
     assert response.status_code == 200
     item = response.json()[0]
@@ -89,7 +93,9 @@ def test_source_title_is_plain_text_not_a_copied_assertion():
 
 
 def test_failed_source_remains_a_failed_run_without_invented_reference():
-    with patch("liwa.modules.evidence.research_import.urlopen", side_effect=TimeoutError):
+    with patch(
+        "property_platform.modules.evidence.research_import.urlopen", side_effect=TimeoutError
+    ):
         run = import_reference(
             {"url": "https://reportagegroup.com/example", "label": "Test", "kind": "developer"},
             actor="test",
@@ -102,9 +108,9 @@ def test_reprocess_preserves_receipt_dates_and_retires_known_wrong_marker():
     from django.contrib.gis.geos import Point
     from test_reem_map_postgis import district
 
-    from liwa.modules.catalog.models import Place
-    from liwa.modules.evidence.models import Capture, MapObservation, Source
-    from liwa.modules.evidence.research_import import reprocess_reference
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import Capture, MapObservation, Source
+    from property_platform.modules.evidence.research_import import reprocess_reference
 
     district()
     source = Source.objects.create(

@@ -1,8 +1,10 @@
+import { brand } from "@property-platform/branding";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { BrandMark } from "@/components/brand-mark";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { getDirection, isLocale, locales } from "@/i18n/locales";
 import { Link } from "@/i18n/navigation";
@@ -22,8 +24,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isLocale(locale)) notFound();
   const t = await getTranslations({ locale, namespace: "Home" });
   return {
-    title: "Liwa Atlas",
+    title: brand.displayName,
+    icons: { icon: brand.webMarkPath },
     description: t("description"),
+    openGraph: {
+      title: brand.displayName,
+      siteName: brand.displayName,
+      description: t("description"),
+      type: "website",
+    },
     robots: { index: false, follow: false },
   };
 }
@@ -43,15 +52,9 @@ export default async function LocaleLayout({ children, params }: Props) {
           messages={{ LanguageSwitcher: messages.LanguageSwitcher }}
         >
           <header className="site-header">
-            <Link className="brand" href="/" aria-label="Liwa Atlas">
-              <svg
-                className="brand-mark"
-                viewBox="0 0 32 32"
-                aria-hidden="true"
-              >
-                <path d="M7 6v20h19M7 16h12V6M19 16v10M7 6h12" />
-              </svg>
-              <bdi>Liwa Atlas</bdi>
+            <Link className="brand" href="/" aria-label={brand.displayName}>
+              <BrandMark />
+              <bdi>{brand.displayName}</bdi>
             </Link>
             <div className="header-tools">
               <nav className="header-nav">

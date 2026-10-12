@@ -1,7 +1,7 @@
 [project]
-name = "liwa-api"
+name = "property-platform-api"
 version = "0.0.0"
-description = "Liwa Atlas domain API and worker runtime"
+description = "Property Platform domain API and worker runtime"
 requires-python = ">=3.14.8,<3.15"
 dependencies = [
   "django==6.1.2",
@@ -19,10 +19,10 @@ requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/liwa"]
+packages = ["src/property_platform"]
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "liwa.config.settings.testing"
+DJANGO_SETTINGS_MODULE = "property_platform.config.settings.testing"
 testpaths = ["tests"]
 addopts = "--strict-markers"
 markers = ["postgis: requires a real PostgreSQL/PostGIS database"]
@@ -35,15 +35,15 @@ line-length = 100
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.importlinter]
-root_package = "liwa"
+root_package = "property_platform"
 
 [[tool.importlinter.contracts]]
 name = "Domain modules follow their dependency direction"
 type = "layers"
-layers = ["liwa.modules.publication", "liwa.modules.evidence", "liwa.modules.catalog"]
+layers = ["property_platform.modules.publication", "property_platform.modules.evidence", "property_platform.modules.catalog"]
 
 [[tool.importlinter.contracts]]
 name = "Domain modules never import delivery or configuration"
 type = "forbidden"
-source_modules = ["liwa.modules"]
-forbidden_modules = ["liwa.api", "liwa.config"]
+source_modules = ["property_platform.modules"]
+forbidden_modules = ["property_platform.api", "property_platform.config"]
