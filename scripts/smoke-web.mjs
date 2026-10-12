@@ -66,11 +66,31 @@ try {
     assert.equal(explore.status, 200, locale);
     assert.ok((await explore.text()).includes(messages.Atlas.explore), locale);
   }
-  assert.equal(
-    (await fetch(`${origin}/api/atlas/parcels?bbox=54.4,24.4,54.5,24.5`))
-      .status,
-    403,
-  );
+  for (const path of [
+    "parcels?bbox=54.4,24.4,54.5,24.5",
+    "map-context?bbox=54.4,24.4,54.5,24.5",
+    "references",
+    "imagery",
+  ]) {
+    assert.equal(
+      (await fetch(`${origin}/api/atlas/${path}`)).status,
+      403,
+      path,
+    );
+    const endpoint = path.split("?")[0];
+    assert.equal(
+      (await fetch(`${origin}/api/atlas/${endpoint}?url=https://example.com`))
+        .status,
+      400,
+      endpoint,
+    );
+    assert.equal(
+      (await fetch(`${origin}/api/atlas/${endpoint}`, { method: "POST" }))
+        .status,
+      405,
+      endpoint,
+    );
+  }
   assert.equal(
     (await fetch(`${origin}/api/atlas/parcels?url=https://example.com`)).status,
     400,
@@ -78,10 +98,6 @@ try {
   assert.equal(
     (await fetch(`${origin}/api/atlas/parcels/invalid-id`)).status,
     404,
-  );
-  assert.equal(
-    (await fetch(`${origin}/api/atlas/parcels`, { method: "POST" })).status,
-    405,
   );
   assert.equal((await fetch(`${origin}/xx`)).status, 404);
   console.log(`Standalone smoke checks passed for ${locales.length} locales.`);

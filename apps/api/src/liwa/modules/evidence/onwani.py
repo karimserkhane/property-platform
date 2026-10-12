@@ -9,13 +9,15 @@ from urllib.request import Request, urlopen
 
 SOURCE_KEY = "dmt:onwani:smarthub:plot:adm:reem"
 BASE_URL = "https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/0"
-VERSION = "onwani-reem-v1"
+VERSION = "onwani-reem-v2"
 WHERE = "DISTRICTENG = 'AL REEM ISLAND' AND MUNICIPALITYENG = 'ADM'"
 FIELDS = (
     "OBJECTID,PLOTID,GISID,SectorNumber_PlotID,DISTRICTENG,DISTRICTID,"
     "MUNICIPALITYENG,COMMUNITYENG,ELMS_LandUse_Const,Construction_Status,"
     "APPROVALDATE,MODIFIEDDATE,DataReceivedDate,Permit_LastDate,Permit_LastType,"
-    "MEPS_CONS_STATUS,MEPS_CONS_UPDATEON,DMT_DCR_URL"
+    "MEPS_CONS_STATUS,MEPS_CONS_UPDATEON,DMT_DCR_URL,ELMS_LANDUSENAME_E,"
+    "ELMS_LANDUSENAME_A,PLANNINGSTATUS,OWNERSHIPTYPE,ELMS_AllocationStatus,"
+    "CALCULATEDAREA,ELMS_PARENTLANDUSE_E"
 )
 MAX_BYTES = 8 * 1024 * 1024
 MAX_RECORDS = 20000
@@ -109,6 +111,11 @@ def parse_feature(feature):
         if value is not None and (not isinstance(value, str) or len(value) > limit):
             raise SourceError("Unexpected attribute type or length")
         values[name] = value or ""
+    detailed_use = attrs.get("ELMS_LANDUSENAME_E")
+    if detailed_use is not None:
+        if not isinstance(detailed_use, str) or len(detailed_use) > 255:
+            raise SourceError("Unexpected detailed land use")
+        values["land_use"] = detailed_use or values["land_use"]
     return {"record_id": str(oid), "values": values, "rings": rings, "attributes": attrs}
 
 

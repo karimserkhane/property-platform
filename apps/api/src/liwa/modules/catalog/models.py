@@ -44,3 +44,76 @@ class Parcel(models.Model):
 
     def __str__(self):
         return self.code or str(self.id)
+
+
+class MapIdentity(models.Model):
+    """A provider identity, never an automatically accepted commercial identity."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    source_namespace = models.CharField(max_length=120)
+    source_record_id = models.CharField(max_length=80)
+    name = models.CharField(max_length=255, blank=True)
+    name_ar = models.CharField(max_length=255, blank=True)
+    kind = models.CharField(max_length=100, blank=True)
+    revision = models.PositiveIntegerField(default=1)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_namespace", "source_record_id"],
+                name="%(class)s_source_identity",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(revision__gte=1), name="%(class)s_revision_positive"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(source_namespace__regex=r"\S", source_record_id__regex=r"\S"),
+                name="%(class)s_source_nonblank",
+            ),
+            models.CheckConstraint(
+                condition=IsValid("geometry") & ~IsEmpty("geometry"),
+                name="%(class)s_geometry_valid",
+            ),
+        ]
+
+
+class Street(MapIdentity):
+    geometry = models.MultiLineStringField(srid=4326)
+
+    class Meta(MapIdentity.Meta):
+        db_table = "street"
+
+
+class Building(MapIdentity):
+    geometry = models.MultiPolygonField(srid=4326)
+    height_m = models.FloatField(null=True)
+    levels = models.PositiveSmallIntegerField(null=True)
+
+    class Meta(MapIdentity.Meta):
+        db_table = "building"
+        constraints = [
+            *MapIdentity.Meta.constraints,
+            models.CheckConstraint(
+                condition=models.Q(height_m__isnull=True)
+                | models.Q(height_m__gt=0, height_m__lte=1000),
+                name="building_height_range",
+            ),
+        ]
+
+
+class Place(MapIdentity):
+    geometry = models.PointField(srid=4326)
+
+    class Meta(MapIdentity.Meta):
+        db_table = "place"
+
+
+class AdministrativeArea(MapIdentity):
+    geometry = models.MultiPolygonField(srid=4326)
+
+    class Meta(MapIdentity.Meta):
+        db_table = "administrative_area"

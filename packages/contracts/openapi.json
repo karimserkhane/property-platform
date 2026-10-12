@@ -60,6 +60,160 @@
         ]
       }
     },
+    "/api/v1/preview/references": {
+      "get": {
+        "operationId": "previewReferences",
+        "summary": "References",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ResearchReferenceResponse"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/imagery": {
+      "get": {
+        "operationId": "previewImagery",
+        "summary": "Imagery",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ImageryResponse"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/map-context": {
+      "get": {
+        "operationId": "previewMapContext",
+        "summary": "Context",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "bbox",
+            "schema": {
+              "title": "Bbox",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapContext"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
     "/api/v1/preview/parcels": {
       "get": {
         "operationId": "previewParcels",
@@ -226,57 +380,138 @@
         "title": "Health",
         "type": "object"
       },
-      "Collection": {
+      "ResearchReferenceResponse": {
         "properties": {
-          "type": {
-            "title": "Type",
+          "label": {
+            "title": "Label",
             "type": "string"
           },
-          "features": {
-            "items": {
-              "$ref": "#/components/schemas/Feature"
-            },
-            "title": "Features",
-            "type": "array"
+          "title": {
+            "title": "Title",
+            "type": "string"
           },
-          "truncated": {
-            "title": "Truncated",
+          "source_kind": {
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "available": {
+            "title": "Available",
             "type": "boolean"
+          },
+          "place_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place Id"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
           }
         },
         "required": [
-          "type",
-          "features",
-          "truncated"
+          "label",
+          "title",
+          "source_kind",
+          "available",
+          "place_id",
+          "url",
+          "retrieved_at",
+          "published_at"
         ],
-        "title": "Collection",
+        "title": "ResearchReferenceResponse",
         "type": "object"
       },
-      "Feature": {
+      "Error": {
         "properties": {
-          "type": {
-            "title": "Type",
+          "code": {
+            "title": "Code",
             "type": "string"
-          },
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "Error",
+        "type": "object"
+      },
+      "ImageryResponse": {
+        "properties": {
           "id": {
-            "format": "uuid",
             "title": "Id",
             "type": "string"
           },
-          "geometry": {
-            "$ref": "#/components/schemas/Geometry"
+          "acquired_at": {
+            "format": "date-time",
+            "title": "Acquired At",
+            "type": "string"
           },
-          "properties": {
-            "$ref": "#/components/schemas/Properties"
+          "cloud_cover_tile": {
+            "title": "Cloud Cover Tile",
+            "type": "number"
+          },
+          "resolution_m": {
+            "title": "Resolution M",
+            "type": "integer"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Coordinates",
+            "type": "array"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
           }
         },
         "required": [
-          "type",
           "id",
-          "geometry",
-          "properties"
+          "acquired_at",
+          "cloud_cover_tile",
+          "resolution_m",
+          "coordinates",
+          "image_url",
+          "source_url",
+          "retrieved_at"
         ],
-        "title": "Feature",
+        "title": "ImageryResponse",
         "type": "object"
       },
       "Geometry": {
@@ -309,6 +544,322 @@
         "title": "Geometry",
         "type": "object"
       },
+      "LineGeometry": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "title": "Coordinates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "LineGeometry",
+        "type": "object"
+      },
+      "MapCollection": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/MapFeature"
+            },
+            "title": "Features",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "features",
+          "truncated"
+        ],
+        "title": "MapCollection",
+        "type": "object"
+      },
+      "MapContext": {
+        "properties": {
+          "street": {
+            "$ref": "#/components/schemas/MapCollection"
+          },
+          "building": {
+            "$ref": "#/components/schemas/MapCollection"
+          },
+          "place": {
+            "$ref": "#/components/schemas/MapCollection"
+          },
+          "administrative_area": {
+            "$ref": "#/components/schemas/MapCollection"
+          }
+        },
+        "required": [
+          "street",
+          "building",
+          "place",
+          "administrative_area"
+        ],
+        "title": "MapContext",
+        "type": "object"
+      },
+      "MapFeature": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "geometry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Geometry"
+              },
+              {
+                "$ref": "#/components/schemas/LineGeometry"
+              },
+              {
+                "$ref": "#/components/schemas/PointGeometry"
+              }
+            ],
+            "title": "Geometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/MapProperties"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "MapFeature",
+        "type": "object"
+      },
+      "MapProperties": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "height_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height M"
+          },
+          "levels": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Levels"
+          },
+          "parcel_ids": {
+            "default": [],
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Parcel Ids",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/MapProvenance"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "name_ar",
+          "kind",
+          "source"
+        ],
+        "title": "MapProperties",
+        "type": "object"
+      },
+      "MapProvenance": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "reliability": {
+            "title": "Reliability",
+            "type": "string"
+          },
+          "acquisition_method": {
+            "title": "Acquisition Method",
+            "type": "string"
+          },
+          "timestamp_basis": {
+            "title": "Timestamp Basis",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "retrieved_at",
+          "published_at",
+          "ingested_at",
+          "reliability",
+          "acquisition_method",
+          "timestamp_basis"
+        ],
+        "title": "MapProvenance",
+        "type": "object"
+      },
+      "PointGeometry": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "coordinates": {
+            "items": {
+              "type": "number"
+            },
+            "title": "Coordinates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "PointGeometry",
+        "type": "object"
+      },
+      "Collection": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/Feature"
+            },
+            "title": "Features",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "classification_version": {
+            "title": "Classification Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "features",
+          "truncated",
+          "classification_version"
+        ],
+        "title": "Collection",
+        "type": "object"
+      },
+      "Feature": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/Geometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/Properties"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "Feature",
+        "type": "object"
+      },
       "Properties": {
         "properties": {
           "id": {
@@ -323,27 +874,29 @@
           "community": {
             "title": "Community",
             "type": "string"
+          },
+          "land_use": {
+            "title": "Land Use",
+            "type": "string"
+          },
+          "construction_status": {
+            "title": "Construction Status",
+            "type": "string"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
           }
         },
         "required": [
           "id",
           "code",
-          "community"
+          "community",
+          "land_use",
+          "construction_status",
+          "category"
         ],
         "title": "Properties",
-        "type": "object"
-      },
-      "Error": {
-        "properties": {
-          "code": {
-            "title": "Code",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code"
-        ],
-        "title": "Error",
         "type": "object"
       },
       "Detail": {
@@ -375,6 +928,39 @@
           "publication_status": {
             "title": "Publication Status",
             "type": "string"
+          },
+          "land_use": {
+            "title": "Land Use",
+            "type": "string"
+          },
+          "construction_status": {
+            "title": "Construction Status",
+            "type": "string"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "area_m2": {
+            "title": "Area M2",
+            "type": "number"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/ParcelAttributes"
+          },
+          "places": {
+            "items": {
+              "$ref": "#/components/schemas/NearbyPlace"
+            },
+            "title": "Places",
+            "type": "array"
+          },
+          "streets": {
+            "items": {
+              "$ref": "#/components/schemas/NearbyStreet"
+            },
+            "title": "Streets",
+            "type": "array"
           }
         },
         "required": [
@@ -384,9 +970,153 @@
           "community",
           "revision",
           "source",
-          "publication_status"
+          "publication_status",
+          "land_use",
+          "construction_status",
+          "category",
+          "area_m2",
+          "attributes",
+          "places",
+          "streets"
         ],
         "title": "Detail",
+        "type": "object"
+      },
+      "NearbyPlace": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "name_ar",
+          "kind"
+        ],
+        "title": "NearbyPlace",
+        "type": "object"
+      },
+      "NearbyStreet": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "distance_m": {
+            "title": "Distance M",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "name_ar",
+          "distance_m"
+        ],
+        "title": "NearbyStreet",
+        "type": "object"
+      },
+      "ParcelAttributes": {
+        "properties": {
+          "planning": {
+            "title": "Planning",
+            "type": "string"
+          },
+          "ownership": {
+            "title": "Ownership",
+            "type": "string"
+          },
+          "allocation": {
+            "title": "Allocation",
+            "type": "string"
+          },
+          "approval_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approval Date"
+          },
+          "received_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received Date"
+          },
+          "permit_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permit Date"
+          },
+          "permit_type": {
+            "title": "Permit Type",
+            "type": "string"
+          },
+          "meps": {
+            "title": "Meps",
+            "type": "string"
+          },
+          "meps_updated": {
+            "title": "Meps Updated",
+            "type": "string"
+          },
+          "dcr_url": {
+            "title": "Dcr Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "planning",
+          "ownership",
+          "allocation",
+          "approval_date",
+          "received_date",
+          "permit_date",
+          "permit_type",
+          "meps",
+          "meps_updated",
+          "dcr_url"
+        ],
+        "title": "ParcelAttributes",
         "type": "object"
       },
       "Provenance": {

@@ -9,6 +9,7 @@
 - [Structure et responsabilités](engineering/REPOSITORY.md)
 - [Démarrage et vérifications](engineering/DEVELOPMENT.md)
 - [Première exploration locale : livraison et validation](engineering/ATLAS_PREVIEW.md)
+- [Atlas Al Reem : couches réelles, sources et correspondance avec le HTML](engineering/REEM_MAP.md)
 - [Versions des outils et compatibilités](engineering/TOOLCHAIN.md)
 - [Multilingue et RTL](engineering/INTERNATIONALIZATION.md)
 - [Collecte directe, provenance des données et audit](engineering/DATA_PROVENANCE.md)

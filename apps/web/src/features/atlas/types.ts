@@ -2,6 +2,15 @@ import type { components } from "@liwa/contracts";
 
 export type ParcelCollection = components["schemas"]["Collection"];
 export type ParcelDetail = components["schemas"]["Detail"];
+export type MapContext = components["schemas"]["MapContext"];
+export type MapFeature = components["schemas"]["MapFeature"];
+export type ResearchReference =
+  components["schemas"]["ResearchReferenceResponse"];
+export type ImageryScene = components["schemas"]["ImageryResponse"];
+export type MapLabels = Record<
+  keyof typeof import("../../../messages/en.json").Map,
+  string
+>;
 export type AtlasLabels = Record<
   | "explore"
   | "sources"

@@ -10,13 +10,13 @@ Un schéma regroupe des objets dans une base. Ce n'est ni un dossier du dépôt 
 
 | Domaine cible | Contenu | Tables ou exemples | État |
 |---|---|---|---|
-| `real_estate` | Biens, projets et relations acceptées | `parcel`, `building`, `unit`, `development_project` | Schéma créé ; seule `parcel` est implémentée |
-| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Schéma créé avec les six tables de provenance |
+| `real_estate` | Biens, projets et relations acceptées | `parcel`, `building`, `unit`, `development_project` | Schéma créé : parcel, street, building, place, administrative_area ; unités/projets acceptés à créer |
+| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Schéma créé avec neuf tables, dont map_observation, research_reference, imagery_scene |
 | `publication` | Dossiers validés et versions accessibles au public | `project_version`, `publication_decision` | Première fonctionnalité de publication |
 | `market` | Transactions, offres, prix et échéanciers | `transaction`, `listing`, `price_observation`, `payment_schedule` | Première fonctionnalité de prix ; responsabilités à documenter |
 | `media` | Métadonnées des documents, images, vidéos et dérivés | `asset`, `asset_version`, `processing_result` | Premier traitement documentaire ; fichiers dans un stockage adapté |
 
-`real_estate` et `evidence` sont implémentés ; `publication`, `market` et `media` restent des domaines futurs. Les autres domaines, dont avis, lieux et rues, feront l'objet d'une décision avec leur première fonctionnalité. Aucun schéma par pays, île, langue ou source : les territoires et langues sont des données liées aux objets. Dev, test et production sont des bases/environnements séparés, pas des schémas d'une même base de production.
+`real_estate` et `evidence` sont implémentés ; `publication`, `market` et `media` restent des domaines futurs. Lieux et rues sont désormais possédés par le catalogue géographique ; avis et médias complets demanderont leur propre décision. Aucun schéma par pays, île, langue ou source : les territoires et langues sont des données liées aux objets. Dev, test et production sont des bases/environnements séparés, pas des schémas d'une même base de production.
 
 Conventions : anglais, minuscules, `snake_case`, noms de tables au singulier, noms de colonnes précis, clés étrangères `<objet>_id`. Éviter les noms de marque, `data`, `misc`, `table1` et les suffixes `v2` pour contourner les migrations. Les noms internes des contraintes existantes ne sont pas renommés pour l'apparence.
 
@@ -38,7 +38,9 @@ Après application des migrations, les tables métier sont réparties entre `rea
 
 Les tables techniques Django restent gérées par leurs migrations. Les extensions PostGIS et leurs fonctions ne doivent pas être déplacées comme des tables ordinaires. `tiger` et `topology`, présents dans l'image locale, ne sont pas utilisés par notre import. Leur présence ne signifie pas que leurs données alimentent le site.
 
-L'inspection locale a trouvé PostgreSQL 18.6 et PostGIS 3.6.4, 2 431 parcelles valides/non vides en EPSG:4326, une observation en quarantaine et aucun lien contradictoire entre les événements d'audit, observations et acquisitions existants. Ce sont des constats datés, pas des effectifs garantis pour les imports futurs. Les sept tables métier restent de petite taille ; rien ne justifie aujourd'hui partitionnement, réplication de lecture ou séparation en plusieurs bases.
+L'inspection locale a trouvé PostgreSQL 18.6 et PostGIS 3.6.4, 2 431 parcelles valides/non vides en EPSG:4326, une observation en quarantaine et aucun lien contradictoire entre les événements d'audit, observations et acquisitions existants. Ce sont des constats datés, pas des effectifs garantis pour les imports futurs. Les tables métier restent de petite taille ; rien ne justifie aujourd'hui partitionnement, réplication de lecture ou séparation en plusieurs bases.
+
+Les couches supplémentaires et leur provenance sont décrites dans [REEM_MAP.md](REEM_MAP.md). Les migrations catalog 0004 et evidence 0005–0009 ajoutent les tables typées, le reçu d’acquisition, les références, les aperçus et la capture parent. Les parcelles existantes restent dans real_estate.parcel. Capture parent, observations et scènes utilisent des clés étrangères protégées ; une invalidation de repère conserve identité et historique avec active=false. Les petits PNG du pilote ne remplacent pas le futur stockage objet.
 
 ## 3. Migration et compatibilité Django
 

@@ -22,6 +22,9 @@ class Properties(Schema):
     id: UUID
     code: str
     community: str
+    land_use: str
+    construction_status: str
+    category: str
 
 
 class Feature(Schema):
@@ -35,6 +38,7 @@ class Collection(Schema):
     type: str
     features: list[Feature]
     truncated: bool
+    classification_version: str
 
 
 class Provenance(Schema):
@@ -45,6 +49,33 @@ class Provenance(Schema):
     ingested_at: datetime
 
 
+class ParcelAttributes(Schema):
+    planning: str
+    ownership: str
+    allocation: str
+    approval_date: str | None
+    received_date: str | None
+    permit_date: str | None
+    permit_type: str
+    meps: str
+    meps_updated: str
+    dcr_url: str
+
+
+class NearbyPlace(Schema):
+    id: UUID
+    name: str
+    name_ar: str
+    kind: str
+
+
+class NearbyStreet(Schema):
+    id: UUID
+    name: str
+    name_ar: str
+    distance_m: float
+
+
 class Detail(Schema):
     id: UUID
     code: str
@@ -53,6 +84,133 @@ class Detail(Schema):
     revision: int
     source: Provenance
     publication_status: str
+    land_use: str
+    construction_status: str
+    category: str
+    area_m2: float
+    attributes: ParcelAttributes
+    places: list[NearbyPlace]
+    streets: list[NearbyStreet]
+
+
+class MapProvenance(Provenance):
+    reliability: str
+    acquisition_method: str
+    timestamp_basis: str
+
+
+class ResearchReferenceResponse(Schema):
+    label: str
+    title: str
+    source_kind: str
+    available: bool
+    place_id: UUID | None
+    url: str
+    retrieved_at: datetime
+    published_at: datetime | None
+
+
+@router.get(
+    "/references",
+    response={200: list[ResearchReferenceResponse], 403: Error, 503: Error},
+    operation_id="previewReferences",
+)
+def references(request):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from liwa.modules.evidence.queries import research_references
+
+    try:
+        return research_references()
+    except DatabaseError:
+        return Status(503, {"code": "data_unavailable"})
+
+
+class ImageryResponse(Schema):
+    id: str
+    acquired_at: datetime
+    cloud_cover_tile: float
+    resolution_m: int
+    coordinates: list[list[float]]
+    image_url: str
+    source_url: str
+    retrieved_at: datetime
+
+
+@router.get(
+    "/imagery",
+    response={200: list[ImageryResponse], 403: Error, 503: Error},
+    operation_id="previewImagery",
+)
+def imagery(request):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from liwa.modules.evidence.queries import imagery_scenes
+
+    try:
+        return imagery_scenes()
+    except DatabaseError:
+        return Status(503, {"code": "data_unavailable"})
+
+
+class MapProperties(Schema):
+    id: UUID
+    name: str
+    name_ar: str
+    kind: str
+    height_m: float | None = None
+    levels: int | None = None
+    parcel_ids: list[UUID] = []
+    source: MapProvenance
+
+
+class LineGeometry(Schema):
+    type: str
+    coordinates: list[list[list[float]]]
+
+
+class PointGeometry(Schema):
+    type: str
+    coordinates: list[float]
+
+
+class MapFeature(Schema):
+    type: str
+    id: UUID
+    geometry: Geometry | LineGeometry | PointGeometry
+    properties: MapProperties
+
+
+class MapCollection(Schema):
+    type: str
+    features: list[MapFeature]
+    truncated: bool
+
+
+class MapContext(Schema):
+    street: MapCollection
+    building: MapCollection
+    place: MapCollection
+    administrative_area: MapCollection
+
+
+@router.get(
+    "/map-context",
+    response={200: MapContext, 403: Error, 422: Error, 503: Error},
+    operation_id="previewMapContext",
+)
+def context(request, bbox: str):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    bounds = parse_bbox(bbox)
+    if bounds is None:
+        return Status(422, {"code": "invalid_query"})
+    from liwa.modules.publication.map_preview import map_context
+
+    try:
+        return map_context(bounds)
+    except DatabaseError:
+        return Status(503, {"code": "data_unavailable"})
 
 
 def enabled():

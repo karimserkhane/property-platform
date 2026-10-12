@@ -1,6 +1,6 @@
 import "server-only";
 
-const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_BYTES = 8 * 1024 * 1024;
 
 // Only server configuration chooses the upstream; visitor input is never a URL.
 export async function readPreview(path: string, search = "") {

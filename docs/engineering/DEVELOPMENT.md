@@ -1,6 +1,6 @@
 # Lancer et développer Liwa Atlas, étape par étape
 
-Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, exploration locale des parcelles Onwani, API de contrôle de santé, base PostGIS et import manuel avec provenance. Bâtiments/unités, prix, dossiers publics approuvés, authentification, médias et traitements IA arriveront avec les fonctionnalités suivantes.
+Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte locale des parcelles, rues, secteurs, empreintes de bâtiments et lieux, sources consultables, deux aperçus satellite, API de contrôle de santé, base PostGIS et imports manuels avec provenance. Unités, prix, dossiers publics approuvés, authentification, bibliothèque de médias et traitements IA arriveront avec les fonctionnalités suivantes.
 
 ### Essayer le nouvel accueil et la carte locale
 
@@ -9,12 +9,13 @@ Après une mise à jour du backend, reconstruire son image depuis `C:\Users\Kari
 ```powershell
 pnpm.cmd install --frozen-lockfile
 docker compose -f infra/local/compose.yaml up -d --build api
+docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
 pnpm.cmd dev:web
 ```
 
-La première commande installe les dépendances verrouillées, dont MapLibre ; la deuxième prend le nouveau code API sans effacer les parcelles ; la troisième démarre le site dans ce terminal. Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore Al Reem**. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche utilise le début du code de parcelle ; elle ne recherche pas encore des appartements ou des prix.
+La première commande installe les dépendances verrouillées, dont MapLibre ; la deuxième reconstruit l'API ; la troisième applique les migrations de structure ; la quatrième démarre le site dans ce terminal. Les imports de données se lancent séparément (section 6). Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore Al Reem**. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
 
-Si la base est vide, appliquer les migrations et l'import de la section 6 avant d'explorer. Un message d'indisponibilité indique de vérifier l'API ; une carte vide et une recherche sans résultat sont des états différents. Le fond est neutre : rues, images satellite et bâtiments 3D ne sont pas encore intégrés. Les coordonnées ne sont pas une certification de limites foncières.
+Si la base est vide, appliquer les migrations et l'import de la section 6 avant d'explorer. Un message d'indisponibilité indique de vérifier l'API ; une carte vide et une recherche sans résultat sont des états différents. Les couches rues, secteurs, empreintes 2D, lieux et satellite sont disponibles après les imports de la section 6.8. La 3D n'est pas encore livrée. Les coordonnées ne sont pas une certification de limites foncières.
 
 Pour changer l'adresse de l'API, copier `C:\Users\Karim\Repositories\property-platform\apps\web\.env.example` vers `C:\Users\Karim\Repositories\property-platform\apps\web\.env.local`, régler LIWA_API_ORIGIN, puis redémarrer Next.js. Ce réglage reste côté serveur. Le site en développement autorise le relais local ; pour essayer le **site compilé localement**, définir aussi LIWA_ENABLE_LOCAL_PREVIEW=1 dans ce fichier ou dans le terminal de lancement. Sans cet opt-in, le web compilé refuse l'aperçu. Django hors DEBUG le refuse dans tous les cas. Ce mécanisme n'est pas une procédure de mise en production.
 
@@ -67,6 +68,7 @@ Cette commande conserve le volume PostgreSQL. Ne pas ajouter `-v`. Le contrôle 
 - [Retrouver modèles et migrations](#fichiers-modeles-migrations)
 - [Vérifier que l'API répond](#verifier-api)
 - [Lancer l'import Onwani](#premier-import-manuel-des-parcelles-onwani)
+- [Ajouter rues, bâtiments, lieux, références et satellite](#couches-reem)
 - [Lire le code de collecte, contrôle et stockage](#code-import)
 - [Consulter les tables avec une interface graphique](#consulter-la-base)
 - [Reconstruire le backend après une modification](#modification-backend)
@@ -801,11 +803,84 @@ Docker Desktop → Volumes → `liwa-local_postgres18-data` montre les fichiers 
 
 ### 6.7. Ce qui est manuel aujourd'hui et ce qui sera automatisé
 
-Aujourd'hui, une commande déclenche une acquisition de parcelles. Elle ne collecte ni toutes les rues, ni tous les bâtiments, ni les prix, forums, avis ou réseaux sociaux. Elle ne génère pas de vidéos, n'appelle pas d'IA et ne publie pas de carte. Les captures JSON bornées restent dans PostgreSQL ; stockage objet, déduplication physique des captures et politique de rétention viendront avec les volumes et autres formats.
+Aujourd'hui, les commandes manuelles collectent parcelles, secteurs, rues et objets OSM, puis un registre borné de pages de promoteurs, courtiers, médias et forums. Cela ne couvre pas tous les bâtiments ou toutes les discussions. Les workflows automatiques, prix structurés, avis, IA et génération vidéo ne sont pas implémentés. Les réponses et petits aperçus du pilote restent dans PostgreSQL ; stockage objet, déduplication physique et rétention viendront avec les volumes et autres formats.
 
 Le futur workflow sera **planification → tâche durable → worker Python → même service d'import → contrôles et validation → publication**. Un worker est un processus qui exécute des tâches ; un planificateur décide quand les déclencher. Le serveur web n'aura pas à attendre la collecte dans une requête de visiteur. Les fréquences dépendront de la source, de ses droits d'accès, de son rythme et de ses limites ; elles ne sont pas encore configurées.
 
 Automatiser la collecte ne signifie pas accepter ou publier toutes les informations automatiquement. Prix, noms rapprochés, permis, témoignages et suggestions IA demanderont leurs propres règles de validation et preuves. Les sources indisponibles et informations inconnues resteront signalées. Les principes et limites sont détaillés dans [docs/engineering/DATA_PROVENANCE.md](DATA_PROVENANCE.md).
+
+<a id="couches-reem"></a>
+
+### 6.8. Ajouter les couches de l'île, les références et le satellite
+
+**Sur ce poste, ces données ont déjà été importées dans PostgreSQL.** Pour voir le résultat, redémarrer/reconstruire l'API et le site suffit. Ne pas relancer toutes les collectes à chaque ouverture de la carte. Sur une base vide ou pour actualiser une source, utiliser le parcours suivant.
+
+Ouvrir PowerShell dans PyCharm ou Windows et se placer à la racine :
+
+```powershell
+Set-Location C:\Users\Karim\Repositories\property-platform
+docker compose -f infra/local/compose.yaml up -d --build api
+docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
+```
+
+`migrate` applique les fichiers de migration Django. Il crée les nouvelles tables dans leurs schémas propriétaires, conserve les parcelles existantes et **ne télécharge aucune donnée**. Les commandes suivantes exécutent le code d'import adapté à ces modèles. Attendre la fin de chaque commande avant la suivante.
+
+```powershell
+docker compose -f infra/local/compose.yaml exec api python manage.py import_onwani --actor Karim
+docker compose -f infra/local/compose.yaml exec api python manage.py import_reem_map --actor Karim
+docker compose -f infra/local/compose.yaml exec api python manage.py import_reem_references --actor Karim
+```
+
+- `import_onwani` relit les parcelles officielles, avec les usages détaillés et attributs observés disponibles. La commande met à jour les identités existantes et leur audit.
+- `import_reem_map` collecte dans l'ordre district, secteurs, rues officielles, puis OSM. Chaque couche a sa propre acquisition et transaction ; une erreur OSM ne supprime pas les couches officielles déjà importées. Pour une seule couche, ajouter `--layer district`, `--layer community`, `--layer street` ou `--layer osm`. OSM est borné à Reem ; une indisponibilité du fournisseur exige une relance ultérieure, sans vider la base.
+- `import_reem_references` relit les URL du registre. Elle conserve titre, provenance, dates et, pour les formats pris en charge, un repère déclaré. Plusieurs sources d'un même projet restent distinctes. HTTP 200 prouve la réception d'une réponse, pas la validité du contenu. La sortie indique réussite/échec par page ; l'import peut prendre plusieurs minutes.
+
+`--actor Karim` indique qui a lancé l'opération dans l'audit interne. Pour un nom complet, écrire `--actor "Karim Serkhane"`. L'ouvrir dans le navigateur ne relance pas ces commandes. Les données restent dans le volume PostgreSQL après un arrêt normal.
+
+Pour appliquer un nouvel extracteur aux pages déjà stockées, sans les télécharger à nouveau :
+
+```powershell
+docker compose -f infra/local/compose.yaml exec api python manage.py import_reem_references --reprocess --actor Karim
+```
+
+Ce retraitement ajoute son propre historique, conserve la date de collecte originale et relie les captures via `parent_capture_id`. Il ne prétend pas que la page vient d'être actualisée. Les repères incohérents ne deviennent pas des identités commerciales acceptées.
+
+#### Retrouver le code et les tables
+
+| Code sur ton PC | Ce qu'il fait |
+|---|---|
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\map_sources.py` | URL fixes, requêtes bornées, contrôle des réponses/coordonnées |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\map_import.py` | Préparation, filtrage de Reem, réconciliation et observations typées |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\research_sources.py` | Extraction inerte et contrôlée des titres et repères par fournisseur |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\research_import.py` | Collecte/retraitement des pages et audit |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\project_sources.json` | Registre de liens publics à relire ; pas une liste de périmètres certifiés |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\catalog\models.py` | Modèles Parcel, Street, Building, Place, AdministrativeArea |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\catalog\map_queries.py` | Lectures spatiales et distances/surfaces calculées dans PostGIS |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\evidence\models.py` | Captures, observations, références et aperçus satellite |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\liwa\modules\publication\land_use.py` | Couleurs/catégories ; l'usage source original reste conservé |
+| `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\` | Carte, filtres, listes, fiches, sources et exports |
+
+Dans ton outil SQL, actualiser l'arborescence après `migrate`. Tu trouveras `liwa.real_estate.street`, `building`, `place`, `administrative_area` et les tables `liwa.evidence.map_observation`, `research_reference`, `imagery_scene`. Les captures et historiques ont leurs tables propres. Le [dossier de couverture](REEM_MAP.md) détaille les effectifs, sources, écarts avec le HTML et règles de rapprochement.
+
+#### Satellite : parcours facultatif de collecte, séparé du serveur
+
+Les deux aperçus Sentinel sont déjà dans la base locale. Le bouton **Satellite** permet de choisir Esri ou une date Sentinel. Esri charge un fond externe ; Sentinel charge les petits aperçus stockés dans PostgreSQL. Une image montre une observation datée, sans certifier un permis ou un périmètre.
+
+Pour reconstruire ces aperçus sur une autre machine, depuis la racine, avec Python 3.14 installé :
+
+```powershell
+python -m venv .cache/imagery-tools
+.\.cache\imagery-tools\Scripts\python.exe -m pip install -r scripts/imagery-requirements.txt
+.\.cache\imagery-tools\Scripts\python.exe scripts/acquire_reem_imagery.py --output .cache/acquisitions/sentinel-reem.json
+docker compose -f infra/local/compose.yaml cp .cache/acquisitions/sentinel-reem.json api:/tmp/sentinel-reem.json
+docker compose -f infra/local/compose.yaml exec api python manage.py import_reem_imagery --actor Karim --receipt /tmp/sentinel-reem.json
+```
+
+L'environnement `.cache/imagery-tools` installe Rasterio et ses dépendances **uniquement pour ce traitement**. Le script `C:\Users\Karim\Repositories\property-platform\scripts\acquire_reem_imagery.py` lit les métadonnées STAC puis seulement les plages d'octets utiles des rasters, recadre Reem, reprojette pour la carte et produit un reçu borné. Cela peut prendre plusieurs minutes. Les certificats HTTPS restent vérifiés.
+
+`compose cp` copie ce reçu local vers `/tmp/sentinel-reem.json` **dans le conteneur API**. La dernière commande vérifie identité, coordonnées, dates, empreinte et taille, puis stocke les deux aperçus et leurs preuves en base. Ces fichiers de travail ne vont pas dans Git. Une scène existante n'est pas remplacée silencieusement si son rendu change : la commande exige alors une revue.
+
+Enfin relancer le site avec `pnpm.cmd dev:web`, ou reconstruire le profil Docker de prévisualisation du début du guide. Ouvrir `/en/explore`, essayer RT4, une parcelle, les onglets rues/projets, la légende et les dates satellite. Les imports ne sont pas nécessaires pour simplement consulter les données déjà présentes.
 
 <a id="compte-administration"></a>
 

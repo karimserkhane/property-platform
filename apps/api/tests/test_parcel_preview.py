@@ -11,6 +11,8 @@ def test_preview_is_disabled_even_with_flag_in_non_debug_mode(client):
             == 403
         )
         assert client.get(f"/api/v1/preview/parcels/{uuid4()}").status_code == 403
+        for path in ("references", "imagery", "map-context?bbox=54.4,24.4,54.5,24.5"):
+            assert client.get(f"/api/v1/preview/{path}").status_code == 403
 
 
 @pytest.mark.parametrize(

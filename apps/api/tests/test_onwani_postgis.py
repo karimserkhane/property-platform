@@ -233,10 +233,7 @@ def test_database_rejects_invalid_audit_metadata(changes):
 
 def test_integrity_migrations_preserve_existing_import_and_are_reversible():
     previous = [("catalog", "0001_initial"), ("evidence", "0002_quarantinedobservation")]
-    current = [
-        ("catalog", "0003_real_estate_schema"),
-        ("evidence", "0004_evidence_schema"),
-    ]
+    current = MigrationExecutor(connection).loader.graph.leaf_nodes()
     try:
         acquisition = run([feature()])
         parcel = Parcel.objects.get()
@@ -302,7 +299,7 @@ def test_schema_collision_rolls_back_evidence_move_and_can_be_resumed():
         ("catalog", "0002_enforce_data_integrity"),
         ("evidence", "0003_enforce_data_integrity"),
     ]
-    current = [("catalog", "0003_real_estate_schema"), ("evidence", "0004_evidence_schema")]
+    current = MigrationExecutor(connection).loader.graph.leaf_nodes()
     acquisition = run([feature()])
     parcel_id = Parcel.objects.get().pk
     blocker_created = False

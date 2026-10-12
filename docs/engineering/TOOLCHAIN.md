@@ -47,7 +47,7 @@ Le dépôt ne gère pas les installations système de Git, Docker Desktop ni l'�
 
 ## Ajout cartographique — 11 octobre 2026
 
-**MapLibre GL JS 6.14.0**, version stable du registre npm vérifiée lors de l'installation, est fixé dans `apps/web/package.json` et le lockfile. Il est chargé dans le seul module d'exploration ; les versions des compilateurs existants restent inchangées. Son ajout explicite a produit une exception de délai de publication pour cette version dans `pnpm-workspace.yaml` ; aucune désactivation générale des contrôles de dépendances ou de TLS n'a été faite. Le moteur fonctionne ici sans tuiles externes ; les droits et coûts d'un fournisseur de fond de carte seront une décision séparée. [Documentation MapLibre](https://maplibre.org/maplibre-gl-js/docs/).
+**MapLibre GL JS 6.14.0**, version stable du registre npm vérifiée lors de l'installation, est fixé dans `apps/web/package.json` et le lockfile. Il est chargé dans le seul module d'exploration ; les versions des compilateurs existants restent inchangées. Son ajout explicite a produit une exception de délai de publication pour cette version dans `pnpm-workspace.yaml` ; aucune désactivation générale des contrôles de dépendances ou de TLS n'a été faite. Le plan utilise les géométries de la base ; le fond satellite optionnel utilise Esri ou les aperçus Sentinel conservés. La diffusion publique et les droits des fournisseurs restent une décision séparée. [Documentation MapLibre](https://maplibre.org/maplibre-gl-js/docs/).
 
 ## PostgreSQL : données existantes
 
@@ -65,3 +65,7 @@ Les contrôles locaux doivent couvrir installation verrouillée, qualité, TypeS
 - [PostgreSQL](https://www.postgresql.org/support/versioning/), [image officielle PostGIS et volumes](https://github.com/postgis/docker-postgis).
 - [Images Node officielles](https://github.com/docker-library/official-images/blob/master/library/node), [images Python officielles](https://github.com/docker-library/official-images/blob/master/library/python).
 - [checkout](https://github.com/actions/checkout/releases), [setup-node](https://github.com/actions/setup-node/releases), [pnpm action-setup](https://github.com/pnpm/action-setup/releases), [setup-uv](https://github.com/astral-sh/setup-uv/releases).
+
+## Outil satellite isolé — 11 octobre 2026
+
+Rasterio 1.5.2 est utilisé uniquement par `scripts/acquire_reem_imagery.py`, dans un environnement local distinct. Ses dépendances sont fixées dans `scripts/imagery-requirements.txt` ; aucune modification des dépendances API/web, des compilateurs ou des images de service. Le transport lit des plages HTTPS vérifiées et borne les octets, le script ne télécharge pas le raster entier. [Version Rasterio sur PyPI](https://pypi.org/project/rasterio/1.5.2/). MapLibre 6 gère le texte RTL et les polices locales sans plugin distant : [API RTL](https://maplibre.org/maplibre-gl-js/docs/API/functions/setRTLTextPlugin/), [polices locales](https://maplibre.org/maplibre-gl-js/docs/examples/style-labels-with-local-fonts/).

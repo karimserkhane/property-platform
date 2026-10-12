@@ -38,6 +38,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/references": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** References */
+        get: operations["previewReferences"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/imagery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Imagery */
+        get: operations["previewImagery"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/map-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context */
+        get: operations["previewMapContext"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/parcels": {
         parameters: {
             query?: never;
@@ -84,6 +135,157 @@ export interface components {
              */
             status: "ok" | "ready" | "unavailable";
         };
+        /** ResearchReferenceResponse */
+        ResearchReferenceResponse: {
+            /** Label */
+            label: string;
+            /** Title */
+            title: string;
+            /** Source Kind */
+            source_kind: string;
+            /** Available */
+            available: boolean;
+            /** Place Id */
+            place_id: string | null;
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+        };
+        /** Error */
+        Error: {
+            /** Code */
+            code: string;
+        };
+        /** ImageryResponse */
+        ImageryResponse: {
+            /** Id */
+            id: string;
+            /**
+             * Acquired At
+             * Format: date-time
+             */
+            acquired_at: string;
+            /** Cloud Cover Tile */
+            cloud_cover_tile: number;
+            /** Resolution M */
+            resolution_m: number;
+            /** Coordinates */
+            coordinates: number[][];
+            /** Image Url */
+            image_url: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+        };
+        /** Geometry */
+        Geometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[][][][];
+        };
+        /** LineGeometry */
+        LineGeometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[][][];
+        };
+        /** MapCollection */
+        MapCollection: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["MapFeature"][];
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** MapContext */
+        MapContext: {
+            street: components["schemas"]["MapCollection"];
+            building: components["schemas"]["MapCollection"];
+            place: components["schemas"]["MapCollection"];
+            administrative_area: components["schemas"]["MapCollection"];
+        };
+        /** MapFeature */
+        MapFeature: {
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Geometry */
+            geometry: components["schemas"]["Geometry"] | components["schemas"]["LineGeometry"] | components["schemas"]["PointGeometry"];
+            properties: components["schemas"]["MapProperties"];
+        };
+        /** MapProperties */
+        MapProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Kind */
+            kind: string;
+            /** Height M */
+            height_m?: number | null;
+            /** Levels */
+            levels?: number | null;
+            /**
+             * Parcel Ids
+             * @default []
+             */
+            parcel_ids: string[];
+            source: components["schemas"]["MapProvenance"];
+        };
+        /** MapProvenance */
+        MapProvenance: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Reliability */
+            reliability: string;
+            /** Acquisition Method */
+            acquisition_method: string;
+            /** Timestamp Basis */
+            timestamp_basis: string;
+        };
+        /** PointGeometry */
+        PointGeometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[];
+        };
         /** Collection */
         Collection: {
             /** Type */
@@ -92,6 +294,8 @@ export interface components {
             features: components["schemas"]["Feature"][];
             /** Truncated */
             truncated: boolean;
+            /** Classification Version */
+            classification_version: string;
         };
         /** Feature */
         Feature: {
@@ -105,13 +309,6 @@ export interface components {
             geometry: components["schemas"]["Geometry"];
             properties: components["schemas"]["Properties"];
         };
-        /** Geometry */
-        Geometry: {
-            /** Type */
-            type: string;
-            /** Coordinates */
-            coordinates: number[][][][];
-        };
         /** Properties */
         Properties: {
             /**
@@ -123,11 +320,12 @@ export interface components {
             code: string;
             /** Community */
             community: string;
-        };
-        /** Error */
-        Error: {
-            /** Code */
-            code: string;
+            /** Land Use */
+            land_use: string;
+            /** Construction Status */
+            construction_status: string;
+            /** Category */
+            category: string;
         };
         /** Detail */
         Detail: {
@@ -147,6 +345,70 @@ export interface components {
             source: components["schemas"]["Provenance"];
             /** Publication Status */
             publication_status: string;
+            /** Land Use */
+            land_use: string;
+            /** Construction Status */
+            construction_status: string;
+            /** Category */
+            category: string;
+            /** Area M2 */
+            area_m2: number;
+            attributes: components["schemas"]["ParcelAttributes"];
+            /** Places */
+            places: components["schemas"]["NearbyPlace"][];
+            /** Streets */
+            streets: components["schemas"]["NearbyStreet"][];
+        };
+        /** NearbyPlace */
+        NearbyPlace: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Kind */
+            kind: string;
+        };
+        /** NearbyStreet */
+        NearbyStreet: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Distance M */
+            distance_m: number;
+        };
+        /** ParcelAttributes */
+        ParcelAttributes: {
+            /** Planning */
+            planning: string;
+            /** Ownership */
+            ownership: string;
+            /** Allocation */
+            allocation: string;
+            /** Approval Date */
+            approval_date: string | null;
+            /** Received Date */
+            received_date: string | null;
+            /** Permit Date */
+            permit_date: string | null;
+            /** Permit Type */
+            permit_type: string;
+            /** Meps */
+            meps: string;
+            /** Meps Updated */
+            meps_updated: string;
+            /** Dcr Url */
+            dcr_url: string;
         };
         /** Provenance */
         Provenance: {
@@ -221,6 +483,131 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    previewReferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResearchReferenceResponse"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewImagery: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageryResponse"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewMapContext: {
+        parameters: {
+            query: {
+                bbox: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MapContext"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

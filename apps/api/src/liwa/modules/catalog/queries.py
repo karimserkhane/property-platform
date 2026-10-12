@@ -2,7 +2,7 @@
 
 import json
 
-from django.contrib.gis.db.models.functions import AsGeoJSON
+from django.contrib.gis.db.models.functions import Area, AsGeoJSON, Transform
 from django.contrib.gis.geos import Polygon
 from django.db import connection, transaction
 
@@ -21,7 +21,9 @@ def parcel_features(*, namespace, bbox, limit, query=""):
         rows = list(
             records.order_by("id")
             .annotate(shape=AsGeoJSON("geometry", precision=6))
-            .values("id", "code", "community", "shape")[: limit + 1]
+            .values("id", "code", "community", "land_use", "construction_status", "shape")[
+                : limit + 1
+            ]
         )
     return {
         "type": "FeatureCollection",
@@ -34,6 +36,8 @@ def parcel_features(*, namespace, bbox, limit, query=""):
                     "id": str(row["id"]),
                     "code": row["code"],
                     "community": row["community"],
+                    "land_use": row["land_use"],
+                    "construction_status": row["construction_status"],
                 },
             }
             for row in rows[:limit]
@@ -45,6 +49,16 @@ def parcel_features(*, namespace, bbox, limit, query=""):
 def parcel_identity(*, namespace, parcel_id):
     return (
         Parcel.objects.filter(source_namespace=namespace, id=parcel_id)
-        .values("id", "code", "district", "community", "revision")
+        .annotate(area=Area(Transform("geometry", 32640)))
+        .values(
+            "id",
+            "code",
+            "district",
+            "community",
+            "revision",
+            "land_use",
+            "construction_status",
+            "area",
+        )
         .first()
     )

@@ -24,7 +24,14 @@ def test_preview_geometry_filter_provenance_and_private_field_allowlist(client):
         assert len(data["features"]) == 1
         item = data["features"][0]
         assert item["geometry"]["type"] == "MultiPolygon"
-        assert set(item["properties"]) == {"id", "code", "community"}
+        assert set(item["properties"]) == {
+            "id",
+            "code",
+            "community",
+            "land_use",
+            "construction_status",
+            "category",
+        }
         detail = client.get(f"/api/v1/preview/parcels/{item['id']}")
         assert detail.status_code == 200
         assert detail.json()["source"]["published_at"] is None

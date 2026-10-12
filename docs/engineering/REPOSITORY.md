@@ -39,7 +39,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   └── en.json, ar.json…     Textes de l'interface dans les quinze langues
 │   │   ├── src/                     Code source de l'interface web
 │   │   │   ├── app/                 Pages, routes et structures de page Next.js
-│   │   │   │   ├── api/atlas/        Relais serveur borné des lectures de parcelles
+│   │   │   │   ├── api/atlas/        Relais serveur borné des lectures de l’atlas
 │   │   │   │   ├── globals.css       Styles communs du site
 │   │   │   │   └── [locale]/         Routes associées à une langue, par exemple /en
 │   │   │   │       ├── layout.tsx    Structure de page, langue, direction et métadonnées
@@ -79,23 +79,28 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       ├── modules/         Domaines métier séparés, chacun propriétaire de ses règles
 │       │       │   ├── catalog/      Identité des biens et relations acceptées
 │       │       │   │   ├── apps.py   Déclaration de l'application Django
-│       │       │   │   ├── models.py Parcelles typées avec géométrie PostGIS et identité interne
+│       │       │   │   ├── models.py Parcelles, rues, bâtiments, lieux et territoires typés
 │       │       │   │   ├── services.py  Conversion des géométries et mutations du catalogue
 │       │       │   │   ├── queries.py   Lectures spatiales bornées et identité
+│       │       │   │   ├── map_queries.py   Couches de contexte et proximité dans PostGIS
 │       │       │   │   ├── migrations/  Évolution du schéma du catalogue
 │       │       │   │   └── README.md Responsabilités et dépendances du module
 │       │       │   ├── evidence/     Sources, assertions et rapprochements
 │       │       │   │   ├── apps.py
 │       │       │   │   ├── models.py Sources, acquisitions, captures, observations et audit
-│       │       │   │   ├── onwani.py Protocole et validation des réponses officielles
+│       │       │   │   ├── onwani.py Protocole parcellaire officiel
+│       │       │   │   ├── map_sources.py, map_import.py  Couches officielles et OSM
+│       │       │   │   ├── research_sources.py, research_import.py  Pages et repères déclarés
+│       │       │   │   ├── project_sources.json  Registre de références à collecter
 │       │       │   │   ├── services.py  Orchestration de l'import et de sa transaction
 │       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
 │       │       │   │   ├── migrations/  Évolution du schéma des preuves
-│       │       │   │   ├── management/commands/import_onwani.py  Commande manuelle d'import
+│       │       │   │   ├── management/commands/  Imports Onwani, couches Reem, références et satellite
 │       │       │   │   └── README.md
 │       │       │   └── publication/  Validation et versions publiées
 │       │       │       ├── apps.py
-│       │       │       ├── preview.py  Projection de recherche locale, sans publication automatique
+│       │       │       ├── preview.py, map_preview.py  Projections locales bornées
+│       │       │       ├── land_use.py  Catégories/couleurs, usage original conservé
 │       │       │       └── README.md
 │       │       └── export_openapi.py Export de la description de l'API
 │       └── tests/                   Vérifications HTTP et d'intégration du backend
@@ -125,18 +130,25 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   └── engineering/                 Guides pour installer, développer et maintenir le projet
 │       ├── REPOSITORY.md              Ce guide de structure et de responsabilités
 │       ├── DEVELOPMENT.md             Commandes de démarrage et explications
+│       ├── REEM_MAP.md                Couverture, sources et correspondance avec le HTML
 │       ├── TOOLCHAIN.md               Versions exécutables et compatibilités
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
 │       ├── DATA_PROVENANCE.md          Collecte directe, sources par information et audit
 │       ├── DATABASE_DESIGN.md          Noms du domaine immobilier, audit SQL et trajectoire d'évolution
 │       └── STRUCTURE_REVIEW.md        Revue critique de l'organisation
-└── scripts/                         Utilitaires pour vérifier le dépôt et préparer le site construit
+└── scripts/                         Utilitaires de vérification, préparation du site et acquisitions isolées
+    ├── acquire_reem_imagery.py        Acquisition et recadrage Sentinel hors du runtime API/web
+    ├── imagery-requirements.txt      Dépendances verrouillées de cet environnement raster isolé
     ├── check-doc-links.mjs            Vérification des liens locaux dans les documents
     ├── prepare-web-runtime.mjs        Préparation des ressources de l'artefact web autonome
     └── smoke-web.mjs                  Vérification du site construit et des routes de langue
 ```
 
 ## Pourquoi séparer ces dossiers ?
+
+### Extension de l'atlas : couches géographiques typées
+
+Le module `catalog` possède aussi `Street` (tracé multiligne), `Building` (empreinte multipolygone), `Place` (repère ponctuel) et `AdministrativeArea` (district/secteur multipolygone), dans `real_estate`. Ces objets conservent leurs identités par fournisseur : un bâtiment OSM n'est pas un permis, un repère n'est pas une identité commerciale approuvée. `evidence` possède leur observation avec exactement une cible typée, une capture, une version de mapping et un audit de révision. La direction reste `publication → evidence → catalog`. Les connecteurs Onwani et OSM sont séparés ; l'API lit PostgreSQL et ne collecte rien à l'ouverture de la carte. Un rapprochement spatial reste calculé et signalé comme tel, sans renommer une parcelle. Le HTML utilisateur est une référence de fonctions et une piste de recherche, jamais une source cadastrale. `evidence` possède aussi ResearchReference et ImageryScene ; le premier est une référence capturée, le second un petit dérivé satellite du pilote. Le traitement Rasterio est isolé dans `scripts/acquire_reem_imagery.py`, avec dépendances séparées dans `scripts/imagery-requirements.txt`. Les captures retraitées conservent une clé étrangère parent et leurs dates originales. Les rapprochements spatiaux sont réversibles et ne fusionnent aucune identité de projet.
 
 ### `apps/web` : ce que l'utilisateur voit
 
@@ -215,7 +227,7 @@ Les caches de code ne sont pas le stockage de PostgreSQL. **Supprimer un volume 
 | Modifier la page d'accueil | `apps/web/src/app/[locale]/page.tsx` | Existe |
 | Modifier l'atlas ou ajouter une fiche immobilière | `apps/web/src/features/atlas/` pour le pilote parcellaire ; un module `property/` viendra avec les dossiers immobiliers | Atlas local créé, dossiers bâtiment/unité à créer |
 | Ajouter un composant partagé entre plusieurs fonctionnalités | `apps/web/src/components/` | Dossier existant ; y placer seulement les composants réutilisables |
-| Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/liwa/modules/catalog/` | Modèle Parcel et services existants ; bâtiments et logements à ajouter |
+| Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/liwa/modules/catalog/` | Parcel, Street, Building, Place, AdministrativeArea existants ; logements à ajouter |
 | Ajouter les sources et preuves | `apps/api/src/liwa/modules/evidence/` | Premiers modèles d'acquisition et observations Onwani existants |
 | Ajouter une route métier HTTP | `apps/api/src/liwa/api/`, branchée au routeur | À créer avec les services métier qu'elle appelle |
 | Ajouter des migrations Django | `migrations/` dans le module propriétaire | À générer avec Django lorsque les modèles arrivent |
@@ -250,14 +262,14 @@ Les workers légers utiliseront le même paquet Python que l'API, avec un proces
 
 ## Première exploration locale — 11 octobre 2026
 
-`apps/web/src/features/atlas/` possède l'accueil, l'exploration, la carte et les types consommés depuis les contrats générés. Les routes localisées assemblent ces écrans ; `apps/web/src/app/api/atlas/` relaie uniquement les deux lectures prévues vers une origine configurée côté serveur, avec délai et budget de réponse. Aucune clé ni URL amont configurable par un visiteur n'est envoyée au client. MapLibre est chargé uniquement dans l'exploration ; l'accueil est rendu côté serveur sans ce moteur.
+`apps/web/src/features/atlas/` possède l'accueil, l'exploration, la carte et les types consommés depuis les contrats générés. Les routes localisées assemblent ces écrans ; `apps/web/src/app/api/atlas/` relaie uniquement les lectures fixes de l’atlas vers une origine configurée côté serveur, avec délai et budget de réponse. Aucune clé ni URL amont configurable par un visiteur n'est envoyée au client. MapLibre est chargé uniquement dans l'exploration ; l'accueil est rendu côté serveur sans ce moteur.
 
-`catalog/queries.py` possède les lectures géographiques bornées ; `evidence/queries.py` possède la projection de provenance autorisée ; `publication/preview.py` les assemble sans mutation. L'API `api/parcels.py` valide les entrées et expose un contrat limité. La direction reste publication → evidence/catalog ; aucun nouveau domaine ni migration n'est nécessaire. Les originaux, opérateurs, attributs bruts et historiques internes ne sont pas exposés.
+`catalog/queries.py` possède les lectures géographiques bornées ; `evidence/queries.py` possède la projection de provenance autorisée ; `publication/preview.py` les assemble sans mutation. L'API `api/parcels.py` valide les entrées et expose un contrat limité. La direction reste publication → evidence/catalog. Les migrations ajoutent les objets cartographiques typés dans leurs schémas propriétaires. Les originaux, opérateurs, attributs bruts et historiques internes ne sont pas exposés.
 
 Les endpoints `/api/v1/preview/parcels` et `/api/v1/preview/parcels/{id}` sont un aperçu de recherche **local**, pas une publication approuvée. Django exige DEBUG et LIWA_PARCEL_PREVIEW ; hors DEBUG ils refusent même un flag activé. Un web compilé exige aussi l'opt-in LIWA_ENABLE_LOCAL_PREVIEW=1. Ce flag ne permet pas de contourner Django. Les droits de diffusion, rôles, authentification du personnel, limitation de trafic distribuée et CSP complète avec nonces restent à définir avant publication.
 
-La carte actuelle affiche les contours réels Onwani sur un fond neutre, sans fournisseur externe de tuiles, sans noms de rues ni volumes de bâtiments. La liste paginée fournit une alternative si WebGL ne fonctionne pas. La couverture d'une source, la validité de géométrie et l'approbation d'un dossier sont trois notions distinctes.
+La carte affiche les usages colorés, secteurs, rues et noms, empreintes 2D, lieux, références et vues satellite ; voir [la couverture et les limites](REEM_MAP.md). Les volumes 3D ne sont pas générés. La liste paginée fournit une alternative si WebGL ne fonctionne pas. La couverture d'une source, la validité de géométrie et l'approbation d'un dossier sont trois notions distinctes.
 
 ## Ce que le socle ne prétend pas fournir
 
-Le premier import manuel Onwani alimente les parcelles et conserve captures, observations et audit. Il ne publie pas automatiquement un dossier. L'accueil et la carte proposent désormais un aperçu local. Auth Supabase, stockage objet, autres collecteurs, queue et génération ne sont pas encore intégrés. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.
+Le premier import manuel Onwani alimente les parcelles et conserve captures, observations et audit. Il ne publie pas automatiquement un dossier. L'accueil et la carte proposent désormais un aperçu local. Auth Supabase, stockage objet, queue et génération ne sont pas encore intégrés. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.
