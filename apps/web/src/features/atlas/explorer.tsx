@@ -490,14 +490,32 @@ export function Explorer({
             </details>
           </div>
           <p className="map-credit">
-            DMT / Onwani ·{" "}
-            <a
-              href="https://www.openstreetmap.org/copyright"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              © OpenStreetMap contributors · ODbL
-            </a>
+            <bdi>
+              {[
+                ...new Set(
+                  collection?.features
+                    .map((item) => item.properties.source_name)
+                    .filter(Boolean),
+                ),
+              ].join(" · ")}
+            </bdi>
+            {Object.values(context ?? {}).some((layer) =>
+              layer.features.some((item) =>
+                item.properties.source.name.startsWith("OpenStreetMap"),
+              ),
+            ) && (
+              <>
+                {" "}
+                ·{" "}
+                <a
+                  href="https://www.openstreetmap.org/copyright"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  © OpenStreetMap contributors · ODbL
+                </a>
+              </>
+            )}
           </p>
           {options.satellite && <p className="small-text">{m.imageryNote}</p>}
           {contextError && (

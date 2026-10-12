@@ -239,7 +239,8 @@ export default function ParcelMap({
     });
     instance.addControl(control);
     return () => {
-      instance.removeControl(control);
+      // Map.remove() already disposes controls when the territory unmounts.
+      if (map.current === instance) instance.removeControl(control);
     };
   }, [credits]);
 

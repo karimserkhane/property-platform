@@ -57,4 +57,14 @@ Prix/unités, règles de frais par juridiction, orchestration automatique, scori
 
 123 tests backend ont réussi sur une base PostGIS isolée, dont la provenance d'un deuxième fournisseur synthétique, les mesures géodésiques et le refus de replier une zone inactive sur le pilote. 78 tests sans GIS ont ensuite réussi sur Windows ; ils ne remplacent pas PostGIS. Cinq tests web, types, Biome, Ruff, frontières de modules, contrats générés et liens documentaires ont été contrôlés.
 
-La compilation Docker et la validation du nouveau parcours dans le navigateur restent à terminer : le disque C: s'est rempli pendant la construction et Docker n'a pas récupéré après son redémarrage normal. Les caches de paquets régénérables du dépôt ont été nettoyés ; volumes, captures et sauvegardes ont été conservés. Le build Windows rencontre aussi le contrôle de permissions du cache natif SWC, sans désactivation de protection. Les validations navigateur des versions précédentes ne prouvent pas le fonctionnement de cette modification.
+La compilation du code actuel a réussi hors réseau dans l'environnement Linux déjà validé, avec les mêmes dépendances verrouillées. L'artefact autonome passe les contrôles des quinze langues. Le navigateur a validé le parcours Reem → Sharjah → retour, l'état de préparation de Dubai, l'historique, la conservation du territoire au changement de langue et le RTL sur mobile de 390 pixels, sans débordement. Le nettoyage des contrôles MapLibre au changement de zone a été corrigé pendant cette vérification.
+
+La prévisualisation locale fonctionne sur `http://localhost:3102/en`. Le disque plein a nécessité un redémarrage normal de Docker, puis une reprise des images applicatives locales depuis les environnements sains ; les volumes, captures et sauvegardes ont été conservés. La base retrouve 2 431 parcelles, 665 rues et 188 bâtiments. **Une reconstruction depuis zéro reste bloquée sur ce poste par `UnknownIssuer` vers PyPI et npm**, et le build Windows par les permissions du cache natif SWC. Aucun contrôle de certificat ou de cache n'a été désactivé. Ces incidents locaux ne sont pas une validation du déploiement ni de la chaîne de certificats pour un nouvel environnement.
+
+Pour reprendre la prévisualisation sur ce poste avec ses images actuelles, depuis `C:\Users\Karim\Repositories\property-platform` :
+
+```powershell
+docker compose -f infra/local/compose.yaml --profile web-preview up -d --no-build
+```
+
+Cette commande démarre les images déjà présentes ; elle ne compile pas les modifications suivantes. Pour reconstruire normalement après correction des certificats de l'environnement, utiliser les commandes de [DEVELOPMENT.md](DEVELOPMENT.md). Ne pas ajouter de désactivation TLS pour contourner `UnknownIssuer`.

@@ -35,6 +35,8 @@ Les versions courantes et les exceptions de compatibilité sont documentées dan
 
 ### Variante : prévisualisation entièrement dans Docker
 
+**État du poste après la validation nationale du 12 octobre :** la prévisualisation compilée actuelle est disponible sur 3102 et peut se redémarrer avec `docker compose -f infra/local/compose.yaml --profile web-preview up -d --no-build`. Les reconstructions nécessitant PyPI/npm rencontrent actuellement `UnknownIssuer` sur ce poste ; voir [le compte rendu et les limites](UAE_COVERAGE.md#validation-de-cette-modification). `--no-build` réutilise les images présentes et ne compile pas un nouveau changement.
+
 Si tu préfères essayer le site compilé sans lancer Node sur Windows, depuis `C:\Users\Karim\Repositories\property-platform` :
 
 ```powershell
