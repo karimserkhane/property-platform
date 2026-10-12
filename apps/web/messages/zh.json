@@ -15,7 +15,8 @@
     "coast": "海滨",
     "sunset": "日落时分",
     "pause": "暂停图片轮播",
-    "play": "播放图片轮播"
+    "play": "播放图片轮播",
+    "scroll": "向下滚动，探索更多"
   },
   "LanguageSwitcher": {
     "label": "语言"

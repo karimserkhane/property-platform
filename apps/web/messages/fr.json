@@ -15,7 +15,8 @@
     "coast": "Bord de mer",
     "sunset": "Au couchant",
     "pause": "Arrêter le diaporama",
-    "play": "Lancer le diaporama"
+    "play": "Lancer le diaporama",
+    "scroll": "Défiler pour découvrir"
   },
   "LanguageSwitcher": {
     "label": "Langue"

@@ -1,11 +1,11 @@
 :root {
   color-scheme: light;
   font-family: system-ui, sans-serif;
-  background: #f7f8f5;
-  color: #162b36;
-  --accent: #075e63;
-  --muted: #4f626b;
-  --line: #dbe2df;
+  background: #f8f5ee;
+  color: #0b2132;
+  --accent: #173b55;
+  --muted: #59656c;
+  --line: #ded9cf;
   --control-radius: 12px;
   --control-ease: cubic-bezier(0.22, 0.68, 0, 1);
   --control-duration: 220ms;
@@ -19,6 +19,9 @@
 }
 body {
   margin: 0;
+}
+html:has([data-page="home"]) {
+  scroll-behavior: smooth;
 }
 a {
   color: inherit;
@@ -680,22 +683,22 @@ body:has([data-page="home"]) .site-header {
   z-index: 5;
   max-width: 90rem;
   padding: 1.8rem 4.5rem;
-  color: #fffaf0;
-  border-block-end-color: #fffaf030;
+  color: #fffdf7;
+  border-block-end-color: #fffaf026;
 }
 body:has([data-page="home"]) .brand {
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-size: 1.15rem;
+  font-weight: 450;
+  letter-spacing: 0.025em;
 }
 body:has([data-page="home"]) .brand-mark {
-  background-color: #efd5ae;
+  background-color: #d2b895;
 }
 body:has([data-page="home"]) .language-switcher select {
-  background: #102d3790;
+  background: #0b213280;
   color: #fffaf0;
   border-color: #fffaf059;
-  border-radius: 10px;
+  border-radius: 4px;
   box-shadow:
     0 1px 0 #ffffff12 inset,
     0 5px 16px #04151e26;
@@ -708,7 +711,7 @@ body:has([data-page="home"]) .language-switcher {
   color: #fffaf0;
 }
 body:has([data-page="home"]) .language-switcher option {
-  background: #15343e;
+  background: #0b2132;
   color: #fffaf0;
 }
 body:has([data-page="home"]) .site-header :focus-visible {
@@ -716,7 +719,7 @@ body:has([data-page="home"]) .site-header :focus-visible {
 }
 @media (hover: hover) and (pointer: fine) {
   .button:hover:not(:active) {
-    background: #064b4f;
+    background: #102d42;
     transform: translateY(-2px);
     box-shadow:
       0 1px 0 #ffffff33 inset,
@@ -738,6 +741,9 @@ body:has([data-page="home"]) .site-header :focus-visible {
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  html:has([data-page="home"]) {
+    scroll-behavior: auto;
+  }
   :root {
     --control-duration: 0ms;
   }

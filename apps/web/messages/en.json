@@ -15,7 +15,8 @@
     "coast": "By the sea",
     "sunset": "Golden hour",
     "pause": "Pause slideshow",
-    "play": "Play slideshow"
+    "play": "Play slideshow",
+    "scroll": "Scroll to discover"
   },
   "LanguageSwitcher": {
     "label": "Language"

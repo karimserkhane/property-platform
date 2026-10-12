@@ -103,6 +103,9 @@ export function HomeGallery({ labels }: { labels: GalleryLabels }) {
     <fieldset
       className={styles.gallery}
       aria-label={labels.galleryLabel}
+      data-playing={
+        playing && !hidden && !hovered && !focused ? "true" : "false"
+      }
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setFocused(true)}
@@ -111,41 +114,43 @@ export function HomeGallery({ labels }: { labels: GalleryLabels }) {
           setFocused(false);
       }}
     >
-      {mounted.map((index) => {
-        const image = HOME_SCENES[index];
-        return (
-          <picture
-            key={image.key}
-            className={`${styles.image} ${active === index ? styles.visible : ""}`}
-            style={{ "--photo-position": image.position } as CSSProperties}
-          >
-            <source
-              media="(max-width: 700px)"
-              srcSet={`/images/uae/${image.image}-768.webp`}
-            />
-            <img
-              src={`/images/uae/${image.image}-1920.webp`}
-              alt=""
-              width="1920"
-              height={image.height}
-              decoding="async"
-              fetchPriority={index === 0 ? "high" : "low"}
-              ref={(element) => {
-                if (element?.complete && element.naturalWidth > 0)
-                  imageReady(index);
-              }}
-              onLoad={() => imageReady(index)}
-              onError={() => {
-                setFailed((images) => [...new Set([...images, index])]);
-                if (request.current === index) {
-                  request.current = null;
-                  setRequested(null);
-                }
-              }}
-            />
-          </picture>
-        );
-      })}
+      <div className={styles.heroMedia}>
+        {mounted.map((index) => {
+          const image = HOME_SCENES[index];
+          return (
+            <picture
+              key={image.key}
+              className={`${styles.image} ${active === index ? styles.visible : ""}`}
+              style={{ "--photo-position": image.position } as CSSProperties}
+            >
+              <source
+                media="(max-width: 700px)"
+                srcSet={`/images/uae/${image.image}-768.webp`}
+              />
+              <img
+                src={`/images/uae/${image.image}-1920.webp`}
+                alt=""
+                width="1920"
+                height={image.height}
+                decoding="async"
+                fetchPriority={index === 0 ? "high" : "low"}
+                ref={(element) => {
+                  if (element?.complete && element.naturalWidth > 0)
+                    imageReady(index);
+                }}
+                onLoad={() => imageReady(index)}
+                onError={() => {
+                  setFailed((images) => [...new Set([...images, index])]);
+                  if (request.current === index) {
+                    request.current = null;
+                    setRequested(null);
+                  }
+                }}
+              />
+            </picture>
+          );
+        })}
+      </div>
       <div className={styles.shade} />
       <div className={styles.galleryFooter}>
         <div className={styles.photoCaption}>

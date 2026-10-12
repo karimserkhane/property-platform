@@ -15,7 +15,8 @@
     "coast": "Am Meer",
     "sunset": "Abendlicht",
     "pause": "Bildwechsel pausieren",
-    "play": "Bildwechsel starten"
+    "play": "Bildwechsel starten",
+    "scroll": "Scrollen und entdecken"
   },
   "LanguageSwitcher": {
     "label": "Sprache"

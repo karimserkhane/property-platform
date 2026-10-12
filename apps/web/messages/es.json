@@ -15,7 +15,8 @@
     "coast": "Junto al mar",
     "sunset": "Al atardecer",
     "pause": "Pausar las imágenes",
-    "play": "Reproducir las imágenes"
+    "play": "Reproducir las imágenes",
+    "scroll": "Desplázate para descubrir"
   },
   "LanguageSwitcher": {
     "label": "Idioma"

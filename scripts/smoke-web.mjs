@@ -121,8 +121,25 @@ try {
     }
     assert.equal(
       (html.match(/<img\b/g) ?? []).length,
+      2,
+      `${locale}: one hero photograph and one lazy editorial photograph`,
+    );
+    assert.equal(
+      (html.match(/fetchPriority="high"/g) ?? []).length,
       1,
-      `${locale}: only the first photograph is mounted`,
+      `${locale}: only the hero photograph is prioritized`,
+    );
+    assert.ok(
+      html.includes('loading="lazy"'),
+      `${locale}: editorial photograph defers loading`,
+    );
+    assert.ok(
+      html.includes('href="#discovery"'),
+      `${locale}: native discovery anchor`,
+    );
+    assert.ok(
+      html.includes(messages.Home.scroll),
+      `${locale}: translated discovery link`,
     );
     assert.ok(html.includes("<select"), locale);
     const cssPath = html.match(/href="([^"\s]+\.css[^"\s]*)"/)?.[1];

@@ -8,7 +8,7 @@ Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte loc
 
 ### Essayer le nouvel accueil et la carte locale
 
-L'accueil présente les sept émirats et trois photographies locales de Dubai et Abu Dhabi avec des transitions et des commandes de pause. La plateforme vise tous les Émirats ; Al Reem reste le premier jeu de données. [Le guide de couverture nationale](UAE_COVERAGE.md) indique où configurer les territoires et comment en activer un nouveau. [Le guide du thème](VISUAL_DESIGN.md) explique où changer les images, le cadrage, les textes et les couleurs.
+L'accueil présente les sept émirats et trois photographies locales de Dubai et Abu Dhabi. En faisant défiler la page, le paysage se déplace plus lentement que le texte : c'est la **parallaxe**. Sur ordinateur, la photo du littoral reste un instant en place pendant que le contenu passe à côté. Les commandes du bandeau changent la photo ou suspendent le diaporama et son zoom. Le réglage système « réduire les animations » désactive ces mouvements ; sur téléphone ils sont plus courts et la photo du littoral défile normalement. La plateforme vise tous les Émirats ; Al Reem reste le premier jeu de données. [Le guide de couverture nationale](UAE_COVERAGE.md) indique où configurer les territoires et comment en activer un nouveau. [Le guide du thème](VISUAL_DESIGN.md) explique où changer les images, le cadrage, les textes, les couleurs et les effets.
 
 Après une mise à jour du backend, reconstruire son image depuis `C:\Users\Karim\Repositories\property-platform` :
 
