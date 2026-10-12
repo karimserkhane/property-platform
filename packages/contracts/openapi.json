@@ -64,7 +64,24 @@
       "get": {
         "operationId": "previewReferences",
         "summary": "References",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -82,6 +99,16 @@
           },
           "403": {
             "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -110,7 +137,24 @@
       "get": {
         "operationId": "previewImagery",
         "summary": "Imagery",
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -128,6 +172,16 @@
           },
           "403": {
             "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -165,6 +219,22 @@
               "type": "string"
             },
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
           }
         ],
         "responses": {
@@ -180,6 +250,16 @@
           },
           "403": {
             "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -247,6 +327,22 @@
               "type": "string"
             },
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
           }
         ],
         "responses": {
@@ -262,6 +358,16 @@
           },
           "403": {
             "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
             "content": {
               "application/json": {
                 "schema": {
@@ -310,6 +416,22 @@
               "type": "string"
             },
             "required": true
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
           }
         ],
         "responses": {
@@ -335,6 +457,58 @@
           },
           "404": {
             "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/territories": {
+      "get": {
+        "operationId": "previewTerritories",
+        "summary": "Territories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TerritoryRegistry"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -886,6 +1060,28 @@
           "category": {
             "title": "Category",
             "type": "string"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Name"
           }
         },
         "required": [
@@ -894,7 +1090,9 @@
           "community",
           "land_use",
           "construction_status",
-          "category"
+          "category",
+          "source_url",
+          "source_name"
         ],
         "title": "Properties",
         "type": "object"
@@ -1160,6 +1358,175 @@
           "ingested_at"
         ],
         "title": "Provenance",
+        "type": "object"
+      },
+      "TerritoryRegistry": {
+        "properties": {
+          "default_territory_id": {
+            "title": "Default Territory Id",
+            "type": "string"
+          },
+          "territories": {
+            "items": {
+              "$ref": "#/components/schemas/TerritoryResponse"
+            },
+            "title": "Territories",
+            "type": "array"
+          }
+        },
+        "required": [
+          "default_territory_id",
+          "territories"
+        ],
+        "title": "TerritoryRegistry",
+        "type": "object"
+      },
+      "TerritoryResponse": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Id"
+          },
+          "level": {
+            "title": "Level",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "bounds": {
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Bounds",
+            "type": "array"
+          },
+          "queryable": {
+            "title": "Queryable",
+            "type": "boolean"
+          },
+          "parcel_count": {
+            "title": "Parcel Count",
+            "type": "integer"
+          },
+          "camera_bounds": {
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Camera Bounds",
+            "type": "array"
+          },
+          "focus_bounds": {
+            "anyOf": [
+              {
+                "maxItems": 4,
+                "minItems": 4,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Focus Bounds"
+          },
+          "neighbourhood_bounds": {
+            "anyOf": [
+              {
+                "maxItems": 4,
+                "minItems": 4,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Neighbourhood Bounds"
+          }
+        },
+        "required": [
+          "id",
+          "parent_id",
+          "level",
+          "name",
+          "name_ar",
+          "bounds",
+          "queryable",
+          "parcel_count",
+          "camera_bounds",
+          "focus_bounds",
+          "neighbourhood_bounds"
+        ],
+        "title": "TerritoryResponse",
         "type": "object"
       }
     }

@@ -25,6 +25,8 @@ class Properties(Schema):
     land_use: str
     construction_status: str
     category: str
+    source_url: str | None
+    source_name: str | None
 
 
 class Feature(Schema):
@@ -112,16 +114,22 @@ class ResearchReferenceResponse(Schema):
 
 @router.get(
     "/references",
-    response={200: list[ResearchReferenceResponse], 403: Error, 503: Error},
+    response={200: list[ResearchReferenceResponse], 403: Error, 409: Error, 503: Error},
     operation_id="previewReferences",
 )
-def references(request):
+def references(request, territory: str | None = None):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.publication.coverage import profile_for, reference_source_keys
+
+    profile = profile_for(territory) if territory else None
+    if territory and profile is None:
+        return Status(409, {"code": "territory_not_configured"})
+
     from property_platform.modules.evidence.queries import research_references
 
     try:
-        return research_references()
+        return research_references(reference_source_keys(profile) if profile else None)
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
 
@@ -139,16 +147,22 @@ class ImageryResponse(Schema):
 
 @router.get(
     "/imagery",
-    response={200: list[ImageryResponse], 403: Error, 503: Error},
+    response={200: list[ImageryResponse], 403: Error, 409: Error, 503: Error},
     operation_id="previewImagery",
 )
-def imagery(request):
+def imagery(request, territory: str | None = None):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.publication.coverage import profile_for
+
+    profile = profile_for(territory) if territory else None
+    if territory and profile is None:
+        return Status(409, {"code": "territory_not_configured"})
+
     from property_platform.modules.evidence.queries import imagery_scenes
 
     try:
-        return imagery_scenes()
+        return imagery_scenes(profile.imagery_ids if profile else None)
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
 
@@ -196,15 +210,22 @@ class MapContext(Schema):
 
 @router.get(
     "/map-context",
-    response={200: MapContext, 403: Error, 422: Error, 503: Error},
+    response={200: MapContext, 403: Error, 409: Error, 422: Error, 503: Error},
     operation_id="previewMapContext",
 )
-def context(request, bbox: str):
+def context(request, bbox: str, territory: str | None = None):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
     bounds = parse_bbox(bbox)
     if bounds is None:
         return Status(422, {"code": "invalid_query"})
+    from property_platform.modules.publication.coverage import profile_for
+
+    if territory and profile_for(territory) is None:
+        return Status(409, {"code": "territory_not_configured"})
+    if territory and not within_territory(bounds, territory):
+        return Status(422, {"code": "invalid_query"})
+
     from property_platform.modules.publication.map_preview import map_context
 
     try:
@@ -215,6 +236,13 @@ def context(request, bbox: str):
 
 def enabled():
     return settings.DEBUG and getattr(settings, "PROPERTY_PLATFORM_PARCEL_PREVIEW", False)
+
+
+def within_territory(bounds, territory):
+    from property_platform.modules.catalog.territories import TERRITORY_BY_ID
+
+    west, south, east, north = TERRITORY_BY_ID[territory].bounds
+    return west <= bounds[0] < bounds[2] <= east and south <= bounds[1] < bounds[3] <= north
 
 
 def parse_bbox(value):
@@ -234,38 +262,92 @@ def parse_bbox(value):
 
 @router.get(
     "/parcels",
-    response={200: Collection, 403: Error, 422: Error, 503: Error},
+    response={200: Collection, 403: Error, 409: Error, 422: Error, 503: Error},
     operation_id="previewParcels",
 )
-def parcels(request, bbox: str, limit: int = 3000, q: str = ""):
+def parcels(request, bbox: str, limit: int = 3000, q: str = "", territory: str | None = None):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
     bounds = parse_bbox(bbox)
     query = q.strip()
     if bounds is None or not 1 <= limit <= 3000 or len(query) > 80:
         return Status(422, {"code": "invalid_query"})
+    from property_platform.modules.publication.coverage import profile_for
+
+    profile = profile_for(territory) if territory else None
+    if territory and profile is None:
+        return Status(409, {"code": "territory_not_configured"})
+    if territory and not within_territory(bounds, territory):
+        return Status(422, {"code": "invalid_query"})
+
     from property_platform.modules.publication.preview import features
 
     try:
-        return features(bbox=bounds, limit=limit, query=query)
+        return features(
+            bbox=bounds,
+            limit=limit,
+            query=query,
+            namespaces=profile.parcel_namespaces if profile else None,
+        )
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
 
 
 @router.get(
     "/parcels/{parcel_id}",
-    response={200: Detail, 403: Error, 404: Error, 503: Error},
+    response={200: Detail, 403: Error, 404: Error, 409: Error, 503: Error},
     operation_id="previewParcel",
 )
-def parcel(request, parcel_id: UUID):
+def parcel(request, parcel_id: UUID, territory: str | None = None):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.publication.coverage import profile_for
+
+    profile = profile_for(territory) if territory else None
+    if territory and profile is None:
+        return Status(409, {"code": "territory_not_configured"})
+
     from property_platform.modules.publication.preview import detail
 
     try:
-        result = detail(parcel_id)
+        result = detail(parcel_id, namespaces=profile.parcel_namespaces if profile else None)
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
     if result is None:
         return Status(404, {"code": "not_found"})
     return result
+
+
+class TerritoryResponse(Schema):
+    id: str
+    parent_id: str | None
+    level: str
+    name: str
+    name_ar: str
+    bounds: tuple[float, float, float, float]
+    queryable: bool
+    parcel_count: int
+    camera_bounds: tuple[float, float, float, float]
+    focus_bounds: tuple[float, float, float, float] | None
+    neighbourhood_bounds: tuple[float, float, float, float] | None
+
+
+class TerritoryRegistry(Schema):
+    default_territory_id: str
+    territories: list[TerritoryResponse]
+
+
+@router.get(
+    "/territories",
+    response={200: TerritoryRegistry, 403: Error, 503: Error},
+    operation_id="previewTerritories",
+)
+def territories(request):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.publication.coverage import coverage_registry
+
+    try:
+        return coverage_registry()
+    except DatabaseError:
+        return Status(503, {"code": "data_unavailable"})

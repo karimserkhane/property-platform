@@ -1,6 +1,6 @@
 # property-platform
 
-Property Platform : plateforme immobilière cartographique évolutive, avec dossiers sourcés, plans, comparaison et suivi des changements. Première zone envisagée : Al Reem Island.
+Property Platform : plateforme immobilière cartographique destinée aux **sept émirats**, avec dossiers sourcés, plans, comparaison et suivi des changements. Premier jeu de données : Al Reem Island. Les autres territoires sont préparés dans la navigation ; leur collecte reste à activer après validation des sources.
 
 ## Documents de cadrage
 
@@ -22,6 +22,8 @@ Le dépôt contient Next.js/TypeScript, Django/Django Ninja, contrats OpenAPI g�
 - `.github/workflows` : qualité, compilation, frontières de modules et intégration PostGIS.
 
 Lire [les règles de structure](docs/engineering/REPOSITORY.md) et [le guide de développement](docs/engineering/DEVELOPMENT.md). Les dépendances JavaScript et Python sont verrouillées ; les directions entre modules et la cohérence des contrats sont vérifiées automatiquement.
+
+Voir [la couverture nationale et l'ajout d'une nouvelle zone](docs/engineering/UAE_COVERAGE.md) : géographie centralisée, profils de sources distincts et limites de charge du prototype.
 
 Pour changer le nom commercial sans renommer le code, modifier `packages/branding/src/brand.ts` ; voir [la configuration de marque et la reprise de l'ancienne base locale](docs/engineering/BRANDING.md).
 

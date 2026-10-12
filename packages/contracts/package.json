@@ -6,7 +6,8 @@
   "exports": {
     ".": {
       "types": "./src/generated.ts"
-    }
+    },
+    "./territories": "./territories.json"
   },
   "scripts": {
     "generate": "openapi-typescript openapi.json -o src/generated.ts",

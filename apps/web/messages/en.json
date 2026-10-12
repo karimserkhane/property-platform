@@ -1,15 +1,15 @@
 {
   "Home": {
-    "location": "Al Reem Island",
+    "location": "United Arab Emirates",
     "title": "See beyond the skyline.",
-    "description": "Explore Al Reem through its parcels, streets, buildings and original sources.",
-    "eyebrow": "Abu Dhabi · United Arab Emirates",
+    "description": "Explore places across the Emirates through maps, property records and original sources.",
+    "eyebrow": "United Arab Emirates",
     "navExplore": "Explore",
     "navSources": "Our sources",
     "discoverTitle": "Every address has a bigger picture.",
     "discoverBody": "Read the land, understand the surroundings and follow the information back to its source.",
-    "coverage": "Pilot coverage · Al Reem Island",
-    "galleryLabel": "Abu Dhabi photographs",
+    "coverage": "First dataset · Al Reem Island. Coverage expands area by area.",
+    "galleryLabel": "UAE photographs",
     "photoCredit": "Photography",
     "night": "After dark",
     "coast": "By the sea",
@@ -21,10 +21,10 @@
     "label": "Language"
   },
   "Atlas": {
-    "explore": "Explore Al Reem",
+    "explore": "Explore the Emirates",
     "sources": "Data & sources",
     "pilot": "Local research preview",
-    "intro": "Explore parcels across Al Reem Island. Open a record and see where its information comes from.",
+    "intro": "Choose an area and trace its property information back to the original sources.",
     "search": "Search",
     "reference": "Parcel reference",
     "loading": "Loading parcels…",
@@ -39,7 +39,7 @@
     "unknown": "Not documented",
     "district": "District",
     "community": "Community",
-    "limitations": "Local preview from DMT / Onwani. Parcels are not buildings or homes. Retrieval dates do not establish permit validity; publication dates may be unknown.",
+    "limitations": "Research preview. Parcels are not buildings or homes. Source coverage and dates must be checked for each area; a retrieval date does not establish permit validity.",
     "list": "Parcel list",
     "map": "Parcel map",
     "reset": "Reset",
@@ -74,8 +74,8 @@
     "meps": "MEPS status",
     "dcr": "DCR document",
     "nearby": "Nearby streets",
-    "viewIsland": "Whole island",
-    "viewRT4": "RT4",
+    "viewIsland": "Whole area",
+    "viewRT4": "Focus area",
     "viewNear": "Neighbourhood",
     "exportCSV": "Export CSV",
     "exportPNG": "Export view PNG",
@@ -104,5 +104,15 @@
     "media": "Media",
     "reference": "Research reference",
     "editedDate": "OSM last edit"
+  },
+  "Coverage": {
+    "title": "Seven emirates. One platform.",
+    "emirate": "Emirate",
+    "area": "Area",
+    "chooseEmirate": "Choose an emirate",
+    "preparing": "Coverage in preparation",
+    "preparingBody": "This territory has no activated dataset yet. Explore the Al Reem pilot while further sources are researched and validated.",
+    "visitPilot": "Explore the pilot",
+    "unknownArea": "Unknown area"
   }
 }

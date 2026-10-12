@@ -8,7 +8,7 @@ Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte loc
 
 ### Essayer le nouvel accueil et la carte locale
 
-L'accueil utilise désormais trois photographies locales d'Abu Dhabi avec des transitions et des commandes de pause. Aucun nouvel outil n'est à installer. [Le guide du thème](VISUAL_DESIGN.md) explique où changer les images, le cadrage, les textes et les couleurs.
+L'accueil présente les sept émirats et trois photographies locales de Dubai et Abu Dhabi avec des transitions et des commandes de pause. La plateforme vise tous les Émirats ; Al Reem reste le premier jeu de données. [Le guide de couverture nationale](UAE_COVERAGE.md) indique où configurer les territoires et comment en activer un nouveau. [Le guide du thème](VISUAL_DESIGN.md) explique où changer les images, le cadrage, les textes et les couleurs.
 
 Après une mise à jour du backend, reconstruire son image depuis `C:\Users\Karim\Repositories\property-platform` :
 
@@ -19,7 +19,9 @@ docker compose -f infra/local/compose.yaml exec api python manage.py migrate --n
 pnpm.cmd dev:web
 ```
 
-La première commande installe les dépendances verrouillées, dont MapLibre ; la deuxième reconstruit l'API ; la troisième applique les migrations de structure ; la quatrième démarre le site dans ce terminal. Les imports de données se lancent séparément (section 6). Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore Al Reem**. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
+La première commande installe les dépendances verrouillées, dont MapLibre ; la deuxième reconstruit l'API ; la troisième applique les migrations de structure ; la quatrième démarre le site dans ce terminal. Les imports de données se lancent séparément (section 6). Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore the Emirates**. Les sélecteurs permettent de choisir l'émirat et la zone ; Abu Dhabi ouvre actuellement Al Reem. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Les autres émirats montrent une couverture en préparation. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
+
+La modification de couverture nationale du 12 octobre ne change pas les tables : reconstruire l'API et le site suffit, sans réimporter Reem. `migrate` reste la commande ordinaire pour appliquer d'autres évolutions de structure. Ajouter un émirat à la navigation ne collecte aucune donnée. Les commandes `import_onwani` et `import_reem_*` restent propres au pilote, avec les mêmes preuves et UUID.
 
 Si la base est vide, appliquer les migrations et l'import de la section 6 avant d'explorer. Un message d'indisponibilité indique de vérifier l'API ; une carte vide et une recherche sans résultat sont des états différents. Les couches rues, secteurs, empreintes 2D, lieux et satellite sont disponibles après les imports de la section 6.8. La 3D n'est pas encore livrée. Les coordonnées ne sont pas une certification de limites foncières.
 
@@ -409,7 +411,7 @@ L'adresse se saisit dans le **navigateur**, contrairement aux commandes précéd
 Résultat attendu :
 
 - La racine redirige vers /en, même si le navigateur préfère une autre langue.
-- La page affiche Property Platform, Al Reem Island et le texte d'attente en anglais.
+- La page affiche Property Platform, United Arab Emirates et les sept émirats ; le premier jeu de données annoncé est Al Reem.
 - Le sélecteur propose les quinze langues configurées.
 - [L'arabe](http://localhost:3000/ar), l'ourdou et le persan utilisent le sens de lecture de droite à gauche.
 
@@ -1061,7 +1063,7 @@ pnpm.cmd contracts:check
 git diff -- packages/contracts
 ```
 
-Revoir puis enregistrer **OpenAPI et les types TypeScript ensemble**. Ne pas modifier les types générés à la main. Le web connaît ce contrat, pas les tables Django.
+Revoir puis enregistrer **OpenAPI, les types TypeScript et `packages/contracts/territories.json` ensemble**. L'export Python produit aussi ce snapshot de navigation publique à côté du fichier OpenAPI ; ses nombres de parcelles restent calculés par l'API. Ne modifier aucun de ces fichiers générés à la main. Le web connaît ces contrats, pas les tables Django. La CI vérifie les deux exports backend.
 
 <a id="depannage"></a>
 

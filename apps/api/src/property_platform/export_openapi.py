@@ -23,3 +23,10 @@ if __name__ == "__main__":
         encoding="utf-8",
         newline="\n",
     )
+    from property_platform.modules.publication.coverage import navigation_registry
+
+    destination.with_name("territories.json").write_text(
+        json.dumps(navigation_registry(), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )

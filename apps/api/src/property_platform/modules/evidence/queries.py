@@ -1,11 +1,17 @@
 """Allowlisted provenance reads. Raw payloads and operator identities stay internal."""
 
 import base64
+from urllib.parse import urlparse
+
+from django.db.models import F
 
 from .models import ImageryScene, MapObservation, ParcelObservation, ResearchReference
 
 
-def imagery_scenes():
+def imagery_scenes(scene_ids=None):
+    scenes = ImageryScene.objects.select_related("capture")
+    if scene_ids is not None:
+        scenes = scenes.filter(scene_id__in=scene_ids)
     return [
         {
             "id": scene.scene_id,
@@ -22,7 +28,7 @@ def imagery_scenes():
             "source_url": scene.capture.url,
             "retrieved_at": scene.capture.fetched_at,
         }
-        for scene in ImageryScene.objects.select_related("capture").order_by("-acquired_at")[:2]
+        for scene in scenes.order_by("-acquired_at")[:2]
     ]
 
 
@@ -123,9 +129,12 @@ def map_provenances(target, ids):
     }
 
 
-def research_references():
+def research_references(source_keys=None):
+    records = ResearchReference.objects.all()
+    if source_keys is not None:
+        records = records.filter(capture__run__source__key__in=source_keys)
     rows = (
-        ResearchReference.objects.order_by("capture__run__source_id", "-capture__fetched_at", "-id")
+        records.order_by("capture__run__source_id", "-capture__fetched_at", "-id")
         .distinct("capture__run__source_id")
         .values(
             "label",
@@ -151,3 +160,20 @@ def research_references():
         }
         for row in rows
     ]
+
+
+def parcel_sources(parcel_ids):
+    rows = (
+        ParcelObservation.objects.filter(
+            parcel_id__in=parcel_ids,
+            capture__run__source__key=F("parcel__source_namespace"),
+            capture__run__status__in=["succeeded", "quarantined"],
+        )
+        .order_by("parcel_id", "-capture__fetched_at", "-id")
+        .distinct("parcel_id")
+        .values_list("parcel_id", "capture__run__source__url", "capture__run__source__name")
+    )
+    return {
+        str(identity): {"url": url if urlparse(url).scheme == "https" else None, "name": name}
+        for identity, url, name in rows
+    }

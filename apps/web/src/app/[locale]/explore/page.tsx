@@ -1,12 +1,23 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { Explorer } from "@/features/atlas/explorer";
-import type { AtlasLabels, MapLabels } from "@/features/atlas/types";
+import { TerritoryExplorer } from "@/features/atlas/territory-explorer";
+import type {
+  AtlasLabels,
+  CoverageLabels,
+  MapLabels,
+} from "@/features/atlas/types";
 import english from "../../../../messages/en.json";
 
 export default async function ExplorePage() {
   const t = await getTranslations("Atlas");
   const locale = await getLocale();
   const map = await getTranslations("Map");
+  const coverage = await getTranslations("Coverage");
+  const coverageLabels = Object.fromEntries(
+    Object.keys(english.Coverage).map((key) => [
+      key,
+      coverage(key as keyof typeof english.Coverage),
+    ]),
+  ) as CoverageLabels;
   const mapLabels = Object.fromEntries(
     Object.keys(english.Map).map((key) => [
       key,
@@ -42,5 +53,12 @@ export default async function ExplorePage() {
   const labels = Object.fromEntries(
     keys.map((key) => [key, t(key)]),
   ) as AtlasLabels;
-  return <Explorer labels={labels} mapLabels={mapLabels} locale={locale} />;
+  return (
+    <TerritoryExplorer
+      labels={labels}
+      mapLabels={mapLabels}
+      coverage={coverageLabels}
+      locale={locale}
+    />
+  );
 }

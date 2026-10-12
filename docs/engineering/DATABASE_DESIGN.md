@@ -24,6 +24,8 @@ Noms actuels : `property_platform.real_estate.parcel` et `property_platform.evid
 
 ## 2. Ce qui existe réellement
 
+La portée du produit est nationale : les géométries WGS84 des tables acceptent déjà des objets hors Reem. Le registre de navigation des sept émirats n'ajoute aucune frontière fictive ni migration aux tables ; voir [UAE_COVERAGE.md](UAE_COVERAGE.md). Les rapprochements administratifs canoniques et leurs dates seront ajoutés avec des sources vérifiées, sans réutiliser les rectangles d'interface comme preuve foncière.
+
 Après application des migrations, les tables métier sont réparties entre `real_estate` et `evidence`. Les anciens noms disparaissent sans créer de seconde copie :
 
 | Ancien nom | Propriétaire Django | Nom actuel |

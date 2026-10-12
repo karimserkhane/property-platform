@@ -1,15 +1,15 @@
 {
   "Home": {
-    "location": "Île d’Al Reem",
+    "location": "Émirats arabes unis",
     "title": "Voyez au-delà de l’horizon.",
-    "description": "Explorez Al Reem à travers ses parcelles, ses rues, ses bâtiments et ses sources d’origine.",
-    "eyebrow": "Abu Dhabi · Émirats arabes unis",
+    "description": "Explorez les territoires des Émirats grâce aux cartes, aux données immobilières et aux sources originales.",
+    "eyebrow": "Émirats arabes unis",
     "navExplore": "Explorer",
     "navSources": "Nos sources",
     "discoverTitle": "Chaque adresse raconte davantage.",
     "discoverBody": "Lisez le territoire, comprenez son environnement et retrouvez l’origine de chaque information.",
-    "coverage": "Couverture pilote · Île d’Al Reem",
-    "galleryLabel": "Photographies d’Abu Dhabi",
+    "coverage": "Premier jeu de données · Al Reem. La couverture avance zone par zone.",
+    "galleryLabel": "Photographies des Émirats",
     "photoCredit": "Photographie",
     "night": "De nuit",
     "coast": "Bord de mer",
@@ -21,10 +21,10 @@
     "label": "Langue"
   },
   "Atlas": {
-    "explore": "Explorer Al Reem",
+    "explore": "Explorer les Émirats",
     "sources": "Données et sources",
     "pilot": "Aperçu de recherche local",
-    "intro": "Explorez les parcelles de Reem. Ouvrez une fiche pour retrouver l’origine de ses informations.",
+    "intro": "Choisissez une zone et retrouvez les sources originales de ses informations immobilières.",
     "search": "Rechercher",
     "reference": "Référence de parcelle",
     "loading": "Chargement des parcelles…",
@@ -39,7 +39,7 @@
     "unknown": "Non documenté",
     "district": "District",
     "community": "Communauté",
-    "limitations": "Aperçu local DMT / Onwani. Les parcelles ne sont pas des bâtiments ou logements. La récupération ne prouve pas la validité d’un permis ; la date de publication peut être inconnue.",
+    "limitations": "Aperçu de recherche. Les parcelles ne sont pas des bâtiments ou des logements. Vérifiez les sources et leurs dates pour chaque zone ; la date de collecte ne prouve pas la validité d’un permis.",
     "list": "Liste des parcelles",
     "map": "Carte des parcelles",
     "reset": "Réinitialiser",
@@ -74,8 +74,8 @@
     "meps": "Statut MEPS",
     "dcr": "Document DCR",
     "nearby": "Rues proches",
-    "viewIsland": "Toute l’île",
-    "viewRT4": "RT4",
+    "viewIsland": "Toute la zone",
+    "viewRT4": "Zone ciblée",
     "viewNear": "Voisinage",
     "exportCSV": "Exporter CSV",
     "exportPNG": "Exporter la vue PNG",
@@ -104,5 +104,15 @@
     "media": "Média",
     "reference": "Référence de recherche",
     "editedDate": "Dernière modification OSM"
+  },
+  "Coverage": {
+    "title": "Sept émirats. Une plateforme.",
+    "emirate": "Émirat",
+    "area": "Zone",
+    "chooseEmirate": "Choisir un émirat",
+    "preparing": "Couverture en préparation",
+    "preparingBody": "Cette zone ne dispose pas encore de jeu de données activé. Découvrez le pilote Al Reem pendant la recherche et la validation des prochaines sources.",
+    "visitPilot": "Explorer le pilote",
+    "unknownArea": "Zone inconnue"
   }
 }

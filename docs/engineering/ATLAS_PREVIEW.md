@@ -1,5 +1,7 @@
 # Atlas Al Reem — validation finale du 12 octobre 2026
 
+**Portée de ce compte rendu :** livraison locale précédente de l'atlas Reem. La modification ultérieure de navigation nationale est décrite dans [UAE_COVERAGE.md](UAE_COVERAGE.md), avec ses contrôles propres et la validation navigateur restant à terminer ; les vérifications ci-dessous ne doivent pas lui être attribuées automatiquement.
+
 ## Livré localement
 
 L'exploration affiche les données de PostgreSQL/PostGIS : 2 431 parcelles, un district et 26 secteurs, 64 objets de rues officiels, 601 tronçons OSM, 188 empreintes de bâtiments et 196 lieux actifs. Parmi ces lieux, 29 sont des positions déclarées sur des pages de promoteurs ou de courtiers. Les 110 URL de recherche et les deux aperçus Sentinel-2 disposent de captures traçables. Les détails de couverture et les différences avec le HTML sont dans [REEM_MAP.md](REEM_MAP.md).

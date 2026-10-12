@@ -7,6 +7,12 @@ export type MapFeature = components["schemas"]["MapFeature"];
 export type ResearchReference =
   components["schemas"]["ResearchReferenceResponse"];
 export type ImageryScene = components["schemas"]["ImageryResponse"];
+export type Territory = components["schemas"]["TerritoryResponse"];
+export type TerritoryRegistry = components["schemas"]["TerritoryRegistry"];
+export type CoverageLabels = Record<
+  keyof typeof import("../../../messages/en.json").Coverage,
+  string
+>;
 export type MapLabels = Record<
   keyof typeof import("../../../messages/en.json").Map,
   string

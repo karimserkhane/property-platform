@@ -31,11 +31,15 @@ def test_preview_geometry_filter_provenance_and_private_field_allowlist(client):
             "land_use",
             "construction_status",
             "category",
+            "source_url",
+            "source_name",
         }
         detail = client.get(f"/api/v1/preview/parcels/{item['id']}")
         assert detail.status_code == 200
         assert detail.json()["source"]["published_at"] is None
         assert detail.json()["source"]["retrieved_at"]
+        assert item["properties"]["source_url"] == detail.json()["source"]["url"]
+        assert item["properties"]["source_name"] == detail.json()["source"]["name"]
         for private in ["raw_attributes", "actor", "payload", "record_sha256"]:
             assert private not in detail.json()
         assert client.get(f"/api/v1/preview/parcels/{uuid4()}").status_code == 404

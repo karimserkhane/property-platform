@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.gis.db.models.functions import AsGeoJSON, Centroid, Distance, Transform
+from django.contrib.gis.db.models.functions import AsGeoJSON, Centroid, Distance
 from django.contrib.postgres.expressions import ArraySubquery
 from django.db import connection, transaction
 from django.db.models import OuterRef
@@ -48,9 +48,7 @@ def map_rows(target, bbox, limit=3000):
 
 
 def parcel_surroundings(parcel_id):
-    parcel = Parcel.objects.annotate(center=Transform(Centroid("geometry"), 32640)).get(
-        id=parcel_id
-    )
+    parcel = Parcel.objects.annotate(center=Centroid("geometry")).get(id=parcel_id)
     places = list(
         Place.objects.filter(active=True, geometry__coveredby=parcel.geometry)
         .order_by("name")
@@ -58,8 +56,9 @@ def parcel_surroundings(parcel_id):
     )
     center = parcel.center
     streets = list(
-        Street.objects.filter(active=True)
-        .annotate(distance=Distance(Transform("geometry", 32640), center))
+        # Cheap indexed prefilter, conservatively wider than 120 m throughout the UAE.
+        Street.objects.filter(active=True, geometry__dwithin=(center, 0.002))
+        .annotate(distance=Distance("geometry", center, spheroid=True))
         .filter(distance__lte=120)
         .order_by("distance")
         .values("id", "name", "name_ar", "distance")[:8]

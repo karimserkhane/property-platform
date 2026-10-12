@@ -123,6 +123,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/territories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Territories */
+        get: operations["previewTerritories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -326,6 +343,10 @@ export interface components {
             construction_status: string;
             /** Category */
             category: string;
+            /** Source Url */
+            source_url: string | null;
+            /** Source Name */
+            source_name: string | null;
         };
         /** Detail */
         Detail: {
@@ -429,6 +450,58 @@ export interface components {
              */
             ingested_at: string;
         };
+        /** TerritoryRegistry */
+        TerritoryRegistry: {
+            /** Default Territory Id */
+            default_territory_id: string;
+            /** Territories */
+            territories: components["schemas"]["TerritoryResponse"][];
+        };
+        /** TerritoryResponse */
+        TerritoryResponse: {
+            /** Id */
+            id: string;
+            /** Parent Id */
+            parent_id: string | null;
+            /** Level */
+            level: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Queryable */
+            queryable: boolean;
+            /** Parcel Count */
+            parcel_count: number;
+            /** Camera Bounds */
+            camera_bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Focus Bounds */
+            focus_bounds: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
+            /** Neighbourhood Bounds */
+            neighbourhood_bounds: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -489,7 +562,9 @@ export interface operations {
     };
     previewReferences: {
         parameters: {
-            query?: never;
+            query?: {
+                territory?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -514,6 +589,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Service Unavailable */
             503: {
                 headers: {
@@ -527,7 +611,9 @@ export interface operations {
     };
     previewImagery: {
         parameters: {
-            query?: never;
+            query?: {
+                territory?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -552,6 +638,15 @@ export interface operations {
                     "application/json": components["schemas"]["Error"];
                 };
             };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
             /** @description Service Unavailable */
             503: {
                 headers: {
@@ -567,6 +662,7 @@ export interface operations {
         parameters: {
             query: {
                 bbox: string;
+                territory?: string | null;
             };
             header?: never;
             path?: never;
@@ -585,6 +681,15 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -618,6 +723,7 @@ export interface operations {
                 bbox: string;
                 limit?: number;
                 q?: string;
+                territory?: string | null;
             };
             header?: never;
             path?: never;
@@ -636,6 +742,15 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -665,7 +780,9 @@ export interface operations {
     };
     previewParcel: {
         parameters: {
-            query?: never;
+            query?: {
+                territory?: string | null;
+            };
             header?: never;
             path: {
                 parcel_id: string;
@@ -694,6 +811,53 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewTerritories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TerritoryRegistry"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

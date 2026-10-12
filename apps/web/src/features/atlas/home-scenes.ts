@@ -1,12 +1,12 @@
-// Editorial photographs of Abu Dhabi; these are not project or cadastral evidence.
+// Editorial UAE photographs; these are not project or cadastral evidence.
 export const HOME_SCENES = [
   {
     key: "night",
-    image: "abu-dhabi-night",
-    height: 1235,
-    photographer: "Kevin JD",
-    url: "https://unsplash.com/photos/city-skyline-during-night-time-S5SQzWdUhoE",
-    position: "62% 64%",
+    image: "dubai-night",
+    height: 1280,
+    photographer: "Alla Rome",
+    url: "https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8",
+    position: "62% 52%",
   },
   {
     key: "coast",

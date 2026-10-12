@@ -1,15 +1,15 @@
 {
   "Home": {
-    "location": "阿尔雷姆岛",
+    "location": "阿拉伯联合酋长国",
     "title": "看见天际线之外。",
-    "description": "通过地块、街道、建筑和原始来源，探索雷姆岛。",
-    "eyebrow": "阿布扎比 · 阿拉伯联合酋长国",
+    "description": "通过地图、房地产记录和原始来源探索阿联酋各地区。",
+    "eyebrow": "阿拉伯联合酋长国",
     "navExplore": "探索",
     "navSources": "我们的来源",
     "discoverTitle": "每个地址背后，都有更广阔的图景。",
     "discoverBody": "了解地块与周边环境，并追溯每条信息的原始来源。",
-    "coverage": "试点覆盖 · 雷姆岛",
-    "galleryLabel": "阿布扎比摄影",
+    "coverage": "首个数据集 · Al Reem。覆盖范围逐区扩展。",
+    "galleryLabel": "阿联酋照片",
     "photoCredit": "摄影",
     "night": "夜色",
     "coast": "海滨",
@@ -21,10 +21,10 @@
     "label": "语言"
   },
   "Atlas": {
-    "explore": "探索 Al Reem",
+    "explore": "探索阿联酋",
     "sources": "数据与来源",
     "pilot": "本地研究预览",
-    "intro": "探索 Al Reem 岛上的地块。打开记录，查看信息来源。",
+    "intro": "选择地区，追溯房地产信息的原始来源。",
     "search": "搜索",
     "reference": "地块编号",
     "loading": "正在加载地块…",
@@ -39,7 +39,7 @@
     "unknown": "未记录",
     "district": "区域",
     "community": "社区",
-    "limitations": "DMT / Onwani 本地预览。地块不等于建筑或住宅。获取日期不能证明许可证有效；发布日期可能未知。",
+    "limitations": "研究预览。地块并非建筑或住宅。请逐个区域核查来源及日期；采集日期不能证明许可证有效。",
     "list": "地块列表",
     "map": "地块地图",
     "reset": "重置",
@@ -74,8 +74,8 @@
     "meps": "MEPS 状态",
     "dcr": "DCR 文件",
     "nearby": "附近街道",
-    "viewIsland": "整个岛屿",
-    "viewRT4": "RT4",
+    "viewIsland": "整个地区",
+    "viewRT4": "重点地区",
     "viewNear": "周边",
     "exportCSV": "导出 CSV",
     "exportPNG": "导出 PNG 视图",
@@ -104,5 +104,15 @@
     "media": "媒体",
     "reference": "研究参考",
     "editedDate": "OSM 最近编辑"
+  },
+  "Coverage": {
+    "title": "七个酋长国。一个平台。",
+    "emirate": "酋长国",
+    "area": "地区",
+    "chooseEmirate": "选择酋长国",
+    "preparing": "覆盖范围正在准备中",
+    "preparingBody": "该地区尚无已启用的数据集。新来源仍在研究和验证，可先探索 Al Reem 试点。",
+    "visitPilot": "探索试点",
+    "unknownArea": "未知地区"
   }
 }

@@ -1,15 +1,15 @@
 {
   "Home": {
-    "location": "Isla ng Al Reem",
+    "location": "United Arab Emirates",
     "title": "Tumingin lampas sa skyline.",
-    "description": "Tuklasin ang Al Reem sa pamamagitan ng mga lote, kalsada, gusali at orihinal na sanggunian.",
-    "eyebrow": "Abu Dhabi · United Arab Emirates",
+    "description": "Tuklasin ang mga lugar sa Emirates gamit ang mga mapa, tala ng ari-arian at orihinal na sanggunian.",
+    "eyebrow": "United Arab Emirates",
     "navExplore": "Tuklasin",
     "navSources": "Mga sanggunian",
     "discoverTitle": "May mas malawak na kuwento ang bawat address.",
     "discoverBody": "Kilalanin ang lote at paligid nito, at sundan ang bawat impormasyon hanggang sa pinagmulan.",
-    "coverage": "Saklaw ng pilot · Al Reem Island",
-    "galleryLabel": "Mga larawan ng Abu Dhabi",
+    "coverage": "Unang datos · Al Reem. Lumalawak ang saklaw bawat lugar.",
+    "galleryLabel": "Mga larawan ng Emirates",
     "photoCredit": "Larawan",
     "night": "Sa gabi",
     "coast": "Sa tabing-dagat",
@@ -21,10 +21,10 @@
     "label": "Wika"
   },
   "Atlas": {
-    "explore": "Tuklasin ang Al Reem",
+    "explore": "Tuklasin ang Emirates",
     "sources": "Datos at mga sanggunian",
     "pilot": "Lokal na preview ng pananaliksik",
-    "intro": "Tuklasin ang mga lote sa Al Reem. Buksan ang tala para makita ang pinagmulan ng impormasyon.",
+    "intro": "Pumili ng lugar at tingnan ang orihinal na sanggunian ng impormasyon sa ari-arian nito.",
     "search": "Maghanap",
     "reference": "Sanggunian ng lote",
     "loading": "Naglo-load ng mga lote…",
@@ -39,7 +39,7 @@
     "unknown": "Hindi dokumentado",
     "district": "Distrito",
     "community": "Komunidad",
-    "limitations": "Lokal na preview mula DMT / Onwani. Ang mga lote ay hindi mga gusali o bahay. Hindi pinatutunayan ng petsa ng pagkuha ang bisa ng permit; maaaring hindi alam ang petsa ng paglalathala.",
+    "limitations": "Paunang pananaliksik. Ang mga lote ay hindi mga gusali o bahay. Suriin ang mga source at petsa sa bawat lugar; ang petsa ng pagkuha ay hindi patunay na balido ang permit.",
     "list": "Listahan ng lote",
     "map": "Mapa ng lote",
     "reset": "I-reset",
@@ -74,8 +74,8 @@
     "meps": "Katayuan ng MEPS",
     "dcr": "Dokumentong DCR",
     "nearby": "Mga kalapit na kalye",
-    "viewIsland": "Buong isla",
-    "viewRT4": "RT4",
+    "viewIsland": "Buong lugar",
+    "viewRT4": "Napiling lugar",
     "viewNear": "Paligid",
     "exportCSV": "I-export ang CSV",
     "exportPNG": "I-export ang tanaw na PNG",
@@ -104,5 +104,15 @@
     "media": "Media",
     "reference": "Sanggunian sa pananaliksik",
     "editedDate": "Huling pagbabago sa OSM"
+  },
+  "Coverage": {
+    "title": "Pitong emirate. Isang platform.",
+    "emirate": "Emirate",
+    "area": "Lugar",
+    "chooseEmirate": "Pumili ng emirate",
+    "preparing": "Inihahanda ang saklaw",
+    "preparingBody": "Wala pang aktibong datos para sa lugar na ito. Tuklasin muna ang pilot sa Al Reem habang sinusuri ang mga bagong sanggunian.",
+    "visitPilot": "Tuklasin ang pilot",
+    "unknownArea": "Hindi kilalang lugar"
   }
 }

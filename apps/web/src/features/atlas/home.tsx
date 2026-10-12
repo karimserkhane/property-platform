@@ -1,5 +1,6 @@
 import { brand } from "@property-platform/branding";
-import { getTranslations } from "next-intl/server";
+import navigation from "@property-platform/contracts/territories";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import styles from "./home.module.css";
 import { HomeGallery } from "./home-gallery";
@@ -9,6 +10,8 @@ export async function AtlasHome() {
   const t = await getTranslations("Atlas");
   const home = await getTranslations("Home");
   const map = await getTranslations("Map");
+  const coverage = await getTranslations("Coverage");
+  const locale = await getLocale();
   const galleryLabels = Object.fromEntries(
     (
       [
@@ -43,6 +46,38 @@ export async function AtlasHome() {
             </a>
           </div>
           <p className={styles.coverage}>{home("coverage")}</p>
+        </div>
+      </section>
+      <section className={styles.regions} aria-labelledby="regions-title">
+        <p className={styles.sectionEyebrow}>{home("location")}</p>
+        <h2 id="regions-title">{coverage("title")}</h2>
+        <p className={styles.regionNote}>{home("coverage")}</p>
+        <div className={styles.regionGrid}>
+          {navigation.territories
+            .filter((territory) => territory.level === "emirate")
+            .map((territory) => {
+              const pilot = navigation.territories.find(
+                (area) => area.parent_id === territory.id && area.queryable,
+              );
+              return (
+                <Link
+                  key={territory.id}
+                  className={styles.regionCard}
+                  href={{
+                    pathname: "/explore",
+                    query: { territory: pilot?.id ?? territory.id },
+                  }}
+                >
+                  <bdi>
+                    {locale === "ar" ? territory.name_ar : territory.name}
+                  </bdi>
+                  <span>
+                    {pilot ? coverage("visitPilot") : coverage("preparing")}
+                  </span>
+                  <span aria-hidden="true">↗</span>
+                </Link>
+              );
+            })}
         </div>
       </section>
       <section className={styles.discovery} aria-labelledby="discovery-title">

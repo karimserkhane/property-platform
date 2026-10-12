@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Inspector } from "./inspector";
 import type { MapOptions, MapView } from "./parcel-map";
@@ -23,10 +23,10 @@ import type {
   ParcelCollection,
   ParcelDetail,
   ResearchReference,
+  Territory,
 } from "./types";
 
 const ParcelMap = dynamic(() => import("./parcel-map"), { ssr: false });
-const REEM = "54.385,24.465,54.445,24.530";
 type Tab =
   | "parcels"
   | "places"
@@ -47,11 +47,19 @@ export function Explorer({
   labels,
   mapLabels: m,
   locale,
+  territory,
+  countryBounds,
+  navigation,
 }: {
   labels: AtlasLabels;
   mapLabels: MapLabels;
   locale: string;
+  territory: Territory;
+  countryBounds: number[];
+  navigation: ReactNode;
 }) {
+  const bbox = territory.bounds.join(",");
+  const territoryQuery = encodeURIComponent(territory.id);
   const [collection, setCollection] = useState<ParcelCollection | null>(null);
   const [context, setContext] = useState<MapContext | null>(null);
   const [contextError, setContextError] = useState(false);
@@ -83,7 +91,7 @@ export function Explorer({
     satellite: false,
     scene: "esri",
   });
-  const [view, setView] = useState<MapView>({ kind: "island", token: 0 });
+  const [view, setView] = useState<MapView>({ kind: "area", token: 0 });
   const requestId = useRef(0);
   const detailRequest = useRef<AbortController | null>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt retries the same bounded read.
@@ -92,7 +100,9 @@ export function Explorer({
     setState("loading");
     setContextError(false);
     setReferenceError(false);
-    fetch("/api/atlas/references", { signal: controller.signal })
+    fetch(`/api/atlas/references?territory=${territoryQuery}`, {
+      signal: controller.signal,
+    })
       .then(async (r) => {
         if (!r.ok) throw new Error("unavailable");
         setReferences(await r.json());
@@ -100,7 +110,9 @@ export function Explorer({
       .catch(() => {
         if (!controller.signal.aborted) setReferenceError(true);
       });
-    fetch(`/api/atlas/parcels?bbox=${REEM}`, { signal: controller.signal })
+    fetch(`/api/atlas/parcels?bbox=${bbox}&territory=${territoryQuery}`, {
+      signal: controller.signal,
+    })
       .then(async (r) => {
         if (!r.ok) throw new Error("unavailable");
         const data = (await r.json()) as ParcelCollection;
@@ -111,7 +123,9 @@ export function Explorer({
       .catch(() => {
         if (!controller.signal.aborted) setState("error");
       });
-    fetch(`/api/atlas/map-context?bbox=${REEM}`, { signal: controller.signal })
+    fetch(`/api/atlas/map-context?bbox=${bbox}&territory=${territoryQuery}`, {
+      signal: controller.signal,
+    })
       .then(async (r) => {
         if (!r.ok) throw new Error("unavailable");
         setContext((await r.json()) as MapContext);
@@ -120,13 +134,15 @@ export function Explorer({
         if (!controller.signal.aborted) setContextError(true);
       });
     return () => controller.abort();
-  }, [attempt]);
+  }, [attempt, bbox, territoryQuery]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt retries a failed bounded read; immutable previews stay loaded.
   useEffect(() => {
     if (!options.satellite || imagery.length) return;
     const controller = new AbortController();
-    fetch("/api/atlas/imagery", { signal: controller.signal })
+    fetch(`/api/atlas/imagery?territory=${territoryQuery}`, {
+      signal: controller.signal,
+    })
       .then(async (r) => {
         if (!r.ok) throw new Error("unavailable");
         setImagery(await r.json());
@@ -135,7 +151,7 @@ export function Explorer({
         if (!controller.signal.aborted) setContextError(true);
       });
     return () => controller.abort();
-  }, [options.satellite, imagery.length, attempt]);
+  }, [options.satellite, imagery.length, attempt, territoryQuery]);
 
   async function select(id: string) {
     detailRequest.current?.abort();
@@ -156,12 +172,15 @@ export function Explorer({
     url.searchParams.set("parcel", id);
     window.history.replaceState(null, "", url);
     try {
-      const r = await fetch(`/api/atlas/parcels/${id}`, {
-        signal: AbortSignal.any([
-          detailRequest.current.signal,
-          AbortSignal.timeout(8000),
-        ]),
-      });
+      const r = await fetch(
+        `/api/atlas/parcels/${id}?territory=${territoryQuery}`,
+        {
+          signal: AbortSignal.any([
+            detailRequest.current.signal,
+            AbortSignal.timeout(8000),
+          ]),
+        },
+      );
       if (!r.ok) throw new Error("unavailable");
       const data = (await r.json()) as ParcelDetail;
       if (current === requestId.current) {
@@ -286,12 +305,12 @@ export function Explorer({
         f.properties.community,
         f.properties.land_use,
         f.properties.construction_status,
-        "https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/0",
+        f.properties.source_url ?? "",
       ]),
     ];
     download(
       new Blob(["\uFEFF", csv(rows)], { type: "text/csv;charset=utf-8" }),
-      "al-reem-parcels.csv",
+      `${territory.id}-parcels.csv`,
     );
   }
   return (
@@ -305,22 +324,31 @@ export function Explorer({
           {labels.back}
         </Link>
       </div>
+      {navigation}
       <div className="atlas-workspace">
         <section className="map-column" aria-label={labels.map}>
           <fieldset className="atlas-toolbar" aria-label={m.layers}>
-            {(["island", "rt4", "near"] as const).map((kind) => (
-              <button key={kind} type="button" onClick={() => frame(kind)}>
-                {
-                  m[
-                    kind === "island"
-                      ? "viewIsland"
-                      : kind === "rt4"
-                        ? "viewRT4"
-                        : "viewNear"
-                  ]
-                }
-              </button>
-            ))}
+            {(["area", "focus", "near"] as const)
+              .filter(
+                (kind) =>
+                  kind === "area" ||
+                  (kind === "focus"
+                    ? territory.focus_bounds
+                    : territory.neighbourhood_bounds),
+              )
+              .map((kind) => (
+                <button key={kind} type="button" onClick={() => frame(kind)}>
+                  {
+                    m[
+                      kind === "area"
+                        ? "viewIsland"
+                        : kind === "focus"
+                          ? "viewRT4"
+                          : "viewNear"
+                    ]
+                  }
+                </button>
+              ))}
             {(
               [
                 "streets",
@@ -418,6 +446,8 @@ export function Explorer({
                 locale={locale}
                 imagery={imagery}
                 m={m}
+                territory={territory}
+                countryBounds={countryBounds}
               />
             )}
             {(state !== "ready" || mapFailed) && (
@@ -630,13 +660,24 @@ export function Explorer({
             {tab === "sources" ? (
               <section className="atlas-source-list">
                 <p>{m.spatial}</p>
-                <a
-                  href="https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/0"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  DMT / Onwani · {m.parcels}
-                </a>
+                {[
+                  ...new Set(
+                    (collection?.features ?? []).flatMap((item) =>
+                      item.properties.source_url
+                        ? [item.properties.source_url]
+                        : [],
+                    ),
+                  ),
+                ].map((url) => (
+                  <a
+                    key={url}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {labels.source} · {m.parcels}
+                  </a>
+                ))}
                 {[
                   ...new Map(
                     Object.values(context ?? {}).flatMap((layer) =>

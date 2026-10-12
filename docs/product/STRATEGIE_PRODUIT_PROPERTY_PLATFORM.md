@@ -6,6 +6,8 @@ Actualisation du 11 octobre : consulter le [benchmark concurrentiel](BENCHMARK_C
 
 ## 1. Direction proposée
 
+**Périmètre confirmé le 12 octobre : l'ensemble des Émirats arabes unis.** Reem est le premier terrain de collecte et de validation ; les objectifs, parcours et identités du produit sont nationaux. Le registre de navigation et les profils de sources évitent d'en faire une contrainte du cœur métier. [UAE_COVERAGE.md](../engineering/UAE_COVERAGE.md) décrit l'implémentation actuelle et les conditions d'extension ; les exemples de recherche Reem ci-dessous conservent leur portée réelle.
+
 Créer un dossier vivant du bien et de son environnement, accessible par carte, recherche ou liste, depuis le site et le mobile. La carte relie des informations qui sont aujourd’hui dispersées ; le dossier permet de vérifier leur origine et de comprendre leurs conséquences pour un logement précis.
 
 Promesse : **« Choisissez un logement en comprenant son plan, son coût, son environnement et ce qui peut changer — avec les preuves et les inconnues visibles. »**

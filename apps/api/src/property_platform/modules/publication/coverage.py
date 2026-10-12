@@ -1,0 +1,81 @@
+"""Explicit collection profiles: listing a territory does not activate its sources."""
+
+from dataclasses import asdict, dataclass
+
+from property_platform.modules.catalog.territories import DEFAULT_TERRITORY_ID, TERRITORIES
+from property_platform.modules.evidence.onwani import SOURCE_KEY
+
+
+@dataclass(frozen=True)
+class CoverageProfile:
+    parcel_namespaces: tuple[str, ...]
+    camera_bounds: tuple[float, float, float, float]
+    focus_bounds: tuple[float, float, float, float] | None = None
+    neighbourhood_bounds: tuple[float, float, float, float] | None = None
+    reference_registry: str | None = None
+    imagery_ids: tuple[str, ...] = ()
+
+
+# Provider identities are retained; replacing them would create duplicate catalogue objects.
+PROFILES = {
+    "al-reem-island": CoverageProfile(
+        (SOURCE_KEY,),
+        (54.388, 24.47, 54.429, 24.519),
+        (54.389, 24.493, 54.404, 24.507),
+        (54.392, 24.491, 54.408, 24.502),
+        "project_sources.json",
+        ("S2C_40RBN_20261004_0_L2A", "S2C_40RBN_20260629_0_L2A"),
+    ),
+}
+
+
+def profile_for(territory_id):
+    return PROFILES.get(territory_id)
+
+
+def coverage_registry():
+    from property_platform.modules.catalog.queries import parcel_counts
+
+    namespaces = {key for profile in PROFILES.values() for key in profile.parcel_namespaces}
+    counts = parcel_counts(namespaces)
+    entries = []
+    for territory in TERRITORIES:
+        profile = profile_for(territory.id)
+        count = sum(counts.get(key, 0) for key in profile.parcel_namespaces) if profile else 0
+        entries.append(
+            {
+                **asdict(territory),
+                "queryable": profile is not None,
+                "parcel_count": count,
+                "camera_bounds": profile.camera_bounds if profile else territory.bounds,
+                "focus_bounds": profile.focus_bounds if profile else None,
+                "neighbourhood_bounds": profile.neighbourhood_bounds if profile else None,
+            }
+        )
+    return {"default_territory_id": DEFAULT_TERRITORY_ID, "territories": entries}
+
+
+def navigation_registry():
+    """Build-time public metadata; queryability describes a configured pilot, not live counts."""
+    return {
+        "default_territory_id": DEFAULT_TERRITORY_ID,
+        "territories": [
+            {**asdict(territory), "queryable": profile_for(territory.id) is not None}
+            for territory in TERRITORIES
+        ],
+    }
+
+
+def reference_source_keys(profile):
+    import hashlib
+    import json
+    from pathlib import Path
+
+    if not profile.reference_registry:
+        return ()
+    # Paths belong to trusted deployment configuration, never to query parameters.
+    registry = Path(__file__).parent.parent / "evidence" / profile.reference_registry
+    return tuple(
+        "research:" + hashlib.sha256(row["url"].encode()).hexdigest()[:40]
+        for row in json.loads(registry.read_text(encoding="utf-8"))
+    )

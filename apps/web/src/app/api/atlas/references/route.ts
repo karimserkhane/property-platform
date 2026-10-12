@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { readPreview } from "@/features/atlas/server";
+import { readPreview, territorySearch } from "@/features/atlas/server";
 
 export async function GET(request: Request) {
-  if (new URL(request.url).search)
+  const search = territorySearch(request);
+  if (search === null)
     return NextResponse.json({ code: "invalid_query" }, { status: 400 });
   try {
-    const result = await readPreview("references");
+    const result = await readPreview("references", search);
     return NextResponse.json(result.data ?? { code: "data_unavailable" }, {
       status: result.status,
       headers: { "Cache-Control": "no-store" },

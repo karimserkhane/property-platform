@@ -1,27 +1,29 @@
 {
   "purpose": "Editorial homepage photography, not property evidence",
-  "location": "Abu Dhabi, United Arab Emirates",
+  "location": "Dubai and Abu Dhabi, United Arab Emirates",
   "license": "Unsplash License",
   "license_url": "https://unsplash.com/license",
   "license_checked_at": "2026-10-12",
   "assets": [
     {
-      "file": "abu-dhabi-night-768.webp",
-      "photographer": "Kevin JD",
-      "source_page": "https://unsplash.com/photos/city-skyline-during-night-time-S5SQzWdUhoE",
-      "download_url": "https://images.unsplash.com/photo-1624317937315-0ced8736c9e9?fm=webp&fit=max&w=768&q=82",
-      "width": 768,
-      "byte_length": 65194,
-      "sha256": "8dc0d208a1178272c4a0b63e837900a373efd0c14727c6e56ee5359ddf95d894"
+      "file": "dubai-night-1920.webp",
+      "location": "Dubai, United Arab Emirates",
+      "photographer": "Alla Rome",
+      "source_page": "https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8",
+      "download_url": "https://images.unsplash.com/photo-1671818786453-c54ff4786ab0?fm=webp&fit=max&w=1920&q=82",
+      "width": 1920,
+      "byte_length": 381392,
+      "sha256": "32fbb0cf08dc259f7dcbbf8247cbfe06a97d1564bea603cb463506ea710d7943"
     },
     {
-      "file": "abu-dhabi-night-1920.webp",
-      "photographer": "Kevin JD",
-      "source_page": "https://unsplash.com/photos/city-skyline-during-night-time-S5SQzWdUhoE",
-      "download_url": "https://images.unsplash.com/photo-1624317937315-0ced8736c9e9?fm=webp&fit=max&w=1920&q=82",
-      "width": 1920,
-      "byte_length": 309022,
-      "sha256": "c52032860452f25aae26821824b368a16ffb2f756a8fc2ceea2dcced5df622f8"
+      "file": "dubai-night-768.webp",
+      "location": "Dubai, United Arab Emirates",
+      "photographer": "Alla Rome",
+      "source_page": "https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8",
+      "download_url": "https://images.unsplash.com/photo-1671818786453-c54ff4786ab0?fm=webp&fit=max&w=768&q=82",
+      "width": 768,
+      "byte_length": 71904,
+      "sha256": "391b51ccb411b72dffe25660c4dfd4cc2bd6763a5c7e1fda1d765b11d1a8b748"
     },
     {
       "file": "abu-dhabi-coast-768.webp",

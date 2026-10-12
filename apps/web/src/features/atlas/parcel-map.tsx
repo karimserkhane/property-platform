@@ -2,13 +2,14 @@
 
 import { brand } from "@property-platform/branding";
 import {
+  AttributionControl,
   type GeoJSONSource,
   Map as LibreMap,
   NavigationControl,
   ScaleControl,
   setWorkerUrl,
 } from "maplibre-gl";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { mapLayers, mapName } from "./map-style";
 import {
   type Category,
@@ -22,6 +23,7 @@ import type {
   MapFeature,
   MapLabels,
   ParcelCollection,
+  Territory,
 } from "./types";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -42,10 +44,17 @@ export type MapOptions = {
   scene: string;
 };
 export type MapView = {
-  kind: "island" | "rt4" | "near" | "feature" | "export";
+  kind: "area" | "focus" | "near" | "feature" | "export";
   token: number;
   feature?: Pick<MapFeature, "geometry">;
 };
+
+function boundsOf(bounds: number[]): [[number, number], [number, number]] {
+  return [
+    [bounds[0], bounds[1]],
+    [bounds[2], bounds[3]],
+  ];
+}
 
 export default function ParcelMap({
   data,
@@ -60,6 +69,8 @@ export default function ParcelMap({
   locale,
   imagery,
   m,
+  territory,
+  countryBounds,
 }: {
   data: ParcelCollection;
   context: MapContext | null;
@@ -73,6 +84,8 @@ export default function ParcelMap({
   locale: string;
   imagery: ImageryScene[];
   m: MapLabels;
+  territory: Territory;
+  countryBounds: number[];
 }) {
   const element = useRef<HTMLDivElement>(null);
   const map = useRef<LibreMap | null>(null);
@@ -82,6 +95,31 @@ export default function ParcelMap({
   callbacks.current = { onSelect, onFeature, onError };
   const contextRef = useRef(context);
   contextRef.current = context;
+  const credits = useMemo(
+    () =>
+      [
+        ...new Set(
+          [
+            ...data.features.map((feature) => feature.properties.source_name),
+            // Point research references are credited in their cards, rather than filling the base-map footer.
+            ...[
+              context?.street,
+              context?.building,
+              context?.administrative_area,
+            ].flatMap((collection) =>
+              (collection?.features ?? []).map(
+                (feature) => feature.properties.source.name,
+              ),
+            ),
+          ].filter((name): name is string => Boolean(name)),
+        ),
+      ].map((name) =>
+        name.startsWith("OpenStreetMap")
+          ? "© OpenStreetMap contributors · ODbL"
+          : name,
+      ),
+    [data, context],
+  );
   useEffect(() => {
     if (!element.current) return;
     consumedView.current = 0;
@@ -89,19 +127,11 @@ export default function ParcelMap({
     try {
       instance = new LibreMap({
         container: element.current,
-        center: [54.408, 24.494],
-        zoom: 13.5,
-        bounds: [
-          [54.388, 24.47],
-          [54.429, 24.519],
-        ],
+        bounds: boundsOf(territory.camera_bounds),
         fitBoundsOptions: { padding: 30, animate: false },
-        minZoom: 11,
+        minZoom: 5,
         maxZoom: 20,
-        maxBounds: [
-          [54.36, 24.44],
-          [54.47, 24.55],
-        ],
+        maxBounds: boundsOf(countryBounds),
         canvasContextAttributes: { preserveDrawingBuffer: true },
         style: {
           version: 8,
@@ -114,7 +144,7 @@ export default function ParcelMap({
             },
           ],
         },
-        attributionControl: { compact: false },
+        attributionControl: false,
       });
     } catch {
       callbacks.current.onError();
@@ -143,12 +173,6 @@ export default function ParcelMap({
         instance.addSource(id, {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
-          attribution:
-            id === "parcels"
-              ? "DMT / Onwani"
-              : id === "building"
-                ? '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a>'
-                : undefined,
         });
       instance.addSource("satellite", {
         type: "raster",
@@ -190,7 +214,34 @@ export default function ParcelMap({
       instance.getCanvas().removeEventListener("webglcontextlost", lostContext);
       instance.remove();
     };
-  }, []);
+  }, [countryBounds, territory.camera_bounds]);
+
+  useEffect(() => {
+    const instance = map.current;
+    if (!instance) return;
+    const control = new AttributionControl({
+      compact: false,
+      customAttribution: credits.map((credit) =>
+        credit === "© OpenStreetMap contributors · ODbL"
+          ? '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a>'
+          : credit.replace(
+              /[&<>"']/g,
+              (character) =>
+                ({
+                  "&": "&amp;",
+                  "<": "&lt;",
+                  ">": "&gt;",
+                  '"': "&quot;",
+                  "'": "&#39;",
+                })[character] ?? character,
+            ),
+      ),
+    });
+    instance.addControl(control);
+    return () => {
+      instance.removeControl(control);
+    };
+  }, [credits]);
 
   useEffect(() => {
     const instance = map.current;
@@ -341,7 +392,7 @@ export default function ParcelMap({
         ctx.fillStyle = "#123c40";
         ctx.font = "18px sans-serif";
         ctx.fillText(
-          `${brand.displayName} · ${label} · ${options.satellite ? options.scene : m.plan}`,
+          `${brand.displayName} · ${locale === "ar" ? territory.name_ar : territory.name} · ${options.satellite ? options.scene : m.plan}`,
           16,
           source.height + 25,
         );
@@ -360,11 +411,7 @@ export default function ParcelMap({
           );
         });
         ctx.font = "12px sans-serif";
-        ctx.fillText(
-          "DMT / Onwani · © OpenStreetMap contributors (ODbL)",
-          16,
-          source.height + 116,
-        );
+        ctx.fillText(credits.join(" · "), 16, source.height + 116);
         if (options.satellite)
           ctx.fillText(
             options.scene === "esri"
@@ -374,7 +421,7 @@ export default function ParcelMap({
             source.height + 137,
           );
         canvas.toBlob((blob) => {
-          if (blob) download(blob, "al-reem-map.png");
+          if (blob) download(blob, `${territory.id}-map.png`);
         });
       };
       instance.once(event, exportImage);
@@ -382,22 +429,16 @@ export default function ParcelMap({
       return () => {
         instance.off(event, exportImage);
       };
-    } else if (view.kind === "rt4")
-      instance.fitBounds(
-        [
-          [54.389, 24.493],
-          [54.404, 24.507],
-        ],
-        { padding: 40, duration: 0 },
-      );
-    else if (view.kind === "near")
-      instance.fitBounds(
-        [
-          [54.392, 24.491],
-          [54.408, 24.502],
-        ],
-        { padding: 40, duration: 0 },
-      );
+    } else if (view.kind === "focus" && territory.focus_bounds)
+      instance.fitBounds(boundsOf(territory.focus_bounds), {
+        padding: 40,
+        duration: 0,
+      });
+    else if (view.kind === "near" && territory.neighbourhood_bounds)
+      instance.fitBounds(boundsOf(territory.neighbourhood_bounds), {
+        padding: 40,
+        duration: 0,
+      });
     else if (view.kind === "feature" && view.feature) {
       if (view.feature.geometry.type === "Point")
         instance.easeTo({
@@ -415,15 +456,12 @@ export default function ParcelMap({
         (f) => f.properties.kind === "district",
       );
       const bounds = district && geometryBounds(district.geometry);
-      instance.fitBounds(
-        bounds ?? [
-          [54.388, 24.47],
-          [54.429, 24.519],
-        ],
-        { padding: 30, duration: 0 },
-      );
+      instance.fitBounds(bounds ?? boundsOf(territory.camera_bounds), {
+        padding: 30,
+        duration: 0,
+      });
     }
-  }, [view, m, options.satellite, options.scene, label]);
+  }, [view, m, options.satellite, options.scene, locale, territory, credits]);
   return (
     <>
       <div ref={element} className="parcel-map" role="img" aria-label={label} />

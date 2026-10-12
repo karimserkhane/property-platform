@@ -2,6 +2,21 @@ import "server-only";
 
 const MAX_BYTES = 8 * 1024 * 1024;
 
+export function territorySearch(
+  request: Request,
+  allowed: string[] = ["territory"],
+) {
+  const url = new URL(request.url);
+  if (
+    url.search.length > 1000 ||
+    [...url.searchParams.keys()].some((key) => !allowed.includes(key))
+  )
+    return null;
+  const territory = url.searchParams.get("territory");
+  if (territory !== null && !/^[a-z0-9-]{1,80}$/.test(territory)) return null;
+  return url.search;
+}
+
 // Only server configuration chooses the upstream; visitor input is never a URL.
 export async function readPreview(path: string, search = "") {
   if (

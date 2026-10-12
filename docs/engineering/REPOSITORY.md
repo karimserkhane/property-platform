@@ -36,8 +36,8 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── tsconfig.json             Configuration du compilateur TypeScript
 │   │   ├── Dockerfile                Construction de l'image du site
 │   │   ├── messages/                Traductions des textes affichés aux utilisateurs
-│   │   ├── public/images/uae/        Photographies éditoriales locales, variantes WebP et crédits
 │   │   │   └── en.json, ar.json…     Textes de l'interface dans les quinze langues
+│   │   ├── public/images/uae/        Photographies éditoriales locales, variantes WebP et crédits
 │   │   ├── src/                     Code source de l'interface web
 │   │   │   ├── app/                 Pages, routes et structures de page Next.js
 │   │   │   │   ├── api/atlas/        Relais serveur borné des lectures de l’atlas
@@ -85,6 +85,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── services.py  Conversion des géométries et mutations du catalogue
 │       │       │   │   ├── queries.py   Lectures spatiales bornées et identité
 │       │       │   │   ├── map_queries.py   Couches de contexte et proximité dans PostGIS
+│       │       │   │   ├── territories.py   Registre national de navigation pays/émirat/zone
 │       │       │   │   ├── migrations/  Évolution du schéma du catalogue
 │       │       │   │   └── README.md Responsabilités et dépendances du module
 │       │       │   ├── evidence/     Sources, assertions et rapprochements
@@ -102,6 +103,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   └── publication/  Validation et versions publiées
 │       │       │       ├── apps.py
 │       │       │       ├── preview.py, map_preview.py  Projections locales bornées
+│       │       │       ├── coverage.py  Profils de sources activés, couverture et navigation
 │       │       │       ├── land_use.py  Catégories/couleurs, usage original conservé
 │       │       │       └── README.md
 │       │       └── export_openapi.py Export de la description de l'API
@@ -114,6 +116,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── package.json              Commandes de génération et de vérification
 │   │   ├── tsconfig.json             Réglages de vérification des types
 │   │   ├── openapi.json              Description exportée de l'API Django
+│   │   ├── territories.json          Navigation nationale générée depuis le backend
 │   │   └── src/                     Types utilisables par le site et le futur mobile
 │   │       └── generated.ts          Types TypeScript générés depuis OpenAPI
 │   └── branding/                     Configuration publique de marque, partagée par les clients
@@ -138,6 +141,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       ├── REEM_MAP.md                Couverture, sources et correspondance avec le HTML
 │       ├── VISUAL_DESIGN.md           Thème de l'accueil, crédits photos et animation accessible
 │       ├── BRANDING.md               Identité technique stable, marque configurable et reprise locale
+│       ├── UAE_COVERAGE.md           Couverture des Émirats et activation d'une nouvelle zone
 │       ├── TOOLCHAIN.md               Versions exécutables et compatibilités
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
 │       ├── DATA_PROVENANCE.md          Collecte directe, sources par information et audit
@@ -157,6 +161,12 @@ property-platform/                   Racine du monorepo : code, outils et docume
 ### Extension de l'atlas : couches géographiques typées
 
 Le module `catalog` possède aussi `Street` (tracé multiligne), `Building` (empreinte multipolygone), `Place` (repère ponctuel) et `AdministrativeArea` (district/secteur multipolygone), dans `real_estate`. Ces objets conservent leurs identités par fournisseur : un bâtiment OSM n'est pas un permis, un repère n'est pas une identité commerciale approuvée. `evidence` possède leur observation avec exactement une cible typée, une capture, une version de mapping et un audit de révision. La direction reste `publication → evidence → catalog`. Les connecteurs Onwani et OSM sont séparés ; l'API lit PostgreSQL et ne collecte rien à l'ouverture de la carte. Un rapprochement spatial reste calculé et signalé comme tel, sans renommer une parcelle. Le HTML utilisateur est une référence de fonctions et une piste de recherche, jamais une source cadastrale. `evidence` possède aussi ResearchReference et ImageryScene ; le premier est une référence capturée, le second un petit dérivé satellite du pilote. Le traitement Rasterio est isolé dans `scripts/acquire_reem_imagery.py`, avec dépendances séparées dans `scripts/imagery-requirements.txt`. Les captures retraitées conservent une clé étrangère parent et leurs dates originales. Les rapprochements spatiaux sont réversibles et ne fusionnent aucune identité de projet.
+
+### Couverture nationale : configuration et données réelles
+
+Le produit vise les sept émirats, avec Al Reem comme premier jeu de données. `catalog.territories` possède le registre typé de navigation pays → émirat → zone ; ses rectangles approximatifs ne sont pas des frontières cadastrales. `publication.coverage` possède les profils de sources explicitement activés et compose les nombres via `catalog.queries`, sans modifier ses tables. Les collecteurs `evidence` conservent leur vraie portée et leurs clés stables. La direction `publication → evidence → catalog` reste inchangée.
+
+L'export backend génère `packages/contracts/territories.json` avec OpenAPI. Le web utilise ce snapshot pour son accueil statique et l'API pour les nombres actuels de la zone ; il ne recopie pas une liste d'émirats indépendante. `territory-explorer.tsx` possède les sélecteurs et l'historique de l'URL, réinitialise l'exploration entre zones et affiche les couvertures non activées. Une nouvelle zone requiert ses sources, mappings et contrôles, pas seulement une case dans le menu. Voir [UAE_COVERAGE.md](UAE_COVERAGE.md) pour la procédure et les limites du prototype GeoJSON.
 
 ### `apps/web` : ce que l'utilisateur voit
 

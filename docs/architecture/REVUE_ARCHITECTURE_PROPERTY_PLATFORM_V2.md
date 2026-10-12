@@ -8,6 +8,8 @@ La revue croise trois analyses d'agents IA — backend et accès, géographie, d
 
 ## 1. Décision et correction de la proposition précédente
 
+**Actualisation de portée du 12 octobre :** la plateforme vise les sept émirats, Al Reem restant le premier jeu de données. La stack et les frontières métier restent applicables. Le [guide de couverture nationale](../engineering/UAE_COVERAGE.md) décrit les registres, profils de sources, calculs géodésiques et limites de charge désormais mis en œuvre, ainsi que les validations nécessaires avant une collecte supplémentaire.
+
 **Next.js/TypeScript pour le web ; Django + Django Ninja + GeoDjango pour le cœur métier ; PostgreSQL/PostGIS ; MapLibre ; stockage objet ; workers Python séparés.** Une application métier modulaire, plusieurs processus d'exécution, un propriétaire des règles et des migrations.
 
 La proposition TypeScript/NestJS était viable, mais accordait trop de poids au partage de langage web/mobile. Notre travail difficile est aussi de rattacher des sources à des biens, corriger des imports, gérer des versions, arbitrer des contradictions et administrer les droits. Django apporte un socle utile pour ces opérations et rapproche le backend des traitements Python. Ce choix ne signifie pas que Django répond plus vite que NestJS ni que l'IA impose Python partout.

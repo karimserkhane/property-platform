@@ -1,15 +1,15 @@
 {
   "Home": {
-    "location": "Al Reem Island",
+    "location": "Vereinigte Arabische Emirate",
     "title": "Blick hinter die Skyline.",
-    "description": "Entdecke Al Reem anhand von Grundstücken, Straßen, Gebäuden und Originalquellen.",
-    "eyebrow": "Abu Dhabi · Vereinigte Arabische Emirate",
+    "description": "Entdecke die Emirate anhand von Karten, Immobiliendaten und Originalquellen.",
+    "eyebrow": "Vereinigte Arabische Emirate",
     "navExplore": "Entdecken",
     "navSources": "Unsere Quellen",
     "discoverTitle": "Jede Adresse ist Teil eines größeren Bildes.",
     "discoverBody": "Lerne das Grundstück und seine Umgebung kennen und verfolge jede Information bis zur Quelle.",
-    "coverage": "Pilotgebiet · Al Reem Island",
-    "galleryLabel": "Fotografien von Abu Dhabi",
+    "coverage": "Erster Datensatz · Al Reem. Die Abdeckung wächst Gebiet für Gebiet.",
+    "galleryLabel": "Fotografien der Emirate",
     "photoCredit": "Fotografie",
     "night": "Bei Nacht",
     "coast": "Am Meer",
@@ -21,10 +21,10 @@
     "label": "Sprache"
   },
   "Atlas": {
-    "explore": "Al Reem erkunden",
+    "explore": "Emirate erkunden",
     "sources": "Daten und Quellen",
     "pilot": "Lokale Forschungsvorschau",
-    "intro": "Erkunde die Grundstücke auf Al Reem. Öffne einen Datensatz und prüfe die Herkunft seiner Angaben.",
+    "intro": "Wähle ein Gebiet und verfolge seine Immobilieninformationen bis zur Originalquelle.",
     "search": "Suchen",
     "reference": "Grundstücksreferenz",
     "loading": "Grundstücke werden geladen…",
@@ -39,7 +39,7 @@
     "unknown": "Nicht dokumentiert",
     "district": "Bezirk",
     "community": "Gemeinschaft",
-    "limitations": "Lokale Vorschau von DMT / Onwani. Grundstücke sind keine Gebäude oder Wohnungen. Das Abrufdatum belegt keine Genehmigungsgültigkeit; das Veröffentlichungsdatum kann unbekannt sein.",
+    "limitations": "Recherchevorschau. Grundstücke sind keine Gebäude oder Wohnungen. Prüfen Sie Quellen und Daten für jedes Gebiet; das Abrufdatum belegt keine Genehmigungsgültigkeit.",
     "list": "Grundstücksliste",
     "map": "Grundstückskarte",
     "reset": "Zurücksetzen",
@@ -74,8 +74,8 @@
     "meps": "MEPS-Status",
     "dcr": "DCR-Dokument",
     "nearby": "Nahe Straßen",
-    "viewIsland": "Ganze Insel",
-    "viewRT4": "RT4",
+    "viewIsland": "Gesamtes Gebiet",
+    "viewRT4": "Fokusgebiet",
     "viewNear": "Umgebung",
     "exportCSV": "CSV exportieren",
     "exportPNG": "Ansicht als PNG exportieren",
@@ -104,5 +104,15 @@
     "media": "Medien",
     "reference": "Recherchequelle",
     "editedDate": "Letzte OSM-Bearbeitung"
+  },
+  "Coverage": {
+    "title": "Sieben Emirate. Eine Plattform.",
+    "emirate": "Emirat",
+    "area": "Gebiet",
+    "chooseEmirate": "Emirat auswählen",
+    "preparing": "Abdeckung in Vorbereitung",
+    "preparingBody": "Für dieses Gebiet gibt es noch keinen aktivierten Datensatz. Erkunde Al Reem, während weitere Quellen recherchiert und geprüft werden.",
+    "visitPilot": "Pilotgebiet erkunden",
+    "unknownArea": "Unbekanntes Gebiet"
   }
 }

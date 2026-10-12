@@ -6,6 +6,7 @@
 - [Design de l'accueil et première expérience](product/DESIGN_ACCUEIL.md)
 - [Identité visuelle et crédits photos](engineering/VISUAL_DESIGN.md)
 - [Nom générique, marque configurable et reprise locale](engineering/BRANDING.md)
+- [Couverture des sept émirats et activation d'une nouvelle zone](engineering/UAE_COVERAGE.md)
 - [Architecture de référence](architecture/REVUE_ARCHITECTURE_PROPERTY_PLATFORM_V2.md)
 - [Contre-audit de la stack](architecture/AUDIT_DECISION_STACK_PROPERTY_PLATFORM.md)
 - [Structure et responsabilités](engineering/REPOSITORY.md)

@@ -4,11 +4,11 @@ Refonte de l'accueil du 12 octobre 2026 : photographies plein écran, bleu profo
 
 ## Photos et droits
 
-Les trois photographies montrent Abu Dhabi. Elles servent d'ambiance éditoriale ; elles ne représentent pas une parcelle sélectionnée et ne prouvent ni l'état actuel d'un bâtiment ni une couverture de données hors Al Reem.
+Les trois photographies montrent Dubai et Abu Dhabi. Elles servent d'ambiance éditoriale ; elles ne représentent pas une parcelle sélectionnée et ne prouvent ni l'état actuel d'un bâtiment ni une couverture de données hors Al Reem. L'accueil présente les sept émirats depuis le 12 octobre ; voir [la couverture nationale](UAE_COVERAGE.md).
 
 | Fichier, sous `apps/web/public/images/uae/` | Photographe | Page source |
 |---|---|---|
-| `abu-dhabi-night-768.webp`, `abu-dhabi-night-1920.webp` | Kevin JD | [Corniche Breakwater, skyline de nuit](https://unsplash.com/photos/city-skyline-during-night-time-S5SQzWdUhoE) |
+| `dubai-night-768.webp`, `dubai-night-1920.webp` | Alla Rome | [Dubai JBR, lumières à la tombée du jour](https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8) |
 | `abu-dhabi-coast-768.webp`, `abu-dhabi-coast-1920.webp` | Hanks K | [Plage et palmiers à Abu Dhabi](https://unsplash.com/photos/beach-palm-trees-and-resort-under-a-hazy-sky-_c08bbHy-xg) |
 | `abu-dhabi-sunset-768.webp`, `abu-dhabi-sunset-1920.webp` | Yulia Evtushenko | [Palmiers au coucher du soleil, Corniche Beach](https://unsplash.com/photos/a-couple-of-palm-trees-sitting-next-to-each-other-MhpX3VgaG4U) |
 
@@ -39,7 +39,7 @@ Les effets de survol qui déplacent les boutons sont réservés aux pointeurs pr
 
 ## Animation, accessibilité et transfert
 
-Le premier écran ne monte que la photo de nuit, prioritaire : 65 194 octets sur mobile ou 309 022 octets sur ordinateur. Les autres scènes sont chargées à leur première sélection ou à leur premier passage automatique ; la variante 768 pixels est choisie jusqu'à une largeur de 700 pixels. Les transitions changent l'opacité, sans bibliothèque d'animation, vidéo ou téléchargement de police externe.
+Le premier écran ne monte que la photo de Dubai, prioritaire : 71 904 octets sur mobile ou 381 392 octets sur ordinateur. Les autres scènes sont chargées à leur première sélection ou à leur premier passage automatique ; la variante 768 pixels est choisie jusqu'à une largeur de 700 pixels. Les transitions changent l'opacité, sans bibliothèque d'animation, vidéo ou téléchargement de police externe.
 
 Le passage automatique attend le chargement de la photo et 8,5 secondes de lecture. Le visuel précédent reste affiché pendant le chargement suivant. Une sélection manuelle arrête la lecture automatique ; le bouton lecture permet de la reprendre. Le focus dans la galerie, son survol et un onglet masqué suspendent la rotation. `prefers-reduced-motion` et, lorsqu'il est disponible, le mode économie de données désactivent le démarrage automatique. Les changements de préférence et le retour d'une image déjà en cache sont pris en compte.
 

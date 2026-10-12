@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
+import { HOME_SCENES } from "../apps/web/src/features/atlas/home-scenes.ts";
 import { getDirection, locales } from "../apps/web/src/i18n/locales.ts";
 import { brand } from "../packages/branding/src/brand.ts";
 
@@ -102,7 +103,22 @@ try {
     assert.ok(html.includes(`lang="${locale}"`), locale);
     assert.ok(html.includes(`dir="${getDirection(locale)}"`), locale);
     assert.ok(html.includes(messages.Home.title), locale);
-    assert.ok(html.includes("abu-dhabi-night-1920.webp"), locale);
+    assert.ok(html.includes(`${HOME_SCENES[0].image}-1920.webp`), locale);
+    assert.ok(html.includes(messages.Coverage.title), locale);
+    for (const territory of [
+      "dubai",
+      "sharjah",
+      "ajman",
+      "umm-al-quwain",
+      "ras-al-khaimah",
+      "fujairah",
+      "al-reem-island",
+    ]) {
+      assert.ok(
+        html.includes(`territory=${territory}`),
+        `${locale}: regional navigation ${territory}`,
+      );
+    }
     assert.equal(
       (html.match(/<img\b/g) ?? []).length,
       1,
@@ -126,6 +142,7 @@ try {
     "map-context?bbox=54.4,24.4,54.5,24.5",
     "references",
     "imagery",
+    "territories",
   ]) {
     assert.equal(
       (await fetch(`${origin}/api/atlas/${path}`)).status,

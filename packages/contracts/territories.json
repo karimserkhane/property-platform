@@ -1,0 +1,131 @@
+{
+  "default_territory_id": "al-reem-island",
+  "territories": [
+    {
+      "id": "uae",
+      "parent_id": null,
+      "level": "country",
+      "name": "United Arab Emirates",
+      "name_ar": "الإمارات العربية المتحدة",
+      "bounds": [
+        51.5,
+        22.5,
+        56.6,
+        26.2
+      ],
+      "queryable": false
+    },
+    {
+      "id": "abu-dhabi",
+      "parent_id": "uae",
+      "level": "emirate",
+      "name": "Abu Dhabi",
+      "name_ar": "أبوظبي",
+      "bounds": [
+        51.5,
+        22.5,
+        55.9,
+        25.2
+      ],
+      "queryable": false
+    },
+    {
+      "id": "dubai",
+      "parent_id": "uae",
+      "level": "emirate",
+      "name": "Dubai",
+      "name_ar": "دبي",
+      "bounds": [
+        54.8,
+        24.5,
+        56.3,
+        25.5
+      ],
+      "queryable": false
+    },
+    {
+      "id": "sharjah",
+      "parent_id": "uae",
+      "level": "emirate",
+      "name": "Sharjah",
+      "name_ar": "الشارقة",
+      "bounds": [
+        55.2,
+        24.8,
+        56.5,
+        25.7
+      ],
+      "queryable": false
+    },
+    {
+      "id": "ajman",
+      "parent_id": "uae",
+      "level": "emirate",
+      "name": "Ajman",
+      "name_ar": "عجمان",
+      "bounds": [
+        55.3,
+        24.7,
+        56.2,
+        25.5
+      ],
+      "queryable": false
+    },
+    {
+      "id": "umm-al-quwain",
+      "parent_id": "uae",
+      "level": "emirate",
+      "name": "Umm Al Quwain",
+      "name_ar": "أم القيوين",
+      "bounds": [
+        55.5,
+        25.3,
+        55.9,
+        25.7
+      ],
+      "queryable": false
+    },
+    {
+      "id": "ras-al-khaimah",
+      "parent_id": "uae",
+      "level": "emirate",
+      "name": "Ras Al Khaimah",
+      "name_ar": "رأس الخيمة",
+      "bounds": [
+        55.5,
+        24.8,
+        56.5,
+        26.2
+      ],
+      "queryable": false
+    },
+    {
+      "id": "fujairah",
+      "parent_id": "uae",
+      "level": "emirate",
+      "name": "Fujairah",
+      "name_ar": "الفجيرة",
+      "bounds": [
+        56.0,
+        24.9,
+        56.6,
+        25.7
+      ],
+      "queryable": false
+    },
+    {
+      "id": "al-reem-island",
+      "parent_id": "abu-dhabi",
+      "level": "area",
+      "name": "Al Reem Island",
+      "name_ar": "جزيرة الريم",
+      "bounds": [
+        54.385,
+        24.465,
+        54.445,
+        24.53
+      ],
+      "queryable": true
+    }
+  ]
+}

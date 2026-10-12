@@ -1,15 +1,15 @@
 {
   "Home": {
-    "location": "Isla de Al Reem",
+    "location": "Emiratos Árabes Unidos",
     "title": "Mira más allá del horizonte.",
-    "description": "Explora Al Reem a través de sus parcelas, calles, edificios y fuentes originales.",
-    "eyebrow": "Abu Dabi · Emiratos Árabes Unidos",
+    "description": "Explora los Emiratos mediante mapas, datos inmobiliarios y fuentes originales.",
+    "eyebrow": "Emiratos Árabes Unidos",
     "navExplore": "Explorar",
     "navSources": "Nuestras fuentes",
     "discoverTitle": "Cada dirección tiene una historia más amplia.",
     "discoverBody": "Conoce el terreno, comprende su entorno y sigue cada dato hasta su fuente.",
-    "coverage": "Cobertura piloto · Isla de Al Reem",
-    "galleryLabel": "Fotografías de Abu Dabi",
+    "coverage": "Primer conjunto de datos · Al Reem. La cobertura se amplía por zonas.",
+    "galleryLabel": "Fotografías de los Emiratos",
     "photoCredit": "Fotografía",
     "night": "De noche",
     "coast": "Junto al mar",
@@ -21,10 +21,10 @@
     "label": "Idioma"
   },
   "Atlas": {
-    "explore": "Explorar Al Reem",
+    "explore": "Explorar los Emiratos",
     "sources": "Datos y fuentes",
     "pilot": "Vista de investigación local",
-    "intro": "Explora las parcelas de Al Reem. Abre un registro y consulta el origen de sus datos.",
+    "intro": "Elige una zona y consulta las fuentes originales de su información inmobiliaria.",
     "search": "Buscar",
     "reference": "Referencia de parcela",
     "loading": "Cargando parcelas…",
@@ -39,7 +39,7 @@
     "unknown": "No documentado",
     "district": "Distrito",
     "community": "Comunidad",
-    "limitations": "Vista local de DMT / Onwani. Las parcelas no son edificios ni viviendas. La fecha de recuperación no demuestra la validez de un permiso; la de publicación puede ser desconocida.",
+    "limitations": "Vista de investigación. Las parcelas no son edificios ni viviendas. Comprueba las fuentes y sus fechas para cada zona; la fecha de recopilación no demuestra la validez de un permiso.",
     "list": "Lista de parcelas",
     "map": "Mapa de parcelas",
     "reset": "Restablecer",
@@ -74,8 +74,8 @@
     "meps": "Estado MEPS",
     "dcr": "Documento DCR",
     "nearby": "Calles cercanas",
-    "viewIsland": "Toda la isla",
-    "viewRT4": "RT4",
+    "viewIsland": "Toda la zona",
+    "viewRT4": "Zona de interés",
     "viewNear": "Entorno",
     "exportCSV": "Exportar CSV",
     "exportPNG": "Exportar vista PNG",
@@ -104,5 +104,15 @@
     "media": "Medios",
     "reference": "Referencia de investigación",
     "editedDate": "Última edición OSM"
+  },
+  "Coverage": {
+    "title": "Siete emiratos. Una plataforma.",
+    "emirate": "Emirato",
+    "area": "Zona",
+    "chooseEmirate": "Elegir un emirato",
+    "preparing": "Cobertura en preparación",
+    "preparingBody": "Esta zona aún no tiene un conjunto de datos activo. Explora el piloto de Al Reem mientras se investigan y validan nuevas fuentes.",
+    "visitPilot": "Explorar el piloto",
+    "unknownArea": "Zona desconocida"
   }
 }

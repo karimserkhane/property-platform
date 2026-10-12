@@ -302,6 +302,57 @@
   margin-inline: auto;
   padding: 6rem 4.5rem;
 }
+.regions {
+  max-width: 90rem;
+  margin-inline: auto;
+  padding: 4rem 4.5rem 0;
+}
+.regions h2 {
+  margin-block: 1rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 400;
+}
+.regionNote {
+  color: #596860;
+  font-size: 0.85rem;
+}
+.regionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-block-start: 1.7rem;
+}
+.regionCard {
+  position: relative;
+  padding: 1.4rem 1.1rem;
+  border: 1px solid #d6d1c7;
+  border-radius: var(--control-radius);
+  background: linear-gradient(145deg, #fffdf8, #f1eadf);
+  box-shadow: var(--control-shadow);
+  text-decoration: none;
+  transition:
+    box-shadow var(--control-duration) ease,
+    border-color var(--control-duration) ease;
+}
+.regionCard bdi {
+  display: block;
+  margin-block-end: 0.7rem;
+  font-weight: 550;
+}
+.regionCard span {
+  font-size: 0.68rem;
+  color: #795f40;
+}
+.regionCard span:last-child {
+  position: absolute;
+  inset-inline-end: 1.1rem;
+  bottom: 1.2rem;
+}
+.regionCard:hover {
+  border-color: #a38861;
+  box-shadow: var(--control-shadow-hover);
+}
 .sectionEyebrow {
   color: #795f40;
 }
@@ -404,6 +455,7 @@
   outline-offset: 4px;
 }
 .title:where(html[dir="rtl"] *),
+.regions h2:where(html[dir="rtl"] *),
 .discovery h2:where(html[dir="rtl"] *) {
   font-family: system-ui, sans-serif;
   letter-spacing: normal;
@@ -415,6 +467,9 @@
   letter-spacing: normal;
 }
 @media (max-width: 1000px) {
+  .regions {
+    padding-inline: 2.5rem;
+  }
   .hero {
     padding-inline: 2.5rem;
   }
@@ -434,6 +489,12 @@
   }
 }
 @media (max-width: 700px) {
+  .regions {
+    padding: 3rem 1.4rem 0;
+  }
+  .regionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .hero {
     min-height: max(760px, 96svh);
     padding: 9rem 1.4rem 14.5rem;

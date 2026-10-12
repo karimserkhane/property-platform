@@ -1,15 +1,15 @@
 {
   "Home": {
-    "location": "Ilha de Al Reem",
+    "location": "Emirados Árabes Unidos",
     "title": "Veja além do horizonte.",
-    "description": "Explore Al Reem através dos seus terrenos, ruas, edifícios e fontes originais.",
-    "eyebrow": "Abu Dhabi · Emirados Árabes Unidos",
+    "description": "Explore os Emirados por meio de mapas, dados imobiliários e fontes originais.",
+    "eyebrow": "Emirados Árabes Unidos",
     "navExplore": "Explorar",
     "navSources": "As nossas fontes",
     "discoverTitle": "Cada endereço faz parte de uma história maior.",
     "discoverBody": "Conheça o terreno, compreenda a envolvente e siga cada informação até à sua fonte.",
-    "coverage": "Área piloto · Ilha de Al Reem",
-    "galleryLabel": "Fotografias de Abu Dhabi",
+    "coverage": "Primeiro conjunto de dados · Al Reem. A cobertura cresce por área.",
+    "galleryLabel": "Fotografias dos Emirados",
     "photoCredit": "Fotografia",
     "night": "À noite",
     "coast": "À beira-mar",
@@ -21,10 +21,10 @@
     "label": "Idioma"
   },
   "Atlas": {
-    "explore": "Explorar Al Reem",
+    "explore": "Explorar os Emirados",
     "sources": "Dados e fontes",
     "pilot": "Prévia de pesquisa local",
-    "intro": "Explore os terrenos de Al Reem. Abra um registro e veja a origem dos dados.",
+    "intro": "Escolha uma área e consulte as fontes originais de suas informações imobiliárias.",
     "search": "Pesquisar",
     "reference": "Referência do terreno",
     "loading": "Carregando terrenos…",
@@ -39,7 +39,7 @@
     "unknown": "Não documentado",
     "district": "Distrito",
     "community": "Comunidade",
-    "limitations": "Prévia local DMT / Onwani. Terrenos não são edifícios ou moradias. A data de obtenção não comprova a validade de uma licença; a data de publicação pode ser desconhecida.",
+    "limitations": "Prévia de pesquisa. Lotes não são edifícios nem moradias. Verifique as fontes e datas de cada área; a data de recolha não comprova a validade de uma licença.",
     "list": "Lista de terrenos",
     "map": "Mapa de terrenos",
     "reset": "Redefinir",
@@ -74,8 +74,8 @@
     "meps": "Estado MEPS",
     "dcr": "Documento DCR",
     "nearby": "Ruas próximas",
-    "viewIsland": "Toda a ilha",
-    "viewRT4": "RT4",
+    "viewIsland": "Toda a área",
+    "viewRT4": "Área de interesse",
     "viewNear": "Vizinhança",
     "exportCSV": "Exportar CSV",
     "exportPNG": "Exportar vista PNG",
@@ -104,5 +104,15 @@
     "media": "Média",
     "reference": "Referência de pesquisa",
     "editedDate": "Última edição OSM"
+  },
+  "Coverage": {
+    "title": "Sete emirados. Uma plataforma.",
+    "emirate": "Emirado",
+    "area": "Área",
+    "chooseEmirate": "Escolher um emirado",
+    "preparing": "Cobertura em preparação",
+    "preparingBody": "Esta área ainda não tem um conjunto de dados ativo. Explore o piloto de Al Reem enquanto novas fontes são pesquisadas e verificadas.",
+    "visitPilot": "Explorar o piloto",
+    "unknownArea": "Área desconhecida"
   }
 }

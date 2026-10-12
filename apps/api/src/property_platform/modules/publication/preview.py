@@ -1,21 +1,28 @@
 """Local research projection, deliberately distinct from an approved public dossier."""
 
 from property_platform.modules.catalog.queries import parcel_features, parcel_identity
-from property_platform.modules.evidence.onwani import SOURCE_KEY
-from property_platform.modules.evidence.queries import parcel_attributes, parcel_provenance
+from property_platform.modules.evidence.queries import (
+    parcel_attributes,
+    parcel_provenance,
+    parcel_sources,
+)
 
 
-def features(*, bbox, limit, query):
+def features(*, bbox, limit, query, namespaces=None):
     from .land_use import VERSION, category
 
-    collection = parcel_features(namespace=SOURCE_KEY, bbox=bbox, limit=limit, query=query)
+    collection = parcel_features(namespaces=namespaces, bbox=bbox, limit=limit, query=query)
+    sources = parcel_sources([feature["id"] for feature in collection["features"]])
     for feature in collection["features"]:
         feature["properties"]["category"] = category(feature["properties"]["land_use"])
+        source = sources.get(feature["id"], {})
+        feature["properties"]["source_url"] = source.get("url")
+        feature["properties"]["source_name"] = source.get("name")
     collection["classification_version"] = VERSION
     return collection
 
 
-def detail(parcel_id):
+def detail(parcel_id, namespaces=None):
     from datetime import UTC, datetime
     from urllib.parse import urlparse
 
@@ -23,10 +30,10 @@ def detail(parcel_id):
 
     from .land_use import category
 
-    parcel = parcel_identity(namespace=SOURCE_KEY, parcel_id=parcel_id)
+    parcel = parcel_identity(namespaces=namespaces, parcel_id=parcel_id)
     if parcel is None:
         return None
-    provenance = parcel_provenance(parcel_id=parcel_id, source_key=SOURCE_KEY)
+    provenance = parcel_provenance(parcel_id=parcel_id, source_key=parcel.pop("source_namespace"))
     if provenance is None:
         return None
     parcel["area_m2"] = round(parcel.pop("area").sq_m, 1)

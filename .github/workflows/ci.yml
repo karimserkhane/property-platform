@@ -68,7 +68,7 @@ jobs:
       - run: uv run --project apps/api python apps/api/manage.py migrate --noinput
       - run: uv run --project apps/api pytest apps/api/tests -c apps/api/pyproject.toml
       - run: uv run --project apps/api python -m property_platform.export_openapi --output packages/contracts/openapi.json
-      - run: git diff --exit-code -- packages/contracts/openapi.json
+      - run: git diff --exit-code -- packages/contracts/openapi.json packages/contracts/territories.json
       - run: docker compose -f infra/local/compose.yaml config --quiet
       - run: docker build -t property-platform-api-ci -f apps/api/Dockerfile .
       - run: docker run --rm -e DJANGO_SETTINGS_MODULE=property_platform.config.settings.local property-platform-api-ci python manage.py check
