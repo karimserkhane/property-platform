@@ -10,18 +10,48 @@ Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte loc
 
 L'accueil présente les sept émirats et trois photographies locales de Dubai et Abu Dhabi. En faisant défiler la page, le paysage se déplace plus lentement que le texte : c'est la **parallaxe**. Sur ordinateur, la photo du littoral reste un instant en place pendant que le contenu passe à côté. Les commandes du bandeau changent la photo ou suspendent le diaporama et son zoom. Le réglage système « réduire les animations » désactive ces mouvements ; sur téléphone ils sont plus courts et la photo du littoral défile normalement. La plateforme vise tous les Émirats ; Al Reem reste le premier jeu de données. [Le guide de couverture nationale](UAE_COVERAGE.md) indique où configurer les territoires et comment en activer un nouveau. [Le guide du thème](VISUAL_DESIGN.md) explique où changer les images, le cadrage, les textes, les couleurs et les effets.
 
-Après une mise à jour du backend, reconstruire son image depuis `C:\Users\Karim\Repositories\property-platform` :
+**Pour voir une modification du thème ou du code web**, la base et l'API peuvent rester démarrées. Depuis `C:\Users\Karim\Repositories\property-platform`, lancer :
 
 ```powershell
-pnpm.cmd install --frozen-lockfile
-docker compose -f infra/local/compose.yaml up -d --build api
-docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
 pnpm.cmd dev:web
 ```
 
-La première commande installe les dépendances verrouillées, dont MapLibre ; la deuxième reconstruit l'API ; la troisième applique les migrations de structure ; la quatrième démarre le site dans ce terminal. Les imports de données se lancent séparément (section 6). Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore the Emirates**. Les sélecteurs permettent de choisir l'émirat et la zone ; Abu Dhabi ouvre actuellement Al Reem. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Les autres émirats montrent une couverture en préparation. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
+Garder ce terminal ouvert. Next.js lit le code du dossier Windows et actualise les pages lors des modifications. La commande de racine est bien **`dev:web`**, pas `dev`. Si ce serveur tourne déjà, enregistrer le fichier suffit généralement ; après modification de `.env.local`, le redémarrer avec Ctrl+C puis cette commande. `pnpm.cmd install --frozen-lockfile` sert à la première installation ou après modification des dépendances/verrouillage, pas à chaque modification d'un titre ou d'une couleur.
 
-La modification de couverture nationale du 12 octobre ne change pas les tables : reconstruire l'API et le site suffit, sans réimporter Reem. `migrate` reste la commande ordinaire pour appliquer d'autres évolutions de structure. Ajouter un émirat à la navigation ne collecte aucune donnée. Les commandes `import_onwani` et `import_reem_*` restent propres au pilote, avec les mêmes preuves et UUID.
+Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore the Emirates**. Les sélecteurs permettent de choisir l'émirat et la zone ; Abu Dhabi ouvre actuellement Al Reem. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Les autres émirats montrent une couverture en préparation. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
+
+<a id="apres-maj"></a>
+
+### Que relancer après une modification ?
+
+Toutes les commandes de cette partie s'écrivent dans PowerShell depuis `C:\Users\Karim\Repositories\property-platform`.
+
+| Ce qui a changé | Action utile | Ce que cela change |
+|---|---|---|
+| Code, thème, images ou traductions web ; site sur **3000** | `pnpm.cmd dev:web`, si le serveur est arrêté | Lit les fichiers Windows actuels ; rechargement de développement |
+| Dépendances JavaScript ou `pnpm-lock.yaml` | `pnpm.cmd install --frozen-lockfile`, puis redémarrer le web | Installe les versions décidées dans le verrouillage ; n'importe aucune donnée |
+| Code Python sous `C:\Users\Karim\Repositories\property-platform\apps\api\` | Reconstruire **api**, comme ci-dessous | Copie le code actuel dans une nouvelle image et remplace son conteneur après un build réussi |
+| Nouvelles migrations Django | Après reconstruction réussie de l'API, lancer `migrate --noinput` | Applique les évolutions SQL non encore enregistrées ; ne collecte aucune donnée |
+| Code web ; site Docker sur **3102** | Reconstruire **web**, voir la variante Docker ci-dessous | Prépare un nouveau site compilé ; ce conteneur ne surveille pas les fichiers Windows |
+| Nouvelles données à collecter | Lancer la commande d'import adaptée, section 6 | Contacte la source et enregistre preuves et objets ; une compilation ne lance aucun import |
+
+**Seulement après modification du backend**, exécuter cette commande et attendre son succès :
+
+```powershell
+docker compose -f infra/local/compose.yaml up -d --build api
+```
+
+Elle lit `C:\Users\Karim\Repositories\property-platform\infra\local\compose.yaml`, construit l'image depuis `C:\Users\Karim\Repositories\property-platform\apps\api\Dockerfile`, assure le démarrage de la base dont l'API dépend, puis démarre ou recrée **api** si nécessaire. `-d` signifie que les services restent en arrière-plan. Le site **web** n'est pas la cible de cette commande. Compose réutilise les étapes inchangées du build ; arrêter tous les conteneurs avant n'est pas nécessaire. Les données PostgreSQL restent dans leur volume.
+
+Si la structure SQL a aussi changé, ou pour vérifier les migrations en attente, lancer ensuite :
+
+```powershell
+docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
+```
+
+`exec` exécute la commande **dans le conteneur API existant**. `migrate` applique les migrations Django ; `No migrations to apply` est un résultat normal. Si le build précédent a échoué, ce conteneur peut encore utiliser l'ancien code : une migration réussie ne signifie donc pas que l'image a été mise à jour. Arrêter cette séquence à la première erreur de build et suivre le dépannage ci-dessous. Les imports restent séparés (section 6).
+
+La modification de couverture nationale du 12 octobre ne change pas les tables. Pour installer cette évolution backend sur une autre installation, reconstruire l'API et le site suffit, sans réimporter Reem. Sur le poste où elle a déjà été appliquée, choisir le parcours correspondant aux fichiers modifiés dans le tableau ci-dessus. `migrate` reste la commande ordinaire pour appliquer d'autres évolutions de structure. Ajouter un émirat à la navigation ne collecte aucune donnée. Les commandes `import_onwani` et `import_reem_*` restent propres au pilote, avec les mêmes preuves et UUID.
 
 Si la base est vide, appliquer les migrations et l'import de la section 6 avant d'explorer. Un message d'indisponibilité indique de vérifier l'API ; une carte vide et une recherche sans résultat sont des états différents. Les couches rues, secteurs, empreintes 2D, lieux et satellite sont disponibles après les imports de la section 6.8. La 3D n'est pas encore livrée. Les coordonnées ne sont pas une certification de limites foncières.
 
@@ -43,7 +73,15 @@ Si tu préfères essayer le site compilé sans lancer Node sur Windows, depuis `
 docker compose -f infra/local/compose.yaml --profile web-preview up -d --build web
 ```
 
-Compose construit le site, attend que l'API et PostGIS soient disponibles, puis expose [l'accueil](http://localhost:3102/en) et [l'exploration](http://localhost:3102/en/explore) sur **3102**, sans occuper le port 3000. C'est une prévisualisation locale compilée, sans rechargement automatique. Après modification du code web, relancer cette commande pour reconstruire. Le profil est facultatif : un lancement Compose habituel n'ajoute pas ce site Docker.
+Compose construit le site, assure le démarrage de ses dépendances API/PostGIS, puis expose [l'accueil](http://localhost:3102/en) et [l'exploration](http://localhost:3102/en/explore) sur **3102**, sans occuper le port 3000. Le démarrage des dépendances peut aussi nécessiter leur construction si leurs images/configurations ne sont pas à jour. C'est une prévisualisation locale compilée, sans rechargement automatique. Le profil est facultatif : un lancement Compose habituel n'ajoute pas ce site Docker.
+
+Si **api et db tournent déjà** et que **seul le web a changé**, reconstruire uniquement le web :
+
+```powershell
+docker compose -f infra/local/compose.yaml --profile web-preview up -d --build --no-deps web
+```
+
+`--no-deps` laisse les autres services en place ; ne pas utiliser cette variante si l'API ou la base sont arrêtées ou doivent être mises à jour. La reconstruction peut encore rencontrer le problème de certificat du poste. `restart web` ou `up --no-build` réutilisent l'image existante : ils ne copient pas les nouveaux fichiers web dans une image. Le site Docker sur 3102 et le site de développement sur 3000 peuvent fonctionner ensemble, mais lire deux versions différentes après une modification. Pour travailler au quotidien sur le web, privilégier **3000**.
 
 Pour tout arrêter après avoir utilisé ce profil :
 
@@ -56,6 +94,7 @@ Cette commande conserve le volume PostgreSQL. Ne pas ajouter `-v`. Le contrôle 
 ## Sommaire
 
 - [Mémo rapide : lancer, vérifier et arrêter](#memo-rapide)
+- [Que relancer après une modification ?](#apres-maj)
 - [1. Comprendre les outils et savoir où écrire les commandes](#choisir-le-parcours)
 - [2. Installer les outils Windows](#prerequis)
 - [3. Ouvrir le dépôt, choisir la branche et installer les dépendances](#installer-les-dependances)
@@ -105,12 +144,13 @@ Garder ce terminal ouvert. Ouvrir [le site local](http://localhost:3000) dans le
 
 ```powershell
 Set-Location 'C:\Users\Karim\Repositories\property-platform'
-docker compose -f infra/local/compose.yaml up -d --build
-docker compose -f infra/local/compose.yaml exec api python manage.py migrate --noinput
+docker compose -f infra/local/compose.yaml up -d --no-build db api
 docker compose -f infra/local/compose.yaml ps
 Invoke-RestMethod 'http://localhost:8000/api/v1/health/live'
 Invoke-RestMethod 'http://localhost:8000/api/v1/health/ready'
 ```
+
+Ce mémo suppose que les images et la base ont **déjà été préparées avec ce guide**. `--no-build` démarre les images existantes ; il ne prend pas en compte une modification Python et ne construit pas une image absente. Pour une première installation, suivre l'étape 5 ; pour un changement backend ou de schéma, suivre [Que relancer après une modification ?](#apres-maj).
 
 Résultat attendu : site accessible, `api` en cours d'exécution, `db` en état `healthy`, réponses `ok` et `ready`. Tu peux aussi ouvrir [la documentation de l'API](http://localhost:8000/api/v1/docs). Il s'agit d'une vérification rapide du démarrage ; les contrôles de code et tests automatisés sont détaillés à l'étape 10. Si une commande échoue, résoudre l'erreur avant de continuer.
 
@@ -1089,6 +1129,19 @@ Revoir puis enregistrer **OpenAPI, les types TypeScript et `packages/contracts/t
 | Import en échec | Consulter `evidence.ingestion_run.error` et les journaux API ; le catalogue précédent est conservé. Corriger la cause avant une nouvelle acquisition |
 | CSS/JS absent en standalone | Reconstruire puis lancer node scripts/prepare-web-runtime.mjs, ou utiliser start qui fait cette préparation |
 | Erreur certificat TLS à l'installation | Vérifier les certificats du système/réseau ; Node 26 permet $env:NODE_OPTIONS='--use-system-ca', uv accepte --system-certs sur sa commande réseau ; ne pas désactiver la vérification TLS |
+
+### Comprendre le journal du 12 octobre : le web fonctionne, le build API échoue
+
+Le journal fourni montre plusieurs opérations indépendantes :
+
+- `pnpm.cmd install --frozen-lockfile` a réussi. Le message proposant pnpm 12.11.2 est une information ; aucune mise à jour d'outil n'est nécessaire pour afficher le thème.
+- Le build de **api** échoue lorsque uv tente de récupérer `hatchling==1.32.4`, l'outil de construction du paquet Python. `invalid peer certificate: UnknownIssuer` signifie que ce programme ne peut pas valider l'autorité du certificat HTTPS présenté pour PyPI. Cela ne prouve pas que la version Hatchling est absente. La nouvelle image n'a pas été construite ; le conteneur déjà démarré est resté utilisable dans cette session.
+- `migrate` affiche `No migrations to apply` : aucune migration en attente dans le code du conteneur courant. Cette commande ne répare ni le build ni un certificat.
+- `pnpm.cmd dev:web` affiche `Ready` puis des réponses `200`, y compris pour les parcelles : le site sur **3000** et son accès à l'API fonctionnent.
+- `Detected scroll-behavior: smooth` était un avertissement de navigation du web, corrigé avec l'attribut `data-scroll-behavior="smooth"` dans `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\[locale]\layout.tsx`, suivant [Next.js](https://nextjs.org/docs/messages/missing-data-scroll-behavior). Ce n'était pas un échec Docker.
+- `Terminer le programme de commandes (O/N) ?` puis `ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL` apparaît à l'interruption du serveur dans ce journal. Les réponses précédentes montrent qu'il a fonctionné avant son arrêt. Garder le terminal ouvert pour utiliser 3000 ; après Ctrl+C, répondre `O` si Windows demande confirmation, puis relancer `pnpm.cmd dev:web` pour reprendre. Si la même erreur apparaît sans interruption, lire les lignes précédentes pour sa cause réelle.
+
+Le problème TLS reste distinct du disque plein, désormais résolu. uv peut utiliser les certificats système avec `--system-certs` ou `UV_SYSTEM_CERTS=true`, mais **dans un build Docker, le système est Linux, pas Windows**. Un certificat approuvé dans Windows n'est pas automatiquement ajouté à cette image. Le test précédent du magasin système Linux n'a pas suffi sur ce poste. Pour une correction durable, identifier la chaîne de certificats effectivement présentée et, si nécessaire, configurer une autorité authentifiée du réseau/proxy dans l'environnement de build. Voir [la documentation uv](https://docs.astral.sh/uv/concepts/authentication/certificates/). Les images locales déjà présentes permettent de continuer le développement web pendant ce diagnostic ; elles ne valident pas une reconstruction depuis zéro. Ne pas ajouter un certificat inconnu ni désactiver la vérification HTTPS.
 
 ### Cas particulier : cache natif SWC sous Windows
 

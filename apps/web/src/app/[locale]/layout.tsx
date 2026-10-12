@@ -44,7 +44,11 @@ export default async function LocaleLayout({ children, params }: Props) {
   const home = await getTranslations({ locale, namespace: "Home" });
 
   return (
-    <html lang={locale} dir={getDirection(locale)}>
+    <html
+      lang={locale}
+      dir={getDirection(locale)}
+      data-scroll-behavior="smooth"
+    >
       <body>
         <NextIntlClientProvider
           locale={locale}
