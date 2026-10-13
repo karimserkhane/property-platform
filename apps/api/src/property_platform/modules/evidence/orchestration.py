@@ -14,12 +14,30 @@ from django.db import connection, transaction
 from django.db.models import F
 from django.utils import timezone
 
-from . import imagery_import, map_import, osm_bootstrap, property_import, research_import, services
+from . import (
+    adrec,
+    adrec_import,
+    imagery_import,
+    map_import,
+    osm_bootstrap,
+    property_import,
+    research_import,
+    services,
+)
 from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .failed_acquisitions import source_definition, validate_received_acquisitions
 from .models import Capture, IngestionExecution, IngestionRun, Source
 
-OPERATIONS = {"onwani", "map", "references", "property_presentations", "imagery", "osm_bootstrap"}
+OPERATIONS = {
+    "onwani",
+    "map",
+    "references",
+    "property_presentations",
+    "imagery",
+    "osm_bootstrap",
+    "adrec_sales",
+    "adrec_indices",
+}
 TERMINAL = {"succeeded", "quarantined"}
 TERRITORY = DEFAULT_TERRITORY
 
@@ -43,6 +61,11 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
         raise ValueError("Invalid ingestion operation or execution identity")
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
         raise ValueError("Valid actor required")
+    if operation in {"adrec_sales", "adrec_indices"}:
+        adrec.source_definition(operation, scope)
+        if reference_key is not None:
+            raise ValueError("ADREC does not accept reference identities")
+        return None
     territory = scope.split(":", 1)[0]
     collection_for(territory)
     if territory != DEFAULT_TERRITORY and operation == "imagery":
@@ -224,6 +247,8 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
 
 
 def _source_keys(operation, scope, reference):
+    if operation in {"adrec_sales", "adrec_indices"}:
+        return [adrec.source_definition(operation, scope)[0]]
     territory = scope.split(":", 1)[0]
     profile = collection_for(territory)
     if operation == "osm_bootstrap":
@@ -242,6 +267,11 @@ def _source_keys(operation, scope, reference):
 
 
 def _dispatch(operation, scope, actor, acquisition, receipt, reference):
+    if operation in {"adrec_sales", "adrec_indices"}:
+        run = adrec_import.import_adrec(
+            operation=operation, scope=scope, actor=actor, acquisition=acquisition
+        )
+        return run.status, run.summary
     territory = scope.split(":", 1)[0]
     if operation == "osm_bootstrap":
         run = osm_bootstrap.import_bootstrap(

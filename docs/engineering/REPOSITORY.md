@@ -67,7 +67,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── Dockerfile                Image d'ingestion avec bibliothèques GIS, sans runtime raster/OCR
 │   │   ├── src/property_platform_ingestion/   Code de planification et acquisition
 │   │   │   ├── __main__.py           Commandes serve, check et datasets
-│   │   │   ├── registry.py           Neuf déploiements, portées fixes et identités d'exécution
+│   │   │   ├── registry.py           Vingt déploiements, portées fixes et identités d'exécution
 │   │   │   ├── deployments.py        Enregistrement et conservation des horaires modifiés dans l'UI
 │   │   │   ├── flows.py              Flows/tâches Prefect : exécuter, superviser et signaler les résultats
 │   │   │   ├── runtime.py            Sous-processus Django borné, hors du thread async de Prefect
@@ -359,3 +359,10 @@ Le module `evidence` possède `PropertyPresentation` et `PropertyMedia`, leurs c
 ### Extension Saadiyat : responsabilités
 
 Le module evidence possède collection_profiles.py (configuration immuable examinée), osm_api_protocol.py (parseur XML portable sans ORM) et osm_bootstrap.py (captures et orchestration de la matérialisation initiale). La direction reste ingestion → evidence → catalog ; publication assemble les lectures filtrées par territoire. Le helper map_import.materialize_map_records conserve une unique transaction propriétaire et un audit commun aux formats Overpass et XML. Aucun collecteur ne modifie les modèles directement. Le découpage OSM API initial est manuel ; il ne devient pas un collecteur national récurrent. Voir [SAADIYAT.md](SAADIYAT.md).
+
+
+## Observations de marché ADREC
+
+Les données source ADREC appartiennent au module `evidence` : [ADREC.md](ADREC.md) décrit les modèles typés, captures et règles de snapshots. Le collecteur `apps/ingestion/src/property_platform_ingestion/collectors/adrec.py` acquiert uniquement les endpoints examinés ; `evidence/adrec.py` valide leur protocole et `evidence/adrec_import.py` matérialise les observations via la passerelle durable existante. Les trois tables `adrec_market_snapshot`, `adrec_sale_observation`, `adrec_index_observation` sont dans le schéma `evidence`, avec noms non qualifiés uniques et migration explicite depuis `public`.
+
+La lecture appartient à `publication/adrec_preview.py`, puis à l’adaptateur HTTP et au composant web `features/atlas/adrec-market.tsx`. La dépendance reste `publication → evidence → catalog` ; Prefect ne possède pas les écritures métier. Il n’existe pas de module commercial `market` normalisé supplémentaire ni de rapprochement par nom seul. Les positions de lignes et hashes sont des identités d’observation, jamais des identifiants de transaction. Les séries ambiguës sont conservées mais écartées de la publication.

@@ -126,5 +126,25 @@
     "preparingBody": "This territory has no activated dataset yet. Explore the Al Reem pilot while further sources are researched and validated.",
     "visitPilot": "Explore the pilot",
     "unknownArea": "Unknown area"
+  },
+  "Market": {
+    "tab": "Market",
+    "title": "Recent registered sales",
+    "search": "Search project names",
+    "empty": "No sales snapshot yet",
+    "sales": "Published sales",
+    "note": "Registered sale prices, not current asking prices. Project names are reported by ADREC; building associations remain unverified.",
+    "date": "Registered",
+    "area": "Sold area",
+    "share": "Sold share",
+    "previous": "Previous",
+    "next": "Next",
+    "indices": "Sale price indices",
+    "indexScope": "Abu Dhabi City · all zones. These indices are not valuations of this property.",
+    "review": "Conflicting index series are withheld pending review.",
+    "retrieved": "Collected",
+    "unavailable": "Market data unavailable",
+    "loading": "Loading market data…",
+    "retry": "Retry"
   }
 }

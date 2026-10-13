@@ -157,6 +157,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/adrec-market": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Adrec Market */
+        get: operations["previewAdrecMarket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -570,6 +587,81 @@ export interface components {
                 number
             ] | null;
         };
+        /** AdrecIndexResponse */
+        AdrecIndexResponse: {
+            /** Kind */
+            kind: string;
+            /** Property Type */
+            property_type: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /** Municipality */
+            municipality: string;
+            /** Index Value */
+            index_value: string | null;
+        };
+        /** AdrecMarketResponse */
+        AdrecMarketResponse: {
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Period Start */
+            period_start: string | null;
+            /** Period End */
+            period_end: string | null;
+            /** Retrieved At */
+            retrieved_at: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Total */
+            total: number;
+            /** Offset */
+            offset: number;
+            /** Has More */
+            has_more: boolean;
+            /** Sales */
+            sales: components["schemas"]["AdrecSaleResponse"][];
+            /** Indices */
+            indices: components["schemas"]["AdrecIndexResponse"][];
+            /** Index Review Needed */
+            index_review_needed: boolean;
+        };
+        /** AdrecSaleResponse */
+        AdrecSaleResponse: {
+            /** Position */
+            position: number;
+            /**
+             * Registration Date
+             * Format: date
+             */
+            registration_date: string;
+            /** Project Name */
+            project_name: string;
+            /** District */
+            district: string;
+            /** Community */
+            community: string;
+            /** Property Type */
+            property_type: string;
+            /** Property Layout */
+            property_layout: string;
+            /** Sale Application Type */
+            sale_application_type: string;
+            /** Sale Sequence */
+            sale_sequence: string;
+            /** Price Aed */
+            price_aed: string | null;
+            /** Sold Area Sqm */
+            sold_area_sqm: string | null;
+            /** Plot Area Sqm */
+            plot_area_sqm: string | null;
+            /** Rate Aed Per Sqm */
+            rate_aed_per_sqm: string | null;
+            /** Sold Share */
+            sold_share: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -976,6 +1068,58 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewAdrecMarket: {
+        parameters: {
+            query: {
+                territory: string;
+                q?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdrecMarketResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

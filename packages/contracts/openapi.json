@@ -613,6 +613,98 @@
           "local-preview"
         ]
       }
+    },
+    "/api/v1/preview/adrec-market": {
+      "get": {
+        "operationId": "previewAdrecMarket",
+        "summary": "Adrec Market",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "title": "Territory",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "title": "Offset",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 40,
+              "title": "Limit",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdrecMarketResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
     }
   },
   "components": {
@@ -1757,6 +1849,262 @@
           "neighbourhood_bounds"
         ],
         "title": "TerritoryResponse",
+        "type": "object"
+      },
+      "AdrecIndexResponse": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "property_type": {
+            "title": "Property Type",
+            "type": "string"
+          },
+          "period_end": {
+            "format": "date",
+            "title": "Period End",
+            "type": "string"
+          },
+          "municipality": {
+            "title": "Municipality",
+            "type": "string"
+          },
+          "index_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Index Value"
+          }
+        },
+        "required": [
+          "kind",
+          "property_type",
+          "period_end",
+          "municipality",
+          "index_value"
+        ],
+        "title": "AdrecIndexResponse",
+        "type": "object"
+      },
+      "AdrecMarketResponse": {
+        "properties": {
+          "snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Id"
+          },
+          "period_start": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Start"
+          },
+          "period_end": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period End"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "sales": {
+            "items": {
+              "$ref": "#/components/schemas/AdrecSaleResponse"
+            },
+            "title": "Sales",
+            "type": "array"
+          },
+          "indices": {
+            "items": {
+              "$ref": "#/components/schemas/AdrecIndexResponse"
+            },
+            "title": "Indices",
+            "type": "array"
+          },
+          "index_review_needed": {
+            "title": "Index Review Needed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "snapshot_id",
+          "period_start",
+          "period_end",
+          "retrieved_at",
+          "source_url",
+          "total",
+          "offset",
+          "has_more",
+          "sales",
+          "indices",
+          "index_review_needed"
+        ],
+        "title": "AdrecMarketResponse",
+        "type": "object"
+      },
+      "AdrecSaleResponse": {
+        "properties": {
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "registration_date": {
+            "format": "date",
+            "title": "Registration Date",
+            "type": "string"
+          },
+          "project_name": {
+            "title": "Project Name",
+            "type": "string"
+          },
+          "district": {
+            "title": "District",
+            "type": "string"
+          },
+          "community": {
+            "title": "Community",
+            "type": "string"
+          },
+          "property_type": {
+            "title": "Property Type",
+            "type": "string"
+          },
+          "property_layout": {
+            "title": "Property Layout",
+            "type": "string"
+          },
+          "sale_application_type": {
+            "title": "Sale Application Type",
+            "type": "string"
+          },
+          "sale_sequence": {
+            "title": "Sale Sequence",
+            "type": "string"
+          },
+          "price_aed": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price Aed"
+          },
+          "sold_area_sqm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sold Area Sqm"
+          },
+          "plot_area_sqm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plot Area Sqm"
+          },
+          "rate_aed_per_sqm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rate Aed Per Sqm"
+          },
+          "sold_share": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sold Share"
+          }
+        },
+        "required": [
+          "position",
+          "registration_date",
+          "project_name",
+          "district",
+          "community",
+          "property_type",
+          "property_layout",
+          "sale_application_type",
+          "sale_sequence",
+          "price_aed",
+          "sold_area_sqm",
+          "plot_area_sqm",
+          "rate_aed_per_sqm",
+          "sold_share"
+        ],
+        "title": "AdrecSaleResponse",
         "type": "object"
       }
     }

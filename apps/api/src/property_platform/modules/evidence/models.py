@@ -311,6 +311,8 @@ class IngestionExecution(models.Model):
                         "property_presentations",
                         "imagery",
                         "osm_bootstrap",
+                        "adrec_sales",
+                        "adrec_indices",
                     ],
                 ),
                 name="ingestion_execution_identity_valid",
@@ -548,4 +550,120 @@ class ResearchReference(models.Model):
                 ),
                 name="research_reference_kind_valid",
             )
+        ]
+
+
+class AdrecMarketSnapshot(models.Model):
+    """Append-only provider snapshot, not a registry of unique transactions."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    run = models.OneToOneField(IngestionRun, on_delete=models.PROTECT)
+    dataset = models.CharField(max_length=20)
+    territory = models.CharField(max_length=80)
+    period_start = models.DateField(null=True)
+    period_end = models.DateField(null=True)
+    source_row_count = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "adrec_market_snapshot"
+        indexes = [
+            models.Index(
+                fields=["territory", "dataset", "-created_at"], name="adrec_snapshot_latest"
+            )
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    dataset="sales",
+                    period_start__isnull=False,
+                    period_end__isnull=False,
+                    period_end__gte=models.F("period_start"),
+                )
+                | models.Q(dataset="indices", period_start__isnull=True, period_end__isnull=True),
+                name="adrec_snapshot_window_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(source_row_count__lte=10000), name="adrec_snapshot_bounded"
+            ),
+        ]
+
+
+class AdrecSaleObservation(models.Model):
+    snapshot = models.ForeignKey(
+        AdrecMarketSnapshot, on_delete=models.PROTECT, related_name="sales"
+    )
+    capture = models.ForeignKey(Capture, on_delete=models.PROTECT)
+    source_position = models.PositiveIntegerField()
+    field_path = models.CharField(max_length=80)
+    record_sha256 = models.CharField(max_length=64)
+    registration_date = models.DateField()
+    project_name = models.CharField(max_length=255, blank=True)
+    district = models.CharField(max_length=255)
+    community = models.CharField(max_length=255, blank=True)
+    asset_class = models.CharField(max_length=255, blank=True)
+    property_type = models.CharField(max_length=255, blank=True)
+    property_layout = models.CharField(max_length=255, blank=True)
+    sale_application_type = models.CharField(max_length=255, blank=True)
+    sale_sequence = models.CharField(max_length=255, blank=True)
+    price_aed = models.DecimalField(max_digits=24, decimal_places=2, null=True)
+    sold_area_sqm = models.DecimalField(max_digits=24, decimal_places=8, null=True)
+    plot_area_sqm = models.DecimalField(max_digits=24, decimal_places=8, null=True)
+    rate_aed_per_sqm = models.DecimalField(max_digits=24, decimal_places=8, null=True)
+    sold_share = models.DecimalField(max_digits=9, decimal_places=8, null=True)
+    ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "adrec_sale_observation"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["snapshot", "source_position"], name="adrec_sale_position_unique"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    price_aed__gte=0,
+                    sold_area_sqm__gte=0,
+                    plot_area_sqm__gte=0,
+                    rate_aed_per_sqm__gte=0,
+                    sold_share__gte=0,
+                    sold_share__lte=1,
+                ),
+                name="adrec_sale_numbers_valid",
+            ),
+        ]
+
+
+class AdrecIndexObservation(models.Model):
+    snapshot = models.ForeignKey(
+        AdrecMarketSnapshot, on_delete=models.PROTECT, related_name="indices"
+    )
+    capture = models.ForeignKey(Capture, on_delete=models.PROTECT)
+    source_position = models.PositiveIntegerField()
+    field_path = models.CharField(max_length=80)
+    record_sha256 = models.CharField(max_length=64)
+    kind = models.CharField(max_length=10)
+    municipality = models.CharField(max_length=255)
+    zone_label = models.CharField(max_length=255)
+    property_type = models.CharField(max_length=255)
+    period_end = models.DateField()
+    index_value = models.DecimalField(max_digits=24, decimal_places=8, null=True)
+    usable = models.BooleanField()
+    review_reason = models.CharField(max_length=255, blank=True)
+    ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "adrec_index_observation"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["snapshot", "kind", "source_position"], name="adrec_index_position_unique"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(kind__in=["sale", "rent"], index_value__gte=0),
+                name="adrec_index_kind_value_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(usable=True, review_reason="")
+                | models.Q(usable=False, review_reason__regex=r"\S"),
+                name="adrec_index_review_present",
+            ),
         ]

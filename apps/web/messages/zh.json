@@ -126,5 +126,25 @@
     "preparingBody": "该地区尚无已启用的数据集。新来源仍在研究和验证，可先探索 Al Reem 试点。",
     "visitPilot": "探索试点",
     "unknownArea": "未知地区"
+  },
+  "Market": {
+    "tab": "市场",
+    "title": "近期登记销售",
+    "search": "搜索项目名称",
+    "empty": "暂无销售快照",
+    "sales": "已公布销售",
+    "note": "登记成交价，并非当前报价。项目名称来自 ADREC，与建筑的关联尚未核实。",
+    "date": "登记日期",
+    "area": "售出面积",
+    "share": "售出份额",
+    "previous": "上一页",
+    "next": "下一页",
+    "indices": "销售价格指数",
+    "indexScope": "阿布扎比市 · 所有区域。这些指数不是该房产的估值。",
+    "review": "相互矛盾的指数序列暂不展示，等待审核。",
+    "retrieved": "采集时间",
+    "unavailable": "市场数据不可用",
+    "loading": "正在加载市场数据…",
+    "retry": "重试"
   }
 }

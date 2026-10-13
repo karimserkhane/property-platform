@@ -1,4 +1,5 @@
-import { getLocale, getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { TerritoryExplorer } from "@/features/atlas/territory-explorer";
 import type {
   AtlasLabels,
@@ -10,6 +11,7 @@ import english from "../../../../messages/en.json";
 export default async function ExplorePage() {
   const t = await getTranslations("Atlas");
   const locale = await getLocale();
+  const messages = await getMessages();
   const map = await getTranslations("Map");
   const coverage = await getTranslations("Coverage");
   const coverageLabels = Object.fromEntries(
@@ -54,11 +56,13 @@ export default async function ExplorePage() {
     keys.map((key) => [key, t(key)]),
   ) as AtlasLabels;
   return (
-    <TerritoryExplorer
-      labels={labels}
-      mapLabels={mapLabels}
-      coverage={coverageLabels}
-      locale={locale}
-    />
+    <NextIntlClientProvider messages={{ Market: messages.Market }}>
+      <TerritoryExplorer
+        labels={labels}
+        mapLabels={mapLabels}
+        coverage={coverageLabels}
+        locale={locale}
+      />
+    </NextIntlClientProvider>
   );
 }

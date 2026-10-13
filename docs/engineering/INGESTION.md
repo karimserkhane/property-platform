@@ -85,7 +85,7 @@ docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml
 docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion ps
 ```
 
-Le runner attend les services nécessaires, vérifie le schéma puis enregistre dix-sept déploiements. `Ready` signifie qu'il peut exécuter une tâche ; cela ne signifie pas que celle-ci a déjà importé des données. Ouvrir **[Prefect sur localhost:4200](http://localhost:4200)**. L'accueil peut être celui de l'interface v2.
+Le runner attend les services nécessaires, vérifie le schéma puis enregistre vingt déploiements. `Ready` signifie qu'il peut exécuter une tâche ; cela ne signifie pas que celle-ci a déjà importé des données. Ouvrir **[Prefect sur localhost:4200](http://localhost:4200)**. L'accueil peut être celui de l'interface v2.
 
 **Sur le poste de Karim, ces étapes ont déjà été effectuées le 13 octobre 2026.** La migration est appliquée et les services sont démarrés ; ouvrir l'interface suffit tant que Docker tourne.
 
@@ -289,3 +289,8 @@ Le registre comporte désormais 17 déploiements : les 9 précédents de Reem et
 Les cadences récurrentes Saadiyat sont activées sur le poste de Karim, selon la préférence déjà donnée pour le week-end. Les horaires et activations existants de Reem sont conservés. Sur une installation neuve, les calendriers restent initialement désactivés afin de vérifier les premiers imports avant leur activation. L'import XML initial OSM, Sentinel et le contrôle de disponibilité restent manuels.
 
 Le bootstrap XML est une lecture limitée à quatre fenêtres enregistrées, 16 Mio par réponse et 64 Mio par lot. Il utilise les mêmes identités canoniques OSM que le connecteur Overpass, conserve les XML originaux et déduplique les recouvrements exacts. Une divergence de version/géométrie bloque le lot. L'API d'édition OSM ne sert pas de collecteur récurrent national ; les mises à jour continuent via le déploiement Overpass. Ses indisponibilités restent visibles dans Prefect et n'effacent pas les données acquises.
+
+
+## Collectes ADREC — 13 octobre 2026
+
+Les trois déploiements supplémentaires `adrec-reem-sales`, `adrec-saadiyat-sales` et `adrec-price-indices` portent le total à vingt. Ils alimentent trois tables typées du schéma `evidence` via Django et les captures existantes. Leur fonctionnement, les endpoints, le calendrier dominical et la consultation sur le site sont détaillés dans [ADREC.md](ADREC.md). Une série d’indices contradictoire est conservée non exploitable ; elle ne doit pas être corrigée en choisissant arbitrairement une ligne.

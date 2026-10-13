@@ -1,0 +1,43 @@
+.root h2 {
+  font-size: 1.15rem;
+  margin-block: 0.5rem 1rem;
+}
+.sale {
+  padding: 1rem;
+  margin-block: 0.75rem;
+  border: 1px solid var(--border, #ddd6cb);
+  border-radius: 16px;
+  background: #fff;
+}
+.sale h3 {
+  font-size: 1rem;
+  margin-block: 0 0.6rem;
+}
+.sale > strong {
+  color: #1b5360;
+  font-size: 1.1rem;
+}
+.sale p {
+  font-size: 0.8rem;
+  color: #52636d;
+}
+.sale dl {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  margin-block-end: 0;
+}
+.sale dt {
+  color: #52636d;
+}
+.sale dd {
+  margin-inline: 0;
+  margin-block-start: 0.3rem;
+}
+.indices {
+  padding: 1rem;
+  margin-block: 1.25rem;
+  background: #edf3f1;
+  border-radius: 16px;
+}

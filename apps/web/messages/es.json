@@ -126,5 +126,25 @@
     "preparingBody": "Esta zona aún no tiene un conjunto de datos activo. Explora el piloto de Al Reem mientras se investigan y validan nuevas fuentes.",
     "visitPilot": "Explorar el piloto",
     "unknownArea": "Zona desconocida"
+  },
+  "Market": {
+    "tab": "Mercado",
+    "title": "Ventas registradas recientes",
+    "search": "Buscar proyectos",
+    "empty": "Sin instantánea de ventas",
+    "sales": "Ventas publicadas",
+    "note": "Precios de ventas registradas, no precios de oferta actuales. Los nombres proceden de ADREC; la vinculación con edificios no está verificada.",
+    "date": "Registro",
+    "area": "Superficie vendida",
+    "share": "Participación vendida",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "indices": "Índices de precios de venta",
+    "indexScope": "Ciudad de Abu Dabi · todas las zonas. Estos índices no valoran este inmueble.",
+    "review": "Las series contradictorias se ocultan hasta su revisión.",
+    "retrieved": "Recopilado",
+    "unavailable": "Datos de mercado no disponibles",
+    "loading": "Cargando mercado…",
+    "retry": "Reintentar"
   }
 }

@@ -126,5 +126,25 @@
     "preparingBody": "Cette zone ne dispose pas encore de jeu de données activé. Découvrez le pilote Al Reem pendant la recherche et la validation des prochaines sources.",
     "visitPilot": "Explorer le pilote",
     "unknownArea": "Zone inconnue"
+  },
+  "Market": {
+    "tab": "Marché",
+    "title": "Ventes enregistrées récentes",
+    "search": "Rechercher un projet",
+    "empty": "Aucun snapshot de ventes",
+    "sales": "Ventes publiées",
+    "note": "Prix de ventes enregistrées, pas prix demandés actuels. Les noms viennent d’ADREC ; les liens avec les bâtiments restent à vérifier.",
+    "date": "Enregistrée",
+    "area": "Surface vendue",
+    "share": "Part vendue",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "indices": "Indices des prix de vente",
+    "indexScope": "Ville d’Abu Dhabi · toutes zones. Ces indices ne constituent pas une estimation de ce bien.",
+    "review": "Les séries contradictoires sont suspendues pour vérification.",
+    "retrieved": "Collecté",
+    "unavailable": "Données du marché indisponibles",
+    "loading": "Chargement du marché…",
+    "retry": "Réessayer"
   }
 }

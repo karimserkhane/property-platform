@@ -1,8 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { AdrecMarket } from "./adrec-market";
 import { Inspector } from "./inspector";
 import type { MapOptions, MapView } from "./parcel-map";
 import { readParcelPages } from "./parcel-pages";
@@ -40,7 +42,8 @@ type Tab =
   | "streets"
   | "buildings"
   | "future"
-  | "sources";
+  | "sources"
+  | "market";
 const TABS: Tab[] = [
   "properties",
   "parcels",
@@ -49,6 +52,7 @@ const TABS: Tab[] = [
   "buildings",
   "future",
   "sources",
+  "market",
 ];
 
 export function Explorer({
@@ -66,6 +70,7 @@ export function Explorer({
   countryBounds: number[];
   navigation: ReactNode;
 }) {
+  const marketLabels = useTranslations("Market");
   const bbox = territory.bounds.join(",");
   const territoryQuery = encodeURIComponent(territory.id);
   const [collection, setCollection] = useState<ParcelCollection | null>(null);
@@ -617,7 +622,11 @@ export function Explorer({
                 key={t}
                 onClick={() => changeTab(t)}
               >
-                {t === "sources" ? labels.sources : m[t]}
+                {t === "market"
+                  ? marketLabels("tab")
+                  : t === "sources"
+                    ? labels.sources
+                    : m[t]}
               </button>
             ))}
           </div>
@@ -628,322 +637,341 @@ export function Explorer({
             aria-labelledby={`tab-${tab}`}
             className="atlas-panel"
           >
-            {(detail || feature || detailState !== "ready") && (
-              <section
-                ref={inspection}
-                tabIndex={-1}
-                className="parcel-inspector"
-                aria-live="polite"
-              >
-                <div className="property-inspector-controls">
-                  <button
-                    type="button"
-                    aria-label={m.closeDetails}
-                    onClick={closeDetails}
-                  >
-                    ×
-                  </button>
-                </div>
-                {detailState !== "ready" ? (
-                  <p>
-                    {detailState === "loading"
-                      ? labels.loading
-                      : labels.unavailable}
-                  </p>
-                ) : (
-                  <Inspector
-                    detail={detail}
-                    feature={feature}
-                    context={context}
-                    labels={labels}
-                    m={m}
-                    locale={locale}
-                    select={select}
-                    parcelCodes={parcelCodes}
-                    parcelProperties={parcelProperties}
-                    references={references}
-                    locate={locate}
-                    choose={choose}
-                  />
-                )}
-              </section>
-            )}
-            <label className="atlas-search">
-              <span>{m.searchPrompt}</span>
-              <input
-                type="search"
-                value={query}
-                maxLength={80}
-                dir="auto"
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  setPage(0);
-                }}
+            {tab === "market" ? (
+              <AdrecMarket
+                key={territory.id}
+                territory={territory.id}
+                locale={locale}
               />
-            </label>
-            {tab === "parcels" && (
+            ) : (
               <>
-                <div className="atlas-filters">
-                  <select
-                    aria-label={m.allSectors}
-                    value={sector}
-                    onChange={(e) => {
-                      setSector(e.target.value);
-                      setPage(0);
-                    }}
+                {(detail || feature || detailState !== "ready") && (
+                  <section
+                    ref={inspection}
+                    tabIndex={-1}
+                    className="parcel-inspector"
+                    aria-live="polite"
                   >
-                    <option value="">{m.allSectors}</option>
-                    {sectors.map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label={m.allUses}
-                    value={use}
-                    onChange={(e) => {
-                      setUse(e.target.value);
-                      setPage(0);
-                    }}
-                  >
-                    <option value="">{m.allUses}</option>
-                    {Object.keys(COLORS).map((c) => (
-                      <option key={c} value={c}>
-                        {m[c as Category]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <label className="atlas-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={temps}
-                    onChange={(e) => setTemps(e.target.checked)}
-                  />
-                  {m.temporary}
-                </label>
-              </>
-            )}
-            {(tab === "future" || tab === "sources") && (
-              <>
-                {referenceError && (
-                  <p role="status">
-                    {labels.unavailable}{" "}
-                    <button
-                      type="button"
-                      onClick={() => setAttempt((a) => a + 1)}
-                    >
-                      {labels.retry}
-                    </button>
-                  </p>
-                )}
-                <p className="result-count">
-                  {new Intl.NumberFormat(locale).format(referenceItems.length)}{" "}
-                  · {m.projectReference}
-                </p>
-                <References
-                  items={referenceItems.slice(
-                    currentPage * 40,
-                    (currentPage + 1) * 40,
-                  )}
-                  labels={labels}
-                  m={m}
-                  locale={locale}
-                  choose={(id) => {
-                    const f = context?.place.features.find((f) => f.id === id);
-                    if (f) choose(f);
-                    if (f)
-                      setView((v) => ({
-                        kind: "feature",
-                        token: v.token + 1,
-                        feature: f,
-                      }));
-                  }}
-                />
-                <nav className="atlas-pagination" aria-label={labels.sources}>
-                  {Array.from(
-                    { length: Math.ceil(referenceItems.length / 40) },
-                    (_, i) => i + 1,
-                  ).map((number) => (
-                    <button
-                      type="button"
-                      key={number}
-                      aria-current={
-                        currentPage === number - 1 ? "page" : undefined
-                      }
-                      onClick={() => setPage(number - 1)}
-                    >
-                      {new Intl.NumberFormat(locale).format(number)}
-                    </button>
-                  ))}
-                </nav>
-              </>
-            )}
-            {tab === "sources" ? (
-              <section className="atlas-source-list">
-                <p>{m.spatial}</p>
-                {[
-                  ...new Set(
-                    (collection?.features ?? []).flatMap((item) =>
-                      item.properties.source_url
-                        ? [item.properties.source_url]
-                        : [],
-                    ),
-                  ),
-                ].map((url) => (
-                  <a
-                    key={url}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {labels.source} · {m.parcels}
-                  </a>
-                ))}
-                {[
-                  ...new Map(
-                    Object.values(context ?? {}).flatMap((layer) =>
-                      layer.features.map(
-                        (f) =>
-                          [
-                            f.properties.source.name,
-                            f.properties.source,
-                          ] as const,
-                      ),
-                    ),
-                  ).values(),
-                ].map((source) => (
-                  <article key={source.name}>
-                    <h3>
-                      <bdi>{source.name}</bdi>
-                    </h3>
-                    <p>{sourceLabel(source.reliability, m)}</p>
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {labels.source} ↗
-                    </a>
-                    <p>
-                      {labels.retrieved} ·{" "}
-                      {new Intl.DateTimeFormat(locale, {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                        timeZone: "Asia/Dubai",
-                      }).format(new Date(source.retrieved_at))}
-                    </p>
-                  </article>
-                ))}
-              </section>
-            ) : tab === "future" ? null : (
-              <>
-                <p className="result-count" aria-live="polite">
-                  {new Intl.NumberFormat(locale).format(count)} · {m[tab]}
-                </p>
-
-                {!count && state === "ready" && <p>{m.empty}</p>}
-                {tab === "parcels"
-                  ? parcelItems
-                      .slice(currentPage * 40, (currentPage + 1) * 40)
-                      .map((f) => (
-                        <button
-                          className="atlas-record"
-                          type="button"
-                          aria-pressed={selected === f.id}
-                          key={f.id}
-                          onClick={() => void select(f.id)}
-                        >
-                          <strong>
-                            <bdi>
-                              {propertyName(
-                                preferredParcelProperty(
-                                  parcelProperties.get(f.id) ?? [],
-                                  locale,
-                                ) ?? { name: "", name_ar: "", kind: "" },
-                                locale,
-                              ) || m.parcelTitle}
-                            </bdi>
-                          </strong>
-                          <small>
-                            <bdi>
-                              {readableParcelCode(f.properties.code)} ·{" "}
-                              {f.properties.land_use}
-                            </bdi>
-                          </small>
-                        </button>
-                      ))
-                  : mapItems
-                      .slice(currentPage * 40, (currentPage + 1) * 40)
-                      .map((f) => (
-                        <button
-                          className="atlas-record"
-                          type="button"
-                          aria-pressed={feature?.id === f.id}
-                          key={f.id}
-                          onClick={() => choose(f)}
-                        >
-                          <strong>
-                            <bdi>
-                              {propertyName(f.properties, locale) ||
-                                (tab === "properties" || tab === "buildings"
-                                  ? m.building
-                                  : labels.unknown)}
-                            </bdi>
-                          </strong>
-                          <small>
-                            {tab === "properties" ? (
-                              <>
-                                {f.properties.kind.endsWith("_project_marker")
-                                  ? m.project
-                                  : m.building}
-                                {f.properties.presentation?.developer && (
-                                  <>
-                                    {" "}
-                                    ·{" "}
-                                    <bdi>
-                                      {f.properties.presentation.developer}
-                                    </bdi>
-                                  </>
-                                )}
-                                {f.properties.levels != null && (
-                                  <>
-                                    {" "}
-                                    ·{" "}
-                                    {new Intl.NumberFormat(locale).format(
-                                      f.properties.levels,
-                                    )}{" "}
-                                    {m.levels}
-                                  </>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                <bdi>{f.properties.kind}</bdi> ·{" "}
-                                {sourceLabel(
-                                  f.properties.source.reliability,
-                                  m,
-                                )}
-                              </>
-                            )}
-                          </small>
-                        </button>
-                      ))}
-                <nav className="atlas-pagination" aria-label={labels.list}>
-                  {Array.from({ length: maxPage + 1 }, (_, i) => i + 1).map(
-                    (number) => (
+                    <div className="property-inspector-controls">
                       <button
                         type="button"
-                        key={number}
-                        aria-current={
-                          currentPage === number - 1 ? "page" : undefined
-                        }
-                        onClick={() => setPage(number - 1)}
+                        aria-label={m.closeDetails}
+                        onClick={closeDetails}
                       >
-                        {new Intl.NumberFormat(locale).format(number)}
+                        ×
                       </button>
-                    ),
-                  )}
-                </nav>
+                    </div>
+                    {detailState !== "ready" ? (
+                      <p>
+                        {detailState === "loading"
+                          ? labels.loading
+                          : labels.unavailable}
+                      </p>
+                    ) : (
+                      <Inspector
+                        detail={detail}
+                        feature={feature}
+                        context={context}
+                        labels={labels}
+                        m={m}
+                        locale={locale}
+                        select={select}
+                        parcelCodes={parcelCodes}
+                        parcelProperties={parcelProperties}
+                        references={references}
+                        locate={locate}
+                        choose={choose}
+                      />
+                    )}
+                  </section>
+                )}
+                <label className="atlas-search">
+                  <span>{m.searchPrompt}</span>
+                  <input
+                    type="search"
+                    value={query}
+                    maxLength={80}
+                    dir="auto"
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      setPage(0);
+                    }}
+                  />
+                </label>
+                {tab === "parcels" && (
+                  <>
+                    <div className="atlas-filters">
+                      <select
+                        aria-label={m.allSectors}
+                        value={sector}
+                        onChange={(e) => {
+                          setSector(e.target.value);
+                          setPage(0);
+                        }}
+                      >
+                        <option value="">{m.allSectors}</option>
+                        {sectors.map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </select>
+                      <select
+                        aria-label={m.allUses}
+                        value={use}
+                        onChange={(e) => {
+                          setUse(e.target.value);
+                          setPage(0);
+                        }}
+                      >
+                        <option value="">{m.allUses}</option>
+                        {Object.keys(COLORS).map((c) => (
+                          <option key={c} value={c}>
+                            {m[c as Category]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <label className="atlas-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={temps}
+                        onChange={(e) => setTemps(e.target.checked)}
+                      />
+                      {m.temporary}
+                    </label>
+                  </>
+                )}
+                {(tab === "future" || tab === "sources") && (
+                  <>
+                    {referenceError && (
+                      <p role="status">
+                        {labels.unavailable}{" "}
+                        <button
+                          type="button"
+                          onClick={() => setAttempt((a) => a + 1)}
+                        >
+                          {labels.retry}
+                        </button>
+                      </p>
+                    )}
+                    <p className="result-count">
+                      {new Intl.NumberFormat(locale).format(
+                        referenceItems.length,
+                      )}{" "}
+                      · {m.projectReference}
+                    </p>
+                    <References
+                      items={referenceItems.slice(
+                        currentPage * 40,
+                        (currentPage + 1) * 40,
+                      )}
+                      labels={labels}
+                      m={m}
+                      locale={locale}
+                      choose={(id) => {
+                        const f = context?.place.features.find(
+                          (f) => f.id === id,
+                        );
+                        if (f) choose(f);
+                        if (f)
+                          setView((v) => ({
+                            kind: "feature",
+                            token: v.token + 1,
+                            feature: f,
+                          }));
+                      }}
+                    />
+                    <nav
+                      className="atlas-pagination"
+                      aria-label={labels.sources}
+                    >
+                      {Array.from(
+                        { length: Math.ceil(referenceItems.length / 40) },
+                        (_, i) => i + 1,
+                      ).map((number) => (
+                        <button
+                          type="button"
+                          key={number}
+                          aria-current={
+                            currentPage === number - 1 ? "page" : undefined
+                          }
+                          onClick={() => setPage(number - 1)}
+                        >
+                          {new Intl.NumberFormat(locale).format(number)}
+                        </button>
+                      ))}
+                    </nav>
+                  </>
+                )}
+                {tab === "sources" ? (
+                  <section className="atlas-source-list">
+                    <p>{m.spatial}</p>
+                    {[
+                      ...new Set(
+                        (collection?.features ?? []).flatMap((item) =>
+                          item.properties.source_url
+                            ? [item.properties.source_url]
+                            : [],
+                        ),
+                      ),
+                    ].map((url) => (
+                      <a
+                        key={url}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {labels.source} · {m.parcels}
+                      </a>
+                    ))}
+                    {[
+                      ...new Map(
+                        Object.values(context ?? {}).flatMap((layer) =>
+                          layer.features.map(
+                            (f) =>
+                              [
+                                f.properties.source.name,
+                                f.properties.source,
+                              ] as const,
+                          ),
+                        ),
+                      ).values(),
+                    ].map((source) => (
+                      <article key={source.name}>
+                        <h3>
+                          <bdi>{source.name}</bdi>
+                        </h3>
+                        <p>{sourceLabel(source.reliability, m)}</p>
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {labels.source} ↗
+                        </a>
+                        <p>
+                          {labels.retrieved} ·{" "}
+                          {new Intl.DateTimeFormat(locale, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                            timeZone: "Asia/Dubai",
+                          }).format(new Date(source.retrieved_at))}
+                        </p>
+                      </article>
+                    ))}
+                  </section>
+                ) : tab === "future" ? null : (
+                  <>
+                    <p className="result-count" aria-live="polite">
+                      {new Intl.NumberFormat(locale).format(count)} · {m[tab]}
+                    </p>
+
+                    {!count && state === "ready" && <p>{m.empty}</p>}
+                    {tab === "parcels"
+                      ? parcelItems
+                          .slice(currentPage * 40, (currentPage + 1) * 40)
+                          .map((f) => (
+                            <button
+                              className="atlas-record"
+                              type="button"
+                              aria-pressed={selected === f.id}
+                              key={f.id}
+                              onClick={() => void select(f.id)}
+                            >
+                              <strong>
+                                <bdi>
+                                  {propertyName(
+                                    preferredParcelProperty(
+                                      parcelProperties.get(f.id) ?? [],
+                                      locale,
+                                    ) ?? { name: "", name_ar: "", kind: "" },
+                                    locale,
+                                  ) || m.parcelTitle}
+                                </bdi>
+                              </strong>
+                              <small>
+                                <bdi>
+                                  {readableParcelCode(f.properties.code)} ·{" "}
+                                  {f.properties.land_use}
+                                </bdi>
+                              </small>
+                            </button>
+                          ))
+                      : mapItems
+                          .slice(currentPage * 40, (currentPage + 1) * 40)
+                          .map((f) => (
+                            <button
+                              className="atlas-record"
+                              type="button"
+                              aria-pressed={feature?.id === f.id}
+                              key={f.id}
+                              onClick={() => choose(f)}
+                            >
+                              <strong>
+                                <bdi>
+                                  {propertyName(f.properties, locale) ||
+                                    (tab === "properties" || tab === "buildings"
+                                      ? m.building
+                                      : labels.unknown)}
+                                </bdi>
+                              </strong>
+                              <small>
+                                {tab === "properties" ? (
+                                  <>
+                                    {f.properties.kind.endsWith(
+                                      "_project_marker",
+                                    )
+                                      ? m.project
+                                      : m.building}
+                                    {f.properties.presentation?.developer && (
+                                      <>
+                                        {" "}
+                                        ·{" "}
+                                        <bdi>
+                                          {f.properties.presentation.developer}
+                                        </bdi>
+                                      </>
+                                    )}
+                                    {f.properties.levels != null && (
+                                      <>
+                                        {" "}
+                                        ·{" "}
+                                        {new Intl.NumberFormat(locale).format(
+                                          f.properties.levels,
+                                        )}{" "}
+                                        {m.levels}
+                                      </>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    <bdi>{f.properties.kind}</bdi> ·{" "}
+                                    {sourceLabel(
+                                      f.properties.source.reliability,
+                                      m,
+                                    )}
+                                  </>
+                                )}
+                              </small>
+                            </button>
+                          ))}
+                    <nav className="atlas-pagination" aria-label={labels.list}>
+                      {Array.from({ length: maxPage + 1 }, (_, i) => i + 1).map(
+                        (number) => (
+                          <button
+                            type="button"
+                            key={number}
+                            aria-current={
+                              currentPage === number - 1 ? "page" : undefined
+                            }
+                            onClick={() => setPage(number - 1)}
+                          >
+                            {new Intl.NumberFormat(locale).format(number)}
+                          </button>
+                        ),
+                      )}
+                    </nav>
+                  </>
+                )}
               </>
             )}
           </div>

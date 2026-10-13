@@ -126,5 +126,25 @@
     "preparingBody": "Esta área ainda não tem um conjunto de dados ativo. Explore o piloto de Al Reem enquanto novas fontes são pesquisadas e verificadas.",
     "visitPilot": "Explorar o piloto",
     "unknownArea": "Área desconhecida"
+  },
+  "Market": {
+    "tab": "Mercado",
+    "title": "Vendas registradas recentes",
+    "search": "Pesquisar projetos",
+    "empty": "Ainda sem snapshot de vendas",
+    "sales": "Vendas publicadas",
+    "note": "Preços de vendas registradas, não preços pedidos atuais. Os nomes vêm da ADREC; a ligação aos edifícios não está verificada.",
+    "date": "Registro",
+    "area": "Área vendida",
+    "share": "Quota vendida",
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "indices": "Índices de preços de venda",
+    "indexScope": "Cidade de Abu Dhabi · todas as zonas. Estes índices não avaliam este imóvel.",
+    "review": "Séries contraditórias ficam ocultas até revisão.",
+    "retrieved": "Recolhido",
+    "unavailable": "Dados de mercado indisponíveis",
+    "loading": "Carregando mercado…",
+    "retry": "Tentar novamente"
   }
 }

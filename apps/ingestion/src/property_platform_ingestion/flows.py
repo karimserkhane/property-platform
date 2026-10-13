@@ -1,6 +1,8 @@
 """One deployed dataset at a time; persistence belongs to Django's audited gateway."""
 
+from datetime import datetime
 from typing import Literal
+from zoneinfo import ZoneInfo
 
 from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
@@ -38,7 +40,9 @@ def ingest_source(operation: str, scope: str, actor: str, **parameters) -> dict:
         result.get("summary"),
     )
     if result["status"] == "quarantined":
-        logger.warning("Valid records were applied; rejected geometries remain in quarantine.")
+        logger.warning(
+            "Valid observations were applied; ambiguous or rejected data remain in quarantine."
+        )
     return result
 
 
@@ -132,7 +136,37 @@ def osm_bootstrap(territory: Literal["saadiyat-island"] = "saadiyat-island", act
     return ingest_source("osm_bootstrap", territory, actor)
 
 
+@flow(name="property-platform-adrec-sales", retries=0)
+def adrec_sales(
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "scheduled"
+):
+    """Snapshot 90 completed Dubai days. Scheduled run time fixes the retry scope."""
+    from property_platform.modules.evidence.adrec import sales_scope
+
+    scheduled = flow_run.scheduled_start_time
+    if isinstance(scheduled, str):
+        scheduled = datetime.fromisoformat(scheduled)
+    as_of = scheduled.astimezone(ZoneInfo("Asia/Dubai")).date()
+    return ingest_source("adrec_sales", sales_scope(territory, as_of=as_of), actor)
+
+
+@flow(name="property-platform-adrec-indices", retries=0)
+def adrec_indices(territory: Literal["abu-dhabi"] = "abu-dhabi", actor: str = "scheduled"):
+    """Capture sale/rent series; indistinguishable conflicting series stay unusable."""
+    return ingest_source("adrec_indices", territory, actor)
+
+
 FLOWS = {
     f.name: f
-    for f in (parcels, map_layer, references, presentations, imagery, readiness, osm_bootstrap)
+    for f in (
+        parcels,
+        map_layer,
+        references,
+        presentations,
+        imagery,
+        readiness,
+        osm_bootstrap,
+        adrec_sales,
+        adrec_indices,
+    )
 }

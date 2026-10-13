@@ -422,3 +422,66 @@ def territories(request):
         return coverage_registry()
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
+
+
+class AdrecSaleResponse(Schema):
+    position: int
+    registration_date: date
+    project_name: str
+    district: str
+    community: str
+    property_type: str
+    property_layout: str
+    sale_application_type: str
+    sale_sequence: str
+    price_aed: str | None
+    sold_area_sqm: str | None
+    plot_area_sqm: str | None
+    rate_aed_per_sqm: str | None
+    sold_share: str | None
+
+
+class AdrecIndexResponse(Schema):
+    kind: str
+    property_type: str
+    period_end: date
+    municipality: str
+    index_value: str | None
+
+
+class AdrecMarketResponse(Schema):
+    snapshot_id: UUID | None
+    period_start: date | None
+    period_end: date | None
+    retrieved_at: datetime | None
+    source_url: str
+    total: int
+    offset: int
+    has_more: bool
+    sales: list[AdrecSaleResponse]
+    indices: list[AdrecIndexResponse]
+    index_review_needed: bool
+
+
+@router.get(
+    "/adrec-market",
+    response={200: AdrecMarketResponse, 403: Error, 422: Error, 503: Error},
+    operation_id="previewAdrecMarket",
+)
+def adrec_market(request, territory: str, q: str = "", offset: int = 0, limit: int = 40):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.evidence.adrec import DISTRICTS
+    from property_platform.modules.publication.adrec_preview import market
+
+    if (
+        territory not in DISTRICTS
+        or len(q) > 80
+        or not 0 <= offset <= 10000
+        or not 1 <= limit <= 100
+    ):
+        return Status(422, {"code": "invalid_query"})
+    try:
+        return market(territory, query=q.strip(), offset=offset, limit=limit)
+    except DatabaseError:
+        return Status(503, {"code": "data_unavailable"})

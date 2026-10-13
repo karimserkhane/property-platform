@@ -129,3 +129,28 @@ def reference_identity(url: str) -> str:
 def execution_identity(run_id: str, operation: str, scope: str) -> str:
     # Same Prefect run/operation/scope always resolves to the same durable DB job.
     return hashlib.sha256(f"ingestion-v1:{run_id}:{operation}:{scope}".encode()).hexdigest()
+
+
+DATASETS += (
+    Dataset(
+        "adrec-reem-sales",
+        "property-platform-adrec-sales",
+        "Complete 90-day public sales snapshot; no invented transaction identity.",
+        {"territory": "al-reem-island"},
+        "0 9 * * 0",
+    ),
+    Dataset(
+        "adrec-saadiyat-sales",
+        "property-platform-adrec-sales",
+        "Complete Saadiyat sales snapshot, with original receipts.",
+        {"territory": "saadiyat-island"},
+        "30 9 * * 0",
+    ),
+    Dataset(
+        "adrec-price-indices",
+        "property-platform-adrec-indices",
+        "Abu Dhabi city indices; ambiguous source series are quarantined.",
+        {"territory": "abu-dhabi"},
+        "0 10 * * 0",
+    ),
+)

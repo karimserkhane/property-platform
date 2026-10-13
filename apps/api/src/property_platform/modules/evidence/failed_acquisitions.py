@@ -5,11 +5,13 @@ from urllib.parse import parse_qs, urlparse
 
 from django.utils import timezone
 
-from . import map_sources, onwani, osm_bootstrap
+from . import adrec, map_sources, onwani, osm_bootstrap
 from .collection_profiles import collection_for
 
 
 def source_definition(operation, scope):
+    if operation in {"adrec_sales", "adrec_indices"}:
+        return adrec.source_definition(operation, scope)
     profile = collection_for(scope.split(":", 1)[0])
     if operation == "osm_bootstrap":
         return (
@@ -44,7 +46,6 @@ def source_definition(operation, scope):
 
 
 def _request_shape(url, operation, scope):
-    profile = collection_for(scope.split(":", 1)[0])
     parts = urlparse(url)
     if parts.scheme != "https" or parts.fragment or len(url) > 4000:
         raise ValueError("Unexpected failed GIS receipt URL")
@@ -53,6 +54,10 @@ def _request_shape(url, operation, scope):
     if any(len(values) != 1 for values in query.values()):
         raise ValueError("Duplicate GIS request parameters")
     params = {key: values[0] for key, values in query.items()}
+    if operation in {"adrec_sales", "adrec_indices"}:
+        adrec.validate_request(operation, scope, base, params)
+        return
+    profile = collection_for(scope.split(":", 1)[0])
     if operation == "osm_bootstrap":
         if base != osm_bootstrap.URL or params not in osm_bootstrap.boxes(scope):
             raise ValueError("Unregistered OSM bootstrap window")
@@ -103,10 +108,12 @@ def validate_received_acquisitions(operation, scope, rows):
         return []
     if not isinstance(rows, (list, tuple)) or len(rows) > 205:
         raise ValueError("Failed acquisition journal exceeds its budget")
-    if rows and operation not in {"onwani", "map", "osm_bootstrap"}:
+    if rows and operation not in {"onwani", "map", "osm_bootstrap", "adrec_sales", "adrec_indices"}:
         raise ValueError("Only completed GIS source responses can be retained here")
     output, transferred = [], 0
     maximum = onwani.MAX_BYTES if operation == "onwani" else map_sources.MAX_BYTES
+    if operation in {"adrec_sales", "adrec_indices"}:
+        maximum = adrec.MAX_BYTES
     fields = {
         "url",
         "http_status",

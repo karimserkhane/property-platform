@@ -90,7 +90,15 @@ def execute(request):
         territory = request["scope"].split(":", 1)[0]
         acquisition, receipt, replay = None, None, None
         acquiring = True
-        if operation == "osm_bootstrap":
+        if operation in {"adrec_sales", "adrec_indices"}:
+            from property_platform.modules.evidence import adrec
+
+            from .collectors.adrec import precollect_adrec
+
+            with SourceHTTP([adrec.SALES, *adrec.INDICES.values()]) as transport:
+                replay = precollect_adrec(transport, operation, request["scope"])
+            acquisition = replay.map
+        elif operation == "osm_bootstrap":
             from urllib.parse import urlencode
 
             from property_platform.modules.evidence import osm_api_protocol as osm_bootstrap
@@ -170,7 +178,8 @@ def execute(request):
                     {"payload": item.payload, "receipt": item.capture_receipt()}
                     for item in transport.acquisitions
                 ]
-                if identity["operation"] in {"onwani", "map", "osm_bootstrap"}
+                if identity["operation"]
+                in {"onwani", "map", "osm_bootstrap", "adrec_sales", "adrec_indices"}
                 and transport is not None
                 else None
             )

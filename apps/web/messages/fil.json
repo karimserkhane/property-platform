@@ -126,5 +126,25 @@
     "preparingBody": "Wala pang aktibong datos para sa lugar na ito. Tuklasin muna ang pilot sa Al Reem habang sinusuri ang mga bagong sanggunian.",
     "visitPilot": "Tuklasin ang pilot",
     "unknownArea": "Hindi kilalang lugar"
+  },
+  "Market": {
+    "tab": "Merkado",
+    "title": "Mga bagong rehistradong bentahan",
+    "search": "Maghanap ng proyekto",
+    "empty": "Wala pang snapshot ng benta",
+    "sales": "Mga inilathalang bentahan",
+    "note": "Mga presyo ng rehistradong benta, hindi kasalukuyang asking price. Mula sa ADREC ang mga pangalan; hindi pa beripikado ang ugnayan sa mga gusali.",
+    "date": "Rehistrado",
+    "area": "Lawak na naibenta",
+    "share": "Bahaging naibenta",
+    "previous": "Nakaraan",
+    "next": "Susunod",
+    "indices": "Mga indeks ng presyo ng benta",
+    "indexScope": "Lungsod ng Abu Dhabi · lahat ng sona. Hindi ito pagtataya sa halaga ng ari-ariang ito.",
+    "review": "Nakatago ang magkakasalungat na serye habang sinusuri.",
+    "retrieved": "Nakolekta",
+    "unavailable": "Hindi magagamit ang datos ng merkado",
+    "loading": "Naglo-load ng merkado…",
+    "retry": "Subukang muli"
   }
 }
