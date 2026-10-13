@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sourceLabel } from "./presentation";
+import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
 import type { MapFeature, MapLabels, ResearchReference } from "./types";
 
 export function PropertyCard({
@@ -8,12 +8,14 @@ export function PropertyCard({
   m,
   locale,
   locate,
+  parcel,
 }: {
   feature: MapFeature;
   references: ResearchReference[];
   m: MapLabels;
   locale: string;
   locate: () => void;
+  parcel?: { code: string; label: string };
 }) {
   const p = feature.properties;
   const profile = p.presentation;
@@ -31,18 +33,24 @@ export function PropertyCard({
   const website =
     profile?.website_url ??
     links.find((link) => link.source_kind === "developer")?.url;
-  const title =
-    (locale === "ar" && p.name_ar) ||
-    profile?.name ||
-    p.name ||
-    (isProject ? m.project : m.building);
+  const title = propertyName(p, locale) || typeLabel;
   return (
     <div className="property-card">
       <p className="property-kicker">{typeLabel}</p>
       <h2>
         <bdi>{title}</bdi>
       </h2>
-      {isProject && <span className="evidence-chip">{m.unverified}</span>}
+      {(parcel || isProject) && (
+        <span className="evidence-chip association-chip" title={m.spatial}>
+          {parcel ? m.possibleAssociation : m.unverified}
+        </span>
+      )}
+      {parcel && (
+        <p className="parcel-reference">
+          <span>{parcel.label}</span>
+          <bdi>{readableParcelCode(parcel.code)}</bdi>
+        </p>
+      )}
       {profile && (
         <dl className="property-facts">
           {profile?.developer && (

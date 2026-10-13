@@ -113,7 +113,9 @@
     "mediaUnavailable": "الصورة غير متاحة",
     "propertyInformation": "معلومات العقار",
     "mapDetails": "تفاصيل الخريطة",
-    "closeDetails": "إغلاق التفاصيل"
+    "closeDetails": "إغلاق التفاصيل",
+    "parcelTitle": "قطعة أرض",
+    "possibleAssociation": "ارتباط محتمل"
   },
   "Coverage": {
     "title": "سبع إمارات. منصة واحدة.",

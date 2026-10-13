@@ -8,6 +8,14 @@ Un clic affiche la fiche et met le contour ou le repère en évidence, sans chan
 
 La fiche est placée avant la recherche dans le panneau. Sur ordinateur, seul ce panneau défile pour la lire ; sur téléphone, la page rejoint la fiche située sous la carte, sans changer sa caméra. Fermer la fiche ou utiliser Locate on map ramène la carte à l'écran mobile. La légende cadastrale est repliée dans Properties et reste accessible ; les filtres cadastraux apparaissent seulement dans Parcels. Les bâtiments cachés par une couche ou absents des sources ne sont pas inventés.
 
+### Titres des fiches et des listes — 13 octobre 2026
+
+Même en sélectionnant une parcelle, le titre privilégie le nom de projet ou de bâtiment disponible à cet emplacement, y compris un repère de courtier non confirmé. Sans nom, un promoteur documenté puis un éditeur documenté peuvent servir de titre ; sans ces informations, le libellé traduit « Land parcel » remplace un code technique en titre. Un café ou un banc présent sur la parcelle ne devient pas son identité immobilière. La recherche couvre également les noms de présentation, promoteurs et éditeurs.
+
+Par exemple, la sélection de `RT3_C53_to_C56` présente **The District**, Reportage Properties et le lien du projet, avec « Possible association ». La référence secondaire se lit **RT3 · C53–C56**. Le code exact reste dans les détails cadastraux, les recherches et les exports ; aucune parcelle n'est renommée en base. L'association reste spatiale, pas une confirmation d'identité commerciale ou de propriété. En cas de plusieurs candidats, un nom disponible prime sur un fournisseur sans nom de bien, puis une présentation documentée et un repère de projet priment ; l'ordre alphabétique départage les autres. Les alternatives restent consultables et aucune identité n'est fusionnée.
+
+`C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\presentation.ts` centralise ce choix et le format de référence pour les fiches et listes. Une empreinte et un point OSM peuvent partager exactement la même URL de way : la présentation de l'empreinte peut alors enrichir ce point pour l'affichage. Une ressemblance de nom ou un bâtiment simplement voisin ne suffit pas. Le changement concerne le web ; aucune migration ni réimportation n'est nécessaire.
+
 ## Informations effectivement disponibles
 
 | Objet | Présentation ajoutée en base | Photo |
@@ -82,6 +90,8 @@ Cette étape vérifie empreintes, heures avec fuseau, URL attendues, identité e
 Les registres ne sont pas injectés directement dans le site : ils décrivent une revue et une acquisition ; l'interface consomme la base par l'API. Les noms de projet ne sont pas codés dans les composants. Les textes d'interface sont traduits dans quinze langues ; résumés et légendes gardent leur langue originale, indiquée avec `lang` et `dir`.
 
 ## Validation locale
+
+Pour l'évolution des titres du 13 octobre : 19 tests web, TypeScript, Biome, liens documentaires, compilation et contrôles HTTP des quinze langues passent. La fiche et la liste réelles montrent The District à la place du code en titre ; la référence exacte reste consultable et une sélection conserve l'échelle de 1 km. RT4_C119 vérifie le secours « Land parcel ». Le rendu mobile à 390 × 844 est contrôlé en anglais et arabe, sans débordement horizontal ni erreur console. Seul le conteneur web a été remplacé ; aucune migration, collecte ou modification de données n'a été exécutée. Les contrôles PostGIS ci-dessous proviennent de la tranche initiale, dont le backend n'a pas changé.
 
 140 tests backend sur une base PostGIS de test isolée, 13 tests web, contrats générés et deux règles de dépendance passent. Le build et les contrôles HTTP couvrent les quinze langues et le refus d'accès aux médias hors de la prévisualisation autorisée. Les tests vérifient aussi qu'une lecture de contexte ne sélectionne pas les payloads binaires, qu'un média retiré n'est plus exposé et qu'un lot invalide ou interrompu ne laisse pas de mutations partielles.
 

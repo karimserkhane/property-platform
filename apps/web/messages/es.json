@@ -113,7 +113,9 @@
     "mediaUnavailable": "Fotografía no disponible",
     "propertyInformation": "Información del inmueble",
     "mapDetails": "Detalles del mapa",
-    "closeDetails": "Cerrar detalles"
+    "closeDetails": "Cerrar detalles",
+    "parcelTitle": "Parcela",
+    "possibleAssociation": "Asociación posible"
   },
   "Coverage": {
     "title": "Siete emiratos. Una plataforma.",

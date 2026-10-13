@@ -1,4 +1,10 @@
-import { sourceLabel } from "./presentation";
+import {
+  type ParcelProperty,
+  preferredParcelProperty,
+  propertyName,
+  readableParcelCode,
+  sourceLabel,
+} from "./presentation";
 import { PropertyCard } from "./property-card";
 import type {
   AtlasLabels,
@@ -21,6 +27,7 @@ export function Inspector({
   references,
   locate,
   choose,
+  parcelProperties,
 }: {
   detail: ParcelDetail | null;
   feature: MapFeature | null;
@@ -33,6 +40,7 @@ export function Inspector({
   references: ResearchReference[];
   locate: () => void;
   choose: (feature: MapFeature) => void;
+  parcelProperties: Map<string, ParcelProperty[]>;
 }) {
   const date = (value: string | null | undefined) =>
     value
@@ -44,24 +52,53 @@ export function Inspector({
       : labels.unknown;
   const source = feature?.properties.source ?? detail?.source;
   const a = detail?.attributes;
+  const candidates = detail ? [...(parcelProperties.get(detail.id) ?? [])] : [];
+  for (const place of detail?.places ?? []) {
+    if (!candidates.some((p) => p.id === place.id))
+      candidates.push({ ...place, feature: null });
+  }
+  const preferred = preferredParcelProperty(candidates, locale);
+  const presented = feature ?? preferred?.feature;
+  const otherPlaces =
+    detail?.places.filter((p) => p.id !== preferred?.id) ?? [];
   const title = feature
-    ? (locale === "ar" && feature.properties.name_ar) || feature.properties.name
-    : detail?.code;
+    ? propertyName(feature.properties, locale)
+    : preferred
+      ? propertyName(preferred, locale)
+      : detail
+        ? m.parcelTitle
+        : labels.select;
   return (
     <>
-      {feature && feature.geometry.type !== "MultiLineString" ? (
+      {presented && presented.geometry.type !== "MultiLineString" ? (
         <PropertyCard
-          key={feature.id}
-          feature={feature}
+          key={presented.id}
+          feature={presented}
           references={references}
           m={m}
           locale={locale}
           locate={locate}
+          parcel={
+            detail ? { code: detail.code, label: labels.reference } : undefined
+          }
         />
       ) : (
-        <h2>
-          <bdi>{title || labels.select}</bdi>
-        </h2>
+        <div className="property-card">
+          <h2>
+            <bdi>{title || labels.select}</bdi>
+          </h2>
+          {preferred && (
+            <span className="evidence-chip association-chip" title={m.spatial}>
+              {m.possibleAssociation}
+            </span>
+          )}
+          {detail && (
+            <p className="parcel-reference">
+              <span>{labels.reference}</span>
+              <bdi>{readableParcelCode(detail.code)}</bdi>
+            </p>
+          )}
+        </div>
       )}
       {feature && (
         <details className="property-proof">
@@ -77,7 +114,8 @@ export function Inspector({
               type="button"
               onClick={() => select(id)}
             >
-              <bdi>{parcelCodes[id] ?? labels.unknown}</bdi> →
+              <bdi>{readableParcelCode(parcelCodes[id] ?? labels.unknown)}</bdi>{" "}
+              →
             </button>
           ))}
           {feature.geometry.type === "Point" && (
@@ -94,13 +132,20 @@ export function Inspector({
       )}
       {detail && (
         <>
-          <span className="evidence-chip">{m.official}</span>
-          <button type="button" onClick={locate}>
-            {m.locate}
-          </button>
+          {!presented && (
+            <button type="button" onClick={locate}>
+              {m.locate}
+            </button>
+          )}
           <details className="property-proof">
             <summary>{m.parcelDetails}</summary>
+            <span className="evidence-chip">{m.official}</span>
+            {preferred && <p className="small-text">{m.spatial}</p>}
             <dl>
+              <dt>{labels.reference}</dt>
+              <dd>
+                <bdi>{detail.code}</bdi>
+              </dd>
               <dt>{m.landUse}</dt>
               <dd>
                 <bdi>{detail.land_use || labels.unknown}</bdi>
@@ -154,11 +199,11 @@ export function Inspector({
               </p>
             )}
           </details>
-          {!!detail.places.length && (
+          {!!otherPlaces.length && (
             <>
               <h3>{m.relatedProperties}</h3>
               <p className="small-text">{m.spatial}</p>
-              {detail.places.map((place) => {
+              {otherPlaces.map((place) => {
                 const original = context?.place.features.find(
                   (f) => f.id === place.id,
                 );
@@ -170,10 +215,19 @@ export function Inspector({
                         className="candidate-button"
                         onClick={() => choose(original)}
                       >
-                        <bdi>{place.name}</bdi> →
+                        <bdi>
+                          {(locale === "ar" && place.name_ar) ||
+                            place.name ||
+                            place.name_ar}
+                        </bdi>{" "}
+                        →
                       </button>
                     ) : (
-                      <bdi>{place.name}</bdi>
+                      <bdi>
+                        {(locale === "ar" && place.name_ar) ||
+                          place.name ||
+                          place.name_ar}
+                      </bdi>
                     )}
                     {original && (
                       <>

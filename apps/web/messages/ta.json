@@ -113,7 +113,9 @@
     "mediaUnavailable": "புகைப்படம் கிடைக்கவில்லை",
     "propertyInformation": "சொத்து தகவல்",
     "mapDetails": "வரைபட விவரங்கள்",
-    "closeDetails": "விவரங்களை மூடு"
+    "closeDetails": "விவரங்களை மூடு",
+    "parcelTitle": "நிலப் பகுதி",
+    "possibleAssociation": "சாத்தியமான தொடர்பு"
   },
   "Coverage": {
     "title": "ஏழு அமீரகங்கள். ஒரு தளம்.",

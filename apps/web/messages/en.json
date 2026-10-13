@@ -113,7 +113,9 @@
     "mediaUnavailable": "Photograph unavailable",
     "propertyInformation": "Property information",
     "mapDetails": "Map details",
-    "closeDetails": "Close details"
+    "closeDetails": "Close details",
+    "parcelTitle": "Land parcel",
+    "possibleAssociation": "Possible association"
   },
   "Coverage": {
     "title": "Seven emirates. One platform.",

@@ -11,7 +11,11 @@ import {
   csv,
   download,
   normalized,
+  parcelPropertyIndex,
+  preferredParcelProperty,
   propertyFeatures,
+  propertyName,
+  readableParcelCode,
   sourceLabel,
 } from "./presentation";
 import { References } from "./references";
@@ -217,8 +221,23 @@ export function Explorer({
     if (id && /^[0-9a-f-]{36}$/i.test(id)) void select(id);
   });
 
+  const parcelProperties = useMemo(
+    () => parcelPropertyIndex(context),
+    [context],
+  );
   const placesByParcel = useMemo(() => {
-    const names = new Map<string, string[]>();
+    const names = new Map<string, string[]>(
+      [...parcelProperties].map(([id, candidates]) => [
+        id,
+        candidates.flatMap((p) => [
+          p.name,
+          p.name_ar,
+          p.presentation?.name ?? "",
+          p.presentation?.developer ?? "",
+          p.presentation?.publisher ?? "",
+        ]),
+      ]),
+    );
     for (const f of context?.place.features ?? [])
       for (const id of f.properties.parcel_ids)
         names.set(id, [
@@ -227,7 +246,7 @@ export function Explorer({
           f.properties.name_ar,
         ]);
     return names;
-  }, [context]);
+  }, [context, parcelProperties]);
   const parcelCodes = useMemo(
     () =>
       Object.fromEntries(
@@ -271,7 +290,14 @@ export function Explorer({
     (f) =>
       !query ||
       normalized(
-        [f.properties.name, f.properties.name_ar, f.properties.kind].join(" "),
+        [
+          f.properties.name,
+          f.properties.name_ar,
+          f.properties.presentation?.name,
+          f.properties.presentation?.developer,
+          f.properties.presentation?.publisher,
+          f.properties.kind,
+        ].join(" "),
       ).includes(normalized(query)),
   );
   const parcelItems =
@@ -632,6 +658,7 @@ export function Explorer({
                     locale={locale}
                     select={select}
                     parcelCodes={parcelCodes}
+                    parcelProperties={parcelProperties}
                     references={references}
                     locate={locate}
                     choose={choose}
@@ -826,13 +853,19 @@ export function Explorer({
                         >
                           <strong>
                             <bdi>
-                              {placesByParcel.get(f.id)?.[0] ||
-                                f.properties.code}
+                              {propertyName(
+                                preferredParcelProperty(
+                                  parcelProperties.get(f.id) ?? [],
+                                  locale,
+                                ) ?? { name: "", name_ar: "", kind: "" },
+                                locale,
+                              ) || m.parcelTitle}
                             </bdi>
                           </strong>
                           <small>
                             <bdi>
-                              {f.properties.code} · {f.properties.land_use}
+                              {readableParcelCode(f.properties.code)} ·{" "}
+                              {f.properties.land_use}
                             </bdi>
                           </small>
                         </button>
@@ -849,9 +882,10 @@ export function Explorer({
                         >
                           <strong>
                             <bdi>
-                              {f.properties.name ||
-                                f.properties.name_ar ||
-                                labels.unknown}
+                              {propertyName(f.properties, locale) ||
+                                (tab === "properties" || tab === "buildings"
+                                  ? m.building
+                                  : labels.unknown)}
                             </bdi>
                           </strong>
                           <small>

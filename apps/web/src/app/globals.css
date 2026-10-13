@@ -598,6 +598,28 @@ h2:where(html[dir="rtl"] *),
   margin-block: 4px 16px;
   letter-spacing: -0.025em;
 }
+.parcel-reference {
+  display: grid;
+  gap: 4px;
+  margin-block: 14px;
+  padding: 10px 12px;
+  border-inline-start: 2px solid #b7976e;
+  border-radius: 6px;
+  background: #f2eee7;
+  color: #4f5e66;
+}
+.parcel-reference span {
+  font-size: 10px;
+}
+.parcel-reference bdi {
+  font-size: 13px;
+  font-weight: 650;
+  color: #243d47;
+}
+.evidence-chip.association-chip {
+  background: #f4ead8;
+  color: #715526;
+}
 .property-kicker {
   color: #735b3f;
   font-weight: 650;

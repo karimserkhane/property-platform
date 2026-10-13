@@ -113,7 +113,9 @@
     "mediaUnavailable": "تصویر دستیاب نہیں",
     "propertyInformation": "جائیداد کی معلومات",
     "mapDetails": "نقشے کی تفصیلات",
-    "closeDetails": "تفصیلات بند کریں"
+    "closeDetails": "تفصیلات بند کریں",
+    "parcelTitle": "زمین کا قطعہ",
+    "possibleAssociation": "ممکنہ تعلق"
   },
   "Coverage": {
     "title": "سات امارات۔ ایک پلیٹ فارم۔",

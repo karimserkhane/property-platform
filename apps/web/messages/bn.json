@@ -113,7 +113,9 @@
     "mediaUnavailable": "ছবি পাওয়া যাচ্ছে না",
     "propertyInformation": "সম্পত্তির তথ্য",
     "mapDetails": "মানচিত্রের বিবরণ",
-    "closeDetails": "বিবরণ বন্ধ করুন"
+    "closeDetails": "বিবরণ বন্ধ করুন",
+    "parcelTitle": "জমির প্লট",
+    "possibleAssociation": "সম্ভাব্য সম্পর্ক"
   },
   "Coverage": {
     "title": "সাতটি আমিরাত। একটি প্ল্যাটফর্ম।",

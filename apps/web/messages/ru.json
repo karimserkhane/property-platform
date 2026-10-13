@@ -113,7 +113,9 @@
     "mediaUnavailable": "Фотография недоступна",
     "propertyInformation": "Информация об объекте",
     "mapDetails": "Данные карты",
-    "closeDetails": "Закрыть сведения"
+    "closeDetails": "Закрыть сведения",
+    "parcelTitle": "Земельный участок",
+    "possibleAssociation": "Возможная связь"
   },
   "Coverage": {
     "title": "Семь эмиратов. Одна платформа.",

@@ -113,7 +113,9 @@
     "mediaUnavailable": "ഫോട്ടോ ലഭ്യമല്ല",
     "propertyInformation": "വസ്തുവിന്റെ വിവരങ്ങൾ",
     "mapDetails": "മാപ്പിന്റെ വിവരങ്ങൾ",
-    "closeDetails": "വിവരങ്ങൾ അടയ്ക്കുക"
+    "closeDetails": "വിവരങ്ങൾ അടയ്ക്കുക",
+    "parcelTitle": "ഭൂമിയുടെ പ്ലോട്ട്",
+    "possibleAssociation": "സാധ്യതയുള്ള ബന്ധം"
   },
   "Coverage": {
     "title": "ഏഴ് എമിറേറ്റുകൾ. ഒരു പ്ലാറ്റ്ഫോം.",

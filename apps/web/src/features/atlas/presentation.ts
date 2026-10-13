@@ -1,5 +1,104 @@
 import type { MapContext, MapFeature, MapLabels } from "./types";
 
+type PropertyIdentity = Pick<
+  MapFeature["properties"],
+  "name" | "name_ar" | "kind" | "presentation"
+>;
+export type ParcelProperty = PropertyIdentity & {
+  id: string;
+  feature: MapFeature | null;
+};
+
+// A display preference never accepts a commercial/cadastral identity link.
+export function propertyName(p: PropertyIdentity, locale: string): string {
+  return (
+    (locale === "ar" && p.name_ar.trim()) ||
+    p.presentation?.name.trim() ||
+    p.name.trim() ||
+    p.name_ar.trim() ||
+    p.presentation?.developer.trim() ||
+    p.presentation?.publisher.trim() ||
+    ""
+  );
+}
+
+const buildingKinds = new Set([
+  "yes",
+  "apartments",
+  "residential",
+  "commercial",
+  "retail",
+  "office",
+  "hotel",
+  "industrial",
+  "house",
+  "detached",
+  "terrace",
+]);
+const isProperty = (p: ParcelProperty) =>
+  p.kind.endsWith("_project_marker") ||
+  p.feature?.geometry.type === "MultiPolygon" ||
+  buildingKinds.has(p.kind);
+
+export function preferredParcelProperty(
+  candidates: readonly ParcelProperty[],
+  locale: string,
+): ParcelProperty | null {
+  const named = (p: ParcelProperty) =>
+    Boolean(p.name.trim() || p.name_ar.trim() || p.presentation?.name.trim());
+  return (
+    candidates
+      .filter((p) => isProperty(p) && propertyName(p, locale))
+      .sort(
+        (a, b) =>
+          Number(named(b)) - Number(named(a)) ||
+          Number(Boolean(b.presentation)) - Number(Boolean(a.presentation)) ||
+          Number(b.kind.endsWith("_project_marker")) -
+            Number(a.kind.endsWith("_project_marker")) ||
+          propertyName(a, locale).localeCompare(
+            propertyName(b, locale),
+            locale,
+          ) ||
+          a.id.localeCompare(b.id),
+      )[0] ?? null
+  );
+}
+
+export function parcelPropertyIndex(context: MapContext | null) {
+  const index = new Map<string, ParcelProperty[]>();
+  // OSM exposes the same way as footprint and point. Enrich by exact source
+  // identity only, never by a similar name or nearest building.
+  const buildings = new Map(
+    (context?.building.features ?? [])
+      .filter((f) => f.properties.source.url)
+      .map((f) => [f.properties.source.url, f]),
+  );
+  for (const f of [
+    ...(context?.building.features ?? []),
+    ...(context?.place.features ?? []),
+  ]) {
+    const building = buildings.get(f.properties.source.url);
+    const original = building ?? f;
+    const candidate = {
+      ...original.properties,
+      id: original.id,
+      feature: original,
+    };
+    for (const id of f.properties.parcel_ids) {
+      const candidates = index.get(id) ?? [];
+      if (!candidates.some((p) => p.id === candidate.id))
+        candidates.push(candidate);
+      index.set(id, candidates);
+    }
+  }
+  return index;
+}
+
+// Presentation only: source codes, searches and exports keep their exact text.
+export function readableParcelCode(code: string): string {
+  return code.replace(/_to_/gi, "–").replaceAll("_", " · ");
+}
+
 export function propertyFeatures(context: MapContext | null): MapFeature[] {
   return [
     ...(context?.building.features ?? []),

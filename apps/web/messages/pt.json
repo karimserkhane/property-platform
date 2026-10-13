@@ -113,7 +113,9 @@
     "mediaUnavailable": "Fotografia indisponível",
     "propertyInformation": "Informações do imóvel",
     "mapDetails": "Detalhes do mapa",
-    "closeDetails": "Fechar detalhes"
+    "closeDetails": "Fechar detalhes",
+    "parcelTitle": "Terreno",
+    "possibleAssociation": "Associação possível"
   },
   "Coverage": {
     "title": "Sete emirados. Uma plataforma.",

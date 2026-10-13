@@ -113,7 +113,9 @@
     "mediaUnavailable": "照片不可用",
     "propertyInformation": "房产信息",
     "mapDetails": "地图详情",
-    "closeDetails": "关闭详情"
+    "closeDetails": "关闭详情",
+    "parcelTitle": "地块",
+    "possibleAssociation": "可能关联"
   },
   "Coverage": {
     "title": "七个酋长国。一个平台。",

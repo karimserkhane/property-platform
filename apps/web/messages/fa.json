@@ -113,7 +113,9 @@
     "mediaUnavailable": "تصویر در دسترس نیست",
     "propertyInformation": "اطلاعات ملک",
     "mapDetails": "جزئیات نقشه",
-    "closeDetails": "بستن جزئیات"
+    "closeDetails": "بستن جزئیات",
+    "parcelTitle": "قطعه زمین",
+    "possibleAssociation": "ارتباط احتمالی"
   },
   "Coverage": {
     "title": "هفت امارت. یک پلتفرم.",

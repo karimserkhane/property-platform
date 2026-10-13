@@ -113,7 +113,9 @@
     "mediaUnavailable": "Photographie indisponible",
     "propertyInformation": "Informations du bien",
     "mapDetails": "Détails cartographiques",
-    "closeDetails": "Fermer la fiche"
+    "closeDetails": "Fermer la fiche",
+    "parcelTitle": "Terrain",
+    "possibleAssociation": "Association possible"
   },
   "Coverage": {
     "title": "Sept émirats. Une plateforme.",

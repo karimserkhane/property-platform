@@ -113,7 +113,9 @@
     "mediaUnavailable": "फ़ोटो उपलब्ध नहीं",
     "propertyInformation": "संपत्ति की जानकारी",
     "mapDetails": "मानचित्र का विवरण",
-    "closeDetails": "विवरण बंद करें"
+    "closeDetails": "विवरण बंद करें",
+    "parcelTitle": "भूमि का भूखंड",
+    "possibleAssociation": "संभावित संबंध"
   },
   "Coverage": {
     "title": "सात अमीरात। एक प्लेटफ़ॉर्म।",

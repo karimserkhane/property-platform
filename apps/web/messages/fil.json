@@ -113,7 +113,9 @@
     "mediaUnavailable": "Hindi available ang larawan",
     "propertyInformation": "Impormasyon ng ari-arian",
     "mapDetails": "Detalye ng mapa",
-    "closeDetails": "Isara ang detalye"
+    "closeDetails": "Isara ang detalye",
+    "parcelTitle": "Lote",
+    "possibleAssociation": "Posibleng kaugnayan"
   },
   "Coverage": {
     "title": "Pitong emirate. Isang platform.",

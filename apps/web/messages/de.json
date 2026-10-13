@@ -113,7 +113,9 @@
     "mediaUnavailable": "Foto nicht verfügbar",
     "propertyInformation": "Immobilieninformationen",
     "mapDetails": "Kartendetails",
-    "closeDetails": "Details schließen"
+    "closeDetails": "Details schließen",
+    "parcelTitle": "Grundstück",
+    "possibleAssociation": "Mögliche Zuordnung"
   },
   "Coverage": {
     "title": "Sieben Emirate. Eine Plattform.",
