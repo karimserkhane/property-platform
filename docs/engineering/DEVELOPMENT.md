@@ -26,7 +26,7 @@ pnpm.cmd dev:web
 
 Garder ce terminal ouvert. Next.js lit le code du dossier Windows et actualise les pages lors des modifications. La commande de racine est bien **`dev:web`**, pas `dev`. Si ce serveur tourne déjà, enregistrer le fichier suffit généralement ; après modification de `.env.local`, le redémarrer avec Ctrl+C puis cette commande. `pnpm.cmd install --frozen-lockfile` sert à la première installation ou après modification des dépendances/verrouillage, pas à chaque modification d'un titre ou d'une couleur.
 
-Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore the Emirates**. Les sélecteurs permettent de choisir l'émirat et la zone ; Abu Dhabi ouvre actuellement Al Reem. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Les autres émirats montrent une couverture en préparation. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
+Ouvrir [l'accueil anglais](http://localhost:3000/en), puis **Explore the Emirates**. Les sélecteurs permettent de choisir l'émirat et la zone ; Abu Dhabi ouvre Al Reem par défaut ; sélectionner **Saadiyat Island** dans **Area** pour la deuxième île. [La carte](http://localhost:3000/en/explore) charge les parcelles déjà importées, pas une nouvelle collecte. Les autres émirats montrent une couverture en préparation. Cliquer sur un contour ou une référence de la liste affiche sa source et ses dates. La recherche trouve codes, usages et noms localisés ; l'onglet rues cherche les noms de rues. Les appartements et prix ne sont pas encore recherchables.
 
 **L’exploration met maintenant les biens au premier plan.** L’onglet Properties affiche les bâtiments et repères de projets existants. Un clic ouvre la fiche et souligne l’objet sans déplacer la carte ; le bouton **Locate on map** permet de cadrer volontairement. Les secteurs et périmètres ProjectLimits ne sont plus cliquables. La priorité est bâtiment, repère explicite de projet, vraie parcelle, autre lieu, rue. Les données cadastrales sont conservées dans les sections secondaires.
 
@@ -106,6 +106,8 @@ docker compose -f infra/local/compose.yaml --profile web-preview down
 
 Cette commande conserve le volume PostgreSQL. Ne pas ajouter `-v`. Le contrôle local du 11 octobre a validé cette variante ; le build natif Windows de l'agent a été bloqué par les permissions du cache SWC, sans désactiver ses protections. Cela ne prouve pas que le même problème existe dans ton terminal personnel.
 
+Pour les données et imports de la deuxième île, consulter aussi [Saadiyat : données, commandes et limites](SAADIYAT.md).
+
 ## Sommaire
 
 - [Mémo rapide : lancer, vérifier et arrêter](#memo-rapide)
@@ -123,6 +125,7 @@ Cette commande conserve le volume PostgreSQL. Ne pas ajouter `-v`. Le contrôle 
 - [10. Vérifier le code et les contrats](#verifier-le-code)
 - [11. Dépanner les erreurs](#depannage)
 - [12. Comprendre le passage en production](#production)
+- [Saadiyat : données et imports de la deuxième île](#saadiyat)
 
 **Accès directs :**
 
@@ -1217,3 +1220,11 @@ Ce guide démarre les services sur ta machine ; il ne publie rien sur Internet. 
 Un déploiement public nécessitera HTTPS/reverse proxy, secrets réels (DJANGO_SECRET_KEY, DATABASE_URL, DJANGO_ALLOWED_HOSTS), accès du personnel, statiques d'administration, sauvegardes et rôles SQL. Les migrations restent une étape explicite du déploiement. La CI vérifie sources, contrats, PostGIS et images : observer son résultat GitHub avant de considérer les contrôles distants comme réussis.
 
 Pour poursuivre, lire [les frontières des modules](REPOSITORY.md) et [la revue de structure](STRUCTURE_REVIEW.md). Prochaine étape métier : définir le dossier pilote, puis développer le parcours carte → fiche → preuve → correction → publication.
+
+<a id="saadiyat"></a>
+
+## Ajouter ou actualiser Saadiyat
+
+Saadiyat utilise la même base PostGIS et les mêmes couches de services. Le [guide complet Saadiyat](SAADIYAT.md) explique les sources, les fichiers avec leurs chemins complets et l’ordre des imports dans Prefect. La migration evidence.0013_osm_bootstrap_execution doit être appliquée avant de démarrer le nouveau runner ; elle autorise le nouveau type d’exécution et ne remplit aucune table immobilière. Les imports acquièrent ensuite les données réelles. Sur ce poste, cette migration et les premiers imports ont déjà été effectués.
+
+Dans le site, choisir Abu Dhabi puis Saadiyat Island, ou ouvrir [la prévisualisation Saadiyat](http://localhost:3102/en/explore?territory=saadiyat-island). Revenir à Al Reem réinitialise les couches chargées. Les textes, scènes satellite et références de Reem ne sont pas utilisés comme données Saadiyat.

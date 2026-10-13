@@ -2,10 +2,12 @@ from property_platform.modules.catalog.map_queries import map_rows
 from property_platform.modules.evidence.queries import map_provenances, property_presentations
 
 
-def map_context(bbox):
+def map_context(bbox, *, namespaces=None, parcel_namespaces=None):
     result = {}
     for target in ("street", "building", "place", "administrative_area"):
-        rows, truncated = map_rows(target, bbox)
+        rows, truncated = map_rows(
+            target, bbox, namespaces=namespaces, parcel_namespaces=parcel_namespaces
+        )
         sources = map_provenances(target, [row["id"] for row in rows])
         presentations = property_presentations(target, [row["id"] for row in rows])
         result[target] = {"type": "FeatureCollection", "truncated": truncated, "features": []}

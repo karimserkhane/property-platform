@@ -3,6 +3,7 @@
 from urllib.parse import urlencode
 
 from property_platform.modules.evidence import map_sources, onwani
+from property_platform.modules.evidence.collection_profiles import DEFAULT_TERRITORY, collection_for
 
 from .http import AcquisitionError, SourceHTTP
 
@@ -50,8 +51,9 @@ def _arcgis_parameters(params, *, where, fields):
 class MapCollector:
     """District, sectors, streets and OSM acquisition without ORM access."""
 
-    def __init__(self, client: SourceHTTP):
+    def __init__(self, client: SourceHTTP, territory=DEFAULT_TERRITORY):
         self.client = client
+        self.profile = collection_for(territory)
 
     @staticmethod
     def allowed_urls() -> tuple[str, ...]:
@@ -63,13 +65,13 @@ class MapCollector:
     def fetch_url(self, base: str, params: dict) -> tuple[bytes, dict]:
         try:
             if base in (map_sources.OSM_URL, map_sources.OSM_MIRROR):
-                if params != {"data": map_sources.OSM_QUERY}:
+                if params != {"data": self.profile.osm_query}:
                     raise AcquisitionError("OSM acquisition must use the registered area query")
             else:
                 specification = next(
                     (
                         (url, where, fields)
-                        for url, where, _, fields in map_sources.LAYERS.values()
+                        for url, where, _, fields in self.profile.map_layers().values()
                         if base in (url, url + "/query")
                     ),
                     None,
@@ -98,8 +100,9 @@ class MapCollector:
 class OnwaniCollector:
     """The existing parcel connector keeps schema, batch and geometry validation."""
 
-    def __init__(self, client: SourceHTTP):
+    def __init__(self, client: SourceHTTP, territory=DEFAULT_TERRITORY):
         self.client = client
+        self.profile = collection_for(territory)
 
     @staticmethod
     def allowed_urls() -> tuple[str, str]:
@@ -111,7 +114,7 @@ class OnwaniCollector:
                 base, query = onwani.BASE_URL, {"f": "pjson"}
             else:
                 query = {"f": "json", **params}
-                _arcgis_parameters(query, where=onwani.WHERE, fields=onwani.FIELDS)
+                _arcgis_parameters(query, where=self.profile.parcel_where, fields=onwani.FIELDS)
                 base = onwani.BASE_URL + "/query"
             acquisition = self.client.fetch(
                 base + "?" + urlencode(query), max_bytes=onwani.MAX_BYTES, allowed_base=base

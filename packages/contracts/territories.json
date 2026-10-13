@@ -126,6 +126,20 @@
         24.53
       ],
       "queryable": true
+    },
+    {
+      "id": "saadiyat-island",
+      "parent_id": "abu-dhabi",
+      "level": "area",
+      "name": "Saadiyat Island",
+      "name_ar": "جزيرة السعديات",
+      "bounds": [
+        54.385,
+        24.488,
+        54.483,
+        24.603
+      ],
+      "queryable": true
     }
   ]
 }

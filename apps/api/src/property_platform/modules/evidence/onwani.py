@@ -7,10 +7,12 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SOURCE_KEY = "dmt:onwani:smarthub:plot:adm:reem"
+from .collection_profiles import DEFAULT_TERRITORY, collection_for
+
+SOURCE_KEY = collection_for().parcel_namespace
 BASE_URL = "https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/0"
-VERSION = "onwani-reem-v3"
-WHERE = "DISTRICTENG = 'AL REEM ISLAND' AND MUNICIPALITYENG = 'ADM'"
+VERSION = "onwani-district-v4"
+WHERE = collection_for().parcel_where
 FIELDS = (
     "OBJECTID,PLOTID,GISID,SectorNumber_PlotID,DISTRICTENG,DISTRICTID,"
     "MUNICIPALITYENG,COMMUNITYENG,ELMS_LandUse_Const,Construction_Status,"
@@ -71,13 +73,16 @@ def object_ids(data):
     return sorted(ids)
 
 
-def parse_feature(feature):
+def parse_feature(feature, *, territory=DEFAULT_TERRITORY):
     if not isinstance(feature, dict):
         raise SourceError("Invalid feature")
     attrs = feature.get("attributes")
     if not isinstance(attrs, dict):
         raise SourceError("Missing feature attributes")
-    if attrs.get("DISTRICTENG") != "AL REEM ISLAND" or attrs.get("MUNICIPALITYENG") != "ADM":
+    if (
+        attrs.get("DISTRICTENG") != collection_for(territory).district_name
+        or attrs.get("MUNICIPALITYENG") != "ADM"
+    ):
         raise SourceError("Feature outside requested territory")
     oid = attrs.get("OBJECTID")
     if type(oid) is not int or oid <= 0:

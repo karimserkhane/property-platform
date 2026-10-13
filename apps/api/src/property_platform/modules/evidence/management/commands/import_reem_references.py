@@ -1,8 +1,10 @@
+import hashlib
 import json
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 
+from property_platform.modules.evidence.collection_profiles import COLLECTIONS, collection_for
 from property_platform.modules.evidence.models import ResearchReference
 from property_platform.modules.evidence.research_import import (
     REGISTRY,
@@ -19,6 +21,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--actor", required=True)
+        parser.add_argument("--territory", choices=tuple(COLLECTIONS), default="al-reem-island")
         parser.add_argument("--limit", type=int, default=200)
         parser.add_argument(
             "--reprocess",
@@ -42,16 +45,28 @@ class Command(BaseCommand):
     def collect(self, *args, **options):
         if not 1 <= len(options["actor"].strip()) <= 160 or not 1 <= options["limit"] <= 200:
             raise CommandError("Valid actor and limit required")
+        profile = collection_for(options["territory"])
+        rows = json.loads(
+            REGISTRY.with_name(profile.reference_registry).read_text(encoding="utf-8")
+        )
         if options["reprocess"]:
+            source_keys = [
+                "research:" + hashlib.sha256(row["url"].encode()).hexdigest()[:40] for row in rows
+            ]
             references = list(
-                ResearchReference.objects.select_related("capture__run__source")
+                ResearchReference.objects.filter(capture__run__source__key__in=source_keys)
+                .select_related("capture__run__source")
                 .order_by("capture__run__source_id", "-capture__fetched_at", "-id")
                 .distinct("capture__run__source_id")[: options["limit"]]
             )
             for reference in references:
-                run = reprocess_reference(reference, actor=options["actor"].strip())
+                run = reprocess_reference(
+                    reference, actor=options["actor"].strip(), territory=options["territory"]
+                )
                 self.stdout.write(f"{reference.label}: {run.status} {run.summary}")
             return
-        for row in json.loads(REGISTRY.read_text(encoding="utf-8"))[: options["limit"]]:
-            run = import_reference(row, actor=options["actor"].strip())
+        for row in rows[: options["limit"]]:
+            run = import_reference(
+                row, actor=options["actor"].strip(), territory=options["territory"]
+            )
             self.stdout.write(f"{row['label']}: {run.status} {run.summary}")

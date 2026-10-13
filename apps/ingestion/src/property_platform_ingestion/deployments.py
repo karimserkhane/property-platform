@@ -62,7 +62,7 @@ async def serve_datasets():
                 paused=existing.paused if existing else False,
                 concurrency_limit=1,
                 parameters=parameters,
-                tags=["ingestion", TERRITORY],
+                tags=["ingestion", dataset.parameters.get("territory", TERRITORY)],
                 version=__version__,
                 entrypoint_type=EntrypointType.MODULE_PATH,
             )

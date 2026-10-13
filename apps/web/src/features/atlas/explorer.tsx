@@ -5,6 +5,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Inspector } from "./inspector";
 import type { MapOptions, MapView } from "./parcel-map";
+import { readParcelPages } from "./parcel-pages";
 import {
   type Category,
   COLORS,
@@ -128,13 +129,8 @@ export function Explorer({
       .catch(() => {
         if (!controller.signal.aborted) setReferenceError(true);
       });
-    fetch(`/api/atlas/parcels?bbox=${bbox}&territory=${territoryQuery}`, {
-      signal: controller.signal,
-    })
-      .then(async (r) => {
-        if (!r.ok) throw new Error("unavailable");
-        const data = (await r.json()) as ParcelCollection;
-        if (!Array.isArray(data.features)) throw new Error("invalid");
+    readParcelPages(bbox, territory.id, controller.signal)
+      .then((data) => {
         setCollection(data);
         setState("ready");
       })
@@ -152,7 +148,7 @@ export function Explorer({
         if (!controller.signal.aborted) setContextError(true);
       });
     return () => controller.abort();
-  }, [attempt, bbox, territoryQuery]);
+  }, [attempt, bbox, territoryQuery, territory.id]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt retries a failed bounded read; immutable previews stay loaded.
   useEffect(() => {

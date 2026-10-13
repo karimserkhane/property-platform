@@ -8,10 +8,12 @@ from property_platform.modules.evidence.queries import (
 )
 
 
-def features(*, bbox, limit, query, namespaces=None):
+def features(*, bbox, limit, query, namespaces=None, after=None):
     from .land_use import VERSION, category
 
-    collection = parcel_features(namespaces=namespaces, bbox=bbox, limit=limit, query=query)
+    collection = parcel_features(
+        namespaces=namespaces, bbox=bbox, limit=limit, query=query, after=after
+    )
     sources = parcel_sources([feature["id"] for feature in collection["features"]])
     for feature in collection["features"]:
         feature["properties"]["category"] = category(feature["properties"]["land_use"])

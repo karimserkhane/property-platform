@@ -15,6 +15,7 @@ from property_platform.modules.catalog.services import (
 )
 
 from . import map_sources, onwani
+from .collection_profiles import COLLECTIONS
 from .identity_resolution import (
     IdentityConflict,
     area_attributes,
@@ -29,7 +30,9 @@ from .models import (
     ParcelSourceAlias,
 )
 
-SUPPORTED_AREAS = {"dmt:onwani:reem:district", "dmt:onwani:reem:community"}
+SUPPORTED_AREAS = {
+    p.map_namespace(layer) for p in COLLECTIONS.values() for layer in ("district", "community")
+}
 
 
 def _actor(actor):
@@ -63,7 +66,8 @@ def _features(capture, cache):
 def _plan(run):
     namespace, cache, actions = run.source.key, {}, []
     counts = {"candidates": 0, "already_resolved": 0, "unchanged": 0, "conflicts": 0}
-    if namespace == onwani.SOURCE_KEY:
+    profile = next((p for p in COLLECTIONS.values() if p.parcel_namespace == namespace), None)
+    if profile is not None:
         target, alias_model = Parcel, ParcelSourceAlias
         observations = (
             ParcelObservation.objects.filter(capture__run=run)
@@ -79,7 +83,7 @@ def _plan(run):
             feature = _features(observation.capture, cache).get(observation.source_record_id)
             if feature is None or feature["attributes"] != observation.raw_attributes:
                 raise IdentityConflict("Parcel observation disagrees with its source capture")
-            record = onwani.parse_feature(feature)
+            record = onwani.parse_feature(feature, territory=profile.territory)
             shape = geometry_from_rings(record["rings"])
             alias = alias_model.objects.filter(
                 source_namespace=namespace, source_record_id=record["record_id"], active=True

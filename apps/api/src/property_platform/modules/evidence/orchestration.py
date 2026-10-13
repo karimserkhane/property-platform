@@ -14,22 +14,24 @@ from django.db import connection, transaction
 from django.db.models import F
 from django.utils import timezone
 
-from . import imagery_import, map_import, onwani, property_import, research_import, services
+from . import imagery_import, map_import, osm_bootstrap, property_import, research_import, services
+from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .failed_acquisitions import source_definition, validate_received_acquisitions
 from .models import Capture, IngestionExecution, IngestionRun, Source
 
-OPERATIONS = {"onwani", "map", "references", "property_presentations", "imagery"}
+OPERATIONS = {"onwani", "map", "references", "property_presentations", "imagery", "osm_bootstrap"}
 TERMINAL = {"succeeded", "quarantined"}
-TERRITORY = "al-reem-island"
+TERRITORY = DEFAULT_TERRITORY
 
 
 class ImportBusy(RuntimeError):
     """Another importer holds the shared source lock; no attempt was consumed."""
 
 
-def reference_registry():
+def reference_registry(territory=DEFAULT_TERRITORY):
     """Only reviewed registry entries can be selected, never user supplied URLs."""
-    return json.loads(research_import.REGISTRY.read_text(encoding="utf-8"))
+    path = research_import.REGISTRY.with_name(collection_for(territory).reference_registry)
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def reference_identity(url):
@@ -41,26 +43,32 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
         raise ValueError("Invalid ingestion operation or execution identity")
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
         raise ValueError("Valid actor required")
-    expected_scope = TERRITORY
+    territory = scope.split(":", 1)[0]
+    collection_for(territory)
+    if territory != DEFAULT_TERRITORY and operation == "imagery":
+        raise ValueError("No reviewed imagery registered for this territory")
+    if operation == "osm_bootstrap":
+        osm_bootstrap.boxes(territory)
+    expected_scope = territory
     reference = None
     if operation == "map":
-        if scope not in {f"{TERRITORY}:{layer}" for layer in (*map_import.protocol.LAYERS, "osm")}:
+        if scope not in {f"{territory}:{layer}" for layer in (*map_import.protocol.LAYERS, "osm")}:
             raise ValueError("Unknown map ingestion scope")
         expected_scope = scope
     elif operation == "references":
         if reference_key is None:
-            reference_key = scope.removeprefix(TERRITORY + ":")
+            reference_key = scope.removeprefix(territory + ":")
         reference = next(
             (
                 row
-                for row in reference_registry()
+                for row in reference_registry(territory)
                 if reference_identity(row["url"]) == reference_key
             ),
             None,
         )
         if reference is None:
             raise ValueError("Unknown research reference identity")
-        expected_scope = f"{TERRITORY}:{reference_key}"
+        expected_scope = f"{territory}:{reference_key}"
     elif reference_key is not None:
         raise ValueError("Reference identity is only valid for reference ingestion")
     if scope != expected_scope:
@@ -187,7 +195,7 @@ def record_acquisition_failure(
             cursor.execute("SELECT pg_advisory_unlock(%s)", [lock])
 
 
-def _fingerprint(operation, receipt):
+def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
     if operation not in {"property_presentations", "imagery"}:
         if receipt is not None:
             raise ValueError("Receipt input is only valid for inert property/imagery imports")
@@ -204,7 +212,7 @@ def _fingerprint(operation, receipt):
     }
     if operation == "property_presentations":
         value["review_version"] = property_import.VERSION
-        value["registry"] = property_import.registry()
+        value["registry"] = property_import.registry(territory)
     else:
         value["render_version"] = "reem-sentinel-crop-v1"
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
@@ -216,33 +224,50 @@ def _fingerprint(operation, receipt):
 
 
 def _source_keys(operation, scope, reference):
+    territory = scope.split(":", 1)[0]
+    profile = collection_for(territory)
+    if operation == "osm_bootstrap":
+        return [profile.map_namespace("osm")]
     if operation == "onwani":
-        return [onwani.SOURCE_KEY]
+        return [profile.parcel_namespace]
     if operation == "map":
         layer = scope.rsplit(":", 1)[1]
-        return [f"osm:reem:{layer}" if layer == "osm" else f"dmt:onwani:reem:{layer}"]
+        return [profile.map_namespace(layer)]
     if operation == "references":
         return ["research:" + reference_identity(reference["url"])]
     if operation == "property_presentations":
-        profiles, _ = property_import.registry()
+        profiles, _ = property_import.registry(territory)
         return ["property:" + reference_identity(row["source_url"]) for row in profiles]
     return ["sentinel:" + identity for identity in imagery_import.SCENES]
 
 
 def _dispatch(operation, scope, actor, acquisition, receipt, reference):
+    territory = scope.split(":", 1)[0]
+    if operation == "osm_bootstrap":
+        run = osm_bootstrap.import_bootstrap(
+            territory=territory, actor=actor, acquisition=acquisition
+        )
+        return run.status, run.summary
     if operation == "onwani":
-        run = services.import_onwani(actor=actor, acquisition=acquisition)
+        run = services.import_onwani(actor=actor, acquisition=acquisition, territory=territory)
         return run.status, run.summary
     if operation == "map":
         run = map_import.import_map_layer(
-            layer=scope.rsplit(":", 1)[1], actor=actor, acquisition=acquisition
+            layer=scope.rsplit(":", 1)[1], actor=actor, acquisition=acquisition, territory=territory
         )
         return run.status, run.summary
     if operation == "references":
-        run = research_import.import_reference(reference, actor=actor, acquisition=acquisition)
+        run = research_import.import_reference(
+            reference, actor=actor, acquisition=acquisition, territory=territory
+        )
         return run.status, run.summary
     if operation == "property_presentations":
-        presentations = property_import.import_presentations(receipt, actor=actor)
+        presentations = property_import.import_presentations(
+            receipt,
+            actor=actor,
+            profiles=property_import.registry(territory)[0],
+            photos=property_import.registry(territory)[1],
+        )
         return "succeeded", {"presentations": len(presentations)}
     runs = imagery_import.import_imagery(receipt, actor=actor)
     return "succeeded", {
@@ -276,7 +301,7 @@ def execute_import(
         raise ValueError("Ingestion orchestration requires PostgreSQL/PostGIS")
     if prefect_flow_run_id is not None:
         prefect_flow_run_id = uuid.UUID(str(prefect_flow_run_id))
-    fingerprint = _fingerprint(operation, receipt)
+    fingerprint = _fingerprint(operation, receipt, scope.split(":", 1)[0])
     lock = services.LOCK_KEY if operation == "onwani" else map_import.LOCK_KEY
     with connection.cursor() as cursor:
         cursor.execute("SELECT pg_try_advisory_lock(%s)", [lock])

@@ -4,9 +4,12 @@ from property_platform.modules.evidence.services import import_onwani
 
 
 class Command(BaseCommand):
-    help = "Acquire Al Reem parcels directly from DMT/Onwani, with evidence and audit."
+    help = "Acquire reviewed territory parcels directly from DMT/Onwani, with evidence and audit."
 
     def add_arguments(self, parser):
+        parser.add_argument(
+            "--territory", choices=["al-reem-island", "saadiyat-island"], default="al-reem-island"
+        )
         parser.add_argument(
             "--actor", required=True, help="Operator identifier for the audit trail"
         )
@@ -16,7 +19,7 @@ class Command(BaseCommand):
         if not actor or len(actor) > 160:
             raise CommandError("Actor must contain 1–160 characters")
         try:
-            run = import_onwani(actor=actor)
+            run = import_onwani(actor=actor, territory=options["territory"])
         except Exception as exc:
             raise CommandError(
                 f"Import failed ({type(exc).__name__}); inspect evidence.ingestion_run. "

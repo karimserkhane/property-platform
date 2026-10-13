@@ -1,14 +1,14 @@
 # Couverture nationale et activation des territoires
 
-Décision du 12 octobre 2026 : **Property Platform vise les sept émirats. Al Reem est le premier jeu de données, pas une limite du produit.** L'accueil et la navigation sont nationaux ; les données actuellement collectées restent celles du pilote.
+Décision du 12 octobre 2026 : **Property Platform vise les sept émirats. Al Reem est le premier jeu de données, pas une limite du produit. Saadiyat est le deuxième territoire activé le 13 octobre 2026.** L'accueil et la navigation sont nationaux ; les données actuellement collectées concernent Al Reem et Saadiyat.
 
 ## Couverture actuelle
 
-L'accueil propose Abu Dhabi, Dubai, Sharjah, Ajman, Umm Al Quwain, Ras Al Khaimah et Fujairah. Choisir Abu Dhabi ouvre actuellement Al Reem. Les autres émirats affichent une couverture en préparation : aucune parcelle, référence ou image satellite de Reem ne leur est attribuée. Un identifiant inconnu ne déclenche pas de remplacement silencieux.
+L'accueil propose Abu Dhabi, Dubai, Sharjah, Ajman, Umm Al Quwain, Ras Al Khaimah et Fujairah. Choisir Abu Dhabi ouvre Al Reem par défaut ; le sélecteur de zone propose également Saadiyat. Les autres émirats affichent une couverture en préparation : aucune parcelle, référence ou image satellite de Reem ne leur est attribuée. Un identifiant inconnu ne déclenche pas de remplacement silencieux.
 
 La liste s'appuie sur [le portail du gouvernement des Émirats](https://u.ae/about-the-uae/the-seven-emirates). Les fenêtres de navigation sont **nos rectangles approximatifs**, pas des limites administratives officielles, cadastrales ou des preuves de couverture. Elles peuvent se chevaucher et inclure des territoires voisins. Les émirats ne se résument pas à leur ville principale : Ajman comprend aussi Masfout et Manama ([Department of Digital Ajman](https://media.ajman.ae/en/happiness-bundle/emirate-ajman/emirates-ajman)). Une collecte utilise les géométries et identités de ses sources validées.
 
-La couverture détaillée de Reem reste décrite dans [REEM_MAP.md](REEM_MAP.md). Les photos d'accueil de Dubai et Abu Dhabi sont éditoriales ; elles ne prouvent pas l'existence de dossiers immobiliers dans ces villes.
+La couverture détaillée est décrite dans [REEM_MAP.md](REEM_MAP.md) et [SAADIYAT.md](SAADIYAT.md). Les photos d'accueil de Dubai et Abu Dhabi sont éditoriales ; elles ne prouvent pas l'existence de dossiers immobiliers dans ces villes.
 
 ## Où configurer la géographie
 
@@ -51,9 +51,11 @@ Le prototype charge une petite zone en GeoJSON, avec un rectangle de requête ma
 
 À la montée en charge, prévoir des lectures par fenêtre visible, des tuiles vectorielles ou agrégats à faible zoom, une pagination stable de liste et une recherche nationale séparée. Conserver les index spatiaux et mesurer volumes, réseau, SQL et fraîcheur avant d'ajouter caches ou services. Secrets, droits et calendriers de collecte restent distincts par fournisseur.
 
-Prix/unités, règles de frais par juridiction, scoring de fiabilité et traitements IA/media restent à développer. L'[orchestration Prefect](INGESTION.md) existe pour les sources du pilote Al Reem ; une autre zone demande ses connecteurs et contrôles avant activation. La provenance, l'identité durable, le coût et le contrôle suivent [REPOSITORY.md](REPOSITORY.md), [DATA_PROVENANCE.md](DATA_PROVENANCE.md) et la revue d'architecture. La couverture nationale ne justifie pas à elle seule un remplacement de stack ou des microservices.
+Prix/unités, règles de frais par juridiction, scoring de fiabilité et traitements IA/media restent à développer. L'[orchestration Prefect](INGESTION.md) existe pour les sources examinées Al Reem et Saadiyat ; une autre zone demande ses connecteurs et contrôles avant activation. La provenance, l'identité durable, le coût et le contrôle suivent [REPOSITORY.md](REPOSITORY.md), [DATA_PROVENANCE.md](DATA_PROVENANCE.md) et la revue d'architecture. La couverture nationale ne justifie pas à elle seule un remplacement de stack ou des microservices.
 
-## Validation de cette modification
+<a id="validation-de-cette-modification"></a>
+
+## Validation historique de la navigation nationale (12 octobre 2026)
 
 123 tests backend ont réussi sur une base PostGIS isolée, dont la provenance d'un deuxième fournisseur synthétique, les mesures géodésiques et le refus de replier une zone inactive sur le pilote. 78 tests sans GIS ont ensuite réussi sur Windows ; ils ne remplacent pas PostGIS. Cinq tests web, types, Biome, Ruff, frontières de modules, contrats générés et liens documentaires ont été contrôlés.
 
@@ -68,3 +70,7 @@ docker compose -f infra/local/compose.yaml --profile web-preview up -d --no-buil
 ```
 
 Cette commande démarre les images déjà présentes ; elle ne compile pas les modifications suivantes. Pour reconstruire normalement après correction des certificats de l'environnement, utiliser les commandes de [DEVELOPMENT.md](DEVELOPMENT.md). Ne pas ajouter de désactivation TLS pour contourner `UnknownIssuer`.
+
+## Extension Saadiyat du 13 octobre 2026
+
+Le profil Saadiyat utilise des namespaces distincts, ses vrais filtres de district et des sources propres. Le volume mesuré dépasse une réponse de 3 000 parcelles : la lecture utilise un curseur stable, et le client acquiert des pages de 1 000 avec un budget global de 12 000 objets. Les filtres de couches et de rattachements parcellaire évitent de mélanger les deux zones même lorsque leurs rectangles se chevauchent. Ce mécanisme borné est adapté aux deux îles ; des tuiles/lectures par fenêtre restent nécessaires pour une couverture nationale. La migration evidence.0013 autorise le bootstrap OSM dans le journal ; elle ne déplace aucune table. Le [guide Saadiyat](SAADIYAT.md) donne les imports réels et leurs limites.

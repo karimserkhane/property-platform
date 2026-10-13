@@ -103,6 +103,9 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   ├── catalog/      Identité des biens et relations acceptées
 │       │       │   │   ├── apps.py   Déclaration de l'application Django
 │       │       │   │   ├── models.py Parcelles, rues, bâtiments, lieux et territoires typés
+│       │       │   │   ├── collection_profiles.py  Requêtes et identités examinées, distinctes par territoire
+│       │       │   │   ├── osm_api_protocol.py, osm_bootstrap.py  Import XML OSM initial, borné et manuel
+│       │       │   │   ├── saadiyat_*.json  Références et présentations examinées de Saadiyat
 │       │       │   │   ├── services.py  Conversion des géométries et mutations du catalogue
 │       │       │   │   ├── queries.py   Lectures spatiales bornées et identité
 │       │       │   │   ├── map_queries.py   Couches de contexte et proximité dans PostGIS
@@ -227,7 +230,7 @@ Lors de l'ajout d'un modèle métier, une migration générée peut créer sa ta
 
 Ce dossier est une application Python exécutable séparément. Il possède les flows Prefect, leur enregistrement, le transport HTTPS, les checkpoints de reçus et l'adaptateur vers Django. Le serveur et son interface permettent de modifier les horaires, lancer les jobs et consulter les états/logs. Le runner exécute un flow à la fois dans le profil local. Les horaires initiaux sont créés inactifs ; un redémarrage conserve les horaires, paramètres et activations déjà modifiés dans l'interface, y compris un horaire supprimé. Le guide [INGESTION.md](INGESTION.md) décrit les commandes et l'UI.
 
-Le registre contient **neuf déploiements** : parcelles Onwani ; quatre couches district, community, street et OSM ; références publiques ; présentations immobilières ; import d'un reçu Sentinel existant ; contrôle de disponibilité. Les quatre couches et les parcelles restent limitées aux protocoles Al Reem actuels. Sentinel et le contrôle de disponibilité n'ont aucun horaire récurrent. Les prix, stocks de logements, avis, génération vidéo et sources de nouveaux territoires ne sont pas ajoutés par cet orchestrateur.
+Le registre contient **dix-sept déploiements** : parcelles Onwani ; quatre couches district, community, street et OSM ; références publiques ; présentations immobilières ; import d'un reçu Sentinel existant ; contrôle de disponibilité. Les parcelles, couches et références utilisent les profils examinés Al Reem et Saadiyat. Saadiyat ajoute aussi un import OSM XML initial manuel, sans calendrier. Sentinel et le contrôle de disponibilité n'ont aucun horaire récurrent. Les prix, stocks de logements, avis, génération vidéo et sources de nouveaux territoires ne sont pas ajoutés par cet orchestrateur.
 
 La direction est **`ingestion → services/protocoles evidence → catalog`**. `collectors/` utilise les constantes et protocoles portables du paquet API, sans ORM, sans copie des modèles et sans collecte d'une URL libre. Les acquisitions ont des budgets par réponse et par lot ; un replay conserve les octets et dates réelles de collecte. `domain.py` initialise Django dans un sous-processus synchrone et transmet les captures préparées à `evidence/orchestration.py`. Cette passerelle possède l'identité durable, les transactions et les liens vers les acquisitions ; les collecteurs ne modifient aucune table directement. Le réseau est utilisé avant la transaction de mutation canonique.
 
@@ -300,7 +303,7 @@ Les caches de code ne sont pas le stockage de PostgreSQL. **Supprimer un volume 
 | Ajouter un domaine prix, avis ou documents | Module dédié sous `apps/api/src/property_platform/modules/` | À créer quand ses responsabilités et dépendances sont définies |
 | Ajouter des contrôles de fonctionnalité | Tests proches du module concerné ; tests d'intégration transversaux dans `apps/api/tests/` | À ajouter avec les comportements concernés |
 | Ajouter l'application mobile | `apps/mobile/`, consommant la même API | Non créé ; le pilote web vient d'abord |
-| Ajouter une collecte ou un horaire | Transport sous `apps/ingestion/src/property_platform_ingestion/collectors/`, flows et registre de déploiements dans cette application | Neuf jobs préparés ; transformations et écritures métier restent dans leurs services API |
+| Ajouter une collecte ou un horaire | Transport sous `apps/ingestion/src/property_platform_ingestion/collectors/`, flows et registre de déploiements dans cette application | Dix-sept jobs préparés ; transformations et écritures métier restent dans leurs services API |
 | Ajouter un traitement lourd OCR/rendu | Runtime spécialisé, séparé du web/API et du runner léger | Non implémenté ; définir son budget, stockage, identité et reprise avec le premier traitement |
 
 Exemple futur : la page du site demande la fiche d'un bâtiment à une route de `api`, qui appelle un service de `catalog` et des lectures explicites de `evidence`. Django interroge PostgreSQL/PostGIS puis renvoie une réponse conforme au contrat. Le composant web l'affiche et utilise les traductions de l'interface. Chaque couche a ainsi un rôle précis ; la logique métier ne se retrouve pas recopiée dans la page.
@@ -352,3 +355,7 @@ Le module `evidence` possède `PropertyPresentation` et `PropertyMedia`, leurs c
 `features/atlas/property-card.tsx` possède la présentation des biens sélectionnés à partir du contrat généré ; `Inspector` conserve les informations secondaires. Les résumés, liens de promoteurs et photos ne viennent pas de constantes du composant. Les médias passent par une route fixe de l’API avec les mêmes restrictions locales et un budget de taille ; aucun service de rendu/OCR ni dépendance lourde n’est ajouté. Les imports ne fusionnent pas des objets par nom ou proximité. Voir [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md).
 
 `features/atlas/presentation.ts` possède aussi le choix du titre visible, l'index de candidats par parcelle et la référence cadastrale lisible. Direction : Explorer/Inspector/PropertyCard → présentation pure → types des contrats. Le choix ne filtre pas un nom selon sa fiabilité ; il signale l'association possible et préserve les identités, alternatives et codes sources. Cet index ne crée aucune relation acceptée en base.
+
+### Extension Saadiyat : responsabilités
+
+Le module evidence possède collection_profiles.py (configuration immuable examinée), osm_api_protocol.py (parseur XML portable sans ORM) et osm_bootstrap.py (captures et orchestration de la matérialisation initiale). La direction reste ingestion → evidence → catalog ; publication assemble les lectures filtrées par territoire. Le helper map_import.materialize_map_records conserve une unique transaction propriétaire et un audit commun aux formats Overpass et XML. Aucun collecteur ne modifie les modèles directement. Le découpage OSM API initial est manuel ; il ne devient pas un collecteur national récurrent. Voir [SAADIYAT.md](SAADIYAT.md).

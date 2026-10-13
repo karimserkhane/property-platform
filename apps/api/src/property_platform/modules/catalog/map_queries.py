@@ -15,7 +15,7 @@ MODELS = {
 }
 
 
-def map_rows(target, bbox, limit=3000):
+def map_rows(target, bbox, limit=3000, *, namespaces=None, parcel_namespaces=None):
     from django.contrib.gis.geos import Polygon
 
     envelope = Polygon.from_bbox(bbox)
@@ -28,17 +28,18 @@ def map_rows(target, bbox, limit=3000):
         if target == "building":
             fields += ["height_m", "levels"]
         records = model.objects.filter(active=True, geometry__intersects=envelope)
+        if namespaces is not None:
+            records = records.filter(source_namespace__in=namespaces)
         if target == "administrative_area":
             records = records.filter(superseded_by__isnull=True)
         if target == "place":
+            parcels = Parcel.objects.filter(
+                geometry__covers=OuterRef("geometry"), superseded_by__isnull=True
+            )
+            if parcel_namespaces is not None:
+                parcels = parcels.filter(source_namespace__in=parcel_namespaces)
             records = records.annotate(
-                parcel_ids=ArraySubquery(
-                    Parcel.objects.filter(
-                        geometry__covers=OuterRef("geometry"), superseded_by__isnull=True
-                    )
-                    .order_by("id")
-                    .values("id")[:20]
-                )
+                parcel_ids=ArraySubquery(parcels.order_by("id").values("id")[:20])
             )
             fields += ["parcel_ids"]
         rows = list(

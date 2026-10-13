@@ -377,6 +377,8 @@ export interface components {
             features: components["schemas"]["Feature"][];
             /** Truncated */
             truncated: boolean;
+            /** Next Cursor */
+            next_cursor?: string | null;
             /** Classification Version */
             classification_version: string;
         };
@@ -839,6 +841,7 @@ export interface operations {
                 limit?: number;
                 q?: string;
                 territory?: string | null;
+                after?: string | null;
             };
             header?: never;
             path?: never;

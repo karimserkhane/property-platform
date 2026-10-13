@@ -13,15 +13,17 @@ from django.utils import timezone
 from property_platform.modules.catalog.models import AdministrativeArea, Place
 from property_platform.modules.catalog.services import reconcile_map_record, retire_map_record
 
+from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .models import Capture, IngestionRun, MapObservation, ResearchReference, Source
 from .research_sources import page_metadata, project_marker
 
-VERSION = "reem-references-v2"
+VERSION = "district-references-v3"
 REGISTRY = Path(__file__).with_name("project_sources.json")
 MAX_BYTES = 4 * 1024 * 1024
 
 
-def finish_reference(capture, row, run):
+def finish_reference(capture, row, run, *, territory=DEFAULT_TERRITORY):
+    profile = collection_for(territory)
     payload, url = bytes(capture.payload), row["url"]
     title, markers = page_metadata(payload)
     marker = project_marker(payload, url, title) if capture.http_status == 200 else None
@@ -30,7 +32,8 @@ def finish_reference(capture, row, run):
         district = AdministrativeArea.objects.filter(
             active=True,
             kind="district",
-            name="AL REEM ISLAND",
+            name=profile.district_name,
+            superseded_by__isnull=True,
         ).first()
         if marker and district:
             point = Point(marker["lon"], marker["lat"], srid=4326)
@@ -118,7 +121,7 @@ def finish_reference(capture, row, run):
     return run
 
 
-def reprocess_reference(reference, *, actor):
+def reprocess_reference(reference, *, actor, territory=DEFAULT_TERRITORY):
     parent = reference.capture
     run = IngestionRun.objects.create(
         source=parent.run.source, actor=actor, connector_version=VERSION
@@ -144,6 +147,7 @@ def reprocess_reference(reference, *, actor):
             capture,
             {"url": run.source.url, "label": reference.label, "kind": reference.source_kind},
             run,
+            territory=territory,
         )
     except Exception as exc:
         run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
@@ -176,7 +180,7 @@ def fetch_reference(url):
         }
 
 
-def import_reference(row, *, actor, acquisition=None):
+def import_reference(row, *, actor, acquisition=None, territory=DEFAULT_TERRITORY):
     url = row["url"]
     source, _ = Source.objects.get_or_create(
         key="research:" + hashlib.sha256(url.encode()).hexdigest()[:40],
@@ -194,7 +198,7 @@ def import_reference(row, *, actor, acquisition=None):
             content_sha256=hashlib.sha256(payload).hexdigest(),
             **receipt,
         )
-        return finish_reference(capture, row, run)
+        return finish_reference(capture, row, run, territory=territory)
     except Exception as exc:
         run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
         run.save(update_fields=["status", "error", "finished_at"])

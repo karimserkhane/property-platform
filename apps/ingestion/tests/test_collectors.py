@@ -32,6 +32,19 @@ URL = "https://publisher.example/projects/one"
 ROW = {"url": URL, "label": "Publisher — One", "kind": "developer"}
 
 
+def test_saadiyat_collectors_reject_a_reem_query_before_network():
+    transport = Mock()
+    collector = OnwaniCollector(transport, territory="saadiyat-island")
+    with pytest.raises(onwani.SourceError):
+        collector.fetch({"where": onwani.WHERE, "returnIdsOnly": "true"})
+    transport.fetch.assert_not_called()
+
+    map_collector = MapCollector(transport, territory="saadiyat-island")
+    with pytest.raises(onwani.SourceError):
+        map_collector.fetch_url(map_sources.OSM_URL, {"data": map_sources.OSM_QUERY})
+    transport.fetch.assert_not_called()
+
+
 def client(urls, handler):
     def streaming_handler(request):
         response = handler(request)

@@ -5,14 +5,23 @@ from urllib.parse import parse_qs, urlparse
 
 from django.utils import timezone
 
-from . import map_sources, onwani
+from . import map_sources, onwani, osm_bootstrap
+from .collection_profiles import collection_for
 
 
 def source_definition(operation, scope):
+    profile = collection_for(scope.split(":", 1)[0])
+    if operation == "osm_bootstrap":
+        return (
+            profile.map_namespace("osm"),
+            f"OpenStreetMap — {profile.name} (ODbL)",
+            osm_bootstrap.URL,
+            osm_bootstrap.VERSION,
+        )
     if operation == "onwani":
         return (
-            onwani.SOURCE_KEY,
-            "DMT / Onwani PLOT — Al Reem Island",
+            profile.parcel_namespace,
+            f"DMT / Onwani PLOT — {profile.name}",
             onwani.BASE_URL,
             onwani.VERSION,
         )
@@ -21,20 +30,21 @@ def source_definition(operation, scope):
     layer = scope.rsplit(":", 1)[1]
     if layer == "osm":
         return (
-            "osm:reem:osm",
-            "OpenStreetMap — Al Reem (ODbL)",
+            profile.map_namespace("osm"),
+            f"OpenStreetMap — {profile.name} (ODbL)",
             map_sources.OSM_URL,
             map_sources.VERSION,
         )
     return (
-        f"dmt:onwani:reem:{layer}",
-        f"DMT / Onwani — Al Reem {layer}",
-        map_sources.LAYERS[layer][0],
+        profile.map_namespace(layer),
+        f"DMT / Onwani — {profile.name} {layer}",
+        profile.map_layers()[layer][0],
         map_sources.VERSION,
     )
 
 
 def _request_shape(url, operation, scope):
+    profile = collection_for(scope.split(":", 1)[0])
     parts = urlparse(url)
     if parts.scheme != "https" or parts.fragment or len(url) > 4000:
         raise ValueError("Unexpected failed GIS receipt URL")
@@ -43,16 +53,20 @@ def _request_shape(url, operation, scope):
     if any(len(values) != 1 for values in query.values()):
         raise ValueError("Duplicate GIS request parameters")
     params = {key: values[0] for key, values in query.items()}
+    if operation == "osm_bootstrap":
+        if base != osm_bootstrap.URL or params not in osm_bootstrap.boxes(scope):
+            raise ValueError("Unregistered OSM bootstrap window")
+        return
     if operation == "map" and scope.endswith(":osm"):
         if base not in (map_sources.OSM_URL, map_sources.OSM_MIRROR) or params != {
-            "data": map_sources.OSM_QUERY
+            "data": profile.osm_query
         }:
             raise ValueError("OSM receipt does not match its reviewed source query")
         return
     if operation == "onwani":
-        expected, where, fields = onwani.BASE_URL, onwani.WHERE, onwani.FIELDS
+        expected, where, fields = onwani.BASE_URL, profile.parcel_where, onwani.FIELDS
     else:
-        expected, where, _, fields = map_sources.LAYERS[scope.rsplit(":", 1)[1]]
+        expected, where, _, fields = profile.map_layers()[scope.rsplit(":", 1)[1]]
     if base == expected and params == {"f": "pjson"}:
         return
     if base != expected + "/query":
@@ -89,7 +103,7 @@ def validate_received_acquisitions(operation, scope, rows):
         return []
     if not isinstance(rows, (list, tuple)) or len(rows) > 205:
         raise ValueError("Failed acquisition journal exceeds its budget")
-    if rows and operation not in {"onwani", "map"}:
+    if rows and operation not in {"onwani", "map", "osm_bootstrap"}:
         raise ValueError("Only completed GIS source responses can be retained here")
     output, transferred = [], 0
     maximum = onwani.MAX_BYTES if operation == "onwani" else map_sources.MAX_BYTES

@@ -66,7 +66,7 @@ def osm():
 
 def district():
     return AdministrativeArea.objects.create(
-        source_namespace="test",
+        source_namespace="dmt:onwani:reem:district",
         source_record_id="district",
         name="AL REEM ISLAND",
         kind="district",
@@ -78,6 +78,15 @@ def collect(data):
     return import_map_layer(
         layer="osm", actor="test", replay=(json.dumps(data).encode(), receipt())
     )
+
+
+def test_json_source_cannot_claim_xml_to_bypass_snapshot_metadata():
+    data = osm()
+    data.pop("osm3s")
+    data["source_format"] = "osm_api_xml"
+    with pytest.raises(protocol.SourceError):
+        collect(data)
+    assert not Building.objects.exists()
 
 
 def test_osm_centroid_repeat_reconciliation_and_geometry_audit(client):

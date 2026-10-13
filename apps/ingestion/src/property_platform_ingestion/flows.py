@@ -43,7 +43,9 @@ def ingest_source(operation: str, scope: str, actor: str, **parameters) -> dict:
 
 
 @flow(name="property-platform-parcels", retries=0)
-def parcels(territory: Literal["al-reem-island"] = TERRITORY, actor: str = "scheduled"):
+def parcels(
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "scheduled"
+):
     """Refresh official parcels while retaining original captures and quarantine."""
     return ingest_source("onwani", territory, actor)
 
@@ -51,7 +53,7 @@ def parcels(territory: Literal["al-reem-island"] = TERRITORY, actor: str = "sche
 @flow(name="property-platform-map", retries=0)
 def map_layer(
     layer: Literal["district", "community", "street", "osm"] = "osm",
-    territory: Literal["al-reem-island"] = TERRITORY,
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
     actor: str = "scheduled",
 ):
     """Refresh one source layer; buildings/places share the OSM acquisition."""
@@ -62,13 +64,13 @@ def map_layer(
 def references(
     limit: int = 200,
     reference_key: str | None = None,
-    territory: Literal["al-reem-island"] = TERRITORY,
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
     actor: str = "scheduled",
 ):
     """Collect reviewed references independently; one source failure does not skip others."""
     if type(limit) is not int or not 1 <= limit <= 200:
         raise ValueError("Reference limit must be 1–200")
-    rows, _, _ = source_registries()
+    rows, _, _ = source_registries(territory)
     if reference_key is not None:
         rows = [row for row in rows if reference_identity(row["url"]) == reference_key]
         if len(rows) != 1:
@@ -99,7 +101,9 @@ def references(
 
 
 @flow(name="property-platform-presentations", retries=0)
-def presentations(territory: Literal["al-reem-island"] = TERRITORY, actor: str = "scheduled"):
+def presentations(
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "scheduled"
+):
     """Refresh the reviewed property profiles and licensed media as one validated batch."""
     return ingest_source("property_presentations", territory, actor)
 
@@ -107,7 +111,7 @@ def presentations(territory: Literal["al-reem-island"] = TERRITORY, actor: str =
 @flow(name="property-platform-imagery", retries=0)
 def imagery(
     receipt_name: str = "sentinel-reem.json",
-    territory: Literal["al-reem-island"] = TERRITORY,
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
     actor: str = "manual",
 ):
     """Import an existing isolated-raster receipt; no recurring historical scene downloads."""
@@ -122,4 +126,13 @@ def readiness():
     return result
 
 
-FLOWS = {f.name: f for f in (parcels, map_layer, references, presentations, imagery, readiness)}
+@flow(name="property-platform-osm-bootstrap", retries=0)
+def osm_bootstrap(territory: Literal["saadiyat-island"] = "saadiyat-island", actor: str = "manual"):
+    """One-off bounded API windows, never scheduled bulk harvesting."""
+    return ingest_source("osm_bootstrap", territory, actor)
+
+
+FLOWS = {
+    f.name: f
+    for f in (parcels, map_layer, references, presentations, imagery, readiness, osm_bootstrap)
+}

@@ -25,7 +25,7 @@ def parcel_counts(namespaces):
         )
 
 
-def parcel_features(*, bbox, limit, query="", namespace=None, namespaces=None):
+def parcel_features(*, bbox, limit, query="", namespace=None, namespaces=None, after=None):
     envelope = Polygon.from_bbox(bbox)
     envelope.srid = 4326
     records = Parcel.objects.filter(geometry__intersects=envelope, superseded_by__isnull=True)
@@ -33,6 +33,8 @@ def parcel_features(*, bbox, limit, query="", namespace=None, namespaces=None):
         records = records.filter(source_namespace=namespace)
     if namespaces is not None:
         records = records.filter(source_namespace__in=namespaces)
+    if after is not None:
+        records = records.filter(id__gt=after)
     if query:
         records = records.filter(code__istartswith=query)
     with transaction.atomic():
@@ -63,6 +65,7 @@ def parcel_features(*, bbox, limit, query="", namespace=None, namespaces=None):
             for row in rows[:limit]
         ],
         "truncated": len(rows) > limit,
+        "next_cursor": str(rows[limit - 1]["id"]) if len(rows) > limit else None,
     }
 
 

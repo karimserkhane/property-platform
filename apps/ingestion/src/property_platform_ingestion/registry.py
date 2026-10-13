@@ -5,7 +5,9 @@ import json
 from dataclasses import dataclass
 from importlib.resources import files
 
-TERRITORY = "al-reem-island"
+from property_platform.modules.evidence.collection_profiles import DEFAULT_TERRITORY, collection_for
+
+TERRITORY = DEFAULT_TERRITORY
 TIMEZONE = "Asia/Dubai"
 
 
@@ -67,12 +69,56 @@ DATASETS = (
 )
 
 
-def source_registries():
+# Same reviewed connectors, distinct source identities and deployment scopes.
+DATASETS += (
+    Dataset(
+        "saadiyat-property-presentations",
+        "property-platform-presentations",
+        "Reviewed Park View profiles; no unlicensed promoter photographs.",
+        {"territory": "saadiyat-island"},
+        "30 8 * * 0",
+    ),
+    Dataset(
+        "saadiyat-osm-bootstrap",
+        "property-platform-osm-bootstrap",
+        "Manual bounded OSM API acquisition for initial Saadiyat coverage; no recurring schedule.",
+        {"territory": "saadiyat-island"},
+        None,
+    ),
+    Dataset(
+        "saadiyat-parcels-onwani",
+        "property-platform-parcels",
+        "Official Saadiyat parcels, with captures and quarantine.",
+        {"territory": "saadiyat-island"},
+        "0 6 * * 0",
+    ),
+    *(
+        Dataset(
+            f"saadiyat-map-{layer}",
+            "property-platform-map",
+            f"Saadiyat {layer}; source identities remain separate from Reem.",
+            {"territory": "saadiyat-island", "layer": layer},
+            f"{minute} 7 * * 0",
+        )
+        for layer, minute in (("district", 0), ("community", 15), ("street", 30), ("osm", 45))
+    ),
+    Dataset(
+        "saadiyat-project-references",
+        "property-platform-references",
+        "Reviewed official Saadiyat research sources, not verified inventory.",
+        {"territory": "saadiyat-island", "limit": 200, "reference_key": None},
+        "0 8 * * 0",
+    ),
+)
+
+
+def source_registries(territory=DEFAULT_TERRITORY):
+    profile = collection_for(territory)
     root = files("property_platform.modules.evidence")
     return (
-        json.loads(root.joinpath("project_sources.json").read_text(encoding="utf-8")),
-        json.loads(root.joinpath("property_presentations.json").read_text(encoding="utf-8")),
-        json.loads(root.joinpath("property_media.json").read_text(encoding="utf-8")),
+        json.loads(root.joinpath(profile.reference_registry).read_text(encoding="utf-8")),
+        json.loads(root.joinpath(profile.presentation_registry).read_text(encoding="utf-8")),
+        json.loads(root.joinpath(profile.media_registry).read_text(encoding="utf-8")),
     )
 
 

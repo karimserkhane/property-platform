@@ -11,6 +11,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--actor", required=True)
         parser.add_argument(
+            "--territory", choices=["al-reem-island", "saadiyat-island"], default="al-reem-island"
+        )
+        parser.add_argument(
             "--receipt",
             help="Operator-provided OSM receipt bundle, replayed without claiming a new fetch",
         )
@@ -28,6 +31,7 @@ class Command(BaseCommand):
         from django.utils import timezone
 
         from property_platform.modules.evidence import map_sources as protocol
+        from property_platform.modules.evidence.collection_profiles import collection_for
 
         actor = options["actor"].strip()
         if not actor or len(actor) > 160:
@@ -61,7 +65,9 @@ class Command(BaseCommand):
             if f"{parsed.scheme}://{parsed.netloc}{parsed.path}" not in (
                 protocol.OSM_URL,
                 protocol.OSM_MIRROR,
-            ) or parse_qs(parsed.query).get("data") != [protocol.OSM_QUERY]:
+            ) or parse_qs(parsed.query).get("data") != [
+                collection_for(options["territory"]).osm_query
+            ]:
                 raise CommandError("Receipt does not match the fixed OSM acquisition")
             for key in ("fetched_started_at", "fetched_at"):
                 receipt[key] = datetime.fromisoformat(receipt[key]) if receipt.get(key) else None
@@ -87,7 +93,9 @@ class Command(BaseCommand):
                 raise CommandError("Receipt payload too large")
         for layer in layers:
             try:
-                run = import_map_layer(layer=layer, actor=actor, replay=replay)
+                run = import_map_layer(
+                    layer=layer, actor=actor, replay=replay, territory=options["territory"]
+                )
             except Exception as exc:
                 raise CommandError(
                     f"{layer}: {type(exc).__name__}; previous data preserved"

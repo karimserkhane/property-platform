@@ -3,6 +3,7 @@
 from dataclasses import asdict, dataclass
 
 from property_platform.modules.catalog.territories import DEFAULT_TERRITORY_ID, TERRITORIES
+from property_platform.modules.evidence.collection_profiles import collection_for
 from property_platform.modules.evidence.onwani import SOURCE_KEY
 
 
@@ -25,6 +26,13 @@ PROFILES = {
         (54.392, 24.491, 54.408, 24.502),
         "project_sources.json",
         ("S2C_40RBN_20261004_0_L2A", "S2C_40RBN_20260629_0_L2A"),
+    ),
+    "saadiyat-island": CoverageProfile(
+        (collection_for("saadiyat-island").parcel_namespace,),
+        (54.386, 24.4886, 54.4812, 24.6019),
+        (54.391, 24.524, 54.431, 24.553),
+        (54.405, 24.534, 54.422, 24.548),
+        "saadiyat_project_sources.json",
     ),
 }
 
@@ -79,3 +87,10 @@ def reference_source_keys(profile):
         "research:" + hashlib.sha256(row["url"].encode()).hexdigest()[:40]
         for row in json.loads(registry.read_text(encoding="utf-8"))
     )
+
+
+def map_source_namespaces(territory_id):
+    profile = collection_for(territory_id)
+    return tuple(
+        profile.map_namespace(layer) for layer in ("district", "community", "street", "osm")
+    ) + reference_source_keys(profile_for(territory_id))

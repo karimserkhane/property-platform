@@ -310,6 +310,7 @@ class IngestionExecution(models.Model):
                         "references",
                         "property_presentations",
                         "imagery",
+                        "osm_bootstrap",
                     ],
                 ),
                 name="ingestion_execution_identity_valid",

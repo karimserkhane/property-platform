@@ -11,6 +11,7 @@ from django.utils import timezone
 
 from property_platform.modules.catalog.models import Building, Place
 
+from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .models import Capture, IngestionRun, PropertyMedia, PropertyPresentation, Source
 from .property_protocol import safe_url, validate_photo, validate_receipts
 
@@ -19,10 +20,11 @@ VERSION = "property-presentation-review-v1"
 TARGETS = {"building": Building, "place": Place}
 
 
-def registry():
+def registry(territory=DEFAULT_TERRITORY):
+    profile = collection_for(territory)
     return (
-        json.loads((ROOT / "property_presentations.json").read_text(encoding="utf-8")),
-        json.loads((ROOT / "property_media.json").read_text(encoding="utf-8")),
+        json.loads((ROOT / profile.presentation_registry).read_text(encoding="utf-8")),
+        json.loads((ROOT / profile.media_registry).read_text(encoding="utf-8")),
     )
 
 

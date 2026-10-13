@@ -99,13 +99,13 @@ def precollect_onwani(
         return _decode(payload, receipt, protocol=onwani)
 
     onwani.validate_metadata(acquire())
-    listing_params = {"where": onwani.WHERE, "returnIdsOnly": "true"}
+    listing_params = {"where": collector.profile.parcel_where, "returnIdsOnly": "true"}
     ids = onwani.object_ids(acquire(listing_params))
     for offset in range(0, len(ids), 100):
         batch_ids = ids[offset : offset + 100]
         batch = acquire(
             {
-                "where": onwani.WHERE,
+                "where": collector.profile.parcel_where,
                 "objectIds": ",".join(map(str, batch_ids)),
                 "outFields": onwani.FIELDS,
                 "returnGeometry": "true",
@@ -134,17 +134,19 @@ def precollect_map(
     if layer == "osm":
         try:
             payload, receipt = replay._acquire(
-                ("map", map_sources.OSM_URL, _params({"data": map_sources.OSM_QUERY})),
-                lambda: collector.fetch_url(map_sources.OSM_URL, {"data": map_sources.OSM_QUERY}),
+                ("map", map_sources.OSM_URL, _params({"data": collector.profile.osm_query})),
+                lambda: collector.fetch_url(
+                    map_sources.OSM_URL, {"data": collector.profile.osm_query}
+                ),
             )
             if receipt["http_status"] == 429:
                 # Do not bypass a provider's rate limit through a mirror.
                 return replay
             _decode(payload, receipt, protocol=map_sources)
         except onwani.SourceError:
-            acquire(map_sources.OSM_MIRROR, {"data": map_sources.OSM_QUERY})
+            acquire(map_sources.OSM_MIRROR, {"data": collector.profile.osm_query})
         return replay
-    url, where, geometry_type, fields = map_sources.LAYERS[layer]
+    url, where, geometry_type, fields = collector.profile.map_layers()[layer]
     meta, _ = acquire(url, {"f": "pjson"})
     if meta.get("geometryType") != geometry_type or not set(fields.split(",")).issubset(
         {f["name"] for f in meta.get("fields", [])}

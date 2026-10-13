@@ -40,6 +40,7 @@ class Collection(Schema):
     type: str
     features: list[Feature]
     truncated: bool
+    next_cursor: UUID | None = None
     classification_version: str
 
 
@@ -287,7 +288,11 @@ def context(request, bbox: str, territory: str | None = None):
     from property_platform.modules.publication.map_preview import map_context
 
     try:
-        return map_context(bounds)
+        from property_platform.modules.publication.coverage import map_source_namespaces
+
+        return map_context(
+            bounds, namespaces=map_source_namespaces(territory) if territory else None
+        )
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
 
@@ -323,7 +328,14 @@ def parse_bbox(value):
     response={200: Collection, 403: Error, 409: Error, 422: Error, 503: Error},
     operation_id="previewParcels",
 )
-def parcels(request, bbox: str, limit: int = 3000, q: str = "", territory: str | None = None):
+def parcels(
+    request,
+    bbox: str,
+    limit: int = 3000,
+    q: str = "",
+    territory: str | None = None,
+    after: UUID | None = None,
+):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
     bounds = parse_bbox(bbox)
@@ -345,6 +357,7 @@ def parcels(request, bbox: str, limit: int = 3000, q: str = "", territory: str |
             bbox=bounds,
             limit=limit,
             query=query,
+            after=after,
             namespaces=profile.parcel_namespaces if profile else None,
         )
     except DatabaseError:

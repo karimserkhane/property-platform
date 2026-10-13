@@ -5,7 +5,7 @@ Mise en place du 13 octobre 2026. Le code de collecte et d'orchestration est dan
 ## Sommaire
 
 - [Comprendre les éléments](#comprendre-les-éléments)
-- [Les neuf tâches disponibles](#les-neuf-tâches-disponibles)
+- [Les tâches disponibles](#les-tâches-disponibles)
 - [Premier démarrage](#premier-démarrage)
 - [Lancer et suivre un import dans l'interface](#lancer-et-suivre-un-import-dans-linterface)
 - [Configurer les horaires](#configurer-les-horaires)
@@ -31,7 +31,7 @@ La base métier reste **`property_platform`**, dans le service `db` déjà utili
 
 Cette configuration est locale : interface liée à `127.0.0.1`, mots de passe d'exemple et aucune publication sur Internet. Un environnement hébergé exige ses propres secrets, contrôles d'accès et sauvegardes.
 
-## Les neuf tâches disponibles
+## Les tâches disponibles
 
 Les horaires ci-dessous sont **préparés mais désactivés au premier enregistrement**, dans le fuseau **Asia/Dubai**. Commencer par une exécution manuelle ; activer ensuite les tâches souhaitées dans l'interface. Le démarrage Docker n'effectue pas d'import.
 
@@ -85,7 +85,7 @@ docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml
 docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion ps
 ```
 
-Le runner attend les services nécessaires, vérifie le schéma puis enregistre neuf déploiements. `Ready` signifie qu'il peut exécuter une tâche ; cela ne signifie pas que celle-ci a déjà importé des données. Ouvrir **[Prefect sur localhost:4200](http://localhost:4200)**. L'accueil peut être celui de l'interface v2.
+Le runner attend les services nécessaires, vérifie le schéma puis enregistre dix-sept déploiements. `Ready` signifie qu'il peut exécuter une tâche ; cela ne signifie pas que celle-ci a déjà importé des données. Ouvrir **[Prefect sur localhost:4200](http://localhost:4200)**. L'accueil peut être celui de l'interface v2.
 
 **Sur le poste de Karim, ces étapes ont déjà été effectuées le 13 octobre 2026.** La migration est appliquée et les services sont démarrés ; ouvrir l'interface suffit tant que Docker tourne.
 
@@ -269,3 +269,23 @@ Essais réels du 13 octobre : contrôle de disponibilité, parcelles, district, 
 **Limite amont observée :** Overpass principal répond HTTP 406 et le miroir enregistré ne répond pas dans le délai de lecture de 60 secondes. Le flow `map-osm` est bien installé, mais son rafraîchissement réel a échoué. La réponse 406 et ses dates sont conservées dans une acquisition en échec ; les bâtiments, lieux et rues OSM déjà validés restent affichés avec leur provenance précédente. Ne pas confondre `Ready` avec une source disponible ou un import réussi. Une reprise sera utile lorsque le fournisseur répondra de nouveau, ou après revue d'un autre endpoint autorisé.
 
 L'installation livre l'ordonnancement des sources existantes. Les traitements OCR/3D/IA, la collecte de prix et plans, les flux de disponibilité, les alertes externes et le stockage S3 restent des extensions à construire. Les tâches payantes demanderont une identité durable, une réservation de budget et une réconciliation avant tout réessai.
+
+
+## Extension Saadiyat et calendriers locaux
+
+Le registre comporte désormais 17 déploiements : les 9 précédents de Reem et 8 nouveaux pour Saadiyat. Les flows sont réutilisés avec le paramètre territory, tandis que captures, identités et registres restent propres à chaque île. Le guide [SAADIYAT.md](SAADIYAT.md) donne l'ordre des imports initiaux.
+
+| Déploiement Saadiyat | Cadence locale, Asia/Dubai |
+|---|---|
+| saadiyat-parcels-onwani | Dimanche 06:00 |
+| saadiyat-map-district | Dimanche 07:00 |
+| saadiyat-map-community | Dimanche 07:15 |
+| saadiyat-map-street | Dimanche 07:30 |
+| saadiyat-map-osm | Dimanche 07:45 |
+| saadiyat-project-references | Dimanche 08:00 |
+| saadiyat-property-presentations | Dimanche 08:30 |
+| saadiyat-osm-bootstrap | Manuel, aucun horaire |
+
+Les cadences récurrentes Saadiyat sont activées sur le poste de Karim, selon la préférence déjà donnée pour le week-end. Les horaires et activations existants de Reem sont conservés. Sur une installation neuve, les calendriers restent initialement désactivés afin de vérifier les premiers imports avant leur activation. L'import XML initial OSM, Sentinel et le contrôle de disponibilité restent manuels.
+
+Le bootstrap XML est une lecture limitée à quatre fenêtres enregistrées, 16 Mio par réponse et 64 Mio par lot. Il utilise les mêmes identités canoniques OSM que le connecteur Overpass, conserve les XML originaux et déduplique les recouvrements exacts. Une divergence de version/géométrie bloque le lot. L'API d'édition OSM ne sert pas de collecteur récurrent national ; les mises à jour continuent via le déploiement Overpass. Ses indisponibilités restent visibles dans Prefect et n'effacent pas les données acquises.

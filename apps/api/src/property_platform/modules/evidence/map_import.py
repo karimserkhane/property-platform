@@ -13,6 +13,7 @@ from property_platform.modules.catalog.models import AdministrativeArea, Buildin
 from property_platform.modules.catalog.services import geometry_from_rings, reconcile_map_record
 
 from . import map_sources as protocol
+from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .identity_resolution import resolve_administrative_area
 from .models import Capture, IngestionRun, MapObservation, QuarantinedObservation, Source
 from .onwani import SourceError, object_ids
@@ -48,8 +49,8 @@ def acquire(run, url, params, replay=None, acquisition=None):
     return protocol.decode(payload), capture
 
 
-def official_records(run, layer, acquisition=None):
-    url, where, geometry_type, fields = protocol.LAYERS[layer]
+def official_records(run, layer, acquisition=None, territory=DEFAULT_TERRITORY):
+    url, where, geometry_type, fields = collection_for(territory).map_layers()[layer]
     meta, _ = acquire(run, url, {"f": "pjson"}, acquisition=acquisition)
     if meta.get("geometryType") != geometry_type or not set(fields.split(",")).issubset(
         {f["name"] for f in meta.get("fields", [])}
@@ -138,14 +139,15 @@ def number(value, maximum, *, integer=False):
     )
 
 
-def osm_records(run, replay=None, acquisition=None):
+def osm_records(run, replay=None, acquisition=None, territory=DEFAULT_TERRITORY):
+    profile = collection_for(territory)
     from urllib.error import URLError
 
     try:
         data, capture = acquire(
             run,
             protocol.OSM_URL,
-            {"data": protocol.OSM_QUERY},
+            {"data": profile.osm_query},
             replay=replay,
             acquisition=acquisition,
         )
@@ -158,18 +160,27 @@ def osm_records(run, replay=None, acquisition=None):
         data, capture = acquire(
             run,
             protocol.OSM_MIRROR,
-            {"data": protocol.OSM_QUERY},
+            {"data": profile.osm_query},
             acquisition=acquisition,
         )
+    return osm_data_records(data, capture, territory=territory)
+
+
+def osm_data_records(data, capture, *, territory=DEFAULT_TERRITORY, xml_snapshot=False):
+    profile = collection_for(territory)
     elements = data.get("elements")
     if (
         not isinstance(elements, list)
         or not 1 <= len(elements) <= 20000
-        or not data.get("osm3s", {}).get("timestamp_osm_base")
+        or (not data.get("osm3s", {}).get("timestamp_osm_base") and not xml_snapshot)
     ):
         raise SourceError("Incomplete OSM snapshot")
     district = AdministrativeArea.objects.get(
-        active=True, kind="district", name="AL REEM ISLAND"
+        active=True,
+        kind="district",
+        name=profile.district_name,
+        source_namespace=profile.map_namespace("district"),
+        superseded_by__isnull=True,
     ).geometry
     staged, rejected, seen = [], [], set()
     for e in elements:
@@ -268,7 +279,8 @@ def osm_records(run, replay=None, acquisition=None):
     return staged, rejected
 
 
-def import_map_layer(*, layer, actor, replay=None, acquisition=None):
+def import_map_layer(*, layer, actor, replay=None, acquisition=None, territory=DEFAULT_TERRITORY):
+    profile = collection_for(territory)
     if connection.vendor != "postgresql":
         raise ValueError("Map acquisition requires PostGIS")
     if layer not in (*protocol.LAYERS, "osm"):
@@ -279,98 +291,25 @@ def import_map_layer(*, layer, actor, replay=None, acquisition=None):
             raise ValueError("Map acquisition already running")
     run = None
     try:
-        namespace = f"osm:reem:{layer}" if layer == "osm" else f"dmt:onwani:reem:{layer}"
+        namespace = profile.map_namespace(layer)
         source, _ = Source.objects.get_or_create(
             key=namespace,
             defaults={
-                "name": "OpenStreetMap — Al Reem (ODbL)"
+                "name": f"OpenStreetMap — {profile.name} (ODbL)"
                 if layer == "osm"
-                else f"DMT / Onwani — Al Reem {layer}",
-                "url": protocol.OSM_URL if layer == "osm" else protocol.LAYERS[layer][0],
+                else f"DMT / Onwani — {profile.name} {layer}",
+                "url": protocol.OSM_URL if layer == "osm" else profile.map_layers()[layer][0],
             },
         )
         run = IngestionRun.objects.create(
             source=source, actor=actor, connector_version=protocol.VERSION
         )
         staged, rejected = (
-            osm_records(run, replay=replay, acquisition=acquisition)
+            osm_records(run, replay=replay, acquisition=acquisition, territory=territory)
             if layer == "osm"
-            else official_records(run, layer, acquisition=acquisition)
+            else official_records(run, layer, acquisition=acquisition, territory=territory)
         )
-        if not staged:
-            raise SourceError("No valid map records; previous snapshot preserved")
-        summary = {
-            "created": 0,
-            "updated": 0,
-            "unchanged": 0,
-            "quarantined": len(rejected),
-            "records": len(staged),
-        }
-        with transaction.atomic():
-            for identity, attrs, capture in rejected:
-                QuarantinedObservation.objects.create(
-                    capture=capture,
-                    source_record_id=identity,
-                    field_path="elements",
-                    raw_attributes=attrs,
-                    reason="Invalid OSM geometry or metadata; not repaired",
-                )
-            for target, identity, values, shape, attrs, capture, url, published in staged:
-                canonical_id = (
-                    resolve_administrative_area(
-                        namespace=namespace,
-                        record_id=identity,
-                        values=values,
-                        geometry=shape,
-                        attributes=attrs,
-                        capture=capture,
-                        actor=actor,
-                    )
-                    if target == "administrative_area"
-                    else None
-                )
-                obj, action, before, after = reconcile_map_record(
-                    model=TARGETS[target],
-                    namespace=namespace,
-                    record_id=identity,
-                    values=values,
-                    geometry=shape,
-                    canonical_id=canonical_id,
-                )
-                if target == "administrative_area":
-                    from .models import AdministrativeAreaSourceAlias
-
-                    AdministrativeAreaSourceAlias.objects.filter(
-                        source_namespace=namespace,
-                        source_record_id=identity,
-                        capture=capture,
-                        active=True,
-                    ).update(canonical_revision=obj.revision)
-                summary[action] += 1
-                MapObservation.objects.create(
-                    **{target: obj},
-                    capture=capture,
-                    source_record_id=f"{target}:{identity}",
-                    source_url=url,
-                    raw_attributes=attrs,
-                    mapping_version=protocol.VERSION,
-                    record_sha256=hashlib.sha256(
-                        json.dumps(
-                            {"attributes": attrs, "geometry": json.loads(shape.geojson)},
-                            sort_keys=True,
-                        ).encode()
-                    ).hexdigest(),
-                    source_published_at=published,
-                    action=action,
-                    target_revision=obj.revision,
-                    before=before,
-                    after=after,
-                )
-            # Keep missing identities: absence in a map snapshot is not proof of demolition.
-            run.status = "quarantined" if rejected else "succeeded"
-            run.summary, run.finished_at = summary, timezone.now()
-            run.save(update_fields=["status", "summary", "finished_at"])
-        return run
+        return materialize_map_records(run, namespace, staged, rejected, actor=actor)
     except Exception as exc:
         if run:
             run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
@@ -379,3 +318,80 @@ def import_map_layer(*, layer, actor, replay=None, acquisition=None):
     finally:
         with connection.cursor() as cursor:
             cursor.execute("SELECT pg_advisory_unlock(%s)", [LOCK_KEY])
+
+
+def materialize_map_records(run, namespace, staged, rejected, *, actor):
+    if not staged:
+        raise SourceError("No valid map records; previous snapshot preserved")
+    summary = {
+        "created": 0,
+        "updated": 0,
+        "unchanged": 0,
+        "quarantined": len(rejected),
+        "records": len(staged),
+    }
+    with transaction.atomic():
+        for identity, attrs, capture in rejected:
+            QuarantinedObservation.objects.create(
+                capture=capture,
+                source_record_id=identity,
+                field_path="elements",
+                raw_attributes=attrs,
+                reason="Invalid OSM geometry or metadata; not repaired",
+            )
+        for target, identity, values, shape, attrs, capture, url, published in staged:
+            canonical_id = (
+                resolve_administrative_area(
+                    namespace=namespace,
+                    record_id=identity,
+                    values=values,
+                    geometry=shape,
+                    attributes=attrs,
+                    capture=capture,
+                    actor=actor,
+                )
+                if target == "administrative_area"
+                else None
+            )
+            obj, action, before, after = reconcile_map_record(
+                model=TARGETS[target],
+                namespace=namespace,
+                record_id=identity,
+                values=values,
+                geometry=shape,
+                canonical_id=canonical_id,
+            )
+            if target == "administrative_area":
+                from .models import AdministrativeAreaSourceAlias
+
+                AdministrativeAreaSourceAlias.objects.filter(
+                    source_namespace=namespace,
+                    source_record_id=identity,
+                    capture=capture,
+                    active=True,
+                ).update(canonical_revision=obj.revision)
+            summary[action] += 1
+            MapObservation.objects.create(
+                **{target: obj},
+                capture=capture,
+                source_record_id=f"{target}:{identity}",
+                source_url=url,
+                raw_attributes=attrs,
+                mapping_version=run.connector_version,
+                record_sha256=hashlib.sha256(
+                    json.dumps(
+                        {"attributes": attrs, "geometry": json.loads(shape.geojson)},
+                        sort_keys=True,
+                    ).encode()
+                ).hexdigest(),
+                source_published_at=published,
+                action=action,
+                target_revision=obj.revision,
+                before=before,
+                after=after,
+            )
+        # Keep missing identities: absence in a map snapshot is not proof of demolition.
+        run.status = "quarantined" if rejected else "succeeded"
+        run.summary, run.finished_at = summary, timezone.now()
+        run.save(update_fields=["status", "summary", "finished_at"])
+    return run
