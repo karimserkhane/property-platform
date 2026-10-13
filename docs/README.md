@@ -3,6 +3,7 @@
 - [Étude produit](product/ETUDE_PRODUIT_PROPERTY_PLATFORM.md)
 - [Stratégie produit](product/STRATEGIE_PRODUIT_PROPERTY_PLATFORM.md)
 - [Benchmark concurrentiel actualisé](product/BENCHMARK_CONCURRENTIEL.md)
+- [Inventaire des sources publiques et ouvertes UAE : accès, couverture et priorités](product/SOURCES_DONNEES_UAE.md)
 - [Design de l'accueil et première expérience](product/DESIGN_ACCUEIL.md)
 - [Identité visuelle et crédits photos](engineering/VISUAL_DESIGN.md)
 - [Nom générique, marque configurable et reprise locale](engineering/BRANDING.md)

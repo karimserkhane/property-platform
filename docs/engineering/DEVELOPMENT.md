@@ -6,6 +6,8 @@ Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte loc
 
 **Marché ADREC :** [ADREC.md](ADREC.md) explique les ventes récentes de Reem et Saadiyat, les indices, leurs trois pipelines Prefect et les nouvelles tables PostgreSQL. Ces prix décrivent des ventes passées, pas des unités actuellement disponibles.
 
+**Sources à ajouter :** [SOURCES_DONNEES_UAE.md](../product/SOURCES_DONNEES_UAE.md) répertorie les autorités et jeux de données pertinents dans les sept émirats, les cinq API d’Ajman vérifiées, les accès à qualifier et l’ordre conseillé des prochains pipelines. Cet inventaire n’active pas de nouvelle collecte.
+
 **Prochaine extension des données immobilières :** [PROPERTY_DATA_PIPELINES.md](PROPERTY_DATA_PIPELINES.md) décrit les modèles et extracteurs supplémentaires pour livraison annoncée, typologies, offres et plans de paiement. Programmer une collecte est maintenant possible avec Prefect ; ces nouvelles informations commerciales ne sont pas encore extraites automatiquement.
 
 **Identité technique actualisée le 12 octobre 2026 :** le paquet Python est `property_platform`, les paquets JavaScript utilisent `@property-platform/*`, et la base locale s'appelle `property_platform`. Si ton ancienne installation utilise encore d'autres noms, suivre d'abord [la reprise contrôlée de la base](BRANDING.md#reprendre-une-ancienne-base-locale-sous-le-nouveau-nom). Modifier seulement les variables PostgreSQL ne renomme pas une base déjà stockée. Sur le poste où la reprise a déjà été vérifiée, suivre les commandes ordinaires ci-dessous sans la refaire.
