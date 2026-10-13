@@ -2,6 +2,8 @@
 
 Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte locale des parcelles, rues, secteurs, empreintes de bâtiments et lieux, sources consultables, deux aperçus satellite, API de contrôle de santé, base PostGIS et imports manuels avec provenance. Unités, prix, dossiers publics approuvés, authentification, bibliothèque de médias et traitements IA arriveront avec les fonctionnalités suivantes.
 
+**Prochaine extension des données immobilières :** [PROPERTY_DATA_PIPELINES.md](PROPERTY_DATA_PIPELINES.md) décrit comment alimenter les fiches avec livraison annoncée, typologies, offres et plans de paiement, puis programmer leur actualisation. Il distingue les imports manuels déjà présents des modèles, extracteurs et tâches à développer. Ce cadrage n'a créé aucune table et n'a lancé aucune collecte ou mise à jour de base.
+
 **Identité technique actualisée le 12 octobre 2026 :** le paquet Python est `property_platform`, les paquets JavaScript utilisent `@property-platform/*`, et la base locale s'appelle `property_platform`. Si ton ancienne installation utilise encore d'autres noms, suivre d'abord [la reprise contrôlée de la base](BRANDING.md#reprendre-une-ancienne-base-locale-sous-le-nouveau-nom). Modifier seulement les variables PostgreSQL ne renomme pas une base déjà stockée. Sur le poste où la reprise a déjà été vérifiée, suivre les commandes ordinaires ci-dessous sans la refaire.
 
 **Pour changer le nom affiché :** ouvrir `C:\Users\Karim\Repositories\property-platform\packages\branding\src\brand.ts` et modifier `displayName`. Le [guide de marque](BRANDING.md) explique le nom, le symbole, la reconstruction et les identités métier à conserver.

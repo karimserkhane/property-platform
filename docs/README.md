@@ -16,6 +16,7 @@
 - [Versions des outils et compatibilités](engineering/TOOLCHAIN.md)
 - [Multilingue et RTL](engineering/INTERNATIONALIZATION.md)
 - [Collecte directe, provenance des données et audit](engineering/DATA_PROVENANCE.md)
+- [Pipelines pour les fiches de projets : sources, modèles et ordre de réalisation](engineering/PROPERTY_DATA_PIPELINES.md)
 - [Base de données : noms, intégrité et évolution](engineering/DATABASE_DESIGN.md)
 - [Revue critique de structure](engineering/STRUCTURE_REVIEW.md)
 - [Architecture précédente, archivée](archive/ARCHITECTURE_STACK_PROPERTY_PLATFORM.md)
