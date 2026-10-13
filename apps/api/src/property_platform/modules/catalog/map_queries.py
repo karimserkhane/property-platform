@@ -28,10 +28,14 @@ def map_rows(target, bbox, limit=3000):
         if target == "building":
             fields += ["height_m", "levels"]
         records = model.objects.filter(active=True, geometry__intersects=envelope)
+        if target == "administrative_area":
+            records = records.filter(superseded_by__isnull=True)
         if target == "place":
             records = records.annotate(
                 parcel_ids=ArraySubquery(
-                    Parcel.objects.filter(geometry__covers=OuterRef("geometry"))
+                    Parcel.objects.filter(
+                        geometry__covers=OuterRef("geometry"), superseded_by__isnull=True
+                    )
                     .order_by("id")
                     .values("id")[:20]
                 )

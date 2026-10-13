@@ -3,12 +3,15 @@
 import base64
 from urllib.parse import urlparse
 
-from django.db.models import F, Prefetch
+from django.db.models import Exists, F, OuterRef, Prefetch, Q
+from django.db.models.functions import Coalesce, Substr
 
 from .models import (
+    AdministrativeAreaSourceAlias,
     ImageryScene,
     MapObservation,
     ParcelObservation,
+    ParcelSourceAlias,
     PropertyMedia,
     PropertyPresentation,
     ResearchReference,
@@ -39,12 +42,45 @@ def imagery_scenes(scene_ids=None):
     ]
 
 
+def _parcel_observations(parcel_ids):
+    accepted = ParcelSourceAlias.objects.filter(
+        active=True,
+        parcel_id=OuterRef("parcel_id"),
+        source_namespace=OuterRef("parcel__source_namespace"),
+        source_record_id=OuterRef("source_record_id"),
+    )
+    replacements = ParcelSourceAlias.objects.filter(
+        active=True,
+        parcel_id__in=parcel_ids,
+        parcel_id=OuterRef("parcel__superseded_by_id"),
+        superseded_parcel_id=OuterRef("parcel_id"),
+        capture_id=OuterRef("capture_id"),
+        source_namespace=OuterRef("parcel__source_namespace"),
+        source_record_id=OuterRef("source_record_id"),
+    )
+    return (
+        ParcelObservation.objects.filter(
+            capture__run__source__key=F("parcel__source_namespace"),
+            capture__run__status__in=["succeeded", "quarantined"],
+        )
+        .annotate(
+            _accepted_alias=Exists(accepted),
+            _accepted_replacement=Exists(replacements),
+            _canonical_id=Coalesce("parcel__superseded_by_id", "parcel_id"),
+        )
+        .filter(
+            Q(parcel_id__in=parcel_ids)
+            & (Q(source_record_id=F("parcel__source_record_id")) | Q(_accepted_alias=True))
+            | Q(_accepted_replacement=True)
+        )
+    )
+
+
 def parcel_provenance(*, parcel_id, source_key):
     observation = (
-        ParcelObservation.objects.filter(
-            parcel_id=parcel_id,
+        _parcel_observations([parcel_id])
+        .filter(
             capture__run__source__key=source_key,
-            capture__run__status__in=["succeeded", "quarantined"],
         )
         .order_by("-capture__fetched_at", "-id")
         .values(
@@ -84,9 +120,7 @@ PARCEL_FIELDS = (
 
 def parcel_attributes(parcel_id):
     observation = (
-        ParcelObservation.objects.filter(
-            parcel_id=parcel_id, capture__run__status__in=["succeeded", "quarantined"]
-        )
+        _parcel_observations([parcel_id])
         .order_by("-capture__fetched_at", "-id")
         .values("raw_attributes")
         .first()
@@ -96,14 +130,54 @@ def parcel_attributes(parcel_id):
 
 
 def map_provenances(target, ids):
-    rows = (
-        MapObservation.objects.filter(
-            **{f"{target}_id__in": ids}, capture__run__status__in=["succeeded", "quarantined"]
+    observations = MapObservation.objects.filter(
+        **{f"{target}_id__in": ids}, capture__run__status__in=["succeeded", "quarantined"]
+    ).annotate(_canonical_id=F(f"{target}_id"))
+    if target == "administrative_area":
+        accepted = AdministrativeAreaSourceAlias.objects.filter(
+            active=True,
+            administrative_area_id=OuterRef("administrative_area_id"),
+            source_namespace=OuterRef("administrative_area__source_namespace"),
+            source_record_id=OuterRef("_provider_oid"),
         )
-        .order_by(f"{target}_id", "-capture__fetched_at", "-id")
-        .distinct(f"{target}_id")
+        replacements = AdministrativeAreaSourceAlias.objects.filter(
+            active=True,
+            administrative_area_id__in=ids,
+            administrative_area_id=OuterRef("administrative_area__superseded_by_id"),
+            superseded_area_id=OuterRef("administrative_area_id"),
+            capture_id=OuterRef("capture_id"),
+            source_namespace=OuterRef("administrative_area__source_namespace"),
+            source_record_id=OuterRef("_provider_oid"),
+        )
+        observations = (
+            MapObservation.objects.filter(
+                capture__run__status__in=["succeeded", "quarantined"],
+                capture__run__source__key=F("administrative_area__source_namespace"),
+            )
+            .annotate(
+                _provider_oid=Substr("source_record_id", len("administrative_area:") + 1),
+                _canonical_id=Coalesce(
+                    "administrative_area__superseded_by_id", "administrative_area_id"
+                ),
+            )
+            .annotate(
+                _accepted_alias=Exists(accepted),
+                _accepted_replacement=Exists(replacements),
+            )
+            .filter(
+                Q(administrative_area_id__in=ids)
+                & (
+                    Q(_provider_oid=F("administrative_area__source_record_id"))
+                    | Q(_accepted_alias=True)
+                )
+                | Q(_accepted_replacement=True)
+            )
+        )
+    rows = (
+        observations.order_by("_canonical_id", "-capture__fetched_at", "-id")
+        .distinct("_canonical_id")
         .values(
-            f"{target}_id",
+            "_canonical_id",
             "source_url",
             "source_published_at",
             "ingested_at",
@@ -116,7 +190,7 @@ def map_provenances(target, ids):
         )
     )
     return {
-        str(row[f"{target}_id"]): {
+        str(row["_canonical_id"]): {
             "url": row["source_url"],
             "name": row["capture__run__source__name"],
             "retrieved_at": row["capture__fetched_at"],
@@ -171,14 +245,10 @@ def research_references(source_keys=None):
 
 def parcel_sources(parcel_ids):
     rows = (
-        ParcelObservation.objects.filter(
-            parcel_id__in=parcel_ids,
-            capture__run__source__key=F("parcel__source_namespace"),
-            capture__run__status__in=["succeeded", "quarantined"],
-        )
-        .order_by("parcel_id", "-capture__fetched_at", "-id")
-        .distinct("parcel_id")
-        .values_list("parcel_id", "capture__run__source__url", "capture__run__source__name")
+        _parcel_observations(parcel_ids)
+        .order_by("_canonical_id", "-capture__fetched_at", "-id")
+        .distinct("_canonical_id")
+        .values_list("_canonical_id", "capture__run__source__url", "capture__run__source__name")
     )
     return {
         str(identity): {"url": url if urlparse(url).scheme == "https" else None, "name": name}

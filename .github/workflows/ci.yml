@@ -72,3 +72,24 @@ jobs:
       - run: docker compose -f infra/local/compose.yaml config --quiet
       - run: docker build -t property-platform-api-ci -f apps/api/Dockerfile .
       - run: docker run --rm -e DJANGO_SETTINGS_MODULE=property_platform.config.settings.local property-platform-api-ci python manage.py check
+
+  ingestion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PREFECT_HOME: ${{ github.workspace }}/.cache/prefect
+      PREFECT_SERVER_ALLOW_EPHEMERAL_MODE: "false"
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          version: "0.13.0"
+          python-version: "3.14.8"
+      - run: uv lock --project apps/ingestion --check
+      - run: uv sync --project apps/ingestion --frozen
+      - run: uv run --project apps/ingestion ruff check apps/ingestion
+      - run: uv run --project apps/ingestion ruff format --check apps/ingestion
+      - run: uv run --project apps/ingestion pytest apps/ingestion/tests -c apps/ingestion/pyproject.toml
+      - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion config --quiet
+      - run: docker build -t property-platform-ingestion-ci -f apps/ingestion/Dockerfile .
+      - run: docker run --rm --network none property-platform-ingestion-ci python -m property_platform_ingestion datasets

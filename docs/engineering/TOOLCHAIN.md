@@ -25,10 +25,13 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | dj-database-url | 3.1.2 | Dernière version stable vérifiée |
 | psycopg / psycopg-binary | 3.3.6 | Dernière version stable vérifiée |
 | Gunicorn | 26.2.0 | Mise à jour du serveur WSGI |
+| Prefect | 3.8.8 | Orchestration, serveur/UI et runner ; uniquement dans `apps/ingestion` |
+| HTTPX | 0.28.1 | Transport HTTPS borné des collecteurs ; uniquement dans `apps/ingestion` |
 | pytest / pytest-django | 9.1.1 / 4.14.0 | Dernières versions stables vérifiées |
 | Ruff / Import Linter | 0.17.0 / 2.15 | Dernières versions stables vérifiées |
 | Hatchling | 1.32.4 | Backend de construction Python fixé |
 | PostgreSQL / PostGIS | Tag 18-3.6 | Dernier couple stable fourni par l'image PostGIS ; versions mineures du tag évolutives |
+| PostgreSQL des métadonnées Prefect | Image 18.6-trixie | Base distincte `prefect`, sans PostGIS ni port publié vers l'hôte |
 | Base des images applicatives | Debian Trixie | Node 26.11.1-trixie-slim / Python 3.14.8-slim-trixie |
 | GitHub checkout / setup-node | 7.0.1 / 7.1.0 | Releases stables vérifiées |
 | pnpm action-setup / setup-uv | 6.1.0 / 10.3.0 | Releases stables vérifiées via l'API GitHub |
@@ -52,6 +55,24 @@ Le dépôt ne gère pas les installations système de Git, Docker Desktop ni l'�
 ## PostgreSQL : données existantes
 
 Le passage de 17 à 18 est une migration majeure, pas une simple mise à jour de fichiers. Le Compose crée un volume postgres18-data monté sous /var/lib/postgresql. L'ancien volume postgres-data n'est ni supprimé ni réutilisé directement. Les données existantes demandent un export/restauration ou pg_upgrade validé séparément. Voir [le lancement détaillé](DEVELOPMENT.md).
+
+## Orchestration isolée — 13 octobre 2026
+
+**Prefect 3.8.8 et HTTPX 0.28.1** sont les dernières versions stables vérifiées dans les métadonnées officielles PyPI pour cet ajout. Elles sont fixées dans [apps/ingestion/pyproject.toml](../../apps/ingestion/pyproject.toml) et résolues avec leurs dépendances dans [apps/ingestion/uv.lock](../../apps/ingestion/uv.lock). Prefect annonce Python `>=3.10,<3.15`, dont Python 3.14 ; le runtime reste **Python 3.14.8** pour respecter aussi la compatibilité Django. Cet ajout ne remplace pas les compilateurs et leurs dépendances de compatibilité web. Sources : [Prefect 3.8.8](https://pypi.org/project/prefect/3.8.8/), [HTTPX 0.28.1](https://pypi.org/project/httpx/0.28.1/).
+
+L'image [apps/ingestion/Dockerfile](../../apps/ingestion/Dockerfile) utilise `python:3.14.8-slim-trixie` et `ghcr.io/astral-sh/uv:0.13.0`. Elle installe le paquet API local comme dépendance, ainsi que les bibliothèques système GDAL/GEOS/PROJ nécessaires à ses services géographiques. Prefect et HTTPX ne sont pas ajoutés au runtime web/API. Rasterio, OCR et rendu 3D restent hors de cette image.
+
+Le profil [infra/local/compose.ingestion.yaml](../../infra/local/compose.ingestion.yaml) utilise cette image pour le serveur Prefect et le runner, ainsi que `postgres:18.6-trixie` pour leurs métadonnées séparées. La base métier garde son image PostGIS et son volume existant. L'accès UI local est [localhost:4200](http://localhost:4200) ; aucune instance Prefect Cloud ni ressource S3 n'est créée. Le guide [INGESTION.md](INGESTION.md) distingue enregistrement des jobs, activation d'un horaire et véritable exécution d'un import.
+
+Les contrôles ingestion vérifient le lock, Ruff, les tests de transport sans réseau, les checkpoints et la conservation des horaires modifiés dans l'UI ; la CI construit aussi son image et liste les déploiements sans réseau. Les tests de passerelle et de mutation métier nécessitent PostGIS réel dans la suite API. Un build réussi ne prouve pas qu'une source distante est disponible ni qu'un import a été exécuté. La vérification TLS reste active ; un certificat supplémentaire doit être identifié et approuvé avant de configurer le secret de build facultatif. [Documentation du serveur Prefect dans Docker](https://docs.prefect.io/v3/how-to-guides/self-hosted/server-docker).
+
+### Autorité HTTPS supplémentaire dans Docker
+
+Les trois Dockerfiles web, API et ingestion acceptent le même secret BuildKit **`platform_extra_ca`**, facultatif. Il contient uniquement un certificat **public** d'autorité déjà approuvé par l'opérateur. Le build l'ajoute au magasin Debian avec `update-ca-certificates` ; sans ce secret, le magasin standard reste utilisé. La clé privée n'est jamais fournie et le certificat local n'est pas versionné dans Git.
+
+Sur le poste Karim, les connexions Windows vers PyPI, pythonhosted et le registre npm ont une chaîne vérifiée vers l'autorité d'inspection HTTPS Avast déjà présente dans les magasins approuvés. Le fichier ignoré `C:\Users\Karim\Repositories\property-platform\.cache\validation\ingestion-trusted-ca.crt` contient seulement ce certificat public ; voir [le parcours de build dans INGESTION.md](INGESTION.md). Une nouvelle autorité ou un renouvellement exige une nouvelle vérification, pas la réutilisation aveugle d'un certificat trouvé dans une erreur. Le cache BuildKit ne dépend pas du contenu du secret : après remplacement du certificat, invalider la couche correspondante ou reconstruire sans cache.
+
+Le web utilise **`NODE_USE_SYSTEM_CA=1`** et **`SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt`** pour Node 26 et le client embarqué de pnpm 12. Python/uv utilise **`UV_SYSTEM_CERTS=true`** ; les collecteurs HTTPS utilisent un contexte SSL système avec validation du certificat et du nom d'hôte. Les contrôles d'intégrité, de provenance des paquets et de délai de publication de pnpm restent actifs. Aucun `strict-ssl=false`, `NODE_TLS_REJECT_UNAUTHORIZED=0` ni mode HTTP non vérifié n'est utilisé. Cette adaptation ne modifie ni les versions verrouillées, ni les permissions des fichiers ou propriétaires de caches SWC. [Certificats système Node.js](https://nodejs.org/api/cli.html#node_use_system_ca1), [certificats TLS uv](https://docs.astral.sh/uv/concepts/authentication/certificates/).
 
 ## Vérifications et limites
 

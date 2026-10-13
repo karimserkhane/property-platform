@@ -8,6 +8,7 @@ from django.utils import timezone
 from property_platform.modules.catalog.services import geometry_from_rings, reconcile_parcel
 
 from . import onwani
+from .identity_resolution import resolve_parcel
 from .models import (
     AuditEvent,
     Capture,
@@ -21,7 +22,7 @@ from .models import (
 LOCK_KEY = 716548219
 
 
-def import_onwani(*, actor):
+def import_onwani(*, actor, acquisition=None):
     if connection.vendor != "postgresql":
         raise ValueError("Onwani import requires PostgreSQL/PostGIS")
     with connection.cursor() as cursor:
@@ -39,7 +40,7 @@ def import_onwani(*, actor):
         )
 
         def acquire(params=None):
-            payload, receipt = onwani.fetch(params)
+            payload, receipt = (acquisition or onwani.fetch)(params)
             # Preserve the exact bounded response before parsing or validating its contents.
             capture = Capture.objects.create(
                 run=run,
@@ -115,9 +116,27 @@ def import_onwani(*, actor):
                     reason="Invalid geometry; previous catalogue value preserved if present",
                 )
             for record, geometry, capture, index, digest in staged:
-                parcel, action, before, after = reconcile_parcel(
-                    namespace=onwani.SOURCE_KEY, record=record, geometry=geometry
+                canonical_id = resolve_parcel(
+                    namespace=onwani.SOURCE_KEY,
+                    record=record,
+                    geometry=geometry,
+                    capture=capture,
+                    actor=actor,
                 )
+                parcel, action, before, after = reconcile_parcel(
+                    namespace=onwani.SOURCE_KEY,
+                    record=record,
+                    geometry=geometry,
+                    canonical_id=canonical_id,
+                )
+                from .models import ParcelSourceAlias
+
+                ParcelSourceAlias.objects.filter(
+                    source_namespace=onwani.SOURCE_KEY,
+                    source_record_id=record["record_id"],
+                    capture=capture,
+                    active=True,
+                ).update(canonical_revision=parcel.revision)
                 observation = ParcelObservation.objects.create(
                     parcel=parcel,
                     capture=capture,

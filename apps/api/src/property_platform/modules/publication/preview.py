@@ -33,6 +33,7 @@ def detail(parcel_id, namespaces=None):
     parcel = parcel_identity(namespaces=namespaces, parcel_id=parcel_id)
     if parcel is None:
         return None
+    parcel_id = parcel["id"]
     provenance = parcel_provenance(parcel_id=parcel_id, source_key=parcel.pop("source_namespace"))
     if provenance is None:
         return None

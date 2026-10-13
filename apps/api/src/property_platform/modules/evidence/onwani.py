@@ -9,7 +9,7 @@ from urllib.request import Request, urlopen
 
 SOURCE_KEY = "dmt:onwani:smarthub:plot:adm:reem"
 BASE_URL = "https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/0"
-VERSION = "onwani-reem-v2"
+VERSION = "onwani-reem-v3"
 WHERE = "DISTRICTENG = 'AL REEM ISLAND' AND MUNICIPALITYENG = 'ADM'"
 FIELDS = (
     "OBJECTID,PLOTID,GISID,SectorNumber_PlotID,DISTRICTENG,DISTRICTID,"

@@ -1,9 +1,15 @@
 FROM ghcr.io/astral-sh/uv:0.13.0 AS uv
 FROM python:3.14.8-slim-trixie
 
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 UV_LINK_MODE=copy
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 UV_LINK_MODE=copy UV_SYSTEM_CERTS=true
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends libgdal36 libgeos-c1t64 libproj25 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libgdal36 libgeos-c1t64 libproj25 && rm -rf /var/lib/apt/lists/*
+# Optional public CA already approved by the operator; TLS verification stays enabled.
+RUN --mount=type=secret,id=platform_extra_ca \
+    if [ -s /run/secrets/platform_extra_ca ]; then \
+      cp /run/secrets/platform_extra_ca /usr/local/share/ca-certificates/platform-extra-ca.crt \
+      && update-ca-certificates; \
+    fi
 COPY --from=uv /uv /usr/local/bin/uv
 COPY apps/api/pyproject.toml apps/api/uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project

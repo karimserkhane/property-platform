@@ -10,6 +10,9 @@ class Parcel(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     source_namespace = models.CharField(max_length=120)
     source_record_id = models.CharField(max_length=80)
+    superseded_by = models.ForeignKey(
+        "self", null=True, on_delete=models.PROTECT, related_name="superseded_parcels"
+    )
     official_plot_id = models.CharField(max_length=80, blank=True)
     code = models.CharField(max_length=160, blank=True)
     municipality = models.CharField(max_length=80)
@@ -39,6 +42,11 @@ class Parcel(models.Model):
             models.CheckConstraint(
                 condition=models.Q(source_namespace__regex=r"\S", source_record_id__regex=r"\S"),
                 name="parcel_source_identity_nonblank",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(superseded_by__isnull=True)
+                | ~models.Q(id=models.F("superseded_by")),
+                name="parcel_supersession_not_self",
             ),
         ]
 
@@ -114,6 +122,17 @@ class Place(MapIdentity):
 
 class AdministrativeArea(MapIdentity):
     geometry = models.MultiPolygonField(srid=4326)
+    superseded_by = models.ForeignKey(
+        "self", null=True, on_delete=models.PROTECT, related_name="superseded_areas"
+    )
 
     class Meta(MapIdentity.Meta):
         db_table = "administrative_area"
+        constraints = [
+            *MapIdentity.Meta.constraints,
+            models.CheckConstraint(
+                condition=models.Q(superseded_by__isnull=True)
+                | ~models.Q(id=models.F("superseded_by")),
+                name="administrative_area_supersession_not_self",
+            ),
+        ]

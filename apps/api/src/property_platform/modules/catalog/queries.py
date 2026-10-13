@@ -18,7 +18,7 @@ def parcel_counts(namespaces):
         with connection.cursor() as cursor:
             cursor.execute("SET LOCAL statement_timeout='2000ms'")
         return dict(
-            Parcel.objects.filter(source_namespace__in=namespaces)
+            Parcel.objects.filter(source_namespace__in=namespaces, superseded_by__isnull=True)
             .values("source_namespace")
             .annotate(count=Count("id"))
             .values_list("source_namespace", "count")
@@ -28,7 +28,7 @@ def parcel_counts(namespaces):
 def parcel_features(*, bbox, limit, query="", namespace=None, namespaces=None):
     envelope = Polygon.from_bbox(bbox)
     envelope.srid = 4326
-    records = Parcel.objects.filter(geometry__intersects=envelope)
+    records = Parcel.objects.filter(geometry__intersects=envelope, superseded_by__isnull=True)
     if namespace is not None:
         records = records.filter(source_namespace=namespace)
     if namespaces is not None:
@@ -72,6 +72,14 @@ def parcel_identity(*, parcel_id, namespace=None, namespaces=None):
         records = records.filter(source_namespace=namespace)
     if namespaces is not None:
         records = records.filter(source_namespace__in=namespaces)
+    # Preserve links to a provider-renumbering duplicate without publishing it twice.
+    canonical_id = records.values_list("superseded_by_id", flat=True).first()
+    if canonical_id is not None:
+        records = Parcel.objects.filter(id=canonical_id, superseded_by__isnull=True)
+        if namespace is not None:
+            records = records.filter(source_namespace=namespace)
+        if namespaces is not None:
+            records = records.filter(source_namespace__in=namespaces)
     return (
         records.annotate(area=Area(Cast("geometry", MultiPolygonField(srid=4326, geography=True))))
         .values(

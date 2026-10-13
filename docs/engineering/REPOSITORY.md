@@ -29,7 +29,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 ├── .github/                         Automatisation du travail et des vérifications sur GitHub
 │   └── workflows/                   Procédures de contrôle exécutées par GitHub Actions
 │       └── ci.yml                    Contrôles automatiques exécutés sur GitHub
-├── apps/                            Applications exécutables : site et backend, puis futur mobile
+├── apps/                            Applications exécutables : site, backend et ingestion, puis futur mobile
 │   ├── web/                          Application web Next.js
 │   │   ├── package.json              Dépendances et commandes propres au site
 │   │   ├── next.config.ts            Configuration Next.js et intégration multilingue
@@ -61,6 +61,25 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   └── proxy.ts             Traitement du routage multilingue des requêtes
 │   │   └── tests/                   Vérifications automatisées de l'interface web
 │   │       └── i18n.test.mjs        Contrôles des langues, textes et règles de routage
+│   ├── ingestion/                    Collectes et imports programmés, exécutés séparément du site/API
+│   │   ├── pyproject.toml            Prefect, HTTPX et dépendance locale au paquet métier Django
+│   │   ├── uv.lock                   Versions Python résolues pour le runtime d'ingestion
+│   │   ├── Dockerfile                Image d'ingestion avec bibliothèques GIS, sans runtime raster/OCR
+│   │   ├── src/property_platform_ingestion/   Code de planification et acquisition
+│   │   │   ├── __main__.py           Commandes serve, check et datasets
+│   │   │   ├── registry.py           Neuf déploiements, portées fixes et identités d'exécution
+│   │   │   ├── deployments.py        Enregistrement et conservation des horaires modifiés dans l'UI
+│   │   │   ├── flows.py              Flows/tâches Prefect : exécuter, superviser et signaler les résultats
+│   │   │   ├── runtime.py            Sous-processus Django borné, hors du thread async de Prefect
+│   │   │   ├── domain.py             Assemblage des collecteurs et appel de la passerelle métier
+│   │   │   ├── storage.py            Checkpoints privés de reçus pour rejouer une acquisition
+│   │   │   └── collectors/           Transport HTTPS borné et adaptateurs sans mutation de base
+│   │   │       ├── http.py           URLs enregistrées, certificats, cadence et limites de réponse
+│   │   │       ├── map.py            Transport des protocoles Onwani parcelles et couches ArcGIS/OSM
+│   │   │       ├── references.py     Captures des références publiques examinées
+│   │   │       ├── properties.py     Reçus des présentations et photographies autorisées
+│   │   │       └── snapshots.py      Précollecte puis replay exact, sans réseau dans la transaction SQL
+│   │   └── tests/                    Contrôles sans réseau : collecte, reprise et horaires de déploiement
 │   └── api/                          Application backend Django
 │       ├── manage.py                 Entrée des commandes Django
 │       ├── pyproject.toml            Dépendances Python et configuration des contrôles
@@ -99,7 +118,8 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── project_sources.json  Registre de références à collecter
 │       │       │   │   ├── property_protocol.py, property_import.py  Reçus validés et premières présentations de biens
 │       │       │   │   ├── property_presentations.json, property_media.json  Identités examinées et médias autorisés
-│       │       │   │   ├── services.py  Orchestration de l'import et de sa transaction
+│       │       │   │   ├── services.py  Import officiel des parcelles et transaction propriétaire
+│       │       │   │   ├── orchestration.py  Passerelle d'import, identité durable et résultat atomique
 │       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
 │       │       │   │   ├── migrations/  Évolution du schéma des preuves
 │       │       │   │   ├── management/commands/  Imports Onwani, couches Reem, références et satellite
@@ -128,7 +148,8 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       └── src/brand.ts              Nom affiché et chemin du symbole web
 ├── infra/                           Configuration des environnements d'exécution de la plateforme
 │   └── local/                       Services et stockage nécessaires sur le poste de développement
-│       └── compose.yaml              Services API et PostGIS, réseau et volume local
+│       ├── compose.yaml              Services API et PostGIS, réseau et volume local
+│       └── compose.ingestion.yaml    Profil facultatif : serveur Prefect, métadonnées PostgreSQL et runner
 ├── docs/                            Cadrage produit, décisions d'architecture et guides de travail
 │   ├── README.md                     Index et enchaînement des décisions
 │   ├── product/                     Besoins utilisateurs, marché et stratégie du produit
@@ -142,6 +163,8 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   └── engineering/                 Guides pour installer, développer et maintenir le projet
 │       ├── REPOSITORY.md              Ce guide de structure et de responsabilités
 │       ├── DEVELOPMENT.md             Commandes de démarrage et explications
+│       ├── INGESTION.md               Interface Prefect, activation des horaires et exécution des imports
+│       ├── PROPERTY_DATA_PIPELINES.md  Extension prévue des informations commerciales des fiches
 │       ├── REEM_MAP.md                Couverture, sources et correspondance avec le HTML
 │       ├── VISUAL_DESIGN.md           Thème de l'accueil, crédits photos et animation accessible
 │       ├── BRANDING.md               Identité technique stable, marque configurable et reprise locale
@@ -194,9 +217,23 @@ Le domaine immobilier utilise le schéma SQL `real_estate` et la table `real_est
 
 Le `search_path` de la connexion Django est fixe : `public,real_estate,evidence`. Les modèles utilisent des noms de tables simples et uniques sur ce chemin, ce qui permet de conserver le backend Django/PostGIS standard, son introspection et ses outils de test. Les migrations SQL utilisent des noms explicitement qualifiés. Ne pas créer dans `public` ou un autre schéma du chemin une table homonyme qui masquerait une table métier ; les migrations refusent ces collisions. Les rôles de production ne doivent pas pouvoir créer arbitrairement de nouveaux objets sur ce chemin. Un nouveau schéma ou nom de table nécessite une revue de ces règles, des permissions, des migrations et des tests.
 
+Les UUID internes de parcelles et communautés survivent au renouvellement des `OBJECTID` Onwani. `evidence/identity_resolution.py` possède les décisions typées de rapprochement, leur capture et révocation ; les services `catalog` possèdent la mutation de l'objet canonique et `superseded_by`. Les décisions ne suppriment ni captures ni anciennes identités. Les queries propriétaires excluent les objets remplacés des listes et résolvent leurs anciens liens. Un rapprochement requiert une correspondance exacte non ambiguë des identifiants métier/attributs et de la géométrie ; les noms seuls ou distances ne suffisent pas. Les collecteurs ne prennent pas ces décisions.
+
 Lors de l'ajout d'un modèle métier, une migration générée peut créer sa table dans `public`, premier schéma du chemin : prévoir explicitement son placement dans le schéma propriétaire avec des opérations SQL et un état Django cohérent. Le test PostGIS `test_domain_tables_have_unique_names_and_their_owned_schema` contrôle l'emplacement effectif des modèles gérés de `catalog` et `evidence` et l'unicité de leurs noms. Une nouvelle table ou un nouveau domaine doit étendre ces contrôles ; ne pas supposer que `db_table` simple choisit son schéma de création.
 
 `apps/api/src/property_platform/config/settings/base.py` est partagé, puis complété par `apps/api/src/property_platform/config/settings/local.py`, `apps/api/src/property_platform/config/settings/testing.py` ou `apps/api/src/property_platform/config/settings/production.py`. La présence de ce dernier ne signifie pas que le site est déployé. `apps/api/manage.py` sert notamment à lancer les migrations ou à créer un administrateur ; ce n'est pas une page web.
+
+### `apps/ingestion` : programmer, acquérir et suivre les imports
+
+Ce dossier est une application Python exécutable séparément. Il possède les flows Prefect, leur enregistrement, le transport HTTPS, les checkpoints de reçus et l'adaptateur vers Django. Le serveur et son interface permettent de modifier les horaires, lancer les jobs et consulter les états/logs. Le runner exécute un flow à la fois dans le profil local. Les horaires initiaux sont créés inactifs ; un redémarrage conserve les horaires, paramètres et activations déjà modifiés dans l'interface, y compris un horaire supprimé. Le guide [INGESTION.md](INGESTION.md) décrit les commandes et l'UI.
+
+Le registre contient **neuf déploiements** : parcelles Onwani ; quatre couches district, community, street et OSM ; références publiques ; présentations immobilières ; import d'un reçu Sentinel existant ; contrôle de disponibilité. Les quatre couches et les parcelles restent limitées aux protocoles Al Reem actuels. Sentinel et le contrôle de disponibilité n'ont aucun horaire récurrent. Les prix, stocks de logements, avis, génération vidéo et sources de nouveaux territoires ne sont pas ajoutés par cet orchestrateur.
+
+La direction est **`ingestion → services/protocoles evidence → catalog`**. `collectors/` utilise les constantes et protocoles portables du paquet API, sans ORM, sans copie des modèles et sans collecte d'une URL libre. Les acquisitions ont des budgets par réponse et par lot ; un replay conserve les octets et dates réelles de collecte. `domain.py` initialise Django dans un sous-processus synchrone et transmet les captures préparées à `evidence/orchestration.py`. Cette passerelle possède l'identité durable, les transactions et les liens vers les acquisitions ; les collecteurs ne modifient aucune table directement. Le réseau est utilisé avant la transaction de mutation canonique.
+
+**Le paquet API et ses migrations restent propriétaires des données métier.** `apps/ingestion/pyproject.toml` installe ce paquet depuis `../api` ; le serveur API n'installe ni Prefect ni HTTPX et n'importe pas `property_platform_ingestion`. Le registre métier des URLs et présentations reste dans `apps/api/src/property_platform/modules/evidence/`, tandis que `ingestion/registry.py` décrit seulement les jobs déployés et leurs paramètres. Une nouvelle source doit avoir protocole, identité, tests et propriétaire documentés avant d'être ajoutée à un horaire.
+
+Le profil `infra/local/compose.ingestion.yaml` ajoute un PostgreSQL **distinct pour les métadonnées Prefect**, sur un réseau privé et sans port publié vers Windows. Son volume `prefect-postgres18-data` conserve horaires, déploiements et historique opérationnel ; `ingestion-data` conserve les reçus privés du runner. La base métier `property_platform` conserve catalogue, captures et `evidence.ingestion_execution`. S3 n'est pas installé par ce profil. Les traitements Rasterio restent dans leur environnement isolé ; le runner ne télécharge pas périodiquement les deux scènes historiques et n'intègre aucune dépendance lourde OCR/rendu.
 
 ### `packages/contracts` : l'accord entre le site et l'API
 
@@ -212,7 +249,7 @@ Les identités techniques restent `property-platform`, `property_platform`, `@pr
 
 ### `infra`, `.github` et `scripts` : lancer et vérifier
 
-`infra/local/compose.yaml` décrit l'environnement local : conteneur API, base PostGIS, réseau et stockage persistant. Il ne contient pas les données de la base : celles-ci résident dans un volume Docker. Le site Next.js est lancé séparément dans le parcours local actuel.
+`infra/local/compose.yaml` décrit l'environnement local : conteneur API, base PostGIS, réseau et stockage persistant. Il ne contient pas les données de la base : celles-ci résident dans un volume Docker. `infra/local/compose.ingestion.yaml` complète ce fichier avec le profil facultatif `ingestion`, son serveur Prefect, sa base de métadonnées et le runner. Le parcours de développement web garde Next.js séparé ; le profil facultatif `web-preview` permet aussi de lancer son artefact compilé.
 
 Chaque `Dockerfile` décrit comment construire l'image d'une application. `.github/workflows/ci.yml` décrit les vérifications que GitHub exécute ; un workflow de contrôle ne publie pas automatiquement le site. Les fichiers de `scripts` sont des utilitaires du dépôt, pas des fonctionnalités accessibles aux utilisateurs.
 
@@ -226,7 +263,7 @@ Chaque `Dockerfile` décrit comment construire l'image d'une application. `.gith
 |---|---|---|
 | `package.json` | Quand on lance une commande comme `pnpm.cmd dev:web` | Modifier les commandes ou outils communs ici, les dépendances propres au site dans `apps/web/package.json` |
 | `pnpm-workspace.yaml` | Quand pnpm identifie les applications et paquets du monorepo | Actualiser lors de l'ajout d'un paquet si son chemin n'est pas déjà couvert |
-| `pnpm-lock.yaml` et `apps/api/uv.lock` | Quand les outils installent les versions résolues | Laisser les gestionnaires les générer et les conserver dans Git |
+| `pnpm-lock.yaml`, `apps/api/uv.lock` et `apps/ingestion/uv.lock` | Quand les outils installent les versions résolues | Laisser les gestionnaires les générer et les conserver dans Git ; le lock ingestion résout aussi le paquet API local |
 | `.node-version` et `.python-version` | Quand un outil compatible sélectionne un runtime | Aligner avec les manifestes, Docker, CI et le guide des versions ; ces fichiers n'installent pas les runtimes à eux seuls |
 | `biome.json` et `.editorconfig` | Quand les outils contrôlent ou formatent le code et le texte | Conserver des règles communes plutôt que des préférences contradictoires par développeur |
 | `.gitignore`, `.dockerignore`, `.gitattributes` | Quand Git suit les fichiers ou Docker prépare une construction | Distinguer exclusion de Git, exclusion de l'image et règles de traitement du texte |
@@ -241,6 +278,7 @@ Tu peux voir ces éléments dans PyCharm après installation ou démarrage, mêm
 | `node_modules/` | Bibliothèques JavaScript installées par pnpm | Non, modifier le code dans `src` et les dépendances dans les manifestes |
 | `apps/web/.next/` | Cache et fichiers générés par Next.js | Non, le prochain lancement ou build peut les recréer |
 | `apps/api/.venv/` | Environnement Python local créé par uv si tu utilises ce parcours | Non, le code du projet reste dans `apps/api/src/property_platform/` |
+| `apps/ingestion/.venv/` | Environnement Python isolé des flows et outils d'ingestion | Non, le code du projet reste dans `apps/ingestion/src/property_platform_ingestion/` |
 | `__pycache__/`, `.pytest_cache/`, `.ruff_cache/` | Caches des outils Python | Non, ils ne sont pas des sources |
 | `.cache/`, `.tools-env/` | Éventuels caches et outils locaux utilisés pendant la préparation | Non, leur présence dépend du poste et ils ne sont pas requis comme dossiers source |
 | `.idea/` | Réglages locaux de PyCharm | Ne pas y placer le code ; vérifier les exclusions Git avant tout partage de réglages |
@@ -256,13 +294,14 @@ Les caches de code ne sont pas le stockage de PostgreSQL. **Supprimer un volume 
 | Modifier l'atlas ou ajouter une fiche immobilière | `apps/web/src/features/atlas/` pour le pilote parcellaire ; un module `property/` viendra avec les dossiers immobiliers | Atlas local créé, dossiers bâtiment/unité à créer |
 | Ajouter un composant partagé entre plusieurs fonctionnalités | `apps/web/src/components/` | Dossier existant ; y placer seulement les composants réutilisables |
 | Ajouter les modèles de bâtiments et leurs règles | `apps/api/src/property_platform/modules/catalog/` | Parcel, Street, Building, Place, AdministrativeArea existants ; logements à ajouter |
-| Ajouter les sources et preuves | `apps/api/src/property_platform/modules/evidence/` | Premiers modèles d'acquisition et observations Onwani existants |
+| Ajouter les sources et preuves | `apps/api/src/property_platform/modules/evidence/` | Protocoles métier, registres examinés, modèles d'acquisition et observations existants |
 | Ajouter une route métier HTTP | `apps/api/src/property_platform/api/`, branchée au routeur | À créer avec les services métier qu'elle appelle |
 | Ajouter des migrations Django | `migrations/` dans le module propriétaire | À générer avec Django lorsque les modèles arrivent |
 | Ajouter un domaine prix, avis ou documents | Module dédié sous `apps/api/src/property_platform/modules/` | À créer quand ses responsabilités et dépendances sont définies |
 | Ajouter des contrôles de fonctionnalité | Tests proches du module concerné ; tests d'intégration transversaux dans `apps/api/tests/` | À ajouter avec les comportements concernés |
 | Ajouter l'application mobile | `apps/mobile/`, consommant la même API | Non créé ; le pilote web vient d'abord |
-| Ajouter des workers | Entrées d'exécution Python séparées, réutilisant les services métier ; image distincte pour les traitements lourds | Non implémenté ; emplacement précis à fixer avec le premier traitement |
+| Ajouter une collecte ou un horaire | Transport sous `apps/ingestion/src/property_platform_ingestion/collectors/`, flows et registre de déploiements dans cette application | Neuf jobs préparés ; transformations et écritures métier restent dans leurs services API |
+| Ajouter un traitement lourd OCR/rendu | Runtime spécialisé, séparé du web/API et du runner léger | Non implémenté ; définir son budget, stockage, identité et reprise avec le premier traitement |
 
 Exemple futur : la page du site demande la fiche d'un bâtiment à une route de `api`, qui appelle un service de `catalog` et des lectures explicites de `evidence`. Django interroge PostgreSQL/PostGIS puis renvoie une réponse conforme au contrat. Le composant web l'affiche et utilise les traductions de l'interface. Chaque couche a ainsi un rôle précis ; la logique métier ne se retrouve pas recopiée dans la page.
 
@@ -270,12 +309,12 @@ Exemple futur : la page du site demande la fiche d'un bâtiment à une route de 
 
 - Chaque module possède ses mutations et invariants. Les appels externes passent par des services explicites ; aucun module ne modifie les tables d'un autre directement.
 - Dépendances autorisées : publication → evidence → catalog, et publication → catalog. Les modules n'importent ni configuration ni HTTP. Import Linter vérifie ces directions en CI ; il ne peut pas détecter tous les accès ORM indirects, qui restent à examiner en revue.
-- API, administration et futurs workers appellent les mêmes commandes métier. Les dépendances lourdes OCR/Blender ne sont pas installées dans le serveur web.
+- API, administration et application d'ingestion appellent les services métier propriétaires. Les modèles et migrations ne sont pas dupliqués dans les flows. Les dépendances lourdes OCR/Blender ne sont pas installées dans le serveur web.
 - Le backend possède schémas et migrations métier. OpenAPI est exporté, les types TypeScript sont générés et la CI détecte leur divergence.
 - Le web ne connaît pas les tables ni les modèles Django. Chaque fonctionnalité future sera regroupée sous `src/features/<fonction>` ; seuls les composants réellement partagés rejoignent une bibliothèque commune.
 - Les adaptations de stockage, authentification et fournisseurs seront introduites avec leur première utilisation. Aucun framework abstrait de plugins n'est créé d'avance.
 
-Les workers légers utiliseront le même paquet Python que l'API, avec un processus distinct. Une image spécialisée sera ajoutée pour le calcul lourd. Mobile, market, reviews et scenes arrivent lorsqu'une fonctionnalité les justifie ; aucun dossier vide ne simule une application prête.
+L'application d'ingestion réutilise le paquet Python de l'API dans un processus et une image distincts, avec ses propres dépendances Prefect/HTTPX. Une image spécialisée sera ajoutée avec le premier calcul lourd. Mobile, market, reviews et scenes arrivent lorsqu'une fonctionnalité les justifie ; aucun dossier vide ne simule une application prête.
 
 ## Invariants de travail
 
@@ -304,7 +343,7 @@ La carte affiche les usages colorés, secteurs, rues et noms, empreintes 2D, lie
 
 ## Ce que le socle ne prétend pas fournir
 
-Le premier import manuel Onwani alimente les parcelles et conserve captures, observations et audit. Il ne publie pas automatiquement un dossier. L'accueil et la carte proposent désormais un aperçu local. Auth Supabase, stockage objet, queue et génération ne sont pas encore intégrés. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.
+Les imports Onwani et cartographiques alimentent le catalogue et conservent captures, observations et audit ; ils peuvent désormais être pilotés par Prefect. Ils ne publient pas automatiquement un dossier. L'accueil et la carte proposent un aperçu local. Auth Supabase, stockage objet, queue de génération et génération IA ne sont pas encore intégrés. L'administration Django est locale à ce stade ; elle ne doit pas être ouverte en production avant le parcours d'accès du personnel et ses règles métier. Les nouveaux modèles n'ont pas d'éditeur Django Admin qui contourne leurs services.
 
 ## Présentations immobilières — 12 octobre 2026
 

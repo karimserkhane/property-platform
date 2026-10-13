@@ -13,6 +13,7 @@ from property_platform.modules.catalog.models import AdministrativeArea, Buildin
 from property_platform.modules.catalog.services import geometry_from_rings, reconcile_map_record
 
 from . import map_sources as protocol
+from .identity_resolution import resolve_administrative_area
 from .models import Capture, IngestionRun, MapObservation, QuarantinedObservation, Source
 from .onwani import SourceError, object_ids
 
@@ -29,8 +30,10 @@ class RateLimited(SourceError):
     pass
 
 
-def acquire(run, url, params, replay=None):
-    payload, receipt = replay if replay is not None else protocol.fetch_url(url, params)
+def acquire(run, url, params, replay=None, acquisition=None):
+    payload, receipt = (
+        replay if replay is not None else (acquisition or protocol.fetch_url)(url, params)
+    )
     capture = Capture.objects.create(
         run=run,
         payload=payload,
@@ -45,15 +48,18 @@ def acquire(run, url, params, replay=None):
     return protocol.decode(payload), capture
 
 
-def official_records(run, layer):
+def official_records(run, layer, acquisition=None):
     url, where, geometry_type, fields = protocol.LAYERS[layer]
-    meta, _ = acquire(run, url, {"f": "pjson"})
+    meta, _ = acquire(run, url, {"f": "pjson"}, acquisition=acquisition)
     if meta.get("geometryType") != geometry_type or not set(fields.split(",")).issubset(
         {f["name"] for f in meta.get("fields", [])}
     ):
         raise SourceError("Map source schema changed")
     listing, _ = acquire(
-        run, url + "/query", {"f": "json", "where": where, "returnIdsOnly": "true"}
+        run,
+        url + "/query",
+        {"f": "json", "where": where, "returnIdsOnly": "true"},
+        acquisition=acquisition,
     )
     ids = object_ids(listing)
     seen = set()
@@ -71,6 +77,7 @@ def official_records(run, layer):
                 "outSR": 4326,
                 "returnGeometry": "true",
             },
+            acquisition=acquisition,
         )
         if batch.get("spatialReference", {}).get("wkid") != 4326:
             raise SourceError("Unexpected map CRS")
@@ -108,7 +115,12 @@ def official_records(run, layer):
             staged.append((target, str(oid), values, geometry, attrs, capture, url, None))
         if set(batch_ids) - seen:
             raise SourceError("Incomplete official map batch")
-    latest, _ = acquire(run, url + "/query", {"f": "json", "where": where, "returnIdsOnly": "true"})
+    latest, _ = acquire(
+        run,
+        url + "/query",
+        {"f": "json", "where": where, "returnIdsOnly": "true"},
+        acquisition=acquisition,
+    )
     if set(object_ids(latest)) != seen:
         raise SourceError("Map coverage changed during acquisition")
     return staged, []
@@ -126,18 +138,29 @@ def number(value, maximum, *, integer=False):
     )
 
 
-def osm_records(run, replay=None):
+def osm_records(run, replay=None, acquisition=None):
     from urllib.error import URLError
 
     try:
-        data, capture = acquire(run, protocol.OSM_URL, {"data": protocol.OSM_QUERY}, replay=replay)
+        data, capture = acquire(
+            run,
+            protocol.OSM_URL,
+            {"data": protocol.OSM_QUERY},
+            replay=replay,
+            acquisition=acquisition,
+        )
     except RateLimited:
         raise
     except SourceError, URLError, TimeoutError:
         if replay is not None:
             raise
         # One sequential fallback, never an unbounded retry loop or visitor-triggered request.
-        data, capture = acquire(run, protocol.OSM_MIRROR, {"data": protocol.OSM_QUERY})
+        data, capture = acquire(
+            run,
+            protocol.OSM_MIRROR,
+            {"data": protocol.OSM_QUERY},
+            acquisition=acquisition,
+        )
     elements = data.get("elements")
     if (
         not isinstance(elements, list)
@@ -245,7 +268,7 @@ def osm_records(run, replay=None):
     return staged, rejected
 
 
-def import_map_layer(*, layer, actor, replay=None):
+def import_map_layer(*, layer, actor, replay=None, acquisition=None):
     if connection.vendor != "postgresql":
         raise ValueError("Map acquisition requires PostGIS")
     if layer not in (*protocol.LAYERS, "osm"):
@@ -270,7 +293,9 @@ def import_map_layer(*, layer, actor, replay=None):
             source=source, actor=actor, connector_version=protocol.VERSION
         )
         staged, rejected = (
-            osm_records(run, replay=replay) if layer == "osm" else official_records(run, layer)
+            osm_records(run, replay=replay, acquisition=acquisition)
+            if layer == "osm"
+            else official_records(run, layer, acquisition=acquisition)
         )
         if not staged:
             raise SourceError("No valid map records; previous snapshot preserved")
@@ -291,13 +316,36 @@ def import_map_layer(*, layer, actor, replay=None):
                     reason="Invalid OSM geometry or metadata; not repaired",
                 )
             for target, identity, values, shape, attrs, capture, url, published in staged:
+                canonical_id = (
+                    resolve_administrative_area(
+                        namespace=namespace,
+                        record_id=identity,
+                        values=values,
+                        geometry=shape,
+                        attributes=attrs,
+                        capture=capture,
+                        actor=actor,
+                    )
+                    if target == "administrative_area"
+                    else None
+                )
                 obj, action, before, after = reconcile_map_record(
                     model=TARGETS[target],
                     namespace=namespace,
                     record_id=identity,
                     values=values,
                     geometry=shape,
+                    canonical_id=canonical_id,
                 )
+                if target == "administrative_area":
+                    from .models import AdministrativeAreaSourceAlias
+
+                    AdministrativeAreaSourceAlias.objects.filter(
+                        source_namespace=namespace,
+                        source_record_id=identity,
+                        capture=capture,
+                        active=True,
+                    ).update(canonical_revision=obj.revision)
                 summary[action] += 1
                 MapObservation.objects.create(
                     **{target: obj},

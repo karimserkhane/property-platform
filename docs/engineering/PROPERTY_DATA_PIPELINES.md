@@ -1,6 +1,6 @@
 # Pipelines de données pour les fiches de projets et bâtiments
 
-Cadrage du 13 octobre 2026, à partir de la demande de fiches immobilières comparables à la capture Proprobin. **Ce document décrit la prochaine extension, pas des pipelines déjà automatisés.** Le site et la base n'ont pas été modifiés par cette étude. Les imports actuels restent manuels ; les six présentations documentées sont décrites dans [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md).
+Cadrage du 13 octobre 2026, à partir de la demande de fiches immobilières comparables à la capture Proprobin. **Les nouveaux faits commerciaux décrits ici restent à développer.** Depuis ce cadrage, l'orchestration Prefect des imports existants a été implémentée dans une application dédiée ; voir [INGESTION.md](INGESTION.md). Les six présentations actuelles sont décrites dans [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md).
 
 ## Résultat attendu pour le visiteur
 
@@ -37,14 +37,15 @@ La capture utilisateur sert à définir les informations et la présentation att
 
 | Maillon | Code réel sur le poste | État |
 |---|---|---|
-| Collecte cadastrale | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\onwani.py` | Connecteur et import manuels, captures et audit |
-| Couches spatiales et références | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_import.py` et `research_import.py` dans ce même dossier | Import manuel et identités de fournisseurs conservées |
-| Collecte des présentations | `C:\Users\Karim\Repositories\property-platform\scripts\collect-property-presentations.ps1` | Reçus de pages/PDF et médias examinés ; exécution manuelle |
+| Collecteurs et orchestration | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion` | Prefect : neuf déploiements, collecte HTTPS bornée, horaires initiaux suspendus et reçus persistants |
+| Validation cadastrale | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\onwani.py` | Service partagé par commande manuelle et orchestration, captures et audit |
+| Couches spatiales et références | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_import.py` et `research_import.py` dans ce même dossier | Imports partagés, identités des fournisseurs conservées |
+| Collecte des présentations | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\collectors\properties.py` | Reçus des pages et médias examinés ; le script PowerShell historique reste disponible |
 | Validation et stockage | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\property_protocol.py` et `property_import.py` | Empreintes, dates, identité exacte, droits ; lot atomique |
 | Projection API | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\publication\map_preview.py` | Présentations courantes depuis la base |
 | Fiche web | `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\property-card.tsx` | Nom, promoteur/éditeur, lien, résumé, premiers médias et attributs OSM |
 
-Les registres de présentations contiennent une revue éditoriale manuelle. Vérifier la présence de termes dans une page ne constitue pas un extracteur de livraison, de prix ou de plans de paiement. Ces attributs ne sont pas encore collectés automatiquement et aucun ordonnanceur n'est actif.
+Les registres de présentations contiennent une revue éditoriale manuelle. Vérifier la présence de termes dans une page ne constitue pas un extracteur de livraison, de prix ou de plans de paiement. Ces attributs ne sont pas encore collectés automatiquement. Prefect est disponible pour les imports existants ; ses horaires préparés restent désactivés au premier enregistrement pour permettre une validation manuelle des sources.
 
 ## Chaîne à développer
 
@@ -82,13 +83,13 @@ Pour chaque observation : identité source/cible, capture et emplacement de preu
 
 ## Automatisation progressive et budget
 
-Avec le budget initial inférieur à 500 AED/mois, commencer par un processus Python séparé et un ordonnanceur simple déclenchant les commandes métier. Le code reste dans ce monorepo et réutilise les services Django ; l'exécution de collecte se sépare de l'API. L'ordonnanceur déclenche le travail, il ne constitue pas à lui seul le registre fiable des tentatives.
+Avec le budget initial inférieur à 500 AED/mois, l'application `apps/ingestion` exécute désormais les collecteurs dans un processus Python séparé avec Prefect auto-hébergé localement. Elle reste dans ce monorepo et réutilise les services Django ; l'API ne dépend pas de Prefect. Le suivi technique utilise une base Prefect séparée ; le registre métier durable utilise `evidence.ingestion_execution` dans PostgreSQL/PostGIS. Un coût d'hébergement n'a pas encore été engagé ou mesuré.
 
 Les tâches et leurs tentatives doivent être persistées avec leur portée, version, état, résultat et prochaine échéance. Prévoir verrou/concurrence contrôlée, reprise après interruption, idempotence et réconciliation après résultat incertain. Une clé d'extraction associe identité de source, identité de cible, empreinte de capture et version d'extracteur ; les acquisitions identiques peuvent garder leurs dates de dernière vérification sans recréer des biens ou perdre la preuve précédente. Une réponse 304 ne remplace pas une capture par un payload vide.
 
 Fréquences initiales à ajuster aux sources : attributs de projet quotidiens ou hebdomadaires ; offres plus fréquentes si un accès adapté existe ; inventaire selon son flux autorisé ; géométrie cadastrale à un rythme distinct. Respecter Retry-After et appliquer une temporisation progressive. Un 404 ou un échec ponctuel ne signifie pas que le projet ou l'offre a disparu.
 
-Afficher dans l'exploitation : dernière tentative et dernier succès, couverture, observations ajoutées/modifiées/rejetées, erreurs d'extraction, retard et budget consommé. Une alerte part sur un changement utile ou un connecteur en échec persistant. Le déploiement de cette supervision et sa planification n'ont pas été effectués par ce cadrage.
+L'interface Prefect affiche déjà déploiements, horaires, runs et journaux ; les résultats métier sont audités et les mises en quarantaine signalées. Ajouter progressivement les mesures de couverture, de fraîcheur et de budget consommé pour les nouveaux domaines. Les alertes externes sur un changement utile ou un connecteur en échec persistant restent à configurer.
 
 Aucun besoin mesuré de Kafka, Airflow ou d'un cluster de traitements n'est établi pour ce pilote. Une queue plus élaborée viendra avec la concurrence et les traitements longs. Toute génération payante garde identité durable, réservation de budget et réconciliation avant réessai ; l'IA propose des extractions ou résumés avec preuve, sans devenir la source d'un prix ou d'une livraison.
 
@@ -96,11 +97,11 @@ Aucun besoin mesuré de Kafka, Airflow ou d'un cluster de traitements n'est éta
 
 1. **Première tranche : faits immobiliers**. Commencer par The District, déjà identifié dans les données Reem : collecter sa fiche technique et sa page de projet, puis sa livraison annoncée via une source distincte. Implémenter observations typées, preuve par attribut, tests d'extraction et migration additive ; étendre le contrat et la fiche. Une deuxième source/projet valide que l'adaptateur ne dépend pas d'un seul nom codé en dur.
 2. **Deuxième tranche : offres et plans**. Préciser nature des prix, cible, conditions et validité. Importer plusieurs plans sans les fusionner. Une typologie ou un total de logements ne crée pas d'inventaire disponible. Les logements précis attendent des identifiants et un flux de disponibilité fiable.
-3. **Troisième tranche : exécution programmée**. Ajouter le registre durable des tâches et la commande de worker, puis l'ordonnanceur. Tester concurrence, répétition, redémarrage après capture et après écriture, changement de parser, backoff et source interrompue. Une relance ne double ni logements ni offres ; une panne conserve la dernière projection avec son âge.
+3. **Exécution programmée des nouvelles tranches**. Le socle Prefect, son runner et le registre durable sont désormais implémentés pour les imports existants. Brancher les nouveaux extracteurs et modèles sur cette fondation ; vérifier leurs répétitions, versions, interruptions et changements de parser. Aucun réessai automatique d'écriture n'est activé par défaut : la réconciliation du résultat précède la décision de relancer. Tester la concurrence et l'idempotence des futurs logements/offres avec leurs propres contraintes.
 4. **Quatrième tranche : activité de marché**. Qualifier l'accès aux transactions ADREC et aux autres émirats, leurs droits et identifiants. Calculer les statistiques sur des fenêtres définies après rapprochement vérifié ; absence de couverture, aucune vente observée et zéro calculé sont trois états différents. Aucun indicateur de croissance ne doit précéder ses données et sa méthode.
 
 Chaque tranche exige une validation PostGIS réelle pour les relations spatiales, des tests de contraintes/transactions pour les nouveaux modèles, la régénération des contrats, les quinze langues et le RTL, et un contrôle de la fiche avec données présentes, absentes, périmées ou contradictoires. Les premières captures et nouvelles migrations devront être appliquées explicitement ; compiler le site ne lance aucun import.
 
-## État après ce cadrage
+## État après la mise en place de l'orchestration
 
-Le besoin et les sources pilotes sont documentés. Aucun nouveau champ, pipeline automatique, modèle projet/unité, prix, échéancier, disponibilité, statistique de ventes ou média de promoteur n'a été ajouté à la base. Le prochain développement doit livrer la première tranche complète, de l'acquisition à la fiche, avant d'élargir les métriques.
+Le besoin et les sources pilotes sont documentés. L'orchestration des acquisitions existantes, neuf déploiements et deux tables d'audit supplémentaires sont implémentés ; leur installation locale est décrite dans [INGESTION.md](INGESTION.md). Aucun modèle projet/unité, prix structuré, échéancier, disponibilité, statistique de ventes ou nouveau média de promoteur n'est créé par cette orchestration. La prochaine extension immobilière doit livrer la première tranche complète, de l'acquisition à la fiche, avant d'élargir les métriques.

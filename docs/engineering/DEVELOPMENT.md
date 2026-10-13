@@ -1,8 +1,10 @@
 # Lancer et développer Property Platform, étape par étape
 
-Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte locale des parcelles, rues, secteurs, empreintes de bâtiments et lieux, sources consultables, deux aperçus satellite, API de contrôle de santé, base PostGIS et imports manuels avec provenance. Unités, prix, dossiers publics approuvés, authentification, bibliothèque de médias et traitements IA arriveront avec les fonctionnalités suivantes.
+Ce guide décrit le **socle actuel du dépôt** : accueil multilingue, carte locale des parcelles, rues, secteurs, empreintes de bâtiments et lieux, premières fiches immobilières, sources consultables, deux aperçus satellite, API, base PostGIS et imports avec provenance. Les imports manuels restent disponibles ; leur orchestration Prefect est désormais implémentée dans une application dédiée. Unités, prix structurés, dossiers publics approuvés, authentification, bibliothèque complète de médias et traitements IA arriveront avec les fonctionnalités suivantes.
 
-**Prochaine extension des données immobilières :** [PROPERTY_DATA_PIPELINES.md](PROPERTY_DATA_PIPELINES.md) décrit comment alimenter les fiches avec livraison annoncée, typologies, offres et plans de paiement, puis programmer leur actualisation. Il distingue les imports manuels déjà présents des modèles, extracteurs et tâches à développer. Ce cadrage n'a créé aucune table et n'a lancé aucune collecte ou mise à jour de base.
+**Ingestion et calendrier — ajout du 13 octobre 2026 :** [INGESTION.md](INGESTION.md) explique comment lancer Prefect, consulter les exécutions et configurer les horaires dans [son interface locale](http://localhost:4200). Neuf procédures sont définies : sept calendriers commencent désactivés et deux procédures restent manuelles. Le code se trouve dans `C:\Users\Karim\Repositories\property-platform\apps\ingestion\`, séparé du serveur web. Cette application réutilise les services métier Django ; sa base de métadonnées Prefect est distincte de la base immobilière. L'orchestrateur est facultatif pour consulter le site.
+
+**Prochaine extension des données immobilières :** [PROPERTY_DATA_PIPELINES.md](PROPERTY_DATA_PIPELINES.md) décrit les modèles et extracteurs supplémentaires pour livraison annoncée, typologies, offres et plans de paiement. Programmer une collecte est maintenant possible avec Prefect ; ces nouvelles informations commerciales ne sont pas encore extraites automatiquement.
 
 **Identité technique actualisée le 12 octobre 2026 :** le paquet Python est `property_platform`, les paquets JavaScript utilisent `@property-platform/*`, et la base locale s'appelle `property_platform`. Si ton ancienne installation utilise encore d'autres noms, suivre d'abord [la reprise contrôlée de la base](BRANDING.md#reprendre-une-ancienne-base-locale-sous-le-nouveau-nom). Modifier seulement les variables PostgreSQL ne renomme pas une base déjà stockée. Sur le poste où la reprise a déjà été vérifiée, suivre les commandes ordinaires ci-dessous sans la refaire.
 
@@ -41,6 +43,7 @@ Toutes les commandes de cette partie s'écrivent dans PowerShell depuis `C:\User
 | Code, thème, images ou traductions web ; site sur **3000** | `pnpm.cmd dev:web`, si le serveur est arrêté | Lit les fichiers Windows actuels ; rechargement de développement |
 | Dépendances JavaScript ou `pnpm-lock.yaml` | `pnpm.cmd install --frozen-lockfile`, puis redémarrer le web | Installe les versions décidées dans le verrouillage ; n'importe aucune donnée |
 | Code Python sous `C:\Users\Karim\Repositories\property-platform\apps\api\` | Reconstruire **api**, comme ci-dessous | Copie le code actuel dans une nouvelle image et remplace son conteneur après un build réussi |
+| Code ou dépendances sous `C:\Users\Karim\Repositories\property-platform\apps\ingestion\` ; services Django qu'il réutilise | Reconstruire l'image d'ingestion et reprendre les services, voir [INGESTION.md](INGESTION.md) | Actualise les collecteurs et le runner ; conserver les calendriers édités dans l'UI et les volumes |
 | Nouvelles migrations Django | Après reconstruction réussie de l'API, lancer `migrate --noinput` | Applique les évolutions SQL non encore enregistrées ; ne collecte aucune donnée |
 | Code web ; site Docker sur **3102** | Reconstruire **web**, voir la variante Docker ci-dessous | Prépare un nouveau site compilé ; ce conteneur ne surveille pas les fichiers Windows |
 | Nouvelles données à collecter | Lancer la commande d'import adaptée, section 6 | Contacte la source et enregistre preuves et objets ; une compilation ne lance aucun import |
@@ -60,6 +63,8 @@ docker compose -f infra/local/compose.yaml exec api python manage.py migrate --n
 ```
 
 `exec` exécute la commande **dans le conteneur API existant**. `migrate` applique les migrations Django ; `No migrations to apply` est un résultat normal. Si le build précédent a échoué, ce conteneur peut encore utiliser l'ancien code : une migration réussie ne signifie donc pas que l'image a été mise à jour. Arrêter cette séquence à la première erreur de build et suivre le dépannage ci-dessous. Les imports restent séparés (section 6).
+
+Si Prefect est utilisé, reconstruire aussi l'image d'ingestion après une modification des services Django qu'elle embarque. Les images API et ingestion contiennent chacune une copie du code ; reconstruire l'une n'actualise pas l'autre. Le [guide d'ingestion](INGESTION.md) décrit la séquence et la migration préalable au démarrage du runner.
 
 La modification de couverture nationale du 12 octobre ne change pas les tables. Pour installer cette évolution backend sur une autre installation, reconstruire l'API et le site suffit, sans réimporter Reem. Sur le poste où elle a déjà été appliquée, choisir le parcours correspondant aux fichiers modifiés dans le tableau ci-dessus. `migrate` reste la commande ordinaire pour appliquer d'autres évolutions de structure. Ajouter un émirat à la navigation ne collecte aucune donnée. Les commandes `import_onwani` et `import_reem_*` restent propres au pilote, avec les mêmes preuves et UUID.
 
@@ -111,6 +116,7 @@ Cette commande conserve le volume PostgreSQL. Ne pas ajouter `-v`. Le contrôle 
 - [4. Démarrer le site — terminal A](#demarrer-le-site)
 - [5. Démarrer l'API et la base, puis créer les tables — terminal B](#demarrer-api-postgis)
 - [6. Importer les données et comprendre le pipeline de data engineering](#data-engineering)
+- [6.9. Programmer et suivre les ingestions avec Prefect](#orchestration-prefect)
 - [7. Créer un compte d'administration — facultatif](#compte-administration)
 - [8. Routine quotidienne, modifications et arrêt](#routine-quotidienne)
 - [9. Construire et essayer le site compilé](#site-compile)
@@ -129,6 +135,7 @@ Cette commande conserve le volume PostgreSQL. Ne pas ajouter `-v`. Le contrôle 
 - [Lancer l'import Onwani](#premier-import-manuel-des-parcelles-onwani)
 - [Ajouter rues, bâtiments, lieux, références et satellite](#couches-reem)
 - [Lire le code de collecte, contrôle et stockage](#code-import)
+- [Ouvrir l'orchestrateur et comprendre ses neuf procédures](#orchestration-prefect)
 - [Consulter les tables avec une interface graphique](#consulter-la-base)
 - [Reconstruire le backend après une modification](#modification-backend)
 - [Arrêter en conservant les données](#arreter-les-services)
@@ -164,13 +171,13 @@ Ce mémo suppose que les images et la base ont **déjà été préparées avec c
 
 Résultat attendu : site accessible, `api` en cours d'exécution, `db` en état `healthy`, réponses `ok` et `ready`. Tu peux aussi ouvrir [la documentation de l'API](http://localhost:8000/api/v1/docs). Il s'agit d'une vérification rapide du démarrage ; les contrôles de code et tests automatisés sont détaillés à l'étape 10. Si une commande échoue, résoudre l'erreur avant de continuer.
 
-**Tout arrêter :** appuyer sur **Ctrl+C dans le terminal A**, puis exécuter dans le terminal B :
+**Tout arrêter :** appuyer sur **Ctrl+C dans le terminal A**. Si Prefect est aussi lancé, suivre [l'arrêt complet dans INGESTION.md](INGESTION.md). Sinon, exécuter dans le terminal B :
 
 ```powershell
 docker compose -f infra/local/compose.yaml down
 ```
 
-Le serveur web, l'API et la base sont alors arrêtés. **Les données de PostgreSQL sont conservées** : ne pas ajouter `-v` à `down`, car cette option supprime le volume de données. Fermer le navigateur ne suffit pas à arrêter les services. Docker Desktop peut rester ouvert ou être quitté après cet arrêt.
+Le serveur web, l'API et la base de ce parcours sont alors arrêtés. **Si tu as aussi lancé Prefect**, suivre [l'arrêt complet dans INGESTION.md](INGESTION.md) : l'overlay facultatif ajoute des services que cette commande ne prend pas en charge. **Les données de PostgreSQL sont conservées** : ne pas ajouter `-v` à `down`, car cette option supprime le volume de données. Fermer le navigateur ne suffit pas à arrêter les services. Docker Desktop peut rester ouvert ou être quitté après cet arrêt.
 
 <a id="choisir-le-parcours"></a>
 
@@ -211,17 +218,19 @@ Une **dépendance**, ou bibliothèque, est du code déjà écrit par d'autres d�
 | Next.js | Framework web : ensemble d'outils pour construire et servir le site | Préparer les pages et démarrer le serveur sur le port 3000 |
 | React | Bibliothèque utilisée par Next.js pour l'interface | Construire les composants visibles et leurs interactions |
 | TypeScript | JavaScript avec des types pour détecter certaines erreurs avant l'exécution | Vérifier le code ; les types ne sont pas une base de données |
-| Python / Django | Langage et framework utilisés pour le backend | Faire fonctionner l'API qui gérera les données et les règles métier |
-| API | Programme qui reçoit des demandes et renvoie des réponses structurées | Répondre aux contrôles de santé aujourd'hui, puis aux demandes immobilières |
+| Python / Django | Langage et framework utilisés pour le backend | Faire fonctionner l'API et les services métier qui contrôlent et enregistrent les données |
+| API | Programme qui reçoit des demandes et renvoie des réponses structurées | Répondre aux contrôles de santé et aux lectures de l'atlas local |
 | PostgreSQL | Serveur de base de données | Conserver durablement les données de l'application |
-| PostGIS | Extension de PostgreSQL pour les données géographiques | Stocker les parcelles importées et permettre les requêtes géographiques ; bâtiments à venir |
+| PostGIS | Extension de PostgreSQL pour les données géographiques | Stocker parcelles, rues, empreintes de bâtiments et périmètres ; calculer distances et intersections |
 | Docker Desktop | Application qui fait tourner des environnements isolés sur Windows | Exécuter ici l'API et la base dans des conteneurs Linux |
 | Docker Compose | Outil Docker qui démarre plusieurs services à partir d'un fichier de configuration | Lire infra/local/compose.yaml et gérer les services api et db ensemble |
 | uv | Gestionnaire des outils et dépendances Python | Préparer l'environnement Python pour les tests natifs, à l'étape 10 |
+| Prefect | Orchestrateur avec interface web : décide quand exécuter les ingestions et suit leur résultat | Neuf procédures du pilote ; exécutions, logs et calendriers sur le port 4200 |
+| Runner d'ingestion | Processus Python qui attend les travaux demandés à Prefect | Exécuter une ingestion à la fois, dans un processus séparé du site et de l'API |
 
 **npm et pnpm servent à des tâches similaires.** Nous utilisons npm pour installer pnpm, puis pnpm pour gérer le projet. Les deux noms dans le guide ne désignent pas deux sites à lancer. Le suffixe `.cmd` est simplement le lanceur Windows de ces outils.
 
-Un **serveur** est un programme qui reste en marche pour répondre aux demandes. Un **port** est le numéro qui distingue ses points d'accès sur une machine : 3000 pour le web, 8000 pour l'API, 5432 pour PostgreSQL. **localhost** signifie « cet ordinateur » : localhost:3000 ouvre le serveur web qui tourne sur ton PC.
+Un **serveur** est un programme qui reste en marche pour répondre aux demandes. Un **port** est le numéro qui distingue ses points d'accès sur une machine : 3000 pour le web, 8000 pour l'API, 5432 pour PostgreSQL et 4200 pour Prefect. **localhost** signifie « cet ordinateur » : localhost:3000 ouvre le serveur web qui tourne sur ton PC.
 
 Une **image Docker** est un environnement préparé avec les programmes nécessaires. Un **conteneur** est une instance en cours d'exécution de cette image. Un **volume** est un stockage conservé séparément : la base garde ainsi ses données lorsqu'on arrête ou remplace un conteneur.
 
@@ -242,15 +251,18 @@ Une **image Docker** est un environnement préparé avec les programmes nécessa
 | 11 | Diagnostiquer une erreur précise | Actions adaptées au problème |
 | 12 | Préparer les décisions de production | Aucun hébergement souscrit ni déploiement automatique |
 
-À l'étape 4, si l'installation 3.3 et le démarrage ont réussi, **tu as préparé les bibliothèques puis lancé le serveur web**. L'API et PostgreSQL ne sont pas démarrés par pnpm dev:web. La page actuelle fonctionne sans eux ; elle n'appelle pas encore de catalogue immobilier.
+À l'étape 4, si l'installation 3.3 et le démarrage ont réussi, **tu as préparé les bibliothèques puis lancé le serveur web**. L'API et PostgreSQL ne sont pas démarrés par pnpm dev:web. Les pages du site peuvent s'ouvrir, mais l'exploration des données enregistrées exige aussi les services de l'étape 5.
 
 | Objectif | Prérequis | Étapes |
 |---|---|---|
 | Voir et modifier le site | Git, Node.js 26.11.1, pnpm 12.10.1 | 2 à 4 |
 | Lancer aussi l'API et PostGIS | Prérequis web + Docker Desktop avec Compose | 2 à 5 ; compte facultatif en section 7 |
 | Exécuter les outils Python et tests isolés sur Windows | uv 0.13.0 et Python 3.14.8 géré par uv | 10 |
+| Programmer et superviser les ingestions avec une UI | Docker Desktop, base préparée et image d'ingestion | 6.9 et [INGESTION.md](INGESTION.md) |
 
 Python et uv ne sont pas nécessaires sur Windows pour lancer l'API Docker : l'image contient leur environnement et les bibliothèques GIS. Le web actuel fonctionne seul, sans API ni compte Supabase, cartographique ou IA. Aucun service payant n'est requis pour ce lancement local.
+
+Le fichier `C:\Users\Karim\Repositories\property-platform\.python-version` de racine indique maintenant **3.14.8**, comme les applications API et ingestion. Cette indication guide les outils Python ; elle n'installe rien à la lecture du fichier et ne remplace pas automatiquement un environnement `.venv` existant.
 
 <a id="prerequis"></a>
 
@@ -656,7 +668,7 @@ Invoke-RestMethod 'http://localhost:8000/api/v1/health/ready'
 
 Le champ status doit valoir **ok** pour live et **ready** pour ready. live vérifie que l'API répond ; ready vérifie une connexion fonctionnelle avec PostGIS. ready ne remplace pas les migrations ni les futurs tests métier.
 
-Ouvrir [la documentation interactive locale](http://localhost:8000/api/v1/docs) pour voir les endpoints. Les endpoints immobiliers ne sont pas encore implémentés.
+Ouvrir [la documentation interactive locale](http://localhost:8000/api/v1/docs) pour voir les endpoints. Elle décrit les contrôles de santé et les lectures de l'atlas local ; ces lectures de prévisualisation ne constituent pas encore une API immobilière publique approuvée.
 
 Les ports sont limités à la machine locale : web 3000, API 8000, base 5432. Compose fournit déjà ses variables et identifiants de développement : **aucun .env n'est requis pour ce parcours**. apps/api/.env.example illustre une exécution Python native ; Django ne charge pas automatiquement une copie .env dans la configuration actuelle.
 
@@ -664,7 +676,7 @@ Les ports sont limités à la machine locale : web 3000, API 8000, base 5432. Co
 
 ## 6. Importer les données et comprendre le pipeline de data engineering
 
-Le **data engineering** consiste à organiser la récupération, le contrôle, la transformation et le stockage des données, pour pouvoir refaire le travail et vérifier son origine. Ici, il alimente notre catalogue de parcelles à partir de DMT/Onwani. Il ne dessine pas encore la carte.
+Le **data engineering** consiste à organiser la récupération, le contrôle, la transformation et le stockage des données, pour pouvoir refaire le travail et vérifier son origine. Ici, il alimente les jeux configurés du pilote : parcelles, contexte géographique, références, premières présentations immobilières et aperçus satellite. La carte consulte ensuite les données déjà enregistrées ; elle ne collecte pas les sources à chaque clic.
 
 Trois commandes répondent à trois besoins différents : **démarrer les services** les rend disponibles ; **migrate** prépare les tables ; **import_onwani** les alimente avec les données extérieures. Le navigateur et le serveur Next.js ne participent pas à l'import.
 
@@ -672,7 +684,7 @@ Trois commandes répondent à trois besoins différents : **démarrer les servic
 
 ### 6.1. Lancer le premier import manuel des parcelles Onwani
 
-**Facultatif pour lancer le site, nécessaire pour alimenter le catalogue de parcelles.** Cette commande interroge directement DMT/Onwani ; elle n'utilise pas le HTML fourni. Elle reste manuelle, sans tâche planifiée.
+**Facultatif pour lancer le site, nécessaire pour alimenter le catalogue de parcelles.** Cette commande interroge directement DMT/Onwani ; elle n'utilise pas le HTML fourni. Le parcours ci-dessous reste manuel. Pour lancer la même famille d'import depuis une UI ou selon un calendrier, suivre [le parcours Prefect](#orchestration-prefect).
 
 **1. Ouvrir Docker Desktop**, puis un terminal PowerShell (le terminal B si le site tourne déjà). Le site web n'a pas besoin de tourner pour importer les données.
 
@@ -710,7 +722,7 @@ La première commande reconstruit le programme API avec le nouveau code et déma
 - `observed` : nombre d'enregistrements collectés ; `quarantined` : géométries invalides conservées pour examen, sans correction automatique ni remplacement d'une ancienne géométrie valide.
 - Un statut `quarantined` signale un lot à examiner, pas une carte entièrement validée. Une erreur de réseau, de territoire, de schéma ou de couverture laisse le catalogue précédent intact ; les captures déjà reçues et le statut de l'acquisition restent enregistrés.
 
-Tu peux relancer l'import : il crée une nouvelle acquisition, sans dupliquer les parcelles qui gardent le même identifiant de source. Les observations et captures successives sont conservées. Aucun enregistrement absent n'est supprimé automatiquement. Cela ne publie pas encore les parcelles sur le site, qui reste une page d'attente.
+Tu peux relancer l'import : il crée une nouvelle acquisition, sans dupliquer les parcelles qui gardent le même identifiant de source. Les observations et captures successives sont conservées. Aucun enregistrement absent n'est supprimé automatiquement. L'exploration locale peut consulter ces parcelles ; l'import ne constitue pas une approbation automatique de dossiers publics.
 
 Dans l'outil de base de données, les tables métier sont sous les schémas `real_estate` et `evidence` :
 
@@ -778,7 +790,7 @@ Le programme ne remplace pas un texte incertain par une vérité inventée. Il p
 | Contrôle topologique | Détecter un contour qui se croise | Enregistrement de quarantaine et référence de capture |
 | Détection de changement | Comparer les attributs typés et la géométrie à la parcelle existante | Nouvelle observation ; audit et révision si le catalogue change |
 
-WGS84/EPSG:4326 décrit les coordonnées longitude/latitude utilisées ici. Une **topologie** décrit notamment la cohérence des contours et trous. PostGIS stocke la géométrie ; une bibliothèque cartographique affichera plus tard ces contours à l'écran.
+WGS84/EPSG:4326 décrit les coordonnées longitude/latitude utilisées ici. Une **topologie** décrit notamment la cohérence des contours et trous. PostGIS stocke la géométrie ; MapLibre affiche ces contours dans l'exploration locale.
 
 Une parcelle n'est pas un bâtiment ni un logement. L'usage cadastral ou le dernier permis disponible ne prouve pas à lui seul un prix, une date de livraison ou la disponibilité d'un appartement.
 
@@ -800,6 +812,8 @@ Dans PyCharm, ouvrir les fichiers ci-dessous. Les libellés donnent le chemin co
 | [apps/api/tests/test_onwani_postgis.py](../../apps/api/tests/test_onwani_postgis.py) | Tests avec PostGIS réel | Vérifie géométries, répétition, rollback, quarantaine et imports concurrents |
 
 **Ordre conseillé pour comprendre :** commencer par `apps/api/src/property_platform/modules/evidence/services.py`, puis ouvrir les fonctions qu'il appelle dans les deux fichiers de connecteur et de services catalogue. Les modèles expliquent ensuite les champs enregistrés. L'ORM Django traduit les opérations comme `objects.create()` en requêtes SQL vers PostgreSQL.
+
+Pour la collecte orchestrée, ouvrir aussi `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\`. Ce dossier possède les collecteurs, les flows Prefect, les calendriers et le stockage des reçus. Les règles métier, modèles et transactions restent dans les modules Django ci-dessus ; [INGESTION.md](INGESTION.md) donne les fichiers à lire et leur ordre d'appel.
 
 Ici, la collecte utilise une API publique qui renvoie du JSON. Le **scraping de pages HTML**, l'OCR de documents et les traitements IA seront d'autres collecteurs ; ils ne sont pas implémentés dans cet import.
 
@@ -863,11 +877,11 @@ L'identifiant `capture_id` d'une observation permet de retrouver sa capture et s
 
 Docker Desktop → Volumes → `property-platform-local_postgres18-data` montre les fichiers internes de PostgreSQL, pas un tableau des parcelles. Des fichiers numérotés et du texte illisible sont normaux. Pour lire les lignes, utiliser la connexion SQL ; pour faire évoluer les données métier, utiliser les services/imports prévus, plutôt qu'éditer directement les tables.
 
-### 6.7. Ce qui est manuel aujourd'hui et ce qui sera automatisé
+### 6.7. Imports manuels et orchestration désormais disponible
 
-Aujourd'hui, les commandes manuelles collectent parcelles, secteurs, rues et objets OSM, puis un registre borné de pages de promoteurs, courtiers, médias et forums. Cela ne couvre pas tous les bâtiments ou toutes les discussions. Les workflows automatiques, prix structurés, avis, IA et génération vidéo ne sont pas implémentés. Les réponses et petits aperçus du pilote restent dans PostgreSQL ; stockage objet, déduplication physique et rétention viendront avec les volumes et autres formats.
+Les commandes manuelles collectent parcelles, secteurs, rues et objets OSM, puis un registre borné de pages de promoteurs, courtiers, médias et forums. Prefect peut maintenant déclencher et superviser les ingestions configurées, avec le même catalogue et les mêmes règles métier. Cela ne couvre pas tous les bâtiments ou toutes les discussions. Prix structurés, avis, IA et génération vidéo ne sont pas implémentés. Les réponses et petits aperçus du pilote restent dans PostgreSQL ; stockage objet, déduplication physique et rétention viendront avec les volumes et autres formats.
 
-Le futur workflow sera **planification → tâche durable → worker Python → même service d'import → contrôles et validation → publication**. Un worker est un processus qui exécute des tâches ; un planificateur décide quand les déclencher. Le serveur web n'aura pas à attendre la collecte dans une requête de visiteur. Les fréquences dépendront de la source, de ses droits d'accès, de son rythme et de ses limites ; elles ne sont pas encore configurées.
+Le trajet actuel est **calendrier ou clic dans Prefect → runner Python → exécution durable Django → service d'import → contrôles et stockage → consultation par l'API**. Le runner exécute les tâches ; Prefect décide quand les déclencher et suit leur état. Le serveur web n'attend pas la collecte dans une requête de visiteur. Sept calendriers sont préconfigurés en heure de Dubai, mais initialement désactivés ; l'opérateur peut les adapter et les activer dans l'UI. Les règles de reprise évitent qu'un retry du même travail réapplique silencieusement des écritures déjà validées.
 
 Automatiser la collecte ne signifie pas accepter ou publier toutes les informations automatiquement. Prix, noms rapprochés, permis, témoignages et suggestions IA demanderont leurs propres règles de validation et preuves. Les sources indisponibles et informations inconnues resteront signalées. Les principes et limites sont détaillés dans [docs/engineering/DATA_PROVENANCE.md](DATA_PROVENANCE.md).
 
@@ -944,6 +958,27 @@ L'environnement `.cache/imagery-tools` installe Rasterio et ses dépendances **u
 
 Enfin relancer le site avec `pnpm.cmd dev:web`, ou reconstruire le profil Docker de prévisualisation du début du guide. Ouvrir `/en/explore`, essayer RT4, une parcelle, les onglets rues/projets, la légende et les dates satellite. Les imports ne sont pas nécessaires pour simplement consulter les données déjà présentes.
 
+<a id="orchestration-prefect"></a>
+
+### 6.9. Programmer et suivre les ingestions avec Prefect
+
+**Ce que cette partie ajoute :** une interface d'exploitation sur [http://localhost:4200](http://localhost:4200), indépendante du site immobilier. Une procédure enregistrée dans Prefect s'appelle un **deployment** ; une demande d'exécution crée un **flow run**, avec son état et ses logs. Le démarrage du runner enregistre ces procédures ; il ne lance pas toutes les collectes automatiquement.
+
+Ouvrir le [guide INGESTION.md](INGESTION.md), soit `C:\Users\Karim\Repositories\property-platform\docs\engineering\INGESTION.md`, puis suivre son parcours **installation → migration → démarrage → premier contrôle dans l'UI**. Il contient les commandes complètes, les boutons à utiliser, les cas d'erreur et l'arrêt conservant les volumes. Ce guide de développement conserve les imports manuels comme alternative ; il n'est pas nécessaire de refaire tous les blocs de la section 6 avant chaque utilisation de Prefect.
+
+| Procédures disponibles | Calendrier initial | Ce qu'elles alimentent |
+|---|---|---|
+| Parcelles Onwani | Préconfiguré, désactivé | Parcelles officielles et leurs preuves |
+| Quatre couches : district, secteurs/community, rues officielles, OSM | Quatre calendriers préconfigurés, désactivés | Périmètres, rues, empreintes de bâtiments et lieux du pilote |
+| Références de projets | Préconfiguré, désactivé | Pages du registre examiné et repères déclarés |
+| Présentations immobilières et médias autorisés | Préconfiguré, désactivé | Fiches déjà examinées et photos autorisées ; pas de prix ou stock nouveaux |
+| Aperçus Sentinel | Sans calendrier, manuel | Reçu existant ; l'acquisition raster reste dans son environnement séparé |
+| Vérification de disponibilité de l'ingestion | Sans calendrier, manuel | Contrôle du schéma et des registres, sans collecte ni écriture métier |
+
+Ces lignes représentent **neuf procédures : sept avec calendrier initialement désactivé, deux sans calendrier**. Avant d'activer une actualisation régulière, commencer par une exécution manuelle et examiner son résultat dans Prefect. Les changements de calendrier effectués dans l'UI sont conservés au redémarrage du runner.
+
+Le code se trouve dans `C:\Users\Karim\Repositories\property-platform\apps\ingestion\` et l'overlay Docker dans `C:\Users\Karim\Repositories\property-platform\infra\local\compose.ingestion.yaml`. Les trois services supplémentaires sont **prefect**, **prefect-db** et **ingestion**. Prefect conserve sa supervision dans une base PostgreSQL séparée ; les objets immobiliers et leur provenance restent dans la base PostGIS existante. Les reçus de collecte vont dans un volume dédié, pas dans Git. Les photographies éditoriales et polices déjà versionnées du site restent des ressources statiques, sans ingestion planifiée.
+
 <a id="compte-administration"></a>
 
 ## 7. Créer un compte d'administration — facultatif
@@ -1011,13 +1046,15 @@ Ctrl+C arrête le suivi des journaux, sans arrêter les conteneurs.
 
 ### Tout arrêter en conservant les données
 
-Arrêter Next.js avec Ctrl+C dans le terminal A, puis :
+Arrêter Next.js avec Ctrl+C dans le terminal A. Si Prefect est aussi lancé, utiliser [son arrêt complet](INGESTION.md). Pour le seul parcours API/PostGIS :
 
 ```powershell
 docker compose -f infra/local/compose.yaml down
 ```
 
 down retire les conteneurs/réseaux locaux mais conserve le volume de base. **Ne pas ajouter -v pour un arrêt ordinaire** : cela supprimerait les données PostgreSQL, notamment les comptes et futurs dossiers pilotes.
+
+Si l'overlay Prefect est également démarré, utiliser la procédure d'arrêt de [INGESTION.md](INGESTION.md) pour arrêter aussi **ingestion**, **prefect** et **prefect-db** en conservant leurs volumes. La commande de base ci-dessus ne décrit que le parcours API/PostGIS du présent bloc.
 
 <a id="site-compile"></a>
 

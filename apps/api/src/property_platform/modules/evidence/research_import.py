@@ -151,41 +151,49 @@ def reprocess_reference(reference, *, actor):
         return run
 
 
-def import_reference(row, *, actor):
+def fetch_reference(url):
+    """Default bounded acquisition; workers may inject a separately managed transport."""
+    started = datetime.now(UTC)
+    request = Request(
+        url,
+        headers={"User-Agent": "PropertyPlatform/0.1 (manual public reference acquisition)"},
+    )
+    try:
+        response = urlopen(request, timeout=18)
+    except HTTPError as exc:
+        response = exc
+    with response:
+        payload = response.read(MAX_BYTES + 1)
+        if len(payload) > MAX_BYTES:
+            raise ValueError("Reference exceeds capture budget")
+        return payload, {
+            "url": response.geturl(),
+            "http_status": response.status,
+            "fetched_started_at": started,
+            "fetched_at": datetime.now(UTC),
+            "etag": response.headers.get("ETag", "")[:500],
+            "last_modified_raw": response.headers.get("Last-Modified", "")[:160],
+        }
+
+
+def import_reference(row, *, actor, acquisition=None):
     url = row["url"]
     source, _ = Source.objects.get_or_create(
         key="research:" + hashlib.sha256(url.encode()).hexdigest()[:40],
         defaults={"name": row["label"], "url": url},
     )
     run = IngestionRun.objects.create(source=source, actor=actor, connector_version=VERSION)
-    started = datetime.now(UTC)
     try:
-        request = Request(
-            url,
-            headers={"User-Agent": "PropertyPlatform/0.1 (manual public reference acquisition)"},
+        payload, receipt = (acquisition or fetch_reference)(url)
+        if len(payload) > MAX_BYTES:
+            raise ValueError("Reference exceeds capture budget")
+        capture = Capture.objects.create(
+            run=run,
+            payload=payload,
+            byte_length=len(payload),
+            content_sha256=hashlib.sha256(payload).hexdigest(),
+            **receipt,
         )
-        try:
-            response = urlopen(request, timeout=18)
-        except HTTPError as exc:
-            response = exc
-        with response:
-            payload = response.read(MAX_BYTES + 1)
-            status = response.status
-            actual_url = response.geturl()
-            if len(payload) > MAX_BYTES:
-                raise ValueError("Reference exceeds capture budget")
-            capture = Capture.objects.create(
-                run=run,
-                url=actual_url,
-                payload=payload,
-                byte_length=len(payload),
-                http_status=status,
-                content_sha256=hashlib.sha256(payload).hexdigest(),
-                fetched_started_at=started,
-                fetched_at=datetime.now(UTC),
-                etag=response.headers.get("ETag", "")[:500],
-                last_modified_raw=response.headers.get("Last-Modified", "")[:160],
-            )
         return finish_reference(capture, row, run)
     except Exception as exc:
         run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()

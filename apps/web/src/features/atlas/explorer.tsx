@@ -195,6 +195,12 @@ export function Explorer({
       if (!r.ok) throw new Error("unavailable");
       const data = (await r.json()) as ParcelDetail;
       if (current === requestId.current) {
+        setSelected(data.id);
+        if (data.id !== id) {
+          const canonicalUrl = new URL(window.location.href);
+          canonicalUrl.searchParams.set("parcel", data.id);
+          window.history.replaceState(null, "", canonicalUrl);
+        }
         setDetail(data);
         setDetailState("ready");
       }

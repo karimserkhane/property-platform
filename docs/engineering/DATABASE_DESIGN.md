@@ -2,6 +2,8 @@
 
 Revue du 11 octobre 2026, fondée sur les modèles, migrations, services, tests et une inspection en lecture seule de la base locale `property_platform`. Ce document couvre organisation métier, intégrité, géographie, acquisition, sécurité et exploitation. Il ne constitue pas une certification de production et ne prouve pas qu'un mécanisme prévu existe déjà.
 
+**Actualisation du 13 octobre 2026 :** la [section sur l'orchestration](#orchestration-des-imports--13-octobre-2026) décrit les nouvelles tables d'identité d'exécution et la séparation de la base Prefect. Les résultats chiffrés de la revue du 11 octobre restent des observations historiques.
+
 ## 1. Décision de nommage
 
 Le nom retenu pour le **domaine immobilier et son schéma SQL** est `real_estate`. Il décrit durablement les parcelles, projets, bâtiments et logements, indépendamment de la marque Property Platform et du territoire Reem. `catalog` reste le nom du module Django installé pour préserver les identifiants des modèles et l'historique des migrations. La table est désormais `real_estate.parcel` après application des migrations.
@@ -11,7 +13,7 @@ Un schéma regroupe des objets dans une base. Ce n'est ni un dossier du dépôt 
 | Domaine cible | Contenu | Tables ou exemples | État |
 |---|---|---|---|
 | `real_estate` | Biens, projets et relations acceptées | `parcel`, `building`, `unit`, `development_project` | Schéma créé : parcel, street, building, place, administrative_area ; unités/projets acceptés à créer |
-| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Schéma créé avec onze tables, dont map_observation, research_reference, imagery_scene, property_presentation et property_media |
+| `evidence` | Origine des informations, acquisitions et observations | `source`, `ingestion_run`, `capture`, `parcel_observation` | Quinze tables après evidence 0012, dont les présentations/médias, deux tables d'orchestration et deux tables de décisions d'identité |
 | `publication` | Dossiers validés et versions accessibles au public | `project_version`, `publication_decision` | Première fonctionnalité de publication |
 | `market` | Transactions, offres, prix et échéanciers | `transaction`, `listing`, `price_observation`, `payment_schedule` | Première fonctionnalité de prix ; responsabilités à documenter |
 | `media` | Métadonnées des documents, images, vidéos et dérivés | `asset`, `asset_version`, `processing_result` | Premier traitement documentaire ; fichiers dans un stockage adapté |
@@ -116,11 +118,11 @@ Les clés étrangères sont indexées et l'identité de source est unique. Les i
 
 Le connecteur actuel possède limites de réponse, contrôle de territoire/couverture, verrou PostgreSQL, quarantaine et écriture atomique. Une nouvelle acquisition n'efface pas les captures précédentes ; un échec préserve les captures déjà reçues. L'absence d'une parcelle dans une acquisition ne provoque pas sa suppression automatique.
 
-Le verrou sérialise Onwani seulement : ce n'est pas une protection universelle contre des mises à jour concurrentes par les futures API ou collecteurs. Ces écritures devront partager les services propriétaire, transactions et politique de conflit/version.
+Les verrous sérialisent les imports des familles de sources protégées : Onwani possède sa clé, les couches/références et présentations partagent une autre clé. Ils ne sont pas une protection universelle contre des mises à jour par les futures API ou des écritures SQL directes. Ces écritures devront partager les services propriétaires, transactions et politique de conflit/version. Dans le parcours Prefect, la précollecte réseau précède ces verrous de mutation.
 
 Les JSON bornés restent dans PostgreSQL aujourd'hui. Documents, photos et vidéos iront dans un stockage objet avec références, empreintes, formats, droits, versions et politique de rétention. Déduplication physique et réutilisation logique d'une preuve sont deux décisions différentes. Les fichiers originaux autorisés ne doivent pas être remplacés par leurs dérivés.
 
-Automatisation future : identifiants durables de tâches, états, reprises bornées, détection des tâches bloquées, journalisation et alertes sur erreurs significatives. Pour les appels payants : réservation de budget et réconciliation avant retry. L'idempotence des parcelles n'empêche pas une double facturation d'une vidéo générée. Pas de collecte longue ou rendu 3D dans une requête de visiteur.
+L'orchestration Prefect et les identités durables d'import sont désormais implémentées ; voir [l'extension du 13 octobre](#orchestration-des-imports--13-octobre-2026). La supervision de fraîcheur des informations, une politique de rétention des captures et les alertes métier restent à développer avec leurs besoins mesurés. Pour les futurs appels payants : réservation de budget et réconciliation avant retry. L'idempotence des parcelles n'empêche pas une double facturation d'une vidéo générée. Pas de collecte longue ou rendu 3D dans une requête de visiteur.
 
 ## 9. Permissions, données personnelles et exploitation
 
@@ -144,7 +146,7 @@ Surveiller échecs/durée/ancienneté des imports, quarantaine, dérive de sché
 | Implémenté | Migration `real_estate`/`evidence` compatible Django | ORM, introspection, migrations aller/retour, séquences, contraintes, `flush`, tests et restauration validés sur PostGIS |
 | Avant plusieurs sources immobilières | Correspondances d'identité et rapprochements réversibles | Deux sources pour un bien sans fusion incontrôlée ; annulation d'un rapprochement testée |
 | Avec la carte et les fiches | Modèles bâtiments/logements, versions/publication et requêtes spatiales | Provenance visible, limites de lecture, contrats, tests de publication et plans de requêtes mesurés |
-| Avec la collecte automatique | Tâches durables, reprises, observations de qualité | Échec/reprise, concurrence et détection de tâches bloquées testés |
+| Implémenté pour les imports existants | Prefect et identité durable d'exécution | Horaires/UI séparés des preuves, reprises et résultat atomique ; alertes de fraîcheur et réconciliation opérationnelle à étendre |
 | Avant accès public | Droits d'exécution, protection des preuves, sauvegarde/restauration et supervision | Tests avec les vrais rôles, accès refusés quand attendu et restauration vérifiée |
 
 La migration de noms conserve UUID, observations, audit, captures et relations. Préparer une sauvegarde vérifiée et un relevé des effectifs/identités ; appliquer en période contrôlée, comparer après migration et reconstruire les programmes utilisant les noms. Ne pas éditer les migrations déjà appliquées. [Opérations de migration Django](https://docs.djangoproject.com/en/6.1/ref/migration-operations/)
@@ -159,7 +161,7 @@ La structure cible ne crée pas de nouveaux modules Python à elle seule. Les pr
 - Image API reconstruite et migrations d'intégrité puis de schémas appliquées à la base locale. Comparaison avant/après du contenu complet, des effectifs et identités PostgreSQL des sept tables : identiques. Aucun ancien nom de table métier ne subsiste dans `public` ; tables techniques et extensions restent en place.
 - Import réel après déplacement : `created=0`, `updated=0`, `unchanged=2431`, `observed=2432`, `quarantined=1`. Une nouvelle acquisition conserve ses captures et observations dans `evidence`, sans doublon de parcelle dans `real_estate`. La quarantaine existante n'est pas une erreur de migration.
 
-Ce contrôle ponctuel de restauration n'est pas un service de sauvegarde automatique. Les rôles de production, les reprises de tâches et les versions métier complètes restent à réaliser aux étapes indiquées ci-dessus.
+Ce contrôle ponctuel de restauration n'est pas un service de sauvegarde automatique. Les rôles de production et les versions métier complètes restent à réaliser aux étapes indiquées ci-dessus. L'ajout du 13 octobre implémente les reprises des imports existants ; il ne crée pas un service de restauration ou une réconciliation universelle des traitements futurs.
 
 ## 12. Identité technique générique — 12 octobre 2026
 
@@ -172,3 +174,40 @@ Les paramètres de l'installation active et le parcours de reprise sont dans [BR
 ## Premières présentations et images documentées
 
 La migration evidence 0010 ajoute `property_platform.evidence.property_presentation` et `property_platform.evidence.property_media`, sans modifier les identités ou déplacer les données existantes. Présentation typée, cible exclusive bâtiment/lieu, captures de source et de licence protégées par FK, version de revue, dates et contrôle de diffusion sont décrits dans [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md). Ces petites captures photo de pilote ne remplacent pas le futur domaine média, son stockage objet et ses workflows de droits/administration.
+
+## Orchestration des imports — 13 octobre 2026
+
+Le code [evidence/orchestration.py](../../apps/api/src/property_platform/modules/evidence/orchestration.py) fournit une passerelle propriétaire pour les imports Onwani, couches géographiques, références, présentations et reçus satellite existants. Prefect les déclenche dans `apps/ingestion` ; il ne remplace pas leurs modèles, captures ou invariants. L'enregistrement de neuf déploiements ne collecte aucune nouvelle donnée immobilière. Les programmes et commandes d'exploitation sont décrits dans [INGESTION.md](INGESTION.md).
+
+La migration additive [0011_ingestion_orchestration.py](../../apps/api/src/property_platform/modules/evidence/migrations/0011_ingestion_orchestration.py) ajoute deux tables dans `evidence`, avec contrôle des collisions et placement explicite du schéma :
+
+| Table | Responsabilité | Données conservées |
+|---|---|---|
+| `property_platform.evidence.ingestion_execution` | Identité durable d'une opération planifiée ou reprise | Clé d'exécution unique, opération/portée, opérateur, UUID du flow Prefect, empreinte d'entrée si applicable, tentatives, dates UTC, état et bilan |
+| `property_platform.evidence.ingestion_execution_run` | Relation entre une exécution et ses acquisitions de source | Liens multiples vers `evidence.ingestion_run`, sans déplacer ses captures/observations |
+
+`ingestion_execution` décrit l'exécution opérationnelle ; `ingestion_run` décrit l'acquisition d'une source ; `capture` contient ses octets et dates réelles. Un import de plusieurs présentations peut produire plusieurs acquisitions liées au même job. Le UUID Prefect est une référence opérationnelle ; il ne crée pas de clé étrangère entre deux bases.
+
+Une même identité de flow/opération/portée réutilise un résultat déjà `succeeded` ou `quarantined`, sans nouvelle collecte ni écriture. Pour les présentations et scènes, une empreinte inclut les reçus et leurs dates : rejouer exactement un lot déjà appliqué reste distinct d'une acquisition véritablement nouvelle. Les checkpoints de présentations conservent les dates d'origine lors d'une reprise ; ils ne remplacent pas les captures métier validées. Les vérifications d'identité refusent qu'une clé existante soit réaffectée à une autre demande.
+
+Un nouveau run rejouant exactement un reçu possède sa propre `ingestion_execution`, avec son auteur et son UUID Prefect ; `reused_from` pointe vers l'import initial. La ligne de répétition ne revendique pas une deuxième empreinte d'import canonique et référence les acquisitions déjà validées. Les dates et auteurs des captures initiales ne sont pas remplacés par l'heure du replay.
+
+### Identifiants de fournisseur renouvelés
+
+Les rafraîchissements réels Onwani ont montré que `OBJECTID` peut changer sans changement de parcelle ou de communauté. Les tables typées `evidence.parcel_source_alias` et `evidence.administrative_area_source_alias` gardent les décisions d'association à l'UUID interne, leur capture justificative, auteur, raison et révocation. La contrainte d'unicité concerne les décisions actives ; une décision révoquée reste historique.
+
+`real_estate.parcel.superseded_by` et `real_estate.administrative_area.superseded_by` conservent les objets historiques créés en double. La projection et les compteurs les excluent ; un lien à une parcelle remplacée résout l'objet canonique. Une réparation explicite s'appuie sur les captures et conserve toutes les anciennes observations. Le nom ou la proximité ne déclenche pas de fusion ; une identité ambiguë ou un numéro réutilisé pour un autre objet échoue avant modification canonique. Voir [le guide d'ingestion](INGESTION.md#quand-le-fournisseur-change-ses-identifiants-techniques).
+
+Le réseau de précollecte précède la transaction canonique. Les captures préparées sont rejouées sans réseau ; les vérifications d'ensemble, les mutations et le marqueur de fin réussie/quarantaine partagent la transaction. Une dérive du protocole de replay fait aussi annuler ses mutations. Les verrous PostgreSQL sérialisent l'application des imports protégés ; la concurrence réseau est limitée par le runner local et la cadence des collecteurs, pas par ces verrous acquis après collecte. Les états `failed` restent explicites ; la quarantaine conserve les rejets et les enregistrements valides selon le protocole existant. Ces garanties concernent les imports actuels, pas les futurs appels payants ou la génération.
+
+Le profil Compose sépare les stockages :
+
+| Service / base | Contenu | Volume local |
+|---|---|---|
+| `db` / `property_platform` | Catalogue PostGIS, preuves et identité d'exécution métier | `property-platform-local_postgres18-data`, existant |
+| `prefect-db` / `prefect` | Déploiements, horaires, états/logs opérationnels gérés par Prefect | `property-platform-local_prefect-postgres18-data` |
+| `ingestion` / répertoire `/data` | Checkpoints privés de reçus et entrée des imports satellite | `property-platform-local_ingestion-data` |
+
+`prefect-db` utilise PostgreSQL 18.6, sans extension PostGIS et sans port publié vers Windows. Son réseau de métadonnées est privé. Le serveur expose seulement l'interface locale sur `127.0.0.1:4200`. Prefect gère ses propres migrations de métadonnées ; les migrations Django métier restent une opération explicite via `manage.py migrate`. Supprimer le volume Prefect perd les horaires/historiques de cette UI ; supprimer le volume métier peut perdre les biens et preuves. Aucun de ces volumes n'est une sauvegarde.
+
+S3, des documents commerciaux supplémentaires et les tables d'unités/prix ne sont pas créés par cet ajout. Avant production, définir accès authentifié à l'orchestrateur, secrets, rôles SQL minimaux, sauvegardes des deux bases et politique de rétention des reçus.

@@ -1,7 +1,7 @@
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.gis.geos.error import GEOSException
 
-from .models import Parcel
+from .models import AdministrativeArea, Parcel
 
 
 def geometry_from_rings(rings):
@@ -29,13 +29,16 @@ def geometry_from_rings(rings):
     return geometry
 
 
-def reconcile_parcel(*, namespace, record, geometry):
+def reconcile_parcel(*, namespace, record, geometry, canonical_id=None):
     """Called inside an outer transaction that also persists evidence and audit."""
+    records = Parcel.objects.select_for_update().filter(source_namespace=namespace)
     parcel = (
-        Parcel.objects.select_for_update()
-        .filter(source_namespace=namespace, source_record_id=record["record_id"])
-        .first()
+        records.get(id=canonical_id, superseded_by__isnull=True)
+        if canonical_id is not None
+        else records.filter(source_record_id=record["record_id"]).first()
     )
+    if parcel is not None and parcel.superseded_by_id is not None:
+        raise ValueError("Superseded parcel requires an explicit canonical identity")
     values = record["values"]
     if parcel is None:
         parcel = Parcel.objects.create(
@@ -57,12 +60,16 @@ def reconcile_parcel(*, namespace, record, geometry):
     return parcel, "updated", {**before, "geometry_changed": geometry_changed}, values
 
 
-def reconcile_map_record(*, model, namespace, record_id, values, geometry):
-    identity = (
-        model.objects.select_for_update()
-        .filter(source_namespace=namespace, source_record_id=record_id)
-        .first()
-    )
+def reconcile_map_record(*, model, namespace, record_id, values, geometry, canonical_id=None):
+    records = model.objects.select_for_update().filter(source_namespace=namespace)
+    if canonical_id is not None:
+        if model is not AdministrativeArea:
+            raise ValueError("Canonical aliases are only supported for administrative areas")
+        identity = records.get(id=canonical_id, superseded_by__isnull=True)
+    else:
+        identity = records.filter(source_record_id=record_id).first()
+    if isinstance(identity, AdministrativeArea) and identity.superseded_by_id is not None:
+        raise ValueError("Superseded area requires an explicit canonical identity")
     if identity is None:
         identity = model.objects.create(
             source_namespace=namespace, source_record_id=record_id, geometry=geometry, **values
@@ -79,6 +86,65 @@ def reconcile_map_record(*, model, namespace, record_id, values, geometry):
     identity.revision += 1
     identity.save()
     return identity, "updated", {**before, "geometry_changed": changed}, values
+
+
+def supersede_parcel(*, duplicate_id, canonical_id):
+    duplicate = Parcel.objects.select_for_update().get(id=duplicate_id)
+    canonical = Parcel.objects.select_for_update().get(id=canonical_id)
+    if (
+        duplicate.id == canonical.id
+        or canonical.superseded_by_id is not None
+        or duplicate.superseded_by_id not in (None, canonical.id)
+        or Parcel.objects.filter(superseded_by=duplicate).exists()
+        or duplicate.source_namespace != canonical.source_namespace
+        or not duplicate.official_plot_id
+        or duplicate.official_plot_id != canonical.official_plot_id
+        or duplicate.code != canonical.code
+        or duplicate.municipality != canonical.municipality
+        or duplicate.district != canonical.district
+        or not duplicate.geometry.equals(canonical.geometry)
+    ):
+        raise ValueError("Unsafe parcel supersession")
+    if duplicate.superseded_by_id == canonical.id:
+        return False
+    duplicate.superseded_by = canonical
+    duplicate.revision += 1
+    duplicate.save(update_fields=["superseded_by", "revision", "updated_at"])
+    return True
+
+
+def supersede_administrative_area(*, duplicate_id, canonical_id):
+    duplicate = AdministrativeArea.objects.select_for_update().get(id=duplicate_id)
+    canonical = AdministrativeArea.objects.select_for_update().get(id=canonical_id)
+    if (
+        duplicate.id == canonical.id
+        or canonical.superseded_by_id is not None
+        or duplicate.superseded_by_id not in (None, canonical.id)
+        or AdministrativeArea.objects.filter(superseded_by=duplicate).exists()
+        or duplicate.source_namespace != canonical.source_namespace
+        or (duplicate.name, duplicate.name_ar, duplicate.kind)
+        != (canonical.name, canonical.name_ar, canonical.kind)
+        or not duplicate.geometry.equals(canonical.geometry)
+    ):
+        raise ValueError("Unsafe administrative-area supersession")
+    if duplicate.superseded_by_id == canonical.id:
+        return False
+    duplicate.superseded_by = canonical
+    duplicate.revision += 1
+    duplicate.save(update_fields=["superseded_by", "revision", "updated_at"])
+    return True
+
+
+def restore_superseded_identity(*, model, duplicate_id, canonical_id):
+    if model not in (Parcel, AdministrativeArea):
+        raise ValueError("Unsupported identity restoration")
+    duplicate = model.objects.select_for_update().get(id=duplicate_id)
+    canonical = model.objects.select_for_update().get(id=canonical_id)
+    if canonical.superseded_by_id is not None or duplicate.superseded_by_id != canonical.id:
+        raise ValueError("Supersession has changed; review before reversal")
+    duplicate.superseded_by = None
+    duplicate.revision += 1
+    duplicate.save(update_fields=["superseded_by", "revision", "updated_at"])
 
 
 def retire_map_record(*, model, namespace, record_id):

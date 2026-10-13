@@ -16,6 +16,7 @@
 - [Versions des outils et compatibilités](engineering/TOOLCHAIN.md)
 - [Multilingue et RTL](engineering/INTERNATIONALIZATION.md)
 - [Collecte directe, provenance des données et audit](engineering/DATA_PROVENANCE.md)
+- [Ingestion et orchestration Prefect : installation, interface, calendriers et exploitation](engineering/INGESTION.md)
 - [Pipelines pour les fiches de projets : sources, modèles et ordre de réalisation](engineering/PROPERTY_DATA_PIPELINES.md)
 - [Base de données : noms, intégrité et évolution](engineering/DATABASE_DESIGN.md)
 - [Revue critique de structure](engineering/STRUCTURE_REVIEW.md)
@@ -33,3 +34,5 @@ Les décisions actuelles et les archives sont séparées. Les documents historiq
 Pour comprendre les choix actuels, lire **V2 → contre-audit → structure → versions → guide de développement**. La V1 archivée sert à comprendre les choix précédents et leur évolution.
 
 Les [premières fiches immobilières](engineering/PROPERTY_EXPLORATION.md) décrivent l’exploration centrée sur les biens, les présentations documentées et les photos sous licence du pilote.
+
+Depuis le 13 octobre 2026, [l'orchestration Prefect](engineering/INGESTION.md) est implémentée dans `apps/ingestion`, à côté du site et de l'API dans le même dépôt. Neuf procédures couvrent les données configurées du pilote ; sept calendriers commencent désactivés et deux procédures restent manuelles. L'interface de supervision locale sur le port 4200 utilise sa propre base de métadonnées ; les données immobilières restent dans PostGIS. Les modèles commerciaux supplémentaires décrits dans [le cadrage des pipelines](engineering/PROPERTY_DATA_PIPELINES.md) restent une extension distincte.

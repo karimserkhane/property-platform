@@ -13,6 +13,145 @@ class Source(models.Model):
         db_table = "source"
 
 
+class ParcelSourceAlias(models.Model):
+    """Reviewed provider OBJECTID alias, with proof and reversible supersession."""
+
+    source_namespace = models.CharField(max_length=120)
+    source_record_id = models.CharField(max_length=80)
+    parcel = models.ForeignKey(
+        "catalog.Parcel", on_delete=models.PROTECT, related_name="source_aliases"
+    )
+    capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)
+    superseded_parcel = models.ForeignKey(
+        "catalog.Parcel", null=True, on_delete=models.PROTECT, related_name="supersession_decisions"
+    )
+    actor = models.CharField(max_length=160)
+    reason = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    canonical_revision = models.PositiveIntegerField(default=1)
+    superseded_revision = models.PositiveIntegerField(null=True)
+    active = models.BooleanField(default=True)
+    revoked_at = models.DateTimeField(null=True)
+    revoked_by = models.CharField(max_length=160, blank=True)
+    revocation_reason = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = "parcel_source_alias"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_namespace", "source_record_id"],
+                condition=models.Q(active=True),
+                name="parcel_alias_provider_identity",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    source_namespace__regex=r"\S",
+                    source_record_id__regex=r"\S",
+                    actor__regex=r"\S",
+                    reason__regex=r"\S",
+                ),
+                name="parcel_alias_audit_present",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(superseded_parcel__isnull=True)
+                | ~models.Q(parcel=models.F("superseded_parcel")),
+                name="parcel_alias_distinct_identities",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    active=True, revoked_at__isnull=True, revoked_by="", revocation_reason=""
+                )
+                | models.Q(
+                    active=False,
+                    revoked_at__isnull=False,
+                    revoked_at__gte=models.F("created_at"),
+                    revoked_by__regex=r"\S",
+                    revocation_reason__regex=r"\S",
+                ),
+                name="parcel_alias_review_lifecycle",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(canonical_revision__gte=1)
+                & (
+                    models.Q(superseded_revision__isnull=True)
+                    | models.Q(superseded_revision__gte=1)
+                ),
+                name="parcel_alias_revisions_valid",
+            ),
+        ]
+
+
+class AdministrativeAreaSourceAlias(models.Model):
+    """Provider area alias supported by identical non-OBJECTID attributes/geometry."""
+
+    source_namespace = models.CharField(max_length=120)
+    source_record_id = models.CharField(max_length=80)
+    administrative_area = models.ForeignKey(
+        "catalog.AdministrativeArea", on_delete=models.PROTECT, related_name="source_aliases"
+    )
+    capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)
+    superseded_area = models.ForeignKey(
+        "catalog.AdministrativeArea",
+        null=True,
+        on_delete=models.PROTECT,
+        related_name="supersession_decisions",
+    )
+    actor = models.CharField(max_length=160)
+    reason = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    canonical_revision = models.PositiveIntegerField(default=1)
+    superseded_revision = models.PositiveIntegerField(null=True)
+    active = models.BooleanField(default=True)
+    revoked_at = models.DateTimeField(null=True)
+    revoked_by = models.CharField(max_length=160, blank=True)
+    revocation_reason = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        db_table = "administrative_area_source_alias"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source_namespace", "source_record_id"],
+                condition=models.Q(active=True),
+                name="area_alias_provider_identity",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    source_namespace__regex=r"\S",
+                    source_record_id__regex=r"\S",
+                    actor__regex=r"\S",
+                    reason__regex=r"\S",
+                ),
+                name="area_alias_audit_present",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(superseded_area__isnull=True)
+                | ~models.Q(administrative_area=models.F("superseded_area")),
+                name="area_alias_distinct_identities",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    active=True, revoked_at__isnull=True, revoked_by="", revocation_reason=""
+                )
+                | models.Q(
+                    active=False,
+                    revoked_at__isnull=False,
+                    revoked_at__gte=models.F("created_at"),
+                    revoked_by__regex=r"\S",
+                    revocation_reason__regex=r"\S",
+                ),
+                name="area_alias_review_lifecycle",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(canonical_revision__gte=1)
+                & (
+                    models.Q(superseded_revision__isnull=True)
+                    | models.Q(superseded_revision__gte=1)
+                ),
+                name="area_alias_revisions_valid",
+            ),
+        ]
+
+
 class PropertyPresentation(models.Model):
     """Immutable, manually reviewed presentation of one existing provider identity."""
 
@@ -112,6 +251,73 @@ class IngestionRun(models.Model):
             models.CheckConstraint(
                 condition=models.Q(actor__regex=r"\S", connector_version__regex=r"\S"),
                 name="ingestion_run_operator_version_present",
+            ),
+        ]
+
+
+class IngestionExecution(models.Model):
+    """Operational identity for a scheduled attempt, separate from source evidence."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    execution_key = models.CharField(max_length=64, unique=True)
+    operation = models.CharField(max_length=40)
+    scope = models.CharField(max_length=100)
+    actor = models.CharField(max_length=160)
+    input_sha256 = models.CharField(max_length=64, null=True)
+    prefect_flow_run_id = models.UUIDField(null=True)
+    reused_from = models.ForeignKey(
+        "self", null=True, on_delete=models.PROTECT, related_name="replays"
+    )
+    attempts = models.PositiveIntegerField(default=1)
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True)
+    status = models.CharField(max_length=20, default="running")
+    error = models.CharField(max_length=160, blank=True)
+    summary = models.JSONField(default=dict)
+    runs = models.ManyToManyField(
+        IngestionRun, db_table="ingestion_execution_run", related_name="executions"
+    )
+
+    class Meta:
+        db_table = "ingestion_execution"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["operation", "scope", "input_sha256"],
+                condition=models.Q(
+                    input_sha256__isnull=False, status__in=["succeeded", "quarantined"]
+                ),
+                name="ingestion_execution_receipt_identity",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(status="running", finished_at__isnull=True)
+                    | models.Q(
+                        status__in=["succeeded", "quarantined", "failed"],
+                        finished_at__isnull=False,
+                        finished_at__gte=models.F("started_at"),
+                    )
+                ),
+                name="ingestion_execution_lifecycle_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    execution_key__regex=r"^[0-9a-f]{64}$",
+                    actor__regex=r"\S",
+                    attempts__gte=1,
+                    operation__in=[
+                        "onwani",
+                        "map",
+                        "references",
+                        "property_presentations",
+                        "imagery",
+                    ],
+                ),
+                name="ingestion_execution_identity_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(input_sha256__isnull=True)
+                | models.Q(input_sha256__regex=r"^[0-9a-f]{64}$"),
+                name="ingestion_execution_receipt_hash_valid",
             ),
         ]
 

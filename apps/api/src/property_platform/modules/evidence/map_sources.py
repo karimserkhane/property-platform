@@ -8,7 +8,7 @@ from urllib.request import Request, urlopen
 
 from .onwani import SourceError
 
-VERSION = "reem-map-v2"
+VERSION = "reem-map-v3"
 MAX_BYTES = 16 * 1024 * 1024
 OSM_URL = "https://overpass-api.de/api/interpreter"
 OSM_MIRROR = "https://overpass.private.coffee/api/interpreter"

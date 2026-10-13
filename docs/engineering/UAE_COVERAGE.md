@@ -51,7 +51,7 @@ Le prototype charge une petite zone en GeoJSON, avec un rectangle de requête ma
 
 À la montée en charge, prévoir des lectures par fenêtre visible, des tuiles vectorielles ou agrégats à faible zoom, une pagination stable de liste et une recherche nationale séparée. Conserver les index spatiaux et mesurer volumes, réseau, SQL et fraîcheur avant d'ajouter caches ou services. Secrets, droits et calendriers de collecte restent distincts par fournisseur.
 
-Prix/unités, règles de frais par juridiction, orchestration automatique, scoring de fiabilité et traitements IA/media restent à développer. Leur provenance, identité durable, coût et contrôle suivent [REPOSITORY.md](REPOSITORY.md), [DATA_PROVENANCE.md](DATA_PROVENANCE.md) et la revue d'architecture. La couverture nationale ne justifie pas à elle seule un remplacement de stack ou des microservices.
+Prix/unités, règles de frais par juridiction, scoring de fiabilité et traitements IA/media restent à développer. L'[orchestration Prefect](INGESTION.md) existe pour les sources du pilote Al Reem ; une autre zone demande ses connecteurs et contrôles avant activation. La provenance, l'identité durable, le coût et le contrôle suivent [REPOSITORY.md](REPOSITORY.md), [DATA_PROVENANCE.md](DATA_PROVENANCE.md) et la revue d'architecture. La couverture nationale ne justifie pas à elle seule un remplacement de stack ou des microservices.
 
 ## Validation de cette modification
 
