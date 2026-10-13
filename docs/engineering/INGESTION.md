@@ -124,6 +124,8 @@ Pour tester les références sans parcourir tout le registre, utiliser **Custom 
 
 ## Configurer les horaires
 
+**Configuration locale activée à la demande de Karim le 13 octobre 2026 :** les sept collectes sont désormais programmées chaque **dimanche**, fuseau **Asia/Dubai** : présentations à 02:00, parcelles à 03:00, district à 04:00, communautés à 04:15, rues à 04:30, OSM à 04:45 et références à 05:00. Les références ne sont donc plus le lundi et les présentations ne sont plus quotidiennes sur ce poste. Le contrôle `ingestion-readiness` et les reçus historiques `sentinel-previews` restent manuels. Les tableaux d'horaires initiaux ci-dessus décrivent le premier enregistrement ; Prefect conserve la configuration active locale au redémarrage.
+
 Sur la page d'un déploiement, le volet **Schedules** contient l'horaire préparé. Son interrupteur permet de l'activer ou le suspendre ; le menu associé permet de l'éditer. **Schedule** ajoute un autre horaire. Vérifier le fuseau **Asia/Dubai**, la fréquence et les paramètres avant l'activation. Le navigateur peut afficher les dates des runs dans son propre fuseau ; celui du schedule gouverne l'exécution.
 
 Nos horaires initiaux sont hebdomadaires pour la géométrie et quotidiens pour les présentations. Une activation n'exige pas une nouvelle migration. Les horaires, leur état actif/inactif et les paramètres modifiés dans Prefect sont conservés au redémarrage du runner ; celui-ci ne rétablit pas systématiquement les valeurs du code. Supprimer tous les horaires d'un déploiement laisse ce choix intact au prochain démarrage.
