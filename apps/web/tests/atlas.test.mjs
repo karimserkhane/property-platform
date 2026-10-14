@@ -158,10 +158,11 @@ test("RT4 ProjectLimits never hides the real parcel under the pointer", () => {
   const sector = hit("area-hit", "RT4", { kind: "community" });
   assert.equal(selectMapHit([overlay, sector, parcel]), parcel);
   assert.equal(selectMapHit([parcel, overlay, sector]), parcel);
-  assert.equal(selectMapHit([overlay, sector]), null);
+  assert.equal(selectMapHit([overlay, sector]), overlay);
+  assert.equal(selectMapHit([overlay]), overlay);
 });
 
-test("sectors, island and project perimeters are never click targets", () => {
+test("sectors stay inert and project perimeters are only the last fallback", () => {
   const district = hit("area-hit", "island", { kind: "district" });
   const sector = hit("area-hit", "RT4", { kind: "community" });
   const overlay = hit("parcel-fill", "RT4_TMP_PL2", { category: "overlay" });

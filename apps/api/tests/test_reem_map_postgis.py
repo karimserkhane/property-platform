@@ -154,6 +154,33 @@ def test_spatial_candidates_preserve_overlap_without_assigning_project_identity(
     )
     assert len(building_place["properties"]["parcel_ids"]) == 2
     assert "project_id" not in building_place["properties"]
+    assert building_place["properties"]["use_types"] == ["housing"]
+    school = next(f for f in result["place"]["features"] if f["properties"]["kind"] == "school")
+    assert school["properties"]["use_types"] == ["school"]
+
+
+def test_building_usage_comes_from_preserved_amenity_tags_not_its_generic_kind(client):
+    district()
+    data = osm()
+    data["elements"][0]["tags"].update(building="yes", amenity="school")
+    collect(data)
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+        response = client.get("/api/v1/preview/map-context", {"bbox": "54.39,24.49,54.42,24.52"})
+    feature = response.json()["building"]["features"][0]
+    assert feature["properties"]["kind"] == "yes"
+    assert feature["properties"]["use_types"] == ["school"]
+    assert feature["properties"]["use_classification_version"] == "source-use-v1"
+    assert "tags" not in feature["properties"]
+    assert "_capture_id" not in feature["properties"]["source"]
+    from property_platform.modules.evidence.queries import map_provenances, map_usage_tags
+
+    identity = feature["id"]
+    metadata = map_provenances("building", [identity], include_capture_id=True)
+    old_capture = metadata[identity]["_capture_id"]
+    data["elements"][0]["tags"]["amenity"] = "hospital"
+    collect(data)
+    pinned = map_usage_tags("building", [identity], {identity: old_capture})
+    assert pinned[identity]["amenity"] == "school"
 
 
 def test_parcel_areas_and_nearby_distances_are_computed_by_postgis(client):

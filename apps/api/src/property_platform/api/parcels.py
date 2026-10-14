@@ -6,6 +6,9 @@ from django.conf import settings
 from django.db import DatabaseError
 from ninja import Router, Schema, Status
 
+from property_platform.modules.publication.uses import VERSION as USE_VERSION
+from property_platform.modules.publication.uses import UseType
+
 router = Router(tags=["local-preview"])
 
 
@@ -25,6 +28,8 @@ class Properties(Schema):
     land_use: str
     construction_status: str
     category: str
+    use_types: list[UseType] = []
+    use_classification_version: str = USE_VERSION
     source_url: str | None
     source_name: str | None
 
@@ -90,6 +95,8 @@ class Detail(Schema):
     land_use: str
     construction_status: str
     category: str
+    use_types: list[UseType] = []
+    use_classification_version: str = USE_VERSION
     area_m2: float
     attributes: ParcelAttributes
     places: list[NearbyPlace]
@@ -230,6 +237,8 @@ class MapProperties(Schema):
     name: str
     name_ar: str
     kind: str
+    use_types: list[UseType] = []
+    use_classification_version: str = USE_VERSION
     height_m: float | None = None
     levels: int | None = None
     parcel_ids: list[UUID] = []

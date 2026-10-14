@@ -129,7 +129,44 @@ def parcel_attributes(parcel_id):
     return {key: raw.get(key) for key in PARCEL_FIELDS}
 
 
-def map_provenances(target, ids):
+def map_usage_tags(target, ids, capture_ids):
+    """Allowlisted original OSM tags, kept internal to publication."""
+    if target not in {"building", "place"}:
+        return {}
+    rows = MapObservation.objects.filter(
+        **{f"{target}_id__in": ids},
+        capture_id__in=set(capture_ids.values()),
+        capture__run__status__in=["succeeded", "quarantined"],
+        capture__run__source__key=F(f"{target}__source_namespace"),
+    ).values(f"{target}_id", "capture_id", "raw_attributes")
+    allowed = {
+        "amenity",
+        "building",
+        "shop",
+        "leisure",
+        "tourism",
+        "railway",
+        "public_transport",
+        "religion",
+    }
+    result = {}
+    for row in rows:
+        identity = str(row[f"{target}_id"])
+        if row["capture_id"] != capture_ids.get(identity):
+            continue
+        raw = row["raw_attributes"]
+        tags = raw.get("tags", {}) if isinstance(raw, dict) else {}
+        if not isinstance(tags, dict):
+            tags = {}
+        result[identity] = {
+            key: value
+            for key, value in tags.items()
+            if key in allowed and isinstance(value, str) and len(value) <= 255
+        }
+    return result
+
+
+def map_provenances(target, ids, *, include_capture_id=False):
     observations = MapObservation.objects.filter(
         **{f"{target}_id__in": ids}, capture__run__status__in=["succeeded", "quarantined"]
     ).annotate(_canonical_id=F(f"{target}_id"))
@@ -178,6 +215,7 @@ def map_provenances(target, ids):
         .distinct("_canonical_id")
         .values(
             "_canonical_id",
+            "capture_id",
             "source_url",
             "source_published_at",
             "ingested_at",
@@ -191,6 +229,7 @@ def map_provenances(target, ids):
     )
     return {
         str(row["_canonical_id"]): {
+            **({"_capture_id": row["capture_id"]} if include_capture_id else {}),
             "url": row["source_url"],
             "name": row["capture__run__source__name"],
             "retrieved_at": row["capture__fetched_at"],

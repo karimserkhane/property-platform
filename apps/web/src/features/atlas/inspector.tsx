@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import {
   type ParcelProperty,
   preferredParcelProperty,
@@ -42,6 +43,7 @@ export function Inspector({
   choose: (feature: MapFeature) => void;
   parcelProperties: Map<string, ParcelProperty[]>;
 }) {
+  const usageText = useTranslations("Use");
   const date = (value: string | null | undefined) =>
     value
       ? new Intl.DateTimeFormat(locale, {
@@ -66,7 +68,9 @@ export function Inspector({
     : preferred
       ? propertyName(preferred, locale)
       : detail
-        ? m.parcelTitle
+        ? detail.use_types?.length
+          ? usageText(detail.use_types[0])
+          : detail.land_use || m.parcelTitle
         : labels.select;
   return (
     <>
@@ -98,6 +102,19 @@ export function Inspector({
               <bdi>{readableParcelCode(detail.code)}</bdi>
             </p>
           )}
+        </div>
+      )}
+      {detail?.land_use && (
+        <div className="property-use">
+          <span>{usageText("publishedLandUse")}</span>
+          {!!detail.use_types?.length && (
+            <strong>
+              {detail.use_types.map((type) => usageText(type)).join(" · ")}
+            </strong>
+          )}
+          <small>
+            {usageText("original")} : <bdi>{detail.land_use}</bdi>
+          </small>
         </div>
       )}
       {feature && (

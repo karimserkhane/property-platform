@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
 import type { MapFeature, MapLabels, ResearchReference } from "./types";
@@ -17,14 +18,19 @@ export function PropertyCard({
   locate: () => void;
   parcel?: { code: string; label: string };
 }) {
+  const usageText = useTranslations("Use");
   const p = feature.properties;
   const profile = p.presentation;
   const isProject = p.kind.endsWith("_project_marker");
+  const originalType =
+    !isProject && !["yes", "no", ""].includes(p.kind) ? p.kind : "";
   const typeLabel = isProject
     ? m.project
-    : feature.geometry.type === "Point"
-      ? m.places
-      : m.building;
+    : p.use_types?.length
+      ? usageText(p.use_types[0])
+      : feature.geometry.type === "Point"
+        ? m.places
+        : m.building;
   const links = references.filter(
     (item) => item.place_id === feature.id && item.available,
   );
@@ -40,6 +46,26 @@ export function PropertyCard({
       <h2>
         <bdi>{title}</bdi>
       </h2>
+      {(!!p.use_types?.length || originalType) && (
+        <div className="property-use">
+          <span>{usageText("sourceType")}</span>
+          <strong>
+            {p.use_types?.length ? (
+              p.use_types.map((type) => usageText(type)).join(" · ")
+            ) : (
+              <bdi>{originalType}</bdi>
+            )}
+          </strong>
+          {originalType && !!p.use_types?.length && (
+            <small>
+              {usageText("original")} : <bdi>{originalType}</bdi>
+            </small>
+          )}
+          <a href={p.source.url} target="_blank" rel="noopener noreferrer">
+            {sourceLabel(p.source.reliability, m)} ↗
+          </a>
+        </div>
+      )}
       {(parcel || isProject) && (
         <span className="evidence-chip association-chip" title={m.spatial}>
           {parcel ? m.possibleAssociation : m.unverified}

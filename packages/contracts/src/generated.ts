@@ -328,6 +328,16 @@ export interface components {
             name_ar: string;
             /** Kind */
             kind: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v1
+             */
+            use_classification_version: string;
             /** Height M */
             height_m?: number | null;
             /** Levels */
@@ -462,6 +472,16 @@ export interface components {
             construction_status: string;
             /** Category */
             category: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v1
+             */
+            use_classification_version: string;
             /** Source Url */
             source_url: string | null;
             /** Source Name */
@@ -491,6 +511,16 @@ export interface components {
             construction_status: string;
             /** Category */
             category: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v1
+             */
+            use_classification_version: string;
             /** Area M2 */
             area_m2: number;
             attributes: components["schemas"]["ParcelAttributes"];

@@ -1176,6 +1176,48 @@
             "title": "Kind",
             "type": "string"
           },
+          "use_types": {
+            "default": [],
+            "items": {
+              "enum": [
+                "school",
+                "university",
+                "nursery",
+                "mosque",
+                "worship",
+                "hospital",
+                "healthcare",
+                "rail_station",
+                "bus_station",
+                "rail",
+                "restaurant",
+                "cafe",
+                "retail",
+                "office",
+                "commercial",
+                "mixed_use",
+                "villa",
+                "townhouse",
+                "housing",
+                "hotel",
+                "park",
+                "open_space",
+                "beach",
+                "sports",
+                "parking",
+                "infrastructure",
+                "project_perimeter"
+              ],
+              "type": "string"
+            },
+            "title": "Use Types",
+            "type": "array"
+          },
+          "use_classification_version": {
+            "default": "source-use-v1",
+            "title": "Use Classification Version",
+            "type": "string"
+          },
           "height_m": {
             "anyOf": [
               {
@@ -1534,6 +1576,48 @@
             "title": "Category",
             "type": "string"
           },
+          "use_types": {
+            "default": [],
+            "items": {
+              "enum": [
+                "school",
+                "university",
+                "nursery",
+                "mosque",
+                "worship",
+                "hospital",
+                "healthcare",
+                "rail_station",
+                "bus_station",
+                "rail",
+                "restaurant",
+                "cafe",
+                "retail",
+                "office",
+                "commercial",
+                "mixed_use",
+                "villa",
+                "townhouse",
+                "housing",
+                "hotel",
+                "park",
+                "open_space",
+                "beach",
+                "sports",
+                "parking",
+                "infrastructure",
+                "project_perimeter"
+              ],
+              "type": "string"
+            },
+            "title": "Use Types",
+            "type": "array"
+          },
+          "use_classification_version": {
+            "default": "source-use-v1",
+            "title": "Use Classification Version",
+            "type": "string"
+          },
           "source_url": {
             "anyOf": [
               {
@@ -1610,6 +1694,48 @@
           },
           "category": {
             "title": "Category",
+            "type": "string"
+          },
+          "use_types": {
+            "default": [],
+            "items": {
+              "enum": [
+                "school",
+                "university",
+                "nursery",
+                "mosque",
+                "worship",
+                "hospital",
+                "healthcare",
+                "rail_station",
+                "bus_station",
+                "rail",
+                "restaurant",
+                "cafe",
+                "retail",
+                "office",
+                "commercial",
+                "mixed_use",
+                "villa",
+                "townhouse",
+                "housing",
+                "hotel",
+                "park",
+                "open_space",
+                "beach",
+                "sports",
+                "parking",
+                "infrastructure",
+                "project_perimeter"
+              ],
+              "type": "string"
+            },
+            "title": "Use Types",
+            "type": "array"
+          },
+          "use_classification_version": {
+            "default": "source-use-v1",
+            "title": "Use Classification Version",
             "type": "string"
           },
           "area_m2": {

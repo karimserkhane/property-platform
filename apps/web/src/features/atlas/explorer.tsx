@@ -75,6 +75,7 @@ export function Explorer({
 }) {
   const marketLabels = useTranslations("Market");
   const contextLabels = useTranslations("Context");
+  const usageLabels = useTranslations("Use");
   const bbox = territory.bounds.join(",");
   const territoryQuery = encodeURIComponent(territory.id);
   const [collection, setCollection] = useState<ParcelCollection | null>(null);
@@ -282,6 +283,7 @@ export function Explorer({
                       p.code,
                       p.community,
                       p.land_use,
+                      ...(p.use_types ?? []).map((type) => usageLabels(type)),
                       ...(placesByParcel.get(p.id) ?? []),
                     ].join(" "),
                   ).includes(normalized(query)))
@@ -289,7 +291,7 @@ export function Explorer({
             }),
           }
         : null,
-    [collection, sector, use, temps, query, placesByParcel],
+    [collection, sector, use, temps, query, placesByParcel, usageLabels],
   );
   const target =
     tab === "streets" ? "street" : tab === "buildings" ? "building" : "place";
@@ -308,6 +310,7 @@ export function Explorer({
           f.properties.presentation?.developer,
           f.properties.presentation?.publisher,
           f.properties.kind,
+          ...(f.properties.use_types ?? []).map((type) => usageLabels(type)),
         ].join(" "),
       ).includes(normalized(query)),
   );
@@ -893,7 +896,10 @@ export function Explorer({
                                       locale,
                                     ) ?? { name: "", name_ar: "", kind: "" },
                                     locale,
-                                  ) || m.parcelTitle}
+                                  ) ||
+                                    (f.properties.use_types?.length
+                                      ? usageLabels(f.properties.use_types[0])
+                                      : f.properties.land_use || m.parcelTitle)}
                                 </bdi>
                               </strong>
                               <small>
@@ -917,19 +923,26 @@ export function Explorer({
                               <strong>
                                 <bdi>
                                   {propertyName(f.properties, locale) ||
-                                    (tab === "properties" || tab === "buildings"
-                                      ? m.building
-                                      : labels.unknown)}
+                                    (f.properties.use_types?.length
+                                      ? usageLabels(f.properties.use_types[0])
+                                      : tab === "properties" ||
+                                          tab === "buildings"
+                                        ? m.building
+                                        : labels.unknown)}
                                 </bdi>
                               </strong>
                               <small>
                                 {tab === "properties" ? (
                                   <>
-                                    {f.properties.kind.endsWith(
-                                      "_project_marker",
-                                    )
-                                      ? m.project
-                                      : m.building}
+                                    {f.properties.use_types?.length
+                                      ? f.properties.use_types
+                                          .map((type) => usageLabels(type))
+                                          .join(" · ")
+                                      : f.properties.kind.endsWith(
+                                            "_project_marker",
+                                          )
+                                        ? m.project
+                                        : m.building}
                                     {f.properties.presentation?.developer && (
                                       <>
                                         {" "}
@@ -952,7 +965,14 @@ export function Explorer({
                                   </>
                                 ) : (
                                   <>
-                                    <bdi>{f.properties.kind}</bdi> ·{" "}
+                                    <bdi>
+                                      {f.properties.use_types?.length
+                                        ? f.properties.use_types
+                                            .map((type) => usageLabels(type))
+                                            .join(" · ")
+                                        : f.properties.kind}
+                                    </bdi>{" "}
+                                    ·{" "}
                                     {sourceLabel(
                                       f.properties.source.reliability,
                                       m,

@@ -123,7 +123,7 @@ type MapHit = {
 };
 
 // Rendering order is visual, not the specificity of the object under the pointer.
-// Project perimeters and administrative areas are context, never click targets.
+// Administrative sectors stay inert; project perimeters are the last fallback.
 export function selectMapHit<T extends MapHit>(
   hits: readonly T[],
   parcelAreas: ReadonlyMap<string, number> = new Map(),
@@ -144,14 +144,15 @@ export function selectMapHit<T extends MapHit>(
             ? 2
             : ["streets", "street-names"].includes(hit.layer.id)
               ? 3
-              : hit.layer.id === "parcel-fill" &&
-                  hit.properties.category !== "overlay"
-                ? 4
+              : hit.layer.id === "parcel-fill"
+                ? hit.properties.category === "overlay"
+                  ? 5
+                  : 4
                 : Infinity;
     const area = parcelAreas.get(String(hit.properties.id)) ?? Infinity;
     if (
       rank < priority ||
-      (rank === 4 && priority === 4 && area < selectedArea)
+      ((rank === 4 || rank === 5) && priority === rank && area < selectedArea)
     ) {
       selected = hit;
       priority = rank;

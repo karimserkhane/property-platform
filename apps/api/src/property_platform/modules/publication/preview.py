@@ -10,6 +10,7 @@ from property_platform.modules.evidence.queries import (
 
 def features(*, bbox, limit, query, namespaces=None, after=None):
     from .land_use import VERSION, category
+    from .uses import use_types
 
     collection = parcel_features(
         namespaces=namespaces, bbox=bbox, limit=limit, query=query, after=after
@@ -17,6 +18,7 @@ def features(*, bbox, limit, query, namespaces=None, after=None):
     sources = parcel_sources([feature["id"] for feature in collection["features"]])
     for feature in collection["features"]:
         feature["properties"]["category"] = category(feature["properties"]["land_use"])
+        feature["properties"]["use_types"] = use_types(land_use=feature["properties"]["land_use"])
         source = sources.get(feature["id"], {})
         feature["properties"]["source_url"] = source.get("url")
         feature["properties"]["source_name"] = source.get("name")
@@ -31,6 +33,7 @@ def detail(parcel_id, namespaces=None):
     from property_platform.modules.catalog.map_queries import parcel_surroundings
 
     from .land_use import category
+    from .uses import use_types
 
     parcel = parcel_identity(namespaces=namespaces, parcel_id=parcel_id)
     if parcel is None:
@@ -41,6 +44,7 @@ def detail(parcel_id, namespaces=None):
         return None
     parcel["area_m2"] = round(parcel.pop("area").sq_m, 1)
     parcel["category"] = category(parcel["land_use"])
+    parcel["use_types"] = use_types(land_use=parcel["land_use"])
     attrs = parcel_attributes(parcel_id)
 
     def day(key):

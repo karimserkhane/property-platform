@@ -57,7 +57,11 @@ export default async function ExplorePage() {
   ) as AtlasLabels;
   return (
     <NextIntlClientProvider
-      messages={{ Market: messages.Market, Context: messages.Context }}
+      messages={{
+        Market: messages.Market,
+        Context: messages.Context,
+        Use: messages.Use,
+      }}
     >
       <TerritoryExplorer
         labels={labels}
