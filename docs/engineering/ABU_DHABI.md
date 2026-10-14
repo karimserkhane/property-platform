@@ -147,11 +147,13 @@ La nouvelle option de sélection de zone permet de revenir à l’émirat. Sa vu
 
 ## Carte d’ensemble et districts officiels
 
-La route sans territoire, par exemple [l’exploration en français](http://localhost:3102/fr/explore), ouvre désormais **Toute la zone / Whole area → Abu Dhabi**. Changer d’émirat garde ce niveau général. Choisir Reem ou Saadiyat ouvre la carte détaillée de l’île. Les anciens liens qui ne contiennent qu’un UUID de parcelle gardent le contexte Reem pour leur compatibilité.
+La route sans territoire, par exemple [l’exploration en français](http://localhost:3102/fr/explore), ouvre **Toute la zone : Reem et Saadiyat réunies sur une seule carte immobilière**. Le sélecteur reste sur Abu Dhabi, mais le texte adjacent précise les deux îles effectivement couvertes. Choisir Reem ou Saadiyat ouvre la carte de cette île uniquement. Les anciens liens qui ne contiennent qu’un UUID de parcelle gardent le contexte Reem pour leur compatibilité.
 
 Un **émirat** contient plusieurs **municipalités** ; le jeu Onwani fournit ici des **districts**. Une île peut être un district, mais un secteur comme RT7 est un niveau plus fin. Ne pas assimiler systématiquement district, quartier commercial, communauté et ville.
 
-La vue d’ensemble affiche les 216 limites officielles et un annuaire consultable en anglais/arabe, filtrable par municipalité : Abu Dhabi (ADM), Al Ain (AAM), Al Dhafra (WRM). Les noms originaux restent ceux du producteur. Les boutons Reem et Saadiyat ouvrent les biens effectivement collectés ; les autres districts ne sont pas présentés comme disposant déjà d’un catalogue immobilier complet.
+La vue commune affiche les parcelles, bâtiments, lieux, rues, secteurs et fiches des deux îles, avec les mêmes règles de sélection que leurs vues séparées. Elle compose les namespaces de sources existants ; aucune copie de données ni fusion de leurs identités n’est effectuée. Les demandes utilisent une fenêtre commune bornée, puis une pagination par UUID pour les parcelles. Le cadrage réunit les deux limites de district plutôt que de choisir la première géométrie reçue.
+
+Les **216 observations de limites officielles** demeurent dans PostgreSQL : Abu Dhabi (ADM), Al Ain (AAM), Al Dhafra (WRM). Leur ancienne carte et leur annuaire ne sont plus montés dans l’exploration. Ils restent disponibles dans les données et l’API locale pour une extension future. Cette décision d’affichage ne supprime ni snapshots, ni captures, ni calendriers d’ingestion.
 
 Le pipeline existant **abu-dhabi-districts**, programmé le dimanche à 12 h, heure de Dubai, acquiert les identifiants avant/après et les limites auprès de DMT / Onwani. Il conserve les acquisitions historiques et actualise le dernier snapshot complet. La table est `property_platform.evidence.district_boundary_observation`, liée à `property_platform.evidence.public_context_snapshot` et aux captures. Aucun second pipeline, table dupliquée, migration ou import manuel n’est nécessaire pour cette vue sur le poste déjà alimenté.
 
@@ -163,8 +165,10 @@ Fichiers principaux :
 
 - `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\publication\context_preview.py` : lecture et projection de carte.
 - `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\api\public_context.py` : contrat HTTP typé et garde d’aperçu.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\district-overview.tsx` : annuaire et parcours vers les îles.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\district-map.tsx` : carte des limites.
+- `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\publication\coverage.py` : composition des deux profils, fenêtres et namespaces de lecture.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\territory-explorer.tsx` : sélection de la vue commune ou d’une île.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\parcel-map.tsx` : carte immobilière et cadrage des deux limites.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\district-overview.tsx` et `district-map.tsx` : composants conservés pour un usage futur, non montés dans l’exploration actuelle.
 - `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\registry.py` : déploiement et horaire existants.
 
 ## Sources restant à qualifier
@@ -196,8 +200,14 @@ Prefect contient **26 déploiements et 22 calendriers actifs** sur ce poste apr�
 
 Le compilateur **TypeScript 7** du dépôt passe également dans le runtime Linux du build (`typecheck`), en plus du contrôle TypeScript embarqué de Next.js. Le dernier contrôle ciblé de contexte vérifie aussi qu’un changement de politique d’arrondi SCAD est refusé.
 
-### Vérification de la carte d’ensemble et des clics — 14 octobre 2026
+### Vérification historique de la première carte des districts et des clics — 14 octobre 2026
 
 Dix tests ciblés sur PostGIS réel passent pour les snapshots, la navigation typée et le garde d’aperçu ; les 24 tests web passent, dont les étiquettes, empreintes avec trous et priorité de petite parcelle sous RT7 TMP2. Le compilateur TypeScript 7 et le build Next.js des quinze langues passent dans l’image Docker. La génération Next.js native Windows rencontre toujours la limite du cache SWC documentée ; les mêmes vérifications ont réussi dans Linux sans désactiver les protections.
 
 La vérification navigateur a confirmé : défaut Toute la zone, 216 districts, recherche Saadiyat puis accès à sa carte, retour au niveau émirat, noms arabes et RTL, disposition carte/annuaire sur ordinateur et empilement sur petit écran, sélection réelle de RT7 · 3 au lieu de TMP2, fiche Leaf Tower au clic et secours TMP2 sur un point sans petite parcelle. Les images locales de vérification restent sous `C:\Users\Karim\Repositories\property-platform\.cache\validation\`, ignorées par Git.
+
+### Correction de portée : Reem et Saadiyat réunies — 14 octobre 2026
+
+La carte des 216 districts décrite dans la vérification historique ci-dessus est retirée de l’exploration. Les lectures HTTP réelles de la vue commune renvoient **7 929 parcelles** (2 431 Reem + 5 498 Saadiyat), **1 373 bâtiments**, **398 lieux**, **959 rues** et **44 limites de district/communauté**, dont seulement deux districts : `AL REEM ISLAND` et `AL SAADIYAT ISLAND`. Les listes de chaque couche sont vérifiées comme l’union exacte des deux vues séparées, sans doublons ni troncature. Les 117 URLs de références sont aussi l’union des deux listes ; les UUID de parcelles des deux îles ouvrent leurs fiches dans la vue commune.
+
+**15 tests ciblés sur PostGIS réel et 25 tests web passent**, notamment la lecture combinée avec des OBJECTID identiques dans des namespaces distincts, l’exclusion d’une source future, les preuves de bâtiments, la pagination et le cadrage des deux îles. Les contrats HTTP générés, Ruff, Biome, les deux contrats Import Linter, TypeScript 7 et le build Next.js passent. Seuls les conteneurs API/web sont recréés ; le nombre d’observations de districts reste **216 avant et après**, sans migration ni réimportation. La vérification navigateur montre le sélecteur Toute la zone, les deux cartes et les biens des deux îles.

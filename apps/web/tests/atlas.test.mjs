@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildingAtPoint,
   csv,
+  districtBounds,
   geometryBounds,
   geometryClickArea,
   normalized,
@@ -17,6 +18,36 @@ import {
 const hit = (layer, id, properties = {}) => ({
   layer: { id: layer },
   properties: { id, ...properties },
+});
+
+test("whole area frames both island districts, excluding unrelated community bounds", () => {
+  const area = (kind, coordinates) => ({
+    properties: { kind },
+    geometry: { type: "MultiPolygon", coordinates: [[coordinates]] },
+  });
+  const reem = area("district", [
+    [54.39, 24.47],
+    [54.43, 24.52],
+  ]);
+  const saadiyat = area("district", [
+    [54.385, 24.49],
+    [54.48, 24.6],
+  ]);
+  const community = area("community", [
+    [51, 22],
+    [57, 27],
+  ]);
+  const expected = [
+    [54.385, 24.47],
+    [54.48, 24.6],
+  ];
+  assert.deepEqual(districtBounds([reem, community, saadiyat]), expected);
+  assert.deepEqual(districtBounds([saadiyat, reem]), expected);
+  assert.deepEqual(districtBounds([reem]), [
+    [54.39, 24.47],
+    [54.43, 24.52],
+  ]);
+  assert.equal(districtBounds([community]), null);
 });
 
 const candidate = (id, name, kind, extra = {}) => ({

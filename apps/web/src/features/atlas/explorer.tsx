@@ -76,7 +76,7 @@ export function Explorer({
   const marketLabels = useTranslations("Market");
   const contextLabels = useTranslations("Context");
   const usageLabels = useTranslations("Use");
-  const bbox = territory.bounds.join(",");
+  const bbox = (territory.collection_bounds ?? territory.bounds).join(",");
   const territoryQuery = encodeURIComponent(territory.id);
   const [collection, setCollection] = useState<ParcelCollection | null>(null);
   const [context, setContext] = useState<MapContext | null>(null);

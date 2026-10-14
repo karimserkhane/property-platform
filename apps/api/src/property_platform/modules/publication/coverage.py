@@ -2,7 +2,11 @@
 
 from dataclasses import asdict, dataclass
 
-from property_platform.modules.catalog.territories import DEFAULT_TERRITORY_ID, TERRITORIES
+from property_platform.modules.catalog.territories import (
+    DEFAULT_TERRITORY_ID,
+    TERRITORIES,
+    TERRITORY_BY_ID,
+)
 from property_platform.modules.evidence.collection_profiles import collection_for
 from property_platform.modules.evidence.onwani import SOURCE_KEY
 
@@ -15,6 +19,7 @@ class CoverageProfile:
     neighbourhood_bounds: tuple[float, float, float, float] | None = None
     reference_registry: str | None = None
     imagery_ids: tuple[str, ...] = ()
+    member_territory_ids: tuple[str, ...] = ()
 
 
 # Provider identities are retained; replacing them would create duplicate catalogue objects.
@@ -37,8 +42,42 @@ PROFILES = {
 }
 
 
+def combined_profile(member_ids):
+    """Compose reviewed read scopes; this never activates an emirate-wide collector."""
+    profiles = [PROFILES[key] for key in member_ids]
+    return CoverageProfile(
+        parcel_namespaces=tuple(
+            dict.fromkeys(key for p in profiles for key in p.parcel_namespaces)
+        ),
+        camera_bounds=union_bounds(p.camera_bounds for p in profiles),
+        imagery_ids=tuple(dict.fromkeys(key for p in profiles for key in p.imagery_ids)),
+        member_territory_ids=tuple(member_ids),
+    )
+
+
+def union_bounds(bounds):
+    rows = tuple(bounds)
+    return (
+        min(r[0] for r in rows),
+        min(r[1] for r in rows),
+        max(r[2] for r in rows),
+        max(r[3] for r in rows),
+    )
+
+
+# Whole area means the explicitly mapped islands, not every official district.
+PROFILES["abu-dhabi"] = combined_profile(("al-reem-island", "saadiyat-island"))
+
+
 def profile_for(territory_id):
     return PROFILES.get(territory_id)
+
+
+def member_territories(territory_id):
+    profile = profile_for(territory_id)
+    if profile is None:
+        return ()
+    return profile.member_territory_ids or (territory_id,)
 
 
 def coverage_registry():
@@ -55,6 +94,12 @@ def coverage_registry():
                 **asdict(territory),
                 "queryable": profile is not None,
                 "parcel_count": count,
+                "member_territory_ids": member_territories(territory.id),
+                "collection_bounds": union_bounds(
+                    TERRITORY_BY_ID[key].bounds for key in member_territories(territory.id)
+                )
+                if profile
+                else None,
                 "camera_bounds": profile.camera_bounds if profile else territory.bounds,
                 "focus_bounds": profile.focus_bounds if profile else None,
                 "neighbourhood_bounds": profile.neighbourhood_bounds if profile else None,
@@ -79,6 +124,14 @@ def reference_source_keys(profile):
     import json
     from pathlib import Path
 
+    if profile.member_territory_ids:
+        return tuple(
+            dict.fromkeys(
+                key
+                for member in profile.member_territory_ids
+                for key in reference_source_keys(PROFILES[member])
+            )
+        )
     if not profile.reference_registry:
         return ()
     # Paths belong to trusted deployment configuration, never to query parameters.
@@ -90,7 +143,10 @@ def reference_source_keys(profile):
 
 
 def map_source_namespaces(territory_id):
-    profile = collection_for(territory_id)
     return tuple(
-        profile.map_namespace(layer) for layer in ("district", "community", "street", "osm")
+        dict.fromkeys(
+            collection_for(member).map_namespace(layer)
+            for member in member_territories(territory_id)
+            for layer in ("district", "community", "street", "osm")
+        )
     ) + reference_source_keys(profile_for(territory_id))

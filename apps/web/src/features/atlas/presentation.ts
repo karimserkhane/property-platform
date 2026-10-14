@@ -249,6 +249,27 @@ export function geometryBounds(
   ];
 }
 
+// Frame every mapped island, irrespective of which district the API returns first.
+export function districtBounds(
+  features: MapFeature[],
+): [[number, number], [number, number]] | null {
+  const bounds = features
+    .filter((feature) => feature.properties.kind === "district")
+    .map((feature) => geometryBounds(feature.geometry))
+    .filter((value) => value !== null);
+  if (bounds.length === 0) return null;
+  return [
+    [
+      Math.min(...bounds.map((b) => b[0][0])),
+      Math.min(...bounds.map((b) => b[0][1])),
+    ],
+    [
+      Math.max(...bounds.map((b) => b[1][0])),
+      Math.max(...bounds.map((b) => b[1][1])),
+    ],
+  ];
+}
+
 export function sourceLabel(reliability: string, labels: MapLabels) {
   return reliability === "official"
     ? labels.official

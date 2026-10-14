@@ -629,6 +629,15 @@ export interface components {
             queryable: boolean;
             /** Parcel Count */
             parcel_count: number;
+            /** Member Territory Ids */
+            member_territory_ids: string[];
+            /** Collection Bounds */
+            collection_bounds: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
             /** Camera Bounds */
             camera_bounds: [
                 number,

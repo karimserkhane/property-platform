@@ -3,10 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { AdrecMarket } from "./adrec-market";
-import { DistrictOverview } from "./district-overview";
 import { Explorer } from "./explorer";
-import { PublicContext } from "./public-context";
 import type {
   AtlasLabels,
   CoverageLabels,
@@ -156,8 +153,14 @@ export function TerritoryExplorer({
         </label>
       )}
       <p>
-        {territory.queryable || territory.id === "abu-dhabi"
-          ? name(territory)
+        {territory.queryable
+          ? territory.member_territory_ids
+              .map((id) =>
+                registry.territories.find((value) => value.id === id),
+              )
+              .filter((value): value is Territory => value !== undefined)
+              .map(name)
+              .join(" · ")
           : coverage.preparing}
       </p>
     </div>
@@ -170,37 +173,20 @@ export function TerritoryExplorer({
           <Link href="/">{labels.back}</Link>
         </div>
         {navigation}
-        {territory.id === "abu-dhabi" ? (
-          <>
-            <DistrictOverview
-              locale={locale}
-              labels={labels}
-              coverage={coverage}
-              mapLabels={mapLabels}
-              registry={registry}
-              navigate={navigate}
-            />
-            <section className="emirate-context-overview">
-              <PublicContext locale={locale} />
-              <AdrecMarket territory="abu-dhabi" locale={locale} />
-            </section>
-          </>
-        ) : (
-          <section className="coverage-empty">
-            <p className="eyebrow">
-              <bdi>{name(territory)}</bdi>
-            </p>
-            <h2>{coverage.preparing}</h2>
-            <p>{coverage.preparingBody}</p>
-            <button
-              type="button"
-              className="button"
-              onClick={() => navigate(registry.default_territory_id)}
-            >
-              {coverage.visitPilot}
-            </button>
-          </section>
-        )}
+        <section className="coverage-empty">
+          <p className="eyebrow">
+            <bdi>{name(territory)}</bdi>
+          </p>
+          <h2>{coverage.preparing}</h2>
+          <p>{coverage.preparingBody}</p>
+          <button
+            type="button"
+            className="button"
+            onClick={() => navigate(registry.default_territory_id)}
+          >
+            {coverage.visitPilot}
+          </button>
+        </section>
       </main>
     );
   return (

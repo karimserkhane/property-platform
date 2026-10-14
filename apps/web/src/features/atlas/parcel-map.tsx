@@ -15,6 +15,7 @@ import {
   buildingAtPoint,
   type Category,
   COLORS,
+  districtBounds,
   download,
   geometryBounds,
   geometryClickArea,
@@ -304,10 +305,9 @@ export default function ParcelMap({
         );
       }
       if (!consumedView.current && !initialFrame.current) {
-        const district = context?.administrative_area.features.find(
-          (f) => f.properties.kind === "district",
+        const bounds = districtBounds(
+          context?.administrative_area.features ?? [],
         );
-        const bounds = district && geometryBounds(district.geometry);
         if (bounds) {
           instance.fitBounds(bounds, { padding: 30, duration: 0 });
           initialFrame.current = true;
@@ -499,10 +499,9 @@ export default function ParcelMap({
           instance.fitBounds(bounds, { padding: 60, maxZoom: 17, duration: 0 });
       }
     } else {
-      const district = contextRef.current?.administrative_area.features.find(
-        (f) => f.properties.kind === "district",
+      const bounds = districtBounds(
+        contextRef.current?.administrative_area.features ?? [],
       );
-      const bounds = district && geometryBounds(district.geometry);
       instance.fitBounds(bounds ?? boundsOf(territory.camera_bounds), {
         padding: 30,
         duration: 0,

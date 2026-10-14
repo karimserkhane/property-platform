@@ -17,6 +17,97 @@ from property_platform.modules.evidence.services import import_onwani  # noqa: E
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
 
+def test_whole_area_reads_both_islands_without_leaking_other_sources(client):
+    import json
+
+    from django.test import override_settings
+    from test_reem_map_postgis import osm, receipt
+
+    from property_platform.modules.evidence.map_import import import_map_layer
+    from property_platform.modules.publication.coverage import coverage_registry
+
+    bounds = (54.4, 24.5, 54.42, 24.52)
+    identities = []
+    for member in ("al-reem-island", "saadiyat-island"):
+        profile = collection_for(member)
+        row = feature()
+        row["attributes"]["DISTRICTENG"] = profile.district_name
+        row["geometry"]["rings"] = list(Polygon.from_bbox(bounds).coords)
+        acquired = iter(responses([row]))
+        import_onwani(
+            actor="test", territory=member, acquisition=lambda _, acquired=acquired: next(acquired)
+        )
+        parcel = Parcel.objects.get(source_namespace=profile.parcel_namespace)
+        identities.append(str(parcel.id))
+        AdministrativeArea.objects.create(
+            source_namespace=profile.map_namespace("district"),
+            source_record_id="1",
+            name=profile.district_name,
+            kind="district",
+            geometry=MultiPolygon(Polygon.from_bbox(bounds), srid=4326),
+        )
+        data = osm()
+        data["elements"][0]["tags"]["name"] = member
+        import_map_layer(
+            layer="osm",
+            actor="test",
+            territory=member,
+            replay=(json.dumps(data).encode(), receipt()),
+        )
+    Parcel.objects.create(
+        source_namespace="future-unreviewed-source",
+        source_record_id="1",
+        code="outside",
+        geometry=MultiPolygon(Polygon.from_bbox(bounds), srid=4326),
+    )
+    Building.objects.create(
+        source_namespace="future-unreviewed-source",
+        source_record_id="way/1",
+        name="outside",
+        geometry=MultiPolygon(Polygon.from_bbox(bounds), srid=4326),
+    )
+    registry = coverage_registry()
+    scope = next(row for row in registry["territories"] if row["id"] == "abu-dhabi")
+    assert scope["parcel_count"] == 2
+    assert scope["queryable"]
+    assert scope["collection_bounds"] == (54.385, 24.465, 54.483, 24.603)
+    query = {"bbox": "54.39,24.49,54.43,24.53", "territory": "abu-dhabi"}
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+        parcels = client.get("/api/v1/preview/parcels", {**query, "limit": 1})
+        assert parcels.status_code == 200
+        first = parcels.json()
+        second = client.get(
+            "/api/v1/preview/parcels",
+            {
+                **query,
+                "limit": 1,
+                "after": first["next_cursor"],
+            },
+        )
+        assert second.status_code == 200
+        assert {row["id"] for row in first["features"] + second.json()["features"]} == set(
+            identities
+        )
+        assert not second.json()["truncated"]
+        context = client.get("/api/v1/preview/map-context", query)
+        assert context.status_code == 200
+        assert {row["properties"]["name"] for row in context.json()["building"]["features"]} == {
+            "al-reem-island",
+            "saadiyat-island",
+        }
+        assert all(
+            set(row["properties"]["parcel_ids"]) == set(identities)
+            for row in context.json()["place"]["features"]
+        )
+        for parcel_id in identities:
+            assert (
+                client.get(
+                    f"/api/v1/preview/parcels/{parcel_id}", {"territory": "abu-dhabi"}
+                ).status_code
+                == 200
+            )
+
+
 def test_two_territories_can_share_provider_objectid_without_overwriting():
     reem = feature()
     saadiyat = feature()

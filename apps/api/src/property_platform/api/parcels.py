@@ -300,7 +300,9 @@ def context(request, bbox: str, territory: str | None = None):
         from property_platform.modules.publication.coverage import map_source_namespaces
 
         return map_context(
-            bounds, namespaces=map_source_namespaces(territory) if territory else None
+            bounds,
+            namespaces=map_source_namespaces(territory) if territory else None,
+            parcel_namespaces=profile_for(territory).parcel_namespaces if territory else None,
         )
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
@@ -407,6 +409,8 @@ class TerritoryResponse(Schema):
     bounds: tuple[float, float, float, float]
     queryable: bool
     parcel_count: int
+    member_territory_ids: tuple[str, ...]
+    collection_bounds: tuple[float, float, float, float] | None
     camera_bounds: tuple[float, float, float, float]
     focus_bounds: tuple[float, float, float, float] | None
     neighbourhood_bounds: tuple[float, float, float, float] | None

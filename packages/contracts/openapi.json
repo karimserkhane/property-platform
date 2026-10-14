@@ -2037,6 +2037,40 @@
             "title": "Parcel Count",
             "type": "integer"
           },
+          "member_territory_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Member Territory Ids",
+            "type": "array"
+          },
+          "collection_bounds": {
+            "anyOf": [
+              {
+                "maxItems": 4,
+                "minItems": 4,
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collection Bounds"
+          },
           "camera_bounds": {
             "maxItems": 4,
             "minItems": 4,
@@ -2121,6 +2155,8 @@
           "bounds",
           "queryable",
           "parcel_count",
+          "member_territory_ids",
+          "collection_bounds",
           "camera_bounds",
           "focus_bounds",
           "neighbourhood_bounds"
