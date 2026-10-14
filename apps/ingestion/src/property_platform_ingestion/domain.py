@@ -90,7 +90,25 @@ def execute(request):
         territory = request["scope"].split(":", 1)[0]
         acquisition, receipt, replay = None, None, None
         acquiring = True
-        if operation in {"adrec_sales", "adrec_indices"}:
+        if operation == "public_context":
+            from property_platform.modules.evidence import abu_dhabi
+
+            from .collectors.context import precollect_context, replay_school_archive
+
+            if request.get("receipt_name") is not None:
+                storage = Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion"))
+                path = checked_receipt_path(storage, request["receipt_name"])
+                if path.stat().st_size > 8 * 1024 * 1024:
+                    raise ValueError("School receipt exceeds its budget")
+                raw = path.read_bytes()
+                if len(raw) > 8 * 1024 * 1024:
+                    raise ValueError("School receipt exceeds its budget")
+                replay = replay_school_archive(request["scope"], json.loads(raw))
+            else:
+                with SourceHTTP(abu_dhabi.urls_for(request["scope"])) as transport:
+                    replay = precollect_context(transport, request["scope"])
+            acquisition = replay.map
+        elif operation in {"adrec_sales", "adrec_indices"}:
             from property_platform.modules.evidence import adrec
 
             from .collectors.adrec import precollect_adrec
@@ -179,7 +197,14 @@ def execute(request):
                     for item in transport.acquisitions
                 ]
                 if identity["operation"]
-                in {"onwani", "map", "osm_bootstrap", "adrec_sales", "adrec_indices"}
+                in {
+                    "onwani",
+                    "map",
+                    "osm_bootstrap",
+                    "adrec_sales",
+                    "adrec_indices",
+                    "public_context",
+                }
                 and transport is not None
                 else None
             )

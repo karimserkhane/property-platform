@@ -21,6 +21,7 @@ import {
   readableParcelCode,
   sourceLabel,
 } from "./presentation";
+import { PublicContext } from "./public-context";
 import { References } from "./references";
 import type {
   AtlasLabels,
@@ -43,7 +44,8 @@ type Tab =
   | "buildings"
   | "future"
   | "sources"
-  | "market";
+  | "market"
+  | "context";
 const TABS: Tab[] = [
   "properties",
   "parcels",
@@ -53,6 +55,7 @@ const TABS: Tab[] = [
   "future",
   "sources",
   "market",
+  "context",
 ];
 
 export function Explorer({
@@ -71,6 +74,7 @@ export function Explorer({
   navigation: ReactNode;
 }) {
   const marketLabels = useTranslations("Market");
+  const contextLabels = useTranslations("Context");
   const bbox = territory.bounds.join(",");
   const territoryQuery = encodeURIComponent(territory.id);
   const [collection, setCollection] = useState<ParcelCollection | null>(null);
@@ -622,11 +626,13 @@ export function Explorer({
                 key={t}
                 onClick={() => changeTab(t)}
               >
-                {t === "market"
-                  ? marketLabels("tab")
-                  : t === "sources"
-                    ? labels.sources
-                    : m[t]}
+                {t === "context"
+                  ? contextLabels("tab")
+                  : t === "market"
+                    ? marketLabels("tab")
+                    : t === "sources"
+                      ? labels.sources
+                      : m[t]}
               </button>
             ))}
           </div>
@@ -637,7 +643,9 @@ export function Explorer({
             aria-labelledby={`tab-${tab}`}
             className="atlas-panel"
           >
-            {tab === "market" ? (
+            {tab === "context" ? (
+              <PublicContext locale={locale} />
+            ) : tab === "market" ? (
               <AdrecMarket
                 key={territory.id}
                 territory={territory.id}

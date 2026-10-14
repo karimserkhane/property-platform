@@ -5,11 +5,13 @@ from urllib.parse import parse_qs, urlparse
 
 from django.utils import timezone
 
-from . import adrec, map_sources, onwani, osm_bootstrap
+from . import abu_dhabi, adrec, map_sources, onwani, osm_bootstrap
 from .collection_profiles import collection_for
 
 
 def source_definition(operation, scope):
+    if operation == "public_context":
+        return abu_dhabi.source_definition(operation, scope)
     if operation in {"adrec_sales", "adrec_indices"}:
         return adrec.source_definition(operation, scope)
     profile = collection_for(scope.split(":", 1)[0])
@@ -46,6 +48,9 @@ def source_definition(operation, scope):
 
 
 def _request_shape(url, operation, scope):
+    if operation == "public_context":
+        abu_dhabi.validate_request(scope, url, {})
+        return
     parts = urlparse(url)
     if parts.scheme != "https" or parts.fragment or len(url) > 4000:
         raise ValueError("Unexpected failed GIS receipt URL")
@@ -108,12 +113,23 @@ def validate_received_acquisitions(operation, scope, rows):
         return []
     if not isinstance(rows, (list, tuple)) or len(rows) > 205:
         raise ValueError("Failed acquisition journal exceeds its budget")
-    if rows and operation not in {"onwani", "map", "osm_bootstrap", "adrec_sales", "adrec_indices"}:
+    if rows and operation not in {
+        "onwani",
+        "map",
+        "osm_bootstrap",
+        "adrec_sales",
+        "adrec_indices",
+        "public_context",
+    }:
         raise ValueError("Only completed GIS source responses can be retained here")
     output, transferred = [], 0
     maximum = onwani.MAX_BYTES if operation == "onwani" else map_sources.MAX_BYTES
     if operation in {"adrec_sales", "adrec_indices"}:
         maximum = adrec.MAX_BYTES
+    if operation == "public_context":
+        maximum = abu_dhabi.MAX_BYTES
+        if len(rows) > (3 if scope == "abu-dhabi:districts" else 1):
+            raise ValueError("Unexpected context acquisition response count")
     fields = {
         "url",
         "http_status",

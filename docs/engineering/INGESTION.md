@@ -294,3 +294,8 @@ Le bootstrap XML est une lecture limitée à quatre fenêtres enregistrées, 16 
 ## Collectes ADREC — 13 octobre 2026
 
 Les trois déploiements supplémentaires `adrec-reem-sales`, `adrec-saadiyat-sales` et `adrec-price-indices` portent le total à vingt. Ils alimentent trois tables typées du schéma `evidence` via Django et les captures existantes. Leur fonctionnement, les endpoints, le calendrier dominical et la consultation sur le site sont détaillés dans [ADREC.md](ADREC.md). Une série d’indices contradictoire est conservée non exploitable ; elle ne doit pas être corrigée en choisissant arbitrairement une ligne.
+
+
+## Contexte Abu Dhabi — 14 octobre 2026
+
+Les six nouveaux déploiements portent le total à **26** : ventes ADREC pour l’émirat et cinq jeux de contexte (santé, écoles Charter, bus, recensement immobilier, limites des districts). Le [guide Abu Dhabi](ABU_DHABI.md) détaille sources, horaires et tables. Les cinq acquisitions automatiques validées sont activées le dimanche sur le poste Karim. ADEK a retourné HTTP 403 au collecteur ; son import depuis un document conservé est manuel, avec receipt_name et date d’archive préservée. Son calendrier reste inactif. Ni les paramètres modifiés dans l’UI ni les horaires des vingt déploiements précédents ne sont réinitialisés.

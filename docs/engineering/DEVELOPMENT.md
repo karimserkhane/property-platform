@@ -114,6 +114,8 @@ Pour les données et imports de la deuxième île, consulter aussi [Saadiyat : d
 
 ## Sommaire
 
+- [Contexte Abu Dhabi : nouvelles ingestions et tables](#contexte-abu-dhabi)
+
 - [Mémo rapide : lancer, vérifier et arrêter](#memo-rapide)
 - [Que relancer après une modification ?](#apres-maj)
 - [1. Comprendre les outils et savoir où écrire les commandes](#choisir-le-parcours)
@@ -1232,3 +1234,12 @@ Pour poursuivre, lire [les frontières des modules](REPOSITORY.md) et [la revue 
 Saadiyat utilise la même base PostGIS et les mêmes couches de services. Le [guide complet Saadiyat](SAADIYAT.md) explique les sources, les fichiers avec leurs chemins complets et l’ordre des imports dans Prefect. La migration evidence.0013_osm_bootstrap_execution doit être appliquée avant de démarrer le nouveau runner ; elle autorise le nouveau type d’exécution et ne remplit aucune table immobilière. Les imports acquièrent ensuite les données réelles. Sur ce poste, cette migration et les premiers imports ont déjà été effectués.
 
 Dans le site, choisir Abu Dhabi puis Saadiyat Island, ou ouvrir [la prévisualisation Saadiyat](http://localhost:3102/en/explore?territory=saadiyat-island). Revenir à Al Reem réinitialise les couches chargées. Les textes, scènes satellite et références de Reem ne sont pas utilisés comme données Saadiyat.
+
+
+<a id="contexte-abu-dhabi"></a>
+
+## Ajouter ou actualiser le contexte Abu Dhabi
+
+Le [guide ABU_DHABI.md](ABU_DHABI.md), soit `C:\Users\Karim\Repositories\property-platform\docs\engineering\ABU_DHABI.md`, explique les six nouvelles ingestions, les six tables de preuves, les migrations et la consultation. Sur ce poste, ces données sont présentes ; aucune collecte n’est nécessaire pour ouvrir le site. Elles incluent ventes ADREC de l’émirat, limites Onwani, santé, Charter schools, bus et indicateurs SCAD. Des calendriers dominicaux actualisent les flux validés ; ADEK utilise un document conservé et reste sans actualisation automatique après son refus HTTP 403.
+
+Ouvrir [la vue Abu Dhabi](http://localhost:3102/en/explore?territory=abu-dhabi), ou l’onglet Neighbourhood sur les îles. Ce panneau indique sa portée **tout l’émirat** ; les anciennes cartes de parcelles restent celles de Reem et Saadiyat. Le tableau d’audit du guide indique quelles dates sont connues, approximatives ou inconnues. DARI et plusieurs autres pistes n’ont pas de connecteur qualifié ouvert ; leurs limitations restent explicites.

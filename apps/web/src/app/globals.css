@@ -910,3 +910,16 @@ body:has([data-page="home"]) .site-header :focus-visible {
     padding: 0.65rem;
   }
 }
+/* The emirate overview has data without claiming full parcel-map coverage. */
+.emirate-context-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 2rem;
+  margin-block: 2rem;
+}
+@media (max-width: 800px) {
+  .emirate-context-overview {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

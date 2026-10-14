@@ -705,6 +705,115 @@
           "local-preview"
         ]
       }
+    },
+    "/api/v1/preview/public-context": {
+      "get": {
+        "operationId": "previewPublicContext",
+        "summary": "Context",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "dataset",
+            "schema": {
+              "enum": [
+                "health",
+                "schools",
+                "mobility",
+                "statistics",
+                "districts"
+              ],
+              "title": "Dataset",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "default": "abu-dhabi",
+              "title": "Territory",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "title": "Offset",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 40,
+              "title": "Limit",
+              "type": "integer"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicContextResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-context-preview"
+        ]
+      }
     }
   },
   "components": {
@@ -2105,6 +2214,415 @@
           "sold_share"
         ],
         "title": "AdrecSaleResponse",
+        "type": "object"
+      },
+      "BusRouteResponse": {
+        "properties": {
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "string"
+          },
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "destination": {
+            "title": "Destination",
+            "type": "string"
+          },
+          "timetable_url": {
+            "title": "Timetable Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_record_id",
+          "name",
+          "number",
+          "origin",
+          "destination",
+          "timetable_url"
+        ],
+        "title": "BusRouteResponse",
+        "type": "object"
+      },
+      "CensusResponse": {
+        "properties": {
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "reference_year": {
+            "title": "Reference Year",
+            "type": "integer"
+          },
+          "region": {
+            "title": "Region",
+            "type": "string"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          },
+          "rounding_base": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rounding Base"
+          }
+        },
+        "required": [
+          "source_record_id",
+          "name",
+          "reference_year",
+          "region",
+          "category",
+          "unit",
+          "value",
+          "rounding_base"
+        ],
+        "title": "CensusResponse",
+        "type": "object"
+      },
+      "DistrictResponse": {
+        "properties": {
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "municipality": {
+            "title": "Municipality",
+            "type": "string"
+          },
+          "district_id": {
+            "title": "District Id",
+            "type": "integer"
+          },
+          "bounds": {
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Bounds",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source_record_id",
+          "name",
+          "name_ar",
+          "municipality",
+          "district_id",
+          "bounds"
+        ],
+        "title": "DistrictResponse",
+        "type": "object"
+      },
+      "FacilityResponse": {
+        "properties": {
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "facility_type": {
+            "title": "Facility Type",
+            "type": "string"
+          },
+          "address": {
+            "title": "Address",
+            "type": "string"
+          },
+          "planned": {
+            "title": "Planned",
+            "type": "boolean"
+          },
+          "operator": {
+            "title": "Operator",
+            "type": "string"
+          },
+          "licence_number": {
+            "title": "Licence Number",
+            "type": "string"
+          },
+          "services_original": {
+            "title": "Services Original",
+            "type": "string"
+          },
+          "longitude": {
+            "title": "Longitude",
+            "type": "number"
+          },
+          "latitude": {
+            "title": "Latitude",
+            "type": "number"
+          }
+        },
+        "required": [
+          "source_record_id",
+          "name",
+          "facility_type",
+          "address",
+          "planned",
+          "operator",
+          "licence_number",
+          "services_original",
+          "longitude",
+          "latitude"
+        ],
+        "title": "FacilityResponse",
+        "type": "object"
+      },
+      "PublicContextResponse": {
+        "properties": {
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "territory": {
+            "title": "Territory",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Id"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "acquisition_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acquisition Method"
+          },
+          "timestamp_basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp Basis"
+          },
+          "source_modified_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Modified Date"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "reuse_status": {
+            "title": "Reuse Status",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "health": {
+            "items": {
+              "$ref": "#/components/schemas/FacilityResponse"
+            },
+            "title": "Health",
+            "type": "array"
+          },
+          "districts": {
+            "items": {
+              "$ref": "#/components/schemas/DistrictResponse"
+            },
+            "title": "Districts",
+            "type": "array"
+          },
+          "schools": {
+            "items": {
+              "$ref": "#/components/schemas/SchoolResponse"
+            },
+            "title": "Schools",
+            "type": "array"
+          },
+          "mobility": {
+            "items": {
+              "$ref": "#/components/schemas/BusRouteResponse"
+            },
+            "title": "Mobility",
+            "type": "array"
+          },
+          "statistics": {
+            "items": {
+              "$ref": "#/components/schemas/CensusResponse"
+            },
+            "title": "Statistics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dataset",
+          "territory",
+          "snapshot_id",
+          "retrieved_at",
+          "acquisition_method",
+          "timestamp_basis",
+          "source_modified_date",
+          "source_url",
+          "reuse_status",
+          "total",
+          "offset",
+          "has_more",
+          "health",
+          "districts",
+          "schools",
+          "mobility",
+          "statistics"
+        ],
+        "title": "PublicContextResponse",
+        "type": "object"
+      },
+      "SchoolResponse": {
+        "properties": {
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "municipality": {
+            "title": "Municipality",
+            "type": "string"
+          },
+          "district": {
+            "title": "District",
+            "type": "string"
+          },
+          "district_ar": {
+            "title": "District Ar",
+            "type": "string"
+          },
+          "community": {
+            "title": "Community",
+            "type": "string"
+          },
+          "grades_original": {
+            "title": "Grades Original",
+            "type": "string"
+          },
+          "longitude": {
+            "title": "Longitude",
+            "type": "number"
+          },
+          "latitude": {
+            "title": "Latitude",
+            "type": "number"
+          }
+        },
+        "required": [
+          "source_record_id",
+          "name",
+          "name_ar",
+          "municipality",
+          "district",
+          "district_ar",
+          "community",
+          "grades_original",
+          "longitude",
+          "latitude"
+        ],
+        "title": "SchoolResponse",
         "type": "object"
       }
     }

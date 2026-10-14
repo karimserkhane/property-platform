@@ -1,5 +1,6 @@
 import uuid
 
+from django.contrib.gis.db import models as gis_models
 from django.db import models
 
 
@@ -313,6 +314,7 @@ class IngestionExecution(models.Model):
                         "osm_bootstrap",
                         "adrec_sales",
                         "adrec_indices",
+                        "public_context",
                     ],
                 ),
                 name="ingestion_execution_identity_valid",
@@ -584,7 +586,7 @@ class AdrecMarketSnapshot(models.Model):
                 name="adrec_snapshot_window_valid",
             ),
             models.CheckConstraint(
-                condition=models.Q(source_row_count__lte=10000), name="adrec_snapshot_bounded"
+                condition=models.Q(source_row_count__lte=50000), name="adrec_snapshot_bounded"
             ),
         ]
 
@@ -665,5 +667,150 @@ class AdrecIndexObservation(models.Model):
                 condition=models.Q(usable=True, review_reason="")
                 | models.Q(usable=False, review_reason__regex=r"\S"),
                 name="adrec_index_review_present",
+            ),
+        ]
+
+
+class PublicContextSnapshot(models.Model):
+    """Complete append-only context release. The contents remain domain-typed."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    run = models.OneToOneField(IngestionRun, on_delete=models.PROTECT)
+    capture = models.OneToOneField(Capture, on_delete=models.PROTECT)
+    dataset = models.CharField(max_length=20)
+    territory = models.CharField(max_length=80)
+    source_row_count = models.PositiveIntegerField()
+    source_modified_date = models.DateField(null=True)
+    reuse_status = models.CharField(max_length=80)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "public_context_snapshot"
+        indexes = [
+            models.Index(
+                fields=["territory", "dataset", "-created_at"], name="context_snapshot_latest"
+            )
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    dataset__in=["health", "schools", "mobility", "statistics", "districts"],
+                    source_row_count__gte=1,
+                    source_row_count__lte=5000,
+                    territory__regex=r"\S",
+                    reuse_status__regex=r"\S",
+                ),
+                name="context_snapshot_scope_valid",
+            )
+        ]
+
+
+class PublicContextObservation(models.Model):
+    """Shared audit fields, not a universal business table."""
+
+    snapshot = models.ForeignKey(PublicContextSnapshot, on_delete=models.PROTECT)
+    source_record_id = models.CharField(max_length=80)
+    field_path = models.CharField(max_length=160)
+    record_sha256 = models.CharField(max_length=64)
+    name = models.CharField(max_length=255)
+    ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+        constraints = [
+            models.UniqueConstraint(
+                fields=["snapshot", "source_record_id"], name="%(class)s_identity"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    source_record_id__regex=r"\S",
+                    field_path__regex=r"\S",
+                    name__regex=r"\S",
+                    record_sha256__regex=r"^[0-9a-f]{64}$",
+                ),
+                name="%(class)s_audit",
+            ),
+        ]
+
+
+class HealthFacilityObservation(PublicContextObservation):
+    facility_type = models.CharField(max_length=255)
+    address = models.CharField(max_length=2000, blank=True)
+    planned = models.BooleanField()
+    operator = models.CharField(max_length=255, blank=True)
+    licence_number = models.CharField(max_length=255, blank=True)
+    services_original = models.TextField(blank=True)
+    location = gis_models.PointField(srid=4326)
+
+    class Meta(PublicContextObservation.Meta):
+        abstract = False
+        db_table = "health_facility_observation"
+
+
+class DistrictBoundaryObservation(PublicContextObservation):
+    district_id = models.PositiveIntegerField()
+    name_ar = models.CharField(max_length=255, blank=True)
+    municipality = models.CharField(max_length=3)
+    geometry = gis_models.MultiPolygonField(srid=4326)
+
+    class Meta(PublicContextObservation.Meta):
+        abstract = False
+        db_table = "district_boundary_observation"
+        constraints = [
+            *PublicContextObservation.Meta.constraints,
+            models.CheckConstraint(
+                condition=models.Q(district_id__gte=1, municipality__in=["ADM", "AAM", "WRM"]),
+                name="district_boundary_scope_valid",
+            ),
+        ]
+
+
+class SchoolObservation(PublicContextObservation):
+    name_ar = models.CharField(max_length=255, blank=True)
+    municipality = models.CharField(max_length=255)
+    district = models.CharField(max_length=255, blank=True)
+    district_ar = models.CharField(max_length=255, blank=True)
+    community = models.CharField(max_length=255, blank=True)
+    grades_original = models.CharField(max_length=255, blank=True)
+    location = gis_models.PointField(srid=4326)
+
+    class Meta(PublicContextObservation.Meta):
+        abstract = False
+        db_table = "school_observation"
+
+
+class BusRouteObservation(PublicContextObservation):
+    number = models.CharField(max_length=20)
+    origin = models.CharField(max_length=500)
+    destination = models.CharField(max_length=500)
+    timetable_url = models.URLField(max_length=1000)
+
+    class Meta(PublicContextObservation.Meta):
+        abstract = False
+        db_table = "bus_route_observation"
+
+
+class CensusMeasureObservation(PublicContextObservation):
+    reference_year = models.PositiveSmallIntegerField()
+    region = models.CharField(max_length=80)
+    category = models.CharField(max_length=40)
+    unit = models.CharField(max_length=40)
+    value = models.DecimalField(max_digits=16, decimal_places=3)
+    rounding_base = models.PositiveSmallIntegerField(null=True)
+
+    class Meta(PublicContextObservation.Meta):
+        abstract = False
+        db_table = "census_measure_observation"
+        constraints = [
+            *PublicContextObservation.Meta.constraints,
+            models.CheckConstraint(
+                condition=models.Q(
+                    reference_year__gte=2000,
+                    reference_year__lte=2099,
+                    value__gte=0,
+                    unit__in=["units", "buildings", "percent"],
+                    category__in=["all", "residential", "non_residential"],
+                ),
+                name="census_measure_valid",
             ),
         ]

@@ -5,6 +5,7 @@ from django.db import DatabaseError, connection
 from ninja import NinjaAPI, Schema, Status
 
 from .parcels import router as parcels_router
+from .public_context import router as context_router
 
 api = NinjaAPI(
     title="Property Platform API",
@@ -13,6 +14,7 @@ api = NinjaAPI(
     openapi_url="/openapi.json" if settings.DEBUG else None,
 )
 api.add_router("/preview", parcels_router)
+api.add_router("/preview", context_router)
 
 
 class Health(Schema):

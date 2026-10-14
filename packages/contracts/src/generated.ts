@@ -174,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/public-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context */
+        get: operations["previewPublicContext"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -662,6 +679,143 @@ export interface components {
             /** Sold Share */
             sold_share: string | null;
         };
+        /** BusRouteResponse */
+        BusRouteResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /** Number */
+            number: string;
+            /** Origin */
+            origin: string;
+            /** Destination */
+            destination: string;
+            /** Timetable Url */
+            timetable_url: string;
+        };
+        /** CensusResponse */
+        CensusResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /** Reference Year */
+            reference_year: number;
+            /** Region */
+            region: string;
+            /** Category */
+            category: string;
+            /** Unit */
+            unit: string;
+            /** Value */
+            value: string;
+            /** Rounding Base */
+            rounding_base: number | null;
+        };
+        /** DistrictResponse */
+        DistrictResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Municipality */
+            municipality: string;
+            /** District Id */
+            district_id: number;
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+        };
+        /** FacilityResponse */
+        FacilityResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /** Facility Type */
+            facility_type: string;
+            /** Address */
+            address: string;
+            /** Planned */
+            planned: boolean;
+            /** Operator */
+            operator: string;
+            /** Licence Number */
+            licence_number: string;
+            /** Services Original */
+            services_original: string;
+            /** Longitude */
+            longitude: number;
+            /** Latitude */
+            latitude: number;
+        };
+        /** PublicContextResponse */
+        PublicContextResponse: {
+            /** Dataset */
+            dataset: string;
+            /** Territory */
+            territory: string;
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Retrieved At */
+            retrieved_at: string | null;
+            /** Acquisition Method */
+            acquisition_method: string | null;
+            /** Timestamp Basis */
+            timestamp_basis: string | null;
+            /** Source Modified Date */
+            source_modified_date: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Reuse Status */
+            reuse_status: string;
+            /** Total */
+            total: number;
+            /** Offset */
+            offset: number;
+            /** Has More */
+            has_more: boolean;
+            /** Health */
+            health: components["schemas"]["FacilityResponse"][];
+            /** Districts */
+            districts: components["schemas"]["DistrictResponse"][];
+            /** Schools */
+            schools: components["schemas"]["SchoolResponse"][];
+            /** Mobility */
+            mobility: components["schemas"]["BusRouteResponse"][];
+            /** Statistics */
+            statistics: components["schemas"]["CensusResponse"][];
+        };
+        /** SchoolResponse */
+        SchoolResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Municipality */
+            municipality: string;
+            /** District */
+            district: string;
+            /** District Ar */
+            district_ar: string;
+            /** Community */
+            community: string;
+            /** Grades Original */
+            grades_original: string;
+            /** Longitude */
+            longitude: number;
+            /** Latitude */
+            latitude: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -1107,6 +1261,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdrecMarketResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewPublicContext: {
+        parameters: {
+            query: {
+                dataset: "health" | "schools" | "mobility" | "statistics" | "districts";
+                territory?: string;
+                q?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicContextResponse"];
                 };
             };
             /** @description Forbidden */

@@ -166,3 +166,10 @@ Les noms de futurs déploiements, par exemple `ajman-completed-projects` ou `dub
 Les propriétaires, acheteurs, locataires, dossiers personnels, titres privés et fichiers accidentellement indexés ne font pas partie de cet inventaire exploitable. Les plans de paiement, disponibilités commerciales, plans intérieurs et photos de promoteurs demanderont en parallèle des sources de promoteur ou contrats de diffusion spécifiques : les catalogues gouvernementaux ne couvrent pas à eux seuls tout ce besoin.
 
 Les tests effectués ici concernent la disponibilité et les métadonnées citées. Aucun modèle, table, volume Docker, migration, calendrier ou connecteur applicatif supplémentaire n’a été modifié pendant cette recherche.
+
+
+## Mise en œuvre Abu Dhabi — 14 octobre 2026
+
+Le [guide technique Abu Dhabi](../engineering/ABU_DHABI.md) décrit les données maintenant réellement présentes en base et les six nouveaux déploiements Prefect. La recherche seule de cette page a été suivie d’une implémentation : ADREC ventes à l’échelle de l’émirat ; Onwani 216 limites de districts ; DoH établissements ; ADEK Charter via archive déclarée après un refus automatique ; lignes Mobility ; 12 mesures du Dataset SCAD. Les entrées précédentes conservent l’état de la revue initiale, tandis que ce guide donne l’état d’intégration courant.
+
+DARI a désormais été examiné dans le navigateur : annuaire visible, API observée mais HTTP 401 sans autorisation. ADEK automatique : HTTP 403 ; NCM endpoint annoncé : HTTP 404. Les données privées ou credentials du frontend ne sont pas utilisés. Les jeux Ajman/Dubai hors périmètre Abu Dhabi et les autres candidats internationaux ne sont pas présentés comme ingérés.

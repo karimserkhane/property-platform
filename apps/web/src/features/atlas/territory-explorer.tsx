@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { AdrecMarket } from "./adrec-market";
 import { Explorer } from "./explorer";
+import { PublicContext } from "./public-context";
 import type {
   AtlasLabels,
   CoverageLabels,
@@ -133,12 +135,12 @@ export function TerritoryExplorer({
         <label>
           {coverage.area}
           <select
-            value={territory.level === "area" ? territory.id : ""}
+            value={
+              territory.level === "area" ? territory.id : (emirateId ?? "")
+            }
             onChange={(event) => navigate(event.target.value)}
           >
-            <option value="" disabled>
-              {coverage.area}
-            </option>
+            <option value={emirateId ?? ""}>{mapLabels.viewIsland}</option>
             {areas.map((value) => (
               <option value={value.id} key={value.id}>
                 {name(value)}
@@ -147,7 +149,11 @@ export function TerritoryExplorer({
           </select>
         </label>
       )}
-      <p>{territory.queryable ? name(territory) : coverage.preparing}</p>
+      <p>
+        {territory.queryable || territory.id === "abu-dhabi"
+          ? name(territory)
+          : coverage.preparing}
+      </p>
     </div>
   );
   if (!territory.queryable)
@@ -158,20 +164,27 @@ export function TerritoryExplorer({
           <Link href="/">{labels.back}</Link>
         </div>
         {navigation}
-        <section className="coverage-empty">
-          <p className="eyebrow">
-            <bdi>{name(territory)}</bdi>
-          </p>
-          <h2>{coverage.preparing}</h2>
-          <p>{coverage.preparingBody}</p>
-          <button
-            type="button"
-            className="button"
-            onClick={() => navigate(registry.default_territory_id)}
-          >
-            {coverage.visitPilot}
-          </button>
-        </section>
+        {territory.id === "abu-dhabi" ? (
+          <section className="emirate-context-overview">
+            <PublicContext locale={locale} />
+            <AdrecMarket territory="abu-dhabi" locale={locale} />
+          </section>
+        ) : (
+          <section className="coverage-empty">
+            <p className="eyebrow">
+              <bdi>{name(territory)}</bdi>
+            </p>
+            <h2>{coverage.preparing}</h2>
+            <p>{coverage.preparingBody}</p>
+            <button
+              type="button"
+              className="button"
+              onClick={() => navigate(registry.default_territory_id)}
+            >
+              {coverage.visitPilot}
+            </button>
+          </section>
+        )}
       </main>
     );
   return (

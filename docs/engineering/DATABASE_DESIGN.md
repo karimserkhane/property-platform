@@ -211,3 +211,8 @@ Le profil Compose sépare les stockages :
 `prefect-db` utilise PostgreSQL 18.6, sans extension PostGIS et sans port publié vers Windows. Son réseau de métadonnées est privé. Le serveur expose seulement l'interface locale sur `127.0.0.1:4200`. Prefect gère ses propres migrations de métadonnées ; les migrations Django métier restent une opération explicite via `manage.py migrate`. Supprimer le volume Prefect perd les horaires/historiques de cette UI ; supprimer le volume métier peut perdre les biens et preuves. Aucun de ces volumes n'est une sauvegarde.
 
 S3, des documents commerciaux supplémentaires et les tables d'unités/prix ne sont pas créés par cet ajout. Avant production, définir accès authentifié à l'orchestrateur, secrets, rôles SQL minimaux, sauvegardes des deux bases et politique de rétention des reçus.
+
+
+## Observations du contexte Abu Dhabi
+
+[ABU_DHABI.md](ABU_DHABI.md) décrit les six nouvelles tables du schéma evidence. Le catalogue real_estate et ses UUID restent conservés. PublicContextSnapshot assemble l’audit d’une version complète ; HealthFacilityObservation, SchoolObservation, BusRouteObservation, CensusMeasureObservation et DistrictBoundaryObservation portent des contenus typés et leurs contraintes propres. Captures, observations et nouveaux snapshots sont append-only par les services ; pas de truncate/reload. Ces sources ne deviennent pas des identités commerciales de bâtiments par rapprochement de noms.

@@ -37,3 +37,5 @@ Pour comprendre les choix actuels, lire **V2 → contre-audit → structure → 
 Les [premières fiches immobilières](engineering/PROPERTY_EXPLORATION.md) décrivent l’exploration centrée sur les biens, les présentations documentées et les photos sous licence du pilote.
 
 Depuis le 13 octobre 2026, [l'orchestration Prefect](engineering/INGESTION.md) est implémentée dans `apps/ingestion`, à côté du site et de l'API dans le même dépôt. Dix-sept déploiements couvrent Al Reem et [Saadiyat](engineering/SAADIYAT.md) ; les calendriers commencent désactivés sur une installation neuve et trois procédures restent manuelles. Les calendriers récurrents locaux sont activés le dimanche. L'interface de supervision locale sur le port 4200 utilise sa propre base de métadonnées ; les données immobilières restent dans PostGIS. Les modèles commerciaux supplémentaires décrits dans [le cadrage des pipelines](engineering/PROPERTY_DATA_PIPELINES.md) restent une extension distincte.
+
+- [Ingestions publiques Abu Dhabi : données réelles, Prefect et accès restreints](engineering/ABU_DHABI.md).

@@ -72,6 +72,13 @@ DATASETS = (
 # Same reviewed connectors, distinct source identities and deployment scopes.
 DATASETS += (
     Dataset(
+        "abu-dhabi-districts",
+        "property-platform-public-context",
+        "Complete Onwani district boundaries for ADM, AAM and WRM; source identities preserved.",
+        {"territory": "abu-dhabi", "dataset": "districts"},
+        "0 12 * * 0",
+    ),
+    Dataset(
         "saadiyat-property-presentations",
         "property-platform-presentations",
         "Reviewed Park View profiles; no unlicensed promoter photographs.",
@@ -152,5 +159,35 @@ DATASETS += (
         "Abu Dhabi city indices; ambiguous source series are quarantined.",
         {"territory": "abu-dhabi"},
         "0 10 * * 0",
+    ),
+    Dataset(
+        "adrec-abu-dhabi-sales",
+        "property-platform-adrec-sales",
+        "Complete emirate-wide 90-day sales snapshot; overlaps island-specific snapshots.",
+        {"territory": "abu-dhabi"},
+        "30 10 * * 0",
+    ),
+    *(
+        Dataset(
+            f"abu-dhabi-{dataset}",
+            "property-platform-public-context",
+            description,
+            {"territory": "abu-dhabi", "dataset": dataset},
+            f"{minute} 11 * * 0",
+        )
+        for dataset, minute, description in (
+            (
+                "health",
+                0,
+                "DoH public facilities, locations and planned status; not medical advice.",
+            ),
+            ("schools", 15, "ADEK Charter schools only; ESIS identities, names and locations."),
+            (
+                "mobility",
+                30,
+                "Published bus routes and endpoints; no invented stops or travel times.",
+            ),
+            ("statistics", 45, "SCAD census measures with reference year and disclosure rounding."),
+        )
     ),
 )

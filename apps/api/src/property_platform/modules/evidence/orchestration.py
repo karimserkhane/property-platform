@@ -15,8 +15,10 @@ from django.db.models import F
 from django.utils import timezone
 
 from . import (
+    abu_dhabi,
     adrec,
     adrec_import,
+    context_import,
     imagery_import,
     map_import,
     osm_bootstrap,
@@ -37,6 +39,7 @@ OPERATIONS = {
     "osm_bootstrap",
     "adrec_sales",
     "adrec_indices",
+    "public_context",
 }
 TERMINAL = {"succeeded", "quarantined"}
 TERRITORY = DEFAULT_TERRITORY
@@ -61,6 +64,11 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
         raise ValueError("Invalid ingestion operation or execution identity")
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
         raise ValueError("Valid actor required")
+    if operation == "public_context":
+        abu_dhabi.source_definition(operation, scope)
+        if reference_key is not None:
+            raise ValueError("Context imports do not accept reference identities")
+        return None
     if operation in {"adrec_sales", "adrec_indices"}:
         adrec.source_definition(operation, scope)
         if reference_key is not None:
@@ -247,6 +255,8 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
 
 
 def _source_keys(operation, scope, reference):
+    if operation == "public_context":
+        return [abu_dhabi.source_definition(operation, scope)[0]]
     if operation in {"adrec_sales", "adrec_indices"}:
         return [adrec.source_definition(operation, scope)[0]]
     territory = scope.split(":", 1)[0]
@@ -267,6 +277,9 @@ def _source_keys(operation, scope, reference):
 
 
 def _dispatch(operation, scope, actor, acquisition, receipt, reference):
+    if operation == "public_context":
+        run = context_import.import_context(scope=scope, actor=actor, acquisition=acquisition)
+        return run.status, run.summary
     if operation in {"adrec_sales", "adrec_indices"}:
         run = adrec_import.import_adrec(
             operation=operation, scope=scope, actor=actor, acquisition=acquisition

@@ -471,13 +471,13 @@ class AdrecMarketResponse(Schema):
 def adrec_market(request, territory: str, q: str = "", offset: int = 0, limit: int = 40):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
-    from property_platform.modules.evidence.adrec import DISTRICTS
+    from property_platform.modules.evidence.adrec import DISTRICTS, MAX_ROWS
     from property_platform.modules.publication.adrec_preview import market
 
     if (
         territory not in DISTRICTS
         or len(q) > 80
-        or not 0 <= offset <= 10000
+        or not 0 <= offset <= MAX_ROWS
         or not 1 <= limit <= 100
     ):
         return Status(422, {"code": "invalid_query"})

@@ -138,7 +138,8 @@ def osm_bootstrap(territory: Literal["saadiyat-island"] = "saadiyat-island", act
 
 @flow(name="property-platform-adrec-sales", retries=0)
 def adrec_sales(
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "scheduled"
+    territory: Literal["al-reem-island", "saadiyat-island", "abu-dhabi"] = TERRITORY,
+    actor: str = "scheduled",
 ):
     """Snapshot 90 completed Dubai days. Scheduled run time fixes the retry scope."""
     from property_platform.modules.evidence.adrec import sales_scope
@@ -156,6 +157,23 @@ def adrec_indices(territory: Literal["abu-dhabi"] = "abu-dhabi", actor: str = "s
     return ingest_source("adrec_indices", territory, actor)
 
 
+@flow(name="property-platform-public-context", retries=0)
+def public_context(
+    dataset: Literal["health", "schools", "mobility", "statistics", "districts"] = "health",
+    territory: Literal["abu-dhabi"] = "abu-dhabi",
+    actor: str = "scheduled",
+    receipt_name: str | None = None,
+):
+    """Complete authority snapshot, without name-only property reconciliation."""
+    if receipt_name is not None:
+        if dataset != "schools":
+            raise ValueError("Manual archives are only registered for ADEK schools")
+        return ingest_source(
+            "public_context", f"{territory}:{dataset}", actor, receipt_name=receipt_name
+        )
+    return ingest_source("public_context", f"{territory}:{dataset}", actor)
+
+
 FLOWS = {
     f.name: f
     for f in (
@@ -168,5 +186,6 @@ FLOWS = {
         osm_bootstrap,
         adrec_sales,
         adrec_indices,
+        public_context,
     )
 }

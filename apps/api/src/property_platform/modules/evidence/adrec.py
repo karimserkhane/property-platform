@@ -11,10 +11,14 @@ BASE = "https://adrec.gov.ae/api/feature/MarketData/"
 PAGE_URL = "https://adrec.gov.ae/en/market-data"
 SALES = BASE + "RecentSales"
 INDICES = {"sale": BASE + "ResiSalePriceIndexByArea", "rent": BASE + "ResiRentPriceIndexByArea"}
-DISTRICTS = {"al-reem-island": "Al Reem Island", "saadiyat-island": "Al Saadiyat Island"}
+DISTRICTS = {
+    "al-reem-island": "Al Reem Island",
+    "saadiyat-island": "Al Saadiyat Island",
+    "abu-dhabi": "all",
+}
 VERSION = "adrec-public-dashboard-v2"
 PAGE_SIZE = 1000
-MAX_ROWS = 10000
+MAX_ROWS = 50000
 MAX_BYTES = 8 * 1024 * 1024
 
 
@@ -79,9 +83,10 @@ def index_params():
 def source_definition(operation, scope):
     if operation == "adrec_sales":
         territory, _, _ = sales_window(scope)
+        label = "Abu Dhabi emirate" if territory == "abu-dhabi" else DISTRICTS[territory]
         return (
             f"adrec:market-data:sales:{territory}",
-            f"ADREC — {DISTRICTS[territory]} sales",
+            f"ADREC — {label} sales",
             SALES,
             VERSION,
         )
@@ -193,7 +198,9 @@ def sale_record(row, scope):
         registered = date.fromisoformat(row["sale_application_datetime"])
     except (TypeError, ValueError) as exc:
         raise AdrecError("Unexpected ADREC registration date") from exc
-    if not start <= registered <= end or row["district"] != DISTRICTS[territory]:
+    if not start <= registered <= end or (
+        territory != "abu-dhabi" and row["district"] != DISTRICTS[territory]
+    ):
         raise AdrecError("ADREC row is outside its requested coverage")
     return dict(
         registration_date=registered,
