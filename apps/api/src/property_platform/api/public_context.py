@@ -82,6 +82,49 @@ class PublicContextResponse(Schema):
     statistics: list[CensusResponse]
 
 
+class DistrictMapProperties(DistrictResponse):
+    label_point: tuple[float, float]
+    explore_territory_id: str | None
+
+
+class DistrictMapGeometry(Schema):
+    type: Literal["MultiPolygon"]
+    coordinates: list[list[list[list[float]]]]
+
+
+class DistrictMapFeature(Schema):
+    type: Literal["Feature"]
+    id: str
+    geometry: DistrictMapGeometry
+    properties: DistrictMapProperties
+
+
+class DistrictMapResponse(Schema):
+    type: Literal["FeatureCollection"]
+    territory: Literal["abu-dhabi"]
+    snapshot_id: UUID | None
+    retrieved_at: datetime | None
+    source_url: str
+    display_geometry_version: str
+    features: list[DistrictMapFeature]
+
+
+@router.get(
+    "/district-map",
+    response={200: DistrictMapResponse, 403: Error, 503: Error},
+    operation_id="previewDistrictMap",
+)
+def districts(request):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.publication.context_preview import district_map
+
+    try:
+        return district_map()
+    except DatabaseError, ValueError:
+        return Status(503, {"code": "data_unavailable"})
+
+
 @router.get(
     "/public-context",
     response={200: PublicContextResponse, 403: Error, 422: Error, 503: Error},

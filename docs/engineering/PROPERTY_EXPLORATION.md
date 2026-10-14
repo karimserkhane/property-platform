@@ -98,3 +98,13 @@ Pour l'évolution des titres du 13 octobre : 19 tests web, TypeScript, Biome, li
 Les clics réels sur Leaf Tower, RT4_C119 et The District conservent le cadrage de 300 m ; un clic dans le secteur RT4 vide ne crée aucune sélection. Locate on map est testé séparément. La photo locale charge ses 960 pixels ; anglais et arabe sont vérifiés à 390 × 844 sans débordement horizontal. La fiche devient visible sur mobile et sa fermeture ramène la carte, sans modifier son zoom. Ces contrôles ne remplacent pas une revue linguistique ou des mesures sur appareils physiques.
 
 La base locale conserve ses 2 431 parcelles et 188 bâtiments. Elle contient six présentations courantes, neuf observations de présentation avec leur historique et quatre observations photo (deux versions pour les deux tours ; une photographie distincte). Les reconstructions ont réutilisé les dépendances verrouillées déjà installées ; le problème de certificats d'une installation complète reste la limite décrite dans [DEVELOPMENT.md](DEVELOPMENT.md).
+
+## Clic sur un bien et secours parcellaire — 14 octobre 2026
+
+La sélection fonctionne sur les empreintes **et les étiquettes affichées**. Priorité : bâtiment à la position exacte du clic, repère de projet, lieu nommé, rue, puis parcelle. Le test de l’empreinte utilise ses polygones réels, y compris leurs trous et parties séparées ; il ne choisit pas un bâtiment simplement voisin. Les bâtiments sont visibles dès le niveau de zoom 11,5. Désactiver la couche Bâtiments désactive aussi son test spatial.
+
+Un clic sur le terrain vide d’une parcelle conserve la sélection du terrain. `RT7_TMP2` est publié comme **commercial** par Onwani ; ce code ne suffit pas à le reclasser comme périmètre de projet. Les périmètres explicitement classés ProjectLimits et les secteurs restent non interactifs sur les cartes immobilières. Les clics sur un bien ne déplacent pas la caméra ; le cadrage reste une action explicite de l’utilisateur.
+
+Lorsque plusieurs parcelles se superposent, la plus petite géométrie sous le pointeur prime, indépendamment de l’ordre des couleurs. La surface calculée côté web sert uniquement à cette priorité relative, pas à afficher une mesure cadastrale. RT7 TMP2 couvre environ 116 hectares et chevauche de petites parcelles ; les sources locales actuelles ne contiennent aucune empreinte de bâtiment à l’intérieur de ce grand terrain. Le clic sur une petite parcelle ne crée donc pas une fiche de bâtiment manquante.
+
+Les fonctions de sélection et tests sont dans `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\presentation.ts` et `C:\Users\Karim\Repositories\property-platform\apps\web\tests\atlas.test.mjs`. Les identités et sources SQL ne sont pas modifiées par cette correction d’affichage.

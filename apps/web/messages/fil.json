@@ -125,7 +125,16 @@
     "preparing": "Inihahanda ang saklaw",
     "preparingBody": "Wala pang aktibong datos para sa lugar na ito. Tuklasin muna ang pilot sa Al Reem habang sinusuri ang mga bagong sanggunian.",
     "visitPilot": "Tuklasin ang pilot",
-    "unknownArea": "Hindi kilalang lugar"
+    "unknownArea": "Hindi kilalang lugar",
+    "districtsTitle": "Tuklasin ang mga distrito ng Abu Dhabi",
+    "searchDistricts": "Maghanap ng distrito o isla",
+    "openArea": "Tingnan ang mga ari-arian",
+    "boundaryOnly": "Opisyal na mga hangganan ng distrito sa emirate. Kasalukuyang may detalyadong mapa ng mga ari-arian para sa Reem at Saadiyat.",
+    "showAll": "Lahat ng munisipalidad",
+    "municipalityAbuDhabi": "Munisipalidad ng Abu Dhabi",
+    "municipalityAlAin": "Munisipalidad ng Al Ain",
+    "municipalityAlDhafra": "Munisipalidad ng Al Dhafra",
+    "municipality": "Munisipalidad"
   },
   "Market": {
     "tab": "Merkado",

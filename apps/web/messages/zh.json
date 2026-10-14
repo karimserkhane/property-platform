@@ -125,7 +125,16 @@
     "preparing": "覆盖范围正在准备中",
     "preparingBody": "该地区尚无已启用的数据集。新来源仍在研究和验证，可先探索 Al Reem 试点。",
     "visitPilot": "探索试点",
-    "unknownArea": "未知地区"
+    "unknownArea": "未知地区",
+    "districtsTitle": "探索阿布扎比各区",
+    "searchDistricts": "搜索地区或岛屿",
+    "openArea": "探索房产",
+    "boundaryOnly": "酋长国各区的官方边界。目前仅雷姆岛和萨迪亚特岛提供详细房产地图。",
+    "showAll": "所有市辖区",
+    "municipalityAbuDhabi": "阿布扎比市辖区",
+    "municipalityAlAin": "艾因市辖区",
+    "municipalityAlDhafra": "扎夫拉市辖区",
+    "municipality": "市辖区"
   },
   "Market": {
     "tab": "市场",

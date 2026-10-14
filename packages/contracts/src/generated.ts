@@ -174,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/district-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Districts */
+        get: operations["previewDistrictMap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/public-context": {
         parameters: {
             query?: never;
@@ -678,6 +695,78 @@ export interface components {
             rate_aed_per_sqm: string | null;
             /** Sold Share */
             sold_share: string | null;
+        };
+        /** DistrictMapFeature */
+        DistrictMapFeature: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "Feature";
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["DistrictMapGeometry"];
+            properties: components["schemas"]["DistrictMapProperties"];
+        };
+        /** DistrictMapGeometry */
+        DistrictMapGeometry: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "MultiPolygon";
+            /** Coordinates */
+            coordinates: number[][][][];
+        };
+        /** DistrictMapProperties */
+        DistrictMapProperties: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Municipality */
+            municipality: string;
+            /** District Id */
+            district_id: number;
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Label Point */
+            label_point: [
+                number,
+                number
+            ];
+            /** Explore Territory Id */
+            explore_territory_id: string | null;
+        };
+        /** DistrictMapResponse */
+        DistrictMapResponse: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "FeatureCollection";
+            /**
+             * Territory
+             * @constant
+             */
+            territory: "abu-dhabi";
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Retrieved At */
+            retrieved_at: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Display Geometry Version */
+            display_geometry_version: string;
+            /** Features */
+            features: components["schemas"]["DistrictMapFeature"][];
         };
         /** BusRouteResponse */
         BusRouteResponse: {
@@ -1274,6 +1363,44 @@ export interface operations {
             };
             /** @description Unprocessable Content */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewDistrictMap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistrictMapResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

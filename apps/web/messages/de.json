@@ -125,7 +125,16 @@
     "preparing": "Abdeckung in Vorbereitung",
     "preparingBody": "Für dieses Gebiet gibt es noch keinen aktivierten Datensatz. Erkunde Al Reem, während weitere Quellen recherchiert und geprüft werden.",
     "visitPilot": "Pilotgebiet erkunden",
-    "unknownArea": "Unbekanntes Gebiet"
+    "unknownArea": "Unbekanntes Gebiet",
+    "districtsTitle": "Bezirke von Abu Dhabi erkunden",
+    "searchDistricts": "Bezirk oder Insel suchen",
+    "openArea": "Immobilien erkunden",
+    "boundaryOnly": "Offizielle Bezirksgrenzen im Emirat. Detaillierte Immobilienkarten sind derzeit für Reem und Saadiyat verfügbar.",
+    "showAll": "Alle Gemeinden",
+    "municipalityAbuDhabi": "Gemeinde Abu Dhabi",
+    "municipalityAlAin": "Gemeinde Al Ain",
+    "municipalityAlDhafra": "Gemeinde Al Dhafra",
+    "municipality": "Gemeinde"
   },
   "Market": {
     "tab": "Markt",

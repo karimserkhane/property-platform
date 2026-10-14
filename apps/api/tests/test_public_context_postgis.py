@@ -150,6 +150,53 @@ def test_district_topology_and_capture_chain_preserve_provider_identity():
     assert result["total"] == 1 and result["districts"][0]["district_id"] == 1
 
 
+def test_district_navigation_preserves_source_identity_and_opens_only_reviewed_areas(client):
+    from django.contrib.gis.geos import GEOSGeometry
+
+    from property_platform.modules.evidence.models import DistrictBoundaryObservation
+    from property_platform.modules.publication.context_preview import district_map
+
+    rows = [district(1), district(2), district(3)]
+    rows[0]["properties"].update(DISTRICTID=57, NAMEENGLISH="Not a name match")
+    rows[1]["properties"].update(DISTRICTID=1347)
+    rows[2]["properties"].update(
+        DISTRICTID=57, MUNICIPALITYNAME="WRM", NAMEENGLISH="AL REEM ISLAND"
+    )
+    body = json.dumps({"type": "FeatureCollection", "features": rows}).encode()
+    ids = json.dumps({"objectIds": [1, 2, 3]}).encode()
+
+    def acquire(url, params):
+        _, receipt = acquired([])
+        receipt["url"] = url
+        return ids if url == abu_dhabi.DISTRICT_IDS else body, receipt
+
+    execute_import(
+        operation="public_context",
+        scope="abu-dhabi:districts",
+        actor="test-map",
+        execution_key="f" * 64,
+        acquisition=acquire,
+    )
+    original = {
+        r.source_record_id: r.geometry.ewkt for r in DistrictBoundaryObservation.objects.all()
+    }
+    data = district_map()
+    features = {f["id"]: f for f in data["features"]}
+    assert features["1"]["properties"]["explore_territory_id"] == "al-reem-island"
+    assert features["2"]["properties"]["explore_territory_id"] == "saadiyat-island"
+    assert features["3"]["properties"]["explore_territory_id"] is None
+    for feature in features.values():
+        assert GEOSGeometry(json.dumps(feature["geometry"])).valid
+    assert original == {
+        r.source_record_id: r.geometry.ewkt for r in DistrictBoundaryObservation.objects.all()
+    }
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+        response = client.get("/api/v1/preview/district-map")
+        assert response.status_code == 200 and len(response.json()["features"]) == 3
+    with override_settings(DEBUG=False):
+        assert client.get("/api/v1/preview/district-map").status_code == 403
+
+
 def test_school_archive_is_imported_without_inventing_a_network_clock():
     original = school_archive()
     result = execute_import(

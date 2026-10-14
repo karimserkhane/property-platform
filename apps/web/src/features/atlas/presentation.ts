@@ -124,33 +124,107 @@ type MapHit = {
 
 // Rendering order is visual, not the specificity of the object under the pointer.
 // Project perimeters and administrative areas are context, never click targets.
-export function selectMapHit<T extends MapHit>(hits: readonly T[]): T | null {
+export function selectMapHit<T extends MapHit>(
+  hits: readonly T[],
+  parcelAreas: ReadonlyMap<string, number> = new Map(),
+): T | null {
   let selected: T | null = null;
   let priority = Infinity;
+  let selectedArea = Infinity;
   for (const hit of hits) {
     if (!hit.properties?.id) continue;
     const rank =
       hit.layer.id === "buildings"
         ? 0
-        : hit.layer.id === "places" &&
+        : ["places", "place-names"].includes(hit.layer.id) &&
             typeof hit.properties.kind === "string" &&
             hit.properties.kind.endsWith("_project_marker")
           ? 1
-          : hit.layer.id === "parcel-fill"
-            ? hit.properties.category === "overlay"
-              ? Infinity
-              : 2
-            : hit.layer.id === "places"
+          : ["places", "place-names"].includes(hit.layer.id)
+            ? 2
+            : ["streets", "street-names"].includes(hit.layer.id)
               ? 3
-              : hit.layer.id === "streets"
+              : hit.layer.id === "parcel-fill" &&
+                  hit.properties.category !== "overlay"
                 ? 4
                 : Infinity;
-    if (rank < priority) {
+    const area = parcelAreas.get(String(hit.properties.id)) ?? Infinity;
+    if (
+      rank < priority ||
+      (rank === 4 && priority === 4 && area < selectedArea)
+    ) {
       selected = hit;
       priority = rank;
+      selectedArea = area;
     }
   }
   return selected;
+}
+
+// Relative surface for click specificity only, never a cadastral measurement.
+// Work relative to each ring origin to retain precision for small UAE plots.
+export function geometryClickArea(geometry: MapFeature["geometry"]): number {
+  if (geometry.type !== "MultiPolygon") return Infinity;
+  function ringArea(ring: number[][]) {
+    if (ring.length < 3) return 0;
+    const [ox, oy] = ring[0];
+    let sum = 0;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++)
+      sum +=
+        (ring[j][0] - ox) * (ring[i][1] - oy) -
+        (ring[i][0] - ox) * (ring[j][1] - oy);
+    return Math.abs(sum) / 2;
+  }
+  const area = (geometry.coordinates as number[][][][]).reduce(
+    (sum, rings) =>
+      sum +
+      Math.max(
+        0,
+        ringArea(rings[0] ?? []) -
+          rings.slice(1).reduce((holes, ring) => holes + ringArea(ring), 0),
+      ),
+    0,
+  );
+  return area > 0 ? area : Infinity;
+}
+
+// Test the actual footprint, even below its rendering minzoom. No nearest-name
+// match: holes remain empty land and a boundary counts as part of the building.
+export function buildingAtPoint(
+  features: readonly MapFeature[],
+  point: readonly [number, number],
+): MapFeature | null {
+  function ringContains(ring: number[][]): boolean {
+    let inside = false;
+    const [x, y] = point;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [ax, ay] = ring[j];
+      const [bx, by] = ring[i];
+      const cross = (x - ax) * (by - ay) - (y - ay) * (bx - ax);
+      if (
+        Math.abs(cross) < 1e-14 &&
+        x >= Math.min(ax, bx) &&
+        x <= Math.max(ax, bx) &&
+        y >= Math.min(ay, by) &&
+        y <= Math.max(ay, by)
+      )
+        return true;
+      if (ay > y !== by > y && x < ((bx - ax) * (y - ay)) / (by - ay) + ax)
+        inside = !inside;
+    }
+    return inside;
+  }
+  return (
+    features.find((feature) => {
+      if (feature.geometry.type !== "MultiPolygon") return false;
+      return (feature.geometry.coordinates as number[][][][]).some(
+        (rings) =>
+          Boolean(rings[0]) &&
+          ringContains(rings[0]) &&
+          !rings.slice(1).some(ringContains),
+      );
+    }) ?? null
+  );
 }
 
 export function geometryBounds(

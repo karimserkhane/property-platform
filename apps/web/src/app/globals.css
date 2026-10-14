@@ -18,6 +18,88 @@
   --control-shadow-hover:
     0 1px 0 #ffffffef inset, 0 4px 8px #102e3612, 0 12px 24px #102e3612;
 }
+
+.district-overview {
+  margin-block: 1.5rem 2rem;
+}
+.district-overview-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.district-quick-links {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.district-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1rem;
+  margin-block: 1rem;
+}
+.district-overview-map {
+  height: 620px;
+  border: 1px solid #adc2bd;
+  border-radius: 18px;
+  overflow: hidden;
+}
+.district-directory {
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #dedbd2;
+  border-radius: 18px;
+}
+.district-directory-list {
+  max-height: 440px;
+  overflow: auto;
+}
+.district-directory-list article {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.8rem;
+  border-block-end: 1px solid #e7e6df;
+}
+.district-directory small {
+  color: #587371;
+}
+.district-name {
+  border: 0;
+  background: none;
+  text-align: start;
+  color: #184e53;
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+}
+.district-row-selected {
+  background: #f1eee5;
+}
+.district-selected {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.8rem;
+}
+.district-source {
+  font-size: 0.8rem;
+  color: #587371;
+}
+@media (max-width: 900px) {
+  .district-overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .district-overview-map {
+    height: 440px;
+  }
+  .district-directory-list {
+    max-height: 300px;
+  }
+}
 html[dir="rtl"] {
   --font-ui: "Noto Sans Arabic", "Manrope";
   --font-display: "Noto Sans Arabic";

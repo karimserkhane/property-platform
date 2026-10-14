@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildingAtPoint,
   csv,
   geometryBounds,
+  geometryClickArea,
   normalized,
   parcelPropertyIndex,
   preferredParcelProperty,
@@ -182,6 +184,93 @@ test("an explicit project marker opens its property rather than the underlying p
   const building = hit("buildings", "building");
   assert.equal(selectMapHit([parcel, project]), project);
   assert.equal(selectMapHit([project, building, parcel]), building);
+});
+
+test("property labels and other named places win over RT7 TMP2, with land as fallback", () => {
+  const land = hit("parcel-fill", "RT7_TMP2", { category: "mixed" });
+  const label = hit("place-names", "project", {
+    kind: "publisher_project_marker",
+  });
+  const place = hit("places", "tower", { kind: "apartments" });
+  const street = hit("street-names", "street");
+  assert.equal(selectMapHit([land, label]), label);
+  assert.equal(selectMapHit([land, place]), place);
+  assert.equal(selectMapHit([land, street]), street);
+  assert.equal(selectMapHit([land]), land);
+});
+
+test("large RT7 TMP2 cannot hide a smaller overlapping parcel, regardless of paint order", () => {
+  const broad = hit("parcel-fill", "RT7_TMP2", { category: "mixed" });
+  const unit = hit("parcel-fill", "RT7_C1", { category: "mixed" });
+  const area = new Map([
+    ["RT7_TMP2", 1000],
+    ["RT7_C1", 10],
+  ]);
+  assert.equal(selectMapHit([broad, unit], area), unit);
+  assert.equal(selectMapHit([unit, broad], area), unit);
+  assert.equal(selectMapHit([broad], area), broad);
+  const shape = {
+    type: "MultiPolygon",
+    coordinates: [
+      [
+        [
+          [54, 24],
+          [58, 24],
+          [58, 28],
+          [54, 28],
+          [54, 24],
+        ],
+        [
+          [55, 25],
+          [56, 25],
+          [56, 26],
+          [55, 26],
+          [55, 25],
+        ],
+      ],
+    ],
+  };
+  assert.equal(geometryClickArea(shape), 15);
+});
+
+test("building clicks use exact footprints at low zoom, preserving courtyards and separate parts", () => {
+  const building = {
+    geometry: {
+      type: "MultiPolygon",
+      coordinates: [
+        [
+          [
+            [0, 0],
+            [4, 0],
+            [4, 4],
+            [0, 4],
+            [0, 0],
+          ],
+          [
+            [1, 1],
+            [1, 2],
+            [2, 2],
+            [2, 1],
+            [1, 1],
+          ],
+        ],
+        [
+          [
+            [6, 6],
+            [7, 6],
+            [7, 7],
+            [6, 7],
+            [6, 6],
+          ],
+        ],
+      ],
+    },
+  };
+  assert.equal(buildingAtPoint([building], [3, 3]), building);
+  assert.equal(buildingAtPoint([building], [6.5, 6.5]), building);
+  assert.equal(buildingAtPoint([building], [4, 3]), building);
+  assert.equal(buildingAtPoint([building], [1.5, 1.5]), null);
+  assert.equal(buildingAtPoint([building], [5, 5]), null);
 });
 
 test("property discovery prioritizes documented records without inventing point-to-building links", () => {

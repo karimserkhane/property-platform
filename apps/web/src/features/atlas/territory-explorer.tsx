@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { AdrecMarket } from "./adrec-market";
+import { DistrictOverview } from "./district-overview";
 import { Explorer } from "./explorer";
 import { PublicContext } from "./public-context";
 import type {
@@ -24,6 +26,7 @@ export function TerritoryExplorer({
   coverage: CoverageLabels;
   locale: string;
 }) {
+  const contextText = useTranslations("Context");
   const [registry, setRegistry] = useState<TerritoryRegistry | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -37,9 +40,12 @@ export function TerritoryExplorer({
         if (!response.ok) throw new Error("unavailable");
         const value = (await response.json()) as TerritoryRegistry;
         setRegistry(value);
+        const params = new URL(window.location.href).searchParams;
         setSelected(
-          new URL(window.location.href).searchParams.get("territory") ??
-            value.default_territory_id,
+          params.get("territory") ??
+            (params.has("parcel")
+              ? "al-reem-island"
+              : value.default_territory_id),
         );
       })
       .catch(() => {
@@ -49,11 +55,15 @@ export function TerritoryExplorer({
   }, [attempt]);
   useEffect(() => {
     if (!registry) return;
-    const read = () =>
+    const read = () => {
+      const params = new URL(window.location.href).searchParams;
       setSelected(
-        new URL(window.location.href).searchParams.get("territory") ??
-          registry.default_territory_id,
+        params.get("territory") ??
+          (params.has("parcel")
+            ? "al-reem-island"
+            : registry.default_territory_id),
       );
+    };
     window.addEventListener("popstate", read);
     return () => window.removeEventListener("popstate", read);
   }, [registry]);
@@ -70,7 +80,9 @@ export function TerritoryExplorer({
     return (
       <main className="explore-shell">
         <h1>{labels.explore}</h1>
-        <p role="status">{error ? labels.unavailable : labels.loading}</p>
+        <p role="status">
+          {error ? labels.unavailable : contextText("loading")}
+        </p>
         {error && (
           <button
             type="button"
@@ -111,13 +123,7 @@ export function TerritoryExplorer({
         {coverage.emirate}
         <select
           value={emirateId ?? ""}
-          onChange={(event) => {
-            const first = registry.territories.find(
-              (value) =>
-                value.parent_id === event.target.value && value.queryable,
-            );
-            navigate(first?.id ?? event.target.value);
-          }}
+          onChange={(event) => navigate(event.target.value)}
         >
           <option value="" disabled>
             {coverage.chooseEmirate}
@@ -165,10 +171,20 @@ export function TerritoryExplorer({
         </div>
         {navigation}
         {territory.id === "abu-dhabi" ? (
-          <section className="emirate-context-overview">
-            <PublicContext locale={locale} />
-            <AdrecMarket territory="abu-dhabi" locale={locale} />
-          </section>
+          <>
+            <DistrictOverview
+              locale={locale}
+              labels={labels}
+              coverage={coverage}
+              mapLabels={mapLabels}
+              registry={registry}
+              navigate={navigate}
+            />
+            <section className="emirate-context-overview">
+              <PublicContext locale={locale} />
+              <AdrecMarket territory="abu-dhabi" locale={locale} />
+            </section>
+          </>
         ) : (
           <section className="coverage-empty">
             <p className="eyebrow">

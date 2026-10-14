@@ -23,7 +23,9 @@ COPY packages/contracts ./packages/contracts
 COPY packages/branding ./packages/branding
 COPY scripts ./scripts
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm --filter @property-platform/web build && node scripts/prepare-web-runtime.mjs
+RUN pnpm --filter @property-platform/web typecheck \
+    && pnpm --filter @property-platform/web build \
+    && node scripts/prepare-web-runtime.mjs
 
 FROM base AS runtime
 WORKDIR /app

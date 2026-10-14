@@ -706,6 +706,48 @@
         ]
       }
     },
+    "/api/v1/preview/district-map": {
+      "get": {
+        "operationId": "previewDistrictMap",
+        "summary": "Districts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DistrictMapResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "public-context-preview"
+        ]
+      }
+    },
     "/api/v1/preview/public-context": {
       "get": {
         "operationId": "previewPublicContext",
@@ -2214,6 +2256,209 @@
           "sold_share"
         ],
         "title": "AdrecSaleResponse",
+        "type": "object"
+      },
+      "DistrictMapFeature": {
+        "properties": {
+          "type": {
+            "const": "Feature",
+            "title": "Type",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/DistrictMapGeometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/DistrictMapProperties"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "DistrictMapFeature",
+        "type": "object"
+      },
+      "DistrictMapGeometry": {
+        "properties": {
+          "type": {
+            "const": "MultiPolygon",
+            "title": "Type",
+            "type": "string"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "title": "Coordinates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "DistrictMapGeometry",
+        "type": "object"
+      },
+      "DistrictMapProperties": {
+        "properties": {
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "municipality": {
+            "title": "Municipality",
+            "type": "string"
+          },
+          "district_id": {
+            "title": "District Id",
+            "type": "integer"
+          },
+          "bounds": {
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Bounds",
+            "type": "array"
+          },
+          "label_point": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Label Point",
+            "type": "array"
+          },
+          "explore_territory_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explore Territory Id"
+          }
+        },
+        "required": [
+          "source_record_id",
+          "name",
+          "name_ar",
+          "municipality",
+          "district_id",
+          "bounds",
+          "label_point",
+          "explore_territory_id"
+        ],
+        "title": "DistrictMapProperties",
+        "type": "object"
+      },
+      "DistrictMapResponse": {
+        "properties": {
+          "type": {
+            "const": "FeatureCollection",
+            "title": "Type",
+            "type": "string"
+          },
+          "territory": {
+            "const": "abu-dhabi",
+            "title": "Territory",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Id"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "display_geometry_version": {
+            "title": "Display Geometry Version",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/DistrictMapFeature"
+            },
+            "title": "Features",
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "territory",
+          "snapshot_id",
+          "retrieved_at",
+          "source_url",
+          "display_geometry_version",
+          "features"
+        ],
+        "title": "DistrictMapResponse",
         "type": "object"
       },
       "BusRouteResponse": {

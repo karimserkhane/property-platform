@@ -11,6 +11,7 @@ Extension du **14 octobre 2026**, sur la branche `codex/abu-dhabi-context-ingest
 - [Installation et lancement](#installation-et-lancement)
 - [Archive ADEK](#archive-adek)
 - [Consultation dans le site](#consultation-dans-le-site)
+- [Carte d’ensemble et districts officiels](#carte-densemble-et-districts-officiels)
 - [Sources restant à qualifier](#sources-restant-à-qualifier)
 - [Validation](#validation)
 
@@ -144,6 +145,28 @@ Le panneau indique **tout l’émirat** même depuis une île. Aucun de ces effe
 
 La nouvelle option de sélection de zone permet de revenir à l’émirat. Sa vue de données ne déclare pas une carte parcellaire complète : les géométries de parcelles/bâtiments actuellement affichées restent celles des deux îles. Les couches de secteurs restent non cliquables, et le clic sur un bien ne reçoit pas de nouvel auto-zoom.
 
+## Carte d’ensemble et districts officiels
+
+La route sans territoire, par exemple [l’exploration en français](http://localhost:3102/fr/explore), ouvre désormais **Toute la zone / Whole area → Abu Dhabi**. Changer d’émirat garde ce niveau général. Choisir Reem ou Saadiyat ouvre la carte détaillée de l’île. Les anciens liens qui ne contiennent qu’un UUID de parcelle gardent le contexte Reem pour leur compatibilité.
+
+Un **émirat** contient plusieurs **municipalités** ; le jeu Onwani fournit ici des **districts**. Une île peut être un district, mais un secteur comme RT7 est un niveau plus fin. Ne pas assimiler systématiquement district, quartier commercial, communauté et ville.
+
+La vue d’ensemble affiche les 216 limites officielles et un annuaire consultable en anglais/arabe, filtrable par municipalité : Abu Dhabi (ADM), Al Ain (AAM), Al Dhafra (WRM). Les noms originaux restent ceux du producteur. Les boutons Reem et Saadiyat ouvrent les biens effectivement collectés ; les autres districts ne sont pas présentés comme disposant déjà d’un catalogue immobilier complet.
+
+Le pipeline existant **abu-dhabi-districts**, programmé le dimanche à 12 h, heure de Dubai, acquiert les identifiants avant/après et les limites auprès de DMT / Onwani. Il conserve les acquisitions historiques et actualise le dernier snapshot complet. La table est `property_platform.evidence.district_boundary_observation`, liée à `property_platform.evidence.public_context_snapshot` et aux captures. Aucun second pipeline, table dupliquée, migration ou import manuel n’est nécessaire pour cette vue sur le poste déjà alimenté.
+
+`/api/v1/preview/district-map`, relayé par `/api/atlas/district-map`, lit seulement la base. Le serveur produit une simplification de **20 mètres** pour l’affichage ; la géométrie originale, les bornes et le point intérieur d’étiquette sont conservés. La réponse est bornée à 500 districts ; un dépassement échoue au lieu de tronquer silencieusement. Une version explicite identifie cette géométrie d’affichage. Les accès restent limités à l’aperçu local comme les autres données.
+
+Les liens vers les cartes détaillées utilisent le couple officiel **municipalité + DISTRICTID** : ADM/57 pour Reem et ADM/1347 pour Saadiyat. Une ressemblance de nom ne crée pas un rattachement. Ajouter un autre district détaillé demande un profil de collecte examiné et ses imports ; ajouter seulement son nom ne suffit pas.
+
+Fichiers principaux :
+
+- `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\publication\context_preview.py` : lecture et projection de carte.
+- `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\api\public_context.py` : contrat HTTP typé et garde d’aperçu.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\district-overview.tsx` : annuaire et parcours vers les îles.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\district-map.tsx` : carte des limites.
+- `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\registry.py` : déploiement et horaire existants.
+
 ## Sources restant à qualifier
 
 L’[inventaire national](../product/SOURCES_DONNEES_UAE.md) reste un registre de pistes, pas une liste d’imports tous exécutables.
@@ -172,3 +195,9 @@ Résultats locaux : **237 tests API/PostGIS réussis**, **84 tests ingestion ré
 Prefect contient **26 déploiements et 22 calendriers actifs** sur ce poste après cette extension. Les cinq nouveaux horaires automatiques sont vérifiés actifs ; ADEK est vérifié inactif. Les six imports ont un run terminé avec écritures en PostgreSQL ; le premier refus ADEK reste enregistré. Ces contrôles locaux ne valent pas validation d’un déploiement de production ou résultat observé de CI distante.
 
 Le compilateur **TypeScript 7** du dépôt passe également dans le runtime Linux du build (`typecheck`), en plus du contrôle TypeScript embarqué de Next.js. Le dernier contrôle ciblé de contexte vérifie aussi qu’un changement de politique d’arrondi SCAD est refusé.
+
+### Vérification de la carte d’ensemble et des clics — 14 octobre 2026
+
+Dix tests ciblés sur PostGIS réel passent pour les snapshots, la navigation typée et le garde d’aperçu ; les 24 tests web passent, dont les étiquettes, empreintes avec trous et priorité de petite parcelle sous RT7 TMP2. Le compilateur TypeScript 7 et le build Next.js des quinze langues passent dans l’image Docker. La génération Next.js native Windows rencontre toujours la limite du cache SWC documentée ; les mêmes vérifications ont réussi dans Linux sans désactiver les protections.
+
+La vérification navigateur a confirmé : défaut Toute la zone, 216 districts, recherche Saadiyat puis accès à sa carte, retour au niveau émirat, noms arabes et RTL, disposition carte/annuaire sur ordinateur et empilement sur petit écran, sélection réelle de RT7 · 3 au lieu de TMP2, fiche Leaf Tower au clic et secours TMP2 sur un point sans petite parcelle. Les images locales de vérification restent sous `C:\Users\Karim\Repositories\property-platform\.cache\validation\`, ignorées par Git.

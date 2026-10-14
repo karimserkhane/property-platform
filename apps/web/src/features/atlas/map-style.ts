@@ -79,7 +79,7 @@ export function mapLayers(locale: string): LayerSpecification[] {
       id: "buildings",
       type: "fill",
       source: "building",
-      minzoom: 13.5,
+      minzoom: 11.5,
       paint: {
         "fill-color": "#688783",
         "fill-opacity": 0.48,

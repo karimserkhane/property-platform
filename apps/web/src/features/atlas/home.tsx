@@ -125,7 +125,7 @@ export async function AtlasHome() {
                   data-reveal="visible"
                   href={{
                     pathname: "/explore",
-                    query: { territory: pilot?.id ?? territory.id },
+                    query: { territory: territory.id },
                   }}
                 >
                   <span className={styles.regionIndex} aria-hidden="true">

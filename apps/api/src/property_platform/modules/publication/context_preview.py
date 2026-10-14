@@ -19,9 +19,8 @@ MODELS = {
 }
 
 
-def public_context(dataset, *, query="", offset=0, limit=40):
-    feed = FEEDS[dataset]
-    snapshot = (
+def latest_context_snapshot(dataset):
+    return (
         PublicContextSnapshot.objects.filter(
             dataset=dataset, territory="abu-dhabi", run__status="succeeded"
         )
@@ -29,6 +28,11 @@ def public_context(dataset, *, query="", offset=0, limit=40):
         .order_by("-capture__fetched_at", "-created_at", "-pk")
         .first()
     )
+
+
+def public_context(dataset, *, query="", offset=0, limit=40):
+    feed = FEEDS[dataset]
+    snapshot = latest_context_snapshot(dataset)
     result = {
         "dataset": dataset,
         "territory": "abu-dhabi",
@@ -118,4 +122,64 @@ def public_context(dataset, *, query="", offset=0, limit=40):
                 rounding_base=row.rounding_base,
             )
         result[dataset].append(values)
+    return result
+
+
+def district_map():
+    """Provider boundaries for navigation, not canonical city/property identity.
+
+    Simplification is a derived display shape in metres; original evidence,
+    bounds and the interior label point retain their unmodified geometry.
+    """
+    import json
+
+    from django.contrib.gis.geos import MultiPolygon
+
+    from ..evidence.collection_profiles import COLLECTIONS
+
+    snapshot = latest_context_snapshot("districts")
+    result = {
+        "type": "FeatureCollection",
+        "territory": "abu-dhabi",
+        "snapshot_id": snapshot.pk if snapshot else None,
+        "retrieved_at": snapshot.capture.fetched_at if snapshot else None,
+        "source_url": FEEDS["districts"].page_url,
+        "display_geometry_version": "district-navigation-20m-v1",
+        "features": [],
+    }
+    if not snapshot:
+        return result
+    rows = list(
+        DistrictBoundaryObservation.objects.filter(snapshot=snapshot).order_by(
+            "municipality", "name", "source_record_id"
+        )[:501]
+    )
+    if len(rows) > 500:
+        raise ValueError("District navigation exceeds reviewed response budget")
+    profiles = {("ADM", profile.district_id): profile.territory for profile in COLLECTIONS.values()}
+    for row in rows:
+        shape = row.geometry.clone()
+        shape.transform(3857)
+        shape = shape.simplify(20, preserve_topology=True)
+        shape.transform(4326)
+        if shape.geom_type == "Polygon":
+            shape = MultiPolygon(shape, srid=4326)
+        point = row.geometry.point_on_surface
+        result["features"].append(
+            {
+                "type": "Feature",
+                "id": row.source_record_id,
+                "geometry": json.loads(shape.geojson),
+                "properties": {
+                    "source_record_id": row.source_record_id,
+                    "district_id": row.district_id,
+                    "name": row.name,
+                    "name_ar": row.name_ar,
+                    "municipality": row.municipality,
+                    "bounds": row.geometry.extent,
+                    "label_point": [point.x, point.y],
+                    "explore_territory_id": profiles.get((row.municipality, row.district_id)),
+                },
+            }
+        )
     return result

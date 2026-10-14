@@ -12,10 +12,12 @@ import {
 import { useEffect, useMemo, useRef } from "react";
 import { mapLayers, mapName } from "./map-style";
 import {
+  buildingAtPoint,
   type Category,
   COLORS,
   download,
   geometryBounds,
+  geometryClickArea,
   selectMapHit,
 } from "./presentation";
 import type {
@@ -99,6 +101,15 @@ export default function ParcelMap({
   callbacks.current = { onSelect, onFeature, onError };
   const contextRef = useRef(context);
   contextRef.current = context;
+  const optionsRef = useRef(options);
+  optionsRef.current = options;
+  const parcelAreas = useMemo(
+    () =>
+      new Map(data.features.map((f) => [f.id, geometryClickArea(f.geometry)])),
+    [data],
+  );
+  const parcelAreasRef = useRef(parcelAreas);
+  parcelAreasRef.current = parcelAreas;
   const credits = useMemo(
     () =>
       [
@@ -190,19 +201,35 @@ export default function ParcelMap({
       for (const layer of mapLayers("en")) instance.addLayer(layer);
       instance.on("click", (event) => {
         const hits = instance.queryRenderedFeatures(event.point, {
-          layers: ["buildings", "parcel-fill", "places", "streets"],
+          layers: [
+            "buildings",
+            "places",
+            "place-names",
+            "streets",
+            "street-names",
+            "parcel-fill",
+          ],
         });
-        const hit = selectMapHit(hits);
+        const hit = selectMapHit(hits, parcelAreasRef.current);
+        const footprint =
+          optionsRef.current.buildings &&
+          buildingAtPoint(contextRef.current?.building.features ?? [], [
+            event.lngLat.lng,
+            event.lngLat.lat,
+          ]);
+        if (footprint && hit?.layer.id !== "buildings") {
+          callbacks.current.onFeature(footprint);
+          return;
+        }
         if (!hit) return;
         const id = String(hit.properties.id);
         if (hit.layer.id === "parcel-fill") callbacks.current.onSelect(id);
         else {
-          const target =
-            hit.layer.id === "places"
-              ? "place"
-              : hit.layer.id === "buildings"
-                ? "building"
-                : "street";
+          const target = ["places", "place-names"].includes(hit.layer.id)
+            ? "place"
+            : hit.layer.id === "buildings"
+              ? "building"
+              : "street";
           const feature = contextRef.current?.[target].features.find(
             (f) => f.properties.id === id,
           );

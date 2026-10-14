@@ -13,7 +13,7 @@ class Territory:
     bounds: tuple[float, float, float, float]
 
 
-DEFAULT_TERRITORY_ID = "al-reem-island"
+DEFAULT_TERRITORY_ID = "abu-dhabi"
 TERRITORIES = (
     Territory(
         "uae",

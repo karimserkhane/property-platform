@@ -125,7 +125,16 @@
     "preparing": "Coverage in preparation",
     "preparingBody": "This territory has no activated dataset yet. Explore the Al Reem pilot while further sources are researched and validated.",
     "visitPilot": "Explore the pilot",
-    "unknownArea": "Unknown area"
+    "unknownArea": "Unknown area",
+    "districtsTitle": "Explore Abu Dhabi districts",
+    "searchDistricts": "Search district or island",
+    "openArea": "Explore properties",
+    "boundaryOnly": "Official district boundaries across the emirate. Detailed property maps are currently available for Reem and Saadiyat.",
+    "showAll": "All municipalities",
+    "municipalityAbuDhabi": "Abu Dhabi municipality",
+    "municipalityAlAin": "Al Ain municipality",
+    "municipalityAlDhafra": "Al Dhafra municipality",
+    "municipality": "Municipality"
   },
   "Market": {
     "tab": "Market",
