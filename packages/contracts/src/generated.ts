@@ -403,6 +403,8 @@ export interface components {
             source_url: string;
             /** Taken On */
             taken_on: string | null;
+            /** Delivery Url */
+            delivery_url?: string | null;
         };
         /** PropertyPresentationResponse */
         PropertyPresentationResponse: {

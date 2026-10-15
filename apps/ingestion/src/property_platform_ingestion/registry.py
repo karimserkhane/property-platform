@@ -66,6 +66,13 @@ DATASETS = (
         {},
         None,
     ),
+    Dataset(
+        "media-storage",
+        "property-platform-media-storage",
+        "Resume private archival of acquired licensed photos; never publish to the CDN.",
+        {},
+        None,
+    ),
 )
 
 

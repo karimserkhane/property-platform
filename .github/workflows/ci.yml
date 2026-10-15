@@ -91,5 +91,12 @@ jobs:
       - run: uv run --project apps/ingestion ruff format --check apps/ingestion
       - run: uv run --project apps/ingestion pytest apps/ingestion/tests -c apps/ingestion/pyproject.toml
       - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion config --quiet
+      - name: Validate optional R2 storage configuration without contacting the cloud
+        env:
+          MEDIA_S3_ENDPOINT_URL: https://ci-account.r2.cloudflarestorage.com
+          MEDIA_S3_BUCKET: ci-private-media
+          MEDIA_S3_ACCESS_KEY_ID: configuration-test-only
+          MEDIA_S3_SECRET_ACCESS_KEY: configuration-test-only
+        run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml -f infra/local/compose.storage.s3.yaml --profile ingestion config --quiet
       - run: docker build -t property-platform-ingestion-ci -f apps/ingestion/Dockerfile .
       - run: docker run --rm --network none property-platform-ingestion-ci python -m property_platform_ingestion datasets

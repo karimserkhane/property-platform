@@ -15,8 +15,10 @@ COPY apps/api/pyproject.toml apps/api/uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 COPY apps/api/src ./src
 COPY apps/api/manage.py ./manage.py
-RUN uv sync --frozen --no-dev && useradd --create-home property_platform && mkdir /app/staticfiles && chown -R property_platform:property_platform /app
+RUN uv sync --frozen --no-dev && useradd --create-home --uid 1000 property_platform \
+    && mkdir -p /app/staticfiles /media && chown property_platform:property_platform /media \
+    && chown -R property_platform:property_platform /app
 USER property_platform
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PATH="/app/.venv/bin:$PATH" AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 EXPOSE 8000
 CMD ["gunicorn", "property_platform.config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--access-logfile", "-"]

@@ -1,0 +1,25 @@
+# Optional operator-configured R2/S3 storage. No buckets, domains or subscriptions created.
+# Combine AFTER BOTH compose.yaml and compose.ingestion.yaml, even without the ingestion profile.
+x-media-s3: &media-s3
+  MEDIA_STORAGE_BACKEND: s3
+  MEDIA_S3_NAMESPACE: ${MEDIA_S3_NAMESPACE:-r2-primary}
+  MEDIA_S3_ENDPOINT_URL: ${MEDIA_S3_ENDPOINT_URL:?Configure the R2 account HTTPS endpoint}
+  MEDIA_S3_REGION: ${MEDIA_S3_REGION:-auto}
+  MEDIA_S3_BUCKET: ${MEDIA_S3_BUCKET:?Configure the private originals bucket}
+  MEDIA_S3_ACCESS_KEY_ID: ${MEDIA_S3_ACCESS_KEY_ID:?Configure the bucket-scoped access key}
+  MEDIA_S3_SECRET_ACCESS_KEY: ${MEDIA_S3_SECRET_ACCESS_KEY:?Configure the secret key}
+  MEDIA_S3_PUBLIC_BUCKET: ${MEDIA_S3_PUBLIC_BUCKET:-}
+  MEDIA_PUBLIC_BASE_URL: ${MEDIA_PUBLIC_BASE_URL:-}
+  MEDIA_PUBLICATION_ENABLED: ${MEDIA_PUBLICATION_ENABLED:-0}
+
+services:
+  api:
+    environment:
+      <<: *media-s3
+      # A separate read-only token can be used by the HTTP process.
+      MEDIA_S3_ACCESS_KEY_ID: ${MEDIA_S3_READ_ACCESS_KEY_ID:-${MEDIA_S3_ACCESS_KEY_ID}}
+      MEDIA_S3_SECRET_ACCESS_KEY: ${MEDIA_S3_READ_SECRET_ACCESS_KEY:-${MEDIA_S3_SECRET_ACCESS_KEY}}
+  ingestion:
+    profiles: [ingestion]
+    environment:
+      <<: *media-s3

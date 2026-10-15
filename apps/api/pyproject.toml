@@ -9,6 +9,7 @@ dependencies = [
   "dj-database-url==3.1.2",
   "psycopg[binary]==3.3.6",
   "gunicorn==26.2.0",
+  "boto3==1.43.114",
 ]
 
 [dependency-groups]
@@ -47,3 +48,9 @@ name = "Domain modules never import delivery or configuration"
 type = "forbidden"
 source_modules = ["property_platform.modules"]
 forbidden_modules = ["property_platform.api", "property_platform.config"]
+
+[[tool.importlinter.contracts]]
+name = "Storage adapters remain independent of application and domain modules"
+type = "forbidden"
+source_modules = ["property_platform.object_storage"]
+forbidden_modules = ["property_platform.modules", "property_platform.api", "property_platform.config"]

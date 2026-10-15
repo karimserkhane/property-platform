@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
@@ -70,3 +71,21 @@ STATIC_ROOT = "/app/staticfiles"
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 X_FRAME_OPTIONS = "DENY"
+
+# Operator configuration only. Secrets never appear in OpenAPI or NEXT_PUBLIC_* variables.
+MEDIA_STORAGE = {
+    "backend": os.environ.get("MEDIA_STORAGE_BACKEND", "local"),
+    "local_root": os.environ.get(
+        "MEDIA_LOCAL_ROOT",
+        str(Path.cwd() / ".cache" / "media"),
+    ),
+    "namespace": os.environ.get("MEDIA_S3_NAMESPACE", "r2-primary"),
+    "endpoint_url": os.environ.get("MEDIA_S3_ENDPOINT_URL", ""),
+    "region": os.environ.get("MEDIA_S3_REGION", "auto"),
+    "bucket": os.environ.get("MEDIA_S3_BUCKET", ""),
+    "access_key_id": os.environ.get("MEDIA_S3_ACCESS_KEY_ID", ""),
+    "secret_access_key": os.environ.get("MEDIA_S3_SECRET_ACCESS_KEY", ""),
+    "public_bucket": os.environ.get("MEDIA_S3_PUBLIC_BUCKET", ""),
+    "public_base_url": os.environ.get("MEDIA_PUBLIC_BASE_URL", ""),
+    "publication_enabled": os.environ.get("MEDIA_PUBLICATION_ENABLED", "0") == "1",
+}

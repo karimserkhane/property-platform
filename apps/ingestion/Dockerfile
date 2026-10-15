@@ -16,8 +16,8 @@ RUN --mount=type=secret,id=platform_extra_ca \
     fi
 COPY --from=uv /uv /usr/local/bin/uv
 RUN useradd --create-home --uid 1000 property_platform \
-    && mkdir -p /data /home/property_platform/.prefect \
-    && chown property_platform:property_platform /data /home/property_platform/.prefect
+    && mkdir -p /data /media /home/property_platform/.prefect \
+    && chown property_platform:property_platform /data /media /home/property_platform/.prefect
 
 FROM base AS build
 COPY apps/ingestion/pyproject.toml apps/ingestion/uv.lock ./
@@ -34,5 +34,6 @@ FROM base AS runtime
 # Copy once with the final ownership; no build caches or duplicated chown layer.
 COPY --from=build --chown=1000:1000 /workspace /workspace
 USER property_platform
-ENV PATH="/workspace/apps/ingestion/.venv/bin:$PATH" INGESTION_STORAGE_DIR=/data
+ENV PATH="/workspace/apps/ingestion/.venv/bin:$PATH" INGESTION_STORAGE_DIR=/data \
+    AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 CMD ["python", "-m", "property_platform_ingestion", "serve"]

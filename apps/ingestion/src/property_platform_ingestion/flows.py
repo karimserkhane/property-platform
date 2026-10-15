@@ -109,7 +109,31 @@ def presentations(
     territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "scheduled"
 ):
     """Refresh the reviewed property profiles and licensed media as one validated batch."""
-    return ingest_source("property_presentations", territory, actor)
+    result = ingest_source("property_presentations", territory, actor)
+    result["media_storage"] = archive_media(actor)
+    return result
+
+
+@task(name="Archive acquired media", retries=0, cache_policy=NO_CACHE)
+def archive_media(actor: str) -> dict:
+    run_id = flow_run.id
+    if run_id is None or not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and a 1–80 character operator are required")
+    result = invoke_domain(
+        {
+            "operation": "media_storage",
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        }
+    )
+    get_run_logger().info("Private media archival: %s", result["summary"])
+    return result
+
+
+@flow(name="property-platform-media-storage", retries=0)
+def media_storage(actor: str = "manual"):
+    """Resume a bounded private backfill; public CDN publication stays an explicit command."""
+    return archive_media(actor)
 
 
 @flow(name="property-platform-imagery", retries=0)
@@ -187,5 +211,6 @@ FLOWS = {
         adrec_sales,
         adrec_indices,
         public_context,
+        media_storage,
     )
 }

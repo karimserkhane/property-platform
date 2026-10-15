@@ -1394,6 +1394,17 @@
               }
             ],
             "title": "Taken On"
+          },
+          "delivery_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delivery Url"
           }
         },
         "required": [

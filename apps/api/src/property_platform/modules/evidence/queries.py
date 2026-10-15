@@ -12,7 +12,6 @@ from .models import (
     MapObservation,
     ParcelObservation,
     ParcelSourceAlias,
-    PropertyMedia,
     PropertyPresentation,
     ResearchReference,
 )
@@ -297,6 +296,8 @@ def parcel_sources(parcel_ids):
 
 def property_presentations(target, ids):
     """Bounded typed presentation; raw captures and reviewer identities remain private."""
+    from .media_storage import delivery_url, eligible_media
+
     if target not in ("building", "place"):
         return {}
     rows = (
@@ -308,12 +309,10 @@ def property_presentations(target, ids):
         .prefetch_related(
             Prefetch(
                 "propertymedia_set",
-                queryset=PropertyMedia.objects.filter(
-                    display_allowed=True,
-                    capture__parent_capture_id=F("licence_capture_id"),
-                    capture__run__status="succeeded",
-                    licence_capture__run__status="succeeded",
-                ).order_by("id"),
+                queryset=eligible_media()
+                .select_related("capture", "mediapublication__stored_object")
+                .defer("capture__payload")
+                .order_by("id"),
             )
         )
         .order_by(f"{target}_id", "-capture__fetched_at", "-id")
@@ -341,6 +340,7 @@ def property_presentations(target, ids):
                     "licence_url": photo.licence_url,
                     "source_url": photo.source_url,
                     "taken_on": photo.taken_on,
+                    "delivery_url": delivery_url(photo),
                 }
                 for photo in row.propertymedia_set.all()
             ][:4],
@@ -349,22 +349,18 @@ def property_presentations(target, ids):
 
 
 def property_media_asset(identity):
+    from .media_storage import eligible_media, read_capture
+
     media = (
-        PropertyMedia.objects.select_related("capture")
-        .filter(
-            id=identity,
-            display_allowed=True,
-            capture__run__status="succeeded",
-            capture__http_status=200,
-            capture__parent_capture_id=F("licence_capture_id"),
-            licence_capture__run__status="succeeded",
-            licence_capture__http_status=200,
-        )
+        eligible_media()
+        .select_related("capture")
+        .defer("capture__payload")
+        .filter(id=identity)
         .first()
     )
     if media is None:
         return None
-    payload = bytes(media.capture.payload)
+    payload = read_capture(media.capture, max_bytes=2 * 1024 * 1024)
     if (
         len(payload) > 2 * 1024 * 1024
         or media.mime_type != "image/jpeg"

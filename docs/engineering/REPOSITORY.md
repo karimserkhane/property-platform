@@ -6,6 +6,8 @@ Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCH
 
 ## Comment lire l'arborescence
 
+**Extension stockage du 15 octobre 2026.** `property_platform.object_storage` est le paquet d’infrastructure des adaptateurs disque/S3. Il ne dépend ni des modules métier, ni de l’API, ni de la configuration Django ; Import Linter vérifie cette frontière. Le module **evidence** possède `StoredObject`, `CaptureObject`, `MediaPublication` et `media_storage.py`. La direction reste `publication/API → evidence → object_storage`, avec `evidence → catalog` pour les identités. L’application ingestion appelle ce service après l’import et hors transaction SQL ; elle ne possède pas les tables. Les secrets ne passent jamais dans les contrats clients. Voir [MEDIA_STORAGE.md](MEDIA_STORAGE.md) pour la reprise, les droits, le stockage persistant et le passage facultatif à R2/CDN.
+
 La **racine** est le dossier `property-platform`. Un élément terminé par `/` est un dossier ; les éléments indentés sont à l'intérieur de ce dossier. `src` contient le code source, `tests` les contrôles automatisés et `config` les réglages de l'application. Les noms qui commencent par un point, comme `.github`, sont aussi des fichiers ou dossiers ordinaires, parfois masqués par l'explorateur.
 
 Dans les explications, les chemins des fichiers sont donnés depuis la racine du dépôt. Sur ton poste, ajoute le préfixe `C:\Users\Karim\Repositories\property-platform\` pour obtenir leur chemin Windows absolu. Dans l'arborescence, lis chaque nom avec tous ses dossiers parents.
@@ -99,6 +101,9 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │       └── production.py    Réglages et exigences de production
 │       │       ├── api/             Réception des demandes HTTP et formats des réponses
 │       │       │   └── router.py     API HTTP et contrôles de santé actuels
+│       │       ├── object_storage/  Adaptateurs de fichiers locaux et S3/R2, indépendants du métier
+│       │       │   ├── core.py       Flux bornés, SHA-256, formats et clés immuables
+│       │       │   └── adapters.py   Disque persistant et SDK S3, sans création de ressources cloud
 │       │       ├── modules/         Domaines métier séparés, chacun propriétaire de ses règles
 │       │       │   ├── catalog/      Identité des biens et relations acceptées
 │       │       │   │   ├── apps.py   Déclaration de l'application Django
@@ -123,6 +128,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── property_presentations.json, property_media.json  Identités examinées et médias autorisés
 │       │       │   │   ├── services.py  Import officiel des parcelles et transaction propriétaire
 │       │       │   │   ├── orchestration.py  Passerelle d'import, identité durable et résultat atomique
+│       │       │   │   ├── media_storage.py  Captures archivées, licences et copies publiques contrôlées
 │       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
 │       │       │   │   ├── migrations/  Évolution du schéma des preuves
 │       │       │   │   ├── management/commands/  Imports Onwani, couches Reem, références et satellite
@@ -150,9 +156,13 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       ├── package.json              Paquet @property-platform/branding, sans dépendance runtime
 │       └── src/brand.ts              Nom affiché et chemin du symbole web
 ├── infra/                           Configuration des environnements d'exécution de la plateforme
-│   └── local/                       Services et stockage nécessaires sur le poste de développement
-│       ├── compose.yaml              Services API et PostGIS, réseau et volume local
-│       └── compose.ingestion.yaml    Profil facultatif : serveur Prefect, métadonnées PostgreSQL et runner
+│   ├── local/                       Services et stockage nécessaires sur le poste de développement
+│   │   ├── compose.yaml              Services API et PostGIS, réseau et volumes locaux
+│   │   ├── compose.ingestion.yaml    Profil facultatif : serveur Prefect, métadonnées PostgreSQL et runner
+│   │   ├── compose.storage.s3.yaml   Surcharge facultative R2/S3, après les deux fichiers Compose
+│   │   └── .env.example              Modèle des réglages R2 et CDN, sans secrets
+│   └── storage/                     Exemples de configuration du stockage externe
+│       └── r2-public-cors.json        Lectures GET/HEAD depuis un domaine web à configurer
 ├── docs/                            Cadrage produit, décisions d'architecture et guides de travail
 │   ├── README.md                     Index et enchaînement des décisions
 │   ├── product/                     Besoins utilisateurs, marché et stratégie du produit
@@ -176,6 +186,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       ├── INTERNATIONALIZATION.md    Politique des langues et du RTL
 │       ├── DATA_PROVENANCE.md          Collecte directe, sources par information et audit
 │       ├── DATABASE_DESIGN.md          Noms du domaine immobilier, audit SQL et trajectoire d'évolution
+│       ├── MEDIA_STORAGE.md            Stockage local et R2/S3, fichiers, licences, CDN et sauvegardes
 │       └── STRUCTURE_REVIEW.md        Revue critique de l'organisation
 └── scripts/                         Utilitaires de vérification, préparation du site et acquisitions isolées
     ├── acquire_reem_imagery.py        Acquisition et recadrage Sentinel hors du runtime API/web

@@ -50,6 +50,17 @@ def execute(request):
         }
         if not isinstance(request, dict) or set(request) - allowed:
             raise ValueError("Unexpected domain request parameters")
+        if request.get("operation") == "media_storage":
+            from property_platform.modules.evidence.media_storage import archive_property_media
+
+            if request.get("action") == "reconcile":
+                # No long SQL transaction exists to reconcile: each immutable object has its
+                # own committed binding. The next run resumes the remaining captures.
+                return {"status": "failed", "error": "MediaStorageInterrupted"}
+            if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Media storage accepts only an audited private backfill")
+            result = archive_property_media(actor=request["actor"])
+            return {"status": "succeeded", "summary": result}
         if request.get("operation") == "check":
             # Introspection performs a read only; migrations are never a startup hook.
             from django.db.migrations.executor import MigrationExecutor

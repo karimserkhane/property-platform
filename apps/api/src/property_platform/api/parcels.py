@@ -184,6 +184,7 @@ class PropertyPhoto(Schema):
     licence_url: str
     source_url: str
     taken_on: date | None
+    delivery_url: str | None = None
 
 
 class PropertyPresentationResponse(Schema):

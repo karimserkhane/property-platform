@@ -1,5 +1,7 @@
 # Exploration immobilière et premières fiches documentées
 
+**Ajout du 15 octobre 2026 :** les photos approuvées peuvent être archivées dans le volume partagé `/media`, ou dans R2/S3 par configuration. Une copie publique explicitement créée fournit `delivery_url` ; le composant conserve le relais privé de l’API en secours et les crédits existants. Ni une URL source ni un nom de domaine CDN configuré ne suffisent à autoriser une image. Les autres médias ne sont pas publiés automatiquement. Voir [le guide du stockage et des droits](MEDIA_STORAGE.md).
+
 Évolution du 12 octobre 2026. L'exploration ouvre maintenant l'onglet **Properties**, avec les 188 empreintes de bâtiments et les 29 repères de projets déjà collectés pour Al Reem. Cela donne 217 objets cartographiques, pas 217 projets uniques ni un inventaire d'appartements à vendre. Les identités de fournisseurs restent séparées ; un point de courtier peut décrire le même projet qu'un autre point.
 
 ## Ce que fait le clic

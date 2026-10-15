@@ -224,6 +224,92 @@ class PropertyMedia(models.Model):
         ]
 
 
+class StoredObject(models.Model):
+    """One verified physical copy. Source, licence and retrieval dates belong to Capture."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    backend = models.CharField(max_length=10)
+    namespace = models.CharField(max_length=63)
+    bucket = models.CharField(max_length=63, blank=True)
+    object_key = models.CharField(max_length=200)
+    content_sha256 = models.CharField(max_length=64)
+    byte_length = models.PositiveBigIntegerField()
+    mime_type = models.CharField(max_length=40)
+    created_at = models.DateTimeField(auto_now_add=True)
+    verified_at = models.DateTimeField()
+
+    class Meta:
+        db_table = "stored_object"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["namespace", "bucket", "object_key"], name="stored_object_location_unique"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    backend__in=["local", "s3"],
+                    namespace__regex=r"^[a-z0-9][a-z0-9-]{0,62}$",
+                    content_sha256__regex=r"^[0-9a-f]{64}$",
+                    byte_length__gte=1,
+                    byte_length__lte=134217728,
+                    mime_type__in=[
+                        "image/jpeg",
+                        "image/png",
+                        "image/webp",
+                        "application/pdf",
+                        "video/mp4",
+                        "video/webm",
+                        "model/gltf-binary",
+                    ],
+                ),
+                name="stored_object_metadata_valid",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(backend="local", namespace="local", bucket="")
+                    | (models.Q(backend="s3") & ~models.Q(namespace="local") & ~models.Q(bucket=""))
+                ),
+                name="stored_object_backend_valid",
+            ),
+        ]
+
+
+class CaptureObject(models.Model):
+    """Append-only binding; copying to another provider retains the previous location."""
+
+    capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)
+    stored_object = models.ForeignKey(StoredObject, on_delete=models.PROTECT)
+    actor = models.CharField(max_length=160)
+    stored_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "capture_object"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["capture", "stored_object"], name="capture_object_binding_unique"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(actor__regex=r"\S"), name="capture_object_actor"
+            ),
+        ]
+
+
+class MediaPublication(models.Model):
+    """Explicit reviewed public copy, separate from the private original."""
+
+    media = models.OneToOneField(PropertyMedia, primary_key=True, on_delete=models.PROTECT)
+    stored_object = models.ForeignKey(StoredObject, on_delete=models.PROTECT)
+    actor = models.CharField(max_length=160)
+    published_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "media_publication"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(actor__regex=r"\S"), name="media_publication_actor"
+            ),
+        ]
+
+
 class IngestionRun(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     source = models.ForeignKey(Source, on_delete=models.PROTECT)

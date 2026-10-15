@@ -33,6 +33,8 @@ Cette configuration est locale : interface liée à `127.0.0.1`, mots de passe d
 
 ## Les tâches disponibles
 
+**Ajout du 15 octobre :** le registre contient désormais **27 déploiements**. `media-storage` est un nouveau job manuel de reprise des photos acquises vers le stockage privé ; les imports de présentations Reem et Saadiyat exécutent aussi cette tâche après leur validation Django. API et runner partagent le volume persistant `/media`. L’archivage conserve les captures et les calendriers ; il ne publie rien sur le CDN. Le [guide des médias](MEDIA_STORAGE.md) fournit les commandes de migration, reconstruction et reprise, ainsi que l’activation ultérieure de R2/S3.
+
 Les horaires ci-dessous sont **préparés mais désactivés au premier enregistrement**, dans le fuseau **Asia/Dubai**. Commencer par une exécution manuelle ; activer ensuite les tâches souhaitées dans l'interface. Le démarrage Docker n'effectue pas d'import.
 
 | Déploiement | Données traitées | Horaire proposé |

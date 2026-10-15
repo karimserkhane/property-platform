@@ -129,6 +129,7 @@ Pour les données et imports de la deuxième île, consulter aussi [Saadiyat : d
 - [5. Démarrer l'API et la base, puis créer les tables — terminal B](#demarrer-api-postgis)
 - [6. Importer les données et comprendre le pipeline de data engineering](#data-engineering)
 - [6.9. Programmer et suivre les ingestions avec Prefect](#orchestration-prefect)
+- [Fichiers, photos et futur stockage R2/CDN](#stockage-medias)
 - [7. Créer un compte d'administration — facultatif](#compte-administration)
 - [8. Routine quotidienne, modifications et arrêt](#routine-quotidienne)
 - [9. Construire et essayer le site compilé](#site-compile)
@@ -158,6 +159,10 @@ Pour les données et imports de la deuxième île, consulter aussi [Saadiyat : d
 <a id="memo-rapide"></a>
 
 ## Mémo rapide : lancer, tester et tout arrêter
+
+<a id="stockage-medias"></a>
+
+**Photos et fichiers — ajout du 15 octobre 2026 :** le [guide MEDIA_STORAGE.md](MEDIA_STORAGE.md) détaille le volume local partagé, les trois nouvelles tables `evidence`, la commande `archive_property_media`, la tâche Prefect et la préparation de R2/S3 avec CDN facultatif. Pour installer cette évolution : sauvegarder la base, reconstruire API et ingestion, appliquer `migrate`, puis lancer l’archivage ; le guide donne chaque commande et son effet. Le cloud reste désactivé tant que ses accès ne sont pas configurés. Les captures SQL existantes sont conservées. Le site compilé doit aussi être reconstruit pour utiliser le futur champ `delivery_url`.
 
 **Après avoir installé les outils et dépendances du guide**, ouvrir Docker Desktop, puis deux terminaux PowerShell. Copier les commandes une par une. Pour une première installation, suivre les étapes détaillées plus bas.
 

@@ -35,6 +35,7 @@ export function PropertyCard({
     (item) => item.place_id === feature.id && item.available,
   );
   const [failedImage, setFailedImage] = useState<string | null>(null);
+  const [failedDelivery, setFailedDelivery] = useState<string | null>(null);
   const photo = profile?.media[0];
   const website =
     profile?.website_url ??
@@ -122,12 +123,22 @@ export function PropertyCard({
           ) : (
             // biome-ignore lint/performance/noImgElement: bounded JPEG is already resized during acquisition; retain the guarded local media endpoint without a separate optimizer cache.
             <img
-              src={`/api/atlas/property-media/${photo.id}`}
+              src={
+                photo.delivery_url && failedDelivery !== photo.id
+                  ? photo.delivery_url
+                  : `/api/atlas/property-media/${photo.id}`
+              }
               alt={photo.caption}
               lang={photo.language}
               loading="lazy"
               decoding="async"
-              onError={() => setFailedImage(photo.id)}
+              onError={() => {
+                if (photo.delivery_url && failedDelivery !== photo.id) {
+                  setFailedDelivery(photo.id);
+                } else {
+                  setFailedImage(photo.id);
+                }
+              }}
             />
           )}
           <figcaption>

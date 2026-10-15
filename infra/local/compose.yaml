@@ -26,6 +26,10 @@ services:
       DJANGO_SETTINGS_MODULE: property_platform.config.settings.local
       DJANGO_SECRET_KEY: local-development-key-never-use-in-production
       DATABASE_URL: postgresql://property_platform:property-platform-local-only@db:5432/property_platform
+      MEDIA_STORAGE_BACKEND: local
+      MEDIA_LOCAL_ROOT: /media
+    volumes:
+      - media-data:/media
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
     depends_on:
       db:
@@ -56,3 +60,4 @@ services:
 
 volumes:
   postgres18-data:
+  media-data:
