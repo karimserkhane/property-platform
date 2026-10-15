@@ -257,6 +257,20 @@
     "penthouse": "顶层公寓",
     "townhouse": "联排别墅",
     "villa": "别墅",
-    "studio": "开间"
+    "studio": "开间",
+    "overview": "项目概览",
+    "commercial": "购房信息",
+    "price": "起价",
+    "paymentPlan": "付款计划",
+    "serviceCharge": "物业服务费",
+    "notDocumented": "尚无资料",
+    "visuals": "项目图片",
+    "officialGallery": "查看官方图库",
+    "loading": "正在加载项目详情…",
+    "retry": "重试",
+    "documents": "文件与户型图",
+    "location": "位置",
+    "size": "面积",
+    "availability": "当前房源"
   }
 }

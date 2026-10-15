@@ -257,6 +257,20 @@
     "penthouse": "পেন্টহাউস",
     "townhouse": "টাউনহাউস",
     "villa": "ভিলা",
-    "studio": "স্টুডিও"
+    "studio": "স্টুডিও",
+    "overview": "সংক্ষিপ্ত বিবরণ",
+    "commercial": "ক্রয়ের তথ্য",
+    "price": "প্রারম্ভিক মূল্য",
+    "paymentPlan": "কিস্তি পরিকল্পনা",
+    "serviceCharge": "সার্ভিস চার্জ",
+    "notDocumented": "এখনও নথিভুক্ত হয়নি",
+    "visuals": "প্রকল্পের ছবি",
+    "officialGallery": "অফিশিয়াল গ্যালারি দেখুন",
+    "loading": "প্রকল্পের বিবরণ লোড হচ্ছে…",
+    "retry": "আবার চেষ্টা করুন",
+    "documents": "নথি ও নকশা",
+    "location": "অবস্থান",
+    "size": "আয়তন",
+    "availability": "বর্তমান প্রাপ্যতা"
   }
 }

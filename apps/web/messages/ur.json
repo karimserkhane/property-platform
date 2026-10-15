@@ -257,6 +257,20 @@
     "penthouse": "پینٹ ہاؤس",
     "townhouse": "ٹاؤن ہاؤس",
     "villa": "ولا",
-    "studio": "اسٹوڈیو"
+    "studio": "اسٹوڈیو",
+    "overview": "جائزہ",
+    "commercial": "خریداری کی معلومات",
+    "price": "ابتدائی قیمت",
+    "paymentPlan": "ادائیگی کا منصوبہ",
+    "serviceCharge": "سروس چارجز",
+    "notDocumented": "ابھی دستاویزی معلومات نہیں",
+    "visuals": "منصوبے کی تصاویر",
+    "officialGallery": "سرکاری گیلری دیکھیں",
+    "loading": "منصوبے کی تفصیلات لوڈ ہو رہی ہیں…",
+    "retry": "دوبارہ کوشش کریں",
+    "documents": "دستاویزات اور نقشے",
+    "location": "مقام",
+    "size": "رقبہ",
+    "availability": "موجودہ دستیابی"
   }
 }

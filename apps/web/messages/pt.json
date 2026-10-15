@@ -257,6 +257,20 @@
     "penthouse": "Cobertura",
     "townhouse": "Casa geminada",
     "villa": "Vila",
-    "studio": "Estúdio"
+    "studio": "Estúdio",
+    "overview": "Visão geral",
+    "commercial": "Informações de compra",
+    "price": "Preço inicial",
+    "paymentPlan": "Plano de pagamento",
+    "serviceCharge": "Taxas de condomínio",
+    "notDocumented": "Ainda não documentado",
+    "visuals": "Imagens do projeto",
+    "officialGallery": "Ver galeria oficial",
+    "loading": "A carregar detalhes do projeto…",
+    "retry": "Tentar novamente",
+    "documents": "Documentos e plantas",
+    "location": "Localização",
+    "size": "Área",
+    "availability": "Disponibilidade atual"
   }
 }

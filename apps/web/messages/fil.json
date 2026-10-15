@@ -257,6 +257,20 @@
     "penthouse": "Penthouse",
     "townhouse": "Townhouse",
     "villa": "Villa",
-    "studio": "Studio"
+    "studio": "Studio",
+    "overview": "Pangkalahatang-ideya",
+    "commercial": "Impormasyon sa pagbili",
+    "price": "Panimulang presyo",
+    "paymentPlan": "Plano ng pagbabayad",
+    "serviceCharge": "Bayad sa serbisyo",
+    "notDocumented": "Wala pang dokumentasyon",
+    "visuals": "Mga larawan ng proyekto",
+    "officialGallery": "Tingnan ang opisyal na gallery",
+    "loading": "Naglo-load ng detalye ng proyekto…",
+    "retry": "Subukang muli",
+    "documents": "Mga dokumento at plano",
+    "location": "Lokasyon",
+    "size": "Sukat ng sahig",
+    "availability": "Kasalukuyang availability"
   }
 }

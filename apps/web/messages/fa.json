@@ -257,6 +257,20 @@
     "penthouse": "پنت‌هاوس",
     "townhouse": "تاون‌هاوس",
     "villa": "ویلا",
-    "studio": "استودیو"
+    "studio": "استودیو",
+    "overview": "نمای کلی",
+    "commercial": "اطلاعات خرید",
+    "price": "قیمت پایه",
+    "paymentPlan": "برنامه پرداخت",
+    "serviceCharge": "هزینه خدمات",
+    "notDocumented": "هنوز مستند نشده",
+    "visuals": "تصاویر پروژه",
+    "officialGallery": "مشاهده گالری رسمی",
+    "loading": "در حال بارگذاری جزئیات پروژه…",
+    "retry": "تلاش مجدد",
+    "documents": "اسناد و نقشه‌ها",
+    "location": "موقعیت",
+    "size": "مساحت",
+    "availability": "موجودی فعلی"
   }
 }

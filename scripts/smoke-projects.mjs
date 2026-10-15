@@ -26,6 +26,17 @@ for (const locale of ["en", "fr", "ar"]) {
     );
     assert.equal(response.status, 200, `${locale}/${project.slug}`);
     const html = await response.text();
+    for (const id of [
+      "project-overview",
+      "project-homes",
+      "project-amenities",
+      "project-documents",
+      "project-location",
+    ])
+      assert.ok(
+        html.includes(`id="${id}"`),
+        `${locale}/${project.slug}: navigable property dossier section ${id}`,
+      );
     assert.ok(
       html.includes('data-page="project"'),
       `${locale}/${project.slug}: populated project page, not unavailable state`,
@@ -83,6 +94,33 @@ for (const locale of ["en", "fr", "ar"]) {
     }
   }
 }
+for (const project of projects) {
+  const response = await fetch(
+    new URL(`/api/atlas/projects/${project.slug}`, origin),
+  );
+  assert.equal(response.status, 200, `${project.slug}: map preview relay`);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  const detail = await response.json();
+  assert.equal(detail.slug, project.slug);
+  assert.equal(detail.developer.name, project.developer.name);
+  assert.ok(detail.typologies.length > 0);
+  assert.ok(detail.amenities.length > 0);
+}
+assert.equal(
+  (
+    await fetch(
+      new URL(
+        "/api/atlas/projects/the-district?url=https://example.com",
+        origin,
+      ),
+    )
+  ).status,
+  400,
+);
+assert.equal(
+  (await fetch(new URL("/api/atlas/projects/INVALID", origin))).status,
+  404,
+);
 assert.equal(
   (await fetch(new URL("/en/projects/project-that-does-not-exist", origin)))
     .status,

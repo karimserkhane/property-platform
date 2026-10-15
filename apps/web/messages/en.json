@@ -257,6 +257,20 @@
     "penthouse": "Penthouse",
     "townhouse": "Townhouse",
     "villa": "Villa",
-    "studio": "Studio"
+    "studio": "Studio",
+    "overview": "Overview",
+    "commercial": "Purchase information",
+    "price": "Starting price",
+    "paymentPlan": "Payment plan",
+    "serviceCharge": "Service charges",
+    "notDocumented": "Not yet documented",
+    "visuals": "Project visuals",
+    "officialGallery": "View official gallery",
+    "loading": "Loading project details…",
+    "retry": "Try again",
+    "documents": "Documents & plans",
+    "location": "Location",
+    "size": "Floor area",
+    "availability": "Current availability"
   }
 }

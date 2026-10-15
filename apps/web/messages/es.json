@@ -257,6 +257,20 @@
     "penthouse": "Ático",
     "townhouse": "Casa adosada",
     "villa": "Villa",
-    "studio": "Estudio"
+    "studio": "Estudio",
+    "overview": "Descripción general",
+    "commercial": "Información de compra",
+    "price": "Precio inicial",
+    "paymentPlan": "Plan de pago",
+    "serviceCharge": "Gastos de comunidad",
+    "notDocumented": "Aún sin documentar",
+    "visuals": "Imágenes del proyecto",
+    "officialGallery": "Ver galería oficial",
+    "loading": "Cargando detalles del proyecto…",
+    "retry": "Reintentar",
+    "documents": "Documentos y planos",
+    "location": "Ubicación",
+    "size": "Superficie",
+    "availability": "Disponibilidad actual"
   }
 }

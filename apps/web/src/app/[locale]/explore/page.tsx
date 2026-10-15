@@ -61,7 +61,7 @@ export default async function ExplorePage() {
         Market: messages.Market,
         Context: messages.Context,
         Use: messages.Use,
-        Project: { viewDetails: messages.Project.viewDetails },
+        Project: messages.Project,
       }}
     >
       <TerritoryExplorer

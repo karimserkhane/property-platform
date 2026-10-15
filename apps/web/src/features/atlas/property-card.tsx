@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Link } from "@/i18n/navigation";
+import { ProjectPreview } from "@/features/projects/preview";
 import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
 import type { MapFeature, MapLabels, ResearchReference } from "./types";
 
@@ -20,7 +20,6 @@ export function PropertyCard({
   parcel?: { code: string; label: string };
 }) {
   const usageText = useTranslations("Use");
-  const projectText = useTranslations("Project");
   const p = feature.properties;
   const profile = p.presentation;
   const isProject = p.kind.endsWith("_project_marker");
@@ -43,6 +42,18 @@ export function PropertyCard({
     profile?.website_url ??
     links.find((link) => link.source_kind === "developer")?.url;
   const title = propertyName(p, locale) || typeLabel;
+  if (profile?.project)
+    return (
+      <ProjectPreview
+        key={profile.project.slug}
+        slug={profile.project.slug}
+        name={profile.project.name}
+        developer={profile.developer}
+        locale={locale}
+        locate={locate}
+        locateLabel={m.locate}
+      />
+    );
   return (
     <div className="property-card">
       <p className="property-kicker">{typeLabel}</p>
@@ -101,14 +112,6 @@ export function PropertyCard({
         </dl>
       )}
       <div className="property-actions">
-        {profile?.project && (
-          <Link
-            className="property-website"
-            href={`/projects/${profile.project.slug}`}
-          >
-            {projectText("viewDetails")} <span aria-hidden="true">↗</span>
-          </Link>
-        )}
         {website && (
           <a
             className="property-website"

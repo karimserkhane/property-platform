@@ -257,6 +257,20 @@
     "penthouse": "Penthouse",
     "townhouse": "Reihenhaus",
     "villa": "Villa",
-    "studio": "Studio"
+    "studio": "Studio",
+    "overview": "Überblick",
+    "commercial": "Kaufinformationen",
+    "price": "Einstiegspreis",
+    "paymentPlan": "Zahlungsplan",
+    "serviceCharge": "Servicegebühren",
+    "notDocumented": "Noch nicht dokumentiert",
+    "visuals": "Projektbilder",
+    "officialGallery": "Offizielle Galerie ansehen",
+    "loading": "Projektdetails werden geladen…",
+    "retry": "Erneut versuchen",
+    "documents": "Dokumente und Grundrisse",
+    "location": "Lage",
+    "size": "Wohnfläche",
+    "availability": "Aktuelle Verfügbarkeit"
   }
 }

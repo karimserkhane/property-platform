@@ -1,3 +1,19 @@
+import type { ProjectDetail } from "./types";
+
+// Both the map preview and full dossier use the same rights-aware selection.
+export function projectMedia(project: Pick<ProjectDetail, "media">) {
+  const visible = project.media.filter(
+    (item) => item.rights_status !== "blocked",
+  );
+  const images = visible.filter((item) => playableMedia(item) === "image");
+  const hero = images.find((item) => item.role === "hero") ?? images[0] ?? null;
+  return {
+    hero,
+    documents: visible.filter((item) => item.kind === "document"),
+    visuals: visible.filter((item) => item.kind !== "document"),
+  };
+}
+
 const MEDIA_ROUTE =
   /^\/api\/atlas\/project-media\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

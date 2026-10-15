@@ -257,6 +257,20 @@
     "penthouse": "بنتهاوس",
     "townhouse": "تاون هاوس",
     "villa": "فيلا",
-    "studio": "استوديو"
+    "studio": "استوديو",
+    "overview": "نظرة عامة",
+    "commercial": "معلومات الشراء",
+    "price": "السعر الابتدائي",
+    "paymentPlan": "خطة السداد",
+    "serviceCharge": "رسوم الخدمات",
+    "notDocumented": "لم تُوثّق بعد",
+    "visuals": "صور المشروع",
+    "officialGallery": "عرض المعرض الرسمي",
+    "loading": "جارٍ تحميل تفاصيل المشروع…",
+    "retry": "إعادة المحاولة",
+    "documents": "المستندات والمخططات",
+    "location": "الموقع",
+    "size": "المساحة",
+    "availability": "الوحدات المتاحة حاليًا"
   }
 }

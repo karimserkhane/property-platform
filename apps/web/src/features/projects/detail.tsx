@@ -1,9 +1,11 @@
 import navigation from "@property-platform/contracts/territories";
 import { Link } from "@/i18n/navigation";
+import { ProjectCover } from "./cover";
 import {
   approvedDelivery,
   formatHandover,
   playableMedia,
+  projectMedia,
   safeSourceUrl,
 } from "./presentation";
 import styles from "./project.module.css";
@@ -166,25 +168,32 @@ export function ProjectDetailView({
     ? formatHandover(project.handover, locale, labels.quarter)
     : null;
   const website = safeSourceUrl(project.website_url);
-  const media = project.media.filter(
-    (item) => item.rights_status !== "blocked",
-  );
+  const { documents, visuals } = projectMedia(project);
   const number = new Intl.NumberFormat(locale);
   const date = (value: string) =>
     new Intl.DateTimeFormat(locale, {
       dateStyle: "medium",
       timeZone: "Asia/Dubai",
     }).format(new Date(value));
+  const areaLink = {
+    pathname: "/explore",
+    query: { territory: project.territory },
+  };
+  const sections = [
+    ["project-overview", labels.overview],
+    ...(project.typologies.length ? [["project-homes", labels.homes]] : []),
+    ...(project.amenities.length
+      ? [["project-amenities", labels.amenities]]
+      : []),
+    ...(visuals.length ? [["project-media", labels.media]] : []),
+    ...(documents.length ? [["project-documents", labels.documents]] : []),
+    ["project-location", labels.location],
+  ];
   return (
     <main className={styles.page} data-page="project">
       <nav className={styles.breadcrumb} aria-label={labels.navigation}>
-        <Link
-          href={{
-            pathname: "/explore",
-            query: { territory: project.territory },
-          }}
-        >
-          {labels.backToMap}
+        <Link href={areaLink}>
+          <span aria-hidden="true">←</span> {labels.backToMap}
         </Link>
         <span aria-hidden="true">/</span>
         <bdi>{territoryName}</bdi>
@@ -192,37 +201,20 @@ export function ProjectDetailView({
       <header className={styles.hero}>
         <div className={styles.heroCopy}>
           <p className={styles.kicker}>
-            {labels.project} · <bdi>{territoryName}</bdi>
+            {labels.project} <span aria-hidden="true"> / </span>{" "}
+            <bdi>{territoryName}</bdi>
           </p>
           <h1 lang={project.language} dir="auto">
             <bdi>{project.name}</bdi>
           </h1>
-          <p className={styles.developer}>
+          <div className={styles.developer}>
             <span>{labels.developer}</span>
             <bdi>{project.developer.name}</bdi>
-          </p>
-          {project.summary && (
-            <p
-              className={styles.description}
-              lang={project.language}
-              dir="auto"
-            >
-              {project.summary}
-            </p>
-          )}
+          </div>
           <div className={styles.actions}>
-            <Link
-              className={styles.primaryAction}
-              href={{
-                pathname: "/explore",
-                query: { territory: project.territory },
-              }}
-            >
-              {labels.exploreArea} <span aria-hidden="true">↗</span>
-            </Link>
             {website && (
               <a
-                className={styles.secondaryAction}
+                className={styles.primaryAction}
                 href={website}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -230,122 +222,255 @@ export function ProjectDetailView({
                 {labels.developerWebsite} <span aria-hidden="true">↗</span>
               </a>
             )}
+            <Link className={styles.secondaryAction} href={areaLink}>
+              {labels.exploreArea} <span aria-hidden="true">↗</span>
+            </Link>
           </div>
         </div>
-        {(handover || project.programme_total) && (
-          <div className={styles.highlights}>
-            {handover && project.handover && (
-              <article className={styles.highlight}>
-                <h2>{labels.handover}</h2>
-                <p className={styles.highlightValue}>{handover}</p>
-                <Proof
-                  source={project.handover.source}
-                  original={project.handover.original_text}
-                  labels={labels}
-                />
-              </article>
-            )}
-            {project.programme_total && (
-              <article className={styles.highlight}>
-                <h2>{labels.plannedHomes}</h2>
-                <p className={styles.highlightValue}>
-                  {number.format(project.programme_total.value)}
-                </p>
-                <p className={styles.muted}>{labels.programmeNote}</p>
-                <Proof
-                  source={project.programme_total.source}
-                  original={project.programme_total.original_text}
-                  labels={labels}
-                />
-              </article>
-            )}
-          </div>
-        )}
+        <ProjectCover key={project.id} project={project} labels={labels} />
       </header>
-      {project.typologies.length > 0 && (
-        <section className={styles.section} aria-labelledby="project-homes">
-          <div className={styles.sectionHeading}>
-            <span aria-hidden="true">01 /</span>
-            <h2 id="project-homes">{labels.homes}</h2>
-          </div>
-          <div className={styles.typologies}>
-            {project.typologies.map((item) => (
-              <article
-                className={styles.typology}
-                key={`${item.property_type}:${item.bedrooms}:${item.original_text}`}
+      <div className={styles.factStrip}>
+        <div>
+          <span>{labels.handover}</span>
+          <strong>{handover ?? labels.notDocumented}</strong>
+        </div>
+        <div>
+          <span>{labels.plannedHomes}</span>
+          <strong>
+            {project.programme_total
+              ? number.format(project.programme_total.value)
+              : labels.notDocumented}
+          </strong>
+        </div>
+        <div>
+          <span>{labels.homes}</span>
+          <strong>{number.format(project.typologies.length)}</strong>
+        </div>
+        <div>
+          <span>{labels.location}</span>
+          <strong>
+            <bdi>{territoryName}</bdi>
+          </strong>
+        </div>
+      </div>
+      <nav className={styles.sectionNav} aria-label={labels.navigation}>
+        {sections.map(([id, label]) => (
+          <a key={id} href={`#${id}`}>
+            {label}
+          </a>
+        ))}
+      </nav>
+      <div className={styles.contentLayout}>
+        <div className={styles.mainColumn}>
+          <section
+            className={styles.section}
+            aria-labelledby="project-overview"
+          >
+            <div className={styles.sectionHeading}>
+              <span aria-hidden="true">01 /</span>
+              <h2 id="project-overview">{labels.overview}</h2>
+            </div>
+            {project.summary && (
+              <p
+                className={styles.description}
+                lang={project.language}
+                dir="auto"
               >
-                <h3>
-                  {typeKeys.has(item.property_type) ? (
-                    labels[item.property_type as "apartment"]
-                  ) : (
-                    <bdi>{item.property_type}</bdi>
-                  )}
-                </h3>
-                {item.bedrooms != null && (
-                  <p>
-                    {item.bedrooms === 0 ? (
-                      labels.studio
-                    ) : (
-                      <>
-                        {labels.bedrooms} : {number.format(item.bedrooms)}
-                      </>
-                    )}
+                {project.summary}
+              </p>
+            )}
+            <div className={styles.overviewFacts}>
+              {handover && project.handover && (
+                <article className={styles.highlight}>
+                  <h3>{labels.handover}</h3>
+                  <p className={styles.highlightValue}>{handover}</p>
+                  <Proof
+                    source={project.handover.source}
+                    original={project.handover.original_text}
+                    labels={labels}
+                  />
+                </article>
+              )}
+              {project.programme_total && (
+                <article className={styles.highlight}>
+                  <h3>{labels.plannedHomes}</h3>
+                  <p className={styles.highlightValue}>
+                    {number.format(project.programme_total.value)}
                   </p>
-                )}
-                <Proof
-                  source={item.source}
-                  original={item.original_text}
-                  labels={labels}
-                />
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-      {project.amenities.length > 0 && (
-        <section className={styles.section} aria-labelledby="project-amenities">
-          <div className={styles.sectionHeading}>
-            <span aria-hidden="true">02 /</span>
-            <h2 id="project-amenities">{labels.amenities}</h2>
-          </div>
-          <div className={styles.amenities}>
-            {project.amenities.map((item) => (
-              <article className={styles.amenity} key={item.code}>
-                <h3 lang={item.source.language} dir="auto">
-                  {item.label}
-                </h3>
-                <Proof
-                  source={item.source}
-                  original={item.original_text}
-                  labels={labels}
-                />
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-      {media.length > 0 && (
-        <section className={styles.section} aria-labelledby="project-media">
-          <div className={styles.sectionHeading}>
-            <span aria-hidden="true">03 /</span>
-            <h2 id="project-media">{labels.media}</h2>
-          </div>
-          <div className={styles.media}>
-            {media.map((item) => (
-              <MediaCard media={item} labels={labels} key={item.id} />
-            ))}
-          </div>
-        </section>
-      )}
+                  <p className={styles.muted}>{labels.programmeNote}</p>
+                  <Proof
+                    source={project.programme_total.source}
+                    original={project.programme_total.original_text}
+                    labels={labels}
+                  />
+                </article>
+              )}
+            </div>
+          </section>
+          {project.typologies.length > 0 && (
+            <section className={styles.section} aria-labelledby="project-homes">
+              <div className={styles.sectionHeading}>
+                <span aria-hidden="true">02 /</span>
+                <h2 id="project-homes">{labels.homes}</h2>
+              </div>
+              <div className={styles.typologies}>
+                {project.typologies.map((item) => (
+                  <article
+                    className={styles.typology}
+                    key={`${item.property_type}:${item.bedrooms}:${item.original_text}`}
+                  >
+                    <span className={styles.homeNumber} aria-hidden="true">
+                      {item.bedrooms == null
+                        ? "—"
+                        : item.bedrooms === 0
+                          ? "S"
+                          : number.format(item.bedrooms)}
+                    </span>
+                    <h3>
+                      {typeKeys.has(item.property_type) ? (
+                        labels[item.property_type as "apartment"]
+                      ) : (
+                        <bdi>{item.property_type}</bdi>
+                      )}
+                    </h3>
+                    {item.bedrooms != null && (
+                      <p>
+                        {item.bedrooms === 0 ? (
+                          labels.studio
+                        ) : (
+                          <>
+                            {labels.bedrooms} : {number.format(item.bedrooms)}
+                          </>
+                        )}
+                      </p>
+                    )}
+                    <dl className={styles.homeFacts}>
+                      <div>
+                        <dt>{labels.size}</dt>
+                        <dd>{labels.notDocumented}</dd>
+                      </div>
+                      <div>
+                        <dt>{labels.price}</dt>
+                        <dd>{labels.notDocumented}</dd>
+                      </div>
+                    </dl>
+                    <Proof
+                      source={item.source}
+                      original={item.original_text}
+                      labels={labels}
+                    />
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+          {project.amenities.length > 0 && (
+            <section
+              className={styles.section}
+              aria-labelledby="project-amenities"
+            >
+              <div className={styles.sectionHeading}>
+                <span aria-hidden="true">03 /</span>
+                <h2 id="project-amenities">{labels.amenities}</h2>
+              </div>
+              <div className={styles.amenities}>
+                {project.amenities.map((item) => (
+                  <article className={styles.amenity} key={item.code}>
+                    <span className={styles.amenityDot} aria-hidden="true">
+                      ◇
+                    </span>
+                    <div>
+                      <h3 lang={item.source.language} dir="auto">
+                        {item.label}
+                      </h3>
+                      <Proof
+                        source={item.source}
+                        original={item.original_text}
+                        labels={labels}
+                      />
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )}
+          {visuals.length > 0 && (
+            <section className={styles.section} aria-labelledby="project-media">
+              <div className={styles.sectionHeading}>
+                <span aria-hidden="true">04 /</span>
+                <h2 id="project-media">{labels.media}</h2>
+              </div>
+              <div className={styles.media}>
+                {visuals.map((item) => (
+                  <MediaCard media={item} labels={labels} key={item.id} />
+                ))}
+              </div>
+            </section>
+          )}
+          <section
+            className={`${styles.section} ${styles.location}`}
+            aria-labelledby="project-location"
+          >
+            <p className={styles.kicker}>{labels.location}</p>
+            <h2 id="project-location">
+              <bdi>{territoryName}</bdi>
+            </h2>
+            <Link className={styles.primaryAction} href={areaLink}>
+              {labels.exploreArea} <span aria-hidden="true">↗</span>
+            </Link>
+          </section>
+        </div>
+        <aside className={styles.sidebar} aria-label={labels.commercial}>
+          <section className={styles.commercial}>
+            <p className={styles.kicker}>{labels.commercial}</p>
+            <h2>{labels.price}</h2>
+            <p className={styles.pendingValue}>{labels.notDocumented}</p>
+            <dl>
+              {[
+                labels.paymentPlan,
+                labels.serviceCharge,
+                labels.availability,
+              ].map((label) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{labels.notDocumented}</dd>
+                </div>
+              ))}
+            </dl>
+            {website && (
+              <a
+                className={styles.primaryAction}
+                href={website}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {labels.developerWebsite} <span aria-hidden="true">↗</span>
+              </a>
+            )}
+          </section>
+          {documents.length > 0 && (
+            <section
+              className={styles.documentSection}
+              aria-labelledby="project-documents"
+            >
+              <div className={styles.sectionHeading}>
+                <h2 id="project-documents">{labels.documents}</h2>
+                <span>{number.format(documents.length)}</span>
+              </div>
+              <div className={styles.documents}>
+                {documents.map((item) => (
+                  <MediaCard media={item} labels={labels} key={item.id} />
+                ))}
+              </div>
+            </section>
+          )}
+        </aside>
+      </div>
       {project.sources.length > 0 && (
-        <section
-          className={`${styles.section} ${styles.sources}`}
-          aria-labelledby="project-sources"
-        >
-          <div className={styles.sectionHeading}>
-            <span aria-hidden="true">04 /</span>
-            <h2 id="project-sources">{labels.sources}</h2>
-          </div>
+        <details className={styles.sources}>
+          <summary>
+            {labels.sources} <span aria-hidden="true">+</span>
+          </summary>
           <p className={styles.muted}>{labels.sourceNote}</p>
           {project.sources.map((source) => (
             <article className={styles.source} key={source.url}>
@@ -367,7 +492,7 @@ export function ProjectDetailView({
               </p>
             </article>
           ))}
-        </section>
+        </details>
       )}
     </main>
   );

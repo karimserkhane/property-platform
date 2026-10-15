@@ -257,6 +257,20 @@
     "penthouse": "पेंटहाउस",
     "townhouse": "टाउनहाउस",
     "villa": "विला",
-    "studio": "स्टूडियो"
+    "studio": "स्टूडियो",
+    "overview": "परिचय",
+    "commercial": "खरीद की जानकारी",
+    "price": "शुरुआती कीमत",
+    "paymentPlan": "भुगतान योजना",
+    "serviceCharge": "सेवा शुल्क",
+    "notDocumented": "अभी दर्ज नहीं है",
+    "visuals": "परियोजना की तस्वीरें",
+    "officialGallery": "आधिकारिक गैलरी देखें",
+    "loading": "परियोजना का विवरण लोड हो रहा है…",
+    "retry": "फिर प्रयास करें",
+    "documents": "दस्तावेज़ और नक्शे",
+    "location": "स्थान",
+    "size": "क्षेत्रफल",
+    "availability": "वर्तमान उपलब्धता"
   }
 }

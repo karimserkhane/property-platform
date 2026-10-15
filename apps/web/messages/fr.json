@@ -257,6 +257,20 @@
     "penthouse": "Penthouse",
     "townhouse": "Maison de ville",
     "villa": "Villa",
-    "studio": "Studio"
+    "studio": "Studio",
+    "overview": "Présentation",
+    "commercial": "Informations d’achat",
+    "price": "Prix de départ",
+    "paymentPlan": "Plan de paiement",
+    "serviceCharge": "Charges de copropriété",
+    "notDocumented": "Pas encore renseigné",
+    "visuals": "Visuels du projet",
+    "officialGallery": "Voir la galerie officielle",
+    "loading": "Chargement de la fiche…",
+    "retry": "Réessayer",
+    "documents": "Documents et plans",
+    "location": "Localisation",
+    "size": "Surface",
+    "availability": "Disponibilités actuelles"
   }
 }

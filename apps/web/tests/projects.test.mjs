@@ -5,6 +5,7 @@ import {
   approvedDelivery,
   formatHandover,
   playableMedia,
+  projectMedia,
   safeSourceUrl,
 } from "../src/features/projects/presentation.ts";
 
@@ -145,6 +146,48 @@ const project = {
   typologies: [],
   amenities: [],
 };
+
+test("map and dossier select a licensed hero without promoting document or external references", () => {
+  const image = {
+    id: "photo",
+    kind: "image",
+    role: "gallery",
+    mime_type: "image/webp",
+    rights_status: "approved",
+    delivery_url: "https://cdn.example.com/photo.webp",
+  };
+  const hero = { ...image, id: "hero", role: "hero" };
+  const reference = {
+    ...hero,
+    id: "reference",
+    rights_status: "reference_only",
+  };
+  const blocked = { ...hero, id: "blocked", rights_status: "blocked" };
+  const document = {
+    ...hero,
+    id: "document",
+    kind: "document",
+    mime_type: "application/pdf",
+  };
+  assert.deepEqual(
+    projectMedia({ media: [reference, blocked, image, document, hero] }),
+    {
+      hero,
+      documents: [document],
+      visuals: [reference, image, hero],
+    },
+  );
+  assert.equal(
+    projectMedia({ media: [reference, blocked, document] }).hero,
+    null,
+  );
+  assert.equal(projectMedia({ media: [image] }).hero, image);
+  assert.deepEqual(projectMedia({ media: [] }), {
+    hero: null,
+    documents: [],
+    visuals: [],
+  });
+});
 
 test("project route reads a fixed API path and rejects invalid slugs before any request", async () => {
   const paths = [];
