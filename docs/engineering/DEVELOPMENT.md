@@ -1229,6 +1229,8 @@ Ce guide démarre les services sur ta machine ; il ne publie rien sur Internet. 
 
 Un déploiement public nécessitera HTTPS/reverse proxy, secrets réels (DJANGO_SECRET_KEY, DATABASE_URL, DJANGO_ALLOWED_HOSTS), accès du personnel, statiques d'administration, sauvegardes et rôles SQL. Les migrations restent une étape explicite du déploiement. La CI vérifie sources, contrats, PostGIS et images : observer son résultat GitHub avant de considérer les contrôles distants comme réussis.
 
+**Différence entre tests ciblés et validation complète :** quelques tests réussis ou un build réussi ne remplacent pas le workflow **Foundation checks** de `C:\Users\Karim\Repositories\property-platform\.github\workflows\ci.yml`. Celui-ci lance toute la suite API sur PostGIS, puis notamment `pnpm smoke:web` pour démarrer le site compilé et vérifier les quinze langues, les liens, les fichiers servis et les protections HTTP. La construction Docker du web lance aussi ce dernier contrôle avant de produire son image ; les dépendances de test Python restent hors de l'image API. Une évolution de navigation ou de champs publics doit adapter les attentes de ces contrôles, tout en gardant la liste stricte des champs autorisés et l'exclusion des données privées. Un courriel d'échec concerne le commit indiqué : après correction et push, consulter la nouvelle exécution, car l'ancienne conserve son résultat historique.
+
 Pour poursuivre, lire [les frontières des modules](REPOSITORY.md) et [la revue de structure](STRUCTURE_REVIEW.md). Prochaine étape métier : définir le dossier pilote, puis développer le parcours carte → fiche → preuve → correction → publication.
 
 <a id="saadiyat"></a>

@@ -147,7 +147,7 @@ try {
       "umm-al-quwain",
       "ras-al-khaimah",
       "fujairah",
-      "al-reem-island",
+      "abu-dhabi",
     ]) {
       assert.ok(
         html.includes(`territory=${territory}`),
