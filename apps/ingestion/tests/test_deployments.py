@@ -34,6 +34,32 @@ def test_deleted_schedule_is_not_recreated_on_restart():
     assert schedules_for(DATASETS[0], SimpleNamespace(schedules=[])) == []
 
 
+def test_new_project_collectors_are_manual_and_preserve_later_operator_schedules():
+    projects = [row for row in DATASETS if row.flow_name == "property-platform-project-details"]
+    assert {row.name for row in projects} == {"project-details", "saadiyat-project-details"}
+    assert {row.parameters.get("territory", "al-reem-island") for row in projects} == {
+        "al-reem-island",
+        "saadiyat-island",
+    }
+    for row in projects:
+        assert row.cron is None and schedules_for(row, None) == []
+        edited = SimpleNamespace(
+            schedule=CronSchedule(cron="0 8 * * 1", timezone="Asia/Dubai"),
+            active=True,
+            slug="operator",
+            parameters={},
+            max_scheduled_runs=None,
+        )
+        preserved = schedules_for(row, SimpleNamespace(schedules=[edited]))
+        assert len(preserved) == 1 and preserved[0].active is True
+        assert preserved[0].schedule.cron == "0 8 * * 1"
+
+
+def test_operator_media_intake_has_no_automatic_schedule():
+    dataset = next(row for row in DATASETS if row.name == "project-media-files")
+    assert dataset.cron is None and schedules_for(dataset, None) == []
+
+
 def test_async_registration_awaits_the_factory_before_starting_runner(monkeypatch):
     from prefect.exceptions import ObjectNotFound
 

@@ -33,12 +33,17 @@ Cette configuration est locale : interface liée à `127.0.0.1`, mots de passe d
 
 ## Les tâches disponibles
 
-**Ajout du 15 octobre :** le registre contient désormais **27 déploiements**. `media-storage` est un nouveau job manuel de reprise des photos acquises vers le stockage privé ; les imports de présentations Reem et Saadiyat exécutent aussi cette tâche après leur validation Django. API et runner partagent le volume persistant `/media`. L’archivage conserve les captures et les calendriers ; il ne publie rien sur le CDN. Le [guide des médias](MEDIA_STORAGE.md) fournit les commandes de migration, reconstruction et reprise, ainsi que l’activation ultérieure de R2/S3.
+Les trois nouveaux jobs sont détaillés dans [PROJECTS.md](PROJECTS.md). Les pages sont collectées avant les transactions SQL ; leurs fichiers liés restent externes sans autorisation de copie. L’ingestion de fichiers opérateur écrit les octets dans le stockage privé et les métadonnées dans PostgreSQL.
+
+**Ajout du 15 octobre :** le registre contient désormais **30 déploiements**. `media-storage` est un nouveau job manuel de reprise des photos acquises vers le stockage privé ; les imports de présentations Reem et Saadiyat exécutent aussi cette tâche après leur validation Django. API et runner partagent le volume persistant `/media`. L’archivage conserve les captures et les calendriers ; il ne publie rien sur le CDN. Le [guide des médias](MEDIA_STORAGE.md) fournit les commandes de migration, reconstruction et reprise, ainsi que l’activation ultérieure de R2/S3.
 
 Les horaires ci-dessous sont **préparés mais désactivés au premier enregistrement**, dans le fuseau **Asia/Dubai**. Commencer par une exécution manuelle ; activer ensuite les tâches souhaitées dans l'interface. Le démarrage Docker n'effectue pas d'import.
 
 | Déploiement | Données traitées | Horaire proposé |
 |---|---|---|
+| `project-details` | Faits officiels de The District et Vista 3, liens PDF, conditions et captures | Manuel |
+| `saadiyat-project-details` | Faits officiels Park View, brochure et lien vidéo Vimeo | Manuel |
+| `project-media-files` | Manifeste privé de fichiers opérateur, sans approbation ni publication | Manuel |
 | `parcels-onwani` | Parcelles officielles Onwani, captures, observations et géométries rejetées | Dimanche 03:00 |
 | `map-district` | Couche officielle district/secteurs | Dimanche 04:00 |
 | `map-community` | Couche officielle communautés | Dimanche 04:15 |

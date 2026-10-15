@@ -208,6 +208,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/projects/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Project Detail */
+        get: operations["previewProjectDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/project-media/{media_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Project Media */
+        get: operations["previewProjectMedia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        /** Project Media Head */
+        head: operations["previewProjectMediaHead"];
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -382,6 +417,18 @@ export interface components {
             /** Coordinates */
             coordinates: number[];
         };
+        /** ProjectReferenceResponse */
+        ProjectReferenceResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+        };
         /** PropertyPhoto */
         PropertyPhoto: {
             /**
@@ -431,6 +478,7 @@ export interface components {
             published_at: string | null;
             /** Media */
             media: components["schemas"]["PropertyPhoto"][];
+            project?: components["schemas"]["ProjectReferenceResponse"] | null;
         };
         /** Collection */
         Collection: {
@@ -945,6 +993,171 @@ export interface components {
             longitude: number;
             /** Latitude */
             latitude: number;
+        };
+        /** ProjectAmenityResponse */
+        ProjectAmenityResponse: {
+            /** Code */
+            code: string;
+            /** Label */
+            label: string;
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectDetailResponse */
+        ProjectDetailResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Territory */
+            territory: string;
+            developer: components["schemas"]["ProjectDeveloperResponse"];
+            /** Website Url */
+            website_url: string;
+            /** Summary */
+            summary: string;
+            /** Language */
+            language: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            handover: components["schemas"]["ProjectHandoverResponse"] | null;
+            programme_total: components["schemas"]["ProjectProgrammeResponse"] | null;
+            /** Typologies */
+            typologies: components["schemas"]["ProjectTypologyResponse"][];
+            /** Amenities */
+            amenities: components["schemas"]["ProjectAmenityResponse"][];
+            /** Media */
+            media: components["schemas"]["ProjectMediaResponse"][];
+            /** Sources */
+            sources: components["schemas"]["ProjectSourceResponse"][];
+        };
+        /** ProjectDeveloperResponse */
+        ProjectDeveloperResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Name */
+            name: string;
+            /** Website Url */
+            website_url: string;
+        };
+        /** ProjectHandoverResponse */
+        ProjectHandoverResponse: {
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "year" | "quarter" | "month" | "day";
+            /** Year */
+            year: number;
+            /** Quarter */
+            quarter: number | null;
+            /** Month */
+            month: number | null;
+            /** Day */
+            day: number | null;
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectMediaResponse */
+        ProjectMediaResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "image" | "document" | "video" | "model";
+            /** Role */
+            role: string;
+            /** Title */
+            title: string;
+            /** Mime Type */
+            mime_type: string;
+            /** Source Url */
+            source_url: string;
+            /** Original Text */
+            original_text: string;
+            /**
+             * Rights Status
+             * @enum {string}
+             */
+            rights_status: "reference_only" | "approved" | "blocked";
+            /** Delivery Url */
+            delivery_url: string | null;
+            /** Author */
+            author?: string | null;
+            /** Licence Code */
+            licence_code?: string | null;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Taken On */
+            taken_on?: string | null;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
+            /** Width */
+            width?: number | null;
+            /** Height */
+            height?: number | null;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectProgrammeResponse */
+        ProjectProgrammeResponse: {
+            /** Value */
+            value: number;
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectSourceResponse */
+        ProjectSourceResponse: {
+            /** Url */
+            url: string;
+            /** Name */
+            name: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /** Language */
+            language: string;
+            /**
+             * Evidence Pointer
+             * @default
+             */
+            evidence_pointer: string;
+            /** Rights Status */
+            rights_status: string;
+        };
+        /** ProjectTypologyResponse */
+        ProjectTypologyResponse: {
+            /** Property Type */
+            property_type: string;
+            /** Bedrooms */
+            bedrooms: number | null;
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
         };
     };
     responses: never;
@@ -1501,6 +1714,177 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Error"];
                 };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectDetailResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Partial Content */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Range Not Satisfiable */
+            416: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectMediaHead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Partial Content */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Range Not Satisfiable */
+            416: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Service Unavailable */
             503: {

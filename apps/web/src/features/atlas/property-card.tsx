@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Link } from "@/i18n/navigation";
 import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
 import type { MapFeature, MapLabels, ResearchReference } from "./types";
 
@@ -19,6 +20,7 @@ export function PropertyCard({
   parcel?: { code: string; label: string };
 }) {
   const usageText = useTranslations("Use");
+  const projectText = useTranslations("Project");
   const p = feature.properties;
   const profile = p.presentation;
   const isProject = p.kind.endsWith("_project_marker");
@@ -99,6 +101,14 @@ export function PropertyCard({
         </dl>
       )}
       <div className="property-actions">
+        {profile?.project && (
+          <Link
+            className="property-website"
+            href={`/projects/${profile.project.slug}`}
+          >
+            {projectText("viewDetails")} <span aria-hidden="true">↗</span>
+          </Link>
+        )}
         {website && (
           <a
             className="property-website"

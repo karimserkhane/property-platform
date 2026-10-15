@@ -114,6 +114,14 @@ def presentations(
     return result
 
 
+@flow(name="property-platform-project-details", retries=0)
+def project_details(
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "manual"
+):
+    """Reviewed factual project observations; promoter media remain external references."""
+    return ingest_source("project_details", territory, actor)
+
+
 @task(name="Archive acquired media", retries=0, cache_policy=NO_CACHE)
 def archive_media(actor: str) -> dict:
     run_id = flow_run.id
@@ -198,6 +206,22 @@ def public_context(
     return ingest_source("public_context", f"{territory}:{dataset}", actor)
 
 
+@flow(name="property-platform-project-media-files", retries=0)
+def project_media_files(receipt_name: str = "project-media.json", actor: str = "manual"):
+    """Idempotent private operator files, without approval or public publication."""
+    run_id = flow_run.id
+    if run_id is None or not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and a 1–80 character operator are required")
+    return invoke_domain(
+        {
+            "operation": "project_media_files",
+            "receipt_name": receipt_name,
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        }
+    )
+
+
 FLOWS = {
     f.name: f
     for f in (
@@ -205,6 +229,7 @@ FLOWS = {
         map_layer,
         references,
         presentations,
+        project_details,
         imagery,
         readiness,
         osm_bootstrap,
@@ -212,5 +237,6 @@ FLOWS = {
         adrec_indices,
         public_context,
         media_storage,
+        project_media_files,
     )
 }

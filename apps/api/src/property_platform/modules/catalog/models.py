@@ -4,6 +4,50 @@ from django.contrib.gis.db import models
 from django.contrib.gis.db.models.functions import IsEmpty, IsValid
 
 
+class Developer(models.Model):
+    """Reviewed commercial identity, separate from the name found on a map feature."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    key = models.SlugField(max_length=100, unique=True)
+    name = models.CharField(max_length=255)
+    website_url = models.URLField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "developer"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(key__regex=r"^[a-z0-9]+(?:-[a-z0-9]+)*$", name__regex=r"\S"),
+                name="developer_identity_present",
+            ),
+        ]
+
+
+class Project(models.Model):
+    """Stable commercial identity; its reviewed map associations belong to evidence."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    slug = models.SlugField(max_length=100, unique=True)
+    name = models.CharField(max_length=255)
+    territory_id = models.SlugField(max_length=100)
+    developer = models.ForeignKey(Developer, on_delete=models.PROTECT)
+    website_url = models.URLField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "project"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    slug__regex=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    name__regex=r"\S",
+                    territory_id__regex=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                ),
+                name="project_identity_present",
+            ),
+        ]
+
+
 class Parcel(models.Model):
     """Source-reconciled catalogue identity, not an automatically published dossier."""
 

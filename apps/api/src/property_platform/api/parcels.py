@@ -198,6 +198,16 @@ class PropertyPresentationResponse(Schema):
     retrieved_at: datetime
     published_at: datetime | None
     media: list[PropertyPhoto]
+    project: ProjectReferenceResponse | None = None
+
+
+class ProjectReferenceResponse(Schema):
+    id: UUID
+    slug: str
+    name: str
+
+
+PropertyPresentationResponse.model_rebuild()
 
 
 @router.get(

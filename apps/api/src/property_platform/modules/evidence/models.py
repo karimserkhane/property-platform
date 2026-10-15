@@ -401,6 +401,7 @@ class IngestionExecution(models.Model):
                         "adrec_sales",
                         "adrec_indices",
                         "public_context",
+                        "project_details",
                     ],
                 ),
                 name="ingestion_execution_identity_valid",
@@ -421,9 +422,12 @@ class Capture(models.Model):
     url = models.URLField(max_length=4000)
     fetched_started_at = models.DateTimeField(null=True)
     fetched_at = models.DateTimeField()
-    http_status = models.PositiveSmallIntegerField()
+    http_status = models.PositiveSmallIntegerField(null=True)
     content_sha256 = models.CharField(max_length=64)
-    payload = models.BinaryField()
+    payload = models.BinaryField(null=True)
+    primary_object = models.ForeignKey(
+        StoredObject, null=True, on_delete=models.PROTECT, related_name="primary_captures"
+    )
     byte_length = models.PositiveIntegerField()
     etag = models.CharField(max_length=500, blank=True)
     last_modified_raw = models.CharField(max_length=160, blank=True)
@@ -436,7 +440,10 @@ class Capture(models.Model):
         db_table = "capture"
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(http_status__gte=100, http_status__lte=599),
+                condition=(
+                    models.Q(http_status__isnull=False, http_status__gte=100, http_status__lte=599)
+                    | models.Q(http_status__isnull=True, acquisition_method="manual_media_file")
+                ),
                 name="capture_http_status_valid",
             ),
             models.CheckConstraint(
@@ -446,6 +453,13 @@ class Capture(models.Model):
             models.CheckConstraint(
                 condition=models.Q(content_sha256__regex=r"^[0-9a-f]{64}$"),
                 name="capture_sha256_format_valid",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(payload__isnull=False, primary_object__isnull=True)
+                    | models.Q(payload__isnull=True, primary_object__isnull=False)
+                ),
+                name="capture_exactly_one_payload_location",
             ),
         ]
 
@@ -900,3 +914,14 @@ class CensusMeasureObservation(PublicContextObservation):
                 name="census_measure_valid",
             ),
         ]
+
+
+# Django discovers these models through this module; ownership remains evidence.
+from .project_models import (  # noqa: E402, F401
+    ProjectAmenity,
+    ProjectIdentityLink,
+    ProjectMedia,
+    ProjectMediaPublication,
+    ProjectSnapshot,
+    ProjectTypology,
+)

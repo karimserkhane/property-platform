@@ -5,6 +5,8 @@ from django.db import DatabaseError, connection
 from ninja import NinjaAPI, Schema, Status
 
 from .parcels import router as parcels_router
+from .project_media import router as project_media_router
+from .projects import router as projects_router
 from .public_context import router as context_router
 
 api = NinjaAPI(
@@ -15,6 +17,8 @@ api = NinjaAPI(
 )
 api.add_router("/preview", parcels_router)
 api.add_router("/preview", context_router)
+api.add_router("/preview", projects_router)
+api.add_router("/preview", project_media_router)
 
 
 class Health(Schema):

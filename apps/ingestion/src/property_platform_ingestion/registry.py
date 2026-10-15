@@ -53,6 +53,13 @@ DATASETS = (
         "0 2 * * *",
     ),
     Dataset(
+        "project-details",
+        "property-platform-project-details",
+        "Manual reviewed project facts and external media references; no commercial publication.",
+        {},
+        None,
+    ),
+    Dataset(
         "sentinel-previews",
         "property-platform-imagery",
         "Manual import of two historical Sentinel snapshots from an acquired receipt.",
@@ -79,6 +86,13 @@ DATASETS = (
 # Same reviewed connectors, distinct source identities and deployment scopes.
 DATASETS += (
     Dataset(
+        "project-media-files",
+        "property-platform-project-media-files",
+        "Manual private operator manifest: image/PDF/video/GLB files, no approval or publication.",
+        {},
+        None,
+    ),
+    Dataset(
         "abu-dhabi-districts",
         "property-platform-public-context",
         "Complete Onwani district boundaries for ADM, AAM and WRM; source identities preserved.",
@@ -91,6 +105,13 @@ DATASETS += (
         "Reviewed Park View profiles; no unlicensed promoter photographs.",
         {"territory": "saadiyat-island"},
         "30 8 * * 0",
+    ),
+    Dataset(
+        "saadiyat-project-details",
+        "property-platform-project-details",
+        "Manual Bloom project facts, terms and external video/PDF references; no media copying.",
+        {"territory": "saadiyat-island"},
+        None,
     ),
     Dataset(
         "saadiyat-osm-bootstrap",

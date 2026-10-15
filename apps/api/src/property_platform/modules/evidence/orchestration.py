@@ -22,6 +22,8 @@ from . import (
     imagery_import,
     map_import,
     osm_bootstrap,
+    project_import,
+    project_protocol,
     property_import,
     research_import,
     services,
@@ -35,6 +37,7 @@ OPERATIONS = {
     "map",
     "references",
     "property_presentations",
+    "project_details",
     "imagery",
     "osm_bootstrap",
     "adrec_sales",
@@ -80,6 +83,8 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
         raise ValueError("No reviewed imagery registered for this territory")
     if operation == "osm_bootstrap":
         osm_bootstrap.boxes(territory)
+    if operation == "project_details":
+        project_protocol.project_registry(territory)
     expected_scope = territory
     reference = None
     if operation == "map":
@@ -227,9 +232,11 @@ def record_acquisition_failure(
 
 
 def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
-    if operation not in {"property_presentations", "imagery"}:
+    if operation not in {"property_presentations", "project_details", "imagery"}:
         if receipt is not None:
-            raise ValueError("Receipt input is only valid for inert property/imagery imports")
+            raise ValueError(
+                "Receipt input is only valid for inert property/project/imagery imports"
+            )
         return None
     if (
         not isinstance(receipt, list)
@@ -244,10 +251,18 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
     if operation == "property_presentations":
         value["review_version"] = property_import.VERSION
         value["registry"] = property_import.registry(territory)
+    elif operation == "project_details":
+        value["review_version"] = project_import.VERSION
+        value["parser_version"] = project_protocol.PARSER_VERSION
+        value["registry"] = project_protocol.project_registry(territory)
     else:
         value["render_version"] = "reem-sentinel-crop-v1"
     encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
-    maximum = 32 * 1024 * 1024 if operation == "property_presentations" else 16 * 1024 * 1024
+    maximum = (
+        32 * 1024 * 1024
+        if operation in {"property_presentations", "project_details"}
+        else 16 * 1024 * 1024
+    )
     if len(encoded) > maximum:
         raise ValueError("Receipt input exceeds acquisition budget")
     # Times are intentionally included: a genuinely fresh check is distinct from replay.
@@ -273,6 +288,8 @@ def _source_keys(operation, scope, reference):
     if operation == "property_presentations":
         profiles, _ = property_import.registry(territory)
         return ["property:" + reference_identity(row["source_url"]) for row in profiles]
+    if operation == "project_details":
+        return ["project:" + row["slug"] for row in project_protocol.project_registry(territory)]
     return ["sentinel:" + identity for identity in imagery_import.SCENES]
 
 
@@ -312,6 +329,9 @@ def _dispatch(operation, scope, actor, acquisition, receipt, reference):
             photos=property_import.registry(territory)[1],
         )
         return "succeeded", {"presentations": len(presentations)}
+    if operation == "project_details":
+        summary = project_import.import_project_details(receipt, territory=territory, actor=actor)
+        return "succeeded", summary
     runs = imagery_import.import_imagery(receipt, actor=actor)
     return "succeeded", {
         "scenes": len(runs),
@@ -444,6 +464,14 @@ def execute_import(
                         source__key__in=source_keys, actor=actor, started_at__gte=started
                     )
                 )
+                if operation == "project_details" and status in TERMINAL:
+                    # A parser/registry version can reuse a source snapshot already
+                    # committed by a different operational run. Retain those real
+                    # source-run links rather than inventing fresh acquisition dates.
+                    reported = IngestionRun.objects.filter(
+                        pk__in=summary.get("run_ids", []), source__key__in=source_keys
+                    )
+                    runs = list({run.pk: run for run in [*runs, *reported]}.values())
                 if status == "failed" and not error:
                     error = next((run.error for run in runs if run.error), "SourceUnavailable")
                 if completion_check is not None and status in TERMINAL:

@@ -1,5 +1,7 @@
 # Langues, traduction et mise en page
 
+**Actualisation du 15 octobre 2026 :** les identités promoteur/projet, snapshots typés, typologies, équipements et références PDF/vidéo sont implémentés. Le [guide PROJECTS.md](PROJECTS.md) décrit les nouvelles tables, sources et pipelines, les captures externes pour gros fichiers et les pages traduites. Les offres de logements, plans de paiement, transcodages et traductions automatiques restent un lot ultérieur.
+
 ## Décision
 
 L'anglais est la langue par défaut demandée par l'utilisateur. L'interface initiale propose quinze langues : anglais, arabe, espagnol, allemand, russe, hindi, ourdou, bengali, malayalam, tamoul, filipino, persan, chinois simplifié, français et portugais.

@@ -5,11 +5,19 @@ from urllib.parse import parse_qs, urlparse
 
 from django.utils import timezone
 
-from . import abu_dhabi, adrec, map_sources, onwani, osm_bootstrap
+from . import abu_dhabi, adrec, map_sources, onwani, osm_bootstrap, project_protocol
 from .collection_profiles import collection_for
 
 
 def source_definition(operation, scope):
+    if operation == "project_details":
+        projects = project_protocol.project_registry(scope)
+        return (
+            f"project-acquisition:{scope}",
+            f"Reviewed project HTML acquisition — {scope}",
+            projects[0]["website_url"],
+            project_protocol.PARSER_VERSION,
+        )
     if operation == "public_context":
         return abu_dhabi.source_definition(operation, scope)
     if operation in {"adrec_sales", "adrec_indices"}:
@@ -48,6 +56,10 @@ def source_definition(operation, scope):
 
 
 def _request_shape(url, operation, scope):
+    if operation == "project_details":
+        if url not in project_protocol.project_urls(project_protocol.project_registry(scope)):
+            raise ValueError("Failed project receipt is outside its reviewed HTML URLs")
+        return
     if operation == "public_context":
         abu_dhabi.validate_request(scope, url, {})
         return
@@ -120,8 +132,9 @@ def validate_received_acquisitions(operation, scope, rows):
         "adrec_sales",
         "adrec_indices",
         "public_context",
+        "project_details",
     }:
-        raise ValueError("Only completed GIS source responses can be retained here")
+        raise ValueError("Only completed reviewed source responses can be retained here")
     output, transferred = [], 0
     maximum = onwani.MAX_BYTES if operation == "onwani" else map_sources.MAX_BYTES
     if operation in {"adrec_sales", "adrec_indices"}:
@@ -130,6 +143,11 @@ def validate_received_acquisitions(operation, scope, rows):
         maximum = abu_dhabi.MAX_BYTES
         if len(rows) > (3 if scope == "abu-dhabi:districts" else 1):
             raise ValueError("Unexpected context acquisition response count")
+    if operation == "project_details":
+        maximum = project_protocol.MAX_CAPTURE_BYTES
+        urls = project_protocol.project_urls(project_protocol.project_registry(scope))
+        if len(rows) > len(urls):
+            raise ValueError("Unexpected project acquisition response count")
     fields = {
         "url",
         "http_status",

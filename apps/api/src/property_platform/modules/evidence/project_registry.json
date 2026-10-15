@@ -1,0 +1,205 @@
+[
+  {
+    "slug": "the-district",
+    "name": "The District",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://reportagegroup.com/projects/residential-apartments/the-district/",
+    "developer": {
+      "key": "reportage-properties",
+      "name": "Reportage Properties",
+      "website_url": "https://reportagegroup.com/"
+    },
+    "identity_links": [
+      {
+        "target": "place",
+        "namespace": "research:0e987135bb06f14f232aea62c0c76d7b37776ca6",
+        "record_id": "project-map-marker",
+        "reason": "Reviewed existing project marker; commercial identity is not parcel ownership."
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://reportagegroup.com/projects/residential-apartments/the-district/",
+        "parser": "reportage_project_v1",
+        "role": "project",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://reportagegroup.com/districtoffer/",
+        "parser": "reportage_offer_v1",
+        "role": "offer",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://reportagegroup.com/terms/",
+        "parser": "terms_v1",
+        "role": "terms",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [
+      {
+        "source_url": "https://reportagegroup.com//wp-content/uploads/The-District-by-Reportage-Brochure-Artwork.pdf",
+        "kind": "document",
+        "role": "brochure",
+        "title": "The District brochure",
+        "mime_type": "application/pdf"
+      },
+      {
+        "source_url": "https://reportagegroup.com//wp-content/uploads/The-District-Updated-Unit-Types.pdf",
+        "kind": "document",
+        "role": "floor_plan",
+        "title": "The District unit types",
+        "mime_type": "application/pdf"
+      },
+      {
+        "source_url": "https://reportagegroup.com//wp-content/uploads/The-District-final-fact-sheet.pdf",
+        "kind": "document",
+        "role": "factsheet",
+        "title": "The District factsheet",
+        "mime_type": "application/pdf"
+      }
+    ]
+  },
+  {
+    "slug": "vista-3",
+    "name": "Vista 3",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://reportagegroup.com/projects/residential-apartments/vista-3/",
+    "developer": {
+      "key": "reportage-properties",
+      "name": "Reportage Properties",
+      "website_url": "https://reportagegroup.com/"
+    },
+    "identity_links": [
+      {
+        "target": "place",
+        "namespace": "research:8f5e3769be324f9d73caac6429e94d881a975412",
+        "record_id": "project-map-marker",
+        "reason": "Reviewed existing project marker; commercial identity is not parcel ownership."
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://reportagegroup.com/projects/residential-apartments/vista-3/",
+        "parser": "reportage_project_v1",
+        "role": "project",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://reportagegroup.com/terms/",
+        "parser": "terms_v1",
+        "role": "terms",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [
+      {
+        "source_url": "https://reportageuae.com/wp-content/uploads/Vista-3-Brochure-Artwork-Final-New-1.pdf",
+        "kind": "document",
+        "role": "brochure",
+        "title": "Vista 3 brochure",
+        "mime_type": "application/pdf"
+      },
+      {
+        "source_url": "https://reportageuae.com/wp-content/uploads/Vista-3-Floor-Plan-New-Final.pdf",
+        "kind": "document",
+        "role": "floor_plan",
+        "title": "Vista 3 floor plans",
+        "mime_type": "application/pdf"
+      },
+      {
+        "source_url": "https://reportageuae.com/wp-content/uploads/Vista-3-Fact-Sheet-1.pdf",
+        "kind": "document",
+        "role": "factsheet",
+        "title": "Vista 3 factsheet",
+        "mime_type": "application/pdf"
+      }
+    ]
+  },
+  {
+    "slug": "park-view",
+    "name": "Park View",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://bloomholding.com/what-we-do/properties/park-view",
+    "developer": {
+      "key": "bloom-holding",
+      "name": "Bloom Holding",
+      "website_url": "https://bloomholding.com/"
+    },
+    "identity_links": [
+      {
+        "target": "building",
+        "namespace": "osm:saadiyat:osm",
+        "record_id": "way/729447143",
+        "reason": "Reviewed Park View building membership; developer page describes a project, not an individual unit."
+      },
+      {
+        "target": "building",
+        "namespace": "osm:saadiyat:osm",
+        "record_id": "way/729447144",
+        "reason": "Reviewed Park View building membership; developer page describes a project, not an individual unit."
+      },
+      {
+        "target": "building",
+        "namespace": "osm:saadiyat:osm",
+        "record_id": "way/729447145",
+        "reason": "Reviewed Park View building membership; developer page describes a project, not an individual unit."
+      }
+    ],
+    "sources": [
+      {
+        "url": "https://bloomholding.com/what-we-do/properties/park-view",
+        "parser": "bloom_project_v1",
+        "role": "project",
+        "terms_url": "https://bloomholding.com/terms-of-use",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://bloomholding.com/terms-of-use",
+        "parser": "terms_v1",
+        "role": "terms",
+        "terms_url": "https://bloomholding.com/terms-of-use",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [
+      {
+        "source_url": "https://bloomholding.com/application/files/7416/4328/2984/Park_View_Brochure_Feb_2022.pdf",
+        "kind": "document",
+        "role": "brochure",
+        "title": "Park View brochure",
+        "mime_type": "application/pdf"
+      },
+      {
+        "source_url": "https://vimeo.com/1038853770",
+        "kind": "video",
+        "role": "tour",
+        "title": "Park View Website Video",
+        "mime_type": "text/html"
+      }
+    ]
+  }
+]

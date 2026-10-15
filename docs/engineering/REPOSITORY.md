@@ -4,6 +4,8 @@ Le dépôt conserve les choix de la revue V2 et du contre-audit. Un monorepo con
 
 Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCHAIN.md) fait référence pour leurs versions et exceptions, tandis que les anciennes études conservent le contexte de leurs décisions.
 
+**Extension projets du 15 octobre 2026.** `catalog` possède `Developer`, `Project` et `project_services.py` pour les identités stables. `evidence` possède `project_models.py`, `project_registry.json`, `project_protocol.py` (extraction pure), `project_import.py` (snapshots et rapprochements réversibles), `project_queries.py` (projection bornée) et `project_media_storage.py` (fichiers privés, revue des droits, publication explicite). Les modèles sont réexportés par `evidence/models.py` pour Django. La direction reste `API/publication → evidence → catalog` et `evidence → object_storage` ; aucun accès réseau pendant la transaction d'import. `object_storage/downloads.py` gère les plages d'octets sans importer Django. `apps/ingestion/collectors/projects.py` acquiert les pages et `media_files.py` contrôle les manifestes privés ; les deux appellent les services métier hors du thread async Prefect. `apps/web/src/features/projects/` possède les fiches, `app/[locale]/projects/[slug]/page.tsx` leur route et `app/api/atlas/project-media/[id]/route.ts` le relais par flux. La carte conserve ses règles de sélection. Le [guide des projets](PROJECTS.md) décrit les trois nouveaux déploiements, les tables et l'exploitation.
+
 ## Comment lire l'arborescence
 
 **Extension stockage du 15 octobre 2026.** `property_platform.object_storage` est le paquet d’infrastructure des adaptateurs disque/S3. Il ne dépend ni des modules métier, ni de l’API, ni de la configuration Django ; Import Linter vérifie cette frontière. Le module **evidence** possède `StoredObject`, `CaptureObject`, `MediaPublication` et `media_storage.py`. La direction reste `publication/API → evidence → object_storage`, avec `evidence → catalog` pour les identités. L’application ingestion appelle ce service après l’import et hors transaction SQL ; elle ne possède pas les tables. Les secrets ne passent jamais dans les contrats clients. Voir [MEDIA_STORAGE.md](MEDIA_STORAGE.md) pour la reprise, les droits, le stockage persistant et le passage facultatif à R2/CDN.
@@ -49,6 +51,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   │       ├── layout.tsx    Structure de page, langue, direction et métadonnées
 │   │   │   │       ├── page.tsx      Page d'accueil actuelle
 │   │   │   │       └── explore/page.tsx   Exploration locale des parcelles
+│   │   │   ├── features/projects/   Fiches projets, promoteurs, preuves, documents et vidéos
 │   │   │   ├── features/atlas/      Accueil, carte, liste, fiche et adaptateur API de l'atlas
 │   │   │   ├── theme/fonts.ts        Préchargements de typographie selon la langue, sans réseau tiers
 │   │   │   ├── components/          Éléments d'interface réutilisables
@@ -69,7 +72,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── Dockerfile                Image d'ingestion avec bibliothèques GIS, sans runtime raster/OCR
 │   │   ├── src/property_platform_ingestion/   Code de planification et acquisition
 │   │   │   ├── __main__.py           Commandes serve, check et datasets
-│   │   │   ├── registry.py           Vingt déploiements, portées fixes et identités d'exécution
+│   │   │   ├── registry.py           Trente déploiements, portées fixes et identités d'exécution
 │   │   │   ├── deployments.py        Enregistrement et conservation des horaires modifiés dans l'UI
 │   │   │   ├── flows.py              Flows/tâches Prefect : exécuter, superviser et signaler les résultats
 │   │   │   ├── runtime.py            Sous-processus Django borné, hors du thread async de Prefect
@@ -80,6 +83,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │       ├── map.py            Transport des protocoles Onwani parcelles et couches ArcGIS/OSM
 │   │   │       ├── references.py     Captures des références publiques examinées
 │   │   │       ├── properties.py     Reçus des présentations et photographies autorisées
+│   │   │       ├── projects.py       Acquisition des pages officielles de projets et conditions
 │   │   │       └── snapshots.py      Précollecte puis replay exact, sans réseau dans la transaction SQL
 │   │   └── tests/                    Contrôles sans réseau : collecte, reprise et horaires de déploiement
 │   └── api/                          Application backend Django

@@ -193,7 +193,38 @@ try {
       exploreHtml.includes(`<title>${escapedBrandName}</title>`),
       `${locale}: configured atlas title`,
     );
+    const project = await fetch(`${origin}/${locale}/projects/the-district`);
+    assert.equal(
+      project.status,
+      200,
+      `${locale}: project route remains usable without a preview API`,
+    );
+    const projectHtml = await project.text();
+    assert.ok(
+      projectHtml.includes(messages.Project.unavailableTitle),
+      `${locale}: translated project unavailable title`,
+    );
+    assert.ok(
+      projectHtml.includes(messages.Project.unavailable),
+      `${locale}: translated project unavailable state`,
+    );
+    assert.ok(
+      projectHtml.includes(`dir="${getDirection(locale)}"`),
+      `${locale}: project direction`,
+    );
+    assert.equal(
+      projectHtml.includes("<iframe"),
+      false,
+      `${locale}: no arbitrary media embed`,
+    );
   }
+  for (const slug of ["the-district", "vista-3", "park-view"])
+    assert.equal(
+      (await fetch(`${origin}/en/projects/${slug}`)).status,
+      200,
+      `${slug}: unavailable state without API`,
+    );
+  assert.equal((await fetch(`${origin}/en/projects/INVALID`)).status, 404);
   for (const path of [
     "parcels?bbox=54.4,24.4,54.5,24.5",
     "map-context?bbox=54.4,24.4,54.5,24.5",
@@ -201,6 +232,7 @@ try {
     "imagery",
     "territories",
     "property-media/00000000-0000-0000-0000-000000000000",
+    "project-media/00000000-0000-0000-0000-000000000000",
   ]) {
     assert.equal(
       (await fetch(`${origin}/api/atlas/${path}`)).status,

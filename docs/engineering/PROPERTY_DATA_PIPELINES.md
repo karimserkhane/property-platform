@@ -1,5 +1,7 @@
 # Pipelines de données pour les fiches de projets et bâtiments
 
+**Actualisation du 15 octobre 2026 :** les identités promoteur/projet, snapshots typés, typologies, équipements et références PDF/vidéo sont implémentés. Le [guide PROJECTS.md](PROJECTS.md) décrit les nouvelles tables, sources et pipelines, les captures externes pour gros fichiers et les pages traduites. Les offres de logements, plans de paiement, transcodages et traductions automatiques restent un lot ultérieur.
+
 Cadrage du 13 octobre 2026, à partir de la demande de fiches immobilières comparables à la capture Proprobin. **Les nouveaux faits commerciaux décrits ici restent à développer.** Depuis ce cadrage, l'orchestration Prefect des imports existants a été implémentée dans une application dédiée ; voir [INGESTION.md](INGESTION.md). Les six présentations actuelles sont décrites dans [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md).
 
 ## Résultat attendu pour le visiteur

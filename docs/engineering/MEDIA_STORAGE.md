@@ -1,8 +1,8 @@
 # Fichiers, R2/S3 et CDN
 
-Le dépôt sait archiver les photographies acquises dans un stockage de fichiers persistant, puis les lire depuis l’API. Le même adaptateur accepte PDF, JPEG, PNG, WebP, MP4, WebM et GLB. **Le parcours actuellement raccordé au site reste celui des photographies de biens déjà autorisées.** Ajouter des brochures, vidéos ou modèles nécessite encore leur collecteur, leurs droits et une interface adaptée ; cette fondation ne les collecte ni ne les génère automatiquement.
+Le dépôt sait archiver les photographies acquises dans un stockage persistant et diffuser les **médias de projets approuvés**, y compris les vidéos MP4/WebM. PDF, JPEG, PNG, WebP et GLB utilisent les mêmes adaptateurs. Le [guide des projets et vidéos](PROJECTS.md) décrit les références officielles, l'ingestion de fichiers opérateur, la revue des droits et les pages web. Les fichiers des promoteurs restent des liens externes tant qu'ils ne disposent pas d'une autorisation de copie examinée.
 
-En développement, les fichiers sont dans un volume Docker sur ton PC. Pour la future mise en ligne, le même code peut utiliser **Cloudflare R2**, par son API compatible S3. Un second bucket peut recevoir les seules photos autorisées pour une diffusion publique par un domaine CDN. Aucun compte, abonnement, bucket ni domaine n’est créé par les commandes locales.
+En développement, les fichiers sont dans un volume Docker sur ton PC. Pour la future mise en ligne, le même code peut utiliser **Cloudflare R2**, par son API compatible S3. Un second bucket peut recevoir les seuls médias autorisés pour une diffusion publique par un domaine CDN. Aucun compte, abonnement, bucket ni domaine n’est créé par les commandes locales.
 
 ## 1. Le rôle de chaque composant
 
@@ -10,7 +10,7 @@ En développement, les fichiers sont dans un volume Docker sur ton PC. Pour la f
 |---|---|
 | PostgreSQL/PostGIS | Identités des biens, sources, captures, licences, dates, SHA-256, tailles et références des fichiers |
 | Stockage privé local ou R2 | Octets des fichiers archivés ; noms techniques immuables calculés depuis leur SHA-256 |
-| Bucket public R2 distinct, facultatif | Copies des photos explicitement approuvées pour être publiées |
+| Bucket public R2 distinct, facultatif | Copies des médias explicitement approuvés pour être publiées |
 | Domaine CDN, facultatif | Distribution des copies publiques depuis `https://media.ton-domaine…` |
 | Django | Vérification de provenance, contrôles d’autorisation et enregistrement des références |
 | Prefect | Déclenchement, supervision et reprise de l’archivage après l’import |
@@ -18,7 +18,7 @@ En développement, les fichiers sont dans un volume Docker sur ton PC. Pour la f
 
 Les photographies décoratives de l’accueil, leurs variantes optimisées, les polices et leurs licences restent des ressources versionnées du site. Leur petite taille et leur cycle de publication ne justifient pas un déplacement automatique. Les reçus de collecte Prefect restent dans leur volume privé séparé `/data`.
 
-**Compatibilité avec les preuves existantes :** `evidence.capture.payload` est conservé. Les petites captures historiques gardent leurs octets SQL et leurs dates ; l’archivage crée une copie vérifiée et ses liens. Cette étape ne prétend donc pas avoir supprimé tous les binaires de PostgreSQL. Une acquisition future de gros documents devra faire évoluer explicitement la représentation des captures avant de stocker uniquement leurs métadonnées en SQL. Ne pas remplacer un payload par une chaîne vide.
+**Compatibilité avec les preuves existantes :** les petites captures historiques gardent leurs octets SQL et leurs dates ; l'archivage crée une copie vérifiée et ses liens. La migration `evidence/0020` ajoute une représentation principale externe : exactement `payload` SQL ou `primary_object_id`, jamais les deux ni aucun. Les nouveaux fichiers opérateur sont externes et n'inventent pas de statut HTTP. Aucun ancien payload n'est remplacé par une chaîne vide. Les formats de preuve et les commandes sont détaillés dans [PROJECTS.md](PROJECTS.md).
 
 ## 2. Les fichiers et les tables
 
@@ -43,7 +43,7 @@ Les tables à ouvrir dans ton outil SQL sont :
 - `property_platform.evidence.capture_object` : lien entre une capture et une copie physique, avec opérateur et date de stockage. Une nouvelle copie chez un autre fournisseur ajoute un lien ; elle ne réécrit pas les anciennes preuves.
 - `property_platform.evidence.media_publication` : lien explicite entre une photo approuvée et sa copie publique, avec opérateur et date de publication. Une configuration CDN seule ne crée pas ces lignes.
 
-Source originale, date de récupération, date de publication connue, date d’ingestion, exécution de collecte et licence restent accessibles par les relations `capture`, `property_media` et `licence_capture`. Les octets, clés privées et noms des opérateurs ne sont pas ajoutés au contrat public des fiches. Le seul champ supplémentaire est `delivery_url`, nul tant qu’une copie publique approuvée n’existe pas.
+Source originale, date de récupération, date de publication connue, date d’ingestion, exécution de collecte et licence restent accessibles par les relations `capture`, `property_media` et `licence_capture`. Les octets, clés privées et noms des opérateurs ne sont pas ajoutés au contrat public des fiches. Pour les photographies historiques, `delivery_url` reste nul sans copie publique approuvée. Les nouveaux médias de projets peuvent aussi fournir l’URL du relais privé après approbation ; voir [PROJECTS.md](PROJECTS.md).
 
 ## 3. Installer ou actualiser le stockage local
 

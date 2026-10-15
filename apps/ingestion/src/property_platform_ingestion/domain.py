@@ -50,6 +50,14 @@ def execute(request):
         }
         if not isinstance(request, dict) or set(request) - allowed:
             raise ValueError("Unexpected domain request parameters")
+        if request.get("operation") == "project_media_files":
+            from .media_files import ingest_files
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id", "receipt_name"}:
+                raise ValueError("File intake requires a private manifest and audited actor")
+            root = Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion"))
+            result = ingest_files(root, request["receipt_name"], actor=request["actor"])
+            return {"status": "succeeded", "summary": result}
         if request.get("operation") == "media_storage":
             from property_platform.modules.evidence.media_storage import archive_property_media
 
@@ -180,6 +188,26 @@ def execute(request):
                 request["execution_key"],
                 collect,
             )
+        elif operation == "project_details":
+            from property_platform.modules.evidence.project_protocol import (
+                project_registry,
+                project_urls,
+            )
+
+            from .collectors.projects import collect_project_receipts
+
+            projects = project_registry(territory)
+
+            def collect_projects():
+                nonlocal transport
+                with SourceHTTP(project_urls(projects)) as transport:
+                    return collect_project_receipts(transport, projects)
+
+            receipt = stored_property_receipt(
+                Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion")),
+                request["execution_key"],
+                collect_projects,
+            )
         elif operation == "imagery":
             storage = Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion"))
             path = checked_receipt_path(storage, request["receipt_name"])
@@ -215,6 +243,7 @@ def execute(request):
                     "adrec_sales",
                     "adrec_indices",
                     "public_context",
+                    "project_details",
                 }
                 and transport is not None
                 else None

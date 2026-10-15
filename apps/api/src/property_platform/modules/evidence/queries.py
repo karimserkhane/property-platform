@@ -297,6 +297,7 @@ def parcel_sources(parcel_ids):
 def property_presentations(target, ids):
     """Bounded typed presentation; raw captures and reviewer identities remain private."""
     from .media_storage import delivery_url, eligible_media
+    from .project_queries import project_references
 
     if target not in ("building", "place"):
         return {}
@@ -319,6 +320,7 @@ def property_presentations(target, ids):
         .distinct(f"{target}_id")
     )
     result = {}
+    projects = project_references(target, ids)
     for row in rows:
         result[str(getattr(row, f"{target}_id"))] = {
             "name": row.display_name,
@@ -330,6 +332,7 @@ def property_presentations(target, ids):
             "source_url": row.capture.url,
             "retrieved_at": row.capture.fetched_at,
             "published_at": row.capture.source_published_at,
+            "project": projects.get(str(getattr(row, f"{target}_id"))),
             "media": [
                 {
                     "id": photo.id,

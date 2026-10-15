@@ -1,0 +1,265 @@
+"""All-or-nothing typed project extraction from registered, captured sources."""
+
+import hashlib
+import json
+from datetime import date
+
+from django.db import connection, transaction
+from django.utils import timezone
+
+from property_platform.modules.catalog.models import Building, Parcel, Place
+from property_platform.modules.catalog.project_services import reconcile_project
+
+from .models import (
+    Capture,
+    IngestionRun,
+    ProjectAmenity,
+    ProjectIdentityLink,
+    ProjectMedia,
+    ProjectSnapshot,
+    ProjectTypology,
+    Source,
+)
+
+VERSION = "project-details-v1"
+LOCK_KEY = 716548220
+TARGETS = {"building": Building, "place": Place, "parcel": Parcel}
+
+
+def _receipt_key(project, source, receipt, parsed, receipts):
+    value = {
+        "project": project["slug"],
+        "source": source["url"],
+        "sha256": receipt["sha256"],
+        "fetched_at": receipt["fetched_at"].isoformat(),
+        "fetched_started_at": receipt["fetched_started_at"].isoformat(),
+        "extractor": parsed["parser_version"],
+        "registry_version": VERSION,
+        "registry": project,
+        "terms": {
+            "sha256": receipts[source["terms_url"]]["sha256"],
+            "fetched_at": receipts[source["terms_url"]]["fetched_at"].isoformat(),
+        }
+        if source.get("terms_url") in receipts
+        else None,
+    }
+    return hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()
+
+
+def _handover_values(value):
+    if value is None:
+        return {}
+    precision = value["precision"]
+    year = value["year"]
+    quarter, month, day = (value.get(key) for key in ("quarter", "month", "day"))
+    if type(year) is not int or not 1900 <= year <= 2200:
+        raise ValueError("Invalid handover year")
+    if precision == "year" and any(item is not None for item in (quarter, month, day)):
+        raise ValueError("Year precision cannot invent a quarter, month or day")
+    if precision == "quarter" and (
+        type(quarter) is not int or not 1 <= quarter <= 4 or month is not None or day is not None
+    ):
+        raise ValueError("Invalid handover quarter precision")
+    if precision in {"month", "day"}:
+        if quarter is not None or type(month) is not int or not 1 <= month <= 12:
+            raise ValueError("Invalid handover month")
+        if precision == "month" and day is not None:
+            raise ValueError("Month precision cannot invent a day")
+        if precision == "day":
+            date(year, month, day)
+    if precision not in {"year", "quarter", "month", "day"}:
+        raise ValueError("Invalid handover precision")
+    return {
+        "handover_precision": precision,
+        "handover_year": year,
+        "handover_quarter": quarter,
+        "handover_month": month,
+        "handover_day": day,
+        "handover_original": value["original_text"],
+        "handover_pointer": value["evidence_pointer"],
+    }
+
+
+def import_project_details(receipt_rows, *, territory, actor):
+    """Pure extraction precedes SQL. No promoter images, PDFs or video bodies are fetched here."""
+    from .project_protocol import (
+        extract_project_source,
+        project_registry,
+        validate_project_receipts,
+    )
+
+    if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
+        raise ValueError("Valid project import actor required")
+    definitions = project_registry(territory)
+    receipts = validate_project_receipts(receipt_rows, definitions)
+    parsed_sources, identities = [], {}
+    for definition in definitions:
+        for link in definition["identity_links"]:
+            target = link["target"]
+            if target not in TARGETS:
+                raise ValueError("Unknown project identity target")
+            filters = {"source_namespace": link["namespace"], "source_record_id": link["record_id"]}
+            filters["superseded_by__isnull" if target == "parcel" else "active"] = True
+            identities[(definition["slug"], target, link["namespace"], link["record_id"])] = (
+                TARGETS[target].objects.get(**filters)
+            )
+        for source in definition["sources"]:
+            parsed = extract_project_source(definition, source, receipts[source["url"]])
+            if parsed is not None:
+                handover = _handover_values(parsed.get("handover"))
+                parsed_sources.append((definition, source, parsed, handover))
+    if not parsed_sources:
+        raise ValueError("No usable registered project sources")
+    summary = {
+        "projects": 0,
+        "snapshots": 0,
+        "reused": 0,
+        "links": 0,
+        "typologies": 0,
+        "amenities": 0,
+        "media_references": 0,
+        "run_ids": [],
+    }
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_xact_lock(%s)", [LOCK_KEY])
+        projects = {}
+        for definition, source, parsed, handover in parsed_sources:
+            project = projects.setdefault(definition["slug"], reconcile_project(definition))
+            receipt = receipts[source["url"]]
+            receipt_key = _receipt_key(definition, source, receipt, parsed, receipts)
+            existing = ProjectSnapshot.objects.filter(receipt_key=receipt_key).first()
+            if existing is not None:
+                summary["reused"] += 1
+                summary["run_ids"].append(str(existing.capture.run_id))
+                continue
+            provider, _ = Source.objects.get_or_create(
+                key=f"project:{project.slug}",
+                defaults={"name": definition["developer"]["name"], "url": project.website_url},
+            )
+            run = IngestionRun.objects.create(
+                source=provider, actor=actor.strip(), connector_version=VERSION
+            )
+
+            def capture(url, acquisition_run=run):
+                value = receipts[url]
+                return Capture.objects.create(
+                    run=acquisition_run,
+                    url=url,
+                    payload=value["payload"],
+                    byte_length=len(value["payload"]),
+                    content_sha256=value["sha256"],
+                    http_status=200,
+                    fetched_started_at=value["fetched_started_at"],
+                    fetched_at=value["fetched_at"],
+                    acquisition_method="registered_project_receipt",
+                    timestamp_basis="receipt_collector_clock",
+                )
+
+            evidence = capture(source["url"])
+            terms_url = source.get("terms_url")
+            terms = capture(terms_url) if terms_url and terms_url in receipts else None
+            snapshot = ProjectSnapshot.objects.create(
+                project=project,
+                capture=evidence,
+                terms_capture=terms,
+                receipt_key=receipt_key,
+                extractor_version=parsed["parser_version"],
+                source_role=source["role"],
+                title=parsed["title"],
+                summary=parsed.get("summary", ""),
+                language=definition.get("language", "en"),
+                source_rights_status=source.get("rights_status", "restricted"),
+                acquisition_scope=source.get("acquisition_scope", "local_research"),
+                actor=actor.strip(),
+                total_units=parsed.get("total_units"),
+                total_units_original=parsed.get("total_units_original", ""),
+                total_units_pointer=parsed.get("total_units_pointer", ""),
+                **handover,
+            )
+            for row in parsed.get("typologies", []):
+                ProjectTypology.objects.create(
+                    snapshot=snapshot,
+                    **{
+                        key: row.get(key)
+                        for key in (
+                            "property_type",
+                            "bedrooms",
+                            "original_text",
+                            "evidence_pointer",
+                        )
+                    },
+                )
+                summary["typologies"] += 1
+            for row in parsed.get("amenities", []):
+                ProjectAmenity.objects.create(
+                    snapshot=snapshot,
+                    **{
+                        key: row[key]
+                        for key in ("code", "label", "original_text", "evidence_pointer")
+                    },
+                )
+                summary["amenities"] += 1
+            for row in parsed.get("media", []):
+                if row.get("rights_status", "reference_only") != "reference_only":
+                    raise ValueError("Source extraction cannot approve media redistribution")
+                ProjectMedia.objects.create(
+                    snapshot=snapshot,
+                    rights_status="reference_only",
+                    **{
+                        key: row[key]
+                        for key in (
+                            "kind",
+                            "role",
+                            "title",
+                            "mime_type",
+                            "source_url",
+                            "original_text",
+                            "evidence_pointer",
+                        )
+                    },
+                )
+                summary["media_references"] += 1
+            for link in definition["identity_links"]:
+                target = link["target"]
+                identity = identities[(project.slug, target, link["namespace"], link["record_id"])]
+                # A revoked decision is never silently reactivated by the next acquisition.
+                previous = ProjectIdentityLink.objects.filter(project=project, **{target: identity})
+                if previous.exists():
+                    continue
+                if ProjectIdentityLink.objects.filter(active=True, **{target: identity}).exists():
+                    raise ValueError("Map identity already belongs to a reviewed project")
+                ProjectIdentityLink.objects.create(
+                    project=project,
+                    capture=evidence,
+                    actor=actor.strip(),
+                    reason=link["reason"],
+                    **{target: identity},
+                )
+                summary["links"] += 1
+            run.status, run.finished_at = "succeeded", timezone.now()
+            run.summary = {
+                "project": project.slug,
+                "snapshot_id": snapshot.pk,
+                "media_policy": "reference_only",
+                "acquisition_scope": "local_research",
+            }
+            run.save(update_fields=["status", "finished_at", "summary"])
+            summary["snapshots"] += 1
+            summary["run_ids"].append(str(run.id))
+        summary["projects"] = len(projects)
+    summary["run_ids"] = sorted(set(summary["run_ids"]))
+    return summary
+
+
+def revoke_project_link(link_id, *, actor, reason):
+    if not actor.strip() or not reason.strip():
+        raise ValueError("Revocation requires an actor and reason")
+    with transaction.atomic():
+        link = ProjectIdentityLink.objects.select_for_update().get(pk=link_id)
+        if not link.active:
+            return link
+        link.active, link.revoked_at = False, timezone.now()
+        link.revoked_by, link.revocation_reason = actor.strip(), reason.strip()
+        link.save(update_fields=["active", "revoked_at", "revoked_by", "revocation_reason"])
+        return link
