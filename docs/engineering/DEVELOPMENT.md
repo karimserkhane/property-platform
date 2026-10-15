@@ -1,6 +1,8 @@
 # Lancer et développer Property Platform, étape par étape
 
-**Raccorder Cloudflare R2 :** suivre [les clics dans le tableau de bord et les paramètres locaux](MEDIA_STORAGE.md#51-ce-que-tu-dois-faire-dans-cloudflare), puis [le premier transfert privé](MEDIA_STORAGE.md#53-raccorder-puis-essayer-un-seul-fichier). L'intégration utilise le fichier local `C:\Users\Karim\Repositories\property-platform\infra\local\.env`, ignoré par Git. Un domaine CDN n'est pas nécessaire pour le premier essai ; PostgreSQL reste inchangé.
+**Stockage retenu pour le moment : local, sans R2/S3.** Les photos, PDF, vidéos et modèles acquis utilisent le volume persistant dédié `property-platform-local_media-data`, partagé entre Django et Prefect sous `/media`. Aucune clé cloud n'est nécessaire. Voir [où trouver cet espace et préparer un transfert ultérieur](MEDIA_STORAGE.md#mode-actuel--stockage-local-dédié). Les commandes locales ordinaires suffisent ; ne pas ajouter le fichier `compose.storage.s3.yaml` tant que le cloud n'est pas souhaité.
+
+**Option ultérieure — Cloudflare R2 :** le [guide de raccordement](MEDIA_STORAGE.md#51-ce-que-tu-dois-faire-dans-cloudflare) reste disponible. Le fichier local `C:\Users\Karim\Repositories\property-platform\infra\local\.env` est un emplacement préparé pour les futurs paramètres, ignoré par Git ; sa présence n'active pas le cloud. Aucun domaine CDN ni compte Cloudflare n'est requis pour continuer le développement local.
 
 **Fiches projets et vidéos — 15 octobre 2026 :** le [guide PROJECTS.md](PROJECTS.md) explique les nouvelles tables, les imports Prefect Reportage/Bloom, les pages projets, les PDF et vidéos, et l'ajout de fichiers autorisés. Les trois nouveaux jobs commencent manuels. Reconstruire API et ingestion, appliquer les migrations, lancer les deux imports de projets, puis reconstruire le web ; aucune suppression de volume. Les anciennes sections de lancement et de collecte cartographique restent applicables.
 

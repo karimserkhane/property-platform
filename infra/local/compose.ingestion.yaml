@@ -68,6 +68,7 @@ services:
       INGESTION_STORAGE_DIR: /data
       MEDIA_STORAGE_BACKEND: local
       MEDIA_LOCAL_ROOT: /media
+      MEDIA_PUBLICATION_ENABLED: "0"
     volumes:
       - ingestion-data:/data
       - media-data:/media

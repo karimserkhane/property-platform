@@ -4,6 +4,33 @@ Le dépôt sait archiver les photographies acquises dans un stockage persistant 
 
 En développement, les fichiers sont dans un volume Docker sur ton PC. Pour la future mise en ligne, le même code peut utiliser **Cloudflare R2**, par son API compatible S3. Un second bucket peut recevoir les seuls médias autorisés pour une diffusion publique par un domaine CDN. Aucun compte, abonnement, bucket ni domaine n’est créé par les commandes locales.
 
+## Mode actuel — stockage local dédié
+
+**Choix confirmé le 15 octobre 2026 : conserver les fichiers sur le PC, sans activer de fournisseur cloud.** Le volume existant est réutilisé, sans déplacer les fichiers ni créer un serveur de stockage supplémentaire.
+
+| Élément | Valeur actuelle |
+|---|---|
+| Espace dédié dans Docker Desktop → Volumes | `property-platform-local_media-data` |
+| Chemin partagé dans les conteneurs API et ingestion | `/media` |
+| Dossiers des fichiers | `/media/objects/sha256/…` |
+| Backend Django et Prefect | `local` |
+| Publication publique/CDN | Désactivée (`MEDIA_PUBLICATION_ENABLED=0`) |
+| Références et provenance | PostgreSQL, schéma `evidence` |
+
+Cet espace est **un volume persistant distinct des images Docker**. Il utilise le disque de ton PC géré par Docker Desktop ; ce n'est pas un dossier Windows `C:\media`. Il grandit avec les fichiers et n'a pas de capacité fixe préallouée par le dépôt. Docker Desktop permet d'y consulter les fichiers et d'exporter le volume. Les autres volumes restent distincts : PostgreSQL pour les tables, Prefect pour son historique et `/data` pour les reçus de collecte.
+
+Arrêter ou recréer les conteneurs conserve les fichiers. Ne pas supprimer le volume ni utiliser `down -v`. Sauvegarder le volume **et** PostgreSQL pour conserver à la fois les octets et leurs relations. Les formats pris en charge restent identiques : photos, PDF, MP4/WebM et GLB. Cela n'autorise pas à copier des médias de promoteurs sans droits ; leurs références externes restent des liens.
+
+**Vérification locale :** API et runner utilisent bien `backend=local`, `/media`, publication désactivée. Un objet de 160 006 octets est archivé et partagé par six liens de capture ; les autres données et références ne sont pas autant de fichiers téléchargés. Aucun objet S3 n'est enregistré à cette date. Ce fonctionnement n'envoie pas les médias vers Cloudflare ou un autre fournisseur et ne génère donc pas de frais de stockage cloud pour la plateforme.
+
+### Transférer plus tard vers un stockage compatible S3
+
+L'adaptateur `S3Store` est déjà indépendant de Cloudflare : endpoint HTTPS, région, bucket, namespace et clés sont configurables. Un autre fournisseur compatible avec les opérations utilisées peut donc être raccordé ; il faudra vérifier sa compatibilité réelle, notamment les écritures conditionnelles, métadonnées SHA-256 et requêtes de plages pour la vidéo. Aucun fournisseur distant n'est configuré ni contacté en mode local.
+
+Le transfert devra suivre cet ordre : créer/configurer la destination privée, copier les objets depuis le stockage actuel encore accessible, vérifier taille et SHA-256, enregistrer les nouvelles copies dans `evidence.stored_object` et leurs liens dans `evidence.capture_object`, puis vérifier la lecture depuis le site avant de retirer un ancien accès. Les UUID des biens, médias et captures, dates, sources et droits restent conservés. Les copies locales ne sont pas supprimées automatiquement. Changer seulement l'endpoint ou le bucket ne transfère aucun fichier.
+
+La commande actuelle `archive_property_media` sait recopier les photographies existantes vers le backend configuré. Elle ne constitue pas à elle seule un transfert complet des vidéos, PDF et GLB de projets : leur migration devra aussi traiter leurs captures externes, via le service `archive_capture`, et vérifier toutes les références avant la bascule. Les primitives existent ; cette migration complète sera exécutée et validée au moment du choix du fournisseur, pas automatiquement aujourd'hui. La section Cloudflare ci-dessous reste une option ultérieure.
+
 ## 1. Le rôle de chaque composant
 
 | Composant | Contenu et rôle |
