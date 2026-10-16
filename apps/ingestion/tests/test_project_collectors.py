@@ -304,6 +304,26 @@ def test_project_flow_uses_scoped_durable_gateway_without_archiving_restricted_m
     assert all(item["summary"]["projects"] == 1 for item in result)
 
 
+def test_project_flow_can_refresh_one_registered_project_without_changing_default_batch(
+    monkeypatch,
+):
+    from property_platform_ingestion import flows
+
+    calls = []
+
+    def gateway(operation, scope, actor):
+        calls.append((operation, scope, actor))
+        return {"status": "succeeded"}
+
+    gateway.with_options = lambda **kwargs: gateway
+    monkeypatch.setattr(flows, "ingest_source", gateway)
+    flows.project_details.fn(territory="al-reem-island", actor="reviewer", project_slug="reem-nine")
+    assert calls == [("project_details", "al-reem-island:reem-nine", "reviewer")]
+    with pytest.raises(ValueError, match="not registered"):
+        flows.project_details.fn(territory="al-reem-island", project_slug="unknown-project")
+    assert len(calls) == 1
+
+
 def test_project_and_presentations_checkpoints_cannot_collide_for_one_prefect_run(tmp_path):
     from property_platform_ingestion.registry import execution_identity
     from property_platform_ingestion.storage import stored_property_receipt

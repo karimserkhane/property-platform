@@ -3863,6 +3863,13 @@
             },
             "title": "Sources",
             "type": "array"
+          },
+          "map_locations": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectMapLocationResponse"
+            },
+            "title": "Map Locations",
+            "type": "array"
           }
         },
         "required": [
@@ -3880,7 +3887,8 @@
           "typologies",
           "amenities",
           "media",
-          "sources"
+          "sources",
+          "map_locations"
         ],
         "title": "ProjectDetailResponse",
         "type": "object"
@@ -3952,6 +3960,51 @@
           "source"
         ],
         "title": "ProjectHandoverResponse",
+        "type": "object"
+      },
+      "ProjectMapLocationResponse": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "building",
+              "place",
+              "parcel"
+            ],
+            "title": "Target",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "geometry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Geometry"
+              },
+              {
+                "$ref": "#/components/schemas/PointGeometry"
+              }
+            ],
+            "title": "Geometry"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProjectSourceResponse"
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "name",
+          "geometry",
+          "source"
+        ],
+        "title": "ProjectMapLocationResponse",
         "type": "object"
       },
       "ProjectMediaResponse": {

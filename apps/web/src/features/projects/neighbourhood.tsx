@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { MapLabels } from "../atlas/types";
 import styles from "./project.module.css";
-import type { ProjectLabels } from "./types";
+import type { ProjectLabels, ProjectMapLocation } from "./types";
 
 const LocalMap = dynamic(() => import("./neighbourhood-map"), { ssr: false });
 
@@ -13,6 +13,7 @@ export function ProjectNeighbourhood({
   territory,
   bounds,
   slug,
+  locations,
   locale,
   labels,
   mapLabels,
@@ -21,6 +22,7 @@ export function ProjectNeighbourhood({
   territory: string;
   bounds: number[];
   slug: string;
+  locations: ProjectMapLocation[];
   locale: string;
   labels: ProjectLabels;
   mapLabels: MapLabels;
@@ -31,6 +33,11 @@ export function ProjectNeighbourhood({
   return (
     <div className={styles.neighbourhood} data-neighbourhood={territory}>
       <p className={styles.mapIntro}>{labels.mapIntro}</p>
+      {active && !locations.length && (
+        <p className={styles.mapIntro} role="status">
+          {labels.mapLocationPending}
+        </p>
+      )}
       <div className={styles.neighbourhoodCanvas}>
         {!active ? (
           <div className={styles.mapInvitation}>
@@ -57,7 +64,7 @@ export function ProjectNeighbourhood({
           <LocalMap
             territory={territory}
             bounds={bounds}
-            slug={slug}
+            locations={locations}
             locale={locale}
             label={labels.areaMap}
             mapLabels={mapLabels}

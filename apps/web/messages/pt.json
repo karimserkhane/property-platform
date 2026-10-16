@@ -320,6 +320,7 @@
     "editorialImage": "Abu Dhabi · fotografia ilustrativa",
     "previousImage": "Imagem anterior",
     "nextImage": "Imagem seguinte",
-    "useLocalMap": "Usar o nosso mapa detalhado"
+    "useLocalMap": "Usar o nosso mapa detalhado",
+    "mapLocationPending": "A localização exata do projeto ainda não está documentada. Este mapa mostra o bairro."
   }
 }

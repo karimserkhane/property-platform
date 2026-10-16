@@ -1180,6 +1180,8 @@ export interface components {
             media: components["schemas"]["ProjectMediaResponse"][];
             /** Sources */
             sources: components["schemas"]["ProjectSourceResponse"][];
+            /** Map Locations */
+            map_locations: components["schemas"]["ProjectMapLocationResponse"][];
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {
@@ -1198,6 +1200,24 @@ export interface components {
             day: number | null;
             /** Original Text */
             original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectMapLocationResponse */
+        ProjectMapLocationResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "building" | "place" | "parcel";
+            /** Name */
+            name: string;
+            /** Geometry */
+            geometry: components["schemas"]["Geometry"] | components["schemas"]["PointGeometry"];
             source: components["schemas"]["ProjectSourceResponse"];
         };
         /** ProjectMediaResponse */

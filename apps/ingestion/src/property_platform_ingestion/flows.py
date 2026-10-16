@@ -116,13 +116,16 @@ def presentations(
 
 @flow(name="property-platform-project-details", retries=0)
 def project_details(
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "manual"
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
+    actor: str = "manual",
+    project_slug: str | None = None,
 ):
     """Reviewed factual project observations; promoter media remain external references."""
     from property_platform.modules.evidence.project_protocol import project_registry
 
     results, failures = [], []
-    for project in project_registry(territory):
+    scope = f"{territory}:{project_slug}" if project_slug is not None else territory
+    for project in project_registry(scope):
         scope = f"{territory}:{project['slug']}"
         try:
             results.append(

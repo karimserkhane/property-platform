@@ -320,6 +320,7 @@
     "editorialImage": "Abu Dabi · fotografía ilustrativa",
     "previousImage": "Imagen anterior",
     "nextImage": "Imagen siguiente",
-    "useLocalMap": "Usar nuestro mapa detallado"
+    "useLocalMap": "Usar nuestro mapa detallado",
+    "mapLocationPending": "La ubicación exacta del proyecto aún no está documentada. Este mapa muestra el barrio."
   }
 }

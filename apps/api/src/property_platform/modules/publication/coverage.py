@@ -143,10 +143,21 @@ def reference_source_keys(profile):
 
 
 def map_source_namespaces(territory_id):
-    return tuple(
-        dict.fromkeys(
-            collection_for(member).map_namespace(layer)
-            for member in member_territories(territory_id)
-            for layer in ("district", "community", "street", "osm")
+    from property_platform.modules.evidence.project_protocol import project_registry
+
+    members = member_territories(territory_id)
+    return (
+        tuple(
+            dict.fromkeys(
+                collection_for(member).map_namespace(layer)
+                for member in members
+                for layer in ("district", "community", "street", "osm")
+            )
         )
-    ) + reference_source_keys(profile_for(territory_id))
+        + reference_source_keys(profile_for(territory_id))
+        + tuple(
+            f"project:{project['slug']}"
+            for project in project_registry()
+            if project["territory_id"] in members
+        )
+    )

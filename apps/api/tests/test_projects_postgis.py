@@ -28,6 +28,7 @@ from property_platform.modules.evidence.project_import import (  # noqa: E402
 )
 from property_platform.modules.evidence.project_queries import (  # noqa: E402
     project_detail,
+    project_locations,
     project_references,
 )
 
@@ -118,11 +119,13 @@ def test_project_import_is_typed_idempotent_and_retains_provider_identities(proj
     assert set(Building.objects.values_list("name", flat=True)) == {"Provider building"}
     with CaptureQueriesContext(connection) as queries:
         data = project_detail(definition["slug"])
-    assert len(queries) <= 6
+    assert len(queries) <= 7
     assert all('"payload"' not in query["sql"] for query in queries)
     assert data["handover"]["precision"] == "quarter"
     assert data["handover"]["day"] is None and data["handover"]["month"] is None
     assert data["programme_total"]["value"] == 230
+    assert len(data["map_locations"]) == 3
+    assert all(location["target"] == "building" for location in data["map_locations"])
     assert data["typologies"][0]["bedrooms"] == 0
     assert data["media"][0]["delivery_url"] is None
     assert data["media"][0]["rights_status"] == "reference_only"
@@ -150,6 +153,44 @@ def test_revoked_project_link_stays_revoked_after_fresh_acquisition(project_inpu
     assert ProjectSnapshot.objects.count() == 2
 
 
+def test_map_locations_exclude_inactive_revoked_and_outside_identities(project_input):
+    _, rows, _ = project_input
+    ingest(rows)
+    project = Project.objects.select_related("developer").get(slug="park-view")
+    links = list(ProjectIdentityLink.objects.select_related("building").order_by("id"))
+    links[0].building.active = False
+    links[0].building.save(update_fields=["active"])
+    revoke_project_link(links[1].id, actor="reviewer", reason="Unconfirmed membership")
+    assert len(project_locations(project)) == 1
+    links[2].building.geometry = MultiPolygon(Polygon.from_bbox((55, 25, 55.01, 25.01)), srid=4326)
+    links[2].building.save(update_fields=["geometry"])
+    assert project_locations(project) == []
+
+
+def test_source_position_is_audited_idempotent_and_respects_revocation(project_input):
+    from property_platform.modules.evidence.models import MapObservation
+    from property_platform.modules.evidence.project_locations import materialize_project_position
+
+    _, rows, _ = project_input
+    ingest(rows)
+    snapshot = ProjectSnapshot.objects.select_related("project", "capture__run__source").get()
+    marker = {"name": "Park View", "lat": 24.524, "lon": 54.433, "method": "publisher_map"}
+    for _ in range(2):
+        assert materialize_project_position(
+            snapshot.project, snapshot.capture, marker, actor="test"
+        )
+    link = ProjectIdentityLink.objects.get(project=snapshot.project, place__isnull=False)
+    assert (
+        MapObservation.objects.get(place=link.place).raw_attributes["location_status"]
+        == "declared_unverified"
+    )
+    revoke_project_link(link.id, actor="reviewer", reason="Position rejected")
+    assert not materialize_project_position(
+        snapshot.project, snapshot.capture, marker, actor="test"
+    )
+    assert ProjectIdentityLink.objects.filter(place=link.place).count() == 1
+
+
 def test_changed_developer_identity_rolls_back_complete_batch(project_input):
     _, rows, _ = project_input
     ingest(rows)
@@ -158,6 +199,38 @@ def test_changed_developer_identity_rolls_back_complete_batch(project_input):
     with pytest.raises(ValueError, match="Developer identity changed"):
         ingest(fresh)
     assert ProjectSnapshot.objects.count() == IngestionRun.objects.count() == 1
+
+
+def test_camera_position_review_preserves_history_and_cannot_restore_rejected_pin(project_input):
+    from property_platform.modules.evidence.models import MapObservation
+    from property_platform.modules.evidence.project_locations import (
+        materialize_project_position,
+        withdraw_camera_positions,
+    )
+
+    _, rows, _ = project_input
+    ingest(rows)
+    snapshot = ProjectSnapshot.objects.select_related("project", "capture__run__source").get()
+    marker = {
+        "name": "Park View",
+        "lat": 24.524,
+        "lon": 54.433,
+        "method": "publisher_map_viewpoint",
+    }
+    materialize_project_position(snapshot.project, snapshot.capture, marker, actor="test")
+    link = ProjectIdentityLink.objects.get(place__isnull=False)
+    assert withdraw_camera_positions(actor="reviewer") == [str(link.place_id)]
+    link.refresh_from_db()
+    link.place.refresh_from_db()
+    assert not link.active and not link.place.active
+    correction = MapObservation.objects.get(place=link.place, action="retired")
+    assert correction.capture.parent_capture_id == snapshot.capture_id
+    assert correction.capture.fetched_at == snapshot.capture.fetched_at
+    assert ProjectSnapshot.objects.count() == 1
+    assert withdraw_camera_positions(actor="reviewer") == []
+    assert not materialize_project_position(
+        snapshot.project, snapshot.capture, marker, actor="test"
+    )
 
 
 def test_source_extraction_failure_has_no_partial_database_writes(project_input):

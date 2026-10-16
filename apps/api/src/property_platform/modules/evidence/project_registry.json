@@ -1306,7 +1306,14 @@
       "name": "SAAS Properties",
       "website_url": "https://www.saasproperties.com/"
     },
-    "identity_links": [],
+    "identity_links": [
+      {
+        "target": "building",
+        "namespace": "osm:reem:osm",
+        "record_id": "way/1021938916",
+        "reason": "Reviewed named OSM apartment footprint against the official SAAS project page, its project-specific map label and the same published neighbourhood context. Commercial identity only; not parcel ownership."
+      }
+    ],
     "sources": [
       {
         "url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-eight/",
@@ -1335,7 +1342,14 @@
       "name": "SAAS Properties",
       "website_url": "https://www.saasproperties.com/"
     },
-    "identity_links": [],
+    "identity_links": [
+      {
+        "target": "building",
+        "namespace": "osm:reem:osm",
+        "record_id": "way/1008018832",
+        "reason": "Reviewed named OSM apartment footprint against the official SAAS project page, its project-specific map label and the same published neighbourhood context. Commercial identity only; not parcel ownership."
+      }
+    ],
     "sources": [
       {
         "url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-nine/",

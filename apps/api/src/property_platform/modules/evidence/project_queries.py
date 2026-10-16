@@ -1,8 +1,11 @@
 """Bounded project read models; raw captures, operator details and storage keys stay private."""
 
+import json
+
 from django.db.models import Exists, Max, OuterRef, Prefetch
 
 from property_platform.modules.catalog.models import Project
+from property_platform.modules.catalog.territories import TERRITORY_BY_ID
 
 from .models import ProjectIdentityLink, ProjectMedia, ProjectSnapshot
 
@@ -197,4 +200,60 @@ def project_detail(slug):
         else [],
         "media": media[:60],
         "sources": [_source(row) for row in values],
+        "map_locations": project_locations(project, language=values[0].language),
     }
+
+
+def project_locations(project, *, language="en"):
+    """Explicit active identities only; never locate by a name or island centre."""
+    area = TERRITORY_BY_ID.get(project.territory_id)
+    if area is None:
+        return []
+    west, south, east, north = area.bounds
+    links = list(
+        ProjectIdentityLink.objects.filter(
+            project=project, active=True, capture__run__status="succeeded"
+        )
+        .select_related("building", "place", "parcel", "capture")
+        .defer("capture__payload")
+        .order_by("id")[:50]
+    )
+    from .queries import map_provenances
+
+    points = map_provenances("place", [link.place_id for link in links if link.place_id])
+    result = []
+    for link in links:
+        target = "building" if link.building_id else "place" if link.place_id else "parcel"
+        record = getattr(link, target)
+        if target == "parcel":
+            if record.superseded_by_id is not None:
+                continue
+        elif not record.active:
+            continue
+        geometry = record.geometry
+        if geometry.empty or not geometry.valid:
+            continue
+        left, bottom, right, top = geometry.extent
+        if not (west <= left <= right <= east and south <= bottom <= top <= north):
+            continue
+        point_source = points.get(str(record.id), {}) if target == "place" else {}
+        result.append(
+            {
+                "id": record.id,
+                "target": target,
+                "name": project.name,
+                "geometry": json.loads(geometry.geojson),
+                "source": {
+                    "url": point_source.get("url", link.capture.url),
+                    "name": point_source.get("name", project.developer.name),
+                    "retrieved_at": point_source.get("retrieved_at", link.capture.fetched_at),
+                    "published_at": point_source.get(
+                        "published_at", link.capture.source_published_at
+                    ),
+                    "language": language,
+                    "evidence_pointer": "active_project_identity_link",
+                    "rights_status": "restricted",
+                },
+            }
+        )
+    return result

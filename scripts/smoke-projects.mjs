@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { projectLocationBounds } from "../apps/web/src/features/projects/neighbourhood-focus.ts";
 import { locales } from "../apps/web/src/i18n/locales.ts";
 
 // Explicit live check: the compiled site and API must already be running and imported.
@@ -20,6 +21,9 @@ const projects = JSON.parse(
   ),
 );
 const details = new Map();
+const navigation = JSON.parse(
+  await readFile("packages/contracts/territories.json", "utf8"),
+);
 for (const project of projects) {
   const response = await fetch(
     new URL(`/api/atlas/projects/${project.slug}`, origin),
@@ -29,6 +33,25 @@ for (const project of projects) {
   const detail = await response.json();
   assert.equal(detail.slug, project.slug);
   assert.equal(detail.developer.name, project.developer.name);
+  assert.ok(
+    Array.isArray(detail.map_locations),
+    `${project.slug}: typed map locations`,
+  );
+  const area = navigation.territories.find(
+    (item) => item.id === detail.territory,
+  );
+  if (detail.map_locations.length) {
+    assert.ok(
+      area && projectLocationBounds(detail.map_locations, area.bounds),
+      `${project.slug}: stored project locations remain inside their own territory`,
+    );
+    for (const location of detail.map_locations) {
+      assert.ok(["place", "building", "parcel"].includes(location.target));
+      assert.equal(location.name, project.name);
+      assert.ok(location.source.url.startsWith("https://"));
+      assert.ok(location.source.retrieved_at);
+    }
+  }
   details.set(project.slug, detail);
 }
 for (const locale of locales) {

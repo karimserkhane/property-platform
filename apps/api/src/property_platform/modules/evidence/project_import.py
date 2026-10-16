@@ -21,7 +21,7 @@ from .models import (
     Source,
 )
 
-VERSION = "project-details-v1"
+VERSION = "project-details-v3"
 LOCK_KEY = 716548220
 TARGETS = {"building": Building, "place": Place, "parcel": Parcel}
 
@@ -82,6 +82,7 @@ def _handover_values(value):
 
 def import_project_details(receipt_rows, *, territory, actor):
     """Pure extraction precedes SQL. No promoter images, PDFs or video bodies are fetched here."""
+    from .project_locations import extract_project_position, materialize_project_position
     from .project_protocol import (
         extract_project_source,
         project_registry,
@@ -107,6 +108,9 @@ def import_project_details(receipt_rows, *, territory, actor):
             parsed = extract_project_source(definition, source, receipts[source["url"]])
             if parsed is not None:
                 handover = _handover_values(parsed.get("handover"))
+                parsed["map_position"] = extract_project_position(
+                    definition, source, receipts[source["url"]]
+                )
                 parsed_sources.append((definition, source, parsed, handover))
     if not parsed_sources:
         raise ValueError("No usable registered project sources")
@@ -115,6 +119,7 @@ def import_project_details(receipt_rows, *, territory, actor):
         "snapshots": 0,
         "reused": 0,
         "links": 0,
+        "locations": 0,
         "typologies": 0,
         "amenities": 0,
         "media_references": 0,
@@ -237,6 +242,11 @@ def import_project_details(receipt_rows, *, territory, actor):
                     **{target: identity},
                 )
                 summary["links"] += 1
+            summary["locations"] += int(
+                materialize_project_position(
+                    project, evidence, parsed.get("map_position"), actor=actor.strip()
+                )
+            )
             run.status, run.finished_at = "succeeded", timezone.now()
             run.summary = {
                 "project": project.slug,

@@ -4,7 +4,19 @@ import html
 import json
 import math
 import re
-from urllib.parse import urlparse
+from html.parser import HTMLParser
+from urllib.parse import parse_qs, unquote, urlparse
+
+
+class _MapElements(HTMLParser):
+    def __init__(self, text):
+        super().__init__(convert_charrefs=True)
+        self.nodes = []
+        self.feed(text)
+
+    def handle_starttag(self, tag, attrs):
+        if tag in {"div", "iframe"}:
+            self.nodes.append((tag, dict(attrs)))
 
 
 def page_metadata(payload):
@@ -61,8 +73,8 @@ def project_marker(payload, url, title):
             r'<input\b[^>]*id="map-(latitude|longitude|title)"[^>]*value="([^"]*)"', text, re.I
         ):
             fields[match[1]] = html.unescape(match[2])
-        if set(fields) == {"latitude", "longitude", "title"} and name_matches(
-            fields["title"], title
+        if set(fields) == {"latitude", "longitude", "title"} and (
+            name_matches(fields["title"], title) or name_matches(title, fields["title"])
         ):
             candidates.append(
                 (
@@ -72,6 +84,55 @@ def project_marker(payload, url, title):
                     "publisher_map",
                 )
             )
+    elif parsed.hostname in {"saasproperties.com", "www.saasproperties.com"}:
+        for tag, attrs in _MapElements(text).nodes:
+            if tag != "iframe":
+                continue
+            embed = urlparse(attrs.get("src", ""))
+            if embed.hostname != "www.google.com" or embed.path != "/maps/embed":
+                continue
+            pb = parse_qs(embed.query).get("pb", [""])[0]
+            # The viewport !2d/!3d pair is the camera, not the project pin.
+            position = re.search(r"!8m2!3d([\d.]+)!4d([\d.]+)", pb)
+            label = re.search(r"!2s([^!]+)", pb)
+            if position and label and name_matches(title, unquote(label[1])):
+                candidates.append(
+                    (title, float(position[1]), float(position[2]), "publisher_embedded_pin")
+                )
+    elif parsed.hostname == "bloomholding.com" and parsed.path.startswith(
+        "/what-we-do/properties/"
+    ):
+        for _, attrs in _MapElements(text).nodes:
+            if attrs.get("id") != "map_canvas":
+                continue
+            location = attrs.get("data-location", "").split(",")
+            if len(location) == 2:
+                try:
+                    candidates.append(
+                        (title, float(location[0]), float(location[1]), "publisher_map")
+                    )
+                except ValueError:
+                    continue
+    elif parsed.hostname == "object-1.com" and parsed.path.startswith("/project/"):
+        for _, attrs in _MapElements(text).nodes:
+            try:
+                markers = json.loads(attrs.get("data-markers", "[]"))
+            except ValueError, TypeError:
+                continue
+            if not isinstance(markers, list):
+                continue
+            for marker in markers[:100]:
+                if (
+                    isinstance(marker, dict)
+                    and marker.get("type") == "object"
+                    and name_matches(title, str(marker.get("label", "")))
+                ):
+                    try:
+                        candidates.append(
+                            (title, float(marker["lat"]), float(marker["lng"]), "publisher_map")
+                        )
+                    except KeyError, ValueError, TypeError:
+                        continue
     elif (
         parsed.hostname in ("jre.ae", "rendr.ae") and parsed.path.startswith("/projects/")
     ) or parsed.hostname in (

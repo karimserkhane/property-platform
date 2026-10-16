@@ -320,6 +320,7 @@
     "editorialImage": "Abu Dhabi · illustrative photograph",
     "previousImage": "Previous image",
     "nextImage": "Next image",
-    "useLocalMap": "Use our detailed map"
+    "useLocalMap": "Use our detailed map",
+    "mapLocationPending": "The exact project location is not documented yet. This map shows the neighbourhood."
   }
 }

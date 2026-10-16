@@ -349,6 +349,34 @@ def property_presentations(target, ids):
                 for photo in row.propertymedia_set.all()
             ][:4],
         }
+    # A reviewed project link is sufficient for its canonical name and page;
+    # it does not require a separate marketing presentation or licensed photo.
+    missing = set(projects) - set(result)
+    if missing:
+        from .models import ProjectIdentityLink
+
+        links = (
+            ProjectIdentityLink.objects.filter(
+                active=True, capture__run__status="succeeded", **{f"{target}_id__in": missing}
+            )
+            .select_related("project__developer", "capture")
+            .defer("capture__payload")
+        )
+        for link in links:
+            identity = str(getattr(link, f"{target}_id"))
+            result[identity] = {
+                "name": link.project.name,
+                "publisher": link.project.developer.name,
+                "developer": link.project.developer.name,
+                "website_url": link.project.website_url,
+                "summary": "",
+                "language": "und",
+                "source_url": link.capture.url,
+                "retrieved_at": link.capture.fetched_at,
+                "published_at": link.capture.source_published_at,
+                "project": projects[identity],
+                "media": [],
+            }
     return result
 
 

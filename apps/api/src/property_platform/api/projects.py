@@ -6,7 +6,7 @@ from uuid import UUID
 from django.db import DatabaseError
 from ninja import Router, Schema, Status
 
-from .parcels import Error, enabled
+from .parcels import Error, Geometry, PointGeometry, enabled
 
 router = Router(tags=["local-preview"])
 
@@ -78,6 +78,14 @@ class ProjectMediaResponse(Schema):
     source: ProjectSourceResponse
 
 
+class ProjectMapLocationResponse(Schema):
+    id: UUID
+    target: Literal["building", "place", "parcel"]
+    name: str
+    geometry: Geometry | PointGeometry
+    source: ProjectSourceResponse
+
+
 class ProjectDetailResponse(Schema):
     id: UUID
     slug: str
@@ -94,6 +102,7 @@ class ProjectDetailResponse(Schema):
     amenities: list[ProjectAmenityResponse]
     media: list[ProjectMediaResponse]
     sources: list[ProjectSourceResponse]
+    map_locations: list[ProjectMapLocationResponse]
 
 
 class ProjectSummaryResponse(Schema):

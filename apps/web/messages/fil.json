@@ -320,6 +320,7 @@
     "editorialImage": "Abu Dhabi · larawang pangkapaligiran",
     "previousImage": "Nakaraang larawan",
     "nextImage": "Susunod na larawan",
-    "useLocalMap": "Gamitin ang aming detalyadong mapa"
+    "useLocalMap": "Gamitin ang aming detalyadong mapa",
+    "mapLocationPending": "Hindi pa naidodokumento ang eksaktong lokasyon ng proyekto. Ipinapakita ng mapang ito ang kapitbahayan."
   }
 }

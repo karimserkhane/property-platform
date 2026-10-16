@@ -4,8 +4,12 @@ import { Map as LibreMap, NavigationControl, setWorkerUrl } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import { mapControlLabels, mapLayers, mapName } from "../atlas/map-style";
 import type { MapContext, MapLabels } from "../atlas/types";
-import { projectMapPoints, projectPointBounds } from "./neighbourhood-focus";
+import {
+  neighbourhoodContextBounds,
+  projectLocationBounds,
+} from "./neighbourhood-focus";
 import styles from "./project.module.css";
+import type { ProjectMapLocation } from "./types";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 setWorkerUrl(
@@ -18,7 +22,7 @@ setWorkerUrl(
 export default function NeighbourhoodMap({
   territory,
   bounds,
-  slug,
+  locations,
   locale,
   label,
   mapLabels,
@@ -26,7 +30,7 @@ export default function NeighbourhoodMap({
 }: {
   territory: string;
   bounds: number[];
-  slug: string;
+  locations: ProjectMapLocation[];
   locale: string;
   label: string;
   mapLabels: MapLabels;
@@ -44,7 +48,12 @@ export default function NeighbourhoodMap({
       [bounds[0], bounds[1]],
       [bounds[2], bounds[3]],
     ];
-    const search = new URLSearchParams({ territory, bbox: bounds.join(",") });
+    const projectExtent = projectLocationBounds(locations, bounds);
+    const queryBounds = neighbourhoodContextBounds(projectExtent, bounds);
+    const search = new URLSearchParams({
+      territory,
+      bbox: queryBounds.join(","),
+    });
     void fetch(`/api/atlas/map-context?${search}`, {
       signal: AbortSignal.any([abort.signal, AbortSignal.timeout(10000)]),
     })
@@ -54,17 +63,30 @@ export default function NeighbourhoodMap({
       })
       .then((data) => {
         if (abort.signal.aborted || !root.current) return;
-        const points = projectMapPoints(data, slug, bounds);
-        const projectExtent = projectPointBounds(points);
+        const projectFeatures = projectExtent
+          ? locations.map((location) => ({
+              type: "Feature" as const,
+              id: location.id,
+              geometry: location.geometry,
+              properties: { name: location.name, name_ar: "" },
+            }))
+          : [];
         map = new LibreMap({
           container: root.current,
-          bounds: projectExtent ?? extent,
+          ...(projectExtent &&
+          projectExtent[0][0] === projectExtent[1][0] &&
+          projectExtent[0][1] === projectExtent[1][1]
+            ? { center: projectExtent[0], zoom: 16.5 }
+            : {
+                bounds: projectExtent ?? extent,
+                fitBoundsOptions: {
+                  padding: 64,
+                  maxZoom: projectExtent ? 16.5 : 14,
+                  animate: false,
+                },
+              }),
           maxBounds: extent,
-          fitBoundsOptions: {
-            padding: 64,
-            maxZoom: projectExtent ? 16.5 : 14,
-            animate: false,
-          },
+          scrollZoom: false,
           minZoom: 10,
           maxZoom: 19,
           locale: mapControlLabels(mapLabels, label),
@@ -135,15 +157,51 @@ export default function NeighbourhoodMap({
             }
             map.addLayer(layer);
           }
-          if (points.length) {
+          if (projectFeatures.length && projectExtent) {
             map.addSource("project", {
               type: "geojson",
-              data: { type: "FeatureCollection", features: points },
+              data: { type: "FeatureCollection", features: projectFeatures },
+            });
+            // One visual label for the programme, even when it has several buildings.
+            // This derived label anchor is not stored as a project location.
+            map.addSource("project-label", {
+              type: "geojson",
+              data: {
+                type: "FeatureCollection",
+                features: [
+                  {
+                    type: "Feature",
+                    geometry: {
+                      type: "Point",
+                      coordinates: [
+                        (projectExtent[0][0] + projectExtent[1][0]) / 2,
+                        (projectExtent[0][1] + projectExtent[1][1]) / 2,
+                      ],
+                    },
+                    properties: projectFeatures[0].properties,
+                  },
+                ],
+              },
+            });
+            map.addLayer({
+              id: "project-footprint",
+              type: "fill",
+              source: "project",
+              filter: ["==", ["geometry-type"], "Polygon"],
+              paint: { "fill-color": "#eb7939", "fill-opacity": 0.35 },
+            });
+            map.addLayer({
+              id: "project-outline",
+              type: "line",
+              source: "project",
+              filter: ["==", ["geometry-type"], "Polygon"],
+              paint: { "line-color": "#eb7939", "line-width": 3 },
             });
             map.addLayer({
               id: "project-halo",
               type: "circle",
               source: "project",
+              filter: ["==", ["geometry-type"], "Point"],
               paint: {
                 "circle-radius": 22,
                 "circle-color": "#eb7939",
@@ -154,6 +212,7 @@ export default function NeighbourhoodMap({
               id: "project-point",
               type: "circle",
               source: "project",
+              filter: ["==", ["geometry-type"], "Point"],
               paint: {
                 "circle-radius": 9,
                 "circle-color": "#eb7939",
@@ -164,7 +223,7 @@ export default function NeighbourhoodMap({
             map.addLayer({
               id: "project-name",
               type: "symbol",
-              source: "project",
+              source: "project-label",
               layout: {
                 "text-field": mapName(locale),
                 "text-font": ["Arial", "Noto Sans", "sans-serif"],
@@ -191,7 +250,7 @@ export default function NeighbourhoodMap({
       resize?.disconnect();
       map?.remove();
     };
-  }, [bounds, territory, slug, locale, label, mapLabels]);
+  }, [bounds, territory, locations, locale, label, mapLabels]);
   return (
     <section className={styles.localMap} ref={root} aria-label={label}>
       {failed && (

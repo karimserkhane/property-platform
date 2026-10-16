@@ -320,6 +320,7 @@
     "editorialImage": "Abu Dhabi · Stimmungsbild",
     "previousImage": "Vorheriges Bild",
     "nextImage": "Nächstes Bild",
-    "useLocalMap": "Unsere Detailkarte verwenden"
+    "useLocalMap": "Unsere Detailkarte verwenden",
+    "mapLocationPending": "Der genaue Projektstandort ist noch nicht dokumentiert. Diese Karte zeigt die Nachbarschaft."
   }
 }

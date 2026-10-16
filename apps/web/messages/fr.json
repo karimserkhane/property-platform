@@ -320,6 +320,7 @@
     "editorialImage": "Abu Dhabi · photographie d’ambiance",
     "previousImage": "Image précédente",
     "nextImage": "Image suivante",
-    "useLocalMap": "Utiliser notre carte détaillée"
+    "useLocalMap": "Utiliser notre carte détaillée",
+    "mapLocationPending": "La position exacte du projet n’est pas encore documentée. Cette carte montre le quartier."
   }
 }

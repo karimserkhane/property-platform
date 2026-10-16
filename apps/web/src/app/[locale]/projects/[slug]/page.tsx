@@ -74,6 +74,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             territory={area.id}
             bounds={area.bounds}
             slug={result.project.slug}
+            locations={result.project.map_locations}
             locale={locale}
             labels={labels}
             mapLabels={mapLabels}
