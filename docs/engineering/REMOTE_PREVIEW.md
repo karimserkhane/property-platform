@@ -70,8 +70,8 @@ docker compose -f infra/local/compose.yaml -f infra/local/compose.remote-preview
 
 Les volumes sont conservés. La suppression d'un appareil dans l'administration Tailscale révoque son identité ; arrêter un conteneur ne supprime pas l'appareil du compte. Aucune modification du routeur ni ouverture de port Internet n'est requise pour ce parcours.
 
-## État de préparation sur ce poste
+## Validation sur ce poste
 
-Le 16 octobre 2026, l'installation Windows native est restée en attente de confirmation administrateur et sa commande a été interrompue. Le connecteur Docker a été démarré à la place. Sa connexion utilisateur et son accès HTTPS doivent être validés avant de déclarer l'accès téléphone prêt. Ne pas lancer une seconde installation native pour compléter le parcours Docker ; si une ancienne demande Windows reste affichée, elle peut être annulée.
+Le 16 octobre 2026, l'installation Windows native est restée en attente de confirmation administrateur et sa commande a été interrompue. Le connecteur Docker a été démarré à la place. L'utilisateur a autorisé l'appareil puis HTTPS/Serve ; le connecteur est `Running`. Serve relaie uniquement le port HTTPS 443 vers le web sur 3000, sans configuration Funnel. Les routes `/fr/explore`, `/fr/projects` et `/api/atlas/projects/reem-nine` ont répondu **200 à travers Tailscale, avec certificat TLS vérifié**. Le test physique d'affichage sur le téléphone reste à confirmer par l'utilisateur. L'adresse réelle est lisible avec `serve status` et n'est pas versionnée dans le dépôt. Ne pas lancer une seconde installation native pour compléter le parcours Docker ; si une ancienne demande Windows reste affichée, elle peut être annulée.
 
 Sources : [Docker Tailscale](https://tailscale.com/docs/features/containers/docker), [réseau userspace](https://tailscale.com/docs/concepts/userspace-networking), [commande Serve](https://tailscale.com/docs/reference/tailscale-cli/serve).
