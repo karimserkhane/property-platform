@@ -271,6 +271,9 @@
     "documents": "Mga dokumento at plano",
     "location": "Lokasyon",
     "size": "Sukat ng sahig",
-    "availability": "Kasalukuyang availability"
+    "availability": "Kasalukuyang availability",
+    "projects": "Mga proyekto",
+    "allProjects": "Tingnan ang mga proyekto",
+    "notMapped": "Naghihintay ng beripikasyon ang eksaktong lokasyon sa mapa."
   }
 }

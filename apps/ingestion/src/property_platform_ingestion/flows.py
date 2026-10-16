@@ -18,7 +18,7 @@ def ingest_source(operation: str, scope: str, actor: str, **parameters) -> dict:
     if run_id is None:
         raise ValueError("An active Prefect flow run is required")
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 80:
-        raise ValueError("Operator must contain 1–80 characters")
+        raise ValueError("Operator must contain 1â€“80 characters")
     result = invoke_domain(
         {
             "operation": operation,
@@ -73,7 +73,7 @@ def references(
 ):
     """Collect reviewed references independently; one source failure does not skip others."""
     if type(limit) is not int or not 1 <= limit <= 200:
-        raise ValueError("Reference limit must be 1–200")
+        raise ValueError("Reference limit must be 1â€“200")
     rows, _, _ = source_registries(territory)
     if reference_key is not None:
         rows = [row for row in rows if reference_identity(row["url"]) == reference_key]
@@ -119,14 +119,68 @@ def project_details(
     territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "manual"
 ):
     """Reviewed factual project observations; promoter media remain external references."""
-    return ingest_source("project_details", territory, actor)
+    from property_platform.modules.evidence.project_protocol import project_registry
+
+    results, failures = [], []
+    for project in project_registry(territory):
+        scope = f"{territory}:{project['slug']}"
+        try:
+            results.append(
+                ingest_source.with_options(name=f"Project: {project['name']}")(
+                    "project_details", scope, actor
+                )
+            )
+        except IngestionFailure as exc:
+            get_run_logger().warning(
+                "Project %s failed: %s",
+                project["slug"],
+                exc.result.get("error", "SourceUnavailable"),
+            )
+            failures.append(project["slug"])
+    if failures:
+        raise IngestionFailure(
+            {
+                "status": "failed",
+                "error": "IncompleteProjectBatch",
+                "summary": {"succeeded": len(results), "failed": failures},
+            }
+        )
+    return results
+
+
+@flow(name="property-platform-project-discovery", retries=0)
+def project_discovery(
+    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "manual"
+):
+    from property_platform.modules.evidence.project_discovery import catalogue_registry
+
+    results, failures = [], []
+    for catalogue in catalogue_registry(territory):
+        scope = f"{territory}:{catalogue['key']}"
+        try:
+            results.append(
+                ingest_source.with_options(name=f"Catalogue: {catalogue['publisher_key']}")(
+                    "project_discovery", scope, actor
+                )
+            )
+        except IngestionFailure:
+            failures.append(catalogue["key"])
+    if failures:
+        raise IngestionFailure(
+            {
+                "status": "failed",
+                "error": "IncompleteCatalogueBatch",
+                "summary": {"succeeded": len(results), "failed": failures},
+            }
+        )
+    return results
 
 
 @task(name="Archive acquired media", retries=0, cache_policy=NO_CACHE)
 def archive_media(actor: str) -> dict:
     run_id = flow_run.id
     if run_id is None or not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 80:
-        raise ValueError("An active Prefect run and a 1–80 character operator are required")
+        raise ValueError("An active Prefect run and a 1â€“80 character operator are required")
     result = invoke_domain(
         {
             "operation": "media_storage",
@@ -211,7 +265,7 @@ def project_media_files(receipt_name: str = "project-media.json", actor: str = "
     """Idempotent private operator files, without approval or public publication."""
     run_id = flow_run.id
     if run_id is None or not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 80:
-        raise ValueError("An active Prefect run and a 1–80 character operator are required")
+        raise ValueError("An active Prefect run and a 1â€“80 character operator are required")
     return invoke_domain(
         {
             "operation": "project_media_files",
@@ -230,6 +284,7 @@ FLOWS = {
         references,
         presentations,
         project_details,
+        project_discovery,
         imagery,
         readiness,
         osm_bootstrap,

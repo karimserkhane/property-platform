@@ -22,6 +22,7 @@ from . import (
     imagery_import,
     map_import,
     osm_bootstrap,
+    project_discovery,
     project_import,
     project_protocol,
     property_import,
@@ -38,6 +39,7 @@ OPERATIONS = {
     "references",
     "property_presentations",
     "project_details",
+    "project_discovery",
     "imagery",
     "osm_bootstrap",
     "adrec_sales",
@@ -67,6 +69,11 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
         raise ValueError("Invalid ingestion operation or execution identity")
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
         raise ValueError("Valid actor required")
+    if operation == "project_discovery":
+        project_discovery.catalogue_for(scope)
+        if reference_key is not None:
+            raise ValueError("Project discovery does not accept reference identities")
+        return None
     if operation == "public_context":
         abu_dhabi.source_definition(operation, scope)
         if reference_key is not None:
@@ -84,8 +91,8 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
     if operation == "osm_bootstrap":
         osm_bootstrap.boxes(territory)
     if operation == "project_details":
-        project_protocol.project_registry(territory)
-    expected_scope = territory
+        project_protocol.project_registry(scope)
+    expected_scope = scope if operation == "project_details" else territory
     reference = None
     if operation == "map":
         if scope not in {f"{territory}:{layer}" for layer in (*map_import.protocol.LAYERS, "osm")}:
@@ -232,7 +239,12 @@ def record_acquisition_failure(
 
 
 def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
-    if operation not in {"property_presentations", "project_details", "imagery"}:
+    if operation not in {
+        "property_presentations",
+        "project_details",
+        "project_discovery",
+        "imagery",
+    }:
         if receipt is not None:
             raise ValueError(
                 "Receipt input is only valid for inert property/project/imagery imports"
@@ -251,6 +263,9 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
     if operation == "property_presentations":
         value["review_version"] = property_import.VERSION
         value["registry"] = property_import.registry(territory)
+    elif operation == "project_discovery":
+        value["review_version"] = project_discovery.VERSION
+        value["registry"] = project_discovery.catalogue_for(territory)
     elif operation == "project_details":
         value["review_version"] = project_import.VERSION
         value["parser_version"] = project_protocol.PARSER_VERSION
@@ -270,6 +285,8 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
 
 
 def _source_keys(operation, scope, reference):
+    if operation == "project_discovery":
+        return [f"project-discovery:{scope}"]
     if operation == "public_context":
         return [abu_dhabi.source_definition(operation, scope)[0]]
     if operation in {"adrec_sales", "adrec_indices"}:
@@ -289,11 +306,14 @@ def _source_keys(operation, scope, reference):
         profiles, _ = property_import.registry(territory)
         return ["property:" + reference_identity(row["source_url"]) for row in profiles]
     if operation == "project_details":
-        return ["project:" + row["slug"] for row in project_protocol.project_registry(territory)]
+        return ["project:" + row["slug"] for row in project_protocol.project_registry(scope)]
     return ["sentinel:" + identity for identity in imagery_import.SCENES]
 
 
 def _dispatch(operation, scope, actor, acquisition, receipt, reference):
+    if operation == "project_discovery":
+        run = project_discovery.import_catalogue(receipt, scope=scope, actor=actor)
+        return run.status, run.summary
     if operation == "public_context":
         run = context_import.import_context(scope=scope, actor=actor, acquisition=acquisition)
         return run.status, run.summary
@@ -330,7 +350,7 @@ def _dispatch(operation, scope, actor, acquisition, receipt, reference):
         )
         return "succeeded", {"presentations": len(presentations)}
     if operation == "project_details":
-        summary = project_import.import_project_details(receipt, territory=territory, actor=actor)
+        summary = project_import.import_project_details(receipt, territory=scope, actor=actor)
         return "succeeded", summary
     runs = imagery_import.import_imagery(receipt, actor=actor)
     return "succeeded", {
@@ -364,7 +384,11 @@ def execute_import(
         raise ValueError("Ingestion orchestration requires PostgreSQL/PostGIS")
     if prefect_flow_run_id is not None:
         prefect_flow_run_id = uuid.UUID(str(prefect_flow_run_id))
-    fingerprint = _fingerprint(operation, receipt, scope.split(":", 1)[0])
+    fingerprint = _fingerprint(
+        operation,
+        receipt,
+        scope if operation in {"project_details", "project_discovery"} else scope.split(":", 1)[0],
+    )
     lock = services.LOCK_KEY if operation == "onwani" else map_import.LOCK_KEY
     with connection.cursor() as cursor:
         cursor.execute("SELECT pg_try_advisory_lock(%s)", [lock])

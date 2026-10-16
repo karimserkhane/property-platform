@@ -244,7 +244,11 @@ export function ProjectDetailView({
         </div>
         <div>
           <span>{labels.homes}</span>
-          <strong>{number.format(project.typologies.length)}</strong>
+          <strong>
+            {project.typologies.length
+              ? number.format(project.typologies.length)
+              : labels.notDocumented}
+          </strong>
         </div>
         <div>
           <span>{labels.location}</span>

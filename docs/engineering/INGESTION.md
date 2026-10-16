@@ -33,16 +33,18 @@ Cette configuration est locale : interface liée à `127.0.0.1`, mots de passe d
 
 ## Les tâches disponibles
 
-Les trois nouveaux jobs sont détaillés dans [PROJECTS.md](PROJECTS.md). Les pages sont collectées avant les transactions SQL ; leurs fichiers liés restent externes sans autorisation de copie. L’ingestion de fichiers opérateur écrit les octets dans le stockage privé et les métadonnées dans PostgreSQL.
+Les jobs projets et catalogues sont détaillés dans [PROJECTS.md](PROJECTS.md). Les pages sont collectées avant les transactions SQL ; leurs fichiers liés restent externes sans autorisation de copie. L’ingestion de fichiers opérateur écrit les octets dans le stockage privé et les métadonnées dans PostgreSQL.
 
-**Ajout du 15 octobre :** le registre contient désormais **30 déploiements**. `media-storage` est un nouveau job manuel de reprise des photos acquises vers le stockage privé ; les imports de présentations Reem et Saadiyat exécutent aussi cette tâche après leur validation Django. API et runner partagent le volume persistant `/media`. L’archivage conserve les captures et les calendriers ; il ne publie rien sur le CDN. Le [guide des médias](MEDIA_STORAGE.md) fournit les commandes de migration, reconstruction et reprise, ainsi que l’activation ultérieure de R2/S3.
+**Ajout du 16 octobre :** le registre contient désormais **32 déploiements**. `media-storage` est un nouveau job manuel de reprise des photos acquises vers le stockage privé ; les imports de présentations Reem et Saadiyat exécutent aussi cette tâche après leur validation Django. API et runner partagent le volume persistant `/media`. L’archivage conserve les captures et les calendriers ; il ne publie rien sur le CDN. Le [guide des médias](MEDIA_STORAGE.md) fournit les commandes de migration, reconstruction et reprise, ainsi que l’activation ultérieure de R2/S3.
 
 Les horaires ci-dessous sont **préparés mais désactivés au premier enregistrement**, dans le fuseau **Asia/Dubai**. Commencer par une exécution manuelle ; activer ensuite les tâches souhaitées dans l'interface. Le démarrage Docker n'effectue pas d'import.
 
 | Déploiement | Données traitées | Horaire proposé |
 |---|---|---|
-| `project-details` | Faits officiels de The District et Vista 3, liens PDF, conditions et captures | Manuel |
-| `saadiyat-project-details` | Faits officiels Park View, brochure et lien vidéo Vimeo | Manuel |
+| `project-details` | 30 projets/programmes examinés à Reem, tâches isolées et liens documentaires | Samedi 02:00 |
+| `saadiyat-project-details` | 27 projets/programmes examinés à Saadiyat, tâches isolées | Samedi 03:00 |
+| `reem-project-discovery` | Catalogues officiels et candidats à examiner | Samedi 04:00 |
+| `saadiyat-project-discovery` | Catalogues Saadiyat et candidats à examiner | Samedi 04:30 |
 | `project-media-files` | Manifeste privé de fichiers opérateur, sans approbation ni publication | Manuel |
 | `parcels-onwani` | Parcelles officielles Onwani, captures, observations et géométries rejetées | Dimanche 03:00 |
 | `map-district` | Couche officielle district/secteurs | Dimanche 04:00 |
@@ -56,7 +58,7 @@ Les horaires ci-dessous sont **préparés mais désactivés au premier enregistr
 
 Le registre de recherche contient actuellement **113 URL** ; cela ne signifie pas que 113 fournisseurs acceptent la collecte ou que 113 projets sont identifiés. Le flow de références traite chaque URL séparément et signale un lot incomplet si certaines échouent. Une page de recherche reste une référence, pas une preuve automatiquement acceptée d'un prix ou d'une disponibilité.
 
-Le territoire pris en charge par ces connecteurs reste **Al Reem Island**. Pour une autre zone, ajouter son profil, ses sources et ses contrôles ; sélectionner simplement un autre émirat dans le site ne lance pas de collecte. Les présentations demeurent examinées manuellement : rafraîchir leurs reçus ne constitue pas un extracteur de prix, de livraison ou de plans de paiement. Voir [les prochains pipelines immobiliers](PROPERTY_DATA_PIPELINES.md).
+Les connecteurs sont propres à leurs profils **Al Reem Island**, **Saadiyat Island** ou au contexte officiel **Abu Dhabi** ; cela ne donne pas une couverture nationale automatique. Pour une autre zone, ajouter son profil, ses sources et ses contrôles ; sélectionner simplement un autre émirat dans le site ne lance pas de collecte. Les présentations demeurent examinées manuellement : rafraîchir leurs reçus ne constitue pas un extracteur de prix, de livraison ou de plans de paiement. Voir [les prochains pipelines immobiliers](PROPERTY_DATA_PIPELINES.md).
 
 ## Premier démarrage
 

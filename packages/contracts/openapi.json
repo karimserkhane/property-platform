@@ -857,6 +857,69 @@
         ]
       }
     },
+    "/api/v1/preview/projects": {
+      "get": {
+        "operationId": "previewProjectDirectory",
+        "summary": "Projects",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "al-reem-island",
+                    "saadiyat-island"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDirectoryResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
     "/api/v1/preview/projects/{slug}": {
       "get": {
         "operationId": "previewProjectDetail",
@@ -3261,6 +3324,105 @@
         "title": "SchoolResponse",
         "type": "object"
       },
+      "ProjectDeveloperResponse": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "website_url": {
+            "title": "Website Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "name",
+          "website_url"
+        ],
+        "title": "ProjectDeveloperResponse",
+        "type": "object"
+      },
+      "ProjectDirectoryResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectSummaryResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "ProjectDirectoryResponse",
+        "type": "object"
+      },
+      "ProjectSummaryResponse": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "territory": {
+            "title": "Territory",
+            "type": "string"
+          },
+          "developer": {
+            "$ref": "#/components/schemas/ProjectDeveloperResponse"
+          },
+          "website_url": {
+            "title": "Website Url",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "has_map_identity": {
+            "title": "Has Map Identity",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "territory",
+          "developer",
+          "website_url",
+          "updated_at",
+          "has_map_identity"
+        ],
+        "title": "ProjectSummaryResponse",
+        "type": "object"
+      },
       "ProjectAmenityResponse": {
         "properties": {
           "code": {
@@ -3394,35 +3556,6 @@
           "sources"
         ],
         "title": "ProjectDetailResponse",
-        "type": "object"
-      },
-      "ProjectDeveloperResponse": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "key": {
-            "title": "Key",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "website_url": {
-            "title": "Website Url",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "key",
-          "name",
-          "website_url"
-        ],
-        "title": "ProjectDeveloperResponse",
         "type": "object"
       },
       "ProjectHandoverResponse": {

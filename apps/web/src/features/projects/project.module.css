@@ -13,6 +13,46 @@
   font-size: 12px;
   color: #6c7478;
 }
+.directoryHeading h1 {
+  font-family: var(--font-display), serif;
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 500;
+  margin-block: 12px 28px;
+}
+.directoryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 20px;
+}
+.directoryCard {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  padding: 28px;
+  background: #fffdf7;
+  border: 1px solid #ded8cd;
+  border-radius: 16px;
+}
+.directoryCard h2 {
+  font-family: var(--font-display), serif;
+  font-size: 32px;
+  font-weight: 500;
+  margin-block: 8px 12px;
+}
+.directoryCard :where(h2) a {
+  text-decoration: none;
+}
+.directoryCard > p {
+  font-size: 12px;
+}
+.directoryCard > a {
+  margin-block-start: auto;
+  padding-block-start: 20px;
+}
+.sectionNav a[aria-current="page"] {
+  border-color: #a48150;
+  font-weight: 700;
+}
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);

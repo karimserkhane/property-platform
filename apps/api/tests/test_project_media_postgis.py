@@ -28,7 +28,9 @@ def test_operator_video_intake_is_external_idempotent_and_requires_distinct_righ
     parsed["media"][0].update(
         mime_type="video/mp4", source_url="https://bloomholding.com/example.mp4"
     )
-    import_project_details(rows, territory=definition["territory_id"], actor="test")
+    import_project_details(
+        rows, territory=f"{definition['territory_id']}:{definition['slug']}", actor="test"
+    )
     media = ProjectMedia.objects.first()
     payload = b"\x00\x00\x00\x18ftypmp42" + b"test-video" * 500
     path = tmp_path / "owned.mp4"

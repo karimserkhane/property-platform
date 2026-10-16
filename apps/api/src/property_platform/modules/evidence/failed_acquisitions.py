@@ -5,11 +5,27 @@ from urllib.parse import parse_qs, urlparse
 
 from django.utils import timezone
 
-from . import abu_dhabi, adrec, map_sources, onwani, osm_bootstrap, project_protocol
+from . import (
+    abu_dhabi,
+    adrec,
+    map_sources,
+    onwani,
+    osm_bootstrap,
+    project_discovery,
+    project_protocol,
+)
 from .collection_profiles import collection_for
 
 
 def source_definition(operation, scope):
+    if operation == "project_discovery":
+        row = project_discovery.catalogue_for(scope)
+        return (
+            f"project-discovery:{scope}",
+            row["publisher_key"],
+            row["url"],
+            project_discovery.VERSION,
+        )
     if operation == "project_details":
         projects = project_protocol.project_registry(scope)
         return (
@@ -56,6 +72,10 @@ def source_definition(operation, scope):
 
 
 def _request_shape(url, operation, scope):
+    if operation == "project_discovery":
+        if url != project_discovery.catalogue_for(scope)["url"]:
+            raise ValueError("Failed catalogue receipt is outside its reviewed URL")
+        return
     if operation == "project_details":
         if url not in project_protocol.project_urls(project_protocol.project_registry(scope)):
             raise ValueError("Failed project receipt is outside its reviewed HTML URLs")
@@ -133,6 +153,7 @@ def validate_received_acquisitions(operation, scope, rows):
         "adrec_indices",
         "public_context",
         "project_details",
+        "project_discovery",
     }:
         raise ValueError("Only completed reviewed source responses can be retained here")
     output, transferred = [], 0

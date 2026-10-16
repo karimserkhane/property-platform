@@ -201,5 +201,1842 @@
         "mime_type": "text/html"
       }
     ]
+  },
+  {
+    "slug": "baccarat-residences-saadiyat",
+    "name": "Baccarat Residences Saadiyat",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/baccarat-residences-saadiyat",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22J7000000QNOZIA4",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/baccarat-residences-saadiyat",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22J7000000QNOZIA4"
+  },
+  {
+    "slug": "grove-beach-views",
+    "name": "Grove Beach Views",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/communities?text=Grove%20Beach%20Views",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000XzsQAAS",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000XzsQAAS"
+  },
+  {
+    "slug": "grove-fountain-views",
+    "name": "Grove Fountain Views",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-fountain-views",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000XzrpAAC",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-fountain-views",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000XzrpAAC"
+  },
+  {
+    "slug": "grove-gallery-views",
+    "name": "Grove Gallery Views",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-gallery-views",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000XzrMAAS",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-gallery-views",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000XzrMAAS"
+  },
+  {
+    "slug": "grove-museum-views",
+    "name": "Grove Museum Views",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-museum-views",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000Xzs0AAC",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-museum-views",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000Xzs0AAC"
+  },
+  {
+    "slug": "grove-uptown-views",
+    "name": "Grove Uptown Views",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-uptown-views",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000XzsBAAS",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/grove-uptown-views",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000XzsBAAS"
+  },
+  {
+    "slug": "louvre-abu-dhabi-residences",
+    "name": "Louvre Abu Dhabi Residences",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/louvre-abu-dhabi-residences",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000Xzs4AAC",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/louvre-abu-dhabi-residences",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000Xzs4AAC",
+    "heading_aliases": ["Louvre Residences"]
+  },
+  {
+    "slug": "mamsha-garden",
+    "name": "Mamsha Garden",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/communities?text=Mamsha%20Garden",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22J7000000PYZoIAO",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22J7000000PYZoIAO"
+  },
+  {
+    "slug": "mamsha-palm",
+    "name": "Mamsha Palm",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/mamsha-palm",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000001dAq7AAE",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/mamsha-palm",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000001dAq7AAE"
+  },
+  {
+    "slug": "manarat-living",
+    "name": "Manarat Living",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/manarat-living",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000YksGAAS",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/manarat-living",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000YksGAAS"
+  },
+  {
+    "slug": "manarat-living-iii",
+    "name": "Manarat Living III",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/manarat-living-3",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22J7000000PaMNIA0",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/manarat-living-3",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22J7000000PaMNIA0"
+  },
+  {
+    "slug": "mandarin-oriental-residences-saadiyat-cultural-district-abu-dhabi",
+    "name": "Mandarin Oriental Residences Saadiyat Cultural District, Abu Dhabi",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/communities?text=Mandarin%20Oriental%20Residences%20Saadiyat%20Cultural%20District%2C%20Abu%20Dhabi",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22J7000000PZ9hIAG",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22J7000000PZ9hIAG"
+  },
+  {
+    "slug": "nobu-residences-abu-dhabi",
+    "name": "Nobu Residences Abu Dhabi",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/nobu-residences",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000001ciz5AAA",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/nobu-residences",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000001ciz5AAA"
+  },
+  {
+    "slug": "nouran-living",
+    "name": "Nouran Living",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/nouran-living",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000001dAiwAAE",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/nouran-living",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000001dAiwAAE"
+  },
+  {
+    "slug": "saadiyat-lagoons",
+    "name": "Saadiyat Lagoons",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/saadiyat-lagoons",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000YIvzAAG",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/saadiyat-lagoons",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000YIvzAAG"
+  },
+  {
+    "slug": "saadiyat-reserve-the-dunes",
+    "name": "Saadiyat Reserve The Dunes",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/saadiyat-reserve-dunes",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000XzrXAAS",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/saadiyat-reserve-dunes",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000XzrXAAS"
+  },
+  {
+    "slug": "sei-saadiyat",
+    "name": "Sei Saadiyat",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/sei-saadiyat2",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22Tq000009sx9BIAQ",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/sei-saadiyat2",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22Tq000009sx9BIAQ"
+  },
+  {
+    "slug": "talay-marsa-al-saadiyat",
+    "name": "Talay - Marsa Al Saadiyat",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/talay-marsa-al-saadiyat",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22Tq000009rwjpIAA",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/talay-marsa-al-saadiyat",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22Tq000009rwjpIAA"
+  },
+  {
+    "slug": "the-arthouse",
+    "name": "The Arthouse",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/arthouse",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22J7000000PL81IAG",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/arthouse",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22J7000000PL81IAG"
+  },
+  {
+    "slug": "the-row-saadiyat",
+    "name": "The Row Saadiyat",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/the-row-saadiyat",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a22NM000000N1mbYAC",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/the-row-saadiyat",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a22NM000000N1mbYAC"
+  },
+  {
+    "slug": "the-source",
+    "name": "The Source",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/source",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000Z0MMAA0",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/source",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000Z0MMAA0"
+  },
+  {
+    "slug": "the-source-ii",
+    "name": "The Source II",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/source-2",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000ZQ1oAAG",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/source-2",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000ZQ1oAAG"
+  },
+  {
+    "slug": "the-source-terraces",
+    "name": "The Source Terraces",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/saadiyat-island/the-source-terraces",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000001dBN7AAM",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/saadiyat-island/the-source-terraces",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000001dBN7AAM"
+  },
+  {
+    "slug": "gate",
+    "name": "Gate",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/reem-island/gate",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://searchservice.properties.aldar.com/api/search/communities/a228d000000Xzs1AAC",
+        "parser": "aldar_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://www.aldar.com/properties/en/uae/reem-island/gate",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000Xzs1AAC"
+  },
+  {
+    "slug": "seamont",
+    "name": "Seamont",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.saasproperties.com/en/properties/abu-dhabi/seamont-residences/",
+    "developer": {
+      "key": "saas-properties",
+      "name": "SAAS Properties",
+      "website_url": "https://www.saasproperties.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.saasproperties.com/en/properties/abu-dhabi/seamont-residences/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["media.saasproperties.com"],
+    "url_aliases": [
+      "https://www.saasproperties.com/en/properties/abu-dhabi/seamont-residences"
+    ]
+  },
+  {
+    "slug": "saas-heights",
+    "name": "SAAS Heights",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.saasproperties.com/en/properties/abu-dhabi/saas-heights/",
+    "developer": {
+      "key": "saas-properties",
+      "name": "SAAS Properties",
+      "website_url": "https://www.saasproperties.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.saasproperties.com/en/properties/abu-dhabi/saas-heights/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["media.saasproperties.com"],
+    "url_aliases": [
+      "https://www.saasproperties.com/en/properties/abu-dhabi/saas-heights"
+    ]
+  },
+  {
+    "slug": "reem-eleven",
+    "name": "Reem Eleven",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-eleven/",
+    "developer": {
+      "key": "saas-properties",
+      "name": "SAAS Properties",
+      "website_url": "https://www.saasproperties.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-eleven/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["media.saasproperties.com"],
+    "url_aliases": [
+      "https://www.saasproperties.com/en/properties/abu-dhabi/reem-eleven"
+    ]
+  },
+  {
+    "slug": "reem-eight",
+    "name": "Reem Eight",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-eight/",
+    "developer": {
+      "key": "saas-properties",
+      "name": "SAAS Properties",
+      "website_url": "https://www.saasproperties.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-eight/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["media.saasproperties.com"],
+    "url_aliases": [
+      "https://www.saasproperties.com/en/properties/abu-dhabi/reem-eight"
+    ]
+  },
+  {
+    "slug": "reem-nine",
+    "name": "Reem Nine",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-nine/",
+    "developer": {
+      "key": "saas-properties",
+      "name": "SAAS Properties",
+      "website_url": "https://www.saasproperties.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-nine/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["media.saasproperties.com"],
+    "url_aliases": [
+      "https://www.saasproperties.com/en/properties/abu-dhabi/reem-nine"
+    ]
+  },
+  {
+    "slug": "reem-five",
+    "name": "Reem Five",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-five/",
+    "developer": {
+      "key": "saas-properties",
+      "name": "SAAS Properties",
+      "website_url": "https://www.saasproperties.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.saasproperties.com/en/properties/abu-dhabi/reem-five/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["media.saasproperties.com"],
+    "url_aliases": [
+      "https://www.saasproperties.com/en/properties/abu-dhabi/reem-five"
+    ]
+  },
+  {
+    "slug": "one-reem-island",
+    "name": "One Reem Island",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.saasproperties.com/en/properties/abu-dhabi/one-reem-island/",
+    "developer": {
+      "key": "saas-properties",
+      "name": "SAAS Properties",
+      "website_url": "https://www.saasproperties.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.saasproperties.com/en/properties/abu-dhabi/one-reem-island/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["media.saasproperties.com"],
+    "url_aliases": [
+      "https://www.saasproperties.com/en/properties/abu-dhabi/one-reem-island"
+    ]
+  },
+  {
+    "slug": "radiant-terrace",
+    "name": "Radiant Terrace",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-terrace/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-terrace/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "radiant-bridges-towers",
+    "name": "Radiant Bridges Towers",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-bridges-tower/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-bridges-tower/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "radiant-waves-tower",
+    "name": "Radiant Waves Tower",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-waves-tower/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-waves-tower/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "radiant-atrium-towers",
+    "name": "Radiant Atrium Towers",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-atrium-towers/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-atrium-towers/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "radiant-elite-tower",
+    "name": "Radiant Elite Tower",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-elite-tower/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-elite-tower/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "radiant-garden-towers",
+    "name": "Radiant Garden Towers",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-garden-towers/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-garden-towers/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "radiant-marina-towers",
+    "name": "Radiant Marina Towers",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-marina-towers/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-marina-towers/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "radiant-square",
+    "name": "Radiant Square",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://radiantrealestate.ae/developments/radiant-square/",
+    "developer": {
+      "key": "radiant-real-estate",
+      "name": "Radiant Real Estate",
+      "website_url": "https://radiantrealestate.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://radiantrealestate.ae/developments/radiant-square/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "reem-hills",
+    "name": "Reem Hills",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.modon.com/real-estate/reem-hills",
+    "developer": {
+      "key": "modon",
+      "name": "Modon",
+      "website_url": "https://www.modon.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.modon.com/real-estate/reem-hills",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "muheira",
+    "name": "Muheira",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.modon.com/real-estate/muheira",
+    "developer": {
+      "key": "modon",
+      "name": "Modon",
+      "website_url": "https://www.modon.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.modon.com/real-estate/muheira",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "tara-park",
+    "name": "Tara Park",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.modon.com/real-estate/tara-park",
+    "developer": {
+      "key": "modon",
+      "name": "Modon",
+      "website_url": "https://www.modon.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.modon.com/real-estate/tara-park",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "maysan",
+    "name": "Maysan",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.modon.com/about-modon/media-centre/details/2024/10/21/modon-launches-phase-one-of-maysan--a-freehold-development-on-reem-island",
+    "developer": {
+      "key": "modon",
+      "name": "Modon",
+      "website_url": "https://www.modon.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.modon.com/about-modon/media-centre/details/2024/10/21/modon-launches-phase-one-of-maysan--a-freehold-development-on-reem-island",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": []
+  },
+  {
+    "slug": "pixel",
+    "name": "Pixel",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://imkan.ae/projects/pixel",
+    "developer": {
+      "key": "imkan",
+      "name": "IMKAN",
+      "website_url": "https://imkan.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://imkan.ae/projects/pixel",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["www.imkan.ae", "vimeo.com"]
+  },
+  {
+    "slug": "sunstone",
+    "name": "Sunstone",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://imkan.ae/projects/makers-district/sunstone",
+    "developer": {
+      "key": "imkan",
+      "name": "IMKAN",
+      "website_url": "https://imkan.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://imkan.ae/projects/makers-district/sunstone",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["www.imkan.ae", "vimeo.com"]
+  },
+  {
+    "slug": "the-artery",
+    "name": "The Artery",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://imkan.ae/projects/makers-district/the-artery",
+    "developer": {
+      "key": "imkan",
+      "name": "IMKAN",
+      "website_url": "https://imkan.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://imkan.ae/projects/makers-district/the-artery",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["www.imkan.ae", "vimeo.com"]
+  },
+  {
+    "slug": "nudra",
+    "name": "Nudra",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://imkan.ae/projects/nudra",
+    "developer": {
+      "key": "imkan",
+      "name": "IMKAN",
+      "website_url": "https://imkan.ae/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://imkan.ae/projects/nudra",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["www.imkan.ae", "vimeo.com"]
+  },
+  {
+    "slug": "marlin-1",
+    "name": "Marlin 1",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://reportagegroup.com/projects/residential-apartments/marlin/",
+    "developer": {
+      "key": "reportage-properties",
+      "name": "Reportage Properties",
+      "website_url": "https://reportagegroup.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://reportagegroup.com/projects/residential-apartments/marlin/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://reportagegroup.com/terms/",
+        "parser": "terms_v1",
+        "role": "terms",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": []
+  },
+  {
+    "slug": "marlin-2",
+    "name": "Marlin 2",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://reportagegroup.com/projects/residential-apartments/marlin-2/",
+    "developer": {
+      "key": "reportage-properties",
+      "name": "Reportage Properties",
+      "website_url": "https://reportagegroup.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://reportagegroup.com/projects/residential-apartments/marlin-2/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://reportagegroup.com/terms/",
+        "parser": "terms_v1",
+        "role": "terms",
+        "terms_url": "https://reportagegroup.com/terms/",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": ["reportageuae.com"]
+  },
+  {
+    "slug": "soho-square",
+    "name": "Soho Square",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://bloomholding.com/what-we-do/properties/soho-square",
+    "developer": {
+      "key": "bloom-holding",
+      "name": "Bloom Holding",
+      "website_url": "https://bloomholding.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://bloomholding.com/what-we-do/properties/soho-square",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": "https://bloomholding.com/terms-of-use",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      },
+      {
+        "url": "https://bloomholding.com/terms-of-use",
+        "parser": "terms_v1",
+        "role": "terms",
+        "terms_url": "https://bloomholding.com/terms-of-use",
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": []
+  },
+  {
+    "slug": "riviera-residences",
+    "name": "Riviera Residences",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://mered.ae/projects/riviera",
+    "developer": {
+      "key": "mered",
+      "name": "MERED",
+      "website_url": "https://mered.ae/"
+    },
+    "identity_links": [],
+    "media_references": [],
+    "sources": [
+      {
+        "url": "https://mered.ae/projects/riviera",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ]
+  },
+  {
+    "slug": "a1la-residence",
+    "name": "A1LA Residence",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://object-1.com/project/a1la-residence/",
+    "developer": {
+      "key": "object-1",
+      "name": "Object 1",
+      "website_url": "https://object-1.com/"
+    },
+    "identity_links": [],
+    "media_references": [],
+    "sources": [
+      {
+        "url": "https://object-1.com/project/a1la-residence/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ]
+  },
+  {
+    "slug": "henge-residences",
+    "name": "Henge Residences",
+    "territory_id": "saadiyat-island",
+    "language": "en",
+    "website_url": "https://nord.ae/projects/henge-residences/",
+    "developer": {
+      "key": "nord-development",
+      "name": "NORD Development",
+      "website_url": "https://nord.ae/"
+    },
+    "identity_links": [],
+    "media_references": [],
+    "sources": [
+      {
+        "url": "https://nord.ae/projects/henge-residences/",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ]
+  },
+  {
+    "slug": "gate-arc",
+    "name": "Gate ARC",
+    "territory_id": "al-reem-island",
+    "language": "en",
+    "website_url": "https://www.aldar.com/properties/en/uae/reem-island/gate-arc",
+    "developer": {
+      "key": "aldar-properties",
+      "name": "Aldar Properties",
+      "website_url": "https://www.aldar.com/"
+    },
+    "identity_links": [],
+    "sources": [
+      {
+        "url": "https://www.aldar.com/properties/en/uae/reem-island/gate-arc",
+        "parser": "official_project_v1",
+        "role": "project",
+        "terms_url": null,
+        "rights_status": "restricted",
+        "acquisition_scope": "local_research",
+        "media_policy": "reference_only"
+      }
+    ],
+    "media_references": [],
+    "media_hosts": [
+      "asset.aldar.com",
+      "cdn.aldar.com",
+      "images1.cmp.optimizely.com",
+      "images2.cmp.optimizely.com",
+      "images3.cmp.optimizely.com",
+      "images4.cmp.optimizely.com"
+    ],
+    "record_id": "a228d000000XzsNAAS"
   }
 ]

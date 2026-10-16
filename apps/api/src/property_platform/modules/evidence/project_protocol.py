@@ -1,17 +1,27 @@
 """Portable extraction of reviewed project facts; no network, ORM or media downloads."""
 
+import hashlib
 import json
 import re
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 from .property_protocol import MAX_CAPTURE_BYTES, safe_url, validate_receipts
 
-PARSER_VERSION = "project-facts-v1"
+PARSER_VERSION = "project-facts-v2"
 MAX_PROJECT_RECEIPT_BYTES = 32 * 1024 * 1024
-PARSERS = frozenset({"reportage_project_v1", "reportage_offer_v1", "bloom_project_v1", "terms_v1"})
+PARSERS = frozenset(
+    {
+        "reportage_project_v1",
+        "reportage_offer_v1",
+        "bloom_project_v1",
+        "aldar_project_v1",
+        "official_project_v1",
+        "terms_v1",
+    }
+)
 _VOID = frozenset(
     {
         "area",
@@ -35,9 +45,21 @@ _VOID = frozenset(
 def project_registry(territory=None):
     """Load a fresh copy of the closed, reviewed configuration, never a caller URL."""
     rows = json.loads(Path(__file__).with_name("project_registry.json").read_text("utf-8"))
+    scope = territory
+    slug = None
+    if territory is not None and ":" in territory:
+        territory, slug = territory.split(":", 1)
     if territory is not None and territory not in {row["territory_id"] for row in rows}:
         raise ValueError("Project territory is not registered")
-    return tuple(row for row in rows if territory is None or row["territory_id"] == territory)
+    selected = tuple(
+        row
+        for row in rows
+        if (territory is None or row["territory_id"] == territory)
+        and (slug is None or row["slug"] == slug)
+    )
+    if not selected:
+        raise ValueError(f"Project scope is not registered: {scope}")
+    return selected
 
 
 def project_urls(projects):
@@ -171,8 +193,13 @@ def _amenity(value, pointer):
 
 def _media(project, nodes):
     reviewed = {row["source_url"]: row for row in project["media_references"]}
+    hosts = {
+        urlsplit(project["website_url"]).hostname,
+        *(urlsplit(url).hostname for url in reviewed),
+        *project.get("media_hosts", []),
+    }
     result = []
-    for node in nodes:
+    for index, node in enumerate(nodes):
         if node.tag != "a":
             continue
         original = node.attrs.get("href", "")
@@ -183,17 +210,60 @@ def _media(project, nodes):
             if original.startswith("http://reportageuae.com/")
             else original
         )
-        if url not in reviewed or any(item["source_url"] == url for item in result):
+        url = urljoin(project["website_url"], url)
+        parts = urlsplit(url)
+        if (
+            not safe_url(url)
+            or parts.hostname not in hosts
+            or parts.fragment
+            or len(url) > 4000
+            or re.search(r"(?:signature|token|expires|x-amz-|x-goog-)", parts.query, re.I)
+        ):
             continue
-        row = reviewed[url]
+        if any(item["source_url"] == url for item in result):
+            continue
+        row = reviewed.get(url)
+        if row is None:
+            if parts.path.lower().endswith(".pdf"):
+                name = parts.path.rsplit("/", 1)[-1]
+                role = (
+                    "floor_plan"
+                    if re.search(r"floor|layout|unit[-_ ]?types", name, re.I)
+                    else "brochure"
+                    if "brochure" in name.lower()
+                    else "factsheet"
+                )
+                row = {
+                    "source_url": url,
+                    "kind": "document",
+                    "role": role,
+                    "title": f"{project['name']} · {node.text() or name}"[:255],
+                    "mime_type": "application/pdf",
+                }
+            elif parts.hostname in {"vimeo.com", "www.youtube.com", "youtu.be"} and re.fullmatch(
+                r"/(?:[0-9]+|watch|[A-Za-z0-9_-]+)", parts.path
+            ):
+                row = {
+                    "source_url": url,
+                    "kind": "video",
+                    "role": "tour",
+                    "title": f"{project['name']} · {node.text() or 'Video'}"[:255],
+                    "mime_type": "text/html",
+                }
+            else:
+                continue
         result.append(
             {
                 **row,
                 "rights_status": "reference_only",
-                "original_text": original,
-                "evidence_pointer": f'a[href="{original}"]',
+                "original_text": original[:500],
+                "evidence_pointer": f'a[href="{original}"]'
+                if len(original) < 450
+                else f"a:href[{index}]:sha256={hashlib.sha256(original.encode()).hexdigest()}",
             }
         )
+        if len(result) > 50:
+            raise ValueError("Project media link discovery exceeds its budget")
     return result
 
 
@@ -351,6 +421,10 @@ def extract_project_source(project, source, receipt):
         or not 0 < len(payload) <= MAX_CAPTURE_BYTES
     ):
         raise ValueError("Unexpected validated project receipt")
+    if source["parser"] == "aldar_project_v1":
+        from .project_adapters import aldar_project
+
+        return aldar_project(project, source, receipt, _base)
     document = _Document(payload)
     nodes = tuple(document.root.walk())
     if not any(node.tag == "html" for node in nodes):
@@ -359,6 +433,10 @@ def extract_project_source(project, source, receipt):
         if not re.search(r"(?:Terms|Use of)", document.root.text(), re.I):
             raise ValueError("Source terms page is absent")
         return None
+    if source["parser"] == "official_project_v1":
+        from .project_adapters import official_project
+
+        return official_project(project, source, nodes, _base, _media, _amenity)
     if urlsplit(source["url"]).hostname == "bloomholding.com":
         return _bloom(project, source, nodes)
     return _reportage(project, source, document.root, nodes)

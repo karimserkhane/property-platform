@@ -271,6 +271,9 @@
     "documents": "دستاویزات اور نقشے",
     "location": "مقام",
     "size": "رقبہ",
-    "availability": "موجودہ دستیابی"
+    "availability": "موجودہ دستیابی",
+    "projects": "منصوبے",
+    "allProjects": "منصوبے دیکھیں",
+    "notMapped": "نقشے پر درست مقام کی تصدیق باقی ہے۔"
   }
 }

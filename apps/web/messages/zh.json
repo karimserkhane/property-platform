@@ -271,6 +271,9 @@
     "documents": "文件与户型图",
     "location": "位置",
     "size": "面积",
-    "availability": "当前房源"
+    "availability": "当前房源",
+    "projects": "项目",
+    "allProjects": "浏览项目",
+    "notMapped": "地图上的确切位置尚待核实。"
   }
 }

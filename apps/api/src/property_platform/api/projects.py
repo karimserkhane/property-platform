@@ -96,6 +96,38 @@ class ProjectDetailResponse(Schema):
     sources: list[ProjectSourceResponse]
 
 
+class ProjectSummaryResponse(Schema):
+    id: UUID
+    slug: str
+    name: str
+    territory: str
+    developer: ProjectDeveloperResponse
+    website_url: str
+    updated_at: datetime
+    has_map_identity: bool
+
+
+class ProjectDirectoryResponse(Schema):
+    items: list[ProjectSummaryResponse]
+    has_more: bool
+
+
+@router.get(
+    "/projects",
+    response={200: ProjectDirectoryResponse, 403: Error, 503: Error},
+    operation_id="previewProjectDirectory",
+)
+def projects(request, territory: Literal["al-reem-island", "saadiyat-island"] | None = None):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.evidence.project_queries import project_directory
+
+    try:
+        return project_directory(territory)
+    except DatabaseError:
+        return Status(503, {"code": "data_unavailable"})
+
+
 @router.get(
     "/projects/{slug}",
     response={200: ProjectDetailResponse, 403: Error, 404: Error, 503: Error},

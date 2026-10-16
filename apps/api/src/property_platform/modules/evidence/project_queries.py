@@ -1,10 +1,49 @@
 """Bounded project read models; raw captures, operator details and storage keys stay private."""
 
-from django.db.models import Prefetch
+from django.db.models import Exists, Max, OuterRef, Prefetch
 
 from property_platform.modules.catalog.models import Project
 
 from .models import ProjectIdentityLink, ProjectMedia, ProjectSnapshot
+
+
+def project_directory(territory=None):
+    query = Project.objects.filter(projectsnapshot__capture__run__status="succeeded")
+    if territory is not None:
+        query = query.filter(territory_id=territory)
+    records = list(
+        query.select_related("developer")
+        .annotate(
+            checked_at=Max("projectsnapshot__capture__fetched_at"),
+            mapped=Exists(
+                ProjectIdentityLink.objects.filter(
+                    project_id=OuterRef("id"), active=True, capture__run__status="succeeded"
+                )
+            ),
+        )
+        .order_by("name", "slug")[:201]
+    )
+    return {
+        "items": [
+            {
+                "id": row.id,
+                "slug": row.slug,
+                "name": row.name,
+                "territory": row.territory_id,
+                "developer": {
+                    "id": row.developer.id,
+                    "key": row.developer.key,
+                    "name": row.developer.name,
+                    "website_url": row.developer.website_url,
+                },
+                "website_url": row.website_url,
+                "updated_at": row.checked_at,
+                "has_map_identity": row.mapped,
+            }
+            for row in records[:200]
+        ],
+        "has_more": len(records) > 200,
+    }
 
 
 def _source(snapshot, pointer=""):

@@ -18,8 +18,28 @@ const projects = JSON.parse(
     "utf8",
   ),
 );
+const details = new Map();
+for (const project of projects) {
+  const response = await fetch(
+    new URL(`/api/atlas/projects/${project.slug}`, origin),
+  );
+  assert.equal(response.status, 200, `${project.slug}: map preview relay`);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  const detail = await response.json();
+  assert.equal(detail.slug, project.slug);
+  assert.equal(detail.developer.name, project.developer.name);
+  details.set(project.slug, detail);
+}
 for (const locale of ["en", "fr", "ar"]) {
+  const directory = await fetch(new URL(`/${locale}/projects`, origin));
+  assert.equal(directory.status, 200);
+  const directoryHtml = await directory.text();
   for (const project of projects) {
+    assert.ok(
+      directoryHtml.includes(`/projects/${project.slug}`),
+      `${locale}: directory contains ${project.slug}`,
+    );
+    const detail = details.get(project.slug);
     const response = await fetch(
       new URL(`/${locale}/projects/${project.slug}`, origin),
       { signal: AbortSignal.timeout(15000) },
@@ -28,9 +48,13 @@ for (const locale of ["en", "fr", "ar"]) {
     const html = await response.text();
     for (const id of [
       "project-overview",
-      "project-homes",
-      "project-amenities",
-      "project-documents",
+      ...(detail.typologies.length ? ["project-homes"] : []),
+      ...(detail.amenities.length ? ["project-amenities"] : []),
+      ...(detail.media.some((item) =>
+        ["brochure", "floor_plan", "factsheet"].includes(item.role),
+      )
+        ? ["project-documents"]
+        : []),
       "project-location",
     ])
       assert.ok(
@@ -93,18 +117,6 @@ for (const locale of ["en", "fr", "ar"]) {
       );
     }
   }
-}
-for (const project of projects) {
-  const response = await fetch(
-    new URL(`/api/atlas/projects/${project.slug}`, origin),
-  );
-  assert.equal(response.status, 200, `${project.slug}: map preview relay`);
-  assert.equal(response.headers.get("cache-control"), "no-store");
-  const detail = await response.json();
-  assert.equal(detail.slug, project.slug);
-  assert.equal(detail.developer.name, project.developer.name);
-  assert.ok(detail.typologies.length > 0);
-  assert.ok(detail.amenities.length > 0);
 }
 assert.equal(
   (

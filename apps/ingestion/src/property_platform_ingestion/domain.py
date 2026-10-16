@@ -188,6 +188,26 @@ def execute(request):
                 request["execution_key"],
                 collect,
             )
+        elif operation == "project_discovery":
+            from property_platform.modules.evidence.project_discovery import (
+                candidates_for,
+                catalogue_for,
+            )
+
+            definition = catalogue_for(request["scope"])
+
+            def collect_catalogue():
+                nonlocal transport
+                with SourceHTTP([definition["url"]]) as transport:
+                    item = transport.fetch(definition["url"], max_bytes=4 * 1024 * 1024)
+                    candidates_for(definition, item.payload)
+                    return [item.property_receipt()]
+
+            receipt = stored_property_receipt(
+                Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion")),
+                request["execution_key"],
+                collect_catalogue,
+            )
         elif operation == "project_details":
             from property_platform.modules.evidence.project_protocol import (
                 project_registry,
@@ -196,7 +216,7 @@ def execute(request):
 
             from .collectors.projects import collect_project_receipts
 
-            projects = project_registry(territory)
+            projects = project_registry(request["scope"])
 
             def collect_projects():
                 nonlocal transport
@@ -244,6 +264,7 @@ def execute(request):
                     "adrec_indices",
                     "public_context",
                     "project_details",
+                    "project_discovery",
                 }
                 and transport is not None
                 else None

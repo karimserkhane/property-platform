@@ -271,6 +271,9 @@
     "documents": "اسناد و نقشه‌ها",
     "location": "موقعیت",
     "size": "مساحت",
-    "availability": "موجودی فعلی"
+    "availability": "موجودی فعلی",
+    "projects": "پروژه‌ها",
+    "allProjects": "مشاهده پروژه‌ها",
+    "notMapped": "موقعیت دقیق روی نقشه در انتظار تأیید است."
   }
 }

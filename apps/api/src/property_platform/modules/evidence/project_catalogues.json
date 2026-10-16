@@ -1,0 +1,110 @@
+[
+  {
+    "key": "aldar-saadiyat",
+    "publisher_key": "aldar-properties",
+    "territory_scope": "saadiyat-island",
+    "url": "https://searchservice.properties.aldar.com/api/search/communities?offset=1&limit=100&text=Saadiyat%20Island",
+    "parser": "aldar_catalogue_v1",
+    "prefixes": []
+  },
+  {
+    "key": "aldar-reem",
+    "publisher_key": "aldar-properties",
+    "territory_scope": "al-reem-island",
+    "url": "https://searchservice.properties.aldar.com/api/search/communities?offset=1&limit=100&text=Reem%20Island",
+    "parser": "aldar_catalogue_v1",
+    "prefixes": []
+  },
+  {
+    "key": "saas-reem",
+    "publisher_key": "saas-properties",
+    "territory_scope": "al-reem-island",
+    "url": "https://www.saasproperties.com/en/properties/",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://www.saasproperties.com/en/properties/abu-dhabi/"]
+  },
+  {
+    "key": "radiant-reem",
+    "publisher_key": "radiant-real-estate",
+    "territory_scope": "al-reem-island",
+    "url": "https://radiantrealestate.ae/developments/",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://radiantrealestate.ae/developments/"]
+  },
+  {
+    "key": "imkan-reem",
+    "publisher_key": "imkan",
+    "territory_scope": "al-reem-island",
+    "url": "https://imkan.ae/search",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://imkan.ae/projects/"]
+  },
+  {
+    "key": "imkan-saadiyat",
+    "publisher_key": "imkan",
+    "territory_scope": "saadiyat-island",
+    "url": "https://imkan.ae/search",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://imkan.ae/projects/"]
+  },
+  {
+    "key": "bloom-saadiyat",
+    "publisher_key": "bloom-holding",
+    "territory_scope": "saadiyat-island",
+    "url": "https://bloomholding.com/",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://bloomholding.com/what-we-do/properties/"]
+  },
+  {
+    "key": "modon-reem",
+    "publisher_key": "modon",
+    "territory_scope": "al-reem-island",
+    "url": "https://www.modon.com/real-estate",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://www.modon.com/real-estate/"]
+  },
+  {
+    "key": "reportage-reem",
+    "publisher_key": "reportage-properties",
+    "territory_scope": "al-reem-island",
+    "url": "https://reportagegroup.com/project-listing/",
+    "parser": "html_catalogue_v1",
+    "prefixes": [
+      "https://reportagegroup.com/projects/residential-apartments/",
+      "https://reportagegroup.com/projects/residential-communities/"
+    ]
+  },
+  {
+    "key": "mered-reem",
+    "publisher_key": "mered",
+    "territory_scope": "al-reem-island",
+    "url": "https://mered.ae/projects/riviera",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://mered.ae/projects/"]
+  },
+  {
+    "key": "object1-reem",
+    "publisher_key": "object-1",
+    "territory_scope": "al-reem-island",
+    "url": "https://object-1.com/",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://object-1.com/project/"]
+  },
+  {
+    "key": "nord-saadiyat",
+    "publisher_key": "nord-development",
+    "territory_scope": "saadiyat-island",
+    "url": "https://nord.ae/our-projects/",
+    "parser": "html_catalogue_v1",
+    "prefixes": ["https://nord.ae/projects/"]
+  },
+  {
+    "key": "aldar-reem-rental",
+    "publisher_key": "aldar-properties",
+    "territory_scope": "al-reem-island",
+    "url": "https://searchservice.properties.aldar.com/api/search/rental-properties/communities?offset=1&limit=100&text=Reem%20Island",
+    "parser": "aldar_catalogue_v1",
+    "prefixes": [],
+    "website_prefix": "https://www.aldar.com/properties/en/uae/reem-island/"
+  }
+]

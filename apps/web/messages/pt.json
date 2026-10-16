@@ -271,6 +271,9 @@
     "documents": "Documentos e plantas",
     "location": "Localização",
     "size": "Área",
-    "availability": "Disponibilidade atual"
+    "availability": "Disponibilidade atual",
+    "projects": "Projetos",
+    "allProjects": "Ver projetos",
+    "notMapped": "Localização exata no mapa a aguardar verificação."
   }
 }

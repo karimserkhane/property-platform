@@ -34,7 +34,7 @@ def test_deleted_schedule_is_not_recreated_on_restart():
     assert schedules_for(DATASETS[0], SimpleNamespace(schedules=[])) == []
 
 
-def test_new_project_collectors_are_manual_and_preserve_later_operator_schedules():
+def test_project_collectors_offer_weekend_cadences_and_preserve_operator_schedules():
     projects = [row for row in DATASETS if row.flow_name == "property-platform-project-details"]
     assert {row.name for row in projects} == {"project-details", "saadiyat-project-details"}
     assert {row.parameters.get("territory", "al-reem-island") for row in projects} == {
@@ -42,7 +42,7 @@ def test_new_project_collectors_are_manual_and_preserve_later_operator_schedules
         "saadiyat-island",
     }
     for row in projects:
-        assert row.cron is None and schedules_for(row, None) == []
+        assert row.cron.endswith("* * 6") and schedules_for(row, None)[0].active is False
         edited = SimpleNamespace(
             schedule=CronSchedule(cron="0 8 * * 1", timezone="Asia/Dubai"),
             active=True,

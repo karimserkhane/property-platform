@@ -24,6 +24,7 @@ export function TerritoryExplorer({
   locale: string;
 }) {
   const contextText = useTranslations("Context");
+  const projectText = useTranslations("Project");
   const [registry, setRegistry] = useState<TerritoryRegistry | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -116,6 +117,17 @@ export function TerritoryExplorer({
   );
   const navigation = (
     <div className="territory-controls">
+      <Link
+        className="button"
+        href={{
+          pathname: "/projects",
+          query: ["al-reem-island", "saadiyat-island"].includes(territory.id)
+            ? { territory: territory.id }
+            : undefined,
+        }}
+      >
+        {projectText("allProjects")} ↗
+      </Link>
       <label>
         {coverage.emirate}
         <select

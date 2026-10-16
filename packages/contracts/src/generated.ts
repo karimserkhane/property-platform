@@ -208,6 +208,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Projects */
+        get: operations["previewProjectDirectory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/projects/{slug}": {
         parameters: {
             query?: never;
@@ -994,6 +1011,51 @@ export interface components {
             /** Latitude */
             latitude: number;
         };
+        /** ProjectDeveloperResponse */
+        ProjectDeveloperResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Name */
+            name: string;
+            /** Website Url */
+            website_url: string;
+        };
+        /** ProjectDirectoryResponse */
+        ProjectDirectoryResponse: {
+            /** Items */
+            items: components["schemas"]["ProjectSummaryResponse"][];
+            /** Has More */
+            has_more: boolean;
+        };
+        /** ProjectSummaryResponse */
+        ProjectSummaryResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Territory */
+            territory: string;
+            developer: components["schemas"]["ProjectDeveloperResponse"];
+            /** Website Url */
+            website_url: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Has Map Identity */
+            has_map_identity: boolean;
+        };
         /** ProjectAmenityResponse */
         ProjectAmenityResponse: {
             /** Code */
@@ -1039,20 +1101,6 @@ export interface components {
             media: components["schemas"]["ProjectMediaResponse"][];
             /** Sources */
             sources: components["schemas"]["ProjectSourceResponse"][];
-        };
-        /** ProjectDeveloperResponse */
-        ProjectDeveloperResponse: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Key */
-            key: string;
-            /** Name */
-            name: string;
-            /** Website Url */
-            website_url: string;
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {
@@ -1708,6 +1756,46 @@ export interface operations {
             };
             /** @description Unprocessable Content */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectDirectory: {
+        parameters: {
+            query?: {
+                territory?: ("al-reem-island" | "saadiyat-island") | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectDirectoryResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

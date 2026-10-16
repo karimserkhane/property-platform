@@ -101,7 +101,9 @@ def project_input():
 
 
 def ingest(rows):
-    return import_project_details(rows, territory="saadiyat-island", actor="test-reviewer")
+    return import_project_details(
+        rows, territory="saadiyat-island:park-view", actor="test-reviewer"
+    )
 
 
 def test_project_import_is_typed_idempotent_and_retains_provider_identities(project_input, client):

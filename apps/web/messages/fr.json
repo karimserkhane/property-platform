@@ -271,6 +271,9 @@
     "documents": "Documents et plans",
     "location": "Localisation",
     "size": "Surface",
-    "availability": "Disponibilités actuelles"
+    "availability": "Disponibilités actuelles",
+    "projects": "Projets",
+    "allProjects": "Voir les projets",
+    "notMapped": "Emplacement précis sur la carte en attente de vérification."
   }
 }

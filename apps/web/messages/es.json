@@ -271,6 +271,9 @@
     "documents": "Documentos y planos",
     "location": "Ubicación",
     "size": "Superficie",
-    "availability": "Disponibilidad actual"
+    "availability": "Disponibilidad actual",
+    "projects": "Proyectos",
+    "allProjects": "Ver proyectos",
+    "notMapped": "Ubicación exacta en el mapa pendiente de verificación."
   }
 }

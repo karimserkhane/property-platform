@@ -31,6 +31,27 @@ def html(body):
 def source_html(row, source):
     if source["role"] == "terms":
         return html("<h1>Terms of Use</h1><p>Personal, non-commercial use.</p>")
+    if source["parser"] == "aldar_project_v1":
+        return json.dumps(
+            {
+                "data": {
+                    "communityId": row["record_id"],
+                    "projectName": row["name"],
+                    "communityLocation": "Saadiyat Island"
+                    if row["territory_id"] == "saadiyat-island"
+                    else "Reem Island",
+                    "totalUnits": 42,
+                    "unitTypes": ["Apartment"],
+                    "bedrooms": ["Studio", "2"],
+                    "completionDate": "2029-06-30",
+                }
+            }
+        ).encode()
+    if source["parser"] == "official_project_v1":
+        return html(
+            f"<h1>{row['name']}</h1>"
+            '<meta name="description" content="A reviewed project description">'
+        )
     if source["parser"] == "reportage_offer_v1":
         return html(
             "<title>The District</title><span>Q2, 2029 Handover</span>"
@@ -95,11 +116,15 @@ def client(urls, handler):
 
 
 def test_registry_is_territory_scoped_and_returned_without_shared_mutable_state():
-    assert {row["slug"] for row in project_registry("al-reem-island")} == {
+    assert {row["slug"] for row in project_registry("al-reem-island")} >= {
         "the-district",
         "vista-3",
     }
-    assert [row["slug"] for row in project_registry("saadiyat-island")] == ["park-view"]
+    assert "park-view" in {row["slug"] for row in project_registry("saadiyat-island")}
+    assert len(project_registry()) >= 53
+    assert [row["slug"] for row in project_registry("saadiyat-island:park-view")] == ["park-view"]
+    with pytest.raises(ValueError):
+        project_registry("al-reem-island:park-view")
     row = project("park-view")
     row["developer"]["name"] = "Tampered"
     assert project("park-view")["developer"]["name"] == "Bloom Holding"
@@ -224,9 +249,9 @@ def test_collector_fetches_each_registered_html_once_and_never_fetches_linked_me
 
     with client(project_urls(rows), handler) as http:
         receipts = collect_project_receipts(http, rows)
-    assert len(receipts) == len(calls) == len(set(calls)) == 6
+    assert len(receipts) == len(calls) == len(set(calls)) == len(project_urls(rows))
     assert all(url in project_urls(rows) for url in calls)
-    assert len(validate_project_receipts(receipts, rows)) == 6
+    assert len(validate_project_receipts(receipts, rows)) == len(project_urls(rows))
 
 
 @pytest.mark.parametrize(
@@ -262,18 +287,21 @@ def test_project_flow_uses_scoped_durable_gateway_without_archiving_restricted_m
     from property_platform_ingestion import flows
 
     calls = []
-    monkeypatch.setattr(
-        flows,
-        "ingest_source",
-        lambda operation, scope, actor: (
-            calls.append((operation, scope, actor))
-            or {"status": "succeeded", "summary": {"projects": 1}}
-        ),
-    )
+
+    def gateway(operation, scope, actor):
+        calls.append((operation, scope, actor))
+        return {"status": "succeeded", "summary": {"projects": 1}}
+
+    gateway.with_options = lambda **kwargs: gateway
+    monkeypatch.setattr(flows, "ingest_source", gateway)
     monkeypatch.setattr(flows, "archive_media", lambda *args: pytest.fail("No promoter copies"))
     result = flows.project_details.fn(territory="saadiyat-island", actor="reviewer")
-    assert calls == [("project_details", "saadiyat-island", "reviewer")]
-    assert result["summary"]["projects"] == 1
+    assert calls == [
+        ("project_details", f"saadiyat-island:{row['slug']}", "reviewer")
+        for row in project_registry("saadiyat-island")
+    ]
+    assert len(result) == len(calls)
+    assert all(item["summary"]["projects"] == 1 for item in result)
 
 
 def test_project_and_presentations_checkpoints_cannot_collide_for_one_prefect_run(tmp_path):
@@ -295,3 +323,27 @@ def test_project_and_presentations_checkpoints_cannot_collide_for_one_prefect_ru
         )
         == original
     )
+
+
+def test_one_failed_project_does_not_prevent_other_project_imports(monkeypatch):
+    from property_platform_ingestion import flows
+
+    rows = project_registry("al-reem-island")
+    calls = []
+
+    def gateway(operation, scope, actor):
+        calls.append(scope)
+        if scope.endswith(":" + rows[0]["slug"]):
+            raise flows.IngestionFailure({"status": "failed", "error": "SourceUnavailable"})
+        return {"status": "succeeded"}
+
+    gateway.with_options = lambda **kwargs: gateway
+    monkeypatch.setattr(flows, "ingest_source", gateway)
+    monkeypatch.setattr(flows, "get_run_logger", lambda: __import__("logging").getLogger(__name__))
+    with pytest.raises(flows.IngestionFailure) as caught:
+        flows.project_details.fn(territory="al-reem-island", actor="Karim")
+    assert len(calls) == len(rows)
+    assert caught.value.result["summary"] == {
+        "succeeded": len(rows) - 1,
+        "failed": [rows[0]["slug"]],
+    }

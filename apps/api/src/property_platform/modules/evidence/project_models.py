@@ -5,6 +5,55 @@ import uuid
 from django.db import models
 
 
+class ProjectSourceCandidate(models.Model):
+    """An observed catalogue link, never an automatically accepted map identity."""
+
+    capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)
+    project = models.ForeignKey("catalog.Project", null=True, on_delete=models.PROTECT)
+    publisher_key = models.SlugField(max_length=80)
+    territory_scope = models.SlugField(max_length=80)
+    source_record_id = models.CharField(max_length=200, blank=True)
+    source_url = models.URLField(max_length=4000)
+    source_url_sha256 = models.CharField(max_length=64)
+    title = models.CharField(max_length=255)
+    original_text = models.CharField(max_length=500)
+    evidence_pointer = models.CharField(max_length=500)
+    status = models.CharField(max_length=20, default="pending_review")
+    actor = models.CharField(max_length=160)
+    ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "project_source_candidate"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["capture", "source_url_sha256"], name="project_candidate_capture_url"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    status__in=["pending_review", "registered"],
+                    publisher_key__regex=r"\S",
+                    actor__regex=r"\S",
+                    evidence_pointer__regex=r"\S",
+                ),
+                name="project_candidate_audit_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(source_url_sha256__regex=r"^[a-f0-9]{64}$")
+                & (
+                    models.Q(status="registered", project__isnull=False)
+                    | models.Q(status="pending_review", project__isnull=True)
+                ),
+                name="project_candidate_link_valid",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=["territory_scope", "publisher_key", "-ingested_at"],
+                name="project_candidate_review_idx",
+            )
+        ]
+
+
 class ProjectSnapshot(models.Model):
     project = models.ForeignKey("catalog.Project", on_delete=models.PROTECT)
     capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)

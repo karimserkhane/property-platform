@@ -402,6 +402,7 @@ class IngestionExecution(models.Model):
                         "adrec_indices",
                         "public_context",
                         "project_details",
+                        "project_discovery",
                     ],
                 ),
                 name="ingestion_execution_identity_valid",
@@ -923,5 +924,6 @@ from .project_models import (  # noqa: E402, F401
     ProjectMedia,
     ProjectMediaPublication,
     ProjectSnapshot,
+    ProjectSourceCandidate,
     ProjectTypology,
 )

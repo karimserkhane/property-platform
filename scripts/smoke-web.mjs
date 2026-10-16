@@ -200,6 +200,12 @@ try {
       `${locale}: project route remains usable without a preview API`,
     );
     const projectHtml = await project.text();
+    const directory = await fetch(`${origin}/${locale}/projects`);
+    assert.equal(directory.status, 200, `${locale}: project directory`);
+    const directoryHtml = await directory.text();
+    assert.ok(directoryHtml.includes('data-page="project-directory"'));
+    assert.ok(directoryHtml.includes(messages.Project.unavailable));
+    assert.ok(directoryHtml.includes(`dir="${getDirection(locale)}"`));
     assert.ok(
       projectHtml.includes(messages.Project.unavailableTitle),
       `${locale}: translated project unavailable title`,

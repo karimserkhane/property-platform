@@ -1,8 +1,10 @@
 # Fiches projets, documents et vidéos
 
+[Essayer les fiches](#1-essayer-les-premières-fiches) · [Pipelines](#2-ce-que-les-pipelines-collectent) · [Installer](#3-installer-les-changements-sans-effacer-la-base) · [Tables](#4-où-sont-les-données-) · [Couverture des deux îles](#8-extension-reem-et-saadiyat--16-octobre-2026)
+
 Extension du 15 octobre 2026. Le catalogue distingue maintenant **promoteur → projet → liens vers bâtiments, repères ou parcelles**. Une page de projet rassemble les faits extraits de pages officielles, leurs preuves, documents et vidéos. Les unités effectivement disponibles, prix commerciaux et échéanciers restent un prochain lot : le nombre de logements d'un programme n'est pas un stock disponible.
 
-**Vérification locale du 15 octobre :** les deux runs Prefect ont terminé avec succès : [Reportage](http://localhost:4200/runs/flow-run/2785aaa6-122d-4248-a27a-6f824fa69994) et [Bloom](http://localhost:4200/runs/flow-run/59a57983-a7a5-49ae-90d1-269fcb41d207). La base contient 2 promoteurs, 3 projets, 4 snapshots, 5 liens d'identité actifs, 17 typologies, 20 équipements, 7 références PDF et 1 référence vidéo. Ce sont des observations sourcées ; aucun fichier de promoteur n'a été copié ou approuvé pour republication. Les 22 calendriers locaux préexistants ont été conservés. Les trois nouveaux déploiements restent manuels.
+**Historique de validation du 15 octobre :** les premiers runs [Reportage](http://localhost:4200/runs/flow-run/2785aaa6-122d-4248-a27a-6f824fa69994) et [Bloom](http://localhost:4200/runs/flow-run/59a57983-a7a5-49ae-90d1-269fcb41d207) avaient alimenté 3 projets. L'extension aux deux îles et les nouveaux catalogues sont décrits dans [la section 8](#8-extension-reem-et-saadiyat--16-octobre-2026). Aucun fichier de promoteur n'est approuvé pour republication par ces collectes.
 
 ## 1. Essayer les premières fiches
 
@@ -26,11 +28,13 @@ Les collecteurs ne contactent que les URL examinées du registre. Ils enregistre
 
 | Déploiement Prefect | Portée et résultat | Démarrage initial |
 |---|---|---|
-| `project-details` | Pages Reportage de The District et Vista 3, livraison annoncée si présente, typologies, équipements, liens PDF | Manuel |
-| `saadiyat-project-details` | Page Bloom de Park View, typologies, équipements, brochure et lien vidéo officiel | Manuel |
+| `project-details` | 30 projets/programmes examinés à Reem ; une tâche indépendante par projet | Samedi 02:00, initialement désactivé |
+| `saadiyat-project-details` | 27 projets/programmes examinés à Saadiyat ; une tâche indépendante par projet | Samedi 03:00, initialement désactivé |
+| `reem-project-discovery` | Catalogues officiels : nouveaux liens en attente de revue, pas de création de bien | Samedi 04:00, initialement désactivé |
+| `saadiyat-project-discovery` | Catalogues officiels Saadiyat, captures et candidats | Samedi 04:30, initialement désactivé |
 | `project-media-files` | Fichiers explicitement fournis par l'opérateur, décrits dans un manifeste privé | Manuel |
 
-Les horaires déjà configurés des autres imports sont conservés. Pour ces nouveaux jobs, commencer dans [Prefect](http://localhost:4200) → Deployments → nom du déploiement → Run → paramètre `actor: Karim`. Le PC, Docker et le runner doivent être allumés. Un redémarrage n'exécute pas automatiquement tous les imports.
+Les horaires utilisent **Asia/Dubai**. Les horaires déjà configurés des autres imports sont conservés, y compris un calendrier volontairement supprimé. Dans [Prefect](http://localhost:4200), ouvrir Deployments → nom du déploiement → Run → paramètre `actor: Karim`. Le PC, Docker et le runner doivent être allumés. Un redémarrage n'exécute pas automatiquement tous les imports. Sur une nouvelle installation, activer les calendriers souhaités après une exécution réussie ; le job de fichiers reste manuel.
 
 Le premier parcours est **pages → reçus privés → validation Django → snapshots SQL → API → site**. Une relance de la même exécution réutilise son reçu ; une nouvelle collecte produit une observation datée. Les snapshots historiques sont conservés. Les rapprochements d'identité sont explicites, audités et révocables. Une réponse manquante ou un format modifié fait échouer la collecte : aucune disponibilité ou date n'est inventée.
 
@@ -78,10 +82,11 @@ Dans l'outil SQL, sélectionner la base `property_platform` :
 | `property_platform.evidence.project_amenity` | Équipements cités, texte original et preuve |
 | `property_platform.evidence.project_media` | Référence d'image, PDF, vidéo ou modèle ; rôle, MIME, URL source, auteur, droits et captures associées |
 | `property_platform.evidence.project_media_publication` | Copie publique explicitement publiée après approbation |
+| `property_platform.evidence.project_source_candidate` | Liens observés dans les catalogues officiels : capture, éditeur, périmètre de collecte, titre, URL/empreinte, statut, projet reconnu ou revue en attente |
 | `property_platform.evidence.capture` | Source, run, dates, SHA-256 et contenu inline **ou** objet principal externe |
 | `property_platform.evidence.stored_object` / `capture_object` | Localisation physique immuable et liens vers les captures |
 
-Les migrations additives sont `catalog/0006`, `evidence/0019` puis `evidence/0020`, sous `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\`. Les anciennes tables et leurs preuves restent présentes.
+Les migrations additives sont `catalog/0006`, `evidence/0019`, `evidence/0020` puis `evidence/0021`, sous `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\`. La dernière ajoute les candidats et autorise l'opération d'orchestration correspondante ; elle ne collecte rien. Les anciennes tables et leurs preuves restent présentes.
 
 Une capture contient exactement une représentation principale : `payload` SQL non nul, ou `primary_object_id` non nul. Les anciennes petites captures restent inline. Un fichier opérateur reçoit `payload=NULL`, son objet principal et un `http_status=NULL` : il ne prétend pas être une réponse HTTP. Son horodatage de fichier est conservé avec `timestamp_basis=artifact_filesystem_time`. Le moment d'ingestion et le run sont distincts.
 
@@ -152,10 +157,52 @@ Tous les chemins commencent par `C:\Users\Karim\Repositories\property-platform\`
 - `apps\web\src\features\projects\` : fiche responsive, preuves, médias et erreurs traduites.
 - `apps\web\src\app\api\atlas\project-media\[id]\route.ts` : relais par flux à destination fixe ; taille et délais bornés.
 
-Les tests backend GIS s'exécutent sur une **base PostGIS de test**, jamais avec un `truncate` de la base métier. Après imports et reconstruction du web, cette commande vérifie les trois fiches en anglais, français et arabe :
+Les tests backend GIS s'exécutent sur une **base PostGIS de test**, jamais avec un `truncate` de la base métier. Après imports et reconstruction du web, cette commande vérifie toutes les fiches du registre et l’annuaire en anglais, français et arabe :
 
 ```powershell
 node scripts/smoke-projects.mjs
 ```
 
 Les tests de fichiers utilisent des fixtures isolées : aucun faux média ou faux droit n'est ajouté aux projets de la vraie base. Les tests S3 utilisent des réponses SDK simulées ; ils ne certifient pas la connexion à un compte R2 réel tant qu'il n'est pas configuré.
+
+
+## 8. Extension Reem et Saadiyat — 16 octobre 2026
+
+**Validation locale terminée :** les quatre runs [fiches Reem](http://localhost:4200/runs/flow-run/52a47d25-9a22-4a88-b11e-19b65a3e41d7), [fiches Saadiyat](http://localhost:4200/runs/flow-run/59175f17-6f47-4a16-8a43-dc3b6840a6de), [catalogues Reem](http://localhost:4200/runs/flow-run/01acdd1f-1cef-4d2b-b965-cd584d2cba80) et [catalogues Saadiyat](http://localhost:4200/runs/flow-run/07a22a66-d254-48db-9892-e72c6aecf2ab) sont `Completed`. La migration `evidence/0021` est appliquée après sauvegarde vérifiée. API, runner et web compilé sur 3102 utilisent cette extension.
+
+L'audit SQL/API donne **57 projets, 10 promoteurs et 83 snapshots historiques**. Les fiches courantes exposent une livraison annoncée pour 24 projets, un total de programme pour 39, 120 observations de typologie, 23 équipements et 28 références médias (27 PDF, 1 vidéo). Aucun de ces médias n'est approuvé pour copie ou republication. Les 5 liens d'identité actifs préexistants sont conservés. Les catalogues ont produit **119 observations de liens**, dont 49 rapprochées d'une URL examinée et **70 en attente de revue** ; ce ne sont pas 70 nouveaux projets confirmés.
+
+Sur ce poste, les quatre calendriers du samedi sont **activés**, conformément à la demande de mise à jour le week-end. Les 22 calendriers actifs préexistants sont conservés : 26 sont actifs au total sur 32 déploiements. Le PC, Docker et le runner doivent rester allumés. Les valeurs initiales désactivées décrites plus bas concernent une nouvelle installation.
+
+Vérifications : **332 tests backend sur PostGIS**, **120 tests ingestion** (2 scénarios d'intégration conditionnels ignorés), **36 tests web**, règles d'import, lint/format, contrats OpenAPI et liens documentaires. La compilation et ses contrôles couvrent les 15 langues ; `smoke-projects.mjs` vérifie les 57 fiches et l'annuaire en anglais/français/arabe sur les données réelles. Reem Nine et le filtre Saadiyat ont aussi été vérifiés dans le navigateur, avec un contrôle mobile arabe/RTL. Les tests ne certifient pas l'exhaustivité des sources ou la véracité des annonces des promoteurs.
+
+L’[annuaire des projets](http://localhost:3102/fr/projects) permet d’ouvrir chaque fiche et de filtrer Reem ou Saadiyat. Le bouton **Voir les projets** de la carte y donne accès. Il lit PostgreSQL via Django : aucune collecte distante n’est déclenchée par un clic.
+
+Le registre examiné contient **57 projets/programmes : 30 à Reem, 27 à Saadiyat**, chez **10 promoteurs**. Il n’est pas un recensement exhaustif de tous les bâtiments des deux îles. Certains programmes regroupent plusieurs bâtiments ou phases ; leurs totaux ne doivent pas être additionnés comme un stock disponible.
+
+| Éditeur officiel | Fiches examinées | Source de départ |
+|---|---:|---|
+| Aldar | 25 | [Catalogue officiel](https://www.aldar.com/properties/en/communities), API publique vente et location |
+| SAAS | 7 | [Propriétés](https://www.saasproperties.com/en/properties/) |
+| Radiant | 8 | [Développements](https://radiantrealestate.ae/developments/) |
+| Modon | 4 | [Immobilier](https://www.modon.com/real-estate) et communiqué officiel Maysan |
+| IMKAN | 4 | [Projets](https://imkan.ae/projects) |
+| Reportage | 4 | [Catalogue](https://reportagegroup.com/project-listing/) |
+| Bloom | 2 | [Site officiel](https://bloomholding.com/) |
+| MERED | 1 | [Riviera](https://mered.ae/projects/riviera) |
+| Object 1 | 1 | [A1LA](https://object-1.com/project/a1la-residence/) |
+| NORD | 1 | [Henge](https://nord.ae/projects/henge-residences/) |
+
+Les champs diffèrent selon la source : nom, promoteur, lien officiel et preuve ; puis, lorsqu’ils sont explicitement extractibles, résumé, livraison annoncée, total du programme, typologies et liens documentaires. Une fiche sans équipements ou nombre de chambres documentés ne reçoit pas de valeurs inventées. Les listes de types et de chambres indépendantes d’Aldar ne sont pas croisées pour inventer des combinaisons. Les prix, unités disponibles, rendements et plans de paiement ne sont toujours pas collectés par ces jobs.
+
+**Actualisation des liens :** chaque nouvelle exécution reconsulte les pages autorisées et observe leurs liens PDF/vidéo sûrs. Les nouveaux liens restent `reference_only`, sur les hôtes examinés, sans téléchargement des fichiers ni approbation de republication. Les liens temporaires signés et les contenus de pied de page/projets associés sont écartés. La page officielle Marlin 1 renvoie à des PDF Marlin 2 : ils ne sont pas attribués à Marlin 1. Une nouvelle URL ou identité ambiguë exige une revue du registre.
+
+**Découverte :** 13 catalogues officiels sont acquis par les deux nouveaux flows. Une URL déjà examinée peut référencer un projet existant ; une nouvelle URL reste `pending_review` dans `evidence.project_source_candidate`. Un catalogue peut contenir d’autres quartiers : `territory_scope` est le périmètre demandé à la collecte, pas une localisation acceptée. Le pipeline ne suit pas les URL candidates, ne crée pas automatiquement de projet, ne fusionne pas les noms et ne place aucun repère cartographique. Un opérateur doit vérifier l’identité, la zone, les droits et l’extracteur, puis enrichir le registre avant l’import suivant.
+
+**Reprise et isolation :** chaque tâche utilise une portée `territory:slug` ou `territory:catalogue`. Si une source échoue, les autres tâches continuent ; le flow finit en échec avec la liste des éléments concernés. Les observations réussies restent enregistrées. Relancer la même exécution conserve ses reçus privés et son identité ; une nouvelle exécution crée une observation datée. Il n’y a pas de `truncate and load`.
+
+Les rapprochements cartographiques existants sont conservés. Les nouvelles fiches sans identité géographique examinée restent accessibles dans l’annuaire avec la mention de localisation à vérifier. Leur lien de carte ouvre le territoire, sans prétendre pointer le projet. Une égalité de nom ou une proximité n’est pas une preuve suffisante de parcelle ou de bâtiment.
+
+Pour une autre installation, suivre la section 3, y compris `migrate` pour `evidence/0021`, puis lancer **project-details**, **saadiyat-project-details**, puis les deux jobs **project-discovery** dans Prefect. Attendre la fin de chaque run et vérifier ses journaux. Les quatre cadences proposées sont le samedi à 02:00, 03:00, 04:00 et 04:30, fuseau Asia/Dubai. Elles commencent désactivées ; les calendriers déjà édités dans l’interface restent prioritaires, même s’ils sont vides.
+
+Code ajouté, sous `C:\Users\Karim\Repositories\property-platform\` : `apps/api/src/property_platform/modules/evidence/project_adapters.py`, `project_catalogues.json`, `project_discovery.py`, `migrations/0021_projectsourcecandidate_and_more.py` ; annuaire dans `apps/web/src/app/[locale]/projects/page.tsx`. Les contrats `packages/contracts/openapi.json` et `src/generated.ts` sont régénérés depuis Django.

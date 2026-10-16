@@ -55,9 +55,9 @@ DATASETS = (
     Dataset(
         "project-details",
         "property-platform-project-details",
-        "Manual reviewed project facts and external media references; no commercial publication.",
+        "Refresh Reem projects independently, retaining evidence and document links.",
         {},
-        None,
+        "0 2 * * 6",
     ),
     Dataset(
         "sentinel-previews",
@@ -86,6 +86,20 @@ DATASETS = (
 # Same reviewed connectors, distinct source identities and deployment scopes.
 DATASETS += (
     Dataset(
+        "reem-project-discovery",
+        "property-platform-project-discovery",
+        "Observe official catalogues; new links remain review candidates, never map identities.",
+        {"territory": "al-reem-island"},
+        "0 4 * * 6",
+    ),
+    Dataset(
+        "saadiyat-project-discovery",
+        "property-platform-project-discovery",
+        "Observe Saadiyat publisher catalogues with exact source receipts and review candidates.",
+        {"territory": "saadiyat-island"},
+        "30 4 * * 6",
+    ),
+    Dataset(
         "project-media-files",
         "property-platform-project-media-files",
         "Manual private operator manifest: image/PDF/video/GLB files, no approval or publication.",
@@ -109,9 +123,9 @@ DATASETS += (
     Dataset(
         "saadiyat-project-details",
         "property-platform-project-details",
-        "Manual Bloom project facts, terms and external video/PDF references; no media copying.",
+        "Refresh Saadiyat projects independently, retaining evidence and document links.",
         {"territory": "saadiyat-island"},
-        None,
+        "0 3 * * 6",
     ),
     Dataset(
         "saadiyat-osm-bootstrap",

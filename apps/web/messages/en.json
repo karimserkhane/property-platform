@@ -271,6 +271,9 @@
     "documents": "Documents & plans",
     "location": "Location",
     "size": "Floor area",
-    "availability": "Current availability"
+    "availability": "Current availability",
+    "projects": "Projects",
+    "allProjects": "Browse projects",
+    "notMapped": "Exact map location awaiting verification."
   }
 }

@@ -271,6 +271,9 @@
     "documents": "Dokumente und Grundrisse",
     "location": "Lage",
     "size": "Wohnfläche",
-    "availability": "Aktuelle Verfügbarkeit"
+    "availability": "Aktuelle Verfügbarkeit",
+    "projects": "Projekte",
+    "allProjects": "Projekte ansehen",
+    "notMapped": "Die genaue Kartenposition wird noch geprüft."
   }
 }
