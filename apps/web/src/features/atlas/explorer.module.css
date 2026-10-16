@@ -22,7 +22,7 @@
   background: none;
   border: 0;
   padding: 0;
-  margin-block: 0 16px;
+  margin-block: 0 12px;
   gap: 12px;
   align-items: center;
 }
@@ -46,7 +46,6 @@
   padding: 20px 34px 8px 14px;
   border-radius: 13px;
   background: var(--surface);
-  box-shadow: 0 2px 8px #123d4305;
   font-size: 13px;
   max-width: 100%;
 }
@@ -95,79 +94,37 @@
 .discoveryBar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-block-end: 16px;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block-end: 14px;
 }
-.mobileNavigation,
-.experience :global(.atlas-tabs) {
-  border: 0;
+.mapHint {
+  color: var(--muted);
+  font-size: 12px;
   margin: 0;
-  min-inline-size: 0;
 }
-.search {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  min-height: 54px;
-  padding-inline: 16px 8px;
-  flex: 1;
-  max-width: 610px;
-  color: var(--muted);
-}
-.search:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px #2a747412;
-}
-.search input {
-  border: 0;
-  background: none;
-  color: var(--ink);
-  flex: 1;
-  min-width: 0;
-  height: 50px;
-  font-size: 14px;
-  outline: none;
-}
-.search input::placeholder {
-  color: #6b7a7e;
-}
-.search input::-webkit-search-cancel-button {
-  appearance: none;
-}
-.search button {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  border-radius: 50%;
-}
-.mobileNavigation,
 .selectionReturn {
-  display: none;
+  min-height: 44px;
+  padding: 10px 16px;
+  background: var(--ink);
+  color: white;
+  border: 0;
+  border-radius: 12px;
+  font-size: 12px;
+  flex: none;
 }
 .workspace {
   display: grid;
   align-items: start;
   grid-template-columns: minmax(0, 1fr);
-  gap: 28px;
-}
-.selectionActions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  gap: 20px;
 }
 .workspace :global(.map-column) {
   min-width: 0;
-  scroll-margin-block-start: 150px;
+  scroll-margin-block-start: 24px;
 }
 .experience .workspace :global(.map-frame) {
-  height: min(68svh, 760px);
+  height: min(70svh, 800px);
   min-height: 440px;
   border-radius: 22px;
   border-color: #c8d8d3;
@@ -198,11 +155,6 @@
   cursor: pointer;
   box-shadow: 0 2px 6px #173e4805;
 }
-.mapActions > button[aria-pressed="true"] {
-  background: var(--ink);
-  color: white;
-  border-color: var(--ink);
-}
 .tools {
   margin-inline-start: auto;
   position: relative;
@@ -213,9 +165,11 @@
 .tools > summary::-webkit-details-marker {
   display: none;
 }
+.mapActions > button[aria-pressed="true"],
 .tools[open] > summary {
   background: var(--ink);
   color: white;
+  border-color: var(--ink);
 }
 .experience .toolPanel {
   position: absolute;
@@ -251,20 +205,22 @@
   overflow: visible;
 }
 .experience :global(.atlas-tabs) {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   flex-wrap: nowrap;
-  flex-shrink: 0;
   overflow-x: auto;
-  overscroll-behavior-inline: contain;
-  scrollbar-width: thin;
   gap: 6px;
-  padding: 12px;
-  border-radius: 18px;
+  padding: 6px;
+  border-radius: 16px;
   background: #edf1eb;
+  align-self: start;
 }
 .experience :global(.atlas-tabs button) {
   flex: none;
   min-height: 44px;
-  padding-inline: 15px;
+  padding-inline: 18px;
   font-size: 12px;
   border-radius: 11px;
   box-shadow: none;
@@ -274,106 +230,41 @@
 .experience :global(.atlas-tabs button[aria-pressed="true"]) {
   background: var(--ink);
   color: #fff;
-  border-color: var(--ink);
 }
 .experience :global(.atlas-panel) {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
-  align-items: start;
-  gap: 12px;
+  display: block;
   overflow: visible;
-  padding: 20px 0 0;
-}
-.experience :global(.atlas-panel > :not(.atlas-record)) {
-  grid-column: 1 / -1;
-}
-.experience :global(.atlas-record) {
-  padding: 15px;
-  border-radius: 14px;
-  margin-block: 0;
-  min-height: 86px;
-  background: #fff;
-  border-color: #e1e8e3;
-}
-.experience :global(.atlas-record strong) {
-  font-size: 14px;
-  letter-spacing: -0.02em;
-}
-.experience :global(.atlas-record small) {
-  font-size: 12px;
-  line-height: 1.65;
-  color: #647676;
-}
-.experience :global(.atlas-record[aria-pressed="true"]) {
-  border-color: var(--bronze);
-  box-shadow: 0 0 0 1px var(--bronze) inset;
-  background: #faf8f0;
-}
-.experience :global(.result-count) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 2px 14px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.experience :global(.result-count::before) {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #669b85;
-}
-.experience :global(.atlas-pagination) {
-  justify-content: center;
-  gap: 4px;
-  align-items: center;
-  margin-block: 20px 4px;
-}
-.experience :global(.atlas-pagination button) {
-  min-width: 36px;
-  min-height: 42px;
-  padding: 8px;
-  background: none;
-  box-shadow: none;
-  border-color: transparent;
-  border-radius: 10px;
-  font-size: 11px;
-}
-.experience :global(.atlas-pagination button[aria-current="page"]) {
-  background: var(--ink);
-  color: white;
-}
-.experience :global(.atlas-pagination button:disabled) {
-  opacity: 0.35;
-  cursor: default;
-}
-.experience :global(.atlas-pagination__ellipsis) {
-  color: var(--muted);
-  padding-inline: 2px;
-  font-size: 11px;
+  padding: 18px 0 0;
 }
 .experience :global(.parcel-inspector) {
-  margin: 0 0 18px;
-  padding: clamp(20px, 3vw, 42px);
-  border-color: #dce6df;
-  border-radius: 18px;
-  background: #f8faf5;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: clamp(18px, 3vw, 34px);
+  border: 1px solid #dce6df;
+  border-radius: 22px;
+  background: #fffefa;
+  box-shadow: 0 10px 40px #123e4608;
+  scroll-margin-block-start: 24px;
 }
 .experience :global(.property-inspector-controls) {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
   position: static;
-  padding-block-end: 18px;
+  gap: 12px;
+  padding-block-end: 14px;
   border-block-end: 1px solid var(--line);
-  margin-block-end: 28px;
+  margin-block-end: 20px;
   background: transparent;
 }
 .experience :global(.property-inspector-controls > span) {
   font-size: 11px;
   font-weight: 700;
   color: var(--muted);
+}
+.selectionActions {
+  display: flex;
+  align-items: center;
 }
 .experience :global(.property-inspector-controls button) {
   min-width: 44px;
@@ -382,18 +273,21 @@
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 50%;
-  background: #fff;
+  background: white;
   color: var(--ink);
 }
 .experience :global(.parcel-inspector h2) {
-  font-size: 24px;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.5vw, 44px);
+  font-weight: 500;
+  line-height: 1.1;
+  margin-block: 8px 12px;
 }
 .experience :global(.parcel-inspector:focus-visible) {
-  /* This section receives reading focus; its interactive controls retain rings. */
   outline: none;
 }
 .experience :global(.parcel-inspector h3) {
-  font-size: 14px;
+  font-size: 13px;
 }
 .experience :global(.parcel-inspector p),
 .experience :global(.parcel-inspector a),
@@ -406,6 +300,83 @@
 .experience :global(.candidate-button) {
   min-height: 44px;
   border-radius: 10px;
+}
+.experience :global(.property-proof),
+.experience :global(.source-detail) {
+  border-block-start: 1px solid #e4e8df;
+  padding-block: 8px;
+  margin-block: 12px 0;
+}
+.experience :global(.property-proof > summary),
+.experience :global(.source-detail > summary) {
+  min-height: 44px;
+  align-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.experience :global(.parcel-overlap) {
+  background: #f6f0df;
+  border-inline-start: 3px solid var(--bronze);
+  padding: 12px 18px;
+  margin-block: 20px;
+  border-radius: 0 12px 12px 0;
+}
+.experience :global(.parcel-overlap > p) {
+  font-weight: 600;
+  margin: 0;
+}
+.experience :global(.overlap-record) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding-block: 8px;
+  border-block-start: 1px solid #dfd7c5;
+}
+.experience :global(.overlap-record button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #ded4be;
+}
+.experience :global(.overlap-record small) {
+  color: var(--muted);
+}
+.experience :global(.amenity-groups) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 20px 32px;
+  margin-block: 18px;
+}
+.experience :global(.amenity-groups h3) {
+  color: var(--bronze);
+  margin-block: 0 10px;
+}
+.experience :global(.amenity-groups ul) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.experience :global(.amenity-groups li) {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding-block: 7px;
+  border-block-end: 1px solid #e8ece3;
+}
+.experience :global(.amenity-groups li a) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+.experience :global(.amenity-groups li span) {
+  flex: none;
+  font-size: 11px;
+  color: var(--muted);
 }
 .experience :global(.map-legend) {
   max-height: min(45svh, 370px);
@@ -429,31 +400,13 @@
     border-color: #89aba2;
     background: #f3f7f2;
   }
-  .search button:hover {
-    background: #f0f3ed;
-  }
 }
-@media (max-width: 1100px) and (min-width: 901px) {
-  .workspace {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-  .mapActions > button,
-  .tools > summary {
-    padding-inline: 10px;
-    font-size: 11px;
-  }
-}
-@media (max-width: 900px) {
+@media (max-width: 760px) {
   .experience {
     padding: 14px 12px calc(24px + env(safe-area-inset-bottom));
   }
-  .experience :global(.explore-heading) {
-    margin-block-end: 12px;
-  }
   .experience :global(.explore-heading h1) {
-    font-size: 22px;
-    max-width: 240px;
+    font-size: 23px;
   }
   .experience :global(.explore-heading .text-link) {
     max-width: 80px;
@@ -461,9 +414,8 @@
     text-align: end;
   }
   .experience :global(.territory-controls) {
-    margin-block-end: 12px;
     gap: 10px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
   .experience :global(.territory-area) {
     flex: 1;
@@ -471,125 +423,40 @@
   .experience :global(.territory-area select) {
     min-width: 0;
     width: 100%;
-    font-size: 13px;
   }
   .experience :global(.territory-emirate summary) {
-    font-size: 10px;
-    max-width: 80px;
-    line-height: 1.5;
+    font-size: 11px;
   }
   .experience :global(.territory-projects) {
     font-size: 11px;
   }
   .discoveryBar {
-    display: grid;
-    grid-template-columns: 1fr;
+    align-items: start;
     gap: 10px;
-    position: sticky;
-    top: 0;
-    z-index: 25;
-    background: #f8f7f2f5;
-    padding-block: 4px 8px;
-    margin-block-end: 10px;
-    backdrop-filter: blur(12px);
   }
-  .search {
-    max-width: none;
-    min-height: 50px;
+  .mapHint {
+    font-size: 11px;
   }
-  .search input {
-    font-size: 16px;
-    height: 48px;
-  }
-  .mobileNavigation {
-    display: flex;
-    background: #e8eee7;
-    border: 1px solid #dce4db;
-    border-radius: 14px;
-    padding: 4px;
-    gap: 4px;
-  }
-  .mobileNavigation button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex: 1;
-    min-height: 42px;
-    border: 0;
-    border-radius: 10px;
-    background: none;
-    color: #647575;
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .mobileNavigation button[aria-pressed="true"] {
-    color: var(--ink);
-    background: white;
-    box-shadow: 0 2px 8px #133d4310;
-  }
-  .count {
-    font-size: 10px;
-    font-weight: 500;
-    color: #687b77;
+  .selectionReturn {
+    font-size: 11px;
+    padding-inline: 12px;
   }
   .workspace {
-    display: block;
+    gap: 12px;
   }
   .experience .workspace :global(.map-frame) {
     min-height: 370px;
-    height: max(370px, calc(100svh - 350px));
+    height: min(64svh, 600px);
     border-radius: 18px;
   }
-  .experience .workspace[data-mobile-view="list"] :global(.map-column) {
-    display: none;
-  }
-  .experience .workspace[data-mobile-view="map"] :global(.atlas-sidebar) {
-    display: none;
-  }
-  .experience .workspace[data-mobile-view="list"] :global(.atlas-sidebar) {
-    max-height: none;
-    position: static;
-    box-shadow: none;
-  }
-  .experience :global(.atlas-panel) {
-    padding: 12px 0;
-    grid-template-columns: 1fr;
-  }
-  .experience .workspace[data-mobile-view="list"] :global(.atlas-panel) {
-    overflow: visible;
-  }
-  .experience
-    .workspace[data-mobile-view="map"][data-has-selection="true"][data-show-selection="true"]
-    :global(.atlas-sidebar) {
-    display: flex;
-    position: static;
-    max-height: none;
-    border-radius: 20px;
-  }
-  .experience .workspace[data-mobile-view="map"] :global(.atlas-tabs),
-  .experience
-    .workspace[data-mobile-view="map"]
-    :global(.atlas-panel > :not(.parcel-inspector)) {
-    display: none;
-  }
-  .experience .workspace[data-mobile-view="map"] :global(.parcel-inspector) {
-    padding: 18px;
-    background: none;
-    border: 0;
-    margin: 0;
-  }
-  .experience :global(.property-inspector-controls) {
-    background: var(--surface);
-  }
-  .experience :global(.atlas-pagination button) {
+  .experience :global(.atlas-tabs button) {
     min-height: 44px;
+    padding-inline: 12px;
+    font-size: 11px;
   }
-  .experience :global(.parcel-inspector p),
-  .experience :global(.parcel-inspector a),
-  .experience :global(.parcel-inspector dt),
-  .experience :global(.parcel-inspector dd) {
-    font-size: 14px;
+  .experience :global(.parcel-inspector) {
+    padding: 18px;
+    border-radius: 18px;
   }
   .experience :global(.maplibregl-ctrl-group button) {
     width: 40px;
@@ -600,13 +467,9 @@
   }
   .mapActions > button,
   .tools > summary {
-    flex: 1;
     padding-inline: 10px;
     font-size: 11px;
     border-radius: 10px;
-  }
-  .tools {
-    flex: 1;
   }
   .tools > summary {
     white-space: nowrap;
@@ -614,30 +477,4 @@
   .experience .toolPanel {
     width: min(310px, calc(100vw - 30px));
   }
-  .selectionReturn {
-    display: block;
-    justify-self: center;
-    min-height: 40px;
-    padding-inline: 16px;
-    background: var(--ink);
-    color: white;
-    border: 0;
-    border-radius: 20px;
-    font-size: 12px;
-  }
-}
-
-.experience :global(.parcel-inspector) {
-  scroll-margin-block-start: 24px;
-}
-.experience .selectionReturn {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 10px 18px;
-  background: var(--ink);
-  color: white;
-  border: 0;
-  border-radius: 12px;
-  font-size: 12px;
 }

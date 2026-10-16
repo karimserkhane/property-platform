@@ -50,3 +50,11 @@ def test_all_reference_registries_use_the_supported_source_taxonomy():
         assert all(
             row["kind"] in {"authority", "developer", "broker", "forum", "media"} for row in rows
         )
+
+
+def test_both_islands_acquire_amenities_without_requiring_a_commercial_name():
+    for territory in ("al-reem-island", "saadiyat-island"):
+        query = collection_for(territory).osm_query
+        assert "nwr[shop]" in query and "nwr[amenity]" in query
+        assert "highway=bus_stop" in query and "railway~" in query
+        assert "nwr[name][amenity]" not in query

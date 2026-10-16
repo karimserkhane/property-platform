@@ -13,6 +13,7 @@ def test_preview_is_disabled_even_with_flag_in_non_debug_mode(client):
         assert client.get(f"/api/v1/preview/parcels/{uuid4()}").status_code == 403
         for path in (
             "territories",
+            f"surroundings/place/{uuid4()}",
             "references",
             "imagery",
             "map-context?bbox=54.4,24.4,54.5,24.5",
@@ -41,7 +42,8 @@ def test_invalid_queries_are_rejected_before_accessing_gis(client, query):
 
 @pytest.mark.parametrize("territory", ["dubai", "uae", "unknown-area"])
 @pytest.mark.parametrize(
-    "path", ["parcels", "map-context", "references", "imagery", "parcels/{id}"]
+    "path",
+    ["parcels", "map-context", "references", "imagery", "parcels/{id}", "surroundings/place/{id}"],
 )
 def test_unconfigured_territory_never_falls_back_to_pilot_or_accesses_gis(client, territory, path):
     with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):

@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { ProjectMapDossier } from "@/features/projects/map-dossier";
+import { ProjectMapSummary } from "@/features/projects/map-summary";
 import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
 import type { MapFeature, MapLabels, ResearchReference } from "./types";
 
@@ -44,15 +44,25 @@ export function PropertyCard({
   const title = propertyName(p, locale) || typeLabel;
   if (profile?.project)
     return (
-      <ProjectMapDossier
-        key={profile.project.slug}
-        slug={profile.project.slug}
-        name={profile.project.name}
-        developer={profile.developer}
-        locale={locale}
-        locate={locate}
-        locateLabel={m.locate}
-      />
+      <div className="property-card">
+        <ProjectMapSummary
+          key={profile.project.slug}
+          slug={profile.project.slug}
+          name={profile.project.name}
+          developer={profile.developer}
+          locale={locale}
+          locate={locate}
+          locateLabel={m.locate}
+        />
+        {parcel && (
+          <p className="parcel-reference">
+            <span>
+              {parcel.label} · {m.possibleAssociation}
+            </span>
+            <bdi>{readableParcelCode(parcel.code)}</bdi>
+          </p>
+        )}
+      </div>
     );
   return (
     <div className="property-card">

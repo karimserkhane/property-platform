@@ -217,7 +217,10 @@ def readiness():
 
 
 @flow(name="property-platform-osm-bootstrap", retries=0)
-def osm_bootstrap(territory: Literal["saadiyat-island"] = "saadiyat-island", actor: str = "manual"):
+def osm_bootstrap(
+    territory: Literal["al-reem-island", "saadiyat-island"] = "saadiyat-island",
+    actor: str = "manual",
+):
     """One-off bounded API windows, never scheduled bulk harvesting."""
     return ingest_source("osm_bootstrap", territory, actor)
 

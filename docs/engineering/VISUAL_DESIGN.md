@@ -4,7 +4,7 @@ Refonte du 16 octobre 2026 : teal profond, ivoire et bronze discret, photographi
 
 ## Parcours et hiérarchie
 
-L'accueil propose d'abord deux actions : explorer la carte ou consulter les projets. Le panneau suivant donne accès directement à Al Reem et Saadiyat à partir des territoires actifs du contrat, sans inventer de statistiques de marché. Les liens bâtiments, lieux et rues ouvrent l'onglet correspondant avec le paramètre `tab` de l'exploration. Le lien vers les régions et les trois chapitres photographiques restent disponibles ; les régions sans données sont signalées en préparation.
+L'accueil propose d'abord deux actions : explorer la carte ou consulter les projets. Le panneau suivant donne accès directement à Al Reem et Saadiyat à partir des territoires actifs du contrat, sans inventer de statistiques de marché. Les liens bâtiments, lieux et rues donnent accès à la carte et à ses couches ; les anciens onglets de listes ne sont plus proposés. Le lien vers les régions et les trois chapitres photographiques restent disponibles ; les régions sans données sont signalées en préparation.
 
 L'annuaire `/[locale]/projects` garde sa lecture de données côté serveur, puis `features/projects/directory.tsx` filtre la liste reçue dans le navigateur. La recherche porte sur le nom du projet et du promoteur, accepte plusieurs termes et ignore les accents ; elle ne lance aucune collecte et ne rapproche aucune identité immobilière. Effacer la recherche rend le focus au champ. Le compteur annonce les résultats et un état vide explique comment reprendre. Les cartes mènent à la fiche détaillée ; leur monogramme n'est pas une photographie du projet.
 
@@ -12,15 +12,12 @@ La fiche et l'aperçu cartographique partagent la même hiérarchie : identité 
 
 ## Carte sur ordinateur et téléphone
 
-Le clic sur un bien possédant un projet documenté ouvre maintenant **le dossier complet sous la carte**, et l'annuaire utilise le même parcours. La fiche réutilise la présentation de la page projet : identité, promoteur, livraison, programme, typologies, équipements, médias autorisés, documents, informations d'achat et preuves. La carte centrale occupe toute la largeur et les sections du dossier suivent dans le flux de page. Les raccourcis font défiler la page, sans barres fixes superposées. Le zoom et le centre de la carte restent conservés. Une page indépendante partageable demeure disponible.
+Le clic sur un projet documenté ouvre une fiche courte sous la carte, avec image autorisée ou ambiance explicitement signalée, nom, promoteur et faits disponibles. Le dossier complet s’ouvre sur sa page dédiée. L’annuaire privilégie cette page ; le lien secondaire retrouve la carte. Aucun inventaire de bâtiments anonymes ni recherche générale n’occupe le bas de l’exploration.
 
-Les liens `explore?territory=…&project=…` ouvrent aussi les projets dont le bâtiment n'est pas encore rapproché. Le dossier reste consultable à l'échelle du quartier ; aucune coordonnée n'est déduite du nom. Seuls les liens explicites existants peuvent fournir la surbrillance et l'action Localiser. Les références externes ne deviennent pas automatiquement des médias intégrés.
+Les noms potentiels de parcelles utilisent `≈` et les rapprochements enregistrés, sans fusion d’identités. Les usages officiels restent distincts. Les détails cadastraux, rues proches et équipements autour du lieu sont dépliables. Les équipements sont lus à la demande depuis PostgreSQL, dans sept catégories utiles ; aucune durée de marche, ouverture ou note commerciale n’est inventée. Les enregistrements cadastraux presque superposés peuvent être comparés. Voir [NEIGHBOURHOOD.md](NEIGHBOURHOOD.md).
 
-Sur ordinateur comme sur téléphone, les informations suivent la carte. Sur téléphone, **Carte / Liste** permet de choisir la surface utile sans empiler la carte, tous les outils et tous les résultats dans une longue page. La sélection rend la fiche accessible sous la carte ; elle ne zoome pas automatiquement. Fermer la fiche conserve un parcours clavier cohérent, et une commande permet de retrouver le bien sélectionné.
+La carte reste centrale et en pleine largeur sur ordinateur et téléphone, sans zoom automatique au clic. La sélection défile dans la page, sans panneau à défilement imbriqué. La fermeture conserve un retour clavier ; Localiser cadre explicitement l’objet. Les onglets conservés sont la sélection, le marché, le contexte et les sources. Les exports et couches sont dans les réglages, et la légende est repliable. La pagination bornée reste utilisée pour les sources et données de marché, sans grille générale.
 
-La recherche reste au premier plan. Les réglages de couches et exports sont regroupés dans les réglages de carte ; la légende reste repliable sous la carte. Les onglets de données conservent leurs fonctions ; un `tab` d'URL n'est accepté que s'il appartient à la liste prévue par l'explorateur. La règle « objet précis avant grand terrain » et les associations spatiales restent celles du catalogue existant : la refonte visuelle ne crée ni géométrie ni nouvelle association projet/bâtiment.
-
-Les commandes de pagination remplacent la longue rangée de tous les numéros par une fenêtre bornée : première page, dernière page, voisinage de la page courante et ellipses. La page courante utilise `aria-current`, les nombres suivent la locale et le focus revient à une commande disponible lorsque Précédent ou Suivant devient désactivé. `page-window.ts` possède ce calcul pur, testé séparément de React.
 
 Les textes de ces parcours sont présents dans **toutes les langues du registre**. Les propriétés CSS logiques préservent arabe, ourdou et persan en RTL ; la photographie et la carte ne sont pas retournées. Les boutons exposent des libellés traduits même lorsqu'une icône accompagne le texte. Les commandes principales visent une hauteur tactile d'au moins 44 pixels. Les tests techniques ne remplacent pas une relecture linguistique ou des essais sur le téléphone réel.
 
@@ -84,7 +81,7 @@ La marque reste configurée séparément dans [BRANDING.md](BRANDING.md).
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-scenes.ts` : assets, cadrages et provenance photo.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-experience.tsx` et `home-motion.ts` : comportement du défilement et calculs bornés.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home.module.css` : composition et boutons de l'accueil.
-- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\explorer.tsx` et `explorer.module.css` : recherche, navigation Carte/Liste, réglages, résultats et fiche de sélection.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\explorer.tsx` et `explorer.module.css` : réglages de carte et fiche courte de sélection.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\pagination.tsx` et `page-window.ts` : pagination bornée, libellés et focus clavier.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\directory.tsx` : recherche locale de projets et cartes de résultat.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\project.module.css` : présentation commune de l'annuaire, de la fiche et de l'aperçu.
@@ -96,7 +93,7 @@ La composition de l'accueil, ses photos et l'exploration restent sous la respons
 
 ## Vérification
 
-Pour la refonte du 16 octobre : contrôler les parcours accueil → carte, accueil → projets, recherche/effacement/état vide de l'annuaire, Carte/Liste sur mobile, sélection/fermeture/retour à la carte et pagination aux deux extrémités. Refaire ces parcours en français et dans une locale RTL, vérifier focus et absence de débordement horizontal. Les tests unitaires de `page-window.ts`, les contrôles i18n, le typage et les vérifications HTTP du web compilé complètent cette revue. La capture d'écran ou la réussite d'un test ne certifie pas l'exactitude commerciale des sources.
+Pour la refonte du 16 octobre : contrôler les parcours accueil → carte, accueil → projets, recherche/effacement/état vide de l'annuaire, sélection/fermeture/retour à la carte sur mobile, accès à la page projet et ouverture des environs. Refaire ces parcours en français et dans une locale RTL, vérifier focus et absence de débordement horizontal. Les tests unitaires de `page-window.ts`, les contrôles i18n, le typage et les vérifications HTTP du web compilé complètent cette revue. La capture d'écran ou la réussite d'un test ne certifie pas l'exactitude commerciale des sources.
 
 Les tests de priorité cartographique couvrent le conflit entre RT4_TMP_PL2 et une vraie parcelle, le bâtiment devant sa parcelle, puis les secteurs/île en repli. Voir [REEM_MAP.md](REEM_MAP.md). Les contrôles HTTP du web compilé couvrent toutes les langues du registre, les trois images et les fontes incluses dans l'artefact, leurs tailles et le budget de préchargement. Les contrôles techniques ne remplacent pas une revue linguistique ou des mesures sur appareils physiques.
 

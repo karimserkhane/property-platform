@@ -146,6 +146,7 @@ def map_usage_tags(target, ids, capture_ids):
         "tourism",
         "railway",
         "public_transport",
+        "highway",
         "religion",
     }
     result = {}

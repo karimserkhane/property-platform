@@ -30,7 +30,10 @@ def detail(parcel_id, namespaces=None):
     from datetime import UTC, datetime
     from urllib.parse import urlparse
 
-    from property_platform.modules.catalog.map_queries import parcel_surroundings
+    from property_platform.modules.catalog.map_queries import (
+        overlapping_parcels,
+        parcel_surroundings,
+    )
 
     from .land_use import category
     from .uses import use_types
@@ -58,6 +61,20 @@ def detail(parcel_id, namespaces=None):
 
     url = attrs.get("DMT_DCR_URL") or ""
     places, streets = parcel_surroundings(parcel_id)
+    overlaps = []
+    for row in overlapping_parcels(parcel_id, namespaces=namespaces):
+        source = parcel_provenance(parcel_id=row["id"], source_key=row.pop("source_namespace"))
+        if source is None:
+            continue
+        other = parcel_attributes(row["id"])
+        overlaps.append(
+            {
+                **row,
+                "use_types": use_types(land_use=row["land_use"]),
+                "ownership": other.get("OWNERSHIPTYPE") or "",
+                "source": source,
+            }
+        )
     for row in streets:
         row["distance_m"] = round(row.pop("distance").m, 1)
     parcel["attributes"] = {
@@ -76,6 +93,7 @@ def detail(parcel_id, namespaces=None):
         **parcel,
         "places": places,
         "streets": streets,
+        "overlapping_parcels": overlaps,
         "source": provenance,
         "publication_status": "local_preview",
     }

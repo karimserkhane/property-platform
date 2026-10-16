@@ -24,6 +24,11 @@ export function mapName(locale: string): ExpressionSpecification {
 
 export function mapLayers(locale: string): LayerSpecification[] {
   const name = mapName(locale);
+  const project: ExpressionSpecification = [
+    "in",
+    "_project_marker",
+    ["to-string", ["get", "kind"]],
+  ];
   return [
     {
       id: "satellite",
@@ -138,22 +143,38 @@ export function mapLayers(locale: string): LayerSpecification[] {
       type: "circle",
       source: "place",
       paint: {
-        "circle-color": [
-          "case",
-          ["==", ["get", "kind"], "publisher_project_marker"],
-          "#eb7939",
-          "#246b71",
-        ],
-        "circle-radius": 4,
+        "circle-color": ["case", project, "#eb7939", "#246b71"],
+        "circle-radius": ["case", project, 6, 3.5],
         "circle-stroke-color": "#ffffff",
         "circle-stroke-width": 1.5,
+      },
+    },
+    {
+      id: "project-names",
+      type: "symbol",
+      source: "place",
+      minzoom: 11.5,
+      filter: project,
+      layout: {
+        "text-field": name,
+        "text-font": fonts,
+        "text-size": 13,
+        "text-max-width": 17,
+        "text-variable-anchor": ["top", "bottom", "left", "right"],
+        "text-radial-offset": 0.7,
+      },
+      paint: {
+        "text-color": "#234c56",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 2,
       },
     },
     {
       id: "place-names",
       type: "symbol",
       source: "place",
-      minzoom: 11.5,
+      minzoom: 13.8,
+      filter: ["!", project],
       layout: {
         "text-field": name,
         "text-font": fonts,
@@ -168,6 +189,31 @@ export function mapLayers(locale: string): LayerSpecification[] {
         "text-halo-width": 2,
       },
     },
+    ...(["project", "use"] as const).map(
+      (kind): LayerSpecification => ({
+        id: `parcel-${kind}-names`,
+        type: "symbol",
+        source: "parcels",
+        minzoom: kind === "project" ? 13.5 : 15.3,
+        filter: [
+          "all",
+          ["!=", ["get", "display_name"], ""],
+          ["==", ["get", "potential_name"], kind === "project"],
+        ],
+        layout: {
+          "text-field": ["get", "display_name"],
+          "text-font": fonts,
+          "text-size": kind === "project" ? 12 : 10,
+          "text-max-width": 14,
+          "text-padding": 7,
+        },
+        paint: {
+          "text-color": kind === "project" ? "#123e46" : "#3e5b63",
+          "text-halo-color": "#fffffff2",
+          "text-halo-width": 2.5,
+        },
+      }),
+    ),
     {
       id: "parcel-codes",
       type: "symbol",

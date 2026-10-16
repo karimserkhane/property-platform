@@ -12,7 +12,7 @@ import {
 } from "react";
 import { UiIcon } from "@/components/ui-icon";
 import { isProjectSlug } from "@/features/projects/data";
-import { ProjectMapDossier } from "@/features/projects/map-dossier";
+import { ProjectMapSummary } from "@/features/projects/map-summary";
 import { Link } from "@/i18n/navigation";
 import { AdrecMarket } from "./adrec-market";
 import styles from "./explorer.module.css";
@@ -25,16 +25,13 @@ import {
   COLORS,
   csv,
   download,
-  normalized,
   parcelPropertyIndex,
-  preferredParcelProperty,
   propertyFeatures,
-  propertyName,
-  readableParcelCode,
   sourceLabel,
 } from "./presentation";
 import { PublicContext } from "./public-context";
 import { References } from "./references";
+import { Surroundings } from "./surroundings";
 import type {
   AtlasLabels,
   ImageryScene,
@@ -48,27 +45,8 @@ import type {
 } from "./types";
 
 const ParcelMap = dynamic(() => import("./parcel-map"), { ssr: false });
-type Tab =
-  | "properties"
-  | "parcels"
-  | "places"
-  | "streets"
-  | "buildings"
-  | "future"
-  | "sources"
-  | "market"
-  | "context";
-const TABS: Tab[] = [
-  "properties",
-  "market",
-  "context",
-  "places",
-  "buildings",
-  "streets",
-  "parcels",
-  "future",
-  "sources",
-];
+type Tab = "properties" | "market" | "context" | "sources";
+const TABS: Tab[] = ["properties", "market", "context", "sources"];
 
 export function Explorer({
   labels,
@@ -87,7 +65,6 @@ export function Explorer({
 }) {
   const marketLabels = useTranslations("Market");
   const contextLabels = useTranslations("Context");
-  const usageLabels = useTranslations("Use");
   const bbox = (territory.collection_bounds ?? territory.bounds).join(",");
   const territoryQuery = encodeURIComponent(territory.id);
   const [collection, setCollection] = useState<ParcelCollection | null>(null);
@@ -99,12 +76,8 @@ export function Explorer({
   const [detail, setDetail] = useState<ParcelDetail | null>(null);
   const [feature, setFeature] = useState<MapFeature | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-  const [sector, setSector] = useState("");
   const [use, setUse] = useState("");
-  const [temps, setTemps] = useState(true);
   const [tab, setTab] = useState<Tab>("properties");
-  const [mobileView, setMobileView] = useState<"map" | "list">("map");
   const [showSelection, setShowSelection] = useState(false);
   const [projectSlug, setProjectSlug] = useState<string | null>(null);
   const hasSelection = Boolean(selected || feature || projectSlug);
@@ -131,7 +104,6 @@ export function Explorer({
   const panel = useRef<HTMLElement>(null);
   const inspection = useRef<HTMLElement>(null);
   const mapSection = useRef<HTMLElement>(null);
-  const mapViewButton = useRef<HTMLButtonElement>(null);
   const selectionOrigin = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (showSelection && (feature?.id || selected || projectSlug)) {
@@ -153,7 +125,6 @@ export function Explorer({
       const value = params.get("tab");
       if (value && TABS.includes(value as Tab)) {
         setTab(value as Tab);
-        setMobileView("list");
       } else {
         setTab("properties");
       }
@@ -174,7 +145,6 @@ export function Explorer({
         setShowSelection(true);
 
         setTab("properties");
-        setMobileView("map");
       } else {
         setProjectSlug(null);
         setShowSelection(false);
@@ -323,28 +293,6 @@ export function Explorer({
         : null,
     [context, projectSlug],
   );
-  const placesByParcel = useMemo(() => {
-    const names = new Map<string, string[]>(
-      [...parcelProperties].map(([id, candidates]) => [
-        id,
-        candidates.flatMap((p) => [
-          p.name,
-          p.name_ar,
-          p.presentation?.name ?? "",
-          p.presentation?.developer ?? "",
-          p.presentation?.publisher ?? "",
-        ]),
-      ]),
-    );
-    for (const f of context?.place.features ?? [])
-      for (const id of f.properties.parcel_ids)
-        names.set(id, [
-          ...(names.get(id) ?? []),
-          f.properties.name,
-          f.properties.name_ar,
-        ]);
-    return names;
-  }, [context, parcelProperties]);
   const parcelCodes = useMemo(
     () =>
       Object.fromEntries(
@@ -357,75 +305,18 @@ export function Explorer({
       collection
         ? {
             ...collection,
-            features: collection.features.filter((f) => {
-              const p = f.properties;
-              return (
-                (!sector || p.community === sector) &&
-                (!use || p.category === use) &&
-                (temps || !/(?:TMP|temporary)/i.test(p.code)) &&
-                (!query ||
-                  normalized(
-                    [
-                      p.code,
-                      p.community,
-                      p.land_use,
-                      ...(p.use_types ?? []).map((type) => usageLabels(type)),
-                      ...(placesByParcel.get(p.id) ?? []),
-                    ].join(" "),
-                  ).includes(normalized(query)))
-              );
-            }),
+            features: collection.features.filter(
+              (f) => !use || f.properties.category === use,
+            ),
           }
         : null,
-    [collection, sector, use, temps, query, placesByParcel, usageLabels],
+    [collection, use],
   );
-  const target =
-    tab === "streets" ? "street" : tab === "buildings" ? "building" : "place";
-  const mapItems = (
-    tab === "properties"
-      ? propertyFeatures(context)
-      : (context?.[target].features ?? [])
-  ).filter(
-    (f) =>
-      !query ||
-      normalized(
-        [
-          f.properties.name,
-          f.properties.name_ar,
-          f.properties.presentation?.name,
-          f.properties.presentation?.developer,
-          f.properties.presentation?.publisher,
-          f.properties.kind,
-          ...(f.properties.use_types ?? []).map((type) => usageLabels(type)),
-        ].join(" "),
-      ).includes(normalized(query)),
+  const referenceItems = references;
+  const currentPage = Math.min(
+    page,
+    Math.max(0, Math.ceil(referenceItems.length / 40) - 1),
   );
-  const parcelItems =
-    tab === "future"
-      ? (filtered?.features.filter(
-          (f) =>
-            f.properties.category === "rail" ||
-            /not constructed/i.test(f.properties.construction_status),
-        ) ?? [])
-      : (filtered?.features ?? []);
-  const referenceItems = references.filter(
-    (r) =>
-      !query ||
-      normalized([r.title, r.label, r.source_kind].join(" ")).includes(
-        normalized(query),
-      ),
-  );
-  const count =
-    tab === "future" || tab === "sources"
-      ? referenceItems.length
-      : tab === "parcels"
-        ? parcelItems.length
-        : mapItems.length;
-  const maxPage = Math.max(0, Math.ceil(count / 40) - 1);
-  const currentPage = Math.min(page, maxPage);
-  const sectors = [
-    ...new Set(collection?.features.map((f) => f.properties.community) ?? []),
-  ].sort();
   function changeTab(t: Tab) {
     setTab(t);
     setPage(0);
@@ -435,11 +326,9 @@ export function Explorer({
     window.history.replaceState(null, "", url);
   }
   function frame(kind: MapView["kind"]) {
-    setMobileView("map");
     setView((v) => ({ kind, token: v.token + 1 }));
   }
   function locate() {
-    setMobileView("map");
     setShowSelection(false);
     const target =
       feature ??
@@ -475,12 +364,7 @@ export function Explorer({
     window.history.replaceState(null, "", url);
     const origin = selectionOrigin.current;
     requestAnimationFrame(() => {
-      const target = [
-        origin,
-        mapViewButton.current,
-        mapSection.current,
-        panel.current,
-      ].find(
+      const target = [origin, mapSection.current, panel.current].find(
         (element) => element?.isConnected && element.getClientRects().length,
       );
       target?.focus({ preventScroll: true });
@@ -523,77 +407,19 @@ export function Explorer({
       </div>
       {navigation}
       <div className={styles.discoveryBar}>
-        {tab !== "market" && tab !== "context" && (
-          <label className={styles.search}>
-            <span className="sr-only">{m.searchPrompt}</span>
-            <UiIcon name="search" />
-            <input
-              type="search"
-              value={query}
-              placeholder={m.searchPrompt}
-              maxLength={80}
-              dir="auto"
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setPage(0);
-              }}
-            />
-            {query && (
-              <button
-                type="button"
-                aria-label={labels.reset}
-                onClick={() => {
-                  setQuery("");
-                  setPage(0);
-                }}
-              >
-                <UiIcon name="close" />
-              </button>
-            )}
-          </label>
-        )}
-        <fieldset className={styles.mobileNavigation} aria-label={m.mapView}>
-          <button
-            type="button"
-            ref={mapViewButton}
-            aria-pressed={mobileView === "map"}
-            onClick={() => {
-              setMobileView("map");
-              if (hasSelection) changeTab("properties");
-            }}
-          >
-            <UiIcon name="map" />
-            {m.mapView}
-          </button>
-          <button
-            type="button"
-            aria-pressed={mobileView === "list"}
-            onClick={() => setMobileView("list")}
-          >
-            <UiIcon name="list" />
-            {m.listView}
-            {state === "ready" && tab !== "market" && tab !== "context" && (
-              <span className={styles.count}>
-                {new Intl.NumberFormat(locale).format(count)}
-              </span>
-            )}
-          </button>
-        </fieldset>
+        <p className={styles.mapHint}>{m.exploreHint}</p>
         {hasSelection && (
           <button
             type="button"
             className={styles.selectionReturn}
             onClick={() => {
               setShowSelection(true);
-              setMobileView("map");
               changeTab("properties");
-              requestAnimationFrame(() => {
-                inspection.current?.scrollIntoView({
-                  block: "start",
-                  behavior: "instant",
-                });
-                inspection.current?.focus({ preventScroll: true });
+              inspection.current?.scrollIntoView({
+                block: "start",
+                behavior: "instant",
               });
+              inspection.current?.focus({ preventScroll: true });
             }}
           >
             {m.selectionLabel}
@@ -602,7 +428,6 @@ export function Explorer({
       </div>
       <div
         className={`atlas-workspace ${styles.workspace}`}
-        data-mobile-view={mobileView}
         data-has-selection={hasSelection}
         data-show-selection={showSelection && tab === "properties"}
       >
@@ -774,6 +599,7 @@ export function Explorer({
                 <i style={{ backgroundColor: "#eb7939" }} />{" "}
                 {m.projectReference} · {m.unverified}
               </p>
+              <p className="small-text">≈ {m.possibleAssociation}</p>
               {Object.entries(COLORS).map(([key, color]) => (
                 <button
                   key={key}
@@ -906,7 +732,7 @@ export function Explorer({
                           : labels.unavailable}
                       </p>
                     ) : projectSlug ? (
-                      <ProjectMapDossier
+                      <ProjectMapSummary
                         key={projectSlug}
                         slug={projectSlug}
                         locale={locale}
@@ -927,53 +753,26 @@ export function Explorer({
                         references={references}
                         locate={locate}
                         choose={choose}
+                        territory={territory.id}
+                      />
+                    )}
+                    {projectSlug && projectFeature && (
+                      <Surroundings
+                        identity={projectFeature.id}
+                        target={
+                          projectFeature.geometry.type === "Point"
+                            ? "place"
+                            : "building"
+                        }
+                        territory={territory.id}
+                        m={m}
+                        labels={labels}
+                        locale={locale}
                       />
                     )}
                   </section>
                 )}
-                {tab === "parcels" && (
-                  <>
-                    <div className="atlas-filters">
-                      <select
-                        aria-label={m.allSectors}
-                        value={sector}
-                        onChange={(e) => {
-                          setSector(e.target.value);
-                          setPage(0);
-                        }}
-                      >
-                        <option value="">{m.allSectors}</option>
-                        {sectors.map((s) => (
-                          <option key={s}>{s}</option>
-                        ))}
-                      </select>
-                      <select
-                        aria-label={m.allUses}
-                        value={use}
-                        onChange={(e) => {
-                          setUse(e.target.value);
-                          setPage(0);
-                        }}
-                      >
-                        <option value="">{m.allUses}</option>
-                        {Object.keys(COLORS).map((c) => (
-                          <option key={c} value={c}>
-                            {m[c as Category]}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <label className="atlas-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={temps}
-                        onChange={(e) => setTemps(e.target.checked)}
-                      />
-                      {m.temporary}
-                    </label>
-                  </>
-                )}
-                {(tab === "future" || tab === "sources") && (
+                {tab === "sources" && (
                   <>
                     {referenceError && (
                       <p role="status">
@@ -1081,129 +880,7 @@ export function Explorer({
                       </article>
                     ))}
                   </section>
-                ) : tab === "future" ? null : (
-                  <>
-                    <p className="result-count" aria-live="polite">
-                      {new Intl.NumberFormat(locale).format(count)} · {m[tab]}
-                    </p>
-
-                    {!count && state === "ready" && <p>{m.empty}</p>}
-                    {tab === "parcels"
-                      ? parcelItems
-                          .slice(currentPage * 40, (currentPage + 1) * 40)
-                          .map((f) => (
-                            <button
-                              className="atlas-record"
-                              type="button"
-                              aria-pressed={selected === f.id}
-                              key={f.id}
-                              onClick={() => void select(f.id)}
-                            >
-                              <strong>
-                                <bdi>
-                                  {propertyName(
-                                    preferredParcelProperty(
-                                      parcelProperties.get(f.id) ?? [],
-                                      locale,
-                                    ) ?? { name: "", name_ar: "", kind: "" },
-                                    locale,
-                                  ) ||
-                                    (f.properties.use_types?.length
-                                      ? usageLabels(f.properties.use_types[0])
-                                      : f.properties.land_use || m.parcelTitle)}
-                                </bdi>
-                              </strong>
-                              <small>
-                                <bdi>
-                                  {readableParcelCode(f.properties.code)} ·{" "}
-                                  {f.properties.land_use}
-                                </bdi>
-                              </small>
-                            </button>
-                          ))
-                      : mapItems
-                          .slice(currentPage * 40, (currentPage + 1) * 40)
-                          .map((f) => (
-                            <button
-                              className="atlas-record"
-                              type="button"
-                              aria-pressed={feature?.id === f.id}
-                              key={f.id}
-                              onClick={() => choose(f)}
-                            >
-                              <strong>
-                                <bdi>
-                                  {propertyName(f.properties, locale) ||
-                                    (f.properties.use_types?.length
-                                      ? usageLabels(f.properties.use_types[0])
-                                      : tab === "properties" ||
-                                          tab === "buildings"
-                                        ? m.building
-                                        : labels.unknown)}
-                                </bdi>
-                              </strong>
-                              <small>
-                                {tab === "properties" ? (
-                                  <>
-                                    {f.properties.use_types?.length
-                                      ? f.properties.use_types
-                                          .map((type) => usageLabels(type))
-                                          .join(" · ")
-                                      : f.properties.kind.endsWith(
-                                            "_project_marker",
-                                          )
-                                        ? m.project
-                                        : m.building}
-                                    {f.properties.presentation?.developer && (
-                                      <>
-                                        {" "}
-                                        ·{" "}
-                                        <bdi>
-                                          {f.properties.presentation.developer}
-                                        </bdi>
-                                      </>
-                                    )}
-                                    {f.properties.levels != null && (
-                                      <>
-                                        {" "}
-                                        ·{" "}
-                                        {new Intl.NumberFormat(locale).format(
-                                          f.properties.levels,
-                                        )}{" "}
-                                        {m.levels}
-                                      </>
-                                    )}
-                                  </>
-                                ) : (
-                                  <>
-                                    <bdi>
-                                      {f.properties.use_types?.length
-                                        ? f.properties.use_types
-                                            .map((type) => usageLabels(type))
-                                            .join(" · ")
-                                        : f.properties.kind}
-                                    </bdi>{" "}
-                                    ·{" "}
-                                    {sourceLabel(
-                                      f.properties.source.reliability,
-                                      m,
-                                    )}
-                                  </>
-                                )}
-                              </small>
-                            </button>
-                          ))}
-                    <AtlasPagination
-                      page={currentPage}
-                      pageCount={maxPage + 1}
-                      onPageChange={setPage}
-                      label={m[tab]}
-                      previousLabel={m.previousPage}
-                      nextLabel={m.nextPage}
-                      locale={locale}
-                    />
-                  </>
-                )}
+                ) : null}
               </>
             )}
           </section>

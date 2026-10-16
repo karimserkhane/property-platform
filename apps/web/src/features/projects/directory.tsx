@@ -100,7 +100,7 @@ export function ProjectDirectoryList({
             <article className={styles.directoryCard} key={project.id}>
               <Link
                 className={styles.directoryLink}
-                href={projectMapHref(project.slug, project.territory)}
+                href={`/projects/${project.slug}`}
               >
                 <span className={styles.directoryMonogram} aria-hidden="true">
                   {project.name
@@ -129,9 +129,7 @@ export function ProjectDirectoryList({
               </Link>
               <Link
                 className={styles.directoryPageLink}
-                href={`/projects/${project.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={projectMapHref(project.slug, project.territory)}
               >
                 {labels.openPage} <span aria-hidden="true">↗</span>
               </Link>

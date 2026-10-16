@@ -61,7 +61,11 @@ class CollectionProfile:
         return (
             "[out:json][timeout:45];("
             f"way[building]{bbox};way[highway][name]{bbox};"
-            f"nwr[name][amenity]{bbox};nwr[name][leisure]{bbox};"
+            f"nwr[amenity]{bbox};nwr[leisure]{bbox};nwr[shop]{bbox};"
+            f'nwr[railway~"^(station|halt|tram_stop)$"]{bbox};'
+            f'nwr[public_transport~"^(station|platform|stop_position)$"]{bbox};'
+            f"nwr[highway=bus_stop]{bbox};"
+            f'nwr[tourism~"^(hotel|museum|attraction)$"]{bbox};'
             f"nwr[name][building]{bbox};);out meta center geom;"
         )
 

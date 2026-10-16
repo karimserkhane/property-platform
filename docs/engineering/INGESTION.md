@@ -35,7 +35,7 @@ Cette configuration est locale : interface liée à `127.0.0.1`, mots de passe d
 
 Les jobs projets et catalogues sont détaillés dans [PROJECTS.md](PROJECTS.md). Les pages sont collectées avant les transactions SQL ; leurs fichiers liés restent externes sans autorisation de copie. L’ingestion de fichiers opérateur écrit les octets dans le stockage privé et les métadonnées dans PostgreSQL.
 
-**Ajout du 16 octobre :** le registre contient désormais **32 déploiements**. `media-storage` est un nouveau job manuel de reprise des photos acquises vers le stockage privé ; les imports de présentations Reem et Saadiyat exécutent aussi cette tâche après leur validation Django. API et runner partagent le volume persistant `/media`. L’archivage conserve les captures et les calendriers ; il ne publie rien sur le CDN. Le [guide des médias](MEDIA_STORAGE.md) fournit les commandes de migration, reconstruction et reprise, ainsi que l’activation ultérieure de R2/S3.
+**Ajout du 16 octobre :** le registre contient désormais **33 déploiements**. `media-storage` est un nouveau job manuel de reprise des photos acquises vers le stockage privé ; les imports de présentations Reem et Saadiyat exécutent aussi cette tâche après leur validation Django. API et runner partagent le volume persistant `/media`. L’archivage conserve les captures et les calendriers ; il ne publie rien sur le CDN. Le [guide des médias](MEDIA_STORAGE.md) fournit les commandes de migration, reconstruction et reprise, ainsi que l’activation ultérieure de R2/S3.
 
 Les horaires ci-dessous sont **préparés mais désactivés au premier enregistrement**, dans le fuseau **Asia/Dubai**. Commencer par une exécution manuelle ; activer ensuite les tâches souhaitées dans l'interface. Le démarrage Docker n'effectue pas d'import.
 
@@ -50,7 +50,9 @@ Les horaires ci-dessous sont **préparés mais désactivés au premier enregistr
 | `map-district` | Couche officielle district/secteurs | Dimanche 04:00 |
 | `map-community` | Couche officielle communautés | Dimanche 04:15 |
 | `map-street` | Couche officielle rues | Dimanche 04:30 |
-| `map-osm` | Empreintes de bâtiments et lieux OpenStreetMap, acquis ensemble | Dimanche 04:45 |
+| `map-osm` | Empreintes, commerces, équipements et transports OSM de Reem | Dimanche 04:45 |
+| `saadiyat-map-osm` | Même collecte bornée pour Saadiyat | Dimanche 07:45 |
+| `reem-osm-bootstrap`, `saadiyat-osm-bootstrap` | Reprise officielle OSM XML par quatre fenêtres, mêmes identités et audit | Manuel uniquement |
 | `project-references` | Pages publiques du registre de recherche et repères déclarés de projets | Lundi 05:00 |
 | `property-presentations` | Six présentations examinées et médias dont les droits sont déclarés | Tous les jours 02:00 |
 | `sentinel-previews` | Reçu existant de deux scènes historiques Sentinel | Manuel uniquement |

@@ -18,8 +18,22 @@ def test_xml_preserves_identity_geometry_and_original_edit_date():
     assert row["timestamp"] == "2026-02-01T00:00:00Z"
     assert row["geometry"][0] == row["geometry"][-1]
     assert len(boxes("saadiyat-island")) == 4
+    assert len(boxes("al-reem-island")) == 4
     with pytest.raises(ValueError):
-        boxes("al-reem-island")
+        boxes("unknown-island")
+
+
+def test_xml_retains_unnamed_bus_stops_shops_and_stations_without_inventing_buildings():
+    payload = b"""<osm version="0.6">
+    <node id="1" lat="24.54" lon="54.41" version="1" timestamp="2026-01-01T00:00:00Z">
+    <tag k="highway" v="bus_stop"/></node>
+    <node id="2" lat="24.54" lon="54.41" version="1" timestamp="2026-01-01T00:00:00Z">
+    <tag k="shop" v="supermarket"/></node>
+    <node id="3" lat="24.54" lon="54.41" version="1" timestamp="2026-01-01T00:00:00Z">
+    <tag k="railway" v="station"/></node></osm>"""
+    rows = decode(payload)["elements"]
+    assert [row["id"] for row in rows] == [1, 2, 3]
+    assert rows[0]["tags"] == {"highway": "bus_stop"}
 
 
 @pytest.mark.parametrize(

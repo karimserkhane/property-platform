@@ -169,7 +169,7 @@ def test_building_usage_comes_from_preserved_amenity_tags_not_its_generic_kind(c
     feature = response.json()["building"]["features"][0]
     assert feature["properties"]["kind"] == "yes"
     assert feature["properties"]["use_types"] == ["school"]
-    assert feature["properties"]["use_classification_version"] == "source-use-v1"
+    assert feature["properties"]["use_classification_version"] == "source-use-v2"
     assert "tags" not in feature["properties"]
     assert "_capture_id" not in feature["properties"]["source"]
     from property_platform.modules.evidence.queries import map_provenances, map_usage_tags

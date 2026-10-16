@@ -130,7 +130,21 @@
     "zoomIn": "Aproximar",
     "zoomOut": "Afastar",
     "resetBearing": "Arraste para girar o mapa; clique para orientar para norte",
-    "toggleAttribution": "Mostrar ou ocultar créditos"
+    "toggleAttribution": "Mostrar ou ocultar créditos",
+    "exploreHint": "Selecione um projeto, edifício ou terreno no mapa.",
+    "nearbyPlaces": "Perto deste local",
+    "nearbyNote": "Locais registados num raio de 1,5 km em linha reta a partir do ponto no mapa ou do centro do contorno. A cobertura pode estar incompleta; o funcionamento e os percursos a pé não foram verificados.",
+    "nearbyEmpty": "Nenhum equipamento registado neste raio.",
+    "nearbyEducation": "Educação e creches",
+    "nearbyShopping": "Lojas e mercearias",
+    "nearbyHealth": "Saúde e farmácias",
+    "nearbyTransport": "Transportes públicos",
+    "nearbyLeisure": "Parques, praias e lazer",
+    "nearbyDining": "Cafés e restaurantes",
+    "nearbyWorship": "Locais de culto",
+    "overlapAlert": "Outro registo cadastral sobrepõe-se a este terreno.",
+    "overlappingRecords": "Comparar registos sobrepostos",
+    "overlapNote": "Estes registos distintos sobrepõem-se em pelo menos 80% de cada contorno. Os usos publicados podem diferir; nenhum registo comprova o que foi construído aqui. Abra cada ficha para comparar a fonte e as datas."
   },
   "Coverage": {
     "title": "Sete emirados. Uma plataforma.",
@@ -234,7 +248,8 @@
     "publishedLandUse": "Uso do solo publicado",
     "original": "Designação original",
     "mixed_use": "Uso misto",
-    "open_space": "Espaço aberto"
+    "open_space": "Espaço aberto",
+    "bus_stop": "Paragem de autocarro"
   },
   "Project": {
     "navigation": "Navegação do projeto",

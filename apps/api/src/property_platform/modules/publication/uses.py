@@ -3,7 +3,7 @@
 import re
 from typing import Literal
 
-VERSION = "source-use-v1"
+VERSION = "source-use-v2"
 UseType = Literal[
     "school",
     "university",
@@ -14,6 +14,7 @@ UseType = Literal[
     "healthcare",
     "rail_station",
     "bus_station",
+    "bus_stop",
     "rail",
     "restaurant",
     "cafe",
@@ -46,6 +47,7 @@ def use_types(*, land_use="", kind="", tags=None) -> list[UseType]:
         "tourism",
         "railway",
         "public_transport",
+        "highway",
     )
     # Captured tags take precedence over a catalogue kind read during an update.
     observed_kind = "" if any(key in tags for key in semantic_keys) else kind
@@ -59,6 +61,7 @@ def use_types(*, land_use="", kind="", tags=None) -> list[UseType]:
             "tourism",
             "railway",
             "public_transport",
+            "highway",
         )
     ]
     text = "|".join(re.sub(r"[\s_-]+", "", v.lower()) for v in values if isinstance(v, str))
@@ -71,6 +74,7 @@ def use_types(*, land_use="", kind="", tags=None) -> list[UseType]:
         ("hospital", ("hospital",)),
         ("healthcare", ("healthcare", "clinic", "medical", "pharmacy")),
         ("bus_station", ("busstation", "busterminal")),
+        ("bus_stop", ("busstop",)),
         ("rail", ("railway", "railland", "railroad", "railtransport", "tram")),
         ("restaurant", ("restaurant",)),
         ("cafe", ("cafe",)),

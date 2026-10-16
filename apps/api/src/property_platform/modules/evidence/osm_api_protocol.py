@@ -1,20 +1,21 @@
-"""Portable OSM XML validation for the reviewed one-off Saadiyat windows."""
+"""Portable OSM XML validation for reviewed, operator-triggered island windows."""
 
 import math
 from xml.etree import ElementTree
 
 from .collection_profiles import collection_for
+from .map_sources import osm_place_kind
 from .onwani import SourceError
 
 URL = "https://api.openstreetmap.org/api/0.6/map"
-VERSION = "osm-api-bootstrap-v1"
+VERSION = "osm-api-bootstrap-v2"
 MAX_BYTES = 16 * 1024 * 1024
 
 
 def boxes(territory):
     p = collection_for(territory)
-    if territory != "saadiyat-island":
-        raise ValueError("OSM API bootstrap is reviewed only for Saadiyat")
+    if territory not in {"al-reem-island", "saadiyat-island"}:
+        raise ValueError("OSM API bootstrap requires a reviewed island")
     w, s, e, n = p.osm_bounds
     x, y = round((w + e) / 2, 8), round((s + n) / 2, 8)
     return tuple(
@@ -61,9 +62,8 @@ def decode(payload):
             tags = {t.attrib["k"]: t.attrib["v"] for t in row.findall("tag")}
             if not (
                 tags.get("building")
-                or (
-                    tags.get("name") and any(tags.get(k) for k in ("highway", "amenity", "leisure"))
-                )
+                or (tags.get("name") and tags.get("highway"))
+                or osm_place_kind(tags, named=bool(tags.get("name") or tags.get("name:ar")))
             ):
                 continue
             e = {

@@ -250,6 +250,7 @@ try {
     "property-media/00000000-0000-0000-0000-000000000000",
     "project-media/00000000-0000-0000-0000-000000000000",
     "projects/the-district",
+    "surroundings/place/00000000-0000-0000-0000-000000000000",
   ]) {
     assert.equal(
       (await fetch(`${origin}/api/atlas/${path}`)).status,
@@ -278,6 +279,11 @@ try {
     (await fetch(`${origin}/api/atlas/parcels/invalid-id`)).status,
     404,
   );
+  for (const path of [
+    "surroundings/unknown/00000000-0000-0000-0000-000000000000",
+    "surroundings/place/invalid-id",
+  ])
+    assert.equal((await fetch(`${origin}/api/atlas/${path}`)).status, 404);
   assert.equal((await fetch(`${origin}/xx`)).status, 404);
   console.log(`Standalone smoke checks passed for ${locales.length} locales.`);
 } finally {

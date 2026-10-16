@@ -2,7 +2,7 @@
 
 ## Parcours et données
 
-Depuis le 16 octobre 2026, l'exploration affiche une carte centrale en pleine largeur et le dossier sélectionné **en dessous**, sur ordinateur et téléphone. Le panneau latéral, la feuille mobile fixe et les deux barres fixes superposées ont été retirés. Le bouton du bien sélectionné retrouve le dossier ; Localiser reste l'action explicite qui déplace la caméra.
+Depuis le 16 octobre 2026, l'exploration affiche une carte centrale en pleine largeur et la fiche courte sélectionnée **en dessous**, sur ordinateur et téléphone. Le panneau latéral, la feuille mobile fixe et les deux barres fixes superposées ont été retirés. Le bouton du bien sélectionné retrouve sa fiche ; Localiser reste l'action explicite qui déplace la caméra.
 
 La page projet conserve les faits et sources en base et ajoute une carte de quartier. Le territoire vient de la fiche SQL et de `C:\Users\Karim\Repositories\property-platform\packages\contracts\territories.json` : The District utilise Reem, un projet de Saadiyat utilise Saadiyat, sans condition sur le nom du projet. Un territoire inconnu ne reçoit ni carte ni position inventée.
 
@@ -51,4 +51,4 @@ Direction : route projet → configuration/présentation → carte locale → le
 
 Les 43 tests web comprennent les garde-fous de fournisseur, clé et limites Google, la couverture des polices et la parité des dictionnaires. Le compilateur TypeScript, le lint, les contrats et les liens documentaires sont vérifiés. Les contrôles HTTP standalone couvrent toutes les langues du registre ; le contrôle des projets vérifie aussi le quartier issu de la fiche et l'absence de carte embarquée au premier rendu.
 
-Les parcours navigateur contrôlent la galerie, la carte locale de Reem, les raccourcis du dossier dans la page, le vietnamien et l'arabe/RTL sur téléphone. La mise en page place bien le dossier sous la carte et ne déborde pas horizontalement. L'affichage Google réel reste à valider avec une clé de navigateur restreinte : aucune clé n'a été créée ou simulée dans le site.
+Les parcours navigateur contrôlent la galerie, la carte locale de Reem, le lien vers la page du dossier, le vietnamien et l'arabe/RTL sur téléphone. La mise en page place bien le dossier sous la carte et ne déborde pas horizontalement. L'affichage Google réel reste à valider avec une clé de navigateur restreinte : aucune clé n'a été créée ou simulée dans le site.

@@ -46,7 +46,7 @@ def test_preview_geometry_filter_provenance_and_private_field_allowlist(client):
                 "School": ["school"],
             }[item["properties"]["land_use"]]
         )
-        assert item["properties"]["use_classification_version"] == "source-use-v1"
+        assert item["properties"]["use_classification_version"] == "source-use-v2"
         detail = client.get(f"/api/v1/preview/parcels/{item['id']}")
         assert detail.status_code == 200
         assert detail.json()["source"]["published_at"] is None
@@ -54,7 +54,7 @@ def test_preview_geometry_filter_provenance_and_private_field_allowlist(client):
         assert item["properties"]["source_url"] == detail.json()["source"]["url"]
         assert item["properties"]["source_name"] == detail.json()["source"]["name"]
         assert detail.json()["use_types"] == item["properties"]["use_types"]
-        assert detail.json()["use_classification_version"] == "source-use-v1"
+        assert detail.json()["use_classification_version"] == "source-use-v2"
         for private in ["raw_attributes", "actor", "payload", "record_sha256"]:
             assert private not in detail.json()
         assert client.get(f"/api/v1/preview/parcels/{uuid4()}").status_code == 404

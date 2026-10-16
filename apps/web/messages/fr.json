@@ -130,7 +130,21 @@
     "zoomIn": "Zoomer",
     "zoomOut": "Dézoomer",
     "resetBearing": "Faire glisser pour tourner la carte ; cliquer pour revenir au nord",
-    "toggleAttribution": "Afficher ou masquer les crédits"
+    "toggleAttribution": "Afficher ou masquer les crédits",
+    "exploreHint": "Sélectionnez un projet, un bâtiment ou une parcelle sur la carte.",
+    "nearbyPlaces": "Autour de ce lieu",
+    "nearbyNote": "Lieux recensés dans un rayon de 1,5 km, à vol d’oiseau depuis le point cartographié ou le centre du contour. La couverture peut être incomplète ; ouverture et trajets à pied non vérifiés.",
+    "nearbyEmpty": "Aucun équipement recensé dans ce rayon.",
+    "nearbyEducation": "Éducation et crèches",
+    "nearbyShopping": "Commerces et alimentation",
+    "nearbyHealth": "Santé et pharmacies",
+    "nearbyTransport": "Transports en commun",
+    "nearbyLeisure": "Parcs, plages et loisirs",
+    "nearbyDining": "Cafés et restaurants",
+    "nearbyWorship": "Lieux de culte",
+    "overlapAlert": "Un autre enregistrement cadastral recouvre ce terrain.",
+    "overlappingRecords": "Comparer les enregistrements superposés",
+    "overlapNote": "Ces enregistrements distincts se recouvrent sur au moins 80 % de chaque contour. Les usages publiés peuvent différer ; aucun ne prouve ce qui est construit ici. Ouvrez chaque fiche pour comparer sa source et ses dates."
   },
   "Coverage": {
     "title": "Sept émirats. Une plateforme.",
@@ -234,7 +248,8 @@
     "publishedLandUse": "Usage publié du terrain",
     "original": "Libellé original",
     "mixed_use": "Usage mixte",
-    "open_space": "Espace ouvert"
+    "open_space": "Espace ouvert",
+    "bus_stop": "Arrêt de bus"
   },
   "Project": {
     "navigation": "Navigation du projet",

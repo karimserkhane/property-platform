@@ -130,7 +130,21 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "resetBearing": "Drag to rotate map, click to reset north",
-    "toggleAttribution": "Show or hide attribution"
+    "toggleAttribution": "Show or hide attribution",
+    "exploreHint": "Select a project, building or parcel on the map.",
+    "nearbyPlaces": "Around this location",
+    "nearbyNote": "Recorded places within 1.5 km, measured in a straight line from the mapped point or footprint centre. Coverage may be incomplete; opening status and walking routes are not verified.",
+    "nearbyEmpty": "No recorded amenities within this radius.",
+    "nearbyEducation": "Education & nurseries",
+    "nearbyShopping": "Shops & groceries",
+    "nearbyHealth": "Health & pharmacies",
+    "nearbyTransport": "Public transport",
+    "nearbyLeisure": "Parks, beaches & leisure",
+    "nearbyDining": "Cafés & restaurants",
+    "nearbyWorship": "Places of worship",
+    "overlapAlert": "Another cadastral record overlaps this land.",
+    "overlappingRecords": "Compare overlapping records",
+    "overlapNote": "These distinct records have at least 80% mutual footprint overlap. Published uses may differ; neither record proves what is built here. Open each record to compare its source and dates."
   },
   "Coverage": {
     "title": "Seven emirates. One platform.",
@@ -234,7 +248,8 @@
     "publishedLandUse": "Published land use",
     "original": "Original label",
     "mixed_use": "Mixed use",
-    "open_space": "Open space"
+    "open_space": "Open space",
+    "bus_stop": "Bus stop"
   },
   "Project": {
     "navigation": "Project navigation",

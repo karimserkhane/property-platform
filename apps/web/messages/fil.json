@@ -130,7 +130,21 @@
     "zoomIn": "Mag-zoom in",
     "zoomOut": "Mag-zoom out",
     "resetBearing": "I-drag upang paikutin ang mapa; i-click upang ibalik sa hilaga",
-    "toggleAttribution": "Ipakita o itago ang pagkilala sa mga pinagmulan"
+    "toggleAttribution": "Ipakita o itago ang pagkilala sa mga pinagmulan",
+    "exploreHint": "Pumili ng proyekto, gusali o lote sa mapa.",
+    "nearbyPlaces": "Sa paligid ng lokasyong ito",
+    "nearbyNote": "Mga naitalang lugar sa loob ng 1.5 km sa tuwid na linya mula sa punto sa mapa o gitna ng hangganan. Maaaring kulang ang saklaw; hindi beripikado ang pagbubukas at mga rutang lakaran.",
+    "nearbyEmpty": "Walang naitalang pasilidad sa loob ng radius na ito.",
+    "nearbyEducation": "Edukasyon at mga nursery",
+    "nearbyShopping": "Mga tindahan at grocery",
+    "nearbyHealth": "Kalusugan at mga botika",
+    "nearbyTransport": "Pampublikong transportasyon",
+    "nearbyLeisure": "Mga parke, dalampasigan at libangan",
+    "nearbyDining": "Mga café at restawran",
+    "nearbyWorship": "Mga lugar ng pagsamba",
+    "overlapAlert": "May isa pang rekord ng lupa na nakapatong sa loteng ito.",
+    "overlappingRecords": "Ihambing ang magkapatong na rekord",
+    "overlapNote": "Magkahiwalay ang mga rekord na ito na may hindi bababa sa 80% na pagpatong sa bawat hangganan. Maaaring magkaiba ang inilathalang gamit; walang rekord na patunay ng aktuwal na itinayo rito. Buksan ang bawat rekord upang ihambing ang pinagmulan at mga petsa."
   },
   "Coverage": {
     "title": "Pitong emirate. Isang platform.",
@@ -234,7 +248,8 @@
     "publishedLandUse": "Nakalathalang gamit ng lupa",
     "original": "Orihinal na label",
     "mixed_use": "Magkahalong gamit",
-    "open_space": "Bukas na espasyo"
+    "open_space": "Bukas na espasyo",
+    "bus_stop": "Hintuan ng bus"
   },
   "Project": {
     "navigation": "Nabigasyon ng proyekto",

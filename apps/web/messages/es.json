@@ -130,7 +130,21 @@
     "zoomIn": "Acercar",
     "zoomOut": "Alejar",
     "resetBearing": "Arrastra para girar el mapa; haz clic para orientar al norte",
-    "toggleAttribution": "Mostrar u ocultar atribuciones"
+    "toggleAttribution": "Mostrar u ocultar atribuciones",
+    "exploreHint": "Selecciona un proyecto, edificio o parcela en el mapa.",
+    "nearbyPlaces": "Alrededor de este lugar",
+    "nearbyNote": "Lugares registrados a menos de 1,5 km en línea recta desde el punto cartografiado o el centro del contorno. La cobertura puede ser incompleta; no se verifican la apertura ni las rutas a pie.",
+    "nearbyEmpty": "No hay servicios registrados en este radio.",
+    "nearbyEducation": "Educación y guarderías",
+    "nearbyShopping": "Tiendas y alimentación",
+    "nearbyHealth": "Salud y farmacias",
+    "nearbyTransport": "Transporte público",
+    "nearbyLeisure": "Parques, playas y ocio",
+    "nearbyDining": "Cafés y restaurantes",
+    "nearbyWorship": "Lugares de culto",
+    "overlapAlert": "Otro registro catastral se superpone a este terreno.",
+    "overlappingRecords": "Comparar registros superpuestos",
+    "overlapNote": "Estos registros distintos comparten al menos el 80 % de cada contorno. Los usos publicados pueden diferir; ninguno demuestra qué se ha construido aquí. Abre cada ficha para comparar su fuente y sus fechas."
   },
   "Coverage": {
     "title": "Siete emiratos. Una plataforma.",
@@ -234,7 +248,8 @@
     "publishedLandUse": "Uso del suelo publicado",
     "original": "Etiqueta original",
     "mixed_use": "Uso mixto",
-    "open_space": "Espacio abierto"
+    "open_space": "Espacio abierto",
+    "bus_stop": "Parada de autobús"
   },
   "Project": {
     "navigation": "Navegación del proyecto",

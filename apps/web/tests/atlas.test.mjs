@@ -7,6 +7,7 @@ import {
   geometryBounds,
   geometryClickArea,
   normalized,
+  parcelMapLabels,
   parcelPropertyIndex,
   preferredParcelProperty,
   propertyFeatures,
@@ -379,4 +380,53 @@ test("camera bounds preserve all polygon parts and holes", () => {
       [54.44, 24.51],
     ],
   );
+});
+
+test("parcel labels retain source uses and mark spatial project names as candidates", () => {
+  const parcel = (id, land_use, category, use_types = []) => ({
+    id,
+    type: "Feature",
+    geometry: { type: "MultiPolygon", coordinates: [] },
+    properties: { id, code: id, land_use, category, use_types },
+  });
+  const data = {
+    type: "FeatureCollection",
+    features: [
+      parcel("school", "Schools", "public", ["school"]),
+      parcel("temporary", "Data Center", "tech"),
+      parcel("project", "Commercial", "mixed"),
+      parcel("sector", "ProjectLimits", "overlay"),
+    ],
+  };
+  const projects = new Map([
+    [
+      "project",
+      [candidate("marker", "The District", "publisher_project_marker")],
+    ],
+  ]);
+  const result = parcelMapLabels(data, projects, "fr", (type) =>
+    type === "school" ? "École" : type,
+  );
+  assert.deepEqual(
+    result.features.map((f) => f.properties.display_name),
+    ["École", "Data Center", "≈ The District", ""],
+  );
+  assert.equal(result.features[2].properties.potential_name, true);
+  assert.equal(result.features[0].properties.potential_name, false);
+  assert.equal(data.features[0].properties.land_use, "Schools");
+  assert.equal(data.features[2].properties.display_name, undefined);
+});
+
+test("clickable parcel name labels retain building, place and street priority", () => {
+  const label = hit("parcel-project-names", "parcel");
+  const building = hit("buildings", "building");
+  assert.equal(selectMapHit([label, building]), building);
+  assert.equal(selectMapHit([label]), label);
+  const project = hit("project-names", "project", {
+    kind: "publisher_project_marker",
+  });
+  assert.equal(selectMapHit([label, project]), project);
+  const use = hit("parcel-use-names", "use");
+  const street = hit("street-names", "street");
+  assert.equal(selectMapHit([use, street]), street);
 });

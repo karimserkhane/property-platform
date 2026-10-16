@@ -9,7 +9,7 @@ from urllib.request import Request, urlopen
 from .collection_profiles import collection_for
 from .onwani import SourceError
 
-VERSION = "district-map-v4"
+VERSION = "district-map-v5"
 MAX_BYTES = 16 * 1024 * 1024
 OSM_URL = "https://overpass-api.de/api/interpreter"
 OSM_MIRROR = "https://overpass.private.coffee/api/interpreter"
@@ -17,6 +17,21 @@ OSM_MIRROR = "https://overpass.private.coffee/api/interpreter"
 # Backward-compatible default protocol constants, generated from one reviewed profile.
 OSM_QUERY = collection_for().osm_query
 LAYERS = collection_for().map_layers()
+
+
+def osm_place_kind(tags, *, named=False):
+    """Only recorded amenity semantics; unnamed building footprints stay buildings."""
+    for key in ("amenity", "leisure", "shop", "tourism"):
+        value = tags.get(key)
+        if value and value not in {"no", "vacant", "disused", "abandoned"}:
+            return value
+    if tags.get("railway") in {"station", "halt", "tram_stop"}:
+        return tags["railway"]
+    if tags.get("highway") == "bus_stop":
+        return "bus_stop"
+    if tags.get("public_transport") in {"station", "platform", "stop_position"}:
+        return tags["public_transport"]
+    return tags.get("building", "") if named else ""
 
 
 def fetch_url(base, params):

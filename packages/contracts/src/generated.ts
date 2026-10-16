@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/surroundings/{target}/{identity}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Surroundings */
+        get: operations["previewSurroundings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/references": {
         parameters: {
             query?: never;
@@ -272,6 +289,77 @@ export interface components {
              */
             status: "ok" | "ready" | "unavailable";
         };
+        /** Amenity */
+        Amenity: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Use Types */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /** Distance M */
+            distance_m: number;
+            source: components["schemas"]["MapProvenance"];
+        };
+        /** AmenityGroup */
+        AmenityGroup: {
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "education" | "shopping" | "health" | "transport" | "leisure" | "dining" | "worship";
+            /** Items */
+            items: components["schemas"]["Amenity"][];
+        };
+        /** MapProvenance */
+        MapProvenance: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Reliability */
+            reliability: string;
+            /** Acquisition Method */
+            acquisition_method: string;
+            /** Timestamp Basis */
+            timestamp_basis: string;
+        };
+        /** Surroundings */
+        Surroundings: {
+            /** Radius M */
+            radius_m: number;
+            /**
+             * Distance Basis
+             * @enum {string}
+             */
+            distance_basis: "point" | "centroid";
+            /** Truncated */
+            truncated: boolean;
+            /** Groups */
+            groups: components["schemas"]["AmenityGroup"][];
+        };
+        /** Error */
+        Error: {
+            /** Code */
+            code: string;
+        };
         /** ResearchReferenceResponse */
         ResearchReferenceResponse: {
             /** Label */
@@ -293,11 +381,6 @@ export interface components {
             retrieved_at: string;
             /** Published At */
             published_at: string | null;
-        };
-        /** Error */
-        Error: {
-            /** Code */
-            code: string;
         };
         /** ImageryResponse */
         ImageryResponse: {
@@ -384,10 +467,10 @@ export interface components {
              * Use Types
              * @default []
              */
-            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
             /**
              * Use Classification Version
-             * @default source-use-v1
+             * @default source-use-v2
              */
             use_classification_version: string;
             /** Height M */
@@ -401,31 +484,6 @@ export interface components {
             parcel_ids: string[];
             source: components["schemas"]["MapProvenance"];
             presentation?: components["schemas"]["PropertyPresentationResponse"] | null;
-        };
-        /** MapProvenance */
-        MapProvenance: {
-            /** Name */
-            name: string;
-            /** Url */
-            url: string;
-            /**
-             * Retrieved At
-             * Format: date-time
-             */
-            retrieved_at: string;
-            /** Published At */
-            published_at: string | null;
-            /**
-             * Ingested At
-             * Format: date-time
-             */
-            ingested_at: string;
-            /** Reliability */
-            reliability: string;
-            /** Acquisition Method */
-            acquisition_method: string;
-            /** Timestamp Basis */
-            timestamp_basis: string;
         };
         /** PointGeometry */
         PointGeometry: {
@@ -543,10 +601,10 @@ export interface components {
              * Use Types
              * @default []
              */
-            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
             /**
              * Use Classification Version
-             * @default source-use-v1
+             * @default source-use-v2
              */
             use_classification_version: string;
             /** Source Url */
@@ -582,10 +640,10 @@ export interface components {
              * Use Types
              * @default []
              */
-            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
             /**
              * Use Classification Version
-             * @default source-use-v1
+             * @default source-use-v2
              */
             use_classification_version: string;
             /** Area M2 */
@@ -595,6 +653,8 @@ export interface components {
             places: components["schemas"]["NearbyPlace"][];
             /** Streets */
             streets: components["schemas"]["NearbyStreet"][];
+            /** Overlapping Parcels */
+            overlapping_parcels: components["schemas"]["OverlappingParcel"][];
         };
         /** NearbyPlace */
         NearbyPlace: {
@@ -623,6 +683,25 @@ export interface components {
             name_ar: string;
             /** Distance M */
             distance_m: number;
+        };
+        /** OverlappingParcel */
+        OverlappingParcel: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Land Use */
+            land_use: string;
+            /** Use Types */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /** Construction Status */
+            construction_status: string;
+            /** Ownership */
+            ownership: string;
+            source: components["schemas"]["Provenance"];
         };
         /** ParcelAttributes */
         ParcelAttributes: {
@@ -1261,6 +1340,67 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    previewSurroundings: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path: {
+                target: "parcel" | "building" | "place" | "street";
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Surroundings"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

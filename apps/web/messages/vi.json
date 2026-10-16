@@ -130,7 +130,21 @@
     "zoomIn": "Phóng to",
     "zoomOut": "Thu nhỏ",
     "resetBearing": "Kéo để xoay bản đồ; nhấp để quay về hướng Bắc",
-    "toggleAttribution": "Hiện hoặc ẩn thông tin ghi nguồn"
+    "toggleAttribution": "Hiện hoặc ẩn thông tin ghi nguồn",
+    "exploreHint": "Chọn dự án, tòa nhà hoặc thửa đất trên bản đồ.",
+    "nearbyPlaces": "Xung quanh vị trí này",
+    "nearbyNote": "Các địa điểm đã ghi nhận trong bán kính 1,5 km theo đường thẳng từ điểm trên bản đồ hoặc tâm đường bao. Dữ liệu có thể chưa đầy đủ; chưa xác minh tình trạng hoạt động và lộ trình đi bộ.",
+    "nearbyEmpty": "Chưa ghi nhận tiện ích trong bán kính này.",
+    "nearbyEducation": "Giáo dục và nhà trẻ",
+    "nearbyShopping": "Cửa hàng và thực phẩm",
+    "nearbyHealth": "Y tế và nhà thuốc",
+    "nearbyTransport": "Giao thông công cộng",
+    "nearbyLeisure": "Công viên, bãi biển và giải trí",
+    "nearbyDining": "Quán cà phê và nhà hàng",
+    "nearbyWorship": "Cơ sở tôn giáo",
+    "overlapAlert": "Một hồ sơ địa chính khác chồng lấn thửa đất này.",
+    "overlappingRecords": "So sánh các hồ sơ chồng lấn",
+    "overlapNote": "Đây là các hồ sơ riêng biệt có mức chồng lấn ít nhất 80% đường bao của mỗi bên. Mục đích sử dụng công bố có thể khác nhau; không hồ sơ nào chứng minh thực tế đã xây gì tại đây. Mở từng hồ sơ để so sánh nguồn và ngày tháng."
   },
   "Coverage": {
     "title": "Bảy tiểu vương quốc. Một nền tảng.",
@@ -234,7 +248,8 @@
     "publishedLandUse": "Mục đích sử dụng đất đã công bố",
     "original": "Nhãn gốc",
     "mixed_use": "Sử dụng hỗn hợp",
-    "open_space": "Không gian mở"
+    "open_space": "Không gian mở",
+    "bus_stop": "Trạm xe buýt"
   },
   "Project": {
     "navigation": "Điều hướng dự án",

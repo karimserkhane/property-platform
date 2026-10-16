@@ -86,6 +86,13 @@ DATASETS = (
 # Same reviewed connectors, distinct source identities and deployment scopes.
 DATASETS += (
     Dataset(
+        "reem-osm-bootstrap",
+        "property-platform-osm-bootstrap",
+        "Manual bounded official OSM API acquisition for Reem; no recurring schedule.",
+        {"territory": "al-reem-island"},
+        None,
+    ),
+    Dataset(
         "reem-project-discovery",
         "property-platform-project-discovery",
         "Observe official catalogues; new links remain review candidates, never map identities.",

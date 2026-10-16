@@ -130,7 +130,21 @@
     "zoomIn": "放大",
     "zoomOut": "缩小",
     "resetBearing": "拖动旋转地图；点击恢复朝北方向",
-    "toggleAttribution": "显示或隐藏来源信息"
+    "toggleAttribution": "显示或隐藏来源信息",
+    "exploreHint": "在地图上选择项目、建筑或地块。",
+    "nearbyPlaces": "此处周边",
+    "nearbyNote": "距地图点或轮廓中心直线距离1.5公里内的已记录地点。覆盖可能不完整；营业状态和步行路线未经核实。",
+    "nearbyEmpty": "此范围内暂无已记录的设施。",
+    "nearbyEducation": "教育与托儿设施",
+    "nearbyShopping": "商店与食品杂货",
+    "nearbyHealth": "医疗与药房",
+    "nearbyTransport": "公共交通",
+    "nearbyLeisure": "公园、海滩与休闲",
+    "nearbyDining": "咖啡馆与餐厅",
+    "nearbyWorship": "宗教场所",
+    "overlapAlert": "另有一条地籍记录与此地块重叠。",
+    "overlappingRecords": "比较重叠记录",
+    "overlapNote": "这些是独立记录，双方轮廓的重叠比例均至少为80%。公布的用途可能不同；任何一条记录都不能证明此处实际建成了什么。请分别打开记录，比较来源和日期。"
   },
   "Coverage": {
     "title": "七个酋长国。一个平台。",
@@ -234,7 +248,8 @@
     "publishedLandUse": "公布的土地用途",
     "original": "原始名称",
     "mixed_use": "混合用途",
-    "open_space": "开放空间"
+    "open_space": "开放空间",
+    "bus_stop": "公交站点"
   },
   "Project": {
     "navigation": "项目导航",

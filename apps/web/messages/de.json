@@ -130,7 +130,21 @@
     "zoomIn": "Vergrößern",
     "zoomOut": "Verkleinern",
     "resetBearing": "Zum Drehen ziehen; klicken, um die Karte nach Norden auszurichten",
-    "toggleAttribution": "Quellenangaben ein- oder ausblenden"
+    "toggleAttribution": "Quellenangaben ein- oder ausblenden",
+    "exploreHint": "Wähle ein Projekt, Gebäude oder Grundstück auf der Karte.",
+    "nearbyPlaces": "In dieser Umgebung",
+    "nearbyNote": "Erfasste Orte im Umkreis von 1,5 km Luftlinie ab Kartenpunkt oder Flächenmittelpunkt. Die Abdeckung kann unvollständig sein; Betriebsstatus und Fußwege sind nicht geprüft.",
+    "nearbyEmpty": "Keine Einrichtungen in diesem Umkreis erfasst.",
+    "nearbyEducation": "Bildung und Kindergärten",
+    "nearbyShopping": "Geschäfte und Lebensmittel",
+    "nearbyHealth": "Gesundheit und Apotheken",
+    "nearbyTransport": "Öffentlicher Verkehr",
+    "nearbyLeisure": "Parks, Strände und Freizeit",
+    "nearbyDining": "Cafés und Restaurants",
+    "nearbyWorship": "Religiöse Einrichtungen",
+    "overlapAlert": "Ein weiterer Katastereintrag überlagert dieses Grundstück.",
+    "overlappingRecords": "Überlagerte Einträge vergleichen",
+    "overlapNote": "Diese getrennten Einträge überlagern sich auf mindestens 80 % jeder Fläche. Veröffentlichte Nutzungen können abweichen; kein Eintrag belegt die tatsächliche Bebauung. Öffne jeden Eintrag, um Quelle und Daten zu vergleichen."
   },
   "Coverage": {
     "title": "Sieben Emirate. Eine Plattform.",
@@ -234,7 +248,8 @@
     "publishedLandUse": "Veröffentlichte Flächennutzung",
     "original": "Originalbezeichnung",
     "mixed_use": "Gemischte Nutzung",
-    "open_space": "Freifläche"
+    "open_space": "Freifläche",
+    "bus_stop": "Bushaltestelle"
   },
   "Project": {
     "navigation": "Projektnavigation",

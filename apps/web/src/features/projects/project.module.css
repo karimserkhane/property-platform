@@ -1267,112 +1267,11 @@
   color: #596e6c;
   text-decoration: none;
 }
-.embedded {
-  padding: 0;
-  max-width: none;
-  font-size: 13px;
-}
-.embedded .hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
-  padding: 0;
-  margin-block-end: 24px;
-}
-.embedded .hero .heroCopy {
-  padding: clamp(24px, 4vw, 52px);
-}
-.embedded .hero .heroCopy h2 {
-  margin-block: 12px;
-  font-family: var(--font-display), serif;
-  font-size: 36px;
-  font-weight: 500;
-  line-height: 1.08;
-}
-.embedded .developer {
-  font-size: 14px;
-}
-.embedded .cover {
-  width: 100%;
-  min-height: 420px;
-}
-.embedded .coverCopy {
-  padding: 24px;
-}
-.embedded .coverMonogram {
-  font-size: 110px;
-}
-.embedded .actions {
-  margin-block-start: 20px;
-  gap: 10px;
-}
-.embedded .actions > a {
-  width: auto;
-  font-size: 12px;
-  min-height: 44px;
-}
-.embedded .factStrip {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-  padding-block: 20px;
-  gap: 20px 12px;
-}
-.embedded .factStrip > div {
-  padding: 0;
-  border: 0;
-}
-.embedded .sectionNav {
-  top: auto;
-  margin-block-end: 22px;
-  gap: 8px;
-  background: var(--surface, #fffefa);
-}
-.embedded .sectionNav button {
-  flex-shrink: 0;
-  min-height: 44px;
-  padding: 8px 12px;
-  border: 1px solid #dce2d8;
-  border-radius: 10px;
-  background: #f2f5ef;
-  color: #24484e;
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-.embedded .contentLayout {
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-.embedded .sidebar {
-  position: static;
-  display: block;
-}
-.embedded .overviewFacts {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-}
-.embedded .typologies {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
-  gap: 10px;
-}
-.embedded .amenities,
-.embedded .media {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-}
-.embedded .section {
-  margin-block-end: 26px;
-}
-.embedded .location {
-  padding: 22px;
-}
-.embedded .primaryAction {
-  min-height: 44px;
-}
 @media (max-width: 760px) {
-  .hero .cover,
-  .embedded .hero .cover {
+  .hero .cover {
     min-height: 570px;
   }
-  .hero .heroCopy,
-  .embedded .hero .heroCopy {
+  .hero .heroCopy {
     padding: 130px 24px 30px;
   }
   .hero .cover::after {
@@ -1416,9 +1315,6 @@
   .sectionNav {
     gap: 8px 20px;
   }
-  .embedded .sectionNav {
-    top: auto;
-  }
   .location {
     padding: 22px;
   }
@@ -1446,6 +1342,90 @@
 :global(html[dir="rtl"]) .kicker,
 :global(html[dir="rtl"]) .hero h1 {
   letter-spacing: normal;
+}
+
+/* Compact map selection; the full gallery and evidence stay on the project page. */
+.mapSummary {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.2fr);
+  gap: clamp(20px, 3vw, 36px);
+  align-items: center;
+}
+.summaryCover {
+  height: 260px;
+  min-height: 0;
+  margin: 0;
+  border-radius: 16px;
+  aspect-ratio: auto;
+}
+.summaryCover img {
+  height: 100%;
+}
+.summaryCopy {
+  min-width: 0;
+  padding-block: 10px;
+}
+.summaryDeveloper {
+  color: var(--muted);
+  margin-block: 0 18px;
+}
+.mapSummary .summaryFacts {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-block: 18px 10px;
+}
+.summaryFacts dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+.summaryFacts dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+.summaryTypes {
+  color: var(--accent);
+}
+.summaryActions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-block-start: 20px;
+}
+.summaryActions .primaryAction {
+  min-height: 48px;
+  display: inline-flex;
+  justify-content: center;
+  gap: 16px;
+  align-items: center;
+  border-radius: 12px;
+  padding: 12px 20px;
+  background: var(--ink);
+  color: white;
+  text-decoration: none;
+  box-shadow: 0 5px 14px #153d4320;
+}
+.summaryActions .textAction {
+  border: 0;
+  background: none;
+  padding: 12px 0;
+  box-shadow: none;
+}
+@media (max-width: 650px) {
+  .mapSummary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .summaryCover {
+    height: 190px;
+  }
+  .summaryCopy {
+    padding-block: 0;
+  }
+  .summaryActions .primaryAction {
+    flex: 1;
+  }
 }
 
 .hero .heroCopy .primaryAction {

@@ -7,6 +7,7 @@ import {
   sourceLabel,
 } from "./presentation";
 import { PropertyCard } from "./property-card";
+import { Surroundings } from "./surroundings";
 import type {
   AtlasLabels,
   MapContext,
@@ -29,6 +30,7 @@ export function Inspector({
   locate,
   choose,
   parcelProperties,
+  territory,
 }: {
   detail: ParcelDetail | null;
   feature: MapFeature | null;
@@ -42,6 +44,7 @@ export function Inspector({
   locate: () => void;
   choose: (feature: MapFeature) => void;
   parcelProperties: Map<string, ParcelProperty[]>;
+  territory: string;
 }) {
   const usageText = useTranslations("Use");
   const date = (value: string | null | undefined) =>
@@ -102,6 +105,43 @@ export function Inspector({
               <bdi>{readableParcelCode(detail.code)}</bdi>
             </p>
           )}
+        </div>
+      )}
+      {!!detail?.overlapping_parcels.length && (
+        <div className="parcel-overlap">
+          <p>{m.overlapAlert}</p>
+          <details className="property-proof">
+            <summary>{m.overlappingRecords}</summary>
+            <p className="small-text">{m.overlapNote}</p>
+            {detail.overlapping_parcels.map((parcel) => (
+              <div className="overlap-record" key={parcel.id}>
+                <button
+                  type="button"
+                  className="candidate-button"
+                  onClick={() => select(parcel.id)}
+                >
+                  <strong>
+                    {parcel.use_types[0]
+                      ? usageText(parcel.use_types[0])
+                      : parcel.land_use}
+                  </strong>
+                  <bdi>{readableParcelCode(parcel.code)}</bdi> →
+                </button>
+                <small>
+                  <bdi>
+                    {parcel.land_use} · {parcel.ownership}
+                  </bdi>
+                </small>
+                <a
+                  href={parcel.source.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {labels.source} ↗
+                </a>
+              </div>
+            ))}
+          </details>
         </div>
       )}
       {detail?.land_use && (
@@ -217,8 +257,8 @@ export function Inspector({
             )}
           </details>
           {!!otherPlaces.length && (
-            <>
-              <h3>{m.relatedProperties}</h3>
+            <details className="property-proof">
+              <summary>{m.relatedProperties}</summary>
               <p className="small-text">{m.spatial}</p>
               {otherPlaces.map((place) => {
                 const original = context?.place.features.find(
@@ -262,11 +302,11 @@ export function Inspector({
                   </p>
                 );
               })}
-            </>
+            </details>
           )}
           {!!detail.streets.length && (
-            <>
-              <h3>{m.nearby}</h3>
+            <details className="property-proof">
+              <summary>{m.nearby}</summary>
               <p className="small-text">{m.spatial}</p>
               {detail.streets.map((street) => (
                 <p key={street.id}>
@@ -274,9 +314,28 @@ export function Inspector({
                   {new Intl.NumberFormat(locale).format(street.distance_m)} m
                 </p>
               ))}
-            </>
+            </details>
           )}
         </>
+      )}
+      {(detail || feature) && (
+        <Surroundings
+          key={detail?.id ?? feature?.id}
+          identity={(detail?.id ?? feature?.id) as string}
+          target={
+            detail
+              ? "parcel"
+              : feature?.geometry.type === "Point"
+                ? "place"
+                : feature?.geometry.type === "MultiPolygon"
+                  ? "building"
+                  : "street"
+          }
+          territory={territory}
+          m={m}
+          labels={labels}
+          locale={locale}
+        />
       )}
       {source && (
         <details className="source-detail">

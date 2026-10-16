@@ -259,21 +259,20 @@ def osm_data_records(data, capture, *, territory=DEFAULT_TERRITORY, xml_snapshot
                             published,
                         )
                     )
-            if name:
-                place_kind = tags.get("amenity") or tags.get("leisure") or tags.get("building")
-                if place_kind:
-                    staged.append(
-                        (
-                            "place",
-                            identity,
-                            {**values, "kind": protocol.text(place_kind, 100)},
-                            point,
-                            attrs,
-                            capture,
-                            url,
-                            published,
-                        )
+            place_kind = protocol.osm_place_kind(tags, named=bool(name or values["name_ar"]))
+            if place_kind:
+                staged.append(
+                    (
+                        "place",
+                        identity,
+                        {**values, "kind": protocol.text(place_kind, 100)},
+                        point,
+                        attrs,
+                        capture,
+                        url,
+                        published,
                     )
+                )
         except ValueError, KeyError, TypeError:
             rejected.append((identity, attrs, capture))
     return staged, rejected

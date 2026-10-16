@@ -1,4 +1,9 @@
-import type { MapContext, MapFeature, MapLabels } from "./types";
+import type {
+  MapContext,
+  MapFeature,
+  MapLabels,
+  ParcelCollection,
+} from "./types";
 
 type PropertyIdentity = Pick<
   MapFeature["properties"],
@@ -94,6 +99,45 @@ export function parcelPropertyIndex(context: MapContext | null) {
   return index;
 }
 
+export function parcelMapLabels(
+  data: ParcelCollection,
+  candidates: Map<string, ParcelProperty[]>,
+  locale: string,
+  formatUse: (
+    type: NonNullable<
+      ParcelCollection["features"][number]["properties"]["use_types"]
+    >[number],
+  ) => string,
+): ParcelCollection {
+  return {
+    ...data,
+    features: data.features.map((feature) => {
+      const candidate = preferredParcelProperty(
+        candidates.get(feature.id) ?? [],
+        locale,
+      );
+      const name = candidate ? propertyName(candidate, locale) : "";
+      const p = feature.properties;
+      // Spatial candidates are suggestions, never a cadastral project identity.
+      return {
+        ...feature,
+        properties: {
+          ...p,
+          display_name:
+            p.category === "overlay"
+              ? ""
+              : name
+                ? `≈ ${name}`
+                : p.use_types?.[0]
+                  ? formatUse(p.use_types[0])
+                  : p.land_use,
+          potential_name: Boolean(name),
+        },
+      };
+    }),
+  };
+}
+
 // Presentation only: source codes, searches and exports keep their exact text.
 export function readableParcelCode(code: string): string {
   return code.replace(/_to_/gi, "–").replaceAll("_", " · ");
@@ -136,15 +180,19 @@ export function selectMapHit<T extends MapHit>(
     const rank =
       hit.layer.id === "buildings"
         ? 0
-        : ["places", "place-names"].includes(hit.layer.id) &&
+        : ["places", "place-names", "project-names"].includes(hit.layer.id) &&
             typeof hit.properties.kind === "string" &&
             hit.properties.kind.endsWith("_project_marker")
           ? 1
-          : ["places", "place-names"].includes(hit.layer.id)
+          : ["places", "place-names", "project-names"].includes(hit.layer.id)
             ? 2
             : ["streets", "street-names"].includes(hit.layer.id)
               ? 3
-              : hit.layer.id === "parcel-fill"
+              : [
+                    "parcel-fill",
+                    "parcel-project-names",
+                    "parcel-use-names",
+                  ].includes(hit.layer.id)
                 ? hit.properties.category === "overlay"
                   ? 5
                   : 4

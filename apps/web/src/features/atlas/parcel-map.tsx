@@ -9,6 +9,7 @@ import {
   ScaleControl,
   setWorkerUrl,
 } from "maplibre-gl";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef } from "react";
 import { mapControlLabels, mapLayers, mapName } from "./map-style";
 import {
@@ -19,6 +20,8 @@ import {
   download,
   geometryBounds,
   geometryClickArea,
+  parcelMapLabels,
+  parcelPropertyIndex,
   selectMapHit,
 } from "./presentation";
 import type {
@@ -93,6 +96,11 @@ export default function ParcelMap({
   territory: Territory;
   countryBounds: number[];
 }) {
+  const usage = useTranslations("Use");
+  const labelledParcels = useMemo(
+    () => parcelMapLabels(data, parcelPropertyIndex(context), locale, usage),
+    [data, context, locale, usage],
+  );
   const element = useRef<HTMLElement>(null);
   // The parent keys the map by locale; native controls receive that mount's labels.
   const controlLabels = useRef(mapControlLabels(m, label));
@@ -214,9 +222,12 @@ export default function ParcelMap({
             "buildings",
             "places",
             "place-names",
+            "project-names",
             "streets",
             "street-names",
             "parcel-fill",
+            "parcel-project-names",
+            "parcel-use-names",
           ],
         });
         const hit = selectMapHit(hits, parcelAreasRef.current);
@@ -232,9 +243,16 @@ export default function ParcelMap({
         }
         if (!hit) return;
         const id = String(hit.properties.id);
-        if (hit.layer.id === "parcel-fill") callbacks.current.onSelect(id);
+        if (
+          ["parcel-fill", "parcel-project-names", "parcel-use-names"].includes(
+            hit.layer.id,
+          )
+        )
+          callbacks.current.onSelect(id);
         else {
-          const target = ["places", "place-names"].includes(hit.layer.id)
+          const target = ["places", "place-names", "project-names"].includes(
+            hit.layer.id,
+          )
             ? "place"
             : hit.layer.id === "buildings"
               ? "building"
@@ -294,7 +312,12 @@ export default function ParcelMap({
     const instance = map.current;
     if (!instance) return;
     const update = () => {
-      for (const id of ["street-names", "place-names", "area-names"]) {
+      for (const id of [
+        "street-names",
+        "place-names",
+        "project-names",
+        "area-names",
+      ]) {
         if (instance.getLayer(id))
           instance.setLayoutProperty(id, "text-field", mapName(locale));
       }
@@ -313,7 +336,7 @@ export default function ParcelMap({
     if (!instance) return;
     const update = () => {
       for (const [id, collection] of [
-        ["parcels", data],
+        ["parcels", labelledParcels],
         ...Object.entries(context ?? {}),
       ] as const) {
         const source = instance.getSource(id) as GeoJSONSource | undefined;
@@ -336,7 +359,7 @@ export default function ParcelMap({
     return () => {
       instance.off("load", update);
     };
-  }, [data, context]);
+  }, [labelledParcels, context]);
 
   useEffect(() => {
     const instance = map.current;
@@ -406,7 +429,10 @@ export default function ParcelMap({
         "place-selection": options.places,
         "street-selection": options.streets,
         "place-names": options.places && options.names,
+        "project-names": options.places && options.names,
         "parcel-codes": options.codes,
+        "parcel-project-names": options.names,
+        "parcel-use-names": options.names,
         areas: options.areas,
         "area-names": options.areas && options.names,
         satellite: options.satellite && options.scene === "esri",

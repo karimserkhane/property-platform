@@ -20,8 +20,10 @@ const editorial = [
 export function ProjectCover({
   project,
   labels,
+  compact = false,
 }: {
   project: ProjectDetail;
+  compact?: boolean;
   labels: Pick<
     ProjectLabels,
     | "visuals"
@@ -51,7 +53,10 @@ export function ProjectCover({
     setIndex((value) => (value + step + total) % total);
   const number = new Intl.NumberFormat(locale);
   return (
-    <figure className={styles.cover} data-editorial={!delivery}>
+    <figure
+      className={`${styles.cover} ${compact ? styles.summaryCover : ""}`}
+      data-editorial={!delivery}
+    >
       {/* biome-ignore lint/performance/noImgElement: approved stored media or existing local licensed editorial assets; no remote optimizer. */}
       <img
         key={delivery || ambient.image}
@@ -61,7 +66,11 @@ export function ProjectCover({
             ? undefined
             : `/images/uae/${ambient.image}-768.webp 768w, /images/uae/${ambient.image}-1920.webp 1920w`
         }
-        sizes="(max-width: 760px) 100vw, 1400px"
+        sizes={
+          compact
+            ? "(max-width: 760px) 100vw, 380px"
+            : "(max-width: 760px) 100vw, 1400px"
+        }
         alt={delivery ? photo.title : ""}
         lang={photo?.source.language}
         decoding="async"
@@ -86,36 +95,38 @@ export function ProjectCover({
           <span>{labels.editorialImage}</span>
         )}
       </figcaption>
-      <div className={styles.galleryControls}>
-        {website && !delivery && (
-          <a href={website} target="_blank" rel="noopener noreferrer">
-            {labels.officialGallery} <span aria-hidden="true">↗</span>
-          </a>
-        )}
-        {total > 1 && (
-          <div className={styles.galleryPager}>
-            <button
-              type="button"
-              aria-label={labels.previousImage}
-              onClick={() => move(-1)}
-            >
-              ←
-            </button>
-            <output aria-label={labels.visuals} aria-live="polite">
-              <bdi>
-                {number.format((index % total) + 1)} / {number.format(total)}
-              </bdi>
-            </output>
-            <button
-              type="button"
-              aria-label={labels.nextImage}
-              onClick={() => move(1)}
-            >
-              →
-            </button>
-          </div>
-        )}
-      </div>
+      {!compact && (
+        <div className={styles.galleryControls}>
+          {website && !delivery && (
+            <a href={website} target="_blank" rel="noopener noreferrer">
+              {labels.officialGallery} <span aria-hidden="true">↗</span>
+            </a>
+          )}
+          {total > 1 && (
+            <div className={styles.galleryPager}>
+              <button
+                type="button"
+                aria-label={labels.previousImage}
+                onClick={() => move(-1)}
+              >
+                ←
+              </button>
+              <output aria-label={labels.visuals} aria-live="polite">
+                <bdi>
+                  {number.format((index % total) + 1)} / {number.format(total)}
+                </bdi>
+              </output>
+              <button
+                type="button"
+                aria-label={labels.nextImage}
+                onClick={() => move(1)}
+              >
+                →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </figure>
   );
 }

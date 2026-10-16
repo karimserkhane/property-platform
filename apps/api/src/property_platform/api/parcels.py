@@ -1,5 +1,6 @@
 import math
 from datetime import date, datetime
+from typing import Literal
 from uuid import UUID
 
 from django.conf import settings
@@ -84,6 +85,16 @@ class NearbyStreet(Schema):
     distance_m: float
 
 
+class OverlappingParcel(Schema):
+    id: UUID
+    code: str
+    land_use: str
+    use_types: list[UseType]
+    construction_status: str
+    ownership: str
+    source: Provenance
+
+
 class Detail(Schema):
     id: UUID
     code: str
@@ -101,12 +112,67 @@ class Detail(Schema):
     attributes: ParcelAttributes
     places: list[NearbyPlace]
     streets: list[NearbyStreet]
+    overlapping_parcels: list[OverlappingParcel]
 
 
 class MapProvenance(Provenance):
     reliability: str
     acquisition_method: str
     timestamp_basis: str
+
+
+class Amenity(Schema):
+    id: UUID
+    name: str
+    name_ar: str
+    use_types: list[UseType]
+    distance_m: float
+    source: MapProvenance
+
+
+class AmenityGroup(Schema):
+    key: Literal["education", "shopping", "health", "transport", "leisure", "dining", "worship"]
+    items: list[Amenity]
+
+
+class Surroundings(Schema):
+    radius_m: int
+    distance_basis: Literal["point", "centroid"]
+    truncated: bool
+    groups: list[AmenityGroup]
+
+
+@router.get(
+    "/surroundings/{target}/{identity}",
+    response={200: Surroundings, 403: Error, 404: Error, 409: Error, 503: Error},
+    operation_id="previewSurroundings",
+)
+def surroundings(
+    request,
+    target: Literal["parcel", "building", "place", "street"],
+    identity: UUID,
+    territory: str | None = None,
+):
+    if not enabled():
+        return Status(403, {"code": "preview_disabled"})
+    from property_platform.modules.publication.coverage import map_source_namespaces, profile_for
+    from property_platform.modules.publication.surroundings import surroundings as project
+
+    profile = profile_for(territory) if territory else None
+    if territory and profile is None:
+        return Status(409, {"code": "territory_not_configured"})
+    try:
+        result = project(
+            target,
+            identity,
+            namespaces=map_source_namespaces(territory) if territory else None,
+            parcel_namespaces=profile.parcel_namespaces if profile else None,
+        )
+    except DatabaseError:
+        return Status(503, {"code": "data_unavailable"})
+    if result is None:
+        return Status(404, {"code": "not_found"})
+    return result
 
 
 class ResearchReferenceResponse(Schema):
