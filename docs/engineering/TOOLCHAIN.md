@@ -4,6 +4,8 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 
 ## Versions exécutées ou configurées
 
+**Ajout facultatif du 16 octobre :** Tailscale **1.104.1**, image officielle `tailscale/tailscale:v1.104.1` fixée par digest dans `infra/local/compose.remote-preview.yaml`, fournit la prévisualisation privée sur téléphone. Sa version a été vérifiée dans la distribution officielle et l'image téléchargée. Il n'est ajouté à aucun runtime web/API/ingestion. Voir [REMOTE_PREVIEW.md](REMOTE_PREVIEW.md) et les [paramètres Docker officiels](https://tailscale.com/docs/features/containers/docker/docker-params).
+
 | Outil | Version | Emplacement / rôle |
 |---|---|---|
 | Node.js | 26.11.1 | .node-version, CI, images web ; engines >=26.11.1 <27 |

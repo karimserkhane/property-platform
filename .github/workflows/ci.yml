@@ -29,6 +29,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:web
       - run: pnpm docs:check
+      - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.remote-preview.yaml --profile web-preview --profile remote-preview config --quiet
       - run: pnpm build
       - run: node scripts/prepare-web-runtime.mjs
       - run: pnpm smoke:web
