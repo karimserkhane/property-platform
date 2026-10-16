@@ -126,7 +126,11 @@
     "nextPage": "পরের",
     "selectionLabel": "নির্বাচিত সম্পত্তি",
     "expandDetails": "বিস্তারিত বড় করুন",
-    "collapseDetails": "বিস্তারিত ছোট করুন"
+    "collapseDetails": "বিস্তারিত ছোট করুন",
+    "zoomIn": "জুম ইন করুন",
+    "zoomOut": "জুম আউট করুন",
+    "resetBearing": "মানচিত্র ঘোরাতে টানুন; উত্তরমুখী করতে ক্লিক করুন",
+    "toggleAttribution": "উৎসের স্বীকৃতি দেখান বা লুকান"
   },
   "Coverage": {
     "title": "সাতটি আমিরাত। একটি প্ল্যাটফর্ম।",

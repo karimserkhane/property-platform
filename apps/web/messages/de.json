@@ -126,7 +126,11 @@
     "nextPage": "Weiter",
     "selectionLabel": "Ausgewählte Immobilie",
     "expandDetails": "Details vergrößern",
-    "collapseDetails": "Details verkleinern"
+    "collapseDetails": "Details verkleinern",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "resetBearing": "Zum Drehen ziehen; klicken, um die Karte nach Norden auszurichten",
+    "toggleAttribution": "Quellenangaben ein- oder ausblenden"
   },
   "Coverage": {
     "title": "Sieben Emirate. Eine Plattform.",

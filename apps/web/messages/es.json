@@ -126,7 +126,11 @@
     "nextPage": "Siguiente",
     "selectionLabel": "Inmueble seleccionado",
     "expandDetails": "Ampliar ficha",
-    "collapseDetails": "Reducir ficha"
+    "collapseDetails": "Reducir ficha",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "resetBearing": "Arrastra para girar el mapa; haz clic para orientar al norte",
+    "toggleAttribution": "Mostrar u ocultar atribuciones"
   },
   "Coverage": {
     "title": "Siete emiratos. Una plataforma.",

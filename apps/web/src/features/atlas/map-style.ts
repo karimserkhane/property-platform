@@ -1,5 +1,16 @@
 import type { ExpressionSpecification, LayerSpecification } from "maplibre-gl";
 import { COLORS } from "./presentation";
+import type { MapLabels } from "./types";
+
+export function mapControlLabels(labels: MapLabels, title: string) {
+  return {
+    "Map.Title": title,
+    "NavigationControl.ZoomIn": labels.zoomIn,
+    "NavigationControl.ZoomOut": labels.zoomOut,
+    "NavigationControl.ResetBearing": labels.resetBearing,
+    "AttributionControl.ToggleAttribution": labels.toggleAttribution,
+  };
+}
 
 const fonts = ["Arial", "Noto Sans", "sans-serif"];
 export function mapName(locale: string): ExpressionSpecification {

@@ -8,7 +8,7 @@ Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCH
 
 ## Comment lire l'arborescence
 
-**Refonte de présentation — 16 octobre 2026.** `features/atlas/home.tsx` possède le parcours d'accueil et les entrées Reem/Saadiyat ; `explorer.tsx` et `explorer.module.css` possèdent la recherche cartographique, le choix mobile Carte/Liste, les réglages et la fiche de sélection. `atlas/pagination.tsx` possède le rendu/focus de la pagination et dépend du calcul pur `atlas/page-window.ts`, qui ne dépend ni de React ni de l'API. `features/projects/directory.tsx` possède uniquement le filtre client des projets et promoteurs déjà lus par la route serveur ; il ne crée aucune identité ni requête de collecte. `components/ui-icon.tsx` possède des SVG décoratifs réutilisables et ne dépend d'aucun module métier. La direction reste `route serveur → lecture API/contrat → composants de présentation` et `fonctionnalités → composants génériques`. Les quinze dictionnaires restent propriétaires des libellés ; les preuves conservent leur langue originale. Aucun changement de table, d'ingestion ou de contrat HTTP pour cette refonte. Voir [les parcours et la présentation](VISUAL_DESIGN.md).
+**Refonte de présentation — 16 octobre 2026.** `features/atlas/home.tsx` possède le parcours d'accueil et les entrées Reem/Saadiyat ; `explorer.tsx` et `explorer.module.css` possèdent la recherche cartographique, le choix mobile Carte/Liste, les réglages et la fiche de sélection. `atlas/pagination.tsx` possède le rendu/focus de la pagination et dépend du calcul pur `atlas/page-window.ts`, qui ne dépend ni de React ni de l'API. `features/projects/directory.tsx` possède uniquement le filtre client des projets et promoteurs déjà lus par la route serveur ; il ne crée aucune identité ni requête de collecte. `components/ui-icon.tsx` possède des SVG décoratifs réutilisables et ne dépend d'aucun module métier. La direction reste `route serveur → lecture API/contrat → composants de présentation` et `fonctionnalités → composants génériques`. Les dictionnaires des langues activées restent propriétaires des libellés ; les preuves conservent leur langue originale. Aucun changement de table, d'ingestion ou de contrat HTTP pour cette refonte. Voir [les parcours et la présentation](VISUAL_DESIGN.md).
 
 **Prévisualisation distante facultative — 16 octobre 2026.** `infra/local/compose.remote-preview.yaml` possède le connecteur Tailscale userspace, isolé des modules applicatifs et sans dépendance Python/JavaScript supplémentaire. Il partage uniquement l'espace réseau du web et relaie son port 3000 par Serve privé ; aucun port de base ou d'administration n'est déclaré. L'identité du connecteur est un secret de volume Docker, jamais un fichier versionné. Les instructions et limites sont dans [REMOTE_PREVIEW.md](REMOTE_PREVIEW.md). La CI valide la composition YAML sans créer de compte ou d'accès distant.
 
@@ -22,7 +22,7 @@ La **racine** est le dossier `property-platform`. Un élément terminé par `/` 
 
 Dans les explications, les chemins des fichiers sont donnés depuis la racine du dépôt. Sur ton poste, ajoute le préfixe `C:\Users\Karim\Repositories\property-platform\` pour obtenir leur chemin Windows absolu. Dans l'arborescence, lis chaque nom avec tous ses dossiers parents.
 
-L'arborescence ci-dessous décrit les fichiers suivis par Git aujourd'hui. Les quinze fichiers de traduction sont regroupés pour la lisibilité ; les fichiers Python `__init__.py`, qui identifient les paquets, sont omis. Les dossiers générés par les outils sont expliqués séparément.
+L'arborescence ci-dessous décrit les fichiers suivis par Git aujourd'hui. Les fichiers de traduction sont regroupés pour la lisibilité ; les fichiers Python `__init__.py`, qui identifient les paquets, sont omis. Les dossiers générés par les outils sont expliqués séparément.
 
 ```text
 property-platform/                   Racine du monorepo : code, outils et documentation de Property Platform
@@ -48,7 +48,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── tsconfig.json             Configuration du compilateur TypeScript
 │   │   ├── Dockerfile                Construction de l'image du site
 │   │   ├── messages/                Traductions des textes affichés aux utilisateurs
-│   │   │   └── en.json, ar.json…     Textes de l'interface dans les quinze langues
+│   │   │   └── en.json, ar.json…     Textes de l'interface par langue activée
 │   │   ├── public/images/uae/        Photographies éditoriales locales, variantes WebP et crédits
 │   │   ├── public/fonts/             Fontes WOFF2 locales, plages Unicode, licences et provenance
 │   │   ├── src/                     Code source de l'interface web
@@ -63,13 +63,13 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   ├── features/atlas/      Accueil, carte, liste, fiche et adaptateur API de l'atlas
 │   │   │   │   ├── explorer.tsx, explorer.module.css  Parcours carte/liste et fiche mobile
 │   │   │   │   └── pagination.tsx, page-window.ts    Commandes de pagination et calcul borné indépendant
-│   │   │   ├── theme/fonts.ts        Préchargements de typographie selon la langue, sans réseau tiers
+│   │   │   ├── theme/fonts.ts        Profils de préchargement des polices locales, sans réseau tiers
 │   │   │   ├── components/          Éléments d'interface réutilisables
 │   │   │   │   ├── brand-mark.tsx         Rendu web du symbole public configuré
 │   │   │   │   ├── ui-icon.tsx            SVG décoratifs partagés, sans dépendance métier
 │   │   │   │   └── language-switcher.tsx   Sélecteur de langue interactif
 │   │   │   ├── i18n/                Gestion commune des langues et de la navigation multilingue
-│   │   │   │   ├── locales.ts       Langues acceptées et direction LTR/RTL
+│   │   │   │   ├── locales.ts       Registre des langues, noms, direction LTR/RTL et profil de police
 │   │   │   │   ├── routing.ts       Règles des URL et langue par défaut
 │   │   │   │   ├── request.ts       Chargement des traductions de la langue demandée
 │   │   │   │   ├── navigation.ts    Navigation tenant compte de la langue
@@ -362,9 +362,11 @@ L'application d'ingestion réutilise le paquet Python de l'API dans un processus
 
 La composition `home.tsx` et le visuel fixe `home-visual.tsx` restent serveur. Le contenu passe à `home-experience.tsx`, composant client d'`atlas` qui gère les apparitions et la parallaxe. Direction : expérience → calcul pur `home-motion.ts` / styles ; visuel → métadonnées `home-scenes.ts` / styles. Le diaporama et ses commandes ont été retirés. Ces modules ne lisent pas l'API, ne modifient pas le catalogue et n'introduisent aucun moteur d'animation partagé. Le contenu est visible sans JavaScript ; les effets s'arrêtent avec la réduction des animations ou l'économie de données. Les photos restent éditoriales, séparées des preuves immobilières ; [VISUAL_DESIGN.md](VISUAL_DESIGN.md) décrit références, droits et réglages.
 
-La typographie partagée appartient à `apps/web/src/theme/` : le layout serveur dépend de `theme/fonts.ts` pour sélectionner les préchargements, et le CSS partagé importe les déclarations de `public/fonts/fonts.css`. Direction : layout → theme → métadonnées statiques locales. `theme` ne dépend ni d'`atlas`, ni des contrats, ni de l'API. Les licences et identités des fichiers tiers restent dans `public/fonts/credits.json` ; aucune requête au fournisseur de fonte n'est effectuée pendant la navigation. Les fallbacks systèmes conservent les écritures non couvertes.
+La typographie partagée appartient à `apps/web/src/theme/` : `theme/fonts.ts` possède les profils de préchargement et exporte le type `FontProfile`. `i18n/locales.ts` associe chaque langue à un profil, avec une dépendance de type uniquement vers `theme` ; le layout serveur transmet ce profil à `getFontPreloads`. Le CSS partagé importe les déclarations de `public/fonts/fonts.css`. Direction : layout → i18n/theme → métadonnées statiques locales. `theme` ne dépend ni d'`i18n` à l'exécution, ni d'`atlas`, ni des contrats, ni de l'API. Les licences et identités des fichiers tiers restent dans `public/fonts/credits.json` ; aucune requête au fournisseur de fonte n'est effectuée pendant la navigation. Les fallbacks systèmes conservent les écritures non couvertes. Voir [l'ajout d'une langue](INTERNATIONALIZATION.md#ajouter-une-langue-sans-disperser-sa-configuration).
 
 `catalog/queries.py` possède les lectures géographiques bornées ; `evidence/queries.py` possède la projection de provenance autorisée ; `publication/preview.py` les assemble sans mutation. L'API `api/parcels.py` valide les entrées et expose un contrat limité. La direction reste publication → evidence/catalog. Les migrations ajoutent les objets cartographiques typés dans leurs schémas propriétaires. Les originaux, opérateurs, attributs bruts et historiques internes ne sont pas exposés.
+
+Dans le web, `features/atlas/map-style.ts` possède le style et l'adaptateur des libellés natifs MapLibre ; les cartes de biens et de districts lui transmettent les messages traduits du namespace `Map`. La direction reste cartes → présentation et types locaux. Les instances sont liées à leur locale, sans liste de langues dans cet adaptateur ni traduction des preuves géographiques.
 
 Les endpoints `/api/v1/preview/parcels` et `/api/v1/preview/parcels/{id}` sont un aperçu de recherche **local**, pas une publication approuvée. Django exige DEBUG et PROPERTY_PLATFORM_PARCEL_PREVIEW ; hors DEBUG ils refusent même un flag activé. Un web compilé exige aussi l'opt-in PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW=1. Ce flag ne permet pas de contourner Django. Les droits de diffusion, rôles, authentification du personnel, limitation de trafic distribuée et CSP complète avec nonces restent à définir avant publication.
 
@@ -400,7 +402,7 @@ Le guide [ABU_DHABI.md](ABU_DHABI.md) documente les six nouveaux déploiements e
 
 `ingestion/collectors/context.py` acquiert puis rejoue les réponses avant la transaction. Le flow public_context et registry.py possèdent planification et paramètres fermés ; domain.py reste la passerelle synchrone. L’archive ADEK refusée en acquisition automatique passe par un reçu privé explicitement fourni, avec horodatage de fichier indiqué comme approximatif. Son calendrier reste inactif. Le script scripts/prepare_context_archive.py prépare ce reçu sans collecter ni écrire en base.
 
-`publication/context_preview.py` possède les lectures bornées ; `api/public_context.py` leur livraison locale ; le web features/atlas/public-context.tsx leur rendu et pagination. `district-overview.tsx` et `district-map.tsx` consomment la projection typée `/district-map` des mêmes observations Onwani : annuaire et limites, simplification métrique dérivée sans mutation de la preuve originale. Les liens de navigation vers un territoire collecté utilisent les identifiants officiels municipality/DISTRICTID des profils examinés, jamais le nom seul. La vue générale Abu Dhabi est le défaut de navigation ; la configuration de collecte reste explicitement propre à chaque île. Les namespaces Context et Coverage de quinze dictionnaires conservent l’interface multilingue et le RTL. La direction reste **publication → evidence → catalog**, avec ingestion → evidence ; aucun nouveau module métier ou microservice. Les contrats OpenAPI/types sont générés, pas corrigés manuellement.
+`publication/context_preview.py` possède les lectures bornées ; `api/public_context.py` leur livraison locale ; le web features/atlas/public-context.tsx leur rendu et pagination. `district-overview.tsx` et `district-map.tsx` consomment la projection typée `/district-map` des mêmes observations Onwani : annuaire et limites, simplification métrique dérivée sans mutation de la preuve originale. Les liens de navigation vers un territoire collecté utilisent les identifiants officiels municipality/DISTRICTID des profils examinés, jamais le nom seul. La vue générale Abu Dhabi est le défaut de navigation ; la configuration de collecte reste explicitement propre à chaque île. Les namespaces Context et Coverage des dictionnaires conservent l’interface multilingue et le RTL. La direction reste **publication → evidence → catalog**, avec ingestion → evidence ; aucun nouveau module métier ou microservice. Les contrats OpenAPI/types sont générés, pas corrigés manuellement.
 
 La portée ADREC abu-dhabi utilise le même protocole et tables que les îles. Ses 90 jours complets restent vérifiés par partitions ; le plafond devient 50 000 observations et la pagination HTTP s’aligne. Les snapshots géographiques se recouvrent et ne doivent pas être additionnés.
 

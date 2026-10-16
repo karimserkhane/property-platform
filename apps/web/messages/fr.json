@@ -126,7 +126,11 @@
     "nextPage": "Suivant",
     "selectionLabel": "Bien sélectionné",
     "expandDetails": "Agrandir la fiche",
-    "collapseDetails": "Réduire la fiche"
+    "collapseDetails": "Réduire la fiche",
+    "zoomIn": "Zoomer",
+    "zoomOut": "Dézoomer",
+    "resetBearing": "Faire glisser pour tourner la carte ; cliquer pour revenir au nord",
+    "toggleAttribution": "Afficher ou masquer les crédits"
   },
   "Coverage": {
     "title": "Sept émirats. Une plateforme.",

@@ -2,9 +2,11 @@
 
 **Accès téléphone à distance :** le [guide de prévisualisation privée](REMOTE_PREVIEW.md) explique le connecteur Tailscale Docker facultatif, la connexion sur téléphone, le lien HTTPS de la carte et l'arrêt de cet accès. Le PC et Docker doivent rester allumés. Ce parcours ne publie pas le site sur Internet et ne remplace pas un déploiement de production.
 
+**Vietnamien — 16 octobre 2026 :** choisir **Tiếng Việt** dans le sélecteur ou ouvrir `/vi` pour l'accueil, `/vi/explore` pour la carte et `/vi/projects` pour les projets, sur le même port que le site. Les textes et polices sont locaux ; l'anglais reste la langue par défaut. Le [guide des langues](INTERNATIONALIZATION.md) explique le registre, les dictionnaires et l'ajout d'une langue. Cette modification demande seulement l'actualisation du web ; aucune migration SQL ni ingestion n'est nécessaire.
+
 **Dossiers dans la carte — 16 octobre 2026 :** cliquer sur un bien lié à un projet affiche maintenant sa fiche complète dans le panneau de carte, et l'annuaire ouvre ce même parcours. Sur téléphone, **Agrandir la fiche / Réduire la fiche** adapte l'espace de lecture. Une page projet indépendante reste accessible. Les projets sans localisation précise conservent leur dossier sans nouveau point cartographique. Il s'agit d'une mise à jour web : utiliser les deux commandes ci-dessous, sans migration ni réimport. Le code est dans `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\map-dossier.tsx` et la présentation partagée dans `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\detail.tsx`.
 
-**Refonte du site — 16 octobre 2026 :** l'accueil mène directement aux cartes Reem/Saadiyat et à l'annuaire, qui permet de rechercher un projet ou un promoteur. Sur téléphone, le choix **Carte / Liste** remplace l'empilement des vues, et la sélection ouvre une fiche en bas d'écran. Les réglages et la pagination sont regroupés ; les quinze langues restent disponibles. Ce lot change seulement le frontend : **aucune migration Django, aucun réimport et aucune reconstruction de PostgreSQL ou de Prefect ne sont nécessaires**. Voir [le guide visuel](VISUAL_DESIGN.md).
+**Refonte du site — 16 octobre 2026 :** l'accueil mène directement aux cartes Reem/Saadiyat et à l'annuaire, qui permet de rechercher un projet ou un promoteur. Sur téléphone, le choix **Carte / Liste** remplace l'empilement des vues, et la sélection ouvre une fiche en bas d'écran. Les réglages et la pagination sont regroupés ; toutes les langues du registre restent disponibles. Ce lot change seulement le frontend : **aucune migration Django, aucun réimport et aucune reconstruction de PostgreSQL ou de Prefect ne sont nécessaires**. Voir [le guide visuel](VISUAL_DESIGN.md).
 
 Pour actualiser le site Docker existant **lorsque API et base tournent déjà**, exécuter dans PowerShell depuis `C:\Users\Karim\Repositories\property-platform`, une commande après l'autre, et attendre leur réussite :
 
@@ -516,7 +518,7 @@ Résultat attendu :
 
 - La racine redirige vers /en, même si le navigateur préfère une autre langue.
 - La page affiche Property Platform, United Arab Emirates et les sept émirats ; le premier jeu de données annoncé est Al Reem.
-- Le sélecteur propose les quinze langues configurées.
+- Le sélecteur propose les langues configurées dans le registre, dont **Tiếng Việt** (vietnamien, code `vi`).
 - [L'arabe](http://localhost:3000/ar), l'ourdou et le persan utilisent le sens de lecture de droite à gauche.
 
 Si le port 3000 est occupé, Next peut en choisir un autre : utiliser l'adresse affichée dans le terminal.
@@ -1122,7 +1124,7 @@ node scripts/prepare-web-runtime.mjs
 pnpm.cmd smoke:web
 ```
 
-Le contrôle attend un build existant. Il démarre un serveur temporaire sur **3101**, vérifie les quinze routes, lang/dir, traductions, sélecteur, CSS, défaut anglais et route inexistante, puis arrête son serveur. Libérer le port 3101 avant de le lancer.
+Le contrôle attend un build existant. Il démarre un serveur temporaire sur **3101**, vérifie les routes de toutes les langues activées, lang/dir, traductions, sélecteur, CSS, défaut anglais et route inexistante, puis arrête son serveur. Libérer le port 3101 avant de le lancer.
 
 <a id="verifier-le-code"></a>
 
@@ -1256,7 +1258,7 @@ Ce guide démarre les services sur ta machine ; il ne publie rien sur Internet. 
 
 Un déploiement public nécessitera HTTPS/reverse proxy, secrets réels (DJANGO_SECRET_KEY, DATABASE_URL, DJANGO_ALLOWED_HOSTS), accès du personnel, statiques d'administration, sauvegardes et rôles SQL. Les migrations restent une étape explicite du déploiement. La CI vérifie sources, contrats, PostGIS et images : observer son résultat GitHub avant de considérer les contrôles distants comme réussis.
 
-**Différence entre tests ciblés et validation complète :** quelques tests réussis ou un build réussi ne remplacent pas le workflow **Foundation checks** de `C:\Users\Karim\Repositories\property-platform\.github\workflows\ci.yml`. Celui-ci lance toute la suite API sur PostGIS, puis notamment `pnpm smoke:web` pour démarrer le site compilé et vérifier les quinze langues, les liens, les fichiers servis et les protections HTTP. La construction Docker du web lance aussi ce dernier contrôle avant de produire son image ; les dépendances de test Python restent hors de l'image API. Une évolution de navigation ou de champs publics doit adapter les attentes de ces contrôles, tout en gardant la liste stricte des champs autorisés et l'exclusion des données privées. Un courriel d'échec concerne le commit indiqué : après correction et push, consulter la nouvelle exécution, car l'ancienne conserve son résultat historique.
+**Différence entre tests ciblés et validation complète :** quelques tests réussis ou un build réussi ne remplacent pas le workflow **Foundation checks** de `C:\Users\Karim\Repositories\property-platform\.github\workflows\ci.yml`. Celui-ci lance toute la suite API sur PostGIS, puis notamment `pnpm smoke:web` pour démarrer le site compilé et vérifier toutes les langues du registre, les liens, les fichiers servis et les protections HTTP. La construction Docker du web lance aussi ce dernier contrôle avant de produire son image ; les dépendances de test Python restent hors de l'image API. Une évolution de navigation ou de champs publics doit adapter les attentes de ces contrôles, tout en gardant la liste stricte des champs autorisés et l'exclusion des données privées. Un courriel d'échec concerne le commit indiqué : après correction et push, consulter la nouvelle exécution, car l'ancienne conserve son résultat historique.
 
 Pour poursuivre, lire [les frontières des modules](REPOSITORY.md) et [la revue de structure](STRUCTURE_REVIEW.md). Prochaine étape métier : définir le dossier pilote, puis développer le parcours carte → fiche → preuve → correction → publication.
 

@@ -8,6 +8,8 @@ import {
   setWorkerUrl,
 } from "maplibre-gl";
 import { useEffect, useRef } from "react";
+import { mapControlLabels } from "./map-style";
+import type { MapLabels } from "./types";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 export type DistrictMapData = components["schemas"]["DistrictMapResponse"];
@@ -27,6 +29,7 @@ export default function DistrictMap({
   onSelect,
   onError,
   label,
+  mapLabels,
   view,
 }: {
   data: DistrictMapData;
@@ -35,9 +38,11 @@ export default function DistrictMap({
   onSelect: (id: string) => void;
   onError: () => void;
   label: string;
+  mapLabels: MapLabels;
   view: DistrictView;
 }) {
   const container = useRef<HTMLElement>(null);
+  const controlLabels = useRef(mapControlLabels(mapLabels, label));
   const map = useRef<LibreMap | null>(null);
   const callbacks = useRef({ onSelect, onError });
   callbacks.current = { onSelect, onError };
@@ -56,6 +61,7 @@ export default function DistrictMap({
     try {
       instance = new LibreMap({
         container: container.current,
+        locale: controlLabels.current,
         bounds: [
           [extent[0], extent[1]],
           [extent[2], extent[3]],

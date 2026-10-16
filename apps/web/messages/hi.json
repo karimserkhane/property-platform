@@ -126,7 +126,11 @@
     "nextPage": "अगला",
     "selectionLabel": "चुनी गई संपत्ति",
     "expandDetails": "विवरण बड़ा करें",
-    "collapseDetails": "विवरण छोटा करें"
+    "collapseDetails": "विवरण छोटा करें",
+    "zoomIn": "ज़ूम इन करें",
+    "zoomOut": "ज़ूम आउट करें",
+    "resetBearing": "मानचित्र घुमाने के लिए खींचें; उत्तर की ओर करने के लिए क्लिक करें",
+    "toggleAttribution": "स्रोत श्रेय दिखाएँ या छिपाएँ"
   },
   "Coverage": {
     "title": "सात अमीरात। एक प्लेटफ़ॉर्म।",

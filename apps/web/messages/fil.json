@@ -126,7 +126,11 @@
     "nextPage": "Susunod",
     "selectionLabel": "Napiling ari-arian",
     "expandDetails": "Palakihin ang detalye",
-    "collapseDetails": "Paliitin ang detalye"
+    "collapseDetails": "Paliitin ang detalye",
+    "zoomIn": "Mag-zoom in",
+    "zoomOut": "Mag-zoom out",
+    "resetBearing": "I-drag upang paikutin ang mapa; i-click upang ibalik sa hilaga",
+    "toggleAttribution": "Ipakita o itago ang pagkilala sa mga pinagmulan"
   },
   "Coverage": {
     "title": "Pitong emirate. Isang platform.",

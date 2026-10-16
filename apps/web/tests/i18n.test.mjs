@@ -6,6 +6,7 @@ import {
   defaultLocale,
   getDirection,
   isLocale,
+  localeDefinitions,
   locales,
 } from "../src/i18n/locales.ts";
 
@@ -26,7 +27,9 @@ function flattenMessages(messages, prefix = "") {
 
 test("default language and directions cover the requested languages", () => {
   assert.equal(defaultLocale, "en");
-  for (const code of ["en", "ar", "es", "de", "ru"]) assert.ok(isLocale(code));
+  for (const code of ["en", "ar", "es", "de", "ru", "vi"])
+    assert.ok(isLocale(code));
+  assert.equal(localeDefinitions.vi.name, "Tiếng Việt");
   for (const code of ["ar", "ur", "fa"])
     assert.equal(getDirection(code), "rtl");
   for (const code of locales.filter(
@@ -64,6 +67,13 @@ test("every enabled locale has exactly one complete message dictionary", async (
       assert.ok(text.trim().length > 0, `${code}:${key}`);
       assert.equal(translate(key), text, `${code}:${key}`);
       assert.equal(text.includes("�"), false, `${code}:${key}`);
+      if (code === "vi") {
+        assert.equal(
+          text,
+          text.normalize("NFC"),
+          `${code}:${key}: normalized accents`,
+        );
+      }
     }
   }
 });

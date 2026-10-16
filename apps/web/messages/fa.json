@@ -126,7 +126,11 @@
     "nextPage": "بعدی",
     "selectionLabel": "ملک انتخاب‌شده",
     "expandDetails": "گسترش جزئیات",
-    "collapseDetails": "کاهش جزئیات"
+    "collapseDetails": "کاهش جزئیات",
+    "zoomIn": "بزرگ‌نمایی",
+    "zoomOut": "کوچک‌نمایی",
+    "resetBearing": "برای چرخاندن نقشه بکشید؛ برای بازگشت به جهت شمال کلیک کنید",
+    "toggleAttribution": "نمایش یا پنهان کردن اطلاعات منابع"
   },
   "Coverage": {
     "title": "هفت امارت. یک پلتفرم.",

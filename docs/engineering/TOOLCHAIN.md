@@ -79,7 +79,7 @@ Le web utilise **`NODE_USE_SYSTEM_CA=1`** et **`SSL_CERT_FILE=/etc/ssl/certs/ca-
 
 ## Vérifications et limites
 
-Les contrôles locaux doivent couvrir installation verrouillée, qualité, TypeScript 7, traductions, contrats OpenAPI, build standalone et HTTP sur quinze langues. Python est vérifié avec Ruff, Import Linter, tests HTTP et export OpenAPI. Les tests SQLite ne valident pas PostGIS ; Docker et l'intégration PostGIS sont exécutés par la CI et leur résultat doit être observé. Les tags d'images restent versionnés mais sans digest immuable ; les paquets système Debian ne sont pas figés par un snapshot.
+Les contrôles locaux doivent couvrir installation verrouillée, qualité, TypeScript 7, traductions, contrats OpenAPI, build standalone et HTTP sur toutes les langues du registre. Python est vérifié avec Ruff, Import Linter, tests HTTP et export OpenAPI. Les tests SQLite ne valident pas PostGIS ; Docker et l'intégration PostGIS sont exécutés par la CI et leur résultat doit être observé. Les tags d'images restent versionnés mais sans digest immuable ; les paquets système Debian ne sont pas figés par un snapshot.
 
 ## Sources primaires
 

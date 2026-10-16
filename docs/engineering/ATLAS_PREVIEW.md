@@ -8,7 +8,7 @@ L'exploration affiche les données de PostgreSQL/PostGIS : 2 431 parcelles, un d
 
 La carte comporte huit couleurs d'usage et une légende, des couches activables, les noms anglais/arabe disponibles, les codes au zoom rapproché, recherche, filtres, listes paginées, fiches sourcées, vues de cadrage, coordonnées du curseur et exports CSV/PNG. Les repères commerciaux restent des déclarations de leurs fournisseurs ; un point couvert par une parcelle produit un candidat spatial, pas une attribution acceptée. Les dates de publication inconnues restent inconnues.
 
-L'accueil est précompilé dans quinze langues et ne charge pas le moteur cartographique. L'exploration charge MapLibre et son worker empaquetés avec Next.js. Les noms originaux des preuves sont conservés. Les lectures sont séparées par propriétaire puis assemblées dans `publication` ; OpenAPI et types TypeScript sont générés ensemble. Les migrations et imports nécessaires ont été appliqués à la base locale pendant cette livraison, avec sauvegarde préalable hors Git.
+L'accueil est précompilé dans toutes les langues activées et ne charge pas le moteur cartographique. L'exploration charge MapLibre et son worker empaquetés avec Next.js. Les noms originaux des preuves sont conservés. Les lectures sont séparées par propriétaire puis assemblées dans `publication` ; OpenAPI et types TypeScript sont générés ensemble. Les migrations et imports nécessaires ont été appliqués à la base locale pendant cette livraison, avec sauvegarde préalable hors Git.
 
 ## Limites et contrôles
 

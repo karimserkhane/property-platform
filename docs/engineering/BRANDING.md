@@ -12,7 +12,7 @@
 docker compose -f infra/local/compose.yaml --profile web-preview up -d --build web
 ```
 
-Cette seule valeur alimente le titre des pages, le nom accessible et visible de l'en-tête, la section de découverte, le pied de page et la signature des exports PNG. Elle reste une marque propre, identique dans les quinze langues ; les descriptions et autres textes de l'interface restent dans `apps/web/messages/<langue>.json`. Les noms originaux des sources et des lieux conservent leur sens propre.
+Cette seule valeur alimente le titre des pages, le nom accessible et visible de l'en-tête, la section de découverte, le pied de page et la signature des exports PNG. Elle reste une marque propre, identique dans toutes les langues activées ; les descriptions et autres textes de l'interface restent dans `apps/web/messages/<langue>.json`. Les noms originaux des sources et des lieux conservent leur sens propre.
 
 Les pages sont précompilées : changer la marque d'une version compilée exige une reconstruction. Aucune lecture de base, requête réseau ou variable de secret n'est nécessaire pour afficher le nom. Une future application mobile pourra consommer le même paquet `@property-platform/branding` ; son rendu natif de logo devra être adapté à ses assets.
 

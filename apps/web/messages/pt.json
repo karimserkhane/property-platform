@@ -126,7 +126,11 @@
     "nextPage": "Seguinte",
     "selectionLabel": "Imóvel selecionado",
     "expandDetails": "Ampliar detalhes",
-    "collapseDetails": "Reduzir detalhes"
+    "collapseDetails": "Reduzir detalhes",
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar",
+    "resetBearing": "Arraste para girar o mapa; clique para orientar para norte",
+    "toggleAttribution": "Mostrar ou ocultar créditos"
   },
   "Coverage": {
     "title": "Sete emirados. Uma plataforma.",

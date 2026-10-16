@@ -730,6 +730,7 @@ export function Explorer({
           <div className="map-frame">
             {filtered && !mapFailed && (
               <ParcelMap
+                key={locale}
                 data={filtered}
                 context={context}
                 selected={selected}

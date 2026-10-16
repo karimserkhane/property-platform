@@ -100,7 +100,7 @@ La recherche commence par les références et attributs réellement indexés. Ne
 
 ## Mobile, langues et accessibilité
 
-Anglais par défaut et quinze langues existantes, conformément à [INTERNATIONALIZATION.md](../engineering/INTERNATIONALIZATION.md). Traduire les nouveaux messages par fonctionnalité et faire relire les termes immobiliers. Prévoir l'arabe dès la maquette : espaces suffisants, propriétés CSS logiques, codes isolés et panneaux adaptés ; ne pas retourner la carte ou les plans.
+Anglais par défaut et toutes les langues activées dans le registre, conformément à [INTERNATIONALIZATION.md](../engineering/INTERNATIONALIZATION.md). Traduire les nouveaux messages par fonctionnalité et faire relire les termes immobiliers. Prévoir l'arabe dès la maquette : espaces suffisants, propriétés CSS logiques, codes isolés et panneaux adaptés ; ne pas retourner la carte ou les plans.
 
 Sur petit écran : titre → texte → action → aperçu, sans hauteur fixe ni défilement horizontal. L'accès liste/fiche doit rester possible sans interaction tactile avec la carte. Tester navigation au clavier, focus, lecteurs d'écran, fermeture du panneau, taille des cibles et zoom du navigateur. Une interface attractive doit aussi permettre de lire et de retrouver le même bien sans couleurs ni geste précis.
 

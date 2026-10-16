@@ -10,7 +10,7 @@ import {
   setWorkerUrl,
 } from "maplibre-gl";
 import { useEffect, useMemo, useRef } from "react";
-import { mapLayers, mapName } from "./map-style";
+import { mapControlLabels, mapLayers, mapName } from "./map-style";
 import {
   buildingAtPoint,
   type Category,
@@ -94,6 +94,8 @@ export default function ParcelMap({
   countryBounds: number[];
 }) {
   const element = useRef<HTMLElement>(null);
+  // The parent keys the map by locale; native controls receive that mount's labels.
+  const controlLabels = useRef(mapControlLabels(m, label));
   const map = useRef<LibreMap | null>(null);
   const consumedView = useRef(0);
   const initialFrame = useRef(false);
@@ -143,6 +145,7 @@ export default function ParcelMap({
     try {
       instance = new LibreMap({
         container: element.current,
+        locale: controlLabels.current,
         bounds: boundsOf(territory.camera_bounds),
         fitBoundsOptions: { padding: 30, animate: false },
         minZoom: 5,

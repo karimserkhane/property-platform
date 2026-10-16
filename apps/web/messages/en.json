@@ -126,7 +126,11 @@
     "nextPage": "Next",
     "selectionLabel": "Selected property",
     "expandDetails": "Expand details",
-    "collapseDetails": "Reduce details"
+    "collapseDetails": "Reduce details",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetBearing": "Drag to rotate map, click to reset north",
+    "toggleAttribution": "Show or hide attribution"
   },
   "Coverage": {
     "title": "Seven emirates. One platform.",

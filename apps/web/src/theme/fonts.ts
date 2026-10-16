@@ -9,18 +9,29 @@ const fontFiles = {
   cormorantLatin: "/fonts/cormorant-garamond-latin-v21.woff2",
   cormorantCyrillic: "/fonts/cormorant-garamond-cyrillic-v21.woff2",
   notoArabic: "/fonts/noto-sans-arabic-v33.woff2",
+  manropeVietnamese: "/fonts/manrope-vietnamese-v20.woff2",
+  cormorantVietnamese: "/fonts/cormorant-garamond-vietnamese-v21.woff2",
 } as const;
 
-const latinInterfaceLocales = new Set(["en", "es", "de", "fil", "fr", "pt"]);
+const fontProfiles = {
+  latin: [fontFiles.manropeLatin, fontFiles.cormorantLatin],
+  cyrillic: [
+    fontFiles.manropeLatin,
+    fontFiles.manropeCyrillic,
+    fontFiles.cormorantCyrillic,
+  ],
+  arabic: [fontFiles.manropeLatin, fontFiles.notoArabic],
+  system: [fontFiles.manropeLatin],
+  vietnamese: [
+    fontFiles.manropeLatin,
+    fontFiles.cormorantLatin,
+    fontFiles.manropeVietnamese,
+    fontFiles.cormorantVietnamese,
+  ],
+} as const;
 
-export function getFontPreloads(locale: string): readonly FontPreload[] {
-  const files: string[] = [fontFiles.manropeLatin];
-  if (latinInterfaceLocales.has(locale)) files.push(fontFiles.cormorantLatin);
-  if (locale === "ru") {
-    files.push(fontFiles.manropeCyrillic, fontFiles.cormorantCyrillic);
-  }
-  if (locale === "ar" || locale === "ur" || locale === "fa") {
-    files.push(fontFiles.notoArabic);
-  }
-  return files.map((href) => ({ href, type: "font/woff2" }));
+export type FontProfile = keyof typeof fontProfiles;
+
+export function getFontPreloads(profile: FontProfile): readonly FontPreload[] {
+  return fontProfiles[profile].map((href) => ({ href, type: "font/woff2" }));
 }

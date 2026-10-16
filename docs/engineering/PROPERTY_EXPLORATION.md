@@ -89,7 +89,7 @@ Cette étape vérifie empreintes, heures avec fuseau, URL attendues, identité e
 - `property_protocol.py` valide les reçus sans modèle Django ; `property_import.py` orchestre leur enregistrement ; `queries.py` projette les champs autorisés ; `publication/map_preview.py` assemble cette projection sans mutation.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\property-card.tsx` : présentation du bien ; `inspector.tsx` : informations secondaires et parcelle ; `explorer.tsx` : sélection/liste ; `parcel-map.tsx` : mise en évidence et cadrage explicite.
 
-Les registres ne sont pas injectés directement dans le site : ils décrivent une revue et une acquisition ; l'interface consomme la base par l'API. Les noms de projet ne sont pas codés dans les composants. Les textes d'interface sont traduits dans quinze langues ; résumés et légendes gardent leur langue originale, indiquée avec `lang` et `dir`.
+Les registres ne sont pas injectés directement dans le site : ils décrivent une revue et une acquisition ; l'interface consomme la base par l'API. Les noms de projet ne sont pas codés dans les composants. Les textes d'interface sont traduits dans toutes les langues du registre ; résumés et légendes gardent leur langue originale, indiquée avec `lang` et `dir`.
 
 ## Validation locale
 
@@ -119,7 +119,7 @@ Les données existaient déjà : `property_platform.real_estate.parcel.land_use`
 
 La projection Django ajoute `use_types` et `use_classification_version=source-use-v1` aux réponses de parcelles et de contexte carte. `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\publication\uses.py` possède l’interprétation contrôlée, sans déduire un type du nom du projet. `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\queries.py` transmet seulement les tags autorisés de la capture correspondant à la provenance sélectionnée au module publication ; les coordonnées privées et attributs bruts complets ne sont pas exposés dans l’API. Les contrats et types sont régénérés.
 
-Une station électrique n’est pas une gare ; un lieu de culte n’est appelé mosquée que si un attribut l’indique ; un usage mixte ne devient pas arbitrairement commercial ; un espace ouvert n’est pas assimilé à un parc. Un type inconnu conserve son libellé original. « Usage publié du terrain » décrit ce qu’indique la source, sans présenter un usage planifié comme une activité actuellement ouverte. Les traductions sont dans le namespace Use des quinze fichiers `C:\Users\Karim\Repositories\property-platform\apps\web\messages\`.
+Une station électrique n’est pas une gare ; un lieu de culte n’est appelé mosquée que si un attribut l’indique ; un usage mixte ne devient pas arbitrairement commercial ; un espace ouvert n’est pas assimilé à un parc. Un type inconnu conserve son libellé original. « Usage publié du terrain » décrit ce qu’indique la source, sans présenter un usage planifié comme une activité actuellement ouverte. Les traductions sont dans le namespace Use des dictionnaires sous `C:\Users\Karim\Repositories\property-platform\apps\web\messages\`.
 
 Vérifications : 54 tests backend ciblés passent, incluant les imports et projections sur PostGIS réel ; 24 tests web passent. Les tests incluent ProjectLimits comme dernier choix, les usages mixtes, les types inconnus et les tags d’école conservés sous une empreinte building=yes.
 

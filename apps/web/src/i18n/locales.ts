@@ -1,20 +1,26 @@
+import type { FontProfile } from "../theme/fonts";
+
 export const localeDefinitions = {
-  en: { name: "English", direction: "ltr" },
-  ar: { name: "العربية", direction: "rtl" },
-  es: { name: "Español", direction: "ltr" },
-  de: { name: "Deutsch", direction: "ltr" },
-  ru: { name: "Русский", direction: "ltr" },
-  hi: { name: "हिन्दी", direction: "ltr" },
-  ur: { name: "اردو", direction: "rtl" },
-  bn: { name: "বাংলা", direction: "ltr" },
-  ml: { name: "മലയാളം", direction: "ltr" },
-  ta: { name: "தமிழ்", direction: "ltr" },
-  fil: { name: "Filipino", direction: "ltr" },
-  fa: { name: "فارسی", direction: "rtl" },
-  zh: { name: "中文", direction: "ltr" },
-  fr: { name: "Français", direction: "ltr" },
-  pt: { name: "Português", direction: "ltr" },
-} as const;
+  en: { name: "English", direction: "ltr", fontProfile: "latin" },
+  ar: { name: "العربية", direction: "rtl", fontProfile: "arabic" },
+  es: { name: "Español", direction: "ltr", fontProfile: "latin" },
+  de: { name: "Deutsch", direction: "ltr", fontProfile: "latin" },
+  ru: { name: "Русский", direction: "ltr", fontProfile: "cyrillic" },
+  hi: { name: "हिन्दी", direction: "ltr", fontProfile: "system" },
+  ur: { name: "اردو", direction: "rtl", fontProfile: "arabic" },
+  bn: { name: "বাংলা", direction: "ltr", fontProfile: "system" },
+  ml: { name: "മലയാളം", direction: "ltr", fontProfile: "system" },
+  ta: { name: "தமிழ்", direction: "ltr", fontProfile: "system" },
+  fil: { name: "Filipino", direction: "ltr", fontProfile: "latin" },
+  fa: { name: "فارسی", direction: "rtl", fontProfile: "arabic" },
+  zh: { name: "中文", direction: "ltr", fontProfile: "system" },
+  fr: { name: "Français", direction: "ltr", fontProfile: "latin" },
+  pt: { name: "Português", direction: "ltr", fontProfile: "latin" },
+  vi: { name: "Tiếng Việt", direction: "ltr", fontProfile: "vietnamese" },
+} as const satisfies Record<
+  string,
+  { name: string; direction: "ltr" | "rtl"; fontProfile: FontProfile }
+>;
 
 export type Locale = keyof typeof localeDefinitions;
 export const locales = Object.keys(localeDefinitions) as Locale[];

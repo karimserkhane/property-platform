@@ -136,6 +136,7 @@ export function DistrictOverview({
                   onSelect={setSelected}
                   onError={() => setMapError(true)}
                   label={coverage.districtsTitle}
+                  mapLabels={mapLabels}
                   view={view}
                 />
               )}

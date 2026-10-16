@@ -126,7 +126,11 @@
     "nextPage": "اگلا",
     "selectionLabel": "منتخب جائیداد",
     "expandDetails": "تفصیلات بڑھائیں",
-    "collapseDetails": "تفصیلات مختصر کریں"
+    "collapseDetails": "تفصیلات مختصر کریں",
+    "zoomIn": "زوم ان کریں",
+    "zoomOut": "زوم آؤٹ کریں",
+    "resetBearing": "نقشہ گھمانے کے لیے کھینچیں؛ شمال کی سمت بحال کرنے کے لیے کلک کریں",
+    "toggleAttribution": "ماخذ کی تفصیلات دکھائیں یا چھپائیں"
   },
   "Coverage": {
     "title": "سات امارات۔ ایک پلیٹ فارم۔",

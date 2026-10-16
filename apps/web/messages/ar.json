@@ -126,7 +126,11 @@
     "nextPage": "التالي",
     "selectionLabel": "العقار المحدّد",
     "expandDetails": "توسيع التفاصيل",
-    "collapseDetails": "تصغير التفاصيل"
+    "collapseDetails": "تصغير التفاصيل",
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "resetBearing": "اسحب لتدوير الخريطة، وانقر لإعادة الاتجاه نحو الشمال",
+    "toggleAttribution": "إظهار أو إخفاء حقوق المصادر"
   },
   "Coverage": {
     "title": "سبع إمارات. منصة واحدة.",

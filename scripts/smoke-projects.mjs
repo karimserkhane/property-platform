@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { locales } from "../apps/web/src/i18n/locales.ts";
 
 // Explicit live check: the compiled site and API must already be running and imported.
 // CI's smoke-web.mjs separately checks the translated state when no API is available.
@@ -30,7 +31,7 @@ for (const project of projects) {
   assert.equal(detail.developer.name, project.developer.name);
   details.set(project.slug, detail);
 }
-for (const locale of ["en", "fr", "ar"]) {
+for (const locale of locales) {
   const directory = await fetch(new URL(`/${locale}/projects`, origin));
   assert.equal(directory.status, 200);
   const directoryHtml = await directory.text();
@@ -143,5 +144,5 @@ assert.equal(
   404,
 );
 console.log(
-  `Live project smoke checks passed for ${projects.length} projects in English, French and Arabic.`,
+  `Live project smoke checks passed for ${projects.length} projects in ${locales.length} configured languages.`,
 );

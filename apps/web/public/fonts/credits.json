@@ -83,6 +83,28 @@
       "bytes": 165960,
       "sha256": "ce85091f020920b65762b387b194ef59457ea5b25b760f2dcc35240a94bb8669",
       "fontVersion": "Version 2.012"
+    },
+    {
+      "file": "manrope-vietnamese-v20.woff2",
+      "family": "Manrope",
+      "subset": "vietnamese",
+      "weight": "200 800",
+      "servingVersion": "v20",
+      "sourceUrl": "https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggixSuXd.woff2",
+      "bytes": 8520,
+      "sha256": "6bbb044ab420e07edb0a3042d2eb314b85e83a0182e945a15ab3b9092668dfd5",
+      "acquiredOn": "2026-10-16"
+    },
+    {
+      "file": "cormorant-garamond-vietnamese-v21.woff2",
+      "family": "Cormorant Garamond",
+      "subset": "vietnamese",
+      "weight": "300 700",
+      "servingVersion": "v21",
+      "sourceUrl": "https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYpntKgS4.woff2",
+      "bytes": 11220,
+      "sha256": "6252e819a7665ae512c2d046308a9016ada63c06d0d8f96984c4b29f6c9e1bd2",
+      "acquiredOn": "2026-10-16"
     }
   ]
 }

@@ -141,7 +141,7 @@ Dans Prefect, lancer `abu-dhabi-schools` avec `receipt_name` égal à `adek-scho
 
 [Ouvrir l’émirat](http://localhost:3102/en/explore?territory=abu-dhabi) : le panneau de contexte et le marché ADREC lisent PostgreSQL. Sur Reem/Saadiyat, ouvrir l’onglet **Neighbourhood**. Le sélecteur de données propose santé, Charter schools, bus, statistiques et districts ; rechercher un nom/lieu puis utiliser la pagination.
 
-Le panneau indique **tout l’émirat** même depuis une île. Aucun de ces effectifs n’est présenté comme le nombre d’équipements sur Reem ou à distance de marche. Pour les écoles, l’arabe officiel est privilégié dans l’interface arabe ; les autres noms et grades restent dans leur langue source. Les textes de l’interface sont traduits dans les quinze langues, avec RTL.
+Le panneau indique **tout l’émirat** même depuis une île. Aucun de ces effectifs n’est présenté comme le nombre d’équipements sur Reem ou à distance de marche. Pour les écoles, l’arabe officiel est privilégié dans l’interface arabe ; les autres noms et grades restent dans leur langue source. Les textes de l’interface sont traduits dans toutes les langues activées, avec RTL.
 
 La nouvelle option de sélection de zone permet de revenir à l’émirat. Sa vue de données ne déclare pas une carte parcellaire complète : les géométries de parcelles/bâtiments actuellement affichées restent celles des deux îles. Les couches de secteurs restent non cliquables, et le clic sur un bien ne reçoit pas de nouvel auto-zoom.
 
@@ -189,7 +189,7 @@ Les données foncières privées, comptes séquestres, titres et dossiers de pro
 
 ## Validation
 
-Les suites couvrent la complétude des districts, les types, archives altérées, publication/collecte distinctes, unicité et contraintes SQL, reprise, rollback et conservation du dernier snapshot. Les tests GIS utilisent une vraie base PostGIS isolée ; les données du poste ne sont pas une fixture de test. Les dictionnaires sont contrôlés pour les quinze langues. Les effectifs de ce guide proviennent des imports réels, pas des tests.
+Les suites couvrent la complétude des districts, les types, archives altérées, publication/collecte distinctes, unicité et contraintes SQL, reprise, rollback et conservation du dernier snapshot. Les tests GIS utilisent une vraie base PostGIS isolée ; les données du poste ne sont pas une fixture de test. Les dictionnaires sont contrôlés pour toutes les langues du registre. Les effectifs de ce guide proviennent des imports réels, pas des tests.
 
 Les résultats finaux, builds et vérification du navigateur sont consignés avec la livraison. Les refus 401/403/404 ci-dessus restent des limites de source, pas des imports annoncés réussis.
 

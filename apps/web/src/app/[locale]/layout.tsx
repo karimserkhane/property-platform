@@ -6,7 +6,12 @@ import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { BrandMark } from "@/components/brand-mark";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { getDirection, isLocale, locales } from "@/i18n/locales";
+import {
+  getDirection,
+  isLocale,
+  localeDefinitions,
+  locales,
+} from "@/i18n/locales";
 import { Link } from "@/i18n/navigation";
 import { getFontPreloads } from "@/theme/fonts";
 import "../globals.css";
@@ -52,7 +57,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       data-scroll-behavior="smooth"
     >
       <head>
-        {getFontPreloads(locale).map((font) => (
+        {getFontPreloads(localeDefinitions[locale].fontProfile).map((font) => (
           <link
             key={font.href}
             rel="preload"

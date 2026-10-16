@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { setTimeout } from "node:timers/promises";
 import { HOME_SCENES } from "../apps/web/src/features/atlas/home-scenes.ts";
-import { getDirection, locales } from "../apps/web/src/i18n/locales.ts";
+import {
+  getDirection,
+  localeDefinitions,
+  locales,
+} from "../apps/web/src/i18n/locales.ts";
+import { getFontPreloads } from "../apps/web/src/theme/fonts.ts";
 import { brand } from "../packages/branding/src/brand.ts";
 
 const escapedBrandName = brand.displayName.replace(
@@ -92,9 +98,11 @@ try {
       response.headers.get("content-type").includes("font/woff2"),
       asset.file,
     );
+    const bytes = Buffer.from(await response.arrayBuffer());
+    assert.equal(bytes.byteLength, asset.bytes, asset.file);
     assert.equal(
-      (await response.arrayBuffer()).byteLength,
-      asset.bytes,
+      createHash("sha256").update(bytes).digest("hex"),
+      asset.sha256,
       asset.file,
     );
   }
@@ -119,11 +127,13 @@ try {
       fontBytes > 0 && fontBytes < 200000,
       `${locale}: bounded font preload budget`,
     );
-    if (!["ar", "ur", "fa"].includes(locale))
-      assert.ok(
-        !preloadedFonts.some((path) => path.includes("noto-sans-arabic")),
-        `${locale}: Arabic is not preloaded`,
-      );
+    assert.deepEqual(
+      [...new Set(preloadedFonts)].sort(),
+      getFontPreloads(localeDefinitions[locale].fontProfile)
+        .map((font) => font.href)
+        .sort(),
+      `${locale}: font preloads follow the shared locale registry`,
+    );
     assert.ok(
       html.includes(`<title>${escapedBrandName}</title>`),
       `${locale}: configured brand title`,
