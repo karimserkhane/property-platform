@@ -297,6 +297,14 @@
     "noProjectsHint": "Subukan ang ibang pangalan o burahin ang paghahanap.",
     "directoryIntro": "Tuklasin ang mga proyekto sa Reem at Saadiyat. Tingnan ang mga detalye, saka piliin ang susunod mong lugar.",
     "purchaseNote": "Hindi pa nabeberipika ang mga presyo, availability at kundisyon sa pagbabayad. Kumpirmahin ang kasalukuyang detalye sa developer.",
-    "openPage": "Buksan ang pahina ng proyekto"
+    "openPage": "Buksan ang pahina ng proyekto",
+    "areaMap": "Tuklasin ang paligid",
+    "loadMap": "Buksan ang mapa ng lugar",
+    "mapIntro": "Tuklasin ang mga gusali, kalye at lugar sa pamayanang ito.",
+    "mapUnavailable": "Hindi available ang mapa ng lugar. Maaari mong buksan ang pangunahing mapa.",
+    "editorialImage": "Abu Dhabi · larawang pangkapaligiran",
+    "previousImage": "Nakaraang larawan",
+    "nextImage": "Susunod na larawan",
+    "useLocalMap": "Gamitin ang aming detalyadong mapa"
   }
 }

@@ -87,6 +87,15 @@ for (const locale of locales) {
       `${locale}/${project.slug}: locale`,
     );
     assert.ok(
+      html.includes(`data-neighbourhood="${detail.territory}"`),
+      `${locale}/${project.slug}: neighbourhood follows the stored territory`,
+    );
+    assert.equal(
+      html.includes('class="maplibregl-canvas"'),
+      false,
+      `${locale}/${project.slug}: map engine is deferred`,
+    );
+    assert.ok(
       html.includes(`dir="${locale === "ar" ? "rtl" : "ltr"}"`),
       `${locale}/${project.slug}: direction`,
     );

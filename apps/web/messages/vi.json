@@ -297,6 +297,14 @@
     "noProjectsHint": "Hãy thử tên khác hoặc xóa nội dung tìm kiếm.",
     "directoryIntro": "Khám phá các dự án tại Reem và Saadiyat. Xem thông tin chi tiết, rồi tìm hiểu khu vực tiếp theo.",
     "purchaseNote": "Giá, tình trạng chào bán và điều khoản thanh toán chưa được xác minh. Hãy xác nhận thông tin hiện tại với chủ đầu tư.",
-    "openPage": "Mở trang dự án"
+    "openPage": "Mở trang dự án",
+    "areaMap": "Khám phá khu lân cận",
+    "loadMap": "Mở bản đồ khu lân cận",
+    "mapIntro": "Khám phá các tòa nhà, đường phố và địa điểm trong khu vực này.",
+    "mapUnavailable": "Bản đồ khu lân cận hiện không khả dụng. Bạn vẫn có thể mở bản đồ chính.",
+    "editorialImage": "Abu Dhabi · ảnh minh họa không gian",
+    "previousImage": "Ảnh trước",
+    "nextImage": "Ảnh tiếp theo",
+    "useLocalMap": "Dùng bản đồ chi tiết của chúng tôi"
   }
 }

@@ -107,7 +107,6 @@ export function Explorer({
   const [mobileView, setMobileView] = useState<"map" | "list">("map");
   const [showSelection, setShowSelection] = useState(false);
   const [projectSlug, setProjectSlug] = useState<string | null>(null);
-  const [expandedDetails, setExpandedDetails] = useState(false);
   const hasSelection = Boolean(selected || feature || projectSlug);
   const [page, setPage] = useState(0);
   const [attempt, setAttempt] = useState(0);
@@ -136,18 +135,17 @@ export function Explorer({
   const selectionOrigin = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (showSelection && (feature?.id || selected || projectSlug)) {
-      if (
-        mobileView === "map" &&
-        window.matchMedia("(max-width: 900px)").matches
-      )
-        mapSection.current?.scrollIntoView({
-          block: "start",
-          behavior: "instant",
-        });
       inspection.current?.focus({ preventScroll: true });
-      panel.current?.scrollTo({ top: 0, behavior: "instant" });
+      if (selectionOrigin.current && selectionOrigin.current.tagName !== "BODY")
+        inspection.current?.scrollIntoView({
+          block: "start",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "instant"
+            : "smooth",
+        });
     }
-  }, [feature?.id, selected, projectSlug, showSelection, mobileView]);
+  }, [feature?.id, selected, projectSlug, showSelection]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: select uses only refs and the immutable territory of this keyed explorer; bind browser history once.
   useEffect(() => {
     const readTab = () => {
@@ -174,7 +172,7 @@ export function Explorer({
       if (slug && !params.has("parcel") && isProjectSlug(slug)) {
         setProjectSlug(slug);
         setShowSelection(true);
-        setExpandedDetails(false);
+
         setTab("properties");
         setMobileView("map");
       } else {
@@ -248,7 +246,7 @@ export function Explorer({
     setTab("properties");
     setShowSelection(true);
     setProjectSlug(null);
-    setExpandedDetails(false);
+
     detailRequest.current?.abort();
     detailRequest.current = new AbortController();
     const current = ++requestId.current;
@@ -295,7 +293,7 @@ export function Explorer({
     setTab("properties");
     setShowSelection(true);
     setProjectSlug(null);
-    setExpandedDetails(false);
+
     detailRequest.current?.abort();
     ++requestId.current;
     setFeature(f);
@@ -453,11 +451,10 @@ export function Explorer({
         token: v.token + 1,
         feature: target,
       }));
-    if (window.matchMedia("(max-width: 900px)").matches)
-      mapSection.current?.scrollIntoView({
-        block: "start",
-        behavior: "instant",
-      });
+    mapSection.current?.scrollIntoView({
+      block: "start",
+      behavior: "instant",
+    });
     requestAnimationFrame(() =>
       mapSection.current?.focus({ preventScroll: true }),
     );
@@ -469,7 +466,7 @@ export function Explorer({
     setDetail(null);
     setSelected(null);
     setProjectSlug(null);
-    setExpandedDetails(false);
+
     setDetailState("ready");
     setShowSelection(false);
     const url = new URL(window.location.href);
@@ -582,7 +579,7 @@ export function Explorer({
             )}
           </button>
         </fieldset>
-        {hasSelection && !showSelection && (
+        {hasSelection && (
           <button
             type="button"
             className={styles.selectionReturn}
@@ -590,6 +587,13 @@ export function Explorer({
               setShowSelection(true);
               setMobileView("map");
               changeTab("properties");
+              requestAnimationFrame(() => {
+                inspection.current?.scrollIntoView({
+                  block: "start",
+                  behavior: "instant",
+                });
+                inspection.current?.focus({ preventScroll: true });
+              });
             }}
           >
             {m.selectionLabel}
@@ -601,7 +605,6 @@ export function Explorer({
         data-mobile-view={mobileView}
         data-has-selection={hasSelection}
         data-show-selection={showSelection && tab === "properties"}
-        data-details-expanded={expandedDetails}
       >
         <section
           ref={mapSection}
@@ -887,17 +890,6 @@ export function Explorer({
                     <div className="property-inspector-controls">
                       <span>{m.selectionLabel}</span>
                       <div className={styles.selectionActions}>
-                        <button
-                          className={styles.expandDetails}
-                          type="button"
-                          aria-expanded={expandedDetails}
-                          aria-controls="atlas-panel"
-                          onClick={() => setExpandedDetails((value) => !value)}
-                        >
-                          {expandedDetails
-                            ? m.collapseDetails
-                            : m.expandDetails}
-                        </button>
                         <button
                           type="button"
                           aria-label={m.closeDetails}

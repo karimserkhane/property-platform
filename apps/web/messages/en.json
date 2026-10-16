@@ -297,6 +297,14 @@
     "noProjectsHint": "Try another name or clear your search.",
     "directoryIntro": "Discover projects across Reem and Saadiyat. Explore the details, then find your next area.",
     "purchaseNote": "Prices, availability and payment terms are not yet verified. Confirm current details with the developer.",
-    "openPage": "Open project page"
+    "openPage": "Open project page",
+    "areaMap": "Explore the neighbourhood",
+    "loadMap": "Open neighbourhood map",
+    "mapIntro": "Discover buildings, streets and places across this neighbourhood.",
+    "mapUnavailable": "The neighbourhood map is unavailable. You can still open the main map.",
+    "editorialImage": "Abu Dhabi · illustrative photograph",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "useLocalMap": "Use our detailed map"
   }
 }

@@ -297,6 +297,14 @@
     "noProjectsHint": "请尝试其他名称或清除搜索。",
     "directoryIntro": "发现 Reem 和 Saadiyat 的项目。查看详细信息，再探索您感兴趣的下一个地区。",
     "purchaseNote": "价格、可售情况和付款条款尚未核实。请向开发商确认最新信息。",
-    "openPage": "打开项目页面"
+    "openPage": "打开项目页面",
+    "areaMap": "探索周边",
+    "loadMap": "打开街区地图",
+    "mapIntro": "探索这个街区的建筑、街道和地点。",
+    "mapUnavailable": "街区地图暂不可用，仍可打开主地图。",
+    "editorialImage": "阿布扎比 · 氛围示意照片",
+    "previousImage": "上一张图片",
+    "nextImage": "下一张图片",
+    "useLocalMap": "使用我们的详细地图"
   }
 }

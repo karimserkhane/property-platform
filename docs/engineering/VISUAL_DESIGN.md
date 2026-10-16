@@ -12,11 +12,11 @@ La fiche et l'aperçu cartographique partagent la même hiérarchie : identité 
 
 ## Carte sur ordinateur et téléphone
 
-Le clic sur un bien possédant un projet documenté ouvre maintenant **le dossier complet dans la carte**, et l'annuaire utilise le même parcours. La fiche réutilise la présentation de la page projet : identité, promoteur, livraison, programme, typologies, équipements, médias autorisés, documents, informations d'achat et preuves. Une variante compacte adapte ces sections au panneau. Les raccourcis font défiler ce panneau sans naviguer hors de la carte. Sur téléphone, Agrandir/Réduire fait passer la fiche de sa hauteur partagée à une vue presque pleine ; le zoom et le centre de la carte restent conservés. Une page indépendante partageable demeure disponible.
+Le clic sur un bien possédant un projet documenté ouvre maintenant **le dossier complet sous la carte**, et l'annuaire utilise le même parcours. La fiche réutilise la présentation de la page projet : identité, promoteur, livraison, programme, typologies, équipements, médias autorisés, documents, informations d'achat et preuves. La carte centrale occupe toute la largeur et les sections du dossier suivent dans le flux de page. Les raccourcis font défiler la page, sans barres fixes superposées. Le zoom et le centre de la carte restent conservés. Une page indépendante partageable demeure disponible.
 
 Les liens `explore?territory=…&project=…` ouvrent aussi les projets dont le bâtiment n'est pas encore rapproché. Le dossier reste consultable à l'échelle du quartier ; aucune coordonnée n'est déduite du nom. Seuls les liens explicites existants peuvent fournir la surbrillance et l'action Localiser. Les références externes ne deviennent pas automatiquement des médias intégrés.
 
-Sur ordinateur, la carte et son panneau de résultats se lisent côte à côte. Sur téléphone, **Carte / Liste** permet de choisir la surface utile sans empiler la carte, tous les outils et tous les résultats dans une longue page. La sélection ouvre une fiche en bas de l'écran, avec hauteur bornée et contenu défilant ; la carte ne zoome pas automatiquement. Fermer la fiche conserve un parcours clavier cohérent, et une commande permet de retrouver le bien sélectionné.
+Sur ordinateur comme sur téléphone, les informations suivent la carte. Sur téléphone, **Carte / Liste** permet de choisir la surface utile sans empiler la carte, tous les outils et tous les résultats dans une longue page. La sélection rend la fiche accessible sous la carte ; elle ne zoome pas automatiquement. Fermer la fiche conserve un parcours clavier cohérent, et une commande permet de retrouver le bien sélectionné.
 
 La recherche reste au premier plan. Les réglages de couches et exports sont regroupés dans les réglages de carte ; la légende reste repliable sous la carte. Les onglets de données conservent leurs fonctions ; un `tab` d'URL n'est accepté que s'il appartient à la liste prévue par l'explorateur. La règle « objet précis avant grand terrain » et les associations spatiales restent celles du catalogue existant : la refonte visuelle ne crée ni géométrie ni nouvelle association projet/bâtiment.
 
@@ -105,3 +105,13 @@ Vérification navigateur du 12 octobre 2026 : accueil anglais sur ordinateur, an
 Les builds locaux utilisent les dépendances verrouillées déjà installées. Le certificat PyPI/npm de l'environnement de reconstruction reste une limite distincte décrite dans [DEVELOPMENT.md](DEVELOPMENT.md). Ni l'API ni la base ne changent pour cette évolution de présentation et de sélection.
 
 La sélection cartographique a ensuite évolué : secteurs et périmètres ne captent plus le clic, la caméra reste fixe à la sélection et le panneau affiche d’abord le bien. Voir [PROPERTY_EXPLORATION.md](PROPERTY_EXPLORATION.md) ; le test de secteur sélectionnable décrit plus haut correspond à l’étape précédente, remplacée par ce comportement. Les photos de bâtiments sont séparées des photographies décoratives de l’accueil.
+
+
+## Pages projets et alentours — 16 octobre 2026
+
+La couverture prend toute la largeur avec un titre superposé, un bouton ivoire et une galerie manuelle. Les images approuvées sont prioritaires ; sinon les photos locales de la côte et des palmiers d'Abu Dhabi portent un libellé d'ambiance explicite. Les photographies ne prouvent aucune vue ou prestation du projet. Une transition brève accompagne le changement d'image et le survol ; aucun défilement automatique, aucune vidéo préchargée. La réduction des animations supprime ces effets.
+
+La carte d'alentours ne se charge qu'après activation et se limite au quartier de la fiche. Le [guide des fournisseurs](MAP_PROVIDERS.md) explique MapLibre, l'option Google Embed et sa clé dédiée. Les pages conservent leurs documents, faits et preuves ; cette refonte n'ajoute ni prix ni disponibilité.
+
+
+Références visuelles consultées pour cette évolution : [Aldar](https://www.aldar.com/), [Modon](https://www.modon.com/) et [Emaar](https://www.emaar.com/en), pour leurs grands visuels et la hiérarchie entre destination, projet et action. Les compositions et fichiers de ces sites ne sont pas copiés ; les images de la plateforme conservent leur propre provenance.

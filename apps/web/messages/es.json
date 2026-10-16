@@ -297,6 +297,14 @@
     "noProjectsHint": "Prueba con otro nombre o borra la búsqueda.",
     "directoryIntro": "Descubre proyectos en Reem y Saadiyat. Consulta sus detalles y encuentra tu próxima zona.",
     "purchaseNote": "Los precios, la disponibilidad y las condiciones de pago aún no están verificados. Confirma la información actual con la promotora.",
-    "openPage": "Abrir página del proyecto"
+    "openPage": "Abrir página del proyecto",
+    "areaMap": "Explorar los alrededores",
+    "loadMap": "Abrir mapa del barrio",
+    "mapIntro": "Descubre los edificios, calles y lugares de este barrio.",
+    "mapUnavailable": "El mapa del barrio no está disponible. Puedes abrir el mapa principal.",
+    "editorialImage": "Abu Dabi · fotografía ilustrativa",
+    "previousImage": "Imagen anterior",
+    "nextImage": "Imagen siguiente",
+    "useLocalMap": "Usar nuestro mapa detallado"
   }
 }

@@ -152,32 +152,23 @@
   display: none;
 }
 .workspace {
+  display: grid;
   align-items: start;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 390px);
-  gap: 20px;
-}
-.workspace[data-has-selection="true"] {
-  grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
 }
 .selectionActions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.experience .selectionActions .expandDetails {
-  display: none;
-  border-radius: 12px;
-  padding-inline: 12px;
-  font-size: 11px;
-  font-weight: 600;
-}
 .workspace :global(.map-column) {
   min-width: 0;
   scroll-margin-block-start: 150px;
 }
 .experience .workspace :global(.map-frame) {
-  height: min(74svh, 900px);
-  min-height: 510px;
+  height: min(68svh, 760px);
+  min-height: 440px;
   border-radius: 22px;
   border-color: #c8d8d3;
   box-shadow: 0 8px 35px #1a43430b;
@@ -252,12 +243,12 @@
   color: white;
 }
 .experience :global(.atlas-sidebar) {
+  border: 0;
   border-radius: 22px;
-  background: var(--surface);
-  max-height: min(84svh, 1000px);
-  position: sticky;
-  top: 16px;
-  box-shadow: 0 8px 35px #1a434308;
+  background: transparent;
+  max-height: none;
+  position: static;
+  overflow: visible;
 }
 .experience :global(.atlas-tabs) {
   flex-wrap: nowrap;
@@ -267,7 +258,8 @@
   scrollbar-width: thin;
   gap: 6px;
   padding: 12px;
-  background: #f2f5f1;
+  border-radius: 18px;
+  background: #edf1eb;
 }
 .experience :global(.atlas-tabs button) {
   flex: none;
@@ -285,13 +277,21 @@
   border-color: var(--ink);
 }
 .experience :global(.atlas-panel) {
-  padding: 0 14px 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  align-items: start;
+  gap: 12px;
+  overflow: visible;
+  padding: 20px 0 0;
+}
+.experience :global(.atlas-panel > :not(.atlas-record)) {
+  grid-column: 1 / -1;
 }
 .experience :global(.atlas-record) {
   padding: 15px;
   border-radius: 14px;
-  margin-block: 8px;
-  min-height: 72px;
+  margin-block: 0;
+  min-height: 86px;
   background: #fff;
   border-color: #e1e8e3;
 }
@@ -355,7 +355,7 @@
 }
 .experience :global(.parcel-inspector) {
   margin: 0 0 18px;
-  padding: 16px;
+  padding: clamp(20px, 3vw, 42px);
   border-color: #dce6df;
   border-radius: 18px;
   background: #f8faf5;
@@ -364,11 +364,11 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-block-end: 10px;
-  position: sticky;
-  top: -1px;
-  z-index: 2;
-  background: #f8faf5;
+  position: static;
+  padding-block-end: 18px;
+  border-block-end: 1px solid var(--line);
+  margin-block-end: 28px;
+  background: transparent;
 }
 .experience :global(.property-inspector-controls > span) {
   font-size: 11px;
@@ -435,7 +435,7 @@
 }
 @media (max-width: 1100px) and (min-width: 901px) {
   .workspace {
-    grid-template-columns: minmax(0, 1fr) 330px;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
   }
   .mapActions > button,
@@ -553,43 +553,19 @@
     box-shadow: none;
   }
   .experience :global(.atlas-panel) {
-    padding: 0 16px 16px;
+    padding: 12px 0;
+    grid-template-columns: 1fr;
   }
   .experience .workspace[data-mobile-view="list"] :global(.atlas-panel) {
     overflow: visible;
   }
   .experience
-    .workspace[data-mobile-view="map"][data-has-selection="true"][data-show-selection="true"] {
-    /* Allow the map to scroll above the fixed sheet, including short pages. */
-    padding-block-end: 54svh;
-  }
-  .experience
     .workspace[data-mobile-view="map"][data-has-selection="true"][data-show-selection="true"]
     :global(.atlas-sidebar) {
     display: flex;
-    position: fixed;
-    inset-inline: 8px;
-    inset-block-end: max(8px, env(safe-area-inset-bottom));
-    top: auto;
-    max-height: 54svh;
-    z-index: 50;
-    box-shadow: 0 -12px 65px #0b293a29;
-    border-radius: 24px;
-  }
-  .experience .workspace[data-mobile-view="map"] .expandDetails {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .experience
-    .workspace[data-mobile-view="map"][data-show-selection="true"][data-details-expanded="true"] {
-    padding-block-end: 92svh;
-  }
-  .experience
-    .workspace[data-mobile-view="map"][data-show-selection="true"][data-details-expanded="true"]
-    :global(.atlas-sidebar) {
-    inset-block-start: max(8px, env(safe-area-inset-top));
+    position: static;
     max-height: none;
+    border-radius: 20px;
   }
   .experience .workspace[data-mobile-view="map"] :global(.atlas-tabs),
   .experience
@@ -598,7 +574,7 @@
     display: none;
   }
   .experience .workspace[data-mobile-view="map"] :global(.parcel-inspector) {
-    padding: 0;
+    padding: 18px;
     background: none;
     border: 0;
     margin: 0;
@@ -649,4 +625,19 @@
     border-radius: 20px;
     font-size: 12px;
   }
+}
+
+.experience :global(.parcel-inspector) {
+  scroll-margin-block-start: 24px;
+}
+.experience .selectionReturn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  background: var(--ink);
+  color: white;
+  border: 0;
+  border-radius: 12px;
+  font-size: 12px;
 }

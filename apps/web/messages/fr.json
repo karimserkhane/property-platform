@@ -297,6 +297,14 @@
     "noProjectsHint": "Essayez un autre nom ou effacez votre recherche.",
     "directoryIntro": "Découvrez les projets de Reem et Saadiyat. Consultez leurs détails, puis explorez votre prochain quartier.",
     "purchaseNote": "Les prix, disponibilités et modalités de paiement ne sont pas encore vérifiés. Confirmez les informations actuelles auprès du promoteur.",
-    "openPage": "Ouvrir la page du projet"
+    "openPage": "Ouvrir la page du projet",
+    "areaMap": "Explorer les alentours",
+    "loadMap": "Ouvrir la carte du quartier",
+    "mapIntro": "Découvrez les bâtiments, rues et lieux de ce quartier.",
+    "mapUnavailable": "La carte du quartier est indisponible. La carte principale reste accessible.",
+    "editorialImage": "Abu Dhabi · photographie d’ambiance",
+    "previousImage": "Image précédente",
+    "nextImage": "Image suivante",
+    "useLocalMap": "Utiliser notre carte détaillée"
   }
 }

@@ -1,4 +1,5 @@
 import navigation from "@property-platform/contracts/territories";
+import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { ProjectCover } from "./cover";
 import {
@@ -155,6 +156,7 @@ export function ProjectDetailView({
   onSectionChange,
   onLocate,
   locateLabel,
+  neighbourhood,
 }: {
   project: ProjectDetail;
   locale: string;
@@ -163,6 +165,7 @@ export function ProjectDetailView({
   onSectionChange?: (id: string) => void;
   onLocate?: () => void;
   locateLabel?: string;
+  neighbourhood?: ReactNode;
 }) {
   const embedded = variant === "map";
   const Root = embedded ? "article" : "main";
@@ -240,14 +243,13 @@ export function ProjectDetailView({
           </Link>
         </nav>
       )}
-      {embedded && sectionNavigation}
       <header className={styles.hero}>
         <div className={styles.heroCopy}>
           <p className={styles.kicker}>
             {labels.project} <span aria-hidden="true"> / </span>{" "}
             <bdi>{territoryName}</bdi>
           </p>
-          <Title lang={project.language} dir="auto">
+          <Title lang={project.language}>
             <bdi>{project.name}</bdi>
           </Title>
           <div className={styles.developer}>
@@ -315,7 +317,7 @@ export function ProjectDetailView({
           </strong>
         </div>
       </div>
-      {!embedded && sectionNavigation}
+      {sectionNavigation}
       <div className={styles.contentLayout}>
         <div className={styles.mainColumn}>
           <section
@@ -461,6 +463,7 @@ export function ProjectDetailView({
             <h2 id="project-location">
               <bdi>{territoryName}</bdi>
             </h2>
+            {neighbourhood}
             {embedded ? (
               onLocate ? (
                 <button

@@ -22,7 +22,8 @@ const config: NextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+            value:
+              "frame-ancestors 'none'; object-src 'none'; base-uri 'self'; frame-src https://www.google.com",
           },
         ],
       },

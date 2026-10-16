@@ -1,8 +1,12 @@
 import { brand } from "@property-platform/branding";
+import navigation from "@property-platform/contracts/territories";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import type { MapLabels } from "@/features/atlas/types";
 import { ProjectDetailView } from "@/features/projects/detail";
+import { ProjectNeighbourhood } from "@/features/projects/neighbourhood";
+import { googleNeighbourhoodUrl } from "@/features/projects/neighbourhood-config";
 import { readProject } from "@/features/projects/server";
 import type { ProjectLabels } from "@/features/projects/types";
 import { isLocale } from "@/i18n/locales";
@@ -45,11 +49,43 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       t(key as keyof typeof english.Project),
     ]),
   ) as ProjectLabels;
+  const area = navigation.territories.find(
+    (item) =>
+      item.id === result.project?.territory &&
+      item.level === "area" &&
+      item.queryable,
+  );
+  const mapText = await getTranslations({ locale, namespace: "Map" });
+  const mapLabels = Object.fromEntries(
+    Object.keys(english.Map).map((key) => [
+      key,
+      mapText(key as keyof typeof english.Map),
+    ]),
+  ) as MapLabels;
   return (
     <ProjectDetailView
       project={result.project}
       locale={locale}
       labels={labels}
+      neighbourhood={
+        area ? (
+          <ProjectNeighbourhood
+            key={`${locale}:${area.id}`}
+            territory={area.id}
+            bounds={area.bounds}
+            slug={result.project.slug}
+            locale={locale}
+            labels={labels}
+            mapLabels={mapLabels}
+            googleUrl={googleNeighbourhoodUrl(
+              area.bounds,
+              locale,
+              process.env.PROJECT_NEIGHBOURHOOD_PROVIDER,
+              process.env.GOOGLE_MAPS_EMBED_BROWSER_KEY,
+            )}
+          />
+        ) : undefined
+      }
     />
   );
 }

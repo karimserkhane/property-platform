@@ -53,6 +53,8 @@ services:
     environment:
       PROPERTY_PLATFORM_API_ORIGIN: http://api:8000
       PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW: "1"
+      PROJECT_NEIGHBOURHOOD_PROVIDER: ${PROJECT_NEIGHBOURHOOD_PROVIDER:-local}
+      GOOGLE_MAPS_EMBED_BROWSER_KEY: ${GOOGLE_MAPS_EMBED_BROWSER_KEY:-}
     depends_on:
       api:
         condition: service_healthy

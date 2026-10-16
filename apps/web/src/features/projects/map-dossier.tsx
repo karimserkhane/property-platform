@@ -63,24 +63,10 @@ export function ProjectMapDossier({
   const loading = state.slug !== slug || state.loading;
   function section(id: string) {
     const target = root.current?.querySelector<HTMLElement>(`[id="${id}"]`);
-    const scroller = root.current?.closest<HTMLElement>(".atlas-panel");
-    if (!target || !scroller) return;
-    const controls =
-      scroller
-        .querySelector(".property-inspector-controls")
-        ?.getBoundingClientRect().height ?? 0;
-    const navigation =
-      root.current?.querySelector("nav")?.getBoundingClientRect().height ?? 0;
-    scroller.scrollTo({
-      top:
-        scroller.scrollTop +
-        target.getBoundingClientRect().top -
-        scroller.getBoundingClientRect().top -
-        controls -
-        navigation -
-        20,
-      behavior: "instant",
-    });
+    if (!target) return;
+    target.scrollIntoView({ block: "start", behavior: "instant" });
+    target.setAttribute("tabindex", "-1");
+    target.focus({ preventScroll: true });
   }
   return (
     <div ref={root} aria-busy={loading} data-project-preview={slug}>
