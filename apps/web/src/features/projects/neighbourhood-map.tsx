@@ -2,8 +2,9 @@
 
 import { Map as LibreMap, NavigationControl, setWorkerUrl } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
-import { mapControlLabels, mapLayers } from "../atlas/map-style";
+import { mapControlLabels, mapLayers, mapName } from "../atlas/map-style";
 import type { MapContext, MapLabels } from "../atlas/types";
+import { projectMapPoints, projectPointBounds } from "./neighbourhood-focus";
 import styles from "./project.module.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -53,11 +54,17 @@ export default function NeighbourhoodMap({
       })
       .then((data) => {
         if (abort.signal.aborted || !root.current) return;
+        const points = projectMapPoints(data, slug, bounds);
+        const projectExtent = projectPointBounds(points);
         map = new LibreMap({
           container: root.current,
-          bounds: extent,
+          bounds: projectExtent ?? extent,
           maxBounds: extent,
-          fitBoundsOptions: { padding: 24, animate: false },
+          fitBoundsOptions: {
+            padding: 64,
+            maxZoom: projectExtent ? 16.5 : 14,
+            animate: false,
+          },
           minZoom: 10,
           maxZoom: 19,
           locale: mapControlLabels(mapLabels, label),
@@ -106,14 +113,28 @@ export default function NeighbourhoodMap({
               "places",
               "place-names",
             ].includes(layer.id),
-          ))
+          )) {
+            // Keep the neighbourhood legible while the current project owns the accent.
+            if (layer.id === "buildings" && layer.type === "fill")
+              layer.paint = {
+                ...layer.paint,
+                "fill-color": "#bcc7c2",
+                "fill-opacity": 0.6,
+                "fill-outline-color": "#8faaa3",
+              };
+            if (layer.id === "places" && layer.type === "circle") {
+              layer.filter = [
+                "!",
+                ["in", "_project_marker", ["to-string", ["get", "kind"]]],
+              ];
+              layer.paint = {
+                ...layer.paint,
+                "circle-color": "#839c97",
+                "circle-radius": 3,
+              };
+            }
             map.addLayer(layer);
-          // A pin is shown only for a stored point explicitly linked to this project.
-          const points = data.place.features.filter(
-            (feature) =>
-              feature.geometry.type === "Point" &&
-              feature.properties.presentation?.project?.slug === slug,
-          );
+          }
           if (points.length) {
             map.addSource("project", {
               type: "geojson",
@@ -124,8 +145,8 @@ export default function NeighbourhoodMap({
               type: "circle",
               source: "project",
               paint: {
-                "circle-radius": 15,
-                "circle-color": "#b98e52",
+                "circle-radius": 22,
+                "circle-color": "#eb7939",
                 "circle-opacity": 0.22,
               },
             });
@@ -134,10 +155,29 @@ export default function NeighbourhoodMap({
               type: "circle",
               source: "project",
               paint: {
-                "circle-radius": 7,
-                "circle-color": "#b98e52",
+                "circle-radius": 9,
+                "circle-color": "#eb7939",
                 "circle-stroke-width": 3,
                 "circle-stroke-color": "#fffefa",
+              },
+            });
+            map.addLayer({
+              id: "project-name",
+              type: "symbol",
+              source: "project",
+              layout: {
+                "text-field": mapName(locale),
+                "text-font": ["Arial", "Noto Sans", "sans-serif"],
+                "text-size": 15,
+                "text-anchor": "top",
+                "text-offset": [0, 1.5],
+                "text-max-width": 20,
+                "text-allow-overlap": true,
+              },
+              paint: {
+                "text-color": "#123e46",
+                "text-halo-color": "#fffefa",
+                "text-halo-width": 3,
               },
             });
           }

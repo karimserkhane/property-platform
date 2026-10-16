@@ -8,6 +8,8 @@ La page projet conserve les faits et sources en base et ajoute une carte de quar
 
 Le bouton de chargement active la carte sur demande. Le mode local lit `/api/atlas/map-context`, borné aux limites de ce quartier : rues, bâtiments, lieux et limites. Il ne charge ni toutes les parcelles des deux îles, ni les autres émirats, ni un scraper. Un repère projet nécessite un point stocké déjà explicitement associé à son slug. Le centre du quartier ne devient jamais la position du projet.
 
+**Cadrage du projet — 16 octobre 2026.** À l’ouverture de la carte locale, la caméra cadre les points stockés explicitement rattachés au projet, avec un zoom maximal de 16,5. Le projet porte un repère orange, un halo et son nom ; bâtiments et autres lieux restent discrets, et les repères des autres projets sont masqués dans cette carte de localisation. Plusieurs points du même projet sont cadrés ensemble. Sans point valide dans le quartier, la carte garde la vue du quartier sans inventer de position. Ce cadrage initial est propre à la carte embarquée : les clics de l’explorateur général ne déclenchent toujours pas de zoom automatique. Aucune migration ou réingestion n’est nécessaire.
+
 ## MapLibre et Google Maps
 
 MapLibre est notre moteur de rendu ; Onwani et OpenStreetMap sont des sources et PostgreSQL/PostGIS conserve nos données. Changer de fond ne remplace donc ni les parcelles, ni les preuves, ni les imports.
@@ -43,7 +45,7 @@ Le mode Google utilise l'endpoint fixe `https://www.google.com/maps/embed/v1/vie
 
 ## Propriétaires du code
 
-Les fichiers sont sous `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\` : `neighbourhood-config.ts` construit l'URL bornée ; `neighbourhood.tsx` possède l'activation et le fournisseur ; `neighbourhood-map.tsx` possède le chunk MapLibre différé, la requête API, l'annulation et le nettoyage. La route `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\[locale]\projects\[slug]\page.tsx` assemble ces composants avec la fiche et sa configuration.
+Les fichiers sont sous `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\` : `neighbourhood-config.ts` construit l'URL bornée ; `neighbourhood.tsx` possède l'activation et le fournisseur ; `neighbourhood-map.tsx` possède le chunk MapLibre différé, la requête API, l'annulation et le nettoyage. `neighbourhood-focus.ts` filtre les points explicitement associés et calcule leur cadrage, sans dépendance de rendu ni écriture. La route `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\[locale]\projects\[slug]\page.tsx` assemble ces composants avec la fiche et sa configuration.
 
 Direction : route projet → configuration/présentation → carte locale → lectures API existantes. L'adaptateur réutilise les types et styles purs d'`atlas`, sans importer l'explorateur complet. Aucun nouveau service, contrat ou schéma SQL.
 
