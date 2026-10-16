@@ -131,10 +131,18 @@ export function Explorer({
   const selectionOrigin = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (showSelection && (feature?.id || selected)) {
+      if (
+        mobileView === "map" &&
+        window.matchMedia("(max-width: 900px)").matches
+      )
+        mapSection.current?.scrollIntoView({
+          block: "start",
+          behavior: "instant",
+        });
       inspection.current?.focus({ preventScroll: true });
       panel.current?.scrollTo({ top: 0, behavior: "instant" });
     }
-  }, [feature?.id, selected, showSelection]);
+  }, [feature?.id, selected, showSelection, mobileView]);
   useEffect(() => {
     const readTab = () => {
       const value = new URL(window.location.href).searchParams.get("tab");

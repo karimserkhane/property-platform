@@ -547,7 +547,7 @@
     inset-inline: 8px;
     inset-block-end: max(8px, env(safe-area-inset-bottom));
     top: auto;
-    max-height: 62svh;
+    max-height: 54svh;
     z-index: 50;
     box-shadow: 0 -12px 65px #0b293a29;
     border-radius: 24px;
