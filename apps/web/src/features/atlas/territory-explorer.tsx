@@ -71,6 +71,7 @@ export function TerritoryExplorer({
     const url = new URL(window.location.href);
     url.searchParams.set("territory", id);
     url.searchParams.delete("parcel");
+    url.searchParams.delete("project");
     window.history.pushState(null, "", url);
     setSelected(id);
   }
