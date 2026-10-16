@@ -1060,3 +1060,110 @@
     transform: none;
   }
 }
+.directoryPageLink {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 20px;
+  border-block-start: 1px solid #e7e8df;
+  font-size: 11px;
+  color: #596e6c;
+  text-decoration: none;
+}
+.embedded {
+  padding: 0;
+  max-width: none;
+  font-size: 13px;
+}
+.embedded .hero {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 22px;
+  padding: 0 0 20px;
+}
+.embedded .hero .heroCopy h2 {
+  margin-block: 12px;
+  font-family: var(--font-display), serif;
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1.08;
+}
+.embedded .developer {
+  font-size: 14px;
+}
+.embedded .cover {
+  width: 100%;
+  min-height: 200px;
+}
+.embedded .coverCopy {
+  padding: 24px;
+}
+.embedded .coverMonogram {
+  font-size: 110px;
+}
+.embedded .actions {
+  margin-block-start: 20px;
+  gap: 10px;
+}
+.embedded .actions > a {
+  width: auto;
+  font-size: 12px;
+  min-height: 44px;
+}
+.embedded .factStrip {
+  grid-template-columns: 1fr 1fr;
+  padding-block: 20px;
+  gap: 20px 12px;
+}
+.embedded .factStrip > div {
+  padding: 0;
+  border: 0;
+}
+.embedded .sectionNav {
+  top: 58px;
+  margin-block-end: 22px;
+  gap: 8px;
+  background: var(--surface, #fffefa);
+}
+.embedded .sectionNav button {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #dce2d8;
+  border-radius: 10px;
+  background: #f2f5ef;
+  color: #24484e;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.embedded .contentLayout {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.embedded .sidebar {
+  position: static;
+  display: block;
+}
+.embedded .overviewFacts {
+  grid-template-columns: 1fr;
+}
+.embedded .typologies {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.embedded .amenities,
+.embedded .media {
+  grid-template-columns: 1fr;
+}
+.embedded .section {
+  margin-block-end: 26px;
+}
+.embedded .location {
+  padding: 22px;
+}
+.embedded .primaryAction {
+  min-height: 44px;
+}

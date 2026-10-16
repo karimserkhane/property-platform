@@ -124,7 +124,9 @@
     "dataViews": "浏览地图数据",
     "previousPage": "上一页",
     "nextPage": "下一页",
-    "selectionLabel": "所选房产"
+    "selectionLabel": "所选房产",
+    "expandDetails": "展开详情",
+    "collapseDetails": "收起详情"
   },
   "Coverage": {
     "title": "七个酋长国。一个平台。",
@@ -290,6 +292,7 @@
     "noProjects": "未找到匹配的项目",
     "noProjectsHint": "请尝试其他名称或清除搜索。",
     "directoryIntro": "发现 Reem 和 Saadiyat 的项目。查看详细信息，再探索您感兴趣的下一个地区。",
-    "purchaseNote": "价格、可售情况和付款条款尚未核实。请向开发商确认最新信息。"
+    "purchaseNote": "价格、可售情况和付款条款尚未核实。请向开发商确认最新信息。",
+    "openPage": "打开项目页面"
   }
 }

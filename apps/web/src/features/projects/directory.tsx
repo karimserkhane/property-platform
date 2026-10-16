@@ -3,6 +3,7 @@
 import type { components } from "@property-platform/contracts";
 import { useId, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { projectMapHref } from "./data";
 import styles from "./project.module.css";
 
 type DirectoryProject = components["schemas"]["ProjectSummaryResponse"] & {
@@ -17,6 +18,7 @@ type DirectoryLabels = {
   clearSearch: string;
   noProjects: string;
   noProjectsHint: string;
+  openPage: string;
 };
 
 // Search only presentation fields; it never creates an identity or map match.
@@ -98,7 +100,7 @@ export function ProjectDirectoryList({
             <article className={styles.directoryCard} key={project.id}>
               <Link
                 className={styles.directoryLink}
-                href={`/projects/${project.slug}`}
+                href={projectMapHref(project.slug, project.territory)}
               >
                 <span className={styles.directoryMonogram} aria-hidden="true">
                   {project.name
@@ -124,6 +126,14 @@ export function ProjectDirectoryList({
                 <span className={styles.directoryAction}>
                   {labels.viewDetails}
                 </span>
+              </Link>
+              <Link
+                className={styles.directoryPageLink}
+                href={`/projects/${project.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {labels.openPage} <span aria-hidden="true">↗</span>
               </Link>
             </article>
           ))}

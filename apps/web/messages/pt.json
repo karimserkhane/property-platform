@@ -124,7 +124,9 @@
     "dataViews": "Explorar dados do mapa",
     "previousPage": "Anterior",
     "nextPage": "Seguinte",
-    "selectionLabel": "Imóvel selecionado"
+    "selectionLabel": "Imóvel selecionado",
+    "expandDetails": "Ampliar detalhes",
+    "collapseDetails": "Reduzir detalhes"
   },
   "Coverage": {
     "title": "Sete emirados. Uma plataforma.",
@@ -290,6 +292,7 @@
     "noProjects": "Nenhum projeto correspondente",
     "noProjectsHint": "Experimente outro nome ou limpe a pesquisa.",
     "directoryIntro": "Descubra projetos em Reem e Saadiyat. Consulte os detalhes e explore a sua próxima zona.",
-    "purchaseNote": "Os preços, a disponibilidade e as condições de pagamento ainda não foram verificados. Confirme as informações atuais com o promotor."
+    "purchaseNote": "Os preços, a disponibilidade e as condições de pagamento ainda não foram verificados. Confirme as informações atuais com o promotor.",
+    "openPage": "Abrir página do projeto"
   }
 }

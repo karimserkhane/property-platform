@@ -124,7 +124,9 @@
     "dataViews": "Tingnan ang datos ng mapa",
     "previousPage": "Nakaraan",
     "nextPage": "Susunod",
-    "selectionLabel": "Napiling ari-arian"
+    "selectionLabel": "Napiling ari-arian",
+    "expandDetails": "Palakihin ang detalye",
+    "collapseDetails": "Paliitin ang detalye"
   },
   "Coverage": {
     "title": "Pitong emirate. Isang platform.",
@@ -290,6 +292,7 @@
     "noProjects": "Walang tumugmang proyekto",
     "noProjectsHint": "Subukan ang ibang pangalan o burahin ang paghahanap.",
     "directoryIntro": "Tuklasin ang mga proyekto sa Reem at Saadiyat. Tingnan ang mga detalye, saka piliin ang susunod mong lugar.",
-    "purchaseNote": "Hindi pa nabeberipika ang mga presyo, availability at kundisyon sa pagbabayad. Kumpirmahin ang kasalukuyang detalye sa developer."
+    "purchaseNote": "Hindi pa nabeberipika ang mga presyo, availability at kundisyon sa pagbabayad. Kumpirmahin ang kasalukuyang detalye sa developer.",
+    "openPage": "Buksan ang pahina ng proyekto"
   }
 }

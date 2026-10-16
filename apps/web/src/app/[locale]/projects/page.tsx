@@ -85,6 +85,7 @@ export default async function ProjectDirectory({
             clearSearch: t("clearSearch"),
             noProjects: t("noProjects"),
             noProjectsHint: t("noProjectsHint"),
+            openPage: t("openPage"),
           }}
         />
       ) : (

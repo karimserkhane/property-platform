@@ -5,9 +5,16 @@ type PreviewReader = (
 ) => Promise<{ status: number; data: unknown }>;
 
 // This testable adapter never accepts an origin or source URL from a visitor.
+export function isProjectSlug(slug: string) {
+  return slug.length <= 100 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
+}
+
+export function projectMapHref(slug: string, territory: string) {
+  return { pathname: "/explore", query: { territory, project: slug } };
+}
+
 export async function readProjectData(slug: string, read: PreviewReader) {
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 100)
-    return { status: 404, project: null };
+  if (!isProjectSlug(slug)) return { status: 404, project: null };
   try {
     const result = await read(`projects/${encodeURIComponent(slug)}`);
     if (result.status !== 200) return { status: result.status, project: null };

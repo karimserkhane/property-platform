@@ -124,7 +124,9 @@
     "dataViews": "Browse map data",
     "previousPage": "Previous",
     "nextPage": "Next",
-    "selectionLabel": "Selected property"
+    "selectionLabel": "Selected property",
+    "expandDetails": "Expand details",
+    "collapseDetails": "Reduce details"
   },
   "Coverage": {
     "title": "Seven emirates. One platform.",
@@ -290,6 +292,7 @@
     "noProjects": "No matching projects",
     "noProjectsHint": "Try another name or clear your search.",
     "directoryIntro": "Discover projects across Reem and Saadiyat. Explore the details, then find your next area.",
-    "purchaseNote": "Prices, availability and payment terms are not yet verified. Confirm current details with the developer."
+    "purchaseNote": "Prices, availability and payment terms are not yet verified. Confirm current details with the developer.",
+    "openPage": "Open project page"
   }
 }

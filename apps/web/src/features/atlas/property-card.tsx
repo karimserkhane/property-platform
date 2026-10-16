@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { ProjectPreview } from "@/features/projects/preview";
+import { ProjectMapDossier } from "@/features/projects/map-dossier";
 import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
 import type { MapFeature, MapLabels, ResearchReference } from "./types";
 
@@ -44,7 +44,7 @@ export function PropertyCard({
   const title = propertyName(p, locale) || typeLabel;
   if (profile?.project)
     return (
-      <ProjectPreview
+      <ProjectMapDossier
         key={profile.project.slug}
         slug={profile.project.slug}
         name={profile.project.name}

@@ -151,11 +151,22 @@ export function ProjectDetailView({
   project,
   locale,
   labels,
+  variant = "page",
+  onSectionChange,
+  onLocate,
+  locateLabel,
 }: {
   project: ProjectDetail;
   locale: string;
   labels: ProjectLabels;
+  variant?: "page" | "map";
+  onSectionChange?: (id: string) => void;
+  onLocate?: () => void;
+  locateLabel?: string;
 }) {
+  const embedded = variant === "map";
+  const Root = embedded ? "article" : "main";
+  const Title = embedded ? "h2" : "h1";
   const territory = navigation.territories.find(
     (item) => item.id === project.territory,
   );
@@ -180,7 +191,7 @@ export function ProjectDetailView({
     }).format(new Date(value));
   const areaLink = {
     pathname: "/explore",
-    query: { territory: project.territory },
+    query: { territory: project.territory, project: project.slug },
   };
   const sections = [
     ["project-overview", labels.overview],
@@ -192,31 +203,53 @@ export function ProjectDetailView({
     ...(documents.length ? [["project-documents", labels.documents]] : []),
     ["project-location", labels.location],
   ];
+  const sectionNavigation = (
+    <nav className={styles.sectionNav} aria-label={labels.navigation}>
+      {sections.map(([id, label]) =>
+        embedded ? (
+          <button type="button" key={id} onClick={() => onSectionChange?.(id)}>
+            {label}
+          </button>
+        ) : (
+          <a key={id} href={`#${id}`}>
+            {label}
+          </a>
+        ),
+      )}
+    </nav>
+  );
   return (
-    <main className={styles.page} data-page="project">
-      <nav className={styles.breadcrumb} aria-label={labels.navigation}>
-        <Link href={areaLink}>
-          <span aria-hidden="true">←</span> {labels.backToMap}
-        </Link>
-        <span aria-hidden="true">/</span>
-        <Link
-          href={{
-            pathname: "/projects",
-            query: { territory: project.territory },
-          }}
-        >
-          {labels.projects}
-        </Link>
-      </nav>
+    <Root
+      className={`${styles.page} ${embedded ? styles.embedded : ""}`}
+      data-page="project"
+      data-project-dossier={project.slug}
+    >
+      {!embedded && (
+        <nav className={styles.breadcrumb} aria-label={labels.navigation}>
+          <Link href={areaLink}>
+            <span aria-hidden="true">←</span> {labels.backToMap}
+          </Link>
+          <span aria-hidden="true">/</span>
+          <Link
+            href={{
+              pathname: "/projects",
+              query: { territory: project.territory },
+            }}
+          >
+            {labels.projects}
+          </Link>
+        </nav>
+      )}
+      {embedded && sectionNavigation}
       <header className={styles.hero}>
         <div className={styles.heroCopy}>
           <p className={styles.kicker}>
             {labels.project} <span aria-hidden="true"> / </span>{" "}
             <bdi>{territoryName}</bdi>
           </p>
-          <h1 lang={project.language} dir="auto">
+          <Title lang={project.language} dir="auto">
             <bdi>{project.name}</bdi>
-          </h1>
+          </Title>
           <div className={styles.developer}>
             <span>{labels.developer}</span>
             <bdi>{project.developer.name}</bdi>
@@ -232,9 +265,20 @@ export function ProjectDetailView({
                 {labels.developerWebsite} <span aria-hidden="true">↗</span>
               </a>
             )}
-            <Link className={styles.secondaryAction} href={areaLink}>
-              {labels.exploreArea} <span aria-hidden="true">↗</span>
-            </Link>
+            {embedded ? (
+              <Link
+                className={styles.secondaryAction}
+                href={`/projects/${project.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {labels.openPage} <span aria-hidden="true">↗</span>
+              </Link>
+            ) : (
+              <Link className={styles.secondaryAction} href={areaLink}>
+                {labels.exploreArea} <span aria-hidden="true">↗</span>
+              </Link>
+            )}
           </div>
         </div>
         <ProjectCover key={project.id} project={project} labels={labels} />
@@ -271,13 +315,7 @@ export function ProjectDetailView({
           </strong>
         </div>
       </div>
-      <nav className={styles.sectionNav} aria-label={labels.navigation}>
-        {sections.map(([id, label]) => (
-          <a key={id} href={`#${id}`}>
-            {label}
-          </a>
-        ))}
-      </nav>
+      {!embedded && sectionNavigation}
       <div className={styles.contentLayout}>
         <div className={styles.mainColumn}>
           <section
@@ -423,9 +461,23 @@ export function ProjectDetailView({
             <h2 id="project-location">
               <bdi>{territoryName}</bdi>
             </h2>
-            <Link className={styles.primaryAction} href={areaLink}>
-              {labels.exploreArea} <span aria-hidden="true">↗</span>
-            </Link>
+            {embedded ? (
+              onLocate ? (
+                <button
+                  type="button"
+                  className={styles.primaryAction}
+                  onClick={onLocate}
+                >
+                  {locateLabel ?? labels.exploreArea}
+                </button>
+              ) : (
+                <p className={styles.muted}>{labels.notMapped}</p>
+              )
+            ) : (
+              <Link className={styles.primaryAction} href={areaLink}>
+                {labels.exploreArea} <span aria-hidden="true">↗</span>
+              </Link>
+            )}
           </section>
         </div>
         <aside className={styles.sidebar} aria-label={labels.commercial}>
@@ -505,6 +557,6 @@ export function ProjectDetailView({
           ))}
         </details>
       )}
-    </main>
+    </Root>
   );
 }

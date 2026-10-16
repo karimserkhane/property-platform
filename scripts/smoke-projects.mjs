@@ -39,6 +39,10 @@ for (const locale of ["en", "fr", "ar"]) {
       directoryHtml.includes(`/projects/${project.slug}`),
       `${locale}: directory contains ${project.slug}`,
     );
+    assert.ok(
+      directoryHtml.includes(`project=${project.slug}`),
+      `${locale}: directory opens ${project.slug} inside the map`,
+    );
     const detail = details.get(project.slug);
     const response = await fetch(
       new URL(`/${locale}/projects/${project.slug}`, origin),

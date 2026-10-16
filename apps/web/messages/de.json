@@ -124,7 +124,9 @@
     "dataViews": "Kartendaten durchsuchen",
     "previousPage": "Zurück",
     "nextPage": "Weiter",
-    "selectionLabel": "Ausgewählte Immobilie"
+    "selectionLabel": "Ausgewählte Immobilie",
+    "expandDetails": "Details vergrößern",
+    "collapseDetails": "Details verkleinern"
   },
   "Coverage": {
     "title": "Sieben Emirate. Eine Plattform.",
@@ -290,6 +292,7 @@
     "noProjects": "Keine passenden Projekte",
     "noProjectsHint": "Versuchen Sie einen anderen Namen oder löschen Sie die Suche.",
     "directoryIntro": "Entdecken Sie Projekte auf Reem und Saadiyat. Sehen Sie sich die Details an und erkunden Sie Ihre nächste Gegend.",
-    "purchaseNote": "Preise, Verfügbarkeit und Zahlungsbedingungen sind noch nicht überprüft. Bestätigen Sie die aktuellen Angaben beim Bauträger."
+    "purchaseNote": "Preise, Verfügbarkeit und Zahlungsbedingungen sind noch nicht überprüft. Bestätigen Sie die aktuellen Angaben beim Bauträger.",
+    "openPage": "Projektseite öffnen"
   }
 }

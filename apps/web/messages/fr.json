@@ -124,7 +124,9 @@
     "dataViews": "Parcourir les données de la carte",
     "previousPage": "Précédent",
     "nextPage": "Suivant",
-    "selectionLabel": "Bien sélectionné"
+    "selectionLabel": "Bien sélectionné",
+    "expandDetails": "Agrandir la fiche",
+    "collapseDetails": "Réduire la fiche"
   },
   "Coverage": {
     "title": "Sept émirats. Une plateforme.",
@@ -290,6 +292,7 @@
     "noProjects": "Aucun projet correspondant",
     "noProjectsHint": "Essayez un autre nom ou effacez votre recherche.",
     "directoryIntro": "Découvrez les projets de Reem et Saadiyat. Consultez leurs détails, puis explorez votre prochain quartier.",
-    "purchaseNote": "Les prix, disponibilités et modalités de paiement ne sont pas encore vérifiés. Confirmez les informations actuelles auprès du promoteur."
+    "purchaseNote": "Les prix, disponibilités et modalités de paiement ne sont pas encore vérifiés. Confirmez les informations actuelles auprès du promoteur.",
+    "openPage": "Ouvrir la page du projet"
   }
 }

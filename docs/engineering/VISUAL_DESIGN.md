@@ -12,6 +12,10 @@ La fiche et l'aperçu cartographique partagent la même hiérarchie : identité 
 
 ## Carte sur ordinateur et téléphone
 
+Le clic sur un bien possédant un projet documenté ouvre maintenant **le dossier complet dans la carte**, et l'annuaire utilise le même parcours. La fiche réutilise la présentation de la page projet : identité, promoteur, livraison, programme, typologies, équipements, médias autorisés, documents, informations d'achat et preuves. Une variante compacte adapte ces sections au panneau. Les raccourcis font défiler ce panneau sans naviguer hors de la carte. Sur téléphone, Agrandir/Réduire fait passer la fiche de sa hauteur partagée à une vue presque pleine ; le zoom et le centre de la carte restent conservés. Une page indépendante partageable demeure disponible.
+
+Les liens `explore?territory=…&project=…` ouvrent aussi les projets dont le bâtiment n'est pas encore rapproché. Le dossier reste consultable à l'échelle du quartier ; aucune coordonnée n'est déduite du nom. Seuls les liens explicites existants peuvent fournir la surbrillance et l'action Localiser. Les références externes ne deviennent pas automatiquement des médias intégrés.
+
 Sur ordinateur, la carte et son panneau de résultats se lisent côte à côte. Sur téléphone, **Carte / Liste** permet de choisir la surface utile sans empiler la carte, tous les outils et tous les résultats dans une longue page. La sélection ouvre une fiche en bas de l'écran, avec hauteur bornée et contenu défilant ; la carte ne zoome pas automatiquement. Fermer la fiche conserve un parcours clavier cohérent, et une commande permet de retrouver le bien sélectionné.
 
 La recherche reste au premier plan. Les réglages de couches et exports sont regroupés dans les réglages de carte ; la légende reste repliable sous la carte. Les onglets de données conservent leurs fonctions ; un `tab` d'URL n'est accepté que s'il appartient à la liste prévue par l'explorateur. La règle « objet précis avant grand terrain » et les associations spatiales restent celles du catalogue existant : la refonte visuelle ne crée ni géométrie ni nouvelle association projet/bâtiment.

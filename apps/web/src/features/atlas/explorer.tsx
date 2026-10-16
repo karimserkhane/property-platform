@@ -11,6 +11,8 @@ import {
   useState,
 } from "react";
 import { UiIcon } from "@/components/ui-icon";
+import { isProjectSlug } from "@/features/projects/data";
+import { ProjectMapDossier } from "@/features/projects/map-dossier";
 import { Link } from "@/i18n/navigation";
 import { AdrecMarket } from "./adrec-market";
 import styles from "./explorer.module.css";
@@ -104,6 +106,9 @@ export function Explorer({
   const [tab, setTab] = useState<Tab>("properties");
   const [mobileView, setMobileView] = useState<"map" | "list">("map");
   const [showSelection, setShowSelection] = useState(false);
+  const [projectSlug, setProjectSlug] = useState<string | null>(null);
+  const [expandedDetails, setExpandedDetails] = useState(false);
+  const hasSelection = Boolean(selected || feature || projectSlug);
   const [page, setPage] = useState(0);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -130,7 +135,7 @@ export function Explorer({
   const mapViewButton = useRef<HTMLButtonElement>(null);
   const selectionOrigin = useRef<HTMLElement | null>(null);
   useEffect(() => {
-    if (showSelection && (feature?.id || selected)) {
+    if (showSelection && (feature?.id || selected || projectSlug)) {
       if (
         mobileView === "map" &&
         window.matchMedia("(max-width: 900px)").matches
@@ -142,15 +147,39 @@ export function Explorer({
       inspection.current?.focus({ preventScroll: true });
       panel.current?.scrollTo({ top: 0, behavior: "instant" });
     }
-  }, [feature?.id, selected, showSelection, mobileView]);
+  }, [feature?.id, selected, projectSlug, showSelection, mobileView]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: select uses only refs and the immutable territory of this keyed explorer; bind browser history once.
   useEffect(() => {
     const readTab = () => {
-      const value = new URL(window.location.href).searchParams.get("tab");
+      const params = new URL(window.location.href).searchParams;
+      const value = params.get("tab");
       if (value && TABS.includes(value as Tab)) {
         setTab(value as Tab);
         setMobileView("list");
       } else {
         setTab("properties");
+      }
+      const slug = params.get("project");
+      const parcel = params.get("parcel");
+      if (parcel && /^[0-9a-f-]{36}$/i.test(parcel)) {
+        void select(parcel);
+        return;
+      }
+      detailRequest.current?.abort();
+      ++requestId.current;
+      setFeature(null);
+      setSelected(null);
+      setDetail(null);
+      setDetailState("ready");
+      if (slug && !params.has("parcel") && isProjectSlug(slug)) {
+        setProjectSlug(slug);
+        setShowSelection(true);
+        setExpandedDetails(false);
+        setTab("properties");
+        setMobileView("map");
+      } else {
+        setProjectSlug(null);
+        setShowSelection(false);
       }
     };
     readTab();
@@ -218,6 +247,8 @@ export function Explorer({
         : null;
     setTab("properties");
     setShowSelection(true);
+    setProjectSlug(null);
+    setExpandedDetails(false);
     detailRequest.current?.abort();
     detailRequest.current = new AbortController();
     const current = ++requestId.current;
@@ -228,6 +259,7 @@ export function Explorer({
     const url = new URL(window.location.href);
     url.searchParams.set("parcel", id);
     url.searchParams.delete("tab");
+    url.searchParams.delete("project");
     window.history.replaceState(null, "", url);
     try {
       const r = await fetch(
@@ -262,6 +294,8 @@ export function Explorer({
         : null;
     setTab("properties");
     setShowSelection(true);
+    setProjectSlug(null);
+    setExpandedDetails(false);
     detailRequest.current?.abort();
     ++requestId.current;
     setFeature(f);
@@ -271,19 +305,25 @@ export function Explorer({
     const url = new URL(window.location.href);
     url.searchParams.delete("parcel");
     url.searchParams.delete("tab");
+    if (f.properties.presentation?.project?.slug)
+      url.searchParams.set("project", f.properties.presentation.project.slug);
+    else url.searchParams.delete("project");
     window.history.replaceState(null, "", url);
   }
-  const initialSelection = useRef(false);
-  useEffect(() => {
-    if (initialSelection.current) return;
-    initialSelection.current = true;
-    const id = new URL(window.location.href).searchParams.get("parcel");
-    if (id && /^[0-9a-f-]{36}$/i.test(id)) void select(id);
-  });
-
   const parcelProperties = useMemo(
     () => parcelPropertyIndex(context),
     [context],
+  );
+  // Only existing explicit project links may provide a location or highlight.
+  const projectFeature = useMemo(
+    () =>
+      projectSlug
+        ? (propertyFeatures(context).find(
+            (item) =>
+              item.properties.presentation?.project?.slug === projectSlug,
+          ) ?? null)
+        : null,
+    [context, projectSlug],
   );
   const placesByParcel = useMemo(() => {
     const names = new Map<string, string[]>(
@@ -404,7 +444,9 @@ export function Explorer({
     setMobileView("map");
     setShowSelection(false);
     const target =
-      feature ?? collection?.features.find((f) => f.id === selected);
+      feature ??
+      projectFeature ??
+      collection?.features.find((f) => f.id === selected);
     if (target)
       setView((v) => ({
         kind: "feature",
@@ -426,10 +468,13 @@ export function Explorer({
     setFeature(null);
     setDetail(null);
     setSelected(null);
+    setProjectSlug(null);
+    setExpandedDetails(false);
     setDetailState("ready");
     setShowSelection(false);
     const url = new URL(window.location.href);
     url.searchParams.delete("parcel");
+    url.searchParams.delete("project");
     window.history.replaceState(null, "", url);
     const origin = selectionOrigin.current;
     requestAnimationFrame(() => {
@@ -517,7 +562,7 @@ export function Explorer({
             aria-pressed={mobileView === "map"}
             onClick={() => {
               setMobileView("map");
-              if (selected || feature) changeTab("properties");
+              if (hasSelection) changeTab("properties");
             }}
           >
             <UiIcon name="map" />
@@ -537,7 +582,7 @@ export function Explorer({
             )}
           </button>
         </fieldset>
-        {(selected || feature) && !showSelection && (
+        {hasSelection && !showSelection && (
           <button
             type="button"
             className={styles.selectionReturn}
@@ -554,8 +599,9 @@ export function Explorer({
       <div
         className={`atlas-workspace ${styles.workspace}`}
         data-mobile-view={mobileView}
-        data-has-selection={Boolean(selected || feature)}
+        data-has-selection={hasSelection}
         data-show-selection={showSelection && tab === "properties"}
+        data-details-expanded={expandedDetails}
       >
         <section
           ref={mapSection}
@@ -687,7 +733,7 @@ export function Explorer({
                 data={filtered}
                 context={context}
                 selected={selected}
-                activeFeature={feature}
+                activeFeature={feature ?? projectFeature}
                 onSelect={select}
                 onFeature={choose}
                 onError={() => setMapFailed(true)}
@@ -827,7 +873,10 @@ export function Explorer({
               />
             ) : (
               <>
-                {(detail || feature || detailState !== "ready") && (
+                {(detail ||
+                  feature ||
+                  projectSlug ||
+                  detailState !== "ready") && (
                   <section
                     ref={inspection}
                     tabIndex={-1}
@@ -836,13 +885,26 @@ export function Explorer({
                   >
                     <div className="property-inspector-controls">
                       <span>{m.selectionLabel}</span>
-                      <button
-                        type="button"
-                        aria-label={m.closeDetails}
-                        onClick={closeDetails}
-                      >
-                        <UiIcon name="close" />
-                      </button>
+                      <div className={styles.selectionActions}>
+                        <button
+                          className={styles.expandDetails}
+                          type="button"
+                          aria-expanded={expandedDetails}
+                          aria-controls="atlas-panel"
+                          onClick={() => setExpandedDetails((value) => !value)}
+                        >
+                          {expandedDetails
+                            ? m.collapseDetails
+                            : m.expandDetails}
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={m.closeDetails}
+                          onClick={closeDetails}
+                        >
+                          <UiIcon name="close" />
+                        </button>
+                      </div>
                     </div>
                     {detailState !== "ready" ? (
                       <p>
@@ -850,6 +912,14 @@ export function Explorer({
                           ? labels.loading
                           : labels.unavailable}
                       </p>
+                    ) : projectSlug ? (
+                      <ProjectMapDossier
+                        key={projectSlug}
+                        slug={projectSlug}
+                        locale={locale}
+                        locate={projectFeature ? locate : undefined}
+                        locateLabel={m.locate}
+                      />
                     ) : (
                       <Inspector
                         detail={detail}
