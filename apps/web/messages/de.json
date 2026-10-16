@@ -7,11 +7,13 @@
     "navExplore": "Entdecken",
     "discoverTitle": "Jede Adresse ist Teil eines größeren Bildes.",
     "discoverBody": "Sehen Sie, wie Gebäude, Straßen und Viertel zusammengehören – alles an einem Ort.",
-    "coverage": "Erster Datensatz · Al Reem. Die Abdeckung wächst Gebiet für Gebiet.",
+    "coverage": "Aktuelle Detailabdeckung: Al Reem und Saadiyat.",
     "scroll": "Scrollen und entdecken",
     "navLocations": "Regionen",
     "invitationTitle": "Ihre nächste Entdeckung beginnt hier.",
-    "invitationBody": "Wählen Sie ein Gebiet und erkunden Sie seine Umgebung auf der Karte."
+    "invitationBody": "Wählen Sie ein Gebiet und erkunden Sie seine Umgebung auf der Karte.",
+    "startTitle": "Wo möchten Sie sich umsehen?",
+    "startDescription": "Beginnen Sie mit Al Reem oder Saadiyat, auf der Karte oder im Projektverzeichnis."
   },
   "LanguageSwitcher": {
     "label": "Sprache"
@@ -115,7 +117,14 @@
     "mapDetails": "Kartendetails",
     "closeDetails": "Details schließen",
     "parcelTitle": "Grundstück",
-    "possibleAssociation": "Mögliche Zuordnung"
+    "possibleAssociation": "Mögliche Zuordnung",
+    "mapView": "Karte",
+    "listView": "Liste",
+    "mapTools": "Karteneinstellungen",
+    "dataViews": "Kartendaten durchsuchen",
+    "previousPage": "Zurück",
+    "nextPage": "Weiter",
+    "selectionLabel": "Ausgewählte Immobilie"
   },
   "Coverage": {
     "title": "Sieben Emirate. Eine Plattform.",
@@ -274,6 +283,13 @@
     "availability": "Aktuelle Verfügbarkeit",
     "projects": "Projekte",
     "allProjects": "Projekte ansehen",
-    "notMapped": "Die genaue Kartenposition wird noch geprüft."
+    "notMapped": "Die genaue Kartenposition wird noch geprüft.",
+    "searchProjects": "Projekte suchen",
+    "searchPlaceholder": "Projektname oder Bauträger",
+    "clearSearch": "Suche löschen",
+    "noProjects": "Keine passenden Projekte",
+    "noProjectsHint": "Versuchen Sie einen anderen Namen oder löschen Sie die Suche.",
+    "directoryIntro": "Entdecken Sie Projekte auf Reem und Saadiyat. Sehen Sie sich die Details an und erkunden Sie Ihre nächste Gegend.",
+    "purchaseNote": "Preise, Verfügbarkeit und Zahlungsbedingungen sind noch nicht überprüft. Bestätigen Sie die aktuellen Angaben beim Bauträger."
   }
 }

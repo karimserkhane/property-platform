@@ -8,6 +8,8 @@ Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCH
 
 ## Comment lire l'arborescence
 
+**Refonte de présentation — 16 octobre 2026.** `features/atlas/home.tsx` possède le parcours d'accueil et les entrées Reem/Saadiyat ; `explorer.tsx` et `explorer.module.css` possèdent la recherche cartographique, le choix mobile Carte/Liste, les réglages et la fiche de sélection. `atlas/pagination.tsx` possède le rendu/focus de la pagination et dépend du calcul pur `atlas/page-window.ts`, qui ne dépend ni de React ni de l'API. `features/projects/directory.tsx` possède uniquement le filtre client des projets et promoteurs déjà lus par la route serveur ; il ne crée aucune identité ni requête de collecte. `components/ui-icon.tsx` possède des SVG décoratifs réutilisables et ne dépend d'aucun module métier. La direction reste `route serveur → lecture API/contrat → composants de présentation` et `fonctionnalités → composants génériques`. Les quinze dictionnaires restent propriétaires des libellés ; les preuves conservent leur langue originale. Aucun changement de table, d'ingestion ou de contrat HTTP pour cette refonte. Voir [les parcours et la présentation](VISUAL_DESIGN.md).
+
 **Prévisualisation distante facultative — 16 octobre 2026.** `infra/local/compose.remote-preview.yaml` possède le connecteur Tailscale userspace, isolé des modules applicatifs et sans dépendance Python/JavaScript supplémentaire. Il partage uniquement l'espace réseau du web et relaie son port 3000 par Serve privé ; aucun port de base ou d'administration n'est déclaré. L'identité du connecteur est un secret de volume Docker, jamais un fichier versionné. Les instructions et limites sont dans [REMOTE_PREVIEW.md](REMOTE_PREVIEW.md). La CI valide la composition YAML sans créer de compte ou d'accès distant.
 
 **Extension des deux îles — 16 octobre 2026.** Le registre examiné contient 57 projets/programmes de 10 promoteurs. Dans `evidence`, `project_adapters.py` possède les extracteurs propres aux éditeurs, `project_catalogues.json` borne les 13 catalogues et `project_discovery.py` possède les candidats de découverte. Leur table `evidence.project_source_candidate` conserve capture, URL, statut et opérateur ; elle ne crée ni projet canonique ni localisation. Le territoire de collecte n'est pas une preuve de localisation. Chaque projet et catalogue a une identité d'exécution et des reçus distincts. Ces fichiers suivent les mêmes dépendances que les autres services `evidence`. La route web `app/[locale]/projects/page.tsx` possède l'annuaire filtré, alimenté par la projection bornée `project_queries.project_directory` et le contrat API généré. Voir [la couverture et les limites](PROJECTS.md#8-extension-reem-et-saadiyat--16-octobre-2026).
@@ -57,11 +59,14 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   │   │       ├── layout.tsx    Structure de page, langue, direction et métadonnées
 │   │   │   │       ├── page.tsx      Page d'accueil actuelle
 │   │   │   │       └── explore/page.tsx   Exploration locale des parcelles
-│   │   │   ├── features/projects/   Fiches projets, promoteurs, preuves, documents et vidéos
+│   │   │   ├── features/projects/   Annuaire avec recherche client, fiches projets, promoteurs, documents et vidéos
 │   │   │   ├── features/atlas/      Accueil, carte, liste, fiche et adaptateur API de l'atlas
+│   │   │   │   ├── explorer.tsx, explorer.module.css  Parcours carte/liste et fiche mobile
+│   │   │   │   └── pagination.tsx, page-window.ts    Commandes de pagination et calcul borné indépendant
 │   │   │   ├── theme/fonts.ts        Préchargements de typographie selon la langue, sans réseau tiers
 │   │   │   ├── components/          Éléments d'interface réutilisables
 │   │   │   │   ├── brand-mark.tsx         Rendu web du symbole public configuré
+│   │   │   │   ├── ui-icon.tsx            SVG décoratifs partagés, sans dépendance métier
 │   │   │   │   └── language-switcher.tsx   Sélecteur de langue interactif
 │   │   │   ├── i18n/                Gestion commune des langues et de la navigation multilingue
 │   │   │   │   ├── locales.ts       Langues acceptées et direction LTR/RTL

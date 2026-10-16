@@ -7,11 +7,13 @@
     "navExplore": "探索",
     "discoverTitle": "每个地址背后，都有更广阔的图景。",
     "discoverBody": "在一个地方，了解建筑、街道和社区之间的联系。",
-    "coverage": "首个数据集 · Al Reem。覆盖范围逐区扩展。",
+    "coverage": "目前提供 Al Reem 和 Saadiyat 的详细数据。",
     "scroll": "向下滚动，探索更多",
     "navLocations": "地区",
     "invitationTitle": "您的下一次发现，从这里开始。",
-    "invitationBody": "选择一个地区，在地图上探索周边环境。"
+    "invitationBody": "选择一个地区，在地图上探索周边环境。",
+    "startTitle": "您想探索哪个地区？",
+    "startDescription": "从 Al Reem 或 Saadiyat 开始，在地图或项目目录中探索。"
   },
   "LanguageSwitcher": {
     "label": "语言"
@@ -115,7 +117,14 @@
     "mapDetails": "地图详情",
     "closeDetails": "关闭详情",
     "parcelTitle": "地块",
-    "possibleAssociation": "可能关联"
+    "possibleAssociation": "可能关联",
+    "mapView": "地图",
+    "listView": "列表",
+    "mapTools": "地图设置",
+    "dataViews": "浏览地图数据",
+    "previousPage": "上一页",
+    "nextPage": "下一页",
+    "selectionLabel": "所选房产"
   },
   "Coverage": {
     "title": "七个酋长国。一个平台。",
@@ -274,6 +283,13 @@
     "availability": "当前房源",
     "projects": "项目",
     "allProjects": "浏览项目",
-    "notMapped": "地图上的确切位置尚待核实。"
+    "notMapped": "地图上的确切位置尚待核实。",
+    "searchProjects": "搜索项目",
+    "searchPlaceholder": "项目或开发商名称",
+    "clearSearch": "清除搜索",
+    "noProjects": "未找到匹配的项目",
+    "noProjectsHint": "请尝试其他名称或清除搜索。",
+    "directoryIntro": "发现 Reem 和 Saadiyat 的项目。查看详细信息，再探索您感兴趣的下一个地区。",
+    "purchaseNote": "价格、可售情况和付款条款尚未核实。请向开发商确认最新信息。"
   }
 }

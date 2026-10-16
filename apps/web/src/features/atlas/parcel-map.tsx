@@ -93,7 +93,7 @@ export default function ParcelMap({
   territory: Territory;
   countryBounds: number[];
 }) {
-  const element = useRef<HTMLDivElement>(null);
+  const element = useRef<HTMLElement>(null);
   const map = useRef<LibreMap | null>(null);
   const consumedView = useRef(0);
   const initialFrame = useRef(false);
@@ -167,6 +167,11 @@ export default function ParcelMap({
       return;
     }
     map.current = instance;
+    const resize = new ResizeObserver(([entry]) => {
+      if (entry.contentRect.width > 0 && entry.contentRect.height > 0)
+        instance.resize();
+    });
+    resize.observe(element.current);
     instance.addControl(
       new NavigationControl({ showCompass: true }),
       "top-right",
@@ -239,6 +244,7 @@ export default function ParcelMap({
       });
     });
     return () => {
+      resize.disconnect();
       map.current = null;
       instance.getCanvas().removeEventListener("webglcontextlost", lostContext);
       instance.remove();
@@ -249,8 +255,16 @@ export default function ParcelMap({
     const instance = map.current;
     if (!instance) return;
     const control = new AttributionControl({
-      compact: false,
-      customAttribution: credits.map((credit) =>
+      // Use MapLibre's responsive attribution control on narrow maps.
+      // Layer names stay in the source details and PNG export. Attribute the
+      // common provider once here so island/layer repeats do not cover the map.
+      customAttribution: [
+        ...new Set(
+          credits.map((credit) =>
+            credit.startsWith("DMT / Onwani") ? "DMT / Onwani" : credit,
+          ),
+        ),
+      ].map((credit) =>
         credit === "© OpenStreetMap contributors · ODbL"
           ? '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a>'
           : credit.replace(
@@ -421,6 +435,7 @@ export default function ParcelMap({
   useEffect(() => {
     const instance = map.current;
     if (!instance || !view.token || consumedView.current === view.token) return;
+    instance.resize();
     consumedView.current = view.token;
     if (view.kind === "export") {
       // GeoJSON workers and local glyphs can still be preparing the current view.
@@ -510,7 +525,7 @@ export default function ParcelMap({
   }, [view, m, options.satellite, options.scene, locale, territory, credits]);
   return (
     <>
-      <div ref={element} className="parcel-map" role="img" aria-label={label} />
+      <section ref={element} className="parcel-map" aria-label={label} />
       <output
         ref={coordinates}
         className="map-coordinates"

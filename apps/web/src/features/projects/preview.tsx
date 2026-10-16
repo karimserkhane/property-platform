@@ -91,22 +91,26 @@ export function ProjectPreview({
           </p>
         ) : project ? (
           <>
-            <div className={styles.previewFacts}>
-              <div>
-                <span>{t("handover")}</span>
-                <strong>{handover ?? t("notDocumented")}</strong>
-              </div>
-              <div>
-                <span>{t("plannedHomes")}</span>
-                <strong>
-                  {project.programme_total
-                    ? new Intl.NumberFormat(locale).format(
+            {(handover || project.programme_total) && (
+              <div className={styles.previewFacts}>
+                {handover && (
+                  <div>
+                    <span>{t("handover")}</span>
+                    <strong>{handover}</strong>
+                  </div>
+                )}
+                {project.programme_total && (
+                  <div>
+                    <span>{t("plannedHomes")}</span>
+                    <strong>
+                      {new Intl.NumberFormat(locale).format(
                         project.programme_total.value,
-                      )
-                    : t("notDocumented")}
-                </strong>
+                      )}
+                    </strong>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
             {types.length > 0 && (
               <div className={styles.chips}>
                 {types.map((type) => (

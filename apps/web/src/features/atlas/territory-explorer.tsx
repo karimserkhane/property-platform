@@ -115,40 +115,12 @@ export function TerritoryExplorer({
   const country = registry.territories.find(
     (value) => value.level === "country",
   );
+  const emirate = registry.territories.find((value) => value.id === emirateId);
   const navigation = (
     <div className="territory-controls">
-      <Link
-        className="button"
-        href={{
-          pathname: "/projects",
-          query: ["al-reem-island", "saadiyat-island"].includes(territory.id)
-            ? { territory: territory.id }
-            : undefined,
-        }}
-      >
-        {projectText("allProjects")} ↗
-      </Link>
-      <label>
-        {coverage.emirate}
-        <select
-          value={emirateId ?? ""}
-          onChange={(event) => navigate(event.target.value)}
-        >
-          <option value="" disabled>
-            {coverage.chooseEmirate}
-          </option>
-          {registry.territories
-            .filter((value) => value.level === "emirate")
-            .map((value) => (
-              <option value={value.id} key={value.id}>
-                {name(value)}
-              </option>
-            ))}
-        </select>
-      </label>
       {areas.length > 0 && (
-        <label>
-          {coverage.area}
+        <label className="territory-area">
+          <span>{coverage.area}</span>
           <select
             value={
               territory.level === "area" ? territory.id : (emirateId ?? "")
@@ -164,17 +136,38 @@ export function TerritoryExplorer({
           </select>
         </label>
       )}
-      <p>
-        {territory.queryable
-          ? territory.member_territory_ids
-              .map((id) =>
-                registry.territories.find((value) => value.id === id),
-              )
-              .filter((value): value is Territory => value !== undefined)
-              .map(name)
-              .join(" · ")
-          : coverage.preparing}
-      </p>
+      <details className="territory-emirate">
+        <summary>{emirate ? name(emirate) : coverage.emirate}</summary>
+        <label>
+          {coverage.emirate}
+          <select
+            value={emirateId ?? ""}
+            onChange={(event) => navigate(event.target.value)}
+          >
+            <option value="" disabled>
+              {coverage.chooseEmirate}
+            </option>
+            {registry.territories
+              .filter((value) => value.level === "emirate")
+              .map((value) => (
+                <option value={value.id} key={value.id}>
+                  {name(value)}
+                </option>
+              ))}
+          </select>
+        </label>
+      </details>
+      <Link
+        className="territory-projects"
+        href={{
+          pathname: "/projects",
+          query: ["al-reem-island", "saadiyat-island"].includes(territory.id)
+            ? { territory: territory.id }
+            : undefined,
+        }}
+      >
+        {projectText("projects")} ↗
+      </Link>
     </div>
   );
   if (!territory.queryable)

@@ -3,6 +3,7 @@ import navigation from "@property-platform/contracts/territories";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { readPreview } from "@/features/atlas/server";
+import { ProjectDirectoryList } from "@/features/projects/directory";
 import styles from "@/features/projects/project.module.css";
 import { isLocale } from "@/i18n/locales";
 import { Link } from "@/i18n/navigation";
@@ -43,13 +44,14 @@ export default async function ProjectDirectory({
       <nav className={styles.breadcrumb} aria-label={t("navigation")}>
         <Link href="/explore">← {t("backToMap")}</Link>
       </nav>
-      <div className={styles.directoryHeading}>
+      <header className={styles.directoryHeading}>
         <p className={styles.kicker}>
           {["al-reem-island", "saadiyat-island"].map(areaName).join(" / ")}
         </p>
         <h1>{t("projects")}</h1>
-      </div>
-      <nav className={styles.sectionNav} aria-label={t("location")}>
+        <p className={styles.directoryIntro}>{t("directoryIntro")}</p>
+      </header>
+      <nav className={styles.areaNav} aria-label={t("location")}>
         <Link
           href="/projects"
           aria-current={territory === undefined ? "page" : undefined}
@@ -67,38 +69,24 @@ export default async function ProjectDirectory({
         ))}
       </nav>
       {data ? (
-        <>
-          <p className={styles.muted}>
-            {new Intl.NumberFormat(locale).format(data.items.length)}
-            {data.has_more ? "+" : ""} · {t("projects")}
-          </p>
-          <div className={styles.directoryGrid}>
-            {data.items.map((project) => (
-              <article className={styles.directoryCard} key={project.id}>
-                <p className={styles.kicker}>
-                  <bdi>{areaName(project.territory)}</bdi>
-                </p>
-                <h2>
-                  <Link href={`/projects/${project.slug}`}>
-                    <bdi>{project.name}</bdi>
-                  </Link>
-                </h2>
-                <p>
-                  <bdi>{project.developer.name}</bdi>
-                </p>
-                {!project.has_map_identity && (
-                  <p className={styles.muted}>{t("notMapped")}</p>
-                )}
-                <Link
-                  className={styles.textAction}
-                  href={`/projects/${project.slug}`}
-                >
-                  {t("viewDetails")} ↗
-                </Link>
-              </article>
-            ))}
-          </div>
-        </>
+        <ProjectDirectoryList
+          key={territory ?? "all"}
+          projects={data.items.map((project) => ({
+            ...project,
+            areaName: areaName(project.territory),
+          }))}
+          locale={locale}
+          hasMore={data.has_more}
+          labels={{
+            projects: t("projects"),
+            viewDetails: t("viewDetails"),
+            searchProjects: t("searchProjects"),
+            searchPlaceholder: t("searchPlaceholder"),
+            clearSearch: t("clearSearch"),
+            noProjects: t("noProjects"),
+            noProjectsHint: t("noProjectsHint"),
+          }}
+        />
       ) : (
         <p role="status">{t("unavailable")}</p>
       )}

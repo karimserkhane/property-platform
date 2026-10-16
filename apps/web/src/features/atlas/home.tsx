@@ -12,9 +12,13 @@ export async function AtlasHome() {
   const home = await getTranslations("Home");
   const map = await getTranslations("Map");
   const coverage = await getTranslations("Coverage");
+  const project = await getTranslations("Project");
   const locale = await getLocale();
   const coast = HOME_SCENES[1];
   const sunset = HOME_SCENES[2];
+  const areas = navigation.territories.filter(
+    (territory) => territory.level === "area" && territory.queryable,
+  );
   return (
     <HomeExperience>
       <section
@@ -35,9 +39,9 @@ export async function AtlasHome() {
             <Link className={styles.primaryAction} href="/explore">
               {t("explore")} <span aria-hidden="true">↗</span>
             </Link>
-            <a className={styles.secondaryAction} href="#regions">
-              {coverage("chooseEmirate")} <span aria-hidden="true">↓</span>
-            </a>
+            <Link className={styles.secondaryAction} href="/projects">
+              {project("projects")} <span aria-hidden="true">↗</span>
+            </Link>
           </div>
           <p className={styles.coverage}>{home("coverage")}</p>
         </div>
@@ -45,6 +49,52 @@ export async function AtlasHome() {
           <span aria-hidden="true">↓</span>
           {home("scroll")}
         </a>
+      </section>
+      <section className={styles.start} aria-labelledby="start-title">
+        <div className={styles.startHeading}>
+          <p className={styles.sectionEyebrow}>{home("navExplore")}</p>
+          <h2 id="start-title">{home("startTitle")}</h2>
+          <p>{home("startDescription")}</p>
+          <a className={styles.startMore} href="#regions">
+            {coverage("chooseEmirate")} <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+        <div className={styles.areaLinks}>
+          {areas.map((area) => (
+            <Link
+              key={area.id}
+              className={styles.areaLink}
+              href={{ pathname: "/explore", query: { territory: area.id } }}
+            >
+              <span className={styles.areaIcon} aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M19 10c0 5-7 10-7 10S5 15 5 10a7 7 0 0 1 14 0Z"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                  />
+                  <circle
+                    cx="12"
+                    cy="10"
+                    r="2.5"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                  />
+                </svg>
+              </span>
+              <span className={styles.areaName}>
+                <bdi>{locale === "ar" ? area.name_ar : area.name}</bdi>
+                <span>{t("map")}</span>
+              </span>
+              <span className={styles.areaArrow} aria-hidden="true">
+                ↗
+              </span>
+            </Link>
+          ))}
+          <Link className={styles.areaDirectory} href="/projects">
+            {project("projects")} <span aria-hidden="true">↗</span>
+          </Link>
+        </div>
       </section>
       <section
         className={styles.discovery}
@@ -60,12 +110,21 @@ export async function AtlasHome() {
           <p>{home("discoverBody")}</p>
           <div className={styles.layerLinks}>
             {[
-              map("parcels"),
-              map("streets"),
-              map("buildings"),
-              map("places"),
-            ].map((label, index) => (
-              <Link key={label} href="/explore" className={styles.layerLink}>
+              { label: project("projects"), href: "/projects" },
+              {
+                label: map("buildings"),
+                href: { pathname: "/explore", query: { tab: "buildings" } },
+              },
+              {
+                label: map("places"),
+                href: { pathname: "/explore", query: { tab: "places" } },
+              },
+              {
+                label: map("streets"),
+                href: { pathname: "/explore", query: { tab: "streets" } },
+              },
+            ].map(({ label, href }, index) => (
+              <Link key={label} href={href} className={styles.layerLink}>
                 <span className={styles.layerIndex} aria-hidden="true">
                   0{index + 1}
                 </span>

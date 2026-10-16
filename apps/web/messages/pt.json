@@ -7,11 +7,13 @@
     "navExplore": "Explorar",
     "discoverTitle": "Cada endereço faz parte de uma história maior.",
     "discoverBody": "Veja como os edifícios, as ruas e os bairros se ligam, tudo num só lugar.",
-    "coverage": "Primeiro conjunto de dados · Al Reem. A cobertura cresce por área.",
+    "coverage": "Cobertura detalhada atual: Al Reem e Saadiyat.",
     "scroll": "Role para descobrir",
     "navLocations": "Regiões",
     "invitationTitle": "A sua próxima descoberta começa aqui.",
-    "invitationBody": "Escolha uma área e explore os seus arredores no mapa."
+    "invitationBody": "Escolha uma área e explore os seus arredores no mapa.",
+    "startTitle": "Onde gostaria de explorar?",
+    "startDescription": "Comece por Al Reem ou Saadiyat, no mapa ou no diretório de projetos."
   },
   "LanguageSwitcher": {
     "label": "Idioma"
@@ -115,7 +117,14 @@
     "mapDetails": "Detalhes do mapa",
     "closeDetails": "Fechar detalhes",
     "parcelTitle": "Terreno",
-    "possibleAssociation": "Associação possível"
+    "possibleAssociation": "Associação possível",
+    "mapView": "Mapa",
+    "listView": "Lista",
+    "mapTools": "Definições do mapa",
+    "dataViews": "Explorar dados do mapa",
+    "previousPage": "Anterior",
+    "nextPage": "Seguinte",
+    "selectionLabel": "Imóvel selecionado"
   },
   "Coverage": {
     "title": "Sete emirados. Uma plataforma.",
@@ -274,6 +283,13 @@
     "availability": "Disponibilidade atual",
     "projects": "Projetos",
     "allProjects": "Ver projetos",
-    "notMapped": "Localização exata no mapa a aguardar verificação."
+    "notMapped": "Localização exata no mapa a aguardar verificação.",
+    "searchProjects": "Pesquisar projetos",
+    "searchPlaceholder": "Nome do projeto ou do promotor",
+    "clearSearch": "Limpar pesquisa",
+    "noProjects": "Nenhum projeto correspondente",
+    "noProjectsHint": "Experimente outro nome ou limpe a pesquisa.",
+    "directoryIntro": "Descubra projetos em Reem e Saadiyat. Consulte os detalhes e explore a sua próxima zona.",
+    "purchaseNote": "Os preços, a disponibilidade e as condições de pagamento ainda não foram verificados. Confirme as informações atuais com o promotor."
   }
 }

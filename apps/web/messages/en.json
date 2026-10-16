@@ -7,11 +7,13 @@
     "navExplore": "Explore",
     "discoverTitle": "Every address has a bigger picture.",
     "discoverBody": "See how buildings, streets and neighbourhoods fit together, all in one place.",
-    "coverage": "First dataset · Al Reem Island. Coverage expands area by area.",
+    "coverage": "Current detailed coverage: Al Reem and Saadiyat.",
     "scroll": "Scroll to discover",
     "navLocations": "Regions",
     "invitationTitle": "Your next discovery starts here.",
-    "invitationBody": "Choose an area and explore its surroundings on the map."
+    "invitationBody": "Choose an area and explore its surroundings on the map.",
+    "startTitle": "Where would you like to explore?",
+    "startDescription": "Start with Al Reem or Saadiyat, on the map or in the project directory."
   },
   "LanguageSwitcher": {
     "label": "Language"
@@ -115,7 +117,14 @@
     "mapDetails": "Map details",
     "closeDetails": "Close details",
     "parcelTitle": "Land parcel",
-    "possibleAssociation": "Possible association"
+    "possibleAssociation": "Possible association",
+    "mapView": "Map",
+    "listView": "List",
+    "mapTools": "Map settings",
+    "dataViews": "Browse map data",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "selectionLabel": "Selected property"
   },
   "Coverage": {
     "title": "Seven emirates. One platform.",
@@ -274,6 +283,13 @@
     "availability": "Current availability",
     "projects": "Projects",
     "allProjects": "Browse projects",
-    "notMapped": "Exact map location awaiting verification."
+    "notMapped": "Exact map location awaiting verification.",
+    "searchProjects": "Search projects",
+    "searchPlaceholder": "Project or developer name",
+    "clearSearch": "Clear search",
+    "noProjects": "No matching projects",
+    "noProjectsHint": "Try another name or clear your search.",
+    "directoryIntro": "Discover projects across Reem and Saadiyat. Explore the details, then find your next area.",
+    "purchaseNote": "Prices, availability and payment terms are not yet verified. Confirm current details with the developer."
   }
 }

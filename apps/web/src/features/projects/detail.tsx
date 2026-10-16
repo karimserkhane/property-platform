@@ -169,6 +169,9 @@ export function ProjectDetailView({
     : null;
   const website = safeSourceUrl(project.website_url);
   const { documents, visuals } = projectMedia(project);
+  const homeTypes = [
+    ...new Set(project.typologies.map((item) => item.property_type)),
+  ];
   const number = new Intl.NumberFormat(locale);
   const date = (value: string) =>
     new Intl.DateTimeFormat(locale, {
@@ -196,7 +199,14 @@ export function ProjectDetailView({
           <span aria-hidden="true">←</span> {labels.backToMap}
         </Link>
         <span aria-hidden="true">/</span>
-        <bdi>{territoryName}</bdi>
+        <Link
+          href={{
+            pathname: "/projects",
+            query: { territory: project.territory },
+          }}
+        >
+          {labels.projects}
+        </Link>
       </nav>
       <header className={styles.hero}>
         <div className={styles.heroCopy}>
@@ -230,26 +240,30 @@ export function ProjectDetailView({
         <ProjectCover key={project.id} project={project} labels={labels} />
       </header>
       <div className={styles.factStrip}>
-        <div>
-          <span>{labels.handover}</span>
-          <strong>{handover ?? labels.notDocumented}</strong>
-        </div>
-        <div>
-          <span>{labels.plannedHomes}</span>
-          <strong>
-            {project.programme_total
-              ? number.format(project.programme_total.value)
-              : labels.notDocumented}
-          </strong>
-        </div>
-        <div>
-          <span>{labels.homes}</span>
-          <strong>
-            {project.typologies.length
-              ? number.format(project.typologies.length)
-              : labels.notDocumented}
-          </strong>
-        </div>
+        {handover && (
+          <div>
+            <span>{labels.handover}</span>
+            <strong>{handover}</strong>
+          </div>
+        )}
+        {project.programme_total && (
+          <div>
+            <span>{labels.plannedHomes}</span>
+            <strong>{number.format(project.programme_total.value)}</strong>
+          </div>
+        )}
+        {homeTypes.length > 0 && (
+          <div>
+            <span>{labels.homes}</span>
+            <strong>
+              {homeTypes
+                .map((type) =>
+                  typeKeys.has(type) ? labels[type as "apartment"] : type,
+                )
+                .join(" · ")}
+            </strong>
+          </div>
+        )}
         <div>
           <span>{labels.location}</span>
           <strong>
@@ -348,16 +362,6 @@ export function ProjectDetailView({
                         )}
                       </p>
                     )}
-                    <dl className={styles.homeFacts}>
-                      <div>
-                        <dt>{labels.size}</dt>
-                        <dd>{labels.notDocumented}</dd>
-                      </div>
-                      <div>
-                        <dt>{labels.price}</dt>
-                        <dd>{labels.notDocumented}</dd>
-                      </div>
-                    </dl>
                     <Proof
                       source={item.source}
                       original={item.original_text}
@@ -425,33 +429,6 @@ export function ProjectDetailView({
           </section>
         </div>
         <aside className={styles.sidebar} aria-label={labels.commercial}>
-          <section className={styles.commercial}>
-            <p className={styles.kicker}>{labels.commercial}</p>
-            <h2>{labels.price}</h2>
-            <p className={styles.pendingValue}>{labels.notDocumented}</p>
-            <dl>
-              {[
-                labels.paymentPlan,
-                labels.serviceCharge,
-                labels.availability,
-              ].map((label) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{labels.notDocumented}</dd>
-                </div>
-              ))}
-            </dl>
-            {website && (
-              <a
-                className={styles.primaryAction}
-                href={website}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {labels.developerWebsite} <span aria-hidden="true">↗</span>
-              </a>
-            )}
-          </section>
           {documents.length > 0 && (
             <section
               className={styles.documentSection}
@@ -468,6 +445,36 @@ export function ProjectDetailView({
               </div>
             </section>
           )}
+          <details className={styles.commercial}>
+            <summary>
+              {labels.commercial}
+              <span aria-hidden="true">+</span>
+            </summary>
+            <p className={styles.purchaseNote}>{labels.purchaseNote}</p>
+            <dl>
+              {[
+                labels.price,
+                labels.paymentPlan,
+                labels.serviceCharge,
+                labels.availability,
+              ].map((label) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{labels.notDocumented}</dd>
+                </div>
+              ))}
+            </dl>
+            {website && (
+              <a
+                className={styles.textAction}
+                href={website}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {labels.developerWebsite} <span aria-hidden="true">↗</span>
+              </a>
+            )}
+          </details>
         </aside>
       </div>
       {project.sources.length > 0 && (

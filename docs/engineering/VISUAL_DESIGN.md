@@ -1,10 +1,28 @@
 # Identité visuelle de Property Platform
 
-Accueil épuré du 12 octobre 2026 : bleu encre, ivoire et sable, photographies des Émirats, titres éditoriaux et commandes d'exploration. L'accueil présente les régions et leurs alentours. Les preuves et sources immobilières restent dans la carte et les fiches ; le grand bandeau « Data & sources » de l'accueil a été retiré.
+Refonte du 16 octobre 2026 : teal profond, ivoire et bronze discret, photographies locales des Émirats et parcours cohérent entre accueil, carte et fiches projets. La couverture détaillée actuelle concerne **Al Reem et Saadiyat** ; les autres émirats restent des régions à préparer. Les preuves et sources immobilières restent dans la carte et les fiches, sans grand bandeau technique sur l'accueil.
+
+## Parcours et hiérarchie
+
+L'accueil propose d'abord deux actions : explorer la carte ou consulter les projets. Le panneau suivant donne accès directement à Al Reem et Saadiyat à partir des territoires actifs du contrat, sans inventer de statistiques de marché. Les liens bâtiments, lieux et rues ouvrent l'onglet correspondant avec le paramètre `tab` de l'exploration. Le lien vers les régions et les trois chapitres photographiques restent disponibles ; les régions sans données sont signalées en préparation.
+
+L'annuaire `/[locale]/projects` garde sa lecture de données côté serveur, puis `features/projects/directory.tsx` filtre la liste reçue dans le navigateur. La recherche porte sur le nom du projet et du promoteur, accepte plusieurs termes et ignore les accents ; elle ne lance aucune collecte et ne rapproche aucune identité immobilière. Effacer la recherche rend le focus au champ. Le compteur annonce les résultats et un état vide explique comment reprendre. Les cartes mènent à la fiche détaillée ; leur monogramme n'est pas une photographie du projet.
+
+La fiche et l'aperçu cartographique partagent la même hiérarchie : identité du projet, promoteur, faits documentés, documents et lien officiel. Les prix, disponibilités et modalités de paiement non vérifiés restent explicitement présentés comme tels. Une référence média externe ne devient pas une image intégrée sans publication autorisée. Les noms et textes des sources conservent leur langue originale.
+
+## Carte sur ordinateur et téléphone
+
+Sur ordinateur, la carte et son panneau de résultats se lisent côte à côte. Sur téléphone, **Carte / Liste** permet de choisir la surface utile sans empiler la carte, tous les outils et tous les résultats dans une longue page. La sélection ouvre une fiche en bas de l'écran, avec hauteur bornée et contenu défilant ; la carte ne zoome pas automatiquement. Fermer la fiche conserve un parcours clavier cohérent, et une commande permet de retrouver le bien sélectionné.
+
+La recherche reste au premier plan. Les réglages de couches et exports sont regroupés dans les réglages de carte ; la légende reste repliable sous la carte. Les onglets de données conservent leurs fonctions ; un `tab` d'URL n'est accepté que s'il appartient à la liste prévue par l'explorateur. La règle « objet précis avant grand terrain » et les associations spatiales restent celles du catalogue existant : la refonte visuelle ne crée ni géométrie ni nouvelle association projet/bâtiment.
+
+Les commandes de pagination remplacent la longue rangée de tous les numéros par une fenêtre bornée : première page, dernière page, voisinage de la page courante et ellipses. La page courante utilise `aria-current`, les nombres suivent la locale et le focus revient à une commande disponible lorsque Précédent ou Suivant devient désactivé. `page-window.ts` possède ce calcul pur, testé séparément de React.
+
+Les textes de ces parcours sont présents dans les **quinze langues**. Les propriétés CSS logiques préservent arabe, ourdou et persan en RTL ; la photographie et la carte ne sont pas retournées. Les boutons exposent des libellés traduits même lorsqu'une icône accompagne le texte. Les commandes principales visent une hauteur tactile d'au moins 44 pixels. Les tests techniques ne remplacent pas une relecture linguistique ou des essais sur le téléphone réel.
 
 ## Photographies et droits
 
-Les photos servent d'ambiance éditoriale. Elles ne représentent pas un bien sélectionné et ne prouvent pas une couverture de données hors du pilote Al Reem. Voir [UAE_COVERAGE.md](UAE_COVERAGE.md).
+Les photos servent d'ambiance éditoriale. Elles ne représentent pas un bien sélectionné et ne prouvent pas une couverture nationale. Voir [UAE_COVERAGE.md](UAE_COVERAGE.md) et [la couverture détaillée des projets Reem/Saadiyat](PROJECTS.md).
 
 | Usage | Fichiers sous `apps/web/public/images/uae/` | Auteur et page officielle |
 |---|---|---|
@@ -30,17 +48,18 @@ Les variables `--font-ui` et `--font-display` de `globals.css` permettent de cha
 
 Références visuelles consultées : [Dubai Sotheby's International Realty](https://sothebysrealty.ae/) pour les compositions photographiques et les titres serif, [Aman Residences](https://www.aman.com/residences) pour l'ivoire et l'espace. Nous conservons une composition et des assets propres au projet.
 
-Le bouton principal associe une surface ivoire, une bordure lumineuse, des ombres superposées et une flèche dans un médaillon bleu encre. L'action secondaire permet de choisir un émirat. Le survol déplace légèrement les commandes sur pointeur précis ; le clic produit un enfoncement. Le focus clavier reste visible. Les couleurs sémantiques de la légende cartographique gardent leur signification métier.
+Le bouton principal de l'accueil associe une surface ivoire, une bordure lumineuse, des ombres superposées et une flèche dans un médaillon teal. L'action secondaire mène aux projets ; le choix d'émirat reste accessible plus bas. Les boutons capsule de l'accueil et les surfaces arrondies de l'exploration partagent une palette sobre. Le survol déplace légèrement les commandes sur pointeur précis ; le clic produit un enfoncement. Le focus clavier reste visible. Les couleurs sémantiques de la légende cartographique gardent leur signification métier.
 
 | Couleur | Variable | Usage |
 |---|---|---|
-| `#0B2132` | `--ink` | Texte et fonds bleu encre |
-| `#F8F5EE` | `--ivory` | Surfaces de lecture |
-| `#D2B895` | `--sand` | Accents et contours |
-| `#59656C` | `--muted-ink` | Texte secondaire |
-| `#D9D3C9` | `--rule` | Séparateurs |
+| `#103B43` | `--ink` partagé | Texte et fonds teal profond |
+| `#F8F7F2` | Fond partagé | Fond ivoire du site |
+| `#FFFEFA` | `--surface` | Cartes et contrôles |
+| `#A78653` | `--bronze` | Accents sobres |
+| `#59656C` | `--muted` | Texte secondaire |
+| `#DED9CF` | `--line` | Séparateurs |
 
-Le rayon, la durée et les ombres partagés restent dans `--control-*` de `globals.css`. Les variantes de l'accueil sont dans `home.module.css`. Aucune bibliothèque d'animation n'est ajoutée.
+Le rayon, la durée et les ombres partagés restent dans `--control-*` de `globals.css`. Les variantes de l'accueil sont dans `home.module.css`, avec leur teal `#103B3C`, ivoire `#F8F5EE` et sable `#C7A981`. Les styles de l'explorateur sont isolés dans `explorer.module.css`, ceux des projets dans `project.module.css`. Aucune bibliothèque d'animation ou d'icônes n'est ajoutée : `components/ui-icon.tsx` rend quelques SVG décoratifs, tandis que les boutons portent leurs libellés accessibles.
 
 ## Défilement et accessibilité
 
@@ -61,12 +80,19 @@ La marque reste configurée séparément dans [BRANDING.md](BRANDING.md).
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-scenes.ts` : assets, cadrages et provenance photo.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home-experience.tsx` et `home-motion.ts` : comportement du défilement et calculs bornés.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\home.module.css` : composition et boutons de l'accueil.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\explorer.tsx` et `explorer.module.css` : recherche, navigation Carte/Liste, réglages, résultats et fiche de sélection.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\atlas\pagination.tsx` et `page-window.ts` : pagination bornée, libellés et focus clavier.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\directory.tsx` : recherche locale de projets et cartes de résultat.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\features\projects\project.module.css` : présentation commune de l'annuaire, de la fiche et de l'aperçu.
+- `C:\Users\Karim\Repositories\property-platform\apps\web\src\components\ui-icon.tsx` : SVG partagés sans dépendance métier.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\src\app\globals.css` : thème partagé et variables de typographie.
 - `C:\Users\Karim\Repositories\property-platform\apps\web\messages\<langue>.json` : textes localisés.
 
-La composition et les photos restent sous la responsabilité de la fonctionnalité `atlas`. La typographie partagée appartient à `theme`, sans dépendance à l'API. Aucun média décoratif n'est importé comme preuve immobilière.
+La composition de l'accueil, ses photos et l'exploration restent sous la responsabilité de la fonctionnalité `atlas`. L'annuaire et les fiches appartiennent à `projects` ; ils utilisent les contrats générés et les lectures serveur existantes. Les composants génériques et la typographie partagée n'importent aucun service métier ou client SQL. Aucun média décoratif n'est importé comme preuve immobilière.
 
 ## Vérification
+
+Pour la refonte du 16 octobre : contrôler les parcours accueil → carte, accueil → projets, recherche/effacement/état vide de l'annuaire, Carte/Liste sur mobile, sélection/fermeture/retour à la carte et pagination aux deux extrémités. Refaire ces parcours en français et dans une locale RTL, vérifier focus et absence de débordement horizontal. Les tests unitaires de `page-window.ts`, les contrôles i18n, le typage et les vérifications HTTP du web compilé complètent cette revue. La capture d'écran ou la réussite d'un test ne certifie pas l'exactitude commerciale des sources.
 
 Les tests de priorité cartographique couvrent le conflit entre RT4_TMP_PL2 et une vraie parcelle, le bâtiment devant sa parcelle, puis les secteurs/île en repli. Voir [REEM_MAP.md](REEM_MAP.md). Les contrôles HTTP du web compilé couvrent les quinze langues, les trois images et les fontes incluses dans l'artefact, leurs tailles et le budget de préchargement. Les contrôles techniques ne remplacent pas une revue linguistique ou des mesures sur appareils physiques.
 

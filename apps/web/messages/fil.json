@@ -7,11 +7,13 @@
     "navExplore": "Tuklasin",
     "discoverTitle": "May mas malawak na kuwento ang bawat address.",
     "discoverBody": "Tingnan kung paano magkakaugnay ang mga gusali, kalye at komunidad, sa iisang lugar.",
-    "coverage": "Unang datos · Al Reem. Lumalawak ang saklaw bawat lugar.",
+    "coverage": "Kasalukuyang may detalyadong datos para sa Al Reem at Saadiyat.",
     "scroll": "Mag-scroll para tumuklas",
     "navLocations": "Mga rehiyon",
     "invitationTitle": "Dito nagsisimula ang susunod mong pagtuklas.",
-    "invitationBody": "Pumili ng lugar at tuklasin ang paligid nito sa mapa."
+    "invitationBody": "Pumili ng lugar at tuklasin ang paligid nito sa mapa.",
+    "startTitle": "Saan mo gustong mag-explore?",
+    "startDescription": "Magsimula sa Al Reem o Saadiyat, sa mapa o sa direktoryo ng mga proyekto."
   },
   "LanguageSwitcher": {
     "label": "Wika"
@@ -115,7 +117,14 @@
     "mapDetails": "Detalye ng mapa",
     "closeDetails": "Isara ang detalye",
     "parcelTitle": "Lote",
-    "possibleAssociation": "Posibleng kaugnayan"
+    "possibleAssociation": "Posibleng kaugnayan",
+    "mapView": "Mapa",
+    "listView": "Listahan",
+    "mapTools": "Mga setting ng mapa",
+    "dataViews": "Tingnan ang datos ng mapa",
+    "previousPage": "Nakaraan",
+    "nextPage": "Susunod",
+    "selectionLabel": "Napiling ari-arian"
   },
   "Coverage": {
     "title": "Pitong emirate. Isang platform.",
@@ -274,6 +283,13 @@
     "availability": "Kasalukuyang availability",
     "projects": "Mga proyekto",
     "allProjects": "Tingnan ang mga proyekto",
-    "notMapped": "Naghihintay ng beripikasyon ang eksaktong lokasyon sa mapa."
+    "notMapped": "Naghihintay ng beripikasyon ang eksaktong lokasyon sa mapa.",
+    "searchProjects": "Maghanap ng mga proyekto",
+    "searchPlaceholder": "Pangalan ng proyekto o developer",
+    "clearSearch": "Burahin ang paghahanap",
+    "noProjects": "Walang tumugmang proyekto",
+    "noProjectsHint": "Subukan ang ibang pangalan o burahin ang paghahanap.",
+    "directoryIntro": "Tuklasin ang mga proyekto sa Reem at Saadiyat. Tingnan ang mga detalye, saka piliin ang susunod mong lugar.",
+    "purchaseNote": "Hindi pa nabeberipika ang mga presyo, availability at kundisyon sa pagbabayad. Kumpirmahin ang kasalukuyang detalye sa developer."
   }
 }

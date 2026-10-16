@@ -7,11 +7,13 @@
     "navExplore": "Explorar",
     "discoverTitle": "Cada dirección tiene una historia más amplia.",
     "discoverBody": "Descubre cómo se conectan edificios, calles y barrios, en un solo lugar.",
-    "coverage": "Primer conjunto de datos · Al Reem. La cobertura se amplía por zonas.",
+    "coverage": "Cobertura detallada actual: Al Reem y Saadiyat.",
     "scroll": "Desplázate para descubrir",
     "navLocations": "Regiones",
     "invitationTitle": "Tu próximo descubrimiento empieza aquí.",
-    "invitationBody": "Elige una zona y explora su entorno en el mapa."
+    "invitationBody": "Elige una zona y explora su entorno en el mapa.",
+    "startTitle": "¿Dónde te gustaría explorar?",
+    "startDescription": "Empieza por Al Reem o Saadiyat, en el mapa o en el directorio de proyectos."
   },
   "LanguageSwitcher": {
     "label": "Idioma"
@@ -115,7 +117,14 @@
     "mapDetails": "Detalles del mapa",
     "closeDetails": "Cerrar detalles",
     "parcelTitle": "Parcela",
-    "possibleAssociation": "Asociación posible"
+    "possibleAssociation": "Asociación posible",
+    "mapView": "Mapa",
+    "listView": "Lista",
+    "mapTools": "Ajustes del mapa",
+    "dataViews": "Explorar datos del mapa",
+    "previousPage": "Anterior",
+    "nextPage": "Siguiente",
+    "selectionLabel": "Inmueble seleccionado"
   },
   "Coverage": {
     "title": "Siete emiratos. Una plataforma.",
@@ -274,6 +283,13 @@
     "availability": "Disponibilidad actual",
     "projects": "Proyectos",
     "allProjects": "Ver proyectos",
-    "notMapped": "Ubicación exacta en el mapa pendiente de verificación."
+    "notMapped": "Ubicación exacta en el mapa pendiente de verificación.",
+    "searchProjects": "Buscar proyectos",
+    "searchPlaceholder": "Nombre del proyecto o de la promotora",
+    "clearSearch": "Borrar búsqueda",
+    "noProjects": "No hay proyectos coincidentes",
+    "noProjectsHint": "Prueba con otro nombre o borra la búsqueda.",
+    "directoryIntro": "Descubre proyectos en Reem y Saadiyat. Consulta sus detalles y encuentra tu próxima zona.",
+    "purchaseNote": "Los precios, la disponibilidad y las condiciones de pago aún no están verificados. Confirma la información actual con la promotora."
   }
 }

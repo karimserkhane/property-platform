@@ -43,6 +43,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   if (!isLocale(locale)) notFound();
   const messages = await getMessages({ locale });
   const home = await getTranslations({ locale, namespace: "Home" });
+  const project = await getTranslations({ locale, namespace: "Project" });
 
   return (
     <html
@@ -76,6 +77,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <div className="header-tools">
               <nav className="header-nav">
                 <Link href="/explore">{home("navExplore")}</Link>
+                <Link href="/projects">{project("projects")}</Link>
                 <Link href="/#regions">{home("navLocations")}</Link>
               </nav>
               <LanguageSwitcher />

@@ -2,6 +2,18 @@
 
 **Accès téléphone à distance :** le [guide de prévisualisation privée](REMOTE_PREVIEW.md) explique le connecteur Tailscale Docker facultatif, la connexion sur téléphone, le lien HTTPS de la carte et l'arrêt de cet accès. Le PC et Docker doivent rester allumés. Ce parcours ne publie pas le site sur Internet et ne remplace pas un déploiement de production.
 
+**Refonte du site — 16 octobre 2026 :** l'accueil mène directement aux cartes Reem/Saadiyat et à l'annuaire, qui permet de rechercher un projet ou un promoteur. Sur téléphone, le choix **Carte / Liste** remplace l'empilement des vues, et la sélection ouvre une fiche en bas d'écran. Les réglages et la pagination sont regroupés ; les quinze langues restent disponibles. Ce lot change seulement le frontend : **aucune migration Django, aucun réimport et aucune reconstruction de PostgreSQL ou de Prefect ne sont nécessaires**. Voir [le guide visuel](VISUAL_DESIGN.md).
+
+Pour actualiser le site Docker existant **lorsque API et base tournent déjà**, exécuter dans PowerShell depuis `C:\Users\Karim\Repositories\property-platform`, une commande après l'autre, et attendre leur réussite :
+
+```powershell
+docker compose -f infra/local/compose.yaml --profile web-preview up -d --build --no-deps web
+
+docker compose -f infra/local/compose.yaml -f infra/local/compose.remote-preview.yaml --profile web-preview --profile remote-preview up -d --no-build --no-deps --force-recreate remote-preview
+```
+
+La première commande compile le code actuel et remplace seulement le web sur 3102. La seconde est utile **si l'accès téléphone Tailscale a déjà été configuré** : elle rattache le connecteur au nouvel espace réseau du web, en conservant son volume d'identité. Pour une première configuration ou pour retrouver l'adresse privée, suivre [REMOTE_PREVIEW.md](REMOTE_PREVIEW.md) ; aucune adresse personnelle n'est conservée ici. En développement sur 3000, `pnpm.cmd dev:web` lit directement les fichiers et ce parcours Docker n'est pas nécessaire.
+
 **Stockage retenu pour le moment : local, sans R2/S3.** Les photos, PDF, vidéos et modèles acquis utilisent le volume persistant dédié `property-platform-local_media-data`, partagé entre Django et Prefect sous `/media`. Aucune clé cloud n'est nécessaire. Voir [où trouver cet espace et préparer un transfert ultérieur](MEDIA_STORAGE.md#mode-actuel--stockage-local-dédié). Les commandes locales ordinaires suffisent ; ne pas ajouter le fichier `compose.storage.s3.yaml` tant que le cloud n'est pas souhaité.
 
 **Option ultérieure — Cloudflare R2 :** le [guide de raccordement](MEDIA_STORAGE.md#51-ce-que-tu-dois-faire-dans-cloudflare) reste disponible. Le fichier local `C:\Users\Karim\Repositories\property-platform\infra\local\.env` est un emplacement préparé pour les futurs paramètres, ignoré par Git ; sa présence n'active pas le cloud. Aucun domaine CDN ni compte Cloudflare n'est requis pour continuer le développement local.

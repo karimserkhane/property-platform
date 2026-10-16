@@ -1,0 +1,613 @@
+.experience {
+  color: var(--ink);
+  padding: 20px clamp(14px, 3vw, 48px) 40px;
+}
+.experience :global(.explore-heading) {
+  align-items: center;
+  margin-block-end: 14px;
+}
+.experience :global(.explore-heading h1) {
+  margin: 0;
+  font-size: clamp(23px, 2.4vw, 32px);
+  letter-spacing: -0.04em;
+}
+.experience :global(.explore-heading .eyebrow) {
+  display: none;
+}
+.experience :global(.text-link) {
+  font-size: 12px;
+  color: var(--muted);
+}
+.experience :global(.territory-controls) {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-block: 0 16px;
+  gap: 12px;
+  align-items: center;
+}
+.experience :global(.territory-controls label) {
+  min-width: 0;
+}
+.experience :global(.territory-area) {
+  position: relative;
+}
+.experience :global(.territory-area > span) {
+  position: absolute;
+  inset-inline-start: 14px;
+  top: 7px;
+  font-size: 9px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.experience :global(.territory-area select) {
+  min-height: 54px;
+  min-width: 190px;
+  padding: 20px 34px 8px 14px;
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: 0 2px 8px #123d4305;
+  font-size: 13px;
+  max-width: 100%;
+}
+.experience :global(.territory-emirate) {
+  position: relative;
+  font-size: 12px;
+}
+.experience :global(.territory-emirate summary) {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+.experience :global(.territory-emirate summary::after) {
+  content: "⌄";
+  color: var(--bronze);
+}
+.experience :global(.territory-emirate > label) {
+  position: absolute;
+  top: 100%;
+  inset-inline-end: 0;
+  z-index: 30;
+  padding: 16px;
+  width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+.experience :global(.territory-emirate select) {
+  width: 100%;
+  min-height: 44px;
+}
+.experience :global(.territory-projects) {
+  margin-inline-start: auto;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+.discoveryBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block-end: 16px;
+}
+.mobileNavigation,
+.experience :global(.atlas-tabs) {
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+}
+.search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  min-height: 54px;
+  padding-inline: 16px 8px;
+  flex: 1;
+  max-width: 610px;
+  color: var(--muted);
+}
+.search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px #2a747412;
+}
+.search input {
+  border: 0;
+  background: none;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+  font-size: 14px;
+  outline: none;
+}
+.search input::placeholder {
+  color: #6b7a7e;
+}
+.search input::-webkit-search-cancel-button {
+  appearance: none;
+}
+.search button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  border-radius: 50%;
+}
+.mobileNavigation,
+.selectionReturn {
+  display: none;
+}
+.workspace {
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 390px);
+  gap: 20px;
+}
+.workspace :global(.map-column) {
+  min-width: 0;
+  scroll-margin-block-start: 150px;
+}
+.experience .workspace :global(.map-frame) {
+  height: min(74svh, 900px);
+  min-height: 510px;
+  border-radius: 22px;
+  border-color: #c8d8d3;
+  box-shadow: 0 8px 35px #1a43430b;
+  overflow: hidden;
+}
+.mapActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+  margin-block-end: 10px;
+}
+.mapActions > button,
+.tools > summary {
+  min-height: 44px;
+  padding: 10px 15px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px #173e4805;
+}
+.mapActions > button[aria-pressed="true"] {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+.tools {
+  margin-inline-start: auto;
+  position: relative;
+}
+.tools > summary {
+  list-style: none;
+}
+.tools > summary::-webkit-details-marker {
+  display: none;
+}
+.tools[open] > summary {
+  background: var(--ink);
+  color: white;
+}
+.experience .toolPanel {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 300px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+.experience .toolPanel button {
+  min-height: 44px;
+  font-size: 12px;
+  box-shadow: none;
+  background-image: none;
+}
+.experience .toolPanel button[aria-pressed="true"] {
+  background: var(--ink);
+  color: white;
+}
+.experience :global(.atlas-sidebar) {
+  border-radius: 22px;
+  background: var(--surface);
+  max-height: min(84svh, 1000px);
+  position: sticky;
+  top: 16px;
+  box-shadow: 0 8px 35px #1a434308;
+}
+.experience :global(.atlas-tabs) {
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+  gap: 6px;
+  padding: 12px;
+  background: #f2f5f1;
+}
+.experience :global(.atlas-tabs button) {
+  flex: none;
+  min-height: 44px;
+  padding-inline: 15px;
+  font-size: 12px;
+  border-radius: 11px;
+  box-shadow: none;
+  background: transparent;
+  border-color: transparent;
+}
+.experience :global(.atlas-tabs button[aria-pressed="true"]) {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.experience :global(.atlas-panel) {
+  padding: 14px;
+}
+.experience :global(.atlas-record) {
+  padding: 15px;
+  border-radius: 14px;
+  margin-block: 8px;
+  min-height: 72px;
+  background: #fff;
+  border-color: #e1e8e3;
+}
+.experience :global(.atlas-record strong) {
+  font-size: 14px;
+  letter-spacing: -0.02em;
+}
+.experience :global(.atlas-record small) {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #647676;
+}
+.experience :global(.atlas-record[aria-pressed="true"]) {
+  border-color: var(--bronze);
+  box-shadow: 0 0 0 1px var(--bronze) inset;
+  background: #faf8f0;
+}
+.experience :global(.result-count) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 2px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.experience :global(.result-count::before) {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #669b85;
+}
+.experience :global(.atlas-pagination) {
+  justify-content: center;
+  gap: 4px;
+  align-items: center;
+  margin-block: 20px 4px;
+}
+.experience :global(.atlas-pagination button) {
+  min-width: 36px;
+  min-height: 42px;
+  padding: 8px;
+  background: none;
+  box-shadow: none;
+  border-color: transparent;
+  border-radius: 10px;
+  font-size: 11px;
+}
+.experience :global(.atlas-pagination button[aria-current="page"]) {
+  background: var(--ink);
+  color: white;
+}
+.experience :global(.atlas-pagination button:disabled) {
+  opacity: 0.35;
+  cursor: default;
+}
+.experience :global(.atlas-pagination__ellipsis) {
+  color: var(--muted);
+  padding-inline: 2px;
+  font-size: 11px;
+}
+.experience :global(.parcel-inspector) {
+  margin: 0 0 18px;
+  padding: 16px;
+  border-color: #dce6df;
+  border-radius: 18px;
+  background: #f8faf5;
+}
+.experience :global(.property-inspector-controls) {
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-block-end: 10px;
+  position: sticky;
+  top: -1px;
+  z-index: 2;
+  background: #f8faf5;
+}
+.experience :global(.property-inspector-controls > span) {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.experience :global(.property-inspector-controls button) {
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+}
+.experience :global(.parcel-inspector h2) {
+  font-size: 24px;
+}
+.experience :global(.parcel-inspector h3) {
+  font-size: 14px;
+}
+.experience :global(.parcel-inspector p),
+.experience :global(.parcel-inspector a),
+.experience :global(.parcel-inspector dt),
+.experience :global(.parcel-inspector dd) {
+  font-size: 13px;
+  line-height: 1.75;
+}
+.experience :global(.property-actions > button),
+.experience :global(.candidate-button) {
+  min-height: 44px;
+  border-radius: 10px;
+}
+.experience :global(.map-legend) {
+  max-height: min(45svh, 370px);
+  overflow-y: auto;
+  border-radius: 14px;
+  padding: 5px 12px;
+}
+.experience :global(.map-legend summary) {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding-block: 0;
+}
+.experience :global(.map-legend button) {
+  min-height: 36px;
+  font-size: 12px;
+}
+@media (hover: hover) {
+  .mapActions > button:hover,
+  .tools > summary:hover {
+    border-color: #89aba2;
+    background: #f3f7f2;
+  }
+  .search button:hover {
+    background: #f0f3ed;
+  }
+}
+@media (max-width: 1100px) and (min-width: 901px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 14px;
+  }
+  .mapActions > button,
+  .tools > summary {
+    padding-inline: 10px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 900px) {
+  .experience {
+    padding: 14px 12px calc(24px + env(safe-area-inset-bottom));
+  }
+  .experience :global(.explore-heading) {
+    margin-block-end: 12px;
+  }
+  .experience :global(.explore-heading h1) {
+    font-size: 22px;
+    max-width: 240px;
+  }
+  .experience :global(.explore-heading .text-link) {
+    max-width: 80px;
+    font-size: 10px;
+    text-align: end;
+  }
+  .experience :global(.territory-controls) {
+    margin-block-end: 12px;
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .experience :global(.territory-area) {
+    flex: 1;
+  }
+  .experience :global(.territory-area select) {
+    min-width: 0;
+    width: 100%;
+    font-size: 13px;
+  }
+  .experience :global(.territory-emirate summary) {
+    font-size: 10px;
+    max-width: 80px;
+    line-height: 1.5;
+  }
+  .experience :global(.territory-projects) {
+    font-size: 11px;
+  }
+  .discoveryBar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 25;
+    background: #f8f7f2f5;
+    padding-block: 4px 8px;
+    margin-block-end: 10px;
+    backdrop-filter: blur(12px);
+  }
+  .search {
+    max-width: none;
+    min-height: 50px;
+  }
+  .search input {
+    font-size: 16px;
+    height: 48px;
+  }
+  .mobileNavigation {
+    display: flex;
+    background: #e8eee7;
+    border: 1px solid #dce4db;
+    border-radius: 14px;
+    padding: 4px;
+    gap: 4px;
+  }
+  .mobileNavigation button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    min-height: 42px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: #647575;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .mobileNavigation button[aria-pressed="true"] {
+    color: var(--ink);
+    background: white;
+    box-shadow: 0 2px 8px #133d4310;
+  }
+  .count {
+    font-size: 10px;
+    font-weight: 500;
+    color: #687b77;
+  }
+  .workspace {
+    display: block;
+  }
+  .experience .workspace :global(.map-frame) {
+    min-height: 370px;
+    height: max(370px, calc(100svh - 350px));
+    border-radius: 18px;
+  }
+  .experience .workspace[data-mobile-view="list"] :global(.map-column) {
+    display: none;
+  }
+  .experience .workspace[data-mobile-view="map"] :global(.atlas-sidebar) {
+    display: none;
+  }
+  .experience .workspace[data-mobile-view="list"] :global(.atlas-sidebar) {
+    max-height: none;
+    position: static;
+    box-shadow: none;
+  }
+  .experience :global(.atlas-panel) {
+    padding: 16px;
+  }
+  .experience .workspace[data-mobile-view="list"] :global(.atlas-panel) {
+    overflow: visible;
+  }
+  .experience
+    .workspace[data-mobile-view="map"][data-has-selection="true"][data-show-selection="true"]
+    :global(.atlas-sidebar) {
+    display: flex;
+    position: fixed;
+    inset-inline: 8px;
+    inset-block-end: max(8px, env(safe-area-inset-bottom));
+    top: auto;
+    max-height: 62svh;
+    z-index: 50;
+    box-shadow: 0 -12px 65px #0b293a29;
+    border-radius: 24px;
+  }
+  .experience .workspace[data-mobile-view="map"] :global(.atlas-tabs),
+  .experience
+    .workspace[data-mobile-view="map"]
+    :global(.atlas-panel > :not(.parcel-inspector)) {
+    display: none;
+  }
+  .experience .workspace[data-mobile-view="map"] :global(.parcel-inspector) {
+    padding: 0;
+    background: none;
+    border: 0;
+    margin: 0;
+  }
+  .experience :global(.property-inspector-controls) {
+    background: var(--surface);
+  }
+  .experience :global(.atlas-pagination button) {
+    min-height: 44px;
+  }
+  .experience :global(.parcel-inspector p),
+  .experience :global(.parcel-inspector a),
+  .experience :global(.parcel-inspector dt),
+  .experience :global(.parcel-inspector dd) {
+    font-size: 14px;
+  }
+  .experience :global(.maplibregl-ctrl-group button) {
+    width: 40px;
+    height: 40px;
+  }
+  .mapActions {
+    gap: 6px;
+  }
+  .mapActions > button,
+  .tools > summary {
+    flex: 1;
+    padding-inline: 10px;
+    font-size: 11px;
+    border-radius: 10px;
+  }
+  .tools {
+    flex: 1;
+  }
+  .tools > summary {
+    white-space: nowrap;
+  }
+  .experience .toolPanel {
+    width: min(310px, calc(100vw - 30px));
+  }
+  .selectionReturn {
+    display: block;
+    justify-self: center;
+    min-height: 40px;
+    padding-inline: 16px;
+    background: var(--ink);
+    color: white;
+    border: 0;
+    border-radius: 20px;
+    font-size: 12px;
+  }
+}

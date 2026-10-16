@@ -7,11 +7,13 @@
     "navExplore": "Explorer",
     "discoverTitle": "Chaque adresse raconte davantage.",
     "discoverBody": "Découvrez comment les bâtiments, les rues et les quartiers s’articulent, au même endroit.",
-    "coverage": "Premier jeu de données · Al Reem. La couverture avance zone par zone.",
+    "coverage": "Couverture détaillée actuelle : Al Reem et Saadiyat.",
     "scroll": "Défiler pour découvrir",
     "navLocations": "Les Émirats",
     "invitationTitle": "Votre prochaine découverte commence ici.",
-    "invitationBody": "Choisissez une zone et explorez ses alentours sur la carte."
+    "invitationBody": "Choisissez une zone et explorez ses alentours sur la carte.",
+    "startTitle": "Où souhaitez-vous explorer ?",
+    "startDescription": "Commencez par Al Reem ou Saadiyat, sur la carte ou dans l’annuaire des projets."
   },
   "LanguageSwitcher": {
     "label": "Langue"
@@ -115,7 +117,14 @@
     "mapDetails": "Détails cartographiques",
     "closeDetails": "Fermer la fiche",
     "parcelTitle": "Terrain",
-    "possibleAssociation": "Association possible"
+    "possibleAssociation": "Association possible",
+    "mapView": "Carte",
+    "listView": "Liste",
+    "mapTools": "Réglages de la carte",
+    "dataViews": "Parcourir les données de la carte",
+    "previousPage": "Précédent",
+    "nextPage": "Suivant",
+    "selectionLabel": "Bien sélectionné"
   },
   "Coverage": {
     "title": "Sept émirats. Une plateforme.",
@@ -274,6 +283,13 @@
     "availability": "Disponibilités actuelles",
     "projects": "Projets",
     "allProjects": "Voir les projets",
-    "notMapped": "Emplacement précis sur la carte en attente de vérification."
+    "notMapped": "Emplacement précis sur la carte en attente de vérification.",
+    "searchProjects": "Rechercher des projets",
+    "searchPlaceholder": "Nom du projet ou du promoteur",
+    "clearSearch": "Effacer la recherche",
+    "noProjects": "Aucun projet correspondant",
+    "noProjectsHint": "Essayez un autre nom ou effacez votre recherche.",
+    "directoryIntro": "Découvrez les projets de Reem et Saadiyat. Consultez leurs détails, puis explorez votre prochain quartier.",
+    "purchaseNote": "Les prix, disponibilités et modalités de paiement ne sont pas encore vérifiés. Confirmez les informations actuelles auprès du promoteur."
   }
 }

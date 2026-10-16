@@ -2,10 +2,20 @@
 
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { UiIcon } from "@/components/ui-icon";
 import { Link } from "@/i18n/navigation";
 import { AdrecMarket } from "./adrec-market";
+import styles from "./explorer.module.css";
 import { Inspector } from "./inspector";
+import { AtlasPagination } from "./pagination";
 import type { MapOptions, MapView } from "./parcel-map";
 import { readParcelPages } from "./parcel-pages";
 import {
@@ -48,14 +58,14 @@ type Tab =
   | "context";
 const TABS: Tab[] = [
   "properties",
-  "parcels",
-  "places",
-  "streets",
-  "buildings",
-  "future",
-  "sources",
   "market",
   "context",
+  "places",
+  "buildings",
+  "streets",
+  "parcels",
+  "future",
+  "sources",
 ];
 
 export function Explorer({
@@ -92,6 +102,8 @@ export function Explorer({
   const [use, setUse] = useState("");
   const [temps, setTemps] = useState(true);
   const [tab, setTab] = useState<Tab>("properties");
+  const [mobileView, setMobileView] = useState<"map" | "list">("map");
+  const [showSelection, setShowSelection] = useState(false);
   const [page, setPage] = useState(0);
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -112,17 +124,31 @@ export function Explorer({
   const [view, setView] = useState<MapView>({ kind: "area", token: 0 });
   const requestId = useRef(0);
   const detailRequest = useRef<AbortController | null>(null);
-  const panel = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLElement>(null);
   const inspection = useRef<HTMLElement>(null);
   const mapSection = useRef<HTMLElement>(null);
+  const mapViewButton = useRef<HTMLButtonElement>(null);
+  const selectionOrigin = useRef<HTMLElement | null>(null);
   useEffect(() => {
-    if (feature?.id || selected) {
-      inspection.current?.focus({
-        preventScroll: !window.matchMedia("(max-width: 900px)").matches,
-      });
+    if (showSelection && (feature?.id || selected)) {
+      inspection.current?.focus({ preventScroll: true });
       panel.current?.scrollTo({ top: 0, behavior: "instant" });
     }
-  }, [feature?.id, selected]);
+  }, [feature?.id, selected, showSelection]);
+  useEffect(() => {
+    const readTab = () => {
+      const value = new URL(window.location.href).searchParams.get("tab");
+      if (value && TABS.includes(value as Tab)) {
+        setTab(value as Tab);
+        setMobileView("list");
+      } else {
+        setTab("properties");
+      }
+    };
+    readTab();
+    window.addEventListener("popstate", readTab);
+    return () => window.removeEventListener("popstate", readTab);
+  }, []);
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt retries the same bounded read.
   useEffect(() => {
     const controller = new AbortController();
@@ -178,6 +204,12 @@ export function Explorer({
   }, [options.satellite, imagery.length, attempt, territoryQuery]);
 
   async function select(id: string) {
+    selectionOrigin.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setTab("properties");
+    setShowSelection(true);
     detailRequest.current?.abort();
     detailRequest.current = new AbortController();
     const current = ++requestId.current;
@@ -187,6 +219,7 @@ export function Explorer({
     setDetailState("loading");
     const url = new URL(window.location.href);
     url.searchParams.set("parcel", id);
+    url.searchParams.delete("tab");
     window.history.replaceState(null, "", url);
     try {
       const r = await fetch(
@@ -215,6 +248,12 @@ export function Explorer({
     }
   }
   function choose(f: MapFeature) {
+    selectionOrigin.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setTab("properties");
+    setShowSelection(true);
     detailRequest.current?.abort();
     ++requestId.current;
     setFeature(f);
@@ -223,6 +262,7 @@ export function Explorer({
     setDetailState("ready");
     const url = new URL(window.location.href);
     url.searchParams.delete("parcel");
+    url.searchParams.delete("tab");
     window.history.replaceState(null, "", url);
   }
   const initialSelection = useRef(false);
@@ -343,11 +383,18 @@ export function Explorer({
   function changeTab(t: Tab) {
     setTab(t);
     setPage(0);
+    const url = new URL(window.location.href);
+    if (t === "properties") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", t);
+    window.history.replaceState(null, "", url);
   }
   function frame(kind: MapView["kind"]) {
+    setMobileView("map");
     setView((v) => ({ kind, token: v.token + 1 }));
   }
   function locate() {
+    setMobileView("map");
+    setShowSelection(false);
     const target =
       feature ?? collection?.features.find((f) => f.id === selected);
     if (target)
@@ -361,23 +408,42 @@ export function Explorer({
         block: "start",
         behavior: "instant",
       });
+    requestAnimationFrame(() =>
+      mapSection.current?.focus({ preventScroll: true }),
+    );
   }
-  function closeDetails() {
+  const closeDetails = useCallback(() => {
     detailRequest.current?.abort();
     ++requestId.current;
     setFeature(null);
     setDetail(null);
     setSelected(null);
     setDetailState("ready");
+    setShowSelection(false);
     const url = new URL(window.location.href);
     url.searchParams.delete("parcel");
     window.history.replaceState(null, "", url);
-    if (window.matchMedia("(max-width: 900px)").matches)
-      mapSection.current?.scrollIntoView({
-        block: "start",
-        behavior: "instant",
-      });
-  }
+    const origin = selectionOrigin.current;
+    requestAnimationFrame(() => {
+      const target = [
+        origin,
+        mapViewButton.current,
+        mapSection.current,
+        panel.current,
+      ].find(
+        (element) => element?.isConnected && element.getClientRects().length,
+      );
+      target?.focus({ preventScroll: true });
+    });
+  }, []);
+  useEffect(() => {
+    if (!showSelection) return;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeDetails();
+    };
+    window.addEventListener("keydown", dismiss);
+    return () => window.removeEventListener("keydown", dismiss);
+  }, [showSelection, closeDetails]);
   function exportCSV() {
     const rows = [
       [m.parcels, m.areas, m.landUse, m.construction, labels.source],
@@ -395,7 +461,7 @@ export function Explorer({
     );
   }
   return (
-    <main className="explore-shell atlas-shell">
+    <main className={`explore-shell atlas-shell ${styles.experience}`}>
       <div className="explore-heading">
         <div>
           <p className="eyebrow">{labels.pilot}</p>
@@ -406,75 +472,166 @@ export function Explorer({
         </Link>
       </div>
       {navigation}
-      <div className="atlas-workspace">
+      <div className={styles.discoveryBar}>
+        {tab !== "market" && tab !== "context" && (
+          <label className={styles.search}>
+            <span className="sr-only">{m.searchPrompt}</span>
+            <UiIcon name="search" />
+            <input
+              type="search"
+              value={query}
+              placeholder={m.searchPrompt}
+              maxLength={80}
+              dir="auto"
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(0);
+              }}
+            />
+            {query && (
+              <button
+                type="button"
+                aria-label={labels.reset}
+                onClick={() => {
+                  setQuery("");
+                  setPage(0);
+                }}
+              >
+                <UiIcon name="close" />
+              </button>
+            )}
+          </label>
+        )}
+        <fieldset className={styles.mobileNavigation} aria-label={m.mapView}>
+          <button
+            type="button"
+            ref={mapViewButton}
+            aria-pressed={mobileView === "map"}
+            onClick={() => {
+              setMobileView("map");
+              if (selected || feature) changeTab("properties");
+            }}
+          >
+            <UiIcon name="map" />
+            {m.mapView}
+          </button>
+          <button
+            type="button"
+            aria-pressed={mobileView === "list"}
+            onClick={() => setMobileView("list")}
+          >
+            <UiIcon name="list" />
+            {m.listView}
+            {state === "ready" && tab !== "market" && tab !== "context" && (
+              <span className={styles.count}>
+                {new Intl.NumberFormat(locale).format(count)}
+              </span>
+            )}
+          </button>
+        </fieldset>
+        {(selected || feature) && !showSelection && (
+          <button
+            type="button"
+            className={styles.selectionReturn}
+            onClick={() => {
+              setShowSelection(true);
+              setMobileView("map");
+              changeTab("properties");
+            }}
+          >
+            {m.selectionLabel}
+          </button>
+        )}
+      </div>
+      <div
+        className={`atlas-workspace ${styles.workspace}`}
+        data-mobile-view={mobileView}
+        data-has-selection={Boolean(selected || feature)}
+        data-show-selection={showSelection && tab === "properties"}
+      >
         <section
           ref={mapSection}
+          tabIndex={-1}
           className="map-column"
           aria-label={labels.map}
         >
-          <fieldset className="atlas-toolbar" aria-label={m.layers}>
-            {(["area", "focus", "near"] as const)
-              .filter(
-                (kind) =>
-                  kind === "area" ||
-                  (kind === "focus"
-                    ? territory.focus_bounds
-                    : territory.neighbourhood_bounds),
-              )
-              .map((kind) => (
-                <button key={kind} type="button" onClick={() => frame(kind)}>
-                  {
-                    m[
-                      kind === "area"
-                        ? "viewIsland"
-                        : kind === "focus"
-                          ? "viewRT4"
-                          : "viewNear"
-                    ]
-                  }
-                </button>
-              ))}
-            {(
-              [
-                "streets",
-                "buildings",
-                "places",
-                "areas",
-                "names",
-                "codes",
-              ] as const
-            ).map((key) => (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={options[key]}
-                onClick={() => setOptions((o) => ({ ...o, [key]: !o[key] }))}
-              >
-                {m[key]}
-              </button>
-            ))}
+          <div className={styles.mapActions}>
+            <button type="button" onClick={() => frame("area")}>
+              <UiIcon name="map" />
+              {m.viewIsland}
+            </button>
             <button
               type="button"
               aria-pressed={options.satellite}
               onClick={() =>
-                setOptions((o) => ({ ...o, satellite: !o.satellite }))
+                setOptions((value) => ({
+                  ...value,
+                  satellite: !value.satellite,
+                }))
               }
             >
               {options.satellite ? m.plan : m.satellite}
             </button>
-            <button type="button" onClick={exportCSV}>
-              {m.exportCSV}
-            </button>
-            <button
-              type="button"
-              disabled={
-                state !== "ready" || !context || contextError || mapFailed
-              }
-              onClick={() => frame("export")}
-            >
-              {m.exportPNG}
-            </button>
-          </fieldset>
+            <details className={styles.tools}>
+              <summary>
+                <UiIcon name="layers" />
+                {m.mapTools}
+              </summary>
+              <fieldset
+                className={`atlas-toolbar ${styles.toolPanel}`}
+                aria-label={m.layers}
+              >
+                {(["focus", "near"] as const)
+                  .filter((kind) =>
+                    kind === "focus"
+                      ? territory.focus_bounds
+                      : territory.neighbourhood_bounds,
+                  )
+                  .map((kind) => (
+                    <button
+                      key={kind}
+                      type="button"
+                      onClick={() => frame(kind)}
+                    >
+                      {m[kind === "focus" ? "viewRT4" : "viewNear"]}
+                    </button>
+                  ))}
+                {(
+                  [
+                    "streets",
+                    "buildings",
+                    "places",
+                    "areas",
+                    "names",
+                    "codes",
+                  ] as const
+                ).map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={options[key]}
+                    onClick={() =>
+                      setOptions((o) => ({ ...o, [key]: !o[key] }))
+                    }
+                  >
+                    {m[key]}
+                  </button>
+                ))}
+                <button type="button" onClick={exportCSV}>
+                  {m.exportCSV}
+                </button>
+                <button
+                  type="button"
+                  disabled={
+                    state !== "ready" || !context || contextError || mapFailed
+                  }
+                  onClick={() => frame("export")}
+                >
+                  {m.exportPNG}
+                </button>
+              </fieldset>
+            </details>
+          </div>
           {options.satellite && (
             <div className="atlas-imagery-picker">
               <label>
@@ -618,12 +775,11 @@ export function Explorer({
           )}
         </section>
         <aside className="atlas-sidebar" aria-label={labels.select}>
-          <div className="atlas-tabs" role="tablist" aria-label={m.layers}>
+          <fieldset className="atlas-tabs" aria-label={m.dataViews}>
             {TABS.map((t) => (
               <button
                 type="button"
-                role="tab"
-                aria-selected={tab === t}
+                aria-pressed={tab === t}
                 aria-controls="atlas-panel"
                 id={`tab-${t}`}
                 key={t}
@@ -638,12 +794,19 @@ export function Explorer({
                       : m[t]}
               </button>
             ))}
-          </div>
-          <div
+          </fieldset>
+          <section
             id="atlas-panel"
             ref={panel}
-            role="tabpanel"
-            aria-labelledby={`tab-${tab}`}
+            aria-label={
+              tab === "context"
+                ? contextLabels("tab")
+                : tab === "market"
+                  ? marketLabels("tab")
+                  : tab === "sources"
+                    ? labels.sources
+                    : m[tab]
+            }
             className="atlas-panel"
           >
             {tab === "context" ? (
@@ -664,12 +827,13 @@ export function Explorer({
                     aria-live="polite"
                   >
                     <div className="property-inspector-controls">
+                      <span>{m.selectionLabel}</span>
                       <button
                         type="button"
                         aria-label={m.closeDetails}
                         onClick={closeDetails}
                       >
-                        ×
+                        <UiIcon name="close" />
                       </button>
                     </div>
                     {detailState !== "ready" ? (
@@ -696,19 +860,6 @@ export function Explorer({
                     )}
                   </section>
                 )}
-                <label className="atlas-search">
-                  <span>{m.searchPrompt}</span>
-                  <input
-                    type="search"
-                    value={query}
-                    maxLength={80}
-                    dir="auto"
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      setPage(0);
-                    }}
-                  />
-                </label>
                 {tab === "parcels" && (
                   <>
                     <div className="atlas-filters">
@@ -791,26 +942,15 @@ export function Explorer({
                           }));
                       }}
                     />
-                    <nav
-                      className="atlas-pagination"
-                      aria-label={labels.sources}
-                    >
-                      {Array.from(
-                        { length: Math.ceil(referenceItems.length / 40) },
-                        (_, i) => i + 1,
-                      ).map((number) => (
-                        <button
-                          type="button"
-                          key={number}
-                          aria-current={
-                            currentPage === number - 1 ? "page" : undefined
-                          }
-                          onClick={() => setPage(number - 1)}
-                        >
-                          {new Intl.NumberFormat(locale).format(number)}
-                        </button>
-                      ))}
-                    </nav>
+                    <AtlasPagination
+                      page={currentPage}
+                      pageCount={Math.ceil(referenceItems.length / 40)}
+                      onPageChange={setPage}
+                      label={labels.sources}
+                      previousLabel={m.previousPage}
+                      nextLabel={m.nextPage}
+                      locale={locale}
+                    />
                   </>
                 )}
                 {tab === "sources" ? (
@@ -982,27 +1122,20 @@ export function Explorer({
                               </small>
                             </button>
                           ))}
-                    <nav className="atlas-pagination" aria-label={labels.list}>
-                      {Array.from({ length: maxPage + 1 }, (_, i) => i + 1).map(
-                        (number) => (
-                          <button
-                            type="button"
-                            key={number}
-                            aria-current={
-                              currentPage === number - 1 ? "page" : undefined
-                            }
-                            onClick={() => setPage(number - 1)}
-                          >
-                            {new Intl.NumberFormat(locale).format(number)}
-                          </button>
-                        ),
-                      )}
-                    </nav>
+                    <AtlasPagination
+                      page={currentPage}
+                      pageCount={maxPage + 1}
+                      onPageChange={setPage}
+                      label={m[tab]}
+                      previousLabel={m.previousPage}
+                      nextLabel={m.nextPage}
+                      locale={locale}
+                    />
                   </>
                 )}
               </>
             )}
-          </div>
+          </section>
         </aside>
       </div>
     </main>
