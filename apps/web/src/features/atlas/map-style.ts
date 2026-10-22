@@ -1,5 +1,13 @@
 import type { ExpressionSpecification, LayerSpecification } from "maplibre-gl";
-import { COLORS } from "./presentation";
+import { building3DLayers } from "./building-3d";
+import { HYDROGRAPHY_LAYERS, PLAN_COLORS } from "./hydrography";
+import { BASEMAP_IMAGERY } from "./imagery-sources";
+import {
+  mapMarkerImage,
+  mapPlaceFilter,
+  PROJECT_MARKER_FILTER,
+} from "./map-markers";
+import { parcelFillColor, parcelFillOpacity } from "./presentation";
 import type { MapLabels } from "./types";
 
 export function mapControlLabels(labels: MapLabels, title: string) {
@@ -24,24 +32,29 @@ export function mapName(locale: string): ExpressionSpecification {
 
 export function mapLayers(locale: string): LayerSpecification[] {
   const name = mapName(locale);
-  const project: ExpressionSpecification = [
-    "in",
-    "_project_marker",
-    ["to-string", ["get", "kind"]],
-  ];
+  const project = PROJECT_MARKER_FILTER;
   return [
-    {
-      id: "satellite",
-      type: "raster",
-      source: "satellite",
-      layout: { visibility: "none" },
-    },
+    ...BASEMAP_IMAGERY.map(
+      ({ layerId }): LayerSpecification => ({
+        id: layerId,
+        type: "raster",
+        source: layerId,
+        layout: { visibility: "none" },
+        paint: { "raster-fade-duration": 150 },
+      }),
+    ),
     {
       id: "land",
       type: "fill",
       source: "administrative_area",
       filter: ["==", ["get", "kind"], "district"],
-      paint: { "fill-color": "#f4f6f3" },
+      paint: { "fill-color": PLAN_COLORS.land },
+    },
+    {
+      id: "area-hit",
+      type: "fill",
+      source: "administrative_area",
+      paint: { "fill-opacity": 0 },
     },
     {
       id: "areas",
@@ -58,31 +71,8 @@ export function mapLayers(locale: string): LayerSpecification[] {
       type: "fill",
       source: "parcels",
       paint: {
-        "fill-color": [
-          "match",
-          ["get", "category"],
-          "mixed",
-          COLORS.mixed,
-          "residential",
-          COLORS.residential,
-          "green",
-          COLORS.green,
-          "public",
-          COLORS.public,
-          "tech",
-          COLORS.tech,
-          "rail",
-          COLORS.rail,
-          "overlay",
-          COLORS.overlay,
-          "#e7e3d7",
-        ],
-        "fill-opacity": [
-          "case",
-          ["==", ["get", "category"], "overlay"],
-          0.15,
-          0.86,
-        ],
+        "fill-color": parcelFillColor(),
+        "fill-opacity": parcelFillOpacity(false),
       },
     },
     {
@@ -91,6 +81,10 @@ export function mapLayers(locale: string): LayerSpecification[] {
       source: "parcels",
       paint: { "line-color": "#8f9fa0", "line-width": 0.6 },
     },
+    // Source cadastre can extend beyond the basemap coast (planned land, marinas).
+    // The quiet default masks BOTH parcel surfaces and outlines over water.
+    // Their surveyed geometry is preserved; the expert toggle restores outlines.
+    ...HYDROGRAPHY_LAYERS,
     {
       id: "buildings",
       type: "fill",
@@ -102,6 +96,7 @@ export function mapLayers(locale: string): LayerSpecification[] {
         "fill-outline-color": "#496d67",
       },
     },
+    ...building3DLayers(),
     {
       id: "street-casing",
       type: "line",
@@ -139,14 +134,30 @@ export function mapLayers(locale: string): LayerSpecification[] {
       },
     },
     {
-      id: "places",
+      id: "project-halo",
       type: "circle",
       source: "place",
+      filter: project,
       paint: {
-        "circle-color": ["case", project, "#eb7939", "#246b71"],
-        "circle-radius": ["case", project, 6, 3.5],
-        "circle-stroke-color": "#ffffff",
-        "circle-stroke-width": 1.5,
+        "circle-radius": 13,
+        "circle-color": "#eb7939",
+        "circle-opacity": 0.16,
+        "circle-radius-transition": { duration: 0 },
+        "circle-opacity-transition": { duration: 0 },
+      },
+    },
+    {
+      id: "places",
+      type: "symbol",
+      source: "place",
+      minzoom: 14.5,
+      filter: mapPlaceFilter(),
+      layout: {
+        "icon-image": mapMarkerImage(),
+        "icon-size": ["interpolate", ["linear"], ["zoom"], 13.5, 0.7, 16, 0.9],
+        "icon-padding": 3,
+        "icon-pitch-alignment": "viewport",
+        "icon-rotation-alignment": "viewport",
       },
     },
     {
@@ -173,8 +184,8 @@ export function mapLayers(locale: string): LayerSpecification[] {
       id: "place-names",
       type: "symbol",
       source: "place",
-      minzoom: 13.8,
-      filter: ["!", project],
+      minzoom: 15,
+      filter: mapPlaceFilter(),
       layout: {
         "text-field": name,
         "text-font": fonts,
@@ -247,6 +258,13 @@ export function mapLayers(locale: string): LayerSpecification[] {
       id: "selection",
       type: "line",
       source: "parcels",
+      filter: ["==", ["get", "id"], ""],
+      paint: { "line-color": "#eb7939", "line-width": 3 },
+    },
+    {
+      id: "area-selection",
+      type: "line",
+      source: "administrative_area",
       filter: ["==", ["get", "id"], ""],
       paint: { "line-color": "#eb7939", "line-width": 3 },
     },

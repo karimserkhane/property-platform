@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     "q",
     "offset",
     "limit",
+    "snapshot_id",
   ]);
   if (search === null)
     return NextResponse.json({ code: "invalid_query" }, { status: 400 });

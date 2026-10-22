@@ -17,6 +17,7 @@ export type MapLabels = Record<
   keyof typeof import("../../../messages/en.json").Map,
   string
 >;
+export type UseLabels = typeof import("../../../messages/en.json").Use;
 export type AtlasLabels = Record<
   | "explore"
   | "sources"

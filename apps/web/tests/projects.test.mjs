@@ -4,10 +4,173 @@ import { readProjectData } from "../src/features/projects/data.ts";
 import {
   approvedDelivery,
   formatHandover,
+  formatProjectDate,
+  groupProjectTypologies,
+  mediaLabel,
   playableMedia,
+  projectAmenityKey,
+  projectEvidenceSources,
   projectMedia,
+  projectWebsite,
   safeSourceUrl,
 } from "../src/features/projects/presentation.ts";
+
+test("field-specific notes share one capture citation while separate versions retain their provenance", () => {
+  const source = Object.freeze({
+    url: "https://aldar.example/project",
+    name: "Aldar Properties",
+    kind: "developer",
+    language: "en",
+    retrieved_at: "2026-10-17T12:00:00Z",
+    content_sha256: "version-1",
+  });
+  const sources = ["Studio", 1, 2].map((bedrooms) =>
+    Object.freeze({
+      ...source,
+      evidence_pointer: `bedrooms[${bedrooms}]`,
+    }),
+  );
+  const evidence = projectEvidenceSources(sources);
+  assert.equal(evidence.length, 1);
+  assert.equal(evidence[0].source, sources[0]);
+  assert.equal(
+    projectEvidenceSources([...sources].reverse())[0].key,
+    evidence[0].key,
+  );
+  for (const variation of [
+    { retrieved_at: "2026-10-20T12:00:00Z", historical: true },
+    { content_sha256: "version-2" },
+    { url: "https://agency.example/project", kind: "broker" },
+    { ingested_at: "2026-10-21T12:00:00Z" },
+  ])
+    assert.equal(
+      projectEvidenceSources([...sources, { ...source, ...variation }]).length,
+      2,
+    );
+  assert.equal(sources.length, 3);
+  assert.equal(sources[0].evidence_pointer, "bedrooms[Studio]");
+  assert.deepEqual(projectEvidenceSources([]), []);
+});
+
+test("source dates use the active locale and malformed metadata cannot break a dossier", () => {
+  assert.equal(formatProjectDate("not-a-date", "fr"), null);
+  assert.equal(formatProjectDate("", "en"), null);
+  assert.equal(formatProjectDate("2026-10-17T22:30:00Z", "fr"), "18 oct. 2026");
+  assert.notEqual(
+    formatProjectDate("2026-10-17T12:00:00Z", "en"),
+    formatProjectDate("2026-10-17T12:00:00Z", "fr"),
+  );
+});
+
+test("amenity codes select translated interface labels without rewriting unknown original evidence", () => {
+  assert.equal(projectAmenityKey("gym"), "amenityGym");
+  assert.equal(projectAmenityKey("swimming_pool"), "amenityPool");
+  for (const code of ["unknown_future_facility", "constructor", "toString"])
+    assert.equal(projectAmenityKey(code), null);
+});
+
+test("a project website needs exact first-party evidence before it is called official", () => {
+  const website_url = "https://agency.example/project";
+  const project = {
+    website_url,
+    sources: [{ url: website_url, kind: "broker" }],
+  };
+  assert.equal(projectWebsite(project).official, false);
+  assert.equal(projectWebsite({ ...project, sources: [] }).official, false);
+  assert.equal(
+    projectWebsite({
+      ...project,
+      sources: [
+        { url: "https://agency.example/another-project", kind: "developer" },
+      ],
+    }).official,
+    false,
+  );
+  for (const kind of ["developer", "publisher"])
+    assert.equal(
+      projectWebsite({ ...project, sources: [{ url: website_url, kind }] })
+        .official,
+      true,
+    );
+  assert.equal(
+    projectWebsite({ ...project, website_url: "javascript:alert(1)" }).url,
+    null,
+  );
+});
+
+test("home types group recorded bedroom variants without losing generic or corroborating claims", () => {
+  const claim = (property_type, bedrooms, origin) =>
+    Object.freeze({
+      property_type,
+      bedrooms,
+      original_text: `${origin}: ${property_type} ${bedrooms ?? "unspecified"}`,
+      source: Object.freeze({
+        url: `https://${origin}.example/project`,
+        historical: origin === "archived",
+      }),
+    });
+  const generic = claim("apartment", null, "developer");
+  const duplex = claim("duplex", 4, "developer");
+  const two = claim("apartment", 2, "agency");
+  const one = claim("apartment", 1, "developer");
+  const historicalTwo = claim("apartment", 2, "archived");
+  const rows = Object.freeze([generic, duplex, two, one, historicalTwo]);
+  const groups = groupProjectTypologies(rows);
+  assert.deepEqual(groups, [
+    {
+      property_type: "apartment",
+      bedrooms: [1, 2],
+      claims: [generic, two, one, historicalTwo],
+    },
+    { property_type: "duplex", bedrooms: [4], claims: [duplex] },
+  ]);
+  assert.equal(groups[0].claims[0], generic);
+  assert.equal(groups[0].claims[3].source, historicalTwo.source);
+  assert.deepEqual(rows, [generic, duplex, two, one, historicalTwo]);
+});
+
+test("unknown-only home types stay unknown and bedroom claims never cross property types", () => {
+  const rows = [
+    {
+      property_type: "apartment",
+      bedrooms: null,
+      original_text: "Apartments",
+      source: {},
+    },
+    {
+      property_type: "studio",
+      bedrooms: 0,
+      original_text: "Studios",
+      source: {},
+    },
+    {
+      property_type: "townhouse",
+      bedrooms: 3,
+      original_text: "Three-bedroom townhouses",
+      source: {},
+    },
+    {
+      property_type: "villa",
+      bedrooms: -1,
+      original_text: "Invalid source count",
+      source: {},
+    },
+  ];
+  assert.deepEqual(
+    groupProjectTypologies(rows).map(({ property_type, bedrooms }) => ({
+      property_type,
+      bedrooms,
+    })),
+    [
+      { property_type: "apartment", bedrooms: [] },
+      { property_type: "studio", bedrooms: [0] },
+      { property_type: "townhouse", bedrooms: [3] },
+      { property_type: "villa", bedrooms: [] },
+    ],
+  );
+  assert.equal(groupProjectTypologies(rows)[3].claims[0], rows[3]);
+  assert.deepEqual(groupProjectTypologies([]), []);
+});
 
 test("project references accept HTTPS without credentials and reject active or relative URLs", () => {
   assert.equal(
@@ -187,6 +350,48 @@ test("map and dossier select a licensed hero without promoting document or exter
     documents: [],
     visuals: [],
   });
+});
+
+test("floor plan images stay with documents and never become a cropped cover photograph", () => {
+  const plan = {
+    id: "plan-image",
+    kind: "image",
+    role: "floor_plan",
+    mime_type: "image/webp",
+    rights_status: "approved",
+    delivery_url: "https://cdn.example.com/floor-plan.webp",
+  };
+  const photo = { ...plan, id: "exterior", role: "gallery" };
+  const blockedPlan = { ...plan, id: "withdrawn", rights_status: "blocked" };
+  assert.deepEqual(projectMedia({ media: [plan, photo, blockedPlan] }), {
+    hero: photo,
+    documents: [plan],
+    visuals: [photo],
+  });
+  assert.deepEqual(projectMedia({ media: [plan] }), {
+    hero: null,
+    documents: [plan],
+    visuals: [],
+  });
+  for (const role of ["brochure", "factsheet"]) {
+    const documentImage = { ...plan, role };
+    assert.deepEqual(projectMedia({ media: [documentImage, photo] }), {
+      hero: photo,
+      documents: [documentImage],
+      visuals: [photo],
+    });
+  }
+});
+
+test("media labels use the reviewed document role and preserve other media kinds", () => {
+  assert.equal(mediaLabel({ kind: "image", role: "floor_plan" }), "floorPlans");
+  assert.equal(mediaLabel({ kind: "document", role: "brochure" }), "brochure");
+  assert.equal(
+    mediaLabel({ kind: "document", role: "factsheet" }),
+    "factsheet",
+  );
+  assert.equal(mediaLabel({ kind: "document", role: "unknown" }), "document");
+  assert.equal(mediaLabel({ kind: "video", role: "tour" }), "video");
 });
 
 test("project route reads a fixed API path and rejects invalid slugs before any request", async () => {

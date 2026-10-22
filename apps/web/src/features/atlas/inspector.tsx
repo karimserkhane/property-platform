@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { MapLocateButton } from "@/components/map-locate-button";
 import {
   type ParcelProperty,
   preferredParcelProperty,
@@ -31,6 +32,7 @@ export function Inspector({
   choose,
   parcelProperties,
   territory,
+  showIdentity = true,
 }: {
   detail: ParcelDetail | null;
   feature: MapFeature | null;
@@ -45,6 +47,7 @@ export function Inspector({
   choose: (feature: MapFeature) => void;
   parcelProperties: Map<string, ParcelProperty[]>;
   territory: string;
+  showIdentity?: boolean;
 }) {
   const usageText = useTranslations("Use");
   const date = (value: string | null | undefined) =>
@@ -77,36 +80,59 @@ export function Inspector({
         : labels.select;
   return (
     <>
-      {presented && presented.geometry.type !== "MultiLineString" ? (
-        <PropertyCard
-          key={presented.id}
-          feature={presented}
-          references={references}
-          m={m}
-          locale={locale}
-          locate={locate}
-          parcel={
-            detail ? { code: detail.code, label: labels.reference } : undefined
-          }
-        />
-      ) : (
-        <div className="property-card">
-          <h2>
-            <bdi>{title || labels.select}</bdi>
-          </h2>
-          {preferred && (
-            <span className="evidence-chip association-chip" title={m.spatial}>
-              {m.possibleAssociation}
-            </span>
-          )}
-          {detail && (
-            <p className="parcel-reference">
-              <span>{labels.reference}</span>
-              <bdi>{readableParcelCode(detail.code)}</bdi>
+      {Object.keys(
+        detail?.field_history ?? feature?.properties.field_history ?? {},
+      ).length > 0 && (
+        <details className="small-text">
+          <summary>{m.historical}</summary>
+          {Object.entries(
+            detail?.field_history ?? feature?.properties.field_history ?? {},
+          ).map(([field, source]) => (
+            <p key={field}>
+              <bdi>{field}</bdi> · {date(source.retrieved_at)} ·{" "}
+              <a href={source.url} target="_blank" rel="noopener noreferrer">
+                {labels.source} ↗
+              </a>
             </p>
-          )}
-        </div>
+          ))}
+        </details>
       )}
+      {(showIdentity || !presented?.properties.presentation?.project) &&
+        (presented && presented.geometry.type !== "MultiLineString" ? (
+          <PropertyCard
+            key={`property-card:${presented.id}`}
+            feature={presented}
+            references={references}
+            m={m}
+            locale={locale}
+            locate={locate}
+            parcel={
+              detail
+                ? { code: detail.code, label: labels.reference }
+                : undefined
+            }
+          />
+        ) : (
+          <div className="property-card">
+            <h2>
+              <bdi>{title || labels.select}</bdi>
+            </h2>
+            {preferred && (
+              <span
+                className="evidence-chip association-chip"
+                title={m.spatial}
+              >
+                {m.possibleAssociation}
+              </span>
+            )}
+            {detail && (
+              <p className="parcel-reference">
+                <span>{labels.reference}</span>
+                <bdi>{readableParcelCode(detail.code)}</bdi>
+              </p>
+            )}
+          </div>
+        ))}
       {!!detail?.overlapping_parcels.length && (
         <div className="parcel-overlap">
           <p>{m.overlapAlert}</p>
@@ -189,10 +215,8 @@ export function Inspector({
       )}
       {detail && (
         <>
-          {!presented && (
-            <button type="button" onClick={locate}>
-              {m.locate}
-            </button>
+          {showIdentity && !presented && (
+            <MapLocateButton label={m.locate} onClick={locate} />
           )}
           <details className="property-proof">
             <summary>{m.parcelDetails}</summary>
@@ -318,25 +342,28 @@ export function Inspector({
           )}
         </>
       )}
-      {(detail || feature) && (
-        <Surroundings
-          key={detail?.id ?? feature?.id}
-          identity={(detail?.id ?? feature?.id) as string}
-          target={
-            detail
-              ? "parcel"
-              : feature?.geometry.type === "Point"
-                ? "place"
-                : feature?.geometry.type === "MultiPolygon"
-                  ? "building"
-                  : "street"
-          }
-          territory={territory}
-          m={m}
-          labels={labels}
-          locale={locale}
-        />
-      )}
+      {(detail || feature) &&
+        !["district", "community", "sector"].includes(
+          feature?.properties.kind ?? "",
+        ) && (
+          <Surroundings
+            key={`surroundings:${territory}:${detail ? "parcel" : feature?.geometry.type}:${detail?.id ?? feature?.id}`}
+            identity={(detail?.id ?? feature?.id) as string}
+            target={
+              detail
+                ? "parcel"
+                : feature?.geometry.type === "Point"
+                  ? "place"
+                  : feature?.geometry.type === "MultiPolygon"
+                    ? "building"
+                    : "street"
+            }
+            territory={territory}
+            m={m}
+            labels={labels}
+            locale={locale}
+          />
+        )}
       {source && (
         <details className="source-detail">
           <summary>{m.sourceDate}</summary>

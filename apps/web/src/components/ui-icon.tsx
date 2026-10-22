@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 
-type IconName = "map" | "list" | "search" | "layers" | "close" | "arrow";
+type IconName =
+  | "map"
+  | "list"
+  | "search"
+  | "layers"
+  | "close"
+  | "arrow"
+  | "chevron";
 
 const paths: Record<IconName, ReactNode> = {
   map: (
@@ -29,6 +36,7 @@ const paths: Record<IconName, ReactNode> = {
   ),
   close: <path d="m6 6 12 12M18 6 6 18" />,
   arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
+  chevron: <path d="m6 9 6 6 6-6" />,
 };
 
 export function UiIcon({ name }: { name: IconName }) {

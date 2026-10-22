@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import type { MapLabels } from "../atlas/types";
+import type { MapLabels, UseLabels } from "../atlas/types";
 import styles from "./project.module.css";
 import type { ProjectLabels, ProjectMapLocation } from "./types";
 
@@ -17,6 +17,8 @@ export function ProjectNeighbourhood({
   locale,
   labels,
   mapLabels,
+  useLabels,
+  truncatedLabel,
   googleUrl,
 }: {
   territory: string;
@@ -26,6 +28,8 @@ export function ProjectNeighbourhood({
   locale: string;
   labels: ProjectLabels;
   mapLabels: MapLabels;
+  useLabels: UseLabels;
+  truncatedLabel: string;
   googleUrl: string | null;
 }) {
   const [active, setActive] = useState(false);
@@ -33,10 +37,13 @@ export function ProjectNeighbourhood({
   return (
     <div className={styles.neighbourhood} data-neighbourhood={territory}>
       <p className={styles.mapIntro}>{labels.mapIntro}</p>
-      {active && !locations.length && (
+      {!locations.length && (
         <p className={styles.mapIntro} role="status">
           {labels.mapLocationPending}
         </p>
+      )}
+      {locations.some((location) => location.source.kind === "broker") && (
+        <p className={styles.mapIntro}>{mapLabels.unverified}</p>
       )}
       <div className={styles.neighbourhoodCanvas}>
         {!active ? (
@@ -68,7 +75,11 @@ export function ProjectNeighbourhood({
             locale={locale}
             label={labels.areaMap}
             mapLabels={mapLabels}
+            useLabels={useLabels}
+            truncatedLabel={truncatedLabel}
             unavailable={labels.mapUnavailable}
+            loadingLabel={labels.loading}
+            retryLabel={labels.retry}
           />
         )}
       </div>

@@ -53,7 +53,10 @@ export async function readPreview(path: string, search = "") {
     await reader.cancel();
   }
   const bytes = Buffer.concat(chunks);
-  return { status: 200, data: JSON.parse(bytes.toString("utf8")) as unknown };
+  return {
+    status: response.status,
+    data: JSON.parse(bytes.toString("utf8")) as unknown,
+  };
 }
 
 // A fixed, licensed-media endpoint only; no visitor-selected remote image URL.

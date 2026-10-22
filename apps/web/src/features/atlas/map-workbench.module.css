@@ -1,0 +1,190 @@
+.dock {
+  position: absolute;
+  z-index: 7;
+  inset-inline-start: 160px;
+  inset-block-end: calc(var(--map-controls-bottom, 72px));
+  color: var(--ink);
+}
+.compact {
+  inset-inline-start: 12px;
+  inset-block-start: 12px;
+  inset-block-end: auto;
+}
+.dock summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  font-size: 12px;
+  list-style: none;
+}
+.dock summary::-webkit-details-marker {
+  display: none;
+}
+.panel {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: calc(100% + 10px);
+  width: min(350px, calc(100vw - 32px));
+  max-height: min(500px, 65dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  font-size: 12px;
+}
+.compact .panel {
+  inset-inline-start: 0;
+  inset-block-start: calc(100% + 8px);
+  inset-block-end: auto;
+  width: min(315px, calc(100cqw - 24px));
+  max-height: 260px;
+}
+.panel label {
+  display: grid;
+  gap: 6px;
+  margin-block: 10px;
+}
+.panel input:not([type="checkbox"]),
+.panel select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.panel input[type="checkbox"] {
+  accent-color: var(--ink);
+}
+.panel input[type="range"] {
+  padding-inline: 0;
+  accent-color: var(--accent);
+}
+.panel .check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 36px;
+}
+.panel button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.panel button[aria-pressed="true"] {
+  background: var(--ink);
+  color: white;
+}
+.panel button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-block: 10px;
+}
+.results {
+  display: grid;
+  gap: 5px;
+  margin-block: 8px;
+  max-height: 230px;
+  overflow-y: auto;
+}
+.results button {
+  text-align: start;
+}
+.note {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.reading {
+  padding: 10px;
+  background: #eff4ec;
+  border-radius: 10px;
+  line-height: 1.8;
+  font-variant-numeric: tabular-nums;
+}
+.divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 2px;
+  background: white;
+  box-shadow: 0 0 4px #123e46;
+  pointer-events: none;
+}
+.comparison,
+.comparison:global(.maplibregl-map) {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+.compareCredit {
+  position: absolute;
+  z-index: 4;
+  inset-inline-start: 8px;
+  inset-block-start: 90px;
+  max-width: min(380px, calc(100% - 16px));
+  padding: 5px 8px;
+  background: #fffffff2;
+  font-size: 10px;
+  line-height: 1.5;
+  border-radius: 7px;
+  pointer-events: auto;
+}
+.solarTint {
+  position: absolute;
+  inset: 0;
+  background: #101d38;
+  pointer-events: none;
+  z-index: 3;
+}
+@media (max-width: 760px) {
+  .dock {
+    inset-inline-start: 152px;
+    inset-block-end: var(--map-controls-bottom, 96px);
+  }
+  .dock .panel {
+    inset-inline-start: -138px;
+    width: min(350px, calc(100vw - 28px));
+    max-height: min(
+      55dvh,
+      max(120px, calc(100dvh - var(--map-controls-bottom, 96px) - 240px))
+    );
+  }
+  .compact {
+    inset-inline-start: 12px;
+    inset-block-start: 12px;
+    inset-block-end: auto;
+  }
+  .compact .panel {
+    inset-inline-start: 0;
+    width: min(315px, calc(100cqw - 24px));
+    max-height: min(260px, 45dvh);
+  }
+  .compareCredit {
+    inset-block-start: 90px;
+    max-width: 60%;
+  }
+}

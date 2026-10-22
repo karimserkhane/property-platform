@@ -6,35 +6,36 @@ import {
   approvedDelivery,
   playableMedia,
   projectMedia,
+  projectWebsite,
   safeSourceUrl,
 } from "./presentation";
 import styles from "./project.module.css";
 import type { ProjectDetail, ProjectLabels } from "./types";
 
 // Existing licensed editorial assets stay distinct from project evidence.
-const editorial = [
-  { image: "abu-dhabi-sunset", position: "66% 58%" },
-  { image: "abu-dhabi-coast", position: "50% 74%" },
-] as const;
+const editorial = { image: "abu-dhabi-coast", position: "50% 74%" } as const;
 
 export function ProjectCover({
   project,
   labels,
   compact = false,
 }: {
-  project: ProjectDetail;
+  project?: ProjectDetail | null;
   compact?: boolean;
   labels: Pick<
     ProjectLabels,
     | "visuals"
     | "officialGallery"
+    | "source"
     | "editorialImage"
     | "previousImage"
     | "nextImage"
   >;
 }) {
   const locale = useLocale();
-  const { hero, visuals } = projectMedia(project);
+  const { hero, visuals } = project
+    ? projectMedia(project)
+    : { hero: null, visuals: [] };
   const [index, setIndex] = useState(0);
   const [failed, setFailed] = useState<string[]>([]);
   const images = [
@@ -44,10 +45,11 @@ export function ProjectCover({
     ),
   ].filter((item) => !failed.includes(item.id));
   const photo = images[index % Math.max(images.length, 1)];
-  const ambient = editorial[index % editorial.length];
   const delivery = photo && approvedDelivery(photo);
-  const total = images.length || editorial.length;
-  const website = safeSourceUrl(project.website_url);
+  const total = images.length;
+  const website = project
+    ? projectWebsite(project)
+    : { url: null, official: false };
   const licence = safeSourceUrl(photo?.licence_url);
   const move = (step: number) =>
     setIndex((value) => (value + step + total) % total);
@@ -59,12 +61,12 @@ export function ProjectCover({
     >
       {/* biome-ignore lint/performance/noImgElement: approved stored media or existing local licensed editorial assets; no remote optimizer. */}
       <img
-        key={delivery || ambient.image}
-        src={delivery || `/images/uae/${ambient.image}-1920.webp`}
+        key={delivery || editorial.image}
+        src={delivery || `/images/uae/${editorial.image}-1920.webp`}
         srcSet={
           delivery
             ? undefined
-            : `/images/uae/${ambient.image}-768.webp 768w, /images/uae/${ambient.image}-1920.webp 1920w`
+            : `/images/uae/${editorial.image}-768.webp 768w, /images/uae/${editorial.image}-1920.webp 1920w`
         }
         sizes={
           compact
@@ -74,7 +76,7 @@ export function ProjectCover({
         alt={delivery ? photo.title : ""}
         lang={photo?.source.language}
         decoding="async"
-        style={delivery ? undefined : { objectPosition: ambient.position }}
+        style={delivery ? undefined : { objectPosition: editorial.position }}
         onError={
           delivery
             ? () => setFailed((value) => [...value, photo.id])
@@ -97,9 +99,9 @@ export function ProjectCover({
       </figcaption>
       {!compact && (
         <div className={styles.galleryControls}>
-          {website && !delivery && (
-            <a href={website} target="_blank" rel="noopener noreferrer">
-              {labels.officialGallery} <span aria-hidden="true">↗</span>
+          {website.url && !delivery && (
+            <a href={website.url} target="_blank" rel="noopener noreferrer">
+              {labels.source} <span aria-hidden="true">↗</span>
             </a>
           )}
           {total > 1 && (

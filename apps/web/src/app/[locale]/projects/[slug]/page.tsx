@@ -3,7 +3,7 @@ import navigation from "@property-platform/contracts/territories";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import type { MapLabels } from "@/features/atlas/types";
+import type { MapLabels, UseLabels } from "@/features/atlas/types";
 import { ProjectDetailView } from "@/features/projects/detail";
 import { ProjectNeighbourhood } from "@/features/projects/neighbourhood";
 import { googleNeighbourhoodUrl } from "@/features/projects/neighbourhood-config";
@@ -56,6 +56,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       item.queryable,
   );
   const mapText = await getTranslations({ locale, namespace: "Map" });
+  const usageText = await getTranslations({ locale, namespace: "Use" });
+  const atlasText = await getTranslations({ locale, namespace: "Atlas" });
+  const useLabels = Object.fromEntries(
+    Object.keys(english.Use).map((key) => [
+      key,
+      usageText(key as keyof typeof english.Use),
+    ]),
+  ) as UseLabels;
   const mapLabels = Object.fromEntries(
     Object.keys(english.Map).map((key) => [
       key,
@@ -78,6 +86,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             locale={locale}
             labels={labels}
             mapLabels={mapLabels}
+            useLabels={useLabels}
+            truncatedLabel={atlasText("truncated")}
             googleUrl={googleNeighbourhoodUrl(
               area.bounds,
               locale,

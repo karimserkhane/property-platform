@@ -1,7 +1,9 @@
 "use client";
 
+import navigation from "@property-platform/contracts/territories";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { MapLocateButton } from "@/components/map-locate-button";
 import { Link } from "@/i18n/navigation";
 import { ProjectCover } from "./cover";
 import { readProjectData } from "./data";
@@ -17,6 +19,7 @@ export function ProjectMapSummary({
   locale,
   locate,
   locateLabel,
+  unverifiedLabel,
 }: {
   slug: string;
   name?: string;
@@ -24,6 +27,7 @@ export function ProjectMapSummary({
   locale: string;
   locate?: () => void;
   locateLabel?: string;
+  unverifiedLabel: string;
 }) {
   const t = useTranslations("Project");
   const [attempt, setAttempt] = useState(0);
@@ -68,25 +72,27 @@ export function ProjectMapSummary({
     "villa",
     "studio",
   ] as const);
+  const area = navigation.territories.find(
+    (item) => item.id === project?.territory,
+  );
   return (
     <article
       className={styles.mapSummary}
       aria-busy={loading}
       data-project-preview={slug}
     >
-      {project && (
-        <ProjectCover
-          project={project}
-          compact
-          labels={{
-            visuals: t("visuals"),
-            officialGallery: t("officialGallery"),
-            editorialImage: t("editorialImage"),
-            previousImage: t("previousImage"),
-            nextImage: t("nextImage"),
-          }}
-        />
-      )}
+      <ProjectCover
+        project={project}
+        compact
+        labels={{
+          visuals: t("visuals"),
+          officialGallery: t("officialGallery"),
+          source: t("source"),
+          editorialImage: t("editorialImage"),
+          previousImage: t("previousImage"),
+          nextImage: t("nextImage"),
+        }}
+      />
       <div className={styles.summaryCopy}>
         <p className={styles.kicker}>{t("project")}</p>
         <h2 lang={project?.language}>
@@ -97,9 +103,31 @@ export function ProjectMapSummary({
             <bdi>{project?.developer.name || developer}</bdi>
           </p>
         )}
+        <div className={styles.summaryActions}>
+          <Link className={styles.primaryAction} href={`/projects/${slug}`}>
+            {t("viewDetails")} <span aria-hidden="true">↗</span>
+          </Link>
+          {locate && locateLabel && (
+            <MapLocateButton label={locateLabel} onClick={locate} />
+          )}
+        </div>
         {project ? (
           <>
+            {!project.map_locations.length && (
+              <p className={styles.muted}>{t("notMapped")}</p>
+            )}
+            {project.map_locations.some(
+              (location) => location.source.kind === "broker",
+            ) && <p className={styles.muted}>{unverifiedLabel}</p>}
             <dl className={styles.summaryFacts}>
+              {area && (
+                <div>
+                  <dt>{t("location")}</dt>
+                  <dd>
+                    <bdi>{locale === "ar" ? area.name_ar : area.name}</bdi>
+                  </dd>
+                </div>
+              )}
               {handover && (
                 <div>
                   <dt>{t("handover")}</dt>
@@ -108,7 +136,13 @@ export function ProjectMapSummary({
               )}
               {project.programme_total != null && (
                 <div>
-                  <dt>{t("plannedHomes")}</dt>
+                  <dt>
+                    {t(
+                      project.programme_total.basis === "registered"
+                        ? "registeredHomes"
+                        : "plannedHomes",
+                    )}
+                  </dt>
                   <dd>
                     {new Intl.NumberFormat(locale).format(
                       project.programme_total.value,
@@ -119,13 +153,14 @@ export function ProjectMapSummary({
             </dl>
             {!!homeTypes.length && (
               <p className={styles.summaryTypes}>
-                {homeTypes
-                  .map((type) =>
-                    types.has(type as "apartment")
+                {homeTypes.slice(0, 3).map((type) => (
+                  <span className={styles.typeChip} key={type}>
+                    {types.has(type as "apartment")
                       ? t(type as "apartment")
-                      : type,
-                  )
-                  .join(" · ")}
+                      : type}
+                  </span>
+                ))}
+                {homeTypes.length > 3 && <span aria-hidden="true">…</span>}
               </p>
             )}
           </>
@@ -140,20 +175,6 @@ export function ProjectMapSummary({
             {t("retry")}
           </button>
         )}
-        <div className={styles.summaryActions}>
-          <Link className={styles.primaryAction} href={`/projects/${slug}`}>
-            {t("viewDetails")} <span aria-hidden="true">↗</span>
-          </Link>
-          {locate && (
-            <button
-              className={styles.textAction}
-              type="button"
-              onClick={locate}
-            >
-              {locateLabel}
-            </button>
-          )}
-        </div>
       </div>
     </article>
   );

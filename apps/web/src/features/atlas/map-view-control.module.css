@@ -1,0 +1,242 @@
+.root {
+  position: relative;
+  color: var(--ink);
+}
+.root > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 650;
+}
+.root > summary::-webkit-details-marker {
+  display: none;
+}
+.chevron {
+  color: var(--muted);
+}
+.badge {
+  border-radius: 5px;
+  padding: 2px 5px;
+  color: #fff;
+  background: var(--ink);
+  font-size: 10px;
+}
+.dimension {
+  display: flex;
+  gap: 8px;
+  border: 0;
+  padding: 0;
+  margin: 16px 0 0;
+  min-width: 0;
+}
+.dimension legend {
+  font-size: 11px;
+  color: var(--muted);
+  margin-block-end: 7px;
+}
+.dimension label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.dimension label[data-selected="true"] {
+  background: #edf4ed;
+  border-color: #527e72;
+}
+.dimension input,
+.estimates input {
+  accent-color: var(--ink);
+}
+.estimates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 11px;
+}
+.root[open] .chevron {
+  rotate: 180deg;
+}
+.panel {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 10px);
+  width: min(320px, calc(100vw - 24px));
+  max-height: min(380px, var(--view-menu-room, 60dvh));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 10px 40px #173e4826;
+}
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  position: relative;
+  font-size: 11px;
+  text-align: center;
+}
+.choice[data-selected="true"] {
+  background: #edf4ed;
+  border-color: #527e72;
+  box-shadow: inset 0 0 0 1px #527e72;
+}
+.choice input {
+  position: absolute;
+  inset-block-start: 10px;
+  inset-inline-end: 10px;
+  accent-color: var(--ink);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+.choice:focus-within {
+  outline: 3px solid var(--bronze);
+  outline-offset: 3px;
+}
+.plan,
+.satellite {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 64px;
+  border-radius: 7px;
+}
+.plan {
+  color: #315f60;
+  background: linear-gradient(
+    35deg,
+    #ecdeb9 30%,
+    #f3f6f0 30%,
+    #f3f6f0 40%,
+    #c9dce0 40%,
+    #c9dce0 58%,
+    #e5eddf 58%
+  );
+}
+.satellite {
+  color: #fff8e2;
+  background: linear-gradient(
+    135deg,
+    #254e50,
+    #6b7c52 45%,
+    #9eaa7e 46%,
+    #556746 68%,
+    #234f57
+  );
+}
+.source {
+  display: grid;
+  gap: 7px;
+  padding-block-start: 15px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.source select {
+  min-height: 44px;
+  max-width: 100%;
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: #f4f6f0;
+  border-radius: 10px;
+}
+.note,
+.evidence {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 12px 0 0;
+}
+.evidence {
+  display: block;
+}
+.coverage {
+  margin: 12px 0 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: #edf3f1;
+  color: var(--ink);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 760px) {
+  .panel {
+    padding: 12px;
+  }
+  .choice {
+    flex-direction: row;
+    padding: 8px;
+    min-height: 48px;
+    gap: 7px;
+  }
+  .choice input {
+    position: static;
+    flex-shrink: 0;
+  }
+  .plan,
+  .satellite {
+    width: 24px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .dimension {
+    margin-block-start: 12px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .root[open] .panel {
+    animation: appear 150ms ease-out;
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+      translate: 0 6px;
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+}

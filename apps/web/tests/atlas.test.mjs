@@ -194,14 +194,14 @@ test("RT4 ProjectLimits never hides the real parcel under the pointer", () => {
   assert.equal(selectMapHit([overlay]), overlay);
 });
 
-test("sectors stay inert and project perimeters are only the last fallback", () => {
+test("districts and sectors are the last selectable fallback", () => {
   const district = hit("area-hit", "island", { kind: "district" });
   const sector = hit("area-hit", "RT4", { kind: "community" });
   const overlay = hit("parcel-fill", "RT4_TMP_PL2", { category: "overlay" });
   const place = hit("places", "place");
   const street = hit("streets", "street");
-  assert.equal(selectMapHit([district, sector]), null);
-  assert.equal(selectMapHit([district]), null);
+  assert.equal(selectMapHit([district, sector]), district);
+  assert.equal(selectMapHit([district]), district);
   assert.equal(selectMapHit([district, overlay, street]), street);
   assert.equal(selectMapHit([overlay, street, place]), place);
   assert.equal(selectMapHit([]), null);
@@ -216,7 +216,8 @@ test("an explicit project marker opens its property rather than the underlying p
   const parcel = hit("parcel-fill", "parcel", { category: "mixed" });
   const building = hit("buildings", "building");
   assert.equal(selectMapHit([parcel, project]), project);
-  assert.equal(selectMapHit([project, building, parcel]), building);
+  assert.equal(selectMapHit([project, building, parcel]), project);
+  assert.equal(selectMapHit([building, parcel, project]), project);
 });
 
 test("property labels and other named places win over RT7 TMP2, with land as fallback", () => {

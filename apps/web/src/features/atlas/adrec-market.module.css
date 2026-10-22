@@ -1,13 +1,34 @@
 .root h2 {
-  font-size: 1.15rem;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
   margin-block: 0.5rem 1rem;
+}
+.root {
+  min-width: 0;
+}
+.root :global(.atlas-search) {
+  max-width: 420px;
+  margin-block: 20px;
+}
+.root :global(.atlas-search input) {
+  width: 100%;
+}
+.sales {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-block: 24px;
 }
 .sale {
   padding: 1rem;
-  margin-block: 0.75rem;
-  border: 1px solid var(--border, #ddd6cb);
+  margin: 0;
+  border: 1px solid var(--line);
   border-radius: 16px;
   background: #fff;
+}
+.sale h3,
+.sale > strong,
+.sale dd {
+  overflow-wrap: anywhere;
 }
 .sale h3 {
   font-size: 1rem;
@@ -40,4 +61,14 @@
   margin-block: 1.25rem;
   background: #edf3f1;
   border-radius: 16px;
+}
+@media (max-width: 1000px) {
+  .sales {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .sales {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

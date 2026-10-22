@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { MapLocateButton } from "@/components/map-locate-button";
 import { ProjectMapSummary } from "@/features/projects/map-summary";
 import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
 import type { MapFeature, MapLabels, ResearchReference } from "./types";
@@ -53,6 +54,7 @@ export function PropertyCard({
           locale={locale}
           locate={locate}
           locateLabel={m.locate}
+          unverifiedLabel={m.unverified}
         />
         {parcel && (
           <p className="parcel-reference">
@@ -135,9 +137,7 @@ export function PropertyCard({
             ↗
           </a>
         )}
-        <button type="button" onClick={locate}>
-          {m.locate}
-        </button>
+        <MapLocateButton label={m.locate} onClick={locate} />
       </div>
       {photo && (
         <figure className="property-photo">

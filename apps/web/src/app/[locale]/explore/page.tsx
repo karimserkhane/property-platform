@@ -6,11 +6,25 @@ import type {
   CoverageLabels,
   MapLabels,
 } from "@/features/atlas/types";
+import { redirect } from "@/i18n/navigation";
 import english from "../../../../messages/en.json";
 
-export default async function ExplorePage() {
+export default async function ExplorePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; territory?: string }>;
+}) {
   const t = await getTranslations("Atlas");
   const locale = await getLocale();
+  const query = await searchParams;
+  if (query.tab === "market")
+    redirect({
+      locale,
+      href: {
+        pathname: "/market",
+        query: query.territory ? { territory: query.territory } : undefined,
+      },
+    });
   const messages = await getMessages();
   const map = await getTranslations("Map");
   const coverage = await getTranslations("Coverage");
@@ -58,18 +72,19 @@ export default async function ExplorePage() {
   return (
     <NextIntlClientProvider
       messages={{
-        Market: messages.Market,
         Context: messages.Context,
         Use: messages.Use,
         Project: messages.Project,
       }}
     >
-      <TerritoryExplorer
-        labels={labels}
-        mapLabels={mapLabels}
-        coverage={coverageLabels}
-        locale={locale}
-      />
+      <div className="explore-viewport" data-page="explore">
+        <TerritoryExplorer
+          labels={labels}
+          mapLabels={mapLabels}
+          coverage={coverageLabels}
+          locale={locale}
+        />
+      </div>
     </NextIntlClientProvider>
   );
 }

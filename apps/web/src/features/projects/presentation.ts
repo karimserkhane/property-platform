@@ -1,17 +1,133 @@
-import type { ProjectDetail } from "./types";
+import type { ProjectDetail, ProjectMedia, ProjectSource } from "./types";
+
+// Field-specific notes and pointers never belong in buyer-facing source citations.
+// Group by capture provenance, preserving separate source versions and history.
+export function projectEvidenceSources(sources: ProjectSource[]) {
+  const unique = new Map<string, { key: string; source: ProjectSource }>();
+  for (const source of sources) {
+    const key = JSON.stringify([
+      source.url,
+      source.name,
+      source.kind,
+      source.language,
+      source.content_sha256,
+      source.retrieved_at,
+      source.published_at,
+      source.ingested_at,
+      source.historical,
+      source.rights_status,
+      source.developer_name,
+      source.developer_role,
+    ]);
+    if (!unique.has(key)) unique.set(key, { key, source });
+  }
+  return [...unique.values()];
+}
+
+export function formatProjectDate(value: string, locale: string) {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime())
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeZone: "Asia/Dubai",
+      }).format(date)
+    : null;
+}
+
+const amenityKeys = {
+  swimming_pool: "amenityPool",
+  children_pool: "amenityChildrenPool",
+  children_play_area: "amenityPlayArea",
+  gym: "amenityGym",
+  seating_area: "amenitySeating",
+  retail: "amenityRetail",
+  landscaped_gardens: "amenityGardens",
+  barbecue_area: "amenityBarbecue",
+  parking: "amenityParking",
+  restaurants: "amenityRestaurants",
+  security: "amenitySecurity",
+} as const;
+
+export function projectAmenityKey(code: string) {
+  return Object.hasOwn(amenityKeys, code)
+    ? amenityKeys[code as keyof typeof amenityKeys]
+    : null;
+}
+
+type Typology = ProjectDetail["typologies"][number];
+type TypologyGroup = {
+  property_type: string;
+  bedrooms: number[];
+  claims: Typology[];
+};
+
+// A compact display groups only explicit claims for the same property type.
+// Generic claims do not add bedroom counts, and all source assertions survive.
+export function groupProjectTypologies(
+  typologies: Typology[],
+): TypologyGroup[] {
+  const groups = new Map<string, TypologyGroup>();
+  for (const claim of typologies) {
+    let group = groups.get(claim.property_type);
+    if (!group) {
+      group = { property_type: claim.property_type, bedrooms: [], claims: [] };
+      groups.set(claim.property_type, group);
+    }
+    group.claims.push(claim);
+    if (
+      claim.bedrooms != null &&
+      Number.isInteger(claim.bedrooms) &&
+      claim.bedrooms >= 0 &&
+      !group.bedrooms.includes(claim.bedrooms)
+    )
+      group.bedrooms.push(claim.bedrooms);
+  }
+  return [...groups.values()].map((group) => ({
+    ...group,
+    bedrooms: group.bedrooms.toSorted((a, b) => a - b),
+  }));
+}
+
+// A developer-like hostname or an unverified URL alone is not first-party evidence.
+export function projectWebsite(
+  project: Pick<ProjectDetail, "website_url" | "sources">,
+) {
+  const url = safeSourceUrl(project.website_url);
+  const source = url
+    ? project.sources.find((item) => safeSourceUrl(item.url) === url)
+    : undefined;
+  return {
+    url,
+    official:
+      !!source && ["developer", "publisher"].includes(source.kind ?? ""),
+  };
+}
 
 // Both the map preview and full dossier use the same rights-aware selection.
 export function projectMedia(project: Pick<ProjectDetail, "media">) {
   const visible = project.media.filter(
     (item) => item.rights_status !== "blocked",
   );
-  const images = visible.filter((item) => playableMedia(item) === "image");
+  const isDocument = (item: ProjectMedia) =>
+    item.kind === "document" ||
+    ["floor_plan", "brochure", "factsheet"].includes(item.role);
+  const images = visible.filter(
+    (item) => !isDocument(item) && playableMedia(item) === "image",
+  );
   const hero = images.find((item) => item.role === "hero") ?? images[0] ?? null;
   return {
     hero,
-    documents: visible.filter((item) => item.kind === "document"),
-    visuals: visible.filter((item) => item.kind !== "document"),
+    documents: visible.filter(isDocument),
+    visuals: visible.filter((item) => !isDocument(item)),
   };
+}
+
+// The reviewed role identifies a plan; an image MIME type alone cannot do so.
+export function mediaLabel(media: Pick<ProjectMedia, "role" | "kind">) {
+  if (media.role === "floor_plan") return "floorPlans";
+  if (media.role === "brochure") return "brochure";
+  if (media.role === "factsheet") return "factsheet";
+  return media.kind;
 }
 
 const MEDIA_ROUTE =

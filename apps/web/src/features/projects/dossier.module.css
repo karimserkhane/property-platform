@@ -1,0 +1,147 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+  padding-block: 8px 32px;
+}
+.heroCopy {
+  min-width: 0;
+}
+.hero h1 {
+  margin-block: 8px 18px;
+  font-family: var(--font-display), serif;
+  font-size: clamp(36px, 4.5vw, 64px);
+  font-weight: 500;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.hero > figure {
+  min-height: 280px;
+  height: clamp(280px, 28vw, 380px);
+  border-radius: 18px;
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 24px;
+  padding-block-start: 24px;
+  margin-block: 24px 0;
+  border-block-start: 1px solid #d8ddd5;
+}
+.facts > div {
+  min-width: 0;
+}
+.facts dt {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #586b70;
+}
+.facts dd {
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.locationNotice {
+  margin-block: 18px 0;
+  color: #5b6e70;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.documentGroups {
+  display: grid;
+  gap: 24px;
+}
+.documentGroupTitle {
+  margin-block: 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.documentEmpty {
+  margin: 0;
+  border: 1px dashed #ccd7ce;
+  border-radius: 12px;
+  padding: 20px;
+  background: #f1f4ed;
+  color: #586d6c;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.purchase {
+  max-width: 700px;
+}
+.proof {
+  overflow-wrap: anywhere;
+}
+.typologies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 12px;
+}
+.typology {
+  min-width: 0;
+  padding: 18px 20px 6px;
+  border: 1px solid #dce0d5;
+  border-radius: 14px;
+  background: #fffdfa;
+}
+.typology h3 {
+  margin-block: 0 14px;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.bedrooms {
+  margin: 0;
+}
+.bedrooms dt {
+  color: #586b70;
+  font-size: 12px;
+  margin-block-end: 8px;
+}
+.bedrooms dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  list-style: none;
+}
+.variants li {
+  min-width: 30px;
+  padding: 3px 10px;
+  border: 1px solid #d8e0d1;
+  border-radius: 6px;
+  background: #edf2e9;
+  text-align: center;
+}
+.claims {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.evidenceDate {
+  color: #586b70;
+  font-size: 11px;
+}
+.claims li + li {
+  margin-block-start: 12px;
+  padding-block-start: 12px;
+  border-block-start: 1px solid #dce0d5;
+}
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .hero > figure {
+    min-height: 200px;
+    height: 220px;
+  }
+}

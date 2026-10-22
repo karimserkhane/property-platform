@@ -1,23 +1,32 @@
 "use client";
 
 import type { components } from "@property-platform/contracts";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import styles from "./adrec-market.module.css";
+import type { MapLabels } from "./types";
+
+const MarketDistrictMap = dynamic(() => import("./market-district-map"), {
+  ssr: false,
+});
 
 type Market = components["schemas"]["AdrecMarketResponse"];
 
 export function AdrecMarket({
   territory,
   locale,
+  mapLabels,
 }: {
   territory: string;
   locale: string;
+  mapLabels: MapLabels;
 }) {
   const t = useTranslations("Market");
   const [data, setData] = useState<Market | null>(null);
   const [state, setState] = useState("loading");
   const [query, setQuery] = useState("");
+  const [snapshot, setSnapshot] = useState("");
   const [offset, setOffset] = useState(0);
   const [attempt, setAttempt] = useState(0);
   // biome-ignore lint/correctness/useExhaustiveDependencies: An explicit retry restarts this request.
@@ -31,6 +40,7 @@ export function AdrecMarket({
           q: query,
           offset: String(offset),
         });
+        if (snapshot) search.set("snapshot_id", snapshot);
         const response = await fetch(`/api/atlas/adrec-market?${search}`, {
           signal: controller.signal,
         });
@@ -48,7 +58,7 @@ export function AdrecMarket({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [territory, query, offset, attempt]);
+  }, [territory, query, offset, attempt, snapshot]);
   const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
   const money = new Intl.NumberFormat(locale, {
     style: "currency",
@@ -88,6 +98,33 @@ export function AdrecMarket({
       ) : (
         data && (
           <>
+            <label className="atlas-search">
+              <span>{t("history")}</span>
+              <select
+                value={snapshot}
+                onChange={(event) => {
+                  setSnapshot(event.target.value);
+                  setOffset(0);
+                }}
+              >
+                <option value="">{t("latest")}</option>
+                {data.snapshots.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {new Intl.DateTimeFormat(locale, {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                      timeZone: "Asia/Dubai",
+                    }).format(new Date(item.ingested_at))}{" "}
+                    · {number.format(item.source_row_count)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {data.historical && (
+              <p className="small-text" role="status">
+                {t("historical")}
+              </p>
+            )}
             <p className="small-text">
               {data.period_start && data.period_end
                 ? `${date(data.period_start)} – ${date(data.period_end)}`
@@ -97,58 +134,67 @@ export function AdrecMarket({
               {number.format(data.total)} · {t("sales")}
             </p>
             <p className="small-text">{t("note")}</p>
-            {data.sales.map((row) => (
-              <article
-                className={styles.sale}
-                key={`${data.snapshot_id}:${row.position}`}
-              >
-                <h3>
-                  <bdi>{row.project_name || row.district}</bdi>
-                </h3>
-                <strong>
-                  {row.price_aed === null
-                    ? "—"
-                    : money.format(Number(row.price_aed))}
-                </strong>
-                <p>
-                  <bdi>
-                    {[
-                      row.property_type,
-                      row.property_layout,
-                      row.sale_application_type,
-                      row.sale_sequence,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </bdi>
-                </p>
-                <dl>
-                  <div>
-                    <dt>{t("date")}</dt>
-                    <dd>{date(row.registration_date)}</dd>
-                  </div>
-                  <div>
-                    <dt>{t("area")}</dt>
-                    <dd>
-                      {row.sold_area_sqm === null
-                        ? "—"
-                        : `${number.format(Number(row.sold_area_sqm))} m²`}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>{t("share")}</dt>
-                    <dd>
-                      {row.sold_share === null
-                        ? "—"
-                        : new Intl.NumberFormat(locale, {
-                            style: "percent",
-                            maximumFractionDigits: 2,
-                          }).format(Number(row.sold_share))}
-                    </dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
+            <MarketDistrictMap
+              territory={territory}
+              snapshot={data.snapshot_id}
+              query={query}
+              locale={locale}
+              m={mapLabels}
+            />
+            <div className={styles.sales}>
+              {data.sales.map((row) => (
+                <article
+                  className={styles.sale}
+                  key={`${data.snapshot_id}:${row.position}`}
+                >
+                  <h3>
+                    <bdi>{row.project_name || row.district}</bdi>
+                  </h3>
+                  <strong>
+                    {row.price_aed === null
+                      ? "—"
+                      : money.format(Number(row.price_aed))}
+                  </strong>
+                  <p>
+                    <bdi>
+                      {[
+                        row.property_type,
+                        row.property_layout,
+                        row.sale_application_type,
+                        row.sale_sequence,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </bdi>
+                  </p>
+                  <dl>
+                    <div>
+                      <dt>{t("date")}</dt>
+                      <dd>{date(row.registration_date)}</dd>
+                    </div>
+                    <div>
+                      <dt>{t("area")}</dt>
+                      <dd>
+                        {row.sold_area_sqm === null
+                          ? "—"
+                          : `${number.format(Number(row.sold_area_sqm))} m²`}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{t("share")}</dt>
+                      <dd>
+                        {row.sold_share === null
+                          ? "—"
+                          : new Intl.NumberFormat(locale, {
+                              style: "percent",
+                              maximumFractionDigits: 2,
+                            }).format(Number(row.sold_share))}
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </div>
             <nav className="atlas-pagination" aria-label={t("sales")}>
               <button
                 type="button"
@@ -179,6 +225,7 @@ export function AdrecMarket({
                         : number.format(Number(row.index_value))}
                     </strong>{" "}
                     · {date(row.period_end)}
+                    {row.historical && <small> · {t("historical")}</small>}
                   </p>
                 ))}
               </section>

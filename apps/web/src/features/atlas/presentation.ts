@@ -1,3 +1,4 @@
+import type { ExpressionSpecification } from "maplibre-gl";
 import type {
   MapContext,
   MapFeature,
@@ -12,6 +13,11 @@ type PropertyIdentity = Pick<
 export type ParcelProperty = PropertyIdentity & {
   id: string;
   feature: MapFeature | null;
+  spatial_match?: {
+    method: "boundary-proximity-v1";
+    distance_m: number;
+    source_feature_id: string;
+  };
 };
 
 // A display preference never accepts a commercial/cadastral identity link.
@@ -56,6 +62,7 @@ export function preferredParcelProperty(
       .filter((p) => isProperty(p) && propertyName(p, locale))
       .sort(
         (a, b) =>
+          Number(Boolean(a.spatial_match)) - Number(Boolean(b.spatial_match)) ||
           Number(named(b)) - Number(named(a)) ||
           Number(Boolean(b.presentation)) - Number(Boolean(a.presentation)) ||
           Number(b.kind.endsWith("_project_marker")) -
@@ -69,7 +76,10 @@ export function preferredParcelProperty(
   );
 }
 
-export function parcelPropertyIndex(context: MapContext | null) {
+export function parcelPropertyIndex(
+  context: MapContext | null,
+  parcels?: ParcelCollection | null,
+) {
   const index = new Map<string, ParcelProperty[]>();
   // OSM exposes the same way as footprint and point. Enrich by exact source
   // identity only, never by a similar name or nearest building.
@@ -96,7 +106,122 @@ export function parcelPropertyIndex(context: MapContext | null) {
       index.set(id, candidates);
     }
   }
+  const projects = (context?.place.features ?? []).filter(
+    (f) =>
+      f.geometry.type === "Point" &&
+      f.properties.kind.endsWith("_project_marker") &&
+      Boolean(
+        f.properties.name.trim() ||
+          f.properties.name_ar.trim() ||
+          f.properties.presentation?.name.trim(),
+      ),
+  );
+  for (const parcel of parcels?.features ?? []) {
+    if (
+      !["mixed", "residential"].includes(parcel.properties.category) ||
+      preferredParcelProperty(index.get(parcel.id) ?? [], "en")
+    )
+      continue;
+    const match = nearbyProject(parcel.geometry, projects);
+    if (!match) continue;
+    const f = match.feature;
+    index.set(parcel.id, [
+      ...(index.get(parcel.id) ?? []),
+      {
+        ...f.properties,
+        id: f.id,
+        feature: f,
+        spatial_match: {
+          method: "boundary-proximity-v1",
+          distance_m: match.distance_m,
+          source_feature_id: f.id,
+        },
+      },
+    ]);
+  }
   return index;
+}
+
+// Local metric approximation for display suggestions only; never cadastral evidence.
+// A point in a hole is outside the parcel. Distances are to the actual footprint.
+export function pointParcelDistance(
+  geometry: MapFeature["geometry"],
+  point: readonly [number, number],
+): number {
+  if (geometry.type !== "MultiPolygon") return Infinity;
+  const [lng, lat] = point;
+  const sy = (6371008.8 * Math.PI) / 180,
+    sx = sy * Math.cos((lat * Math.PI) / 180);
+  let distance = Infinity;
+  for (const rings of geometry.coordinates as number[][][][]) {
+    const inside: boolean[] = [];
+    for (const ring of rings) {
+      let contains = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const ax = (ring[j][0] - lng) * sx,
+          ay = (ring[j][1] - lat) * sy;
+        const bx = (ring[i][0] - lng) * sx,
+          by = (ring[i][1] - lat) * sy;
+        const dx = bx - ax,
+          dy = by - ay;
+        const t = Math.max(
+          0,
+          Math.min(1, -(ax * dx + ay * dy) / (dx * dx + dy * dy || 1)),
+        );
+        distance = Math.min(distance, Math.hypot(ax + t * dx, ay + t * dy));
+        if (ay > 0 !== by > 0 && 0 < ax - (ay * dx) / (by - ay))
+          contains = !contains;
+      }
+      inside.push(contains);
+    }
+    if (inside[0] && !inside.slice(1).some(Boolean)) return 0;
+  }
+  return distance;
+}
+
+export function nearbyProject(
+  geometry: MapFeature["geometry"],
+  projects: readonly MapFeature[],
+): { feature: MapFeature; distance_m: number } | null {
+  const bounds = geometryBounds(geometry);
+  if (!bounds || geometry.type !== "MultiPolygon") return null;
+  const candidates = new Map<
+    string,
+    { feature: MapFeature; distance_m: number }
+  >();
+  for (const feature of projects) {
+    if (feature.geometry.type !== "Point") continue;
+    const point = feature.geometry.coordinates as [number, number];
+    // Broad bounding prefilter before inspecting the rings (50 m at UAE latitude).
+    if (
+      point[0] < bounds[0][0] - 0.0006 ||
+      point[0] > bounds[1][0] + 0.0006 ||
+      point[1] < bounds[0][1] - 0.0005 ||
+      point[1] > bounds[1][1] + 0.0005
+    )
+      continue;
+    const distance_m = pointParcelDistance(geometry, point);
+    if (!Number.isFinite(distance_m) || distance_m > 50) continue;
+    // Only an explicit project identity can group separate source observations.
+    // Equal names alone never reconcile two project identities.
+    const slug = feature.properties.presentation?.project?.slug;
+    const key = slug ? `project:${slug}` : `feature:${feature.id}`;
+    const previous = candidates.get(key);
+    if (
+      !previous ||
+      distance_m < previous.distance_m ||
+      (distance_m === previous.distance_m && feature.id < previous.feature.id)
+    )
+      candidates.set(key, { feature, distance_m });
+  }
+  const matches = [...candidates.values()].sort(
+    (a, b) =>
+      a.distance_m - b.distance_m || a.feature.id.localeCompare(b.feature.id),
+  );
+  // Do not choose automatically between almost equally close, distinct projects.
+  if (matches[1] && matches[1].distance_m - matches[0].distance_m < 10)
+    return null;
+  return matches[0] ?? null;
 }
 
 export function parcelMapLabels(
@@ -167,7 +292,7 @@ type MapHit = {
 };
 
 // Rendering order is visual, not the specificity of the object under the pointer.
-// Administrative sectors stay inert; project perimeters are the last fallback.
+// Projects win over footprints, then parcels; administrative areas are last.
 export function selectMapHit<T extends MapHit>(
   hits: readonly T[],
   parcelAreas: ReadonlyMap<string, number> = new Map(),
@@ -178,13 +303,25 @@ export function selectMapHit<T extends MapHit>(
   for (const hit of hits) {
     if (!hit.properties?.id) continue;
     const rank =
-      hit.layer.id === "buildings"
+      [
+        "places",
+        "place-names",
+        "project-names",
+        "single-project",
+        "close-project",
+      ].includes(hit.layer.id) &&
+      typeof hit.properties.kind === "string" &&
+      hit.properties.kind.endsWith("_project_marker")
         ? 0
-        : ["places", "place-names", "project-names"].includes(hit.layer.id) &&
-            typeof hit.properties.kind === "string" &&
-            hit.properties.kind.endsWith("_project_marker")
+        : ["buildings", "buildings-3d"].includes(hit.layer.id)
           ? 1
-          : ["places", "place-names", "project-names"].includes(hit.layer.id)
+          : [
+                "places",
+                "place-names",
+                "project-names",
+                "single-project",
+                "close-project",
+              ].includes(hit.layer.id)
             ? 2
             : ["streets", "street-names"].includes(hit.layer.id)
               ? 3
@@ -196,7 +333,9 @@ export function selectMapHit<T extends MapHit>(
                 ? hit.properties.category === "overlay"
                   ? 5
                   : 4
-                : Infinity;
+                : ["area-hit", "areas", "area-names"].includes(hit.layer.id)
+                  ? 6
+                  : Infinity;
     const area = parcelAreas.get(String(hit.properties.id)) ?? Infinity;
     if (
       rank < priority ||
@@ -329,16 +468,45 @@ export function sourceLabel(reliability: string, labels: MapLabels) {
 }
 
 export const COLORS = {
-  mixed: "#d9bf95",
-  residential: "#eedfae",
-  green: "#bfdbb6",
-  public: "#a9ccdf",
-  tech: "#c7cdd3",
-  rail: "#ac83bc",
-  overlay: "#b9a5c3",
-  unknown: "#e7e3d7",
+  mixed: "#d6b17b",
+  residential: "#f0dfaa",
+  green: "#a9c99c",
+  public: "#dbaaa1",
+  tech: "#b9bec2",
+  rail: "#aa8abb",
+  overlay: "#c3b9ad",
+  unknown: "#e5e0d6",
 } as const;
 export type Category = keyof typeof COLORS;
+export function parcelFillColor(): ExpressionSpecification {
+  return [
+    "match",
+    ["get", "category"],
+    "mixed",
+    COLORS.mixed,
+    "residential",
+    COLORS.residential,
+    "green",
+    COLORS.green,
+    "public",
+    COLORS.public,
+    "tech",
+    COLORS.tech,
+    "rail",
+    COLORS.rail,
+    "overlay",
+    COLORS.overlay,
+    COLORS.unknown,
+  ];
+}
+
+export function parcelFillOpacity(
+  satellite: boolean,
+): number | ExpressionSpecification {
+  return satellite
+    ? 0.06
+    : ["case", ["==", ["get", "category"], "overlay"], 0.15, 0.86];
+}
 export function normalized(value: string) {
   return value
     .normalize("NFD")

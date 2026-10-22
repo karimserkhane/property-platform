@@ -199,6 +199,29 @@ try {
     assert.equal(explore.status, 200, locale);
     const exploreHtml = await explore.text();
     assert.ok(exploreHtml.includes(messages.Atlas.explore), locale);
+    const market = await fetch(`${origin}/${locale}/market`);
+    assert.equal(market.status, 200, `${locale}: dedicated market page`);
+    const marketHtml = await market.text();
+    assert.ok(marketHtml.includes('data-page="market"'), locale);
+    assert.ok(marketHtml.includes(messages.Market.tab), locale);
+    assert.ok(marketHtml.includes(`dir="${getDirection(locale)}"`), locale);
+    const legacyMarket = await fetch(
+      `${origin}/${locale}/explore?tab=market&territory=al-reem-island`,
+      { redirect: "manual" },
+    );
+    assert.ok(
+      [307, 308].includes(legacyMarket.status),
+      `${locale}: legacy market redirect`,
+    );
+    const marketLocation = new URL(
+      legacyMarket.headers.get("location"),
+      origin,
+    );
+    assert.equal(marketLocation.pathname, `/${locale}/market`);
+    assert.equal(
+      marketLocation.searchParams.get("territory"),
+      "al-reem-island",
+    );
     assert.ok(
       exploreHtml.includes(`<title>${escapedBrandName}</title>`),
       `${locale}: configured atlas title`,
@@ -241,6 +264,10 @@ try {
       `${slug}: unavailable state without API`,
     );
   assert.equal((await fetch(`${origin}/en/projects/INVALID`)).status, 404);
+  assert.equal(
+    (await fetch(`${origin}/en/market?territory=invalid`)).status,
+    404,
+  );
   for (const path of [
     "parcels?bbox=54.4,24.4,54.5,24.5",
     "map-context?bbox=54.4,24.4,54.5,24.5",

@@ -6,6 +6,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { BrandMark } from "@/components/brand-mark";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { SiteNavigation } from "@/components/site-navigation";
 import {
   getDirection,
   isLocale,
@@ -49,6 +50,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages({ locale });
   const home = await getTranslations({ locale, namespace: "Home" });
   const project = await getTranslations({ locale, namespace: "Project" });
+  const market = await getTranslations({ locale, namespace: "Market" });
 
   return (
     <html
@@ -80,11 +82,15 @@ export default async function LocaleLayout({ children, params }: Props) {
               <bdi>{brand.displayName}</bdi>
             </Link>
             <div className="header-tools">
-              <nav className="header-nav">
-                <Link href="/explore">{home("navExplore")}</Link>
-                <Link href="/projects">{project("projects")}</Link>
-                <Link href="/#regions">{home("navLocations")}</Link>
-              </nav>
+              <SiteNavigation
+                label={home("navigation")}
+                links={[
+                  { href: "/explore", label: home("navExplore") },
+                  { href: "/projects", label: project("projects") },
+                  { href: "/market", label: market("tab") },
+                  { href: "/#regions", label: home("navLocations") },
+                ]}
+              />
               <LanguageSwitcher />
             </div>
           </header>

@@ -15,6 +15,37 @@ const DATASETS: Dataset[] = [
   "districts",
 ];
 
+function HistoryNote({
+  row,
+  locale,
+}: {
+  row: Pick<
+    components["schemas"]["FacilityResponse"],
+    "historical" | "retrieved_at" | "field_history"
+  >;
+  locale: string;
+}) {
+  const t = useTranslations("Context");
+  const dates = [
+    ...(row.historical ? [row.retrieved_at] : []),
+    ...Object.values(row.field_history).map((field) => field.retrieved_at),
+  ];
+  if (!dates.length) return null;
+  return (
+    <small>
+      {t("historical")} ·{" "}
+      {[...new Set(dates)]
+        .map((value) =>
+          new Intl.DateTimeFormat(locale, {
+            dateStyle: "medium",
+            timeZone: "UTC",
+          }).format(new Date(value)),
+        )
+        .join(" · ")}
+    </small>
+  );
+}
+
 export function PublicContext({ locale }: { locale: string }) {
   const t = useTranslations("Context");
   const [dataset, setDataset] = useState<Dataset>("health");
@@ -125,6 +156,7 @@ export function PublicContext({ locale }: { locale: string }) {
             <div className={styles.cards}>
               {data.districts.map((row) => (
                 <article key={row.source_record_id}>
+                  <HistoryNote row={row} locale={locale} />
                   <h3
                     dir="auto"
                     lang={locale === "ar" && row.name_ar ? "ar" : "en"}
@@ -140,6 +172,7 @@ export function PublicContext({ locale }: { locale: string }) {
               ))}
               {data.health.map((row) => (
                 <article key={row.source_record_id}>
+                  <HistoryNote row={row} locale={locale} />
                   <span className={styles.badge}>
                     {t(row.planned ? "planned" : "existing")}
                   </span>
@@ -164,6 +197,7 @@ export function PublicContext({ locale }: { locale: string }) {
               ))}
               {data.schools.map((row) => (
                 <article key={row.source_record_id}>
+                  <HistoryNote row={row} locale={locale} />
                   <h3
                     dir="auto"
                     lang={locale === "ar" && row.name_ar ? "ar" : "en"}
@@ -183,6 +217,7 @@ export function PublicContext({ locale }: { locale: string }) {
               ))}
               {data.mobility.map((row) => (
                 <article key={row.source_record_id}>
+                  <HistoryNote row={row} locale={locale} />
                   <h3 dir="auto" lang="en">
                     {row.name}
                   </h3>
@@ -196,6 +231,7 @@ export function PublicContext({ locale }: { locale: string }) {
               ))}
               {data.statistics.map((row) => (
                 <article key={row.source_record_id}>
+                  <HistoryNote row={row} locale={locale} />
                   <h3 dir="auto" lang="en">
                     {row.name}
                   </h3>
