@@ -3,10 +3,9 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from django.db import DatabaseError
 from ninja import Query, Router, Schema, Status
 
-from .parcels import Error, Geometry, PointGeometry, enabled
+from .parcels import Error, Geometry, PointGeometry
 
 router = Router(tags=["local-preview"])
 
@@ -145,14 +144,9 @@ def projects(
     offset: int = Query(0, ge=0, le=50000),
     limit: int = Query(200, ge=1, le=200),
 ):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.evidence.project_queries import project_directory
 
-    try:
-        return project_directory(territory, query=q, offset=offset, limit=limit)
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    return project_directory(territory, query=q, offset=offset, limit=limit)
 
 
 @router.get(
@@ -161,14 +155,9 @@ def projects(
     operation_id="previewProjectDetail",
 )
 def project_detail(request, slug: str):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     if len(slug) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
         return Status(404, {"code": "not_found"})
     from property_platform.modules.evidence.project_queries import project_detail as read_project
 
-    try:
-        result = read_project(slug)
-        return result if result is not None else Status(404, {"code": "not_found"})
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    result = read_project(slug)
+    return result if result is not None else Status(404, {"code": "not_found"})

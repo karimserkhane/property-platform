@@ -2,7 +2,6 @@
 
 from uuid import UUID
 
-from django.db import DatabaseError
 from django.http import HttpResponse, StreamingHttpResponse
 from ninja import Router, Status
 
@@ -14,15 +13,13 @@ from property_platform.object_storage.downloads import (
     open_object,
 )
 
-from .parcels import Error, enabled
+from .parcels import Error
 
 router = Router(tags=["local-preview"])
 RESPONSES = {200: None, 206: None, 403: Error, 404: Error, 416: None, 503: Error}
 
 
 def _download(request, media_id):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.evidence.media_storage import receipt_store
     from property_platform.modules.evidence.project_media_storage import authorized_asset
 
@@ -65,7 +62,7 @@ def _download(request, media_id):
             return HttpResponse(headers=headers)
         download = open_object(store, receipt, span)
         return StreamingHttpResponse(download, status=206 if span.partial else 200, headers=headers)
-    except DatabaseError, StorageError:
+    except StorageError:
         return Status(503, {"code": "data_unavailable"})
 
 
