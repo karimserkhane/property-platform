@@ -1,6 +1,7 @@
 """Durable acquisition queue. Only Prefect acquires bytes; HTTP reads use the archive."""
 
 import hashlib
+import logging
 import math
 import struct
 from datetime import timedelta
@@ -13,6 +14,8 @@ from .basemap_models import PROVIDERS
 from .history import audit_context
 from .media_storage import read_capture
 from .models import BasemapRequest, BasemapTile, Capture, IngestionRun, Source
+
+logger = logging.getLogger(__name__)
 
 
 def checked_tile(provider, z, x, y):
@@ -200,6 +203,7 @@ def archive_pending(
                                 request.available, request.last_error = True, ""
                                 saved += 1
                 except Exception as exc:
+                    logger.warning("Basemap request %s failed", request.pk, exc_info=exc)
                     failed += 1
                     request.last_error = type(exc).__name__
                 request.last_attempt_at = timezone.now()

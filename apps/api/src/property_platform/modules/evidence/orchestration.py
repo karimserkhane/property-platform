@@ -7,6 +7,7 @@ inside an asyncio event-loop thread or behind a PostgreSQL transaction pooler.
 
 import hashlib
 import json
+import logging
 import re
 import uuid
 
@@ -34,6 +35,8 @@ from . import (
 from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .failed_acquisitions import source_definition, validate_received_acquisitions
 from .models import Capture, IngestionExecution, IngestionRun, Source
+
+logger = logging.getLogger(__name__)
 
 OPERATIONS = {
     "sdi_parcels",
@@ -501,6 +504,9 @@ def execute_import(
                         raise
                     # Existing services have already rolled back canonical writes. Preserve
                     # their failed capture/run evidence and commit the operational outcome.
+                    logger.warning(
+                        "Execution %s: %s failed", execution_key, operation, exc_info=exc
+                    )
                     status, summary, error = "failed", {}, type(exc).__name__
                 runs = list(
                     IngestionRun.objects.filter(
@@ -526,7 +532,9 @@ def execute_import(
                 execution.save(update_fields=["status", "summary", "error", "finished_at"])
         except Exception as exc:
             # A database failure or completion-marker failure rolls back canonical writes,
-            # so a retry is safe. Diagnostics never include SQL, payloads or credentials.
+            # so a retry is safe. Stored diagnostics never include SQL, payloads or
+            # credentials; the traceback goes to operator logs only.
+            logger.error("Execution %s rolled back", execution_key, exc_info=exc)
             execution.status, execution.error = "failed", type(exc).__name__
             execution.summary, execution.finished_at = {}, timezone.now()
             execution.save(update_fields=["status", "error", "summary", "finished_at"])

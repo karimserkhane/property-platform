@@ -17,6 +17,7 @@ from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .identity_resolution import resolve_administrative_area
 from .models import Capture, IngestionRun, MapObservation, QuarantinedObservation, Source
 from .onwani import SourceError, object_ids
+from .runs import mark_failed
 
 TARGETS = {
     "street": Street,
@@ -315,8 +316,7 @@ def import_map_layer(*, layer, actor, replay=None, acquisition=None, territory=D
         return materialize_map_records(run, namespace, staged, rejected, actor=actor)
     except Exception as exc:
         if run:
-            run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
-            run.save(update_fields=["status", "error", "finished_at"])
+            mark_failed(run, exc)
         raise
     finally:
         with connection.cursor() as cursor:

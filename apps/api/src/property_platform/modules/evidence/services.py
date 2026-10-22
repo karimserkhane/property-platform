@@ -18,6 +18,7 @@ from .models import (
     QuarantinedObservation,
     Source,
 )
+from .runs import mark_failed
 
 # Session lock serializes this connector across commands/workers on this database.
 LOCK_KEY = 716548219
@@ -168,11 +169,7 @@ def import_onwani(*, actor, acquisition=None, territory=DEFAULT_TERRITORY):
         return run
     except Exception as exc:
         if run:
-            # Error class only: do not persist credentials, raw contents or SQL in diagnostics.
-            run.status = "failed"
-            run.error = type(exc).__name__
-            run.finished_at = timezone.now()
-            run.save(update_fields=["status", "error", "finished_at"])
+            mark_failed(run, exc)
         raise
     finally:
         with connection.cursor() as cursor:

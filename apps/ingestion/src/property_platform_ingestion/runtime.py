@@ -42,7 +42,7 @@ def _reconcile(request, error):
         process = subprocess.run(
             [sys.executable, "-m", "property_platform_ingestion.domain"],
             input=json.dumps(reconciliation),
-            capture_output=True,
+            stdout=subprocess.PIPE,
             text=True,
             timeout=30,
             check=False,
@@ -68,12 +68,14 @@ def invoke_domain(request: dict, *, timeout: int = TIMEOUT) -> dict:
     encoded = json.dumps(request)
     if len(encoded.encode()) > MAX_REQUEST:
         raise ValueError("Domain request exceeds its budget")
-    # No shell, arbitrary command, URL or credential is accepted in parameters.
+    # No shell, arbitrary command, URL or credential is accepted in parameters. Only stdout
+    # carries the result; stderr is inherited so domain tracebacks reach the runner's
+    # container log and never a flow result or Prefect UI message.
     try:
         process = subprocess.run(
             [sys.executable, "-m", "property_platform_ingestion.domain"],
             input=encoded,
-            capture_output=True,
+            stdout=subprocess.PIPE,
             text=True,
             timeout=timeout,
             check=False,
@@ -85,7 +87,7 @@ def invoke_domain(request: dict, *, timeout: int = TIMEOUT) -> dict:
     try:
         result = _decode(process)
     except ValueError, TypeError:
-        # Never echo stderr: it can contain connection configuration or raw responses.
+        # Never echo child output into the result: only the diagnostic class is kept.
         return _reconcile(request, "InvalidDomainResponse")
     if process.returncode or result["status"] == "failed":
         raise IngestionFailure(result)

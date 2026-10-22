@@ -280,7 +280,7 @@ docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml
 docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion logs -f ingestion prefect
 ```
 
-`check` ne modifie pas la base. `datasets` affiche le catalogue. `logs -f` suit les journaux jusqu'à **Ctrl+C** ; cela arrête l'affichage, pas les conteneurs. Les commandes complètes sont longues parce que les deux fichiers Compose et le profil sont explicitement indiqués.
+`check` ne modifie pas la base. `datasets` affiche le catalogue. `logs -f` suit les journaux jusqu'à **Ctrl+C** ; cela arrête l'affichage, pas les conteneurs. Le sous-processus Django de chaque collecte hérite de la sortie d'erreur du runner : ses traces d'échec apparaissent dans les journaux du service `ingestion`, alors que le résultat Prefect ne garde que la classe d'erreur. Les commandes complètes sont longues parce que les deux fichiers Compose et le profil sont explicitement indiqués.
 
 ## Validation et limites actuelles
 

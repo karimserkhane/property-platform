@@ -5,7 +5,6 @@ import math
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.geos.error import GEOSException
-from django.utils import timezone
 
 from property_platform.modules.catalog.models import AdministrativeArea
 
@@ -14,6 +13,7 @@ from .map_import import materialize_map_records
 from .models import Capture, IngestionRun, Source
 from .onwani import SourceError
 from .overture_protocol import MIN_CONFIDENCE, RELEASE, URL, VERSION, decode, namespace, place_kind
+from .runs import mark_failed
 
 
 def records(rows, capture, district):
@@ -127,6 +127,5 @@ def import_places(*, territory, actor, acquisition):
         run.save(update_fields=["summary"])
         return run
     except Exception as exc:
-        run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
-        run.save(update_fields=["status", "error", "finished_at"])
+        mark_failed(run, exc)
         raise

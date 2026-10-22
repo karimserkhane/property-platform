@@ -109,6 +109,18 @@ def test_domain_result_preserves_quarantine_as_an_explicit_non_retry_outcome(mon
     assert invoke_domain({"operation": "onwani"}) == response
 
 
+def test_domain_stderr_reaches_operator_logs_and_never_the_result(monkeypatch):
+    def run(*args, **kwargs):
+        assert kwargs["stdout"] is subprocess.PIPE
+        assert "stderr" not in kwargs and not kwargs.get("capture_output")
+        return SimpleNamespace(returncode=1, stdout='{"status": "failed", "error": "KeyError"}')
+
+    monkeypatch.setattr(subprocess, "run", run)
+    with pytest.raises(IngestionFailure) as error:
+        invoke_domain({"operation": "onwani"})
+    assert error.value.result == {"status": "failed", "error": "KeyError"}
+
+
 def test_swallowed_django_source_failure_is_not_reported_as_success(monkeypatch):
     response = {"status": "failed", "error": "SourceUnavailable"}
     monkeypatch.setattr(

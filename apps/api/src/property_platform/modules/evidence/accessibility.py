@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import logging
 from datetime import timedelta
 from decimal import Decimal
 
@@ -21,6 +22,8 @@ from .models import (
     WalkingArea,
     WalkingRequest,
 )
+
+logger = logging.getLogger(__name__)
 
 GRAPH_URL = "https://download.geofabrik.de/asia/gcc-states-latest.osm.pbf"
 ENGINE_VERSION = "valhalla-3.9.1/618cad5eb/graph-v1"
@@ -198,6 +201,7 @@ def archive_graph(*, actor, acquire, build, run_key, from_history=False):
                     "engine_version": graph.engine_version,
                 }
             except Exception as exc:
+                logger.error("Routing graph run %s failed", run.pk, exc_info=exc)
                 run.status, run.error = "failed", type(exc).__name__
             run.finished_at = timezone.now()
             run.save(update_fields=["status", "error", "summary", "finished_at"])
@@ -263,6 +267,7 @@ def archive_walking(*, actor, compute, run_key):
                 request.last_error = ""
                 saved += 1
             except Exception as exc:
+                logger.warning("Walking area request %s failed", request.pk, exc_info=exc)
                 request.last_error = type(exc).__name__
                 failed += 1
             request.last_attempt_at = timezone.now()
