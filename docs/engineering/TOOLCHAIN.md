@@ -1,5 +1,7 @@
 # Versions des outils — vérification du 10 octobre 2026
 
+**Analyses cartographiques — 20 octobre 2026.** Ajouts web verrouillés : SunCalc **2.1.1**, modules Turf `area`, `length`, `boolean-point-in-polygon`, `convex`, `destination` **7.4.0**, et types GeoJSON **7946.0.16**. SunCalc 2 utilise des degrés depuis le nord, pas les radians de ses anciennes API. Aucun changement de compilateur ou de peer TypeScript Next.js/OpenAPI. Le moteur natif facultatif utilise `ghcr.io/valhalla/valhalla-scripted@sha256:eaad372b8ef31e3e4592c442875aeb1375fbf5aeaa0d259b469e3b46583ab10d`, version observée **3.9.1-618cad5eb**, dans son propre conteneur ; il n'entre pas dans les runtimes web/API/Python. Manifeste, lockfile, Docker de routage et contrôle Compose CI sont alignés. Voir [MAP_ANALYSIS.md](MAP_ANALYSIS.md).
+
 La demande de mise à jour porte sur les dernières versions stables des outils du dépôt. Les versions directes sont fixées et les dépendances transitives verrouillées ; une nouvelle version publiée demain ne modifie pas automatiquement le projet. Les préversions, branches master et versions sans compatibilité requise ne sont pas assimilées à une mise à jour fonctionnelle.
 
 ## Versions exécutées ou configurées
@@ -28,6 +30,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | psycopg / psycopg-binary | 3.3.6 | Dernière version stable vérifiée |
 | Gunicorn | 26.2.0 | Mise à jour du serveur WSGI |
 | Prefect | 3.8.8 | Orchestration, serveur/UI et runner ; uniquement dans `apps/ingestion` |
+| SQLAlchemy | 2.0.55 | Compatibilité du planificateur Prefect 3.8.8 ; uniquement dans `apps/ingestion` |
 | HTTPX | 0.28.1 | Transport HTTPS borné des collecteurs ; uniquement dans `apps/ingestion` |
 | boto3 / botocore | 1.43.114 / 1.43.114 | SDK S3/R2, ajouté le 15 octobre ; API et ingestion, aucune dépendance web |
 | pytest / pytest-django | 9.1.1 / 4.14.0 | Dernières versions stables vérifiées |
@@ -42,6 +45,8 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 Les versions npm proviennent du dist-tag latest du registre officiel ; les versions Python des métadonnées PyPI. Les lockfiles ont été régénérés avec pnpm 12 et uv, sans assouplir le contrôle des peers. L'exception d'âge de publication ajoutée par pnpm concerne uniquement @types/node@26.6.5, pas toutes les futures dépendances.
 
 ## Compatibilités qui empêchent un remplacement aveugle
+
+**Planificateur Prefect — correction du 20 octobre 2026.** SQLAlchemy 2.1.4, précédemment résolu transitivement, faisait échouer `schedule_deployments` lors des insertions ORM groupées (`Can't evaluate bulk DML statement; please supply a bulk_dml decorated function`). Les lancements manuels fonctionnaient malgré cet échec des calendriers. L’API des [hybrides SQLAlchemy 2.1](https://docs.sqlalchemy.org/en/21/orm/extensions/hybrid.html) explique le nouveau hook de DML. L’ingestion fixe désormais [SQLAlchemy 2.0.55](https://pypi.org/project/SQLAlchemy/2.0.55/), dernière maintenance 2.0 vérifiée, compatible avec la contrainte Prefect. Le manifeste et le lockfile sont alignés ; serveur et runner utilisent la même image. La CI conserve `uv lock --check`, le build gelé et les tests ingestion. Une mise à jour 2.1 exige de vérifier une création automatique de runs planifiés sur PostgreSQL, en plus des lancements manuels. Aucune migration de schéma Prefect ou de base métier n’est requise par cette correction.
 
 **Python 3.15.0 vient d'être publié, mais Django 6.1 documente uniquement Python 3.12 à 3.14.** L'image Python officielle vérifiée publie aussi 3.14.8 comme version stable et 3.15 sous tags rc. Nous utilisons donc 3.14.8, et ne déclarons pas 3.15 validé. Une prochaine mise à jour pourra le tester lorsque framework, wheels et image stable seront disponibles ensemble.
 
@@ -93,3 +98,7 @@ Les contrôles locaux doivent couvrir installation verrouillée, qualité, TypeS
 ## Outil satellite isolé — 11 octobre 2026
 
 Rasterio 1.5.2 est utilisé uniquement par `scripts/acquire_reem_imagery.py`, dans un environnement local distinct. Ses dépendances sont fixées dans `scripts/imagery-requirements.txt` ; aucune modification des dépendances API/web, des compilateurs ou des images de service. Le transport lit des plages HTTPS vérifiées et borne les octets, le script ne télécharge pas le raster entier. [Version Rasterio sur PyPI](https://pypi.org/project/rasterio/1.5.2/). MapLibre 6 gère le texte RTL et les polices locales sans plugin distant : [API RTL](https://maplibre.org/maplibre-gl-js/docs/API/functions/setRTLTextPlugin/), [polices locales](https://maplibre.org/maplibre-gl-js/docs/examples/style-labels-with-local-fonts/).
+
+## Lecture Parquet des lieux — 17 octobre 2026
+
+[PyArrow 26.0.0](https://pypi.org/project/pyarrow/26.0.0/) est fixé uniquement dans `apps/ingestion/pyproject.toml` et `apps/ingestion/uv.lock`. Ses wheels CPython 3.14/Linux ont été vérifiées. Il lit les fragments régionaux Overture en flux, sans GeoPandas, DuckDB ni extension téléchargée au lancement. Les versions et dépendances de compatibilité web/API restent inchangées. L’image ingestion existante est réutilisée ; aucun nouveau conteneur permanent ou abonnement n’est ajouté.

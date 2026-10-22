@@ -1,5 +1,18 @@
 # Collecte et orchestration avec Prefect
 
+**Complément AD-SDI — 22 octobre 2026.** Le registre atteint **56 déploiements**
+avec trois imports manuels `*-parcels-adsdi`. Le flow distinct compare les lots aux
+parcelles Onwani et conserve les conflits, captures et audit ; il ne remplace pas
+automatiquement un fournisseur par l'autre. Appliquer la migration additive 0030
+et reconstruire API/ingestion. Le [guide de qualité cartographique](MAP_DATA_QUALITY.md)
+documente les règles, l'import sur base vide et les limites de rejeu hors ligne.
+
+**Catalogue — 21 octobre 2026 :** 42 déploiements sont enregistrés dans le code. Les fiches sont traitées source par source ; les vingt portées de découverte et leurs versions sont archivées séparément. Le flow manuel `empty-project-catalogue-rebuild` initialise une cible vide et rejoue fiches puis catalogues avec leurs horodatages d'origine. Il refuse un catalogue déjà alimenté et n'efface aucune donnée. `project-details` accepte `acquisition_mode=live`, `archive_latest` ou `archive_all` ; aucune substitution silencieuse d'une source indisponible. Voir [PROJECT_CATALOGUE.md](PROJECT_CATALOGUE.md) pour les modes, la séparation des bases et les limites de cette reconstruction.
+
+**Analyses de carte — 20 octobre 2026 :** le registre atteint 41 déploiements avec **routing-osm-graph** et **walking-areas**. Le premier archive le PBF OSM en fragments DB de 4 Mio, puis construit le graphe privé Valhalla ; le second archive les contours piétons demandés sur la carte. Les tables typées et leurs journaux sont contrôlés par data-history. Reprise hors ligne, budgets, activation et exploitation dans [MAP_ANALYSIS.md](MAP_ANALYSIS.md).
+
+**Historique — 20 octobre 2026 :** quatre déploiements complètent le registre : **data-history** vérifie chaque table métier et conserve son rapport ; trois **basemap-…** archivent les tuiles ouvertes demandées/couvertes et leurs dates. Voir [DATA_HISTORY.md](DATA_HISTORY.md) pour les migrations, reprises, retraits confirmés et limites de droits. Les données déjà collectées restent dans leurs modèles typés et leurs pipelines existants.
+
 Mise en place du 13 octobre 2026. Le code de collecte et d'orchestration est dans **`C:\Users\Karim\Repositories\property-platform\apps\ingestion`**. Prefect fournit l'interface de lancement, les horaires et les journaux ; les services Django existants valident et enregistrent les données métier. L'application web lit ensuite cette base, sans attendre une collecte distante au clic.
 
 ## Sommaire
@@ -310,3 +323,7 @@ Les trois déploiements supplémentaires `adrec-reem-sales`, `adrec-saadiyat-sal
 ## Contexte Abu Dhabi — 14 octobre 2026
 
 Les six nouveaux déploiements portent le total à **26** : ventes ADREC pour l’émirat et cinq jeux de contexte (santé, écoles Charter, bus, recensement immobilier, limites des districts). Le [guide Abu Dhabi](ABU_DHABI.md) détaille sources, horaires et tables. Les cinq acquisitions automatiques validées sont activées le dimanche sur le poste Karim. ADEK a retourné HTTP 403 au collecteur ; son import depuis un document conservé est manuel, avec receipt_name et date d’archive préservée. Son calendrier reste inactif. Ni les paramètres modifiés dans l’UI ni les horaires des vingt déploiements précédents ne sont réinitialisés.
+
+## Lieux complémentaires — 17 octobre 2026
+
+Le registre contient maintenant **35 déploiements**, avec `reem-places-overture` et `saadiyat-places-overture`. Les deux premières exécutions ont réussi et leurs calendriers dominicaux sont activés sur le poste Karim, sans changement des autres horaires. Le [guide Overture](OVERTURE_PLACES.md) décrit les preuves, la version fixée et les limites.
