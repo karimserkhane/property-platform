@@ -22,6 +22,12 @@ class Geometry(Schema):
     coordinates: list[list[list[list[float]]]]
 
 
+class FieldHistory(Schema):
+    url: str
+    retrieved_at: datetime
+    ingested_at: datetime
+
+
 class Properties(Schema):
     id: UUID
     code: str
@@ -33,6 +39,7 @@ class Properties(Schema):
     use_classification_version: str = USE_VERSION
     source_url: str | None
     source_name: str | None
+    field_history: dict[str, FieldHistory] = {}
 
 
 class Feature(Schema):
@@ -113,6 +120,7 @@ class Detail(Schema):
     places: list[NearbyPlace]
     streets: list[NearbyStreet]
     overlapping_parcels: list[OverlappingParcel]
+    field_history: dict[str, FieldHistory] = {}
 
 
 class MapProvenance(Provenance):
@@ -321,6 +329,7 @@ class MapProperties(Schema):
     parcel_ids: list[UUID] = []
     source: MapProvenance
     presentation: PropertyPresentationResponse | None = None
+    field_history: dict[str, FieldHistory] = {}
 
 
 class LineGeometry(Schema):
@@ -537,6 +546,18 @@ class AdrecIndexResponse(Schema):
     period_end: date
     municipality: str
     index_value: str | None
+    snapshot_id: UUID
+    retrieved_at: datetime
+    ingested_at: datetime
+    historical: bool
+
+
+class AdrecSnapshotResponse(Schema):
+    id: UUID
+    period_start: date
+    period_end: date
+    ingested_at: datetime
+    source_row_count: int
 
 
 class AdrecMarketResponse(Schema):
@@ -551,6 +572,8 @@ class AdrecMarketResponse(Schema):
     sales: list[AdrecSaleResponse]
     indices: list[AdrecIndexResponse]
     index_review_needed: bool
+    historical: bool
+    snapshots: list[AdrecSnapshotResponse]
 
 
 @router.get(
@@ -558,7 +581,14 @@ class AdrecMarketResponse(Schema):
     response={200: AdrecMarketResponse, 403: Error, 422: Error, 503: Error},
     operation_id="previewAdrecMarket",
 )
-def adrec_market(request, territory: str, q: str = "", offset: int = 0, limit: int = 40):
+def adrec_market(
+    request,
+    territory: str,
+    q: str = "",
+    offset: int = 0,
+    limit: int = 40,
+    snapshot_id: UUID | None = None,
+):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.evidence.adrec import DISTRICTS, MAX_ROWS
@@ -572,6 +602,8 @@ def adrec_market(request, territory: str, q: str = "", offset: int = 0, limit: i
     ):
         return Status(422, {"code": "invalid_query"})
     try:
-        return market(territory, query=q.strip(), offset=offset, limit=limit)
+        return market(
+            territory, query=q.strip(), offset=offset, limit=limit, snapshot_id=snapshot_id
+        )
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})

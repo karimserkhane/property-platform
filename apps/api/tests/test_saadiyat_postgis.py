@@ -70,7 +70,7 @@ def test_whole_area_reads_both_islands_without_leaking_other_sources(client):
     scope = next(row for row in registry["territories"] if row["id"] == "abu-dhabi")
     assert scope["parcel_count"] == 2
     assert scope["queryable"]
-    assert scope["collection_bounds"] == (54.385, 24.465, 54.483, 24.603)
+    assert scope["collection_bounds"] == (54.383, 24.465, 54.483, 24.603)
     query = {"bbox": "54.39,24.49,54.43,24.53", "territory": "abu-dhabi"}
     with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         parcels = client.get("/api/v1/preview/parcels", {**query, "limit": 1})
@@ -108,11 +108,10 @@ def test_whole_area_reads_both_islands_without_leaking_other_sources(client):
             )
 
 
-def test_two_territories_can_share_provider_objectid_without_overwriting():
-    reem = feature()
-    saadiyat = feature()
-    saadiyat["attributes"]["DISTRICTENG"] = "AL SAADIYAT ISLAND"
-    for territory, row in [("al-reem-island", reem), ("saadiyat-island", saadiyat)]:
+def test_three_territories_can_share_provider_objectid_without_overwriting():
+    for territory in ("al-reem-island", "saadiyat-island", "al-maryah-island"):
+        row = feature()
+        row["attributes"]["DISTRICTENG"] = collection_for(territory).district_name
         acquired = iter(responses([row]))
         run = import_onwani(
             actor="test",
@@ -120,8 +119,8 @@ def test_two_territories_can_share_provider_objectid_without_overwriting():
             acquisition=lambda _, acquired=acquired: next(acquired),
         )
         assert run.summary["created"] == 1
-    assert Parcel.objects.count() == 2
-    assert Parcel.objects.values("source_namespace").distinct().count() == 2
+    assert Parcel.objects.count() == 3
+    assert Parcel.objects.values("source_namespace").distinct().count() == 3
 
 
 def test_cursor_pages_are_complete_stable_and_isolated():

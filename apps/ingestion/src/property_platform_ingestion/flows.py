@@ -1,6 +1,9 @@
 """One deployed dataset at a time; persistence belongs to Django's audited gateway."""
 
+import hashlib
+import os
 from datetime import datetime
+from pathlib import Path
 from typing import Literal
 from zoneinfo import ZoneInfo
 
@@ -8,7 +11,13 @@ from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
 from prefect.runtime import flow_run
 
-from .registry import TERRITORY, execution_identity, reference_identity, source_registries
+from .registry import (
+    TERRITORY,
+    Territory,
+    execution_identity,
+    reference_identity,
+    source_registries,
+)
 from .runtime import IngestionFailure, invoke_domain
 
 
@@ -23,7 +32,13 @@ def ingest_source(operation: str, scope: str, actor: str, **parameters) -> dict:
         {
             "operation": operation,
             "scope": scope,
-            "execution_key": execution_identity(run_id, operation, scope),
+            "execution_key": execution_identity(
+                run_id,
+                operation,
+                scope + ":archive:" + parameters["archive_key"]
+                if parameters.get("archive_key")
+                else scope,
+            ),
             "prefect_flow_run_id": run_id,
             "actor": f"Prefect/{run_id}/{actor.strip()}",
             **parameters,
@@ -47,17 +62,21 @@ def ingest_source(operation: str, scope: str, actor: str, **parameters) -> dict:
 
 
 @flow(name="property-platform-parcels", retries=0)
-def parcels(
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "scheduled"
-):
+def parcels(territory: Territory = TERRITORY, actor: str = "scheduled"):
     """Refresh official parcels while retaining original captures and quarantine."""
     return ingest_source("onwani", territory, actor)
 
 
+@flow(name="property-platform-sdi-parcels", retries=0)
+def sdi_parcels(territory: Territory = TERRITORY, actor: str = "scheduled"):
+    """Compare official plot identities and preserve conflicting geometries without replacement."""
+    return ingest_source("sdi_parcels", territory, actor)
+
+
 @flow(name="property-platform-map", retries=0)
 def map_layer(
-    layer: Literal["district", "community", "street", "osm"] = "osm",
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
+    layer: Literal["district", "community", "street", "osm", "overture"] = "osm",
+    territory: Territory = TERRITORY,
     actor: str = "scheduled",
 ):
     """Refresh one source layer; buildings/places share the OSM acquisition."""
@@ -68,7 +87,7 @@ def map_layer(
 def references(
     limit: int = 200,
     reference_key: str | None = None,
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
+    territory: Territory = TERRITORY,
     actor: str = "scheduled",
 ):
     """Collect reviewed references independently; one source failure does not skip others."""
@@ -105,9 +124,7 @@ def references(
 
 
 @flow(name="property-platform-presentations", retries=0)
-def presentations(
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "scheduled"
-):
+def presentations(territory: Territory = TERRITORY, actor: str = "scheduled"):
     """Refresh the reviewed property profiles and licensed media as one validated batch."""
     result = ingest_source("property_presentations", territory, actor)
     result["media_storage"] = archive_media(actor)
@@ -116,28 +133,55 @@ def presentations(
 
 @flow(name="property-platform-project-details", retries=0)
 def project_details(
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
+    territory: Territory = TERRITORY,
     actor: str = "manual",
     project_slug: str | None = None,
+    source_kind: Literal["all", "developer", "publisher", "broker", "authority"] = "all",
+    acquisition_mode: Literal["live", "archive_latest", "archive_all"] = "live",
 ):
     """Reviewed factual project observations; promoter media remain external references."""
     from property_platform.modules.evidence.project_protocol import project_registry
 
+    from .project_archive import project_batches
+
+    if acquisition_mode not in {"live", "archive_latest", "archive_all"}:
+        raise ValueError("Unknown project acquisition mode")
+
     results, failures = [], []
     scope = f"{territory}:{project_slug}" if project_slug is not None else territory
-    for project in project_registry(scope):
-        scope = f"{territory}:{project['slug']}"
+    sources = [
+        (project, source)
+        for project in project_registry(scope)
+        for source in project["sources"]
+        if source["role"] != "terms"
+        and (source_kind == "all" or source.get("source_kind", "developer") == source_kind)
+    ]
+    for project, source in sources:
+        source_key = hashlib.sha256(source["url"].encode()).hexdigest()
+        scope = f"{territory}:{project['slug']}:{source_key}"
         try:
-            results.append(
-                ingest_source.with_options(name=f"Project: {project['name']}")(
-                    "project_details", scope, actor
+            if acquisition_mode == "live":
+                versions = (None,)
+            else:
+                root = Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion"))
+                versions = project_batches(root, scope)
+                if not versions:
+                    raise ValueError("No preserved receipts for this reviewed project source")
+                if acquisition_mode == "archive_latest":
+                    versions = versions[-1:]
+            for key in versions:
+                results.append(
+                    ingest_source.with_options(
+                        name=f"Project: {project['name']} ({source['parser']}; {acquisition_mode})"
+                    )("project_details", scope, actor, **({"archive_key": key} if key else {}))
                 )
-            )
-        except IngestionFailure as exc:
+        except (IngestionFailure, ValueError, OSError) as exc:
             get_run_logger().warning(
                 "Project %s failed: %s",
                 project["slug"],
-                exc.result.get("error", "SourceUnavailable"),
+                exc.result.get("error", "SourceUnavailable")
+                if isinstance(exc, IngestionFailure)
+                else type(exc).__name__,
             )
             failures.append(project["slug"])
     if failures:
@@ -152,9 +196,7 @@ def project_details(
 
 
 @flow(name="property-platform-project-discovery", retries=0)
-def project_discovery(
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY, actor: str = "manual"
-):
+def project_discovery(territory: Territory = TERRITORY, actor: str = "manual"):
     from property_platform.modules.evidence.project_discovery import catalogue_registry
 
     results, failures = [], []
@@ -204,7 +246,7 @@ def media_storage(actor: str = "manual"):
 @flow(name="property-platform-imagery", retries=0)
 def imagery(
     receipt_name: str = "sentinel-reem.json",
-    territory: Literal["al-reem-island", "saadiyat-island"] = TERRITORY,
+    territory: Literal["al-reem-island"] = TERRITORY,
     actor: str = "manual",
 ):
     """Import an existing isolated-raster receipt; no recurring historical scene downloads."""
@@ -221,7 +263,7 @@ def readiness():
 
 @flow(name="property-platform-osm-bootstrap", retries=0)
 def osm_bootstrap(
-    territory: Literal["al-reem-island", "saadiyat-island"] = "saadiyat-island",
+    territory: Territory = "saadiyat-island",
     actor: str = "manual",
 ):
     """One-off bounded API windows, never scheduled bulk harvesting."""
@@ -230,7 +272,9 @@ def osm_bootstrap(
 
 @flow(name="property-platform-adrec-sales", retries=0)
 def adrec_sales(
-    territory: Literal["al-reem-island", "saadiyat-island", "abu-dhabi"] = TERRITORY,
+    territory: Literal[
+        "al-reem-island", "saadiyat-island", "al-maryah-island", "abu-dhabi"
+    ] = TERRITORY,
     actor: str = "scheduled",
 ):
     """Snapshot 90 completed Dubai days. Scheduled run time fixes the retry scope."""
@@ -282,15 +326,91 @@ def project_media_files(receipt_name: str = "project-media.json", actor: str = "
     )
 
 
+@flow(name="property-platform-data-history", retries=0)
+def data_history(actor: str = "scheduled"):
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    result = invoke_domain(
+        {
+            "operation": "data_history",
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        }
+    )
+    if result["status"] == "failed":
+        raise IngestionFailure(result)
+    return result
+
+
+@flow(name="property-platform-basemap-archive", retries=0)
+def basemap_archive(
+    provider: Literal[
+        "openfreemap", "sentinel-worldcover-2020", "sentinel-worldcover-2021"
+    ] = "openfreemap",
+    actor: str = "scheduled",
+):
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    return invoke_domain(
+        {
+            "operation": "basemap",
+            "scope": provider,
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        }
+    )
+
+
+@flow(name="property-platform-routing-graph", retries=0)
+def routing_graph(actor: str = "scheduled", refresh: bool = True):
+    """Archive the reviewed OSM extract, then prepare a versioned local graph."""
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    result = invoke_domain(
+        {
+            "operation": "routing_graph",
+            "scope": "refresh" if refresh else "archive",
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        },
+        timeout=1200,
+    )
+    if result["status"] == "failed":
+        raise IngestionFailure(result)
+    return result
+
+
+@flow(name="property-platform-walking-areas", retries=0)
+def walking_areas(actor: str = "scheduled"):
+    """Compute queued 5/10/15-minute walking areas from the archived graph."""
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    return invoke_domain(
+        {
+            "operation": "walking_areas",
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        }
+    )
+
+
+from .project_bootstrap import rebuild_projects  # noqa: E402
+
 FLOWS = {
     f.name: f
     for f in (
         parcels,
+        sdi_parcels,
         map_layer,
         references,
         presentations,
         project_details,
         project_discovery,
+        rebuild_projects,
         imagery,
         readiness,
         osm_bootstrap,
@@ -299,5 +419,9 @@ FLOWS = {
         public_context,
         media_storage,
         project_media_files,
+        basemap_archive,
+        data_history,
+        routing_graph,
+        walking_areas,
     )
 }

@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from property_platform.modules.evidence.collection_profiles import COLLECTIONS
 from property_platform.modules.evidence.map_import import import_map_layer
 
 
@@ -10,9 +11,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--actor", required=True)
-        parser.add_argument(
-            "--territory", choices=["al-reem-island", "saadiyat-island"], default="al-reem-island"
-        )
+        parser.add_argument("--territory", choices=tuple(COLLECTIONS), default="al-reem-island")
         parser.add_argument(
             "--receipt",
             help="Operator-provided OSM receipt bundle, replayed without claiming a new fetch",

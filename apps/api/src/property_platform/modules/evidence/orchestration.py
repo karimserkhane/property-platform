@@ -27,6 +27,8 @@ from . import (
     project_protocol,
     property_import,
     research_import,
+    sdi_import,
+    sdi_protocol,
     services,
 )
 from .collection_profiles import DEFAULT_TERRITORY, collection_for
@@ -34,6 +36,7 @@ from .failed_acquisitions import source_definition, validate_received_acquisitio
 from .models import Capture, IngestionExecution, IngestionRun, Source
 
 OPERATIONS = {
+    "sdi_parcels",
     "onwani",
     "map",
     "references",
@@ -95,7 +98,9 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
     expected_scope = scope if operation == "project_details" else territory
     reference = None
     if operation == "map":
-        if scope not in {f"{territory}:{layer}" for layer in (*map_import.protocol.LAYERS, "osm")}:
+        if scope not in {
+            f"{territory}:{layer}" for layer in (*map_import.protocol.LAYERS, "osm", "overture")
+        }:
             raise ValueError("Unknown map ingestion scope")
         expected_scope = scope
     elif operation == "references":
@@ -174,7 +179,7 @@ def record_acquisition_failure(
     name = type(error).__name__ if isinstance(error, BaseException) else error
     if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,159}", name):
         name = "AcquisitionError"
-    lock = services.LOCK_KEY if operation == "onwani" else map_import.LOCK_KEY
+    lock = services.LOCK_KEY if operation in {"onwani", "sdi_parcels"} else map_import.LOCK_KEY
     with connection.cursor() as cursor:
         cursor.execute("SELECT pg_try_advisory_lock(%s)", [lock])
         if not cursor.fetchone()[0]:
@@ -266,6 +271,9 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
     elif operation == "project_discovery":
         value["review_version"] = project_discovery.VERSION
         value["registry"] = project_discovery.catalogue_for(territory)
+        value["project_urls"] = project_discovery.registered_project_urls(
+            value["registry"]["territory_scope"]
+        )
     elif operation == "project_details":
         value["review_version"] = project_import.VERSION
         value["parser_version"] = project_protocol.PARSER_VERSION
@@ -285,6 +293,8 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
 
 
 def _source_keys(operation, scope, reference):
+    if operation == "sdi_parcels":
+        return [sdi_protocol.namespace(scope)]
     if operation == "project_discovery":
         return [f"project-discovery:{scope}"]
     if operation == "public_context":
@@ -311,6 +321,9 @@ def _source_keys(operation, scope, reference):
 
 
 def _dispatch(operation, scope, actor, acquisition, receipt, reference):
+    if operation == "sdi_parcels":
+        run = sdi_import.import_parcels(territory=scope, actor=actor, acquisition=acquisition)
+        return run.status, run.summary
     if operation == "project_discovery":
         run = project_discovery.import_catalogue(receipt, scope=scope, actor=actor)
         return run.status, run.summary
@@ -389,7 +402,7 @@ def execute_import(
         receipt,
         scope if operation in {"project_details", "project_discovery"} else scope.split(":", 1)[0],
     )
-    lock = services.LOCK_KEY if operation == "onwani" else map_import.LOCK_KEY
+    lock = services.LOCK_KEY if operation in {"onwani", "sdi_parcels"} else map_import.LOCK_KEY
     with connection.cursor() as cursor:
         cursor.execute("SELECT pg_try_advisory_lock(%s)", [lock])
         if not cursor.fetchone()[0]:
@@ -472,6 +485,12 @@ def execute_import(
         source_keys = _source_keys(operation, scope, reference)
         try:
             with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT set_config('platform.actor', %s, true), "
+                        "set_config('platform.execution_key', %s, true)",
+                        [actor, execution_key],
+                    )
                 error = ""
                 try:
                     status, summary = _dispatch(

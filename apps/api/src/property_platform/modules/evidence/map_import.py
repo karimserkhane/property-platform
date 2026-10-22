@@ -282,6 +282,10 @@ def import_map_layer(*, layer, actor, replay=None, acquisition=None, territory=D
     profile = collection_for(territory)
     if connection.vendor != "postgresql":
         raise ValueError("Map acquisition requires PostGIS")
+    if layer == "overture":
+        from .overture_places import import_places
+
+        return import_places(territory=territory, actor=actor, acquisition=acquisition)
     if layer not in (*protocol.LAYERS, "osm"):
         raise ValueError("Unknown map connector")
     with connection.cursor() as cursor:
@@ -319,7 +323,15 @@ def import_map_layer(*, layer, actor, replay=None, acquisition=None, territory=D
             cursor.execute("SELECT pg_advisory_unlock(%s)", [LOCK_KEY])
 
 
-def materialize_map_records(run, namespace, staged, rejected, *, actor):
+def materialize_map_records(
+    run,
+    namespace,
+    staged,
+    rejected,
+    *,
+    actor,
+    quarantine_reason="Invalid OSM geometry or metadata; not repaired",
+):
     if not staged:
         raise SourceError("No valid map records; previous snapshot preserved")
     summary = {
@@ -336,7 +348,7 @@ def materialize_map_records(run, namespace, staged, rejected, *, actor):
                 source_record_id=identity,
                 field_path="elements",
                 raw_attributes=attrs,
-                reason="Invalid OSM geometry or metadata; not repaired",
+                reason=quarantine_reason,
             )
         for target, identity, values, shape, attrs, capture, url, published in staged:
             canonical_id = (

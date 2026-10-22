@@ -84,13 +84,15 @@ def test_two_attempts_cannot_overwrite_the_first_complete_receipt(tmp_path, monk
 
 
 def test_history_and_static_assets_are_not_recurring_jobs():
-    assert len({dataset.name for dataset in DATASETS}) == len(DATASETS) == 33
+    assert len({dataset.name for dataset in DATASETS}) == len(DATASETS) == 56
     imagery = next(dataset for dataset in DATASETS if dataset.name == "sentinel-previews")
     assert imagery.cron is None
-    for territory in ("reem", "saadiyat"):
+    for territory in ("reem", "saadiyat", "maryah"):
         job = next(dataset for dataset in DATASETS if dataset.name == f"{territory}-osm-bootstrap")
         assert job.cron is None
     assert not any("font" in dataset.name or "home" in dataset.name for dataset in DATASETS)
+    assert next(d for d in DATASETS if d.name == "routing-osm-graph").cron == "0 3 1 * *"
+    assert next(d for d in DATASETS if d.name == "walking-areas").cron == "* * * * *"
 
 
 def test_domain_result_preserves_quarantine_as_an_explicit_non_retry_outcome(monkeypatch):

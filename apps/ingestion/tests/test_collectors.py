@@ -45,6 +45,22 @@ def test_saadiyat_collectors_reject_a_reem_query_before_network():
     transport.fetch.assert_not_called()
 
 
+def test_maryah_collectors_cannot_substitute_a_neighbouring_island_query():
+    from property_platform.modules.evidence.collection_profiles import collection_for
+
+    transport = Mock()
+    maryah = collection_for("al-maryah-island")
+    reem = collection_for("al-reem-island")
+    assert maryah.parcel_namespace != reem.parcel_namespace
+    collector = OnwaniCollector(transport, territory=maryah.territory)
+    with pytest.raises(onwani.SourceError):
+        collector.fetch({"where": reem.parcel_where, "returnIdsOnly": "true"})
+    map_collector = MapCollector(transport, territory=maryah.territory)
+    with pytest.raises(onwani.SourceError):
+        map_collector.fetch_url(map_sources.OSM_URL, {"data": reem.osm_query})
+    transport.fetch.assert_not_called()
+
+
 def client(urls, handler):
     def streaming_handler(request):
         response = handler(request)

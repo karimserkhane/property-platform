@@ -4,10 +4,13 @@ import hashlib
 import json
 from dataclasses import dataclass
 from importlib.resources import files
+from typing import Literal, get_args
 
 from property_platform.modules.evidence.collection_profiles import DEFAULT_TERRITORY, collection_for
 
 TERRITORY = DEFAULT_TERRITORY
+Territory = Literal["al-reem-island", "saadiyat-island", "al-maryah-island"]
+TERRITORIES = get_args(Territory)
 TIMEZONE = "Asia/Dubai"
 
 
@@ -83,8 +86,67 @@ DATASETS = (
 )
 
 
+DATASETS += tuple(
+    Dataset(
+        f"basemap-{provider}",
+        "property-platform-basemap-archive",
+        "Archive demanded/covered tiles with exact acquisition times; preserve every version.",
+        {"provider": provider},
+        "* * * * *",
+    )
+    for provider in ("openfreemap", "sentinel-worldcover-2020", "sentinel-worldcover-2021")
+)
+DATASETS += (
+    Dataset(
+        "empty-project-catalogue-rebuild",
+        "property-platform-project-rebuild",
+        "Explicit schema initialization and preserved source replay into an empty catalogue.",
+        {"mode": "archive", "include_geography": False},
+        None,
+    ),
+    Dataset(
+        "data-history",
+        "property-platform-data-history",
+        "Verify every owned table has a pipeline owner and database audit; retain the report.",
+        {},
+        "0 1 * * *",
+    ),
+)
+
 # Same reviewed connectors, distinct source identities and deployment scopes.
 DATASETS += (
+    Dataset(
+        "routing-osm-graph",
+        "property-platform-routing-graph",
+        "Archive OSM inputs and build the local walking network; retain earlier graphs.",
+        {},
+        "0 3 1 * *",
+    ),
+    Dataset(
+        "walking-areas",
+        "property-platform-walking-areas",
+        "Compute and archive queued walking areas, with source graph and exact ingestion time.",
+        {},
+        "* * * * *",
+    ),
+)
+
+# Same reviewed connectors, distinct source identities and deployment scopes.
+DATASETS += (
+    *(
+        Dataset(
+            f"{prefix}-places-overture",
+            "property-platform-map",
+            "Bounded Overture Places release; independent evidence, no project identity inference.",
+            {"territory": territory, "layer": "overture"},
+            f"{minute} 9 * * 0",
+        )
+        for prefix, territory, minute in (
+            ("reem", "al-reem-island", 0),
+            ("saadiyat", "saadiyat-island", 30),
+            ("maryah", "al-maryah-island", 45),
+        )
+    ),
     Dataset(
         "reem-osm-bootstrap",
         "property-platform-osm-bootstrap",
@@ -167,6 +229,73 @@ DATASETS += (
     ),
 )
 
+# Independent scopes preserve previous deployments and operator-edited schedules.
+# No reviewed presentation/media entries exist for Maryah yet, so no empty
+# presentation import is advertised as project coverage.
+DATASETS += (
+    Dataset(
+        "maryah-parcels-onwani",
+        "property-platform-parcels",
+        "Official Al Maryah parcels, with exact acquisition times and quarantine.",
+        {"territory": "al-maryah-island"},
+        "0 13 * * 0",
+    ),
+    *(
+        Dataset(
+            f"maryah-map-{layer}",
+            "property-platform-map",
+            f"Al Maryah {layer}; preserve source identities and prior observations.",
+            {"territory": "al-maryah-island", "layer": layer},
+            f"{minute} 14 * * 0",
+        )
+        for layer, minute in (("district", 0), ("community", 15), ("street", 30), ("osm", 45))
+    ),
+    Dataset(
+        "maryah-osm-bootstrap",
+        "property-platform-osm-bootstrap",
+        "Manual bounded official OSM acquisition for Al Maryah; original XML retained.",
+        {"territory": "al-maryah-island"},
+        None,
+    ),
+    Dataset(
+        "maryah-project-references",
+        "property-platform-references",
+        "Reviewed Al Maryah public sources, without automatic project reconciliation.",
+        {"territory": "al-maryah-island", "limit": 200, "reference_key": None},
+        "0 15 * * 0",
+    ),
+    Dataset(
+        "maryah-project-details",
+        "property-platform-project-details",
+        "Refresh reviewed Al Maryah projects independently; retain source history and documents.",
+        {"territory": "al-maryah-island"},
+        "0 5 * * 6",
+    ),
+    Dataset(
+        "maryah-project-discovery",
+        "property-platform-project-discovery",
+        "Archive Al Maryah publisher catalogues; discoveries remain review candidates.",
+        {"territory": "al-maryah-island"},
+        "30 5 * * 6",
+    ),
+)
+
+
+DATASETS += tuple(
+    Dataset(
+        f"{prefix}-parcels-adsdi",
+        "property-platform-sdi-parcels",
+        "Compare AD-SDI evidence; preserve Onwani geometry and exact capture history.",
+        {"territory": territory},
+        None,
+    )
+    for prefix, territory in (
+        ("reem", "al-reem-island"),
+        ("saadiyat", "saadiyat-island"),
+        ("maryah", "al-maryah-island"),
+    )
+)
+
 
 def source_registries(territory=DEFAULT_TERRITORY):
     profile = collection_for(territory)
@@ -208,6 +337,13 @@ DATASETS += (
         "Abu Dhabi city indices; ambiguous source series are quarantined.",
         {"territory": "abu-dhabi"},
         "0 10 * * 0",
+    ),
+    Dataset(
+        "adrec-maryah-sales",
+        "property-platform-adrec-sales",
+        "Complete Al Maryah sales snapshot; exact public district and retained receipts.",
+        {"territory": "al-maryah-island"},
+        "45 9 * * 0",
     ),
     Dataset(
         "adrec-abu-dhabi-sales",

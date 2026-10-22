@@ -5,6 +5,7 @@ from django.db import connection, transaction
 from property_platform.modules.catalog.map_queries import nearby_place_rows
 from property_platform.modules.evidence.queries import map_provenances, map_usage_tags
 
+from .place_display import distinct_places
 from .uses import use_types
 
 GROUPS = {
@@ -35,6 +36,7 @@ def _surroundings(target, identity, namespaces, parcel_namespaces):
     if result is None:
         return None
     rows, truncated = result
+    rows = distinct_places(rows)
     sources = map_provenances("place", [row["id"] for row in rows], include_capture_id=True)
     tags = map_usage_tags(
         "place",

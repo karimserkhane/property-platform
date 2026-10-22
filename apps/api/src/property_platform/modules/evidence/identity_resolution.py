@@ -97,6 +97,19 @@ def resolve_parcel(*, namespace, record, geometry, capture, actor):
         )
     )
     if not candidates:
+        if (
+            Parcel.objects.filter(
+                official_plot_id=stable,
+                municipality=values["municipality"],
+                district=values["district"],
+                superseded_by__isnull=True,
+            )
+            .exclude(source_namespace=namespace)
+            .exists()
+        ):
+            raise IdentityConflict(
+                "Official plot already owned by another source; explicit review required"
+            )
         return None
     if len(candidates) != 1 or not parcel_values_match(candidates[0], record, geometry):
         raise IdentityConflict("New OBJECTID requires a unique unchanged plot identity")

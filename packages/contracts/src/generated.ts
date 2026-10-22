@@ -277,6 +277,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/basemap/{provider}/{z}/{x}/{y}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tile */
+        get: operations["previewBasemapTile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/accessibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Accessibility */
+        get: operations["previewWalkingArea"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/market-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Market Map */
+        get: operations["previewDistrictMarket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -407,6 +458,21 @@ export interface components {
              */
             retrieved_at: string;
         };
+        /** FieldHistory */
+        FieldHistory: {
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+        };
         /** Geometry */
         Geometry: {
             /** Type */
@@ -484,6 +550,13 @@ export interface components {
             parcel_ids: string[];
             source: components["schemas"]["MapProvenance"];
             presentation?: components["schemas"]["PropertyPresentationResponse"] | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
         };
         /** PointGeometry */
         PointGeometry: {
@@ -611,6 +684,13 @@ export interface components {
             source_url: string | null;
             /** Source Name */
             source_name: string | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
         };
         /** Detail */
         Detail: {
@@ -655,6 +735,13 @@ export interface components {
             streets: components["schemas"]["NearbyStreet"][];
             /** Overlapping Parcels */
             overlapping_parcels: components["schemas"]["OverlappingParcel"][];
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
         };
         /** NearbyPlace */
         NearbyPlace: {
@@ -821,6 +908,23 @@ export interface components {
             municipality: string;
             /** Index Value */
             index_value: string | null;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
         };
         /** AdrecMarketResponse */
         AdrecMarketResponse: {
@@ -846,6 +950,10 @@ export interface components {
             indices: components["schemas"]["AdrecIndexResponse"][];
             /** Index Review Needed */
             index_review_needed: boolean;
+            /** Historical */
+            historical: boolean;
+            /** Snapshots */
+            snapshots: components["schemas"]["AdrecSnapshotResponse"][];
         };
         /** AdrecSaleResponse */
         AdrecSaleResponse: {
@@ -881,6 +989,31 @@ export interface components {
             /** Sold Share */
             sold_share: string | null;
         };
+        /** AdrecSnapshotResponse */
+        AdrecSnapshotResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Source Row Count */
+            source_row_count: number;
+        };
         /** DistrictMapFeature */
         DistrictMapFeature: {
             /**
@@ -909,6 +1042,27 @@ export interface components {
             source_record_id: string;
             /** Name */
             name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
             /** Name Ar */
             name_ar: string;
             /** Municipality */
@@ -953,12 +1107,46 @@ export interface components {
             /** Features */
             features: components["schemas"]["DistrictMapFeature"][];
         };
+        /** HistoricalField */
+        HistoricalField: {
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+        };
         /** BusRouteResponse */
         BusRouteResponse: {
             /** Source Record Id */
             source_record_id: string;
             /** Name */
             name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
             /** Number */
             number: string;
             /** Origin */
@@ -974,6 +1162,27 @@ export interface components {
             source_record_id: string;
             /** Name */
             name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
             /** Reference Year */
             reference_year: number;
             /** Region */
@@ -993,6 +1202,27 @@ export interface components {
             source_record_id: string;
             /** Name */
             name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
             /** Name Ar */
             name_ar: string;
             /** Municipality */
@@ -1013,6 +1243,27 @@ export interface components {
             source_record_id: string;
             /** Name */
             name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
             /** Facility Type */
             facility_type: string;
             /** Address */
@@ -1073,6 +1324,27 @@ export interface components {
             source_record_id: string;
             /** Name */
             name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
             /** Name Ar */
             name_ar: string;
             /** Municipality */
@@ -1110,6 +1382,10 @@ export interface components {
             items: components["schemas"]["ProjectSummaryResponse"][];
             /** Has More */
             has_more: boolean;
+            /** Total */
+            total: number;
+            /** Offset */
+            offset: number;
         };
         /** ProjectSummaryResponse */
         ProjectSummaryResponse: {
@@ -1163,6 +1439,7 @@ export interface components {
             website_url: string;
             /** Summary */
             summary: string;
+            summary_source?: components["schemas"]["ProjectSourceResponse"] | null;
             /** Language */
             language: string;
             /**
@@ -1269,6 +1546,12 @@ export interface components {
         ProjectProgrammeResponse: {
             /** Value */
             value: number;
+            /**
+             * Basis
+             * @default announced
+             * @enum {string}
+             */
+            basis: "announced" | "registered";
             /** Original Text */
             original_text: string;
             source: components["schemas"]["ProjectSourceResponse"];
@@ -1279,6 +1562,18 @@ export interface components {
             url: string;
             /** Name */
             name: string;
+            /**
+             * Kind
+             * @default developer
+             * @enum {string}
+             */
+            kind: "developer" | "publisher" | "broker" | "authority" | "media" | "community" | "reference";
+            /** Content Sha256 */
+            content_sha256?: string | null;
+            /** Developer Name */
+            developer_name?: string | null;
+            /** Developer Role */
+            developer_role?: ("declared" | "registered") | null;
             /**
              * Retrieved At
              * Format: date-time
@@ -1295,6 +1590,13 @@ export interface components {
             evidence_pointer: string;
             /** Rights Status */
             rights_status: string;
+            /** Ingested At */
+            ingested_at?: string | null;
+            /**
+             * Historical
+             * @default false
+             */
+            historical: boolean;
         };
         /** ProjectTypologyResponse */
         ProjectTypologyResponse: {
@@ -1305,6 +1607,108 @@ export interface components {
             /** Original Text */
             original_text: string;
             source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** WalkingCollection */
+        WalkingCollection: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["WalkingFeature"][];
+        };
+        /** WalkingFeature */
+        WalkingFeature: {
+            /** Type */
+            type: string;
+            geometry: components["schemas"]["WalkingGeometry"];
+            properties: components["schemas"]["WalkingProperties"];
+        };
+        /** WalkingGeometry */
+        WalkingGeometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[][][][];
+        };
+        /** WalkingProperties */
+        WalkingProperties: {
+            /** Minutes */
+            minutes: number;
+            /** Mode */
+            mode: string;
+        };
+        /** WalkingResponse */
+        WalkingResponse: {
+            collection: components["schemas"]["WalkingCollection"];
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Graph Id */
+            graph_id: string;
+            /**
+             * Graph Fetched At
+             * Format: date-time
+             */
+            graph_fetched_at: string;
+            /** Source Url */
+            source_url: string;
+            /** Historical */
+            historical: boolean;
+        };
+        /** DistrictMarketFeature */
+        DistrictMarketFeature: {
+            /** Type */
+            type: string;
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["WalkingGeometry"];
+            properties: components["schemas"]["DistrictMarketProperties"];
+        };
+        /** DistrictMarketProperties */
+        DistrictMarketProperties: {
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Sales */
+            sales: number;
+            /** Rate Samples */
+            rate_samples: number;
+            /** Median Rate */
+            median_rate: string | null;
+            /** Volume Aed */
+            volume_aed: string;
+            /**
+             * Boundary Ingested At
+             * Format: date-time
+             */
+            boundary_ingested_at: string;
+        };
+        /** DistrictMarketResponse */
+        DistrictMarketResponse: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["DistrictMarketFeature"][];
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Boundary Snapshot Id */
+            boundary_snapshot_id: string | null;
+            /** Period Start */
+            period_start: string | null;
+            /** Period End */
+            period_end: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Boundary Source Url */
+            boundary_source_url: string;
+            /** Unmatched Sales */
+            unmatched_sales: number;
+            /** Mapped Sales */
+            mapped_sales: number;
+            /** Historical */
+            historical: boolean;
         };
     };
     responses: never;
@@ -1798,6 +2202,7 @@ export interface operations {
                 q?: string;
                 offset?: number;
                 limit?: number;
+                snapshot_id?: string | null;
             };
             header?: never;
             path?: never;
@@ -1937,7 +2342,10 @@ export interface operations {
     previewProjectDirectory: {
         parameters: {
             query?: {
-                territory?: ("al-reem-island" | "saadiyat-island") | null;
+                territory?: ("al-reem-island" | "saadiyat-island" | "al-maryah-island") | null;
+                q?: string;
+                offset?: number;
+                limit?: number;
             };
             header?: never;
             path?: never;
@@ -2133,6 +2541,169 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewBasemapTile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+                z: number;
+                x: number;
+                y: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Archived, source-specific tile bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                    "application/x-protobuf": string;
+                };
+            };
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewWalkingArea: {
+        parameters: {
+            query: {
+                longitude: number;
+                latitude: number;
+                minutes?: number;
+                territory?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WalkingResponse"];
+                };
+            };
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewDistrictMarket: {
+        parameters: {
+            query?: {
+                territory?: string;
+                q?: string;
+                snapshot_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistrictMarketResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
             };
             /** @description Service Unavailable */
             503: {

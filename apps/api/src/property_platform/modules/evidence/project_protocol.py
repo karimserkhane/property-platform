@@ -19,6 +19,10 @@ PARSERS = frozenset(
         "bloom_project_v1",
         "aldar_project_v1",
         "official_project_v1",
+        "psi_project_v1",
+        "adrec_project_v1",
+        "propertyfinder_project_v1",
+        "bayut_guide_v1",
         "terms_v1",
     }
 )
@@ -46,9 +50,13 @@ def project_registry(territory=None):
     """Load a fresh copy of the closed, reviewed configuration, never a caller URL."""
     rows = json.loads(Path(__file__).with_name("project_registry.json").read_text("utf-8"))
     scope = territory
-    slug = None
+    slug, source_key = None, None
     if territory is not None and ":" in territory:
-        territory, slug = territory.split(":", 1)
+        parts = territory.split(":")
+        if len(parts) not in (2, 3):
+            raise ValueError("Invalid project source scope")
+        territory, slug = parts[:2]
+        source_key = parts[2] if len(parts) == 3 else None
     if territory is not None and territory not in {row["territory_id"] for row in rows}:
         raise ValueError("Project territory is not registered")
     selected = tuple(
@@ -59,6 +67,21 @@ def project_registry(territory=None):
     )
     if not selected:
         raise ValueError(f"Project scope is not registered: {scope}")
+    if source_key is not None:
+        project = selected[0]
+        sources = [
+            row
+            for row in project["sources"]
+            if row["role"] != "terms"
+            and hashlib.sha256(row["url"].encode()).hexdigest() == source_key
+        ]
+        if len(sources) != 1:
+            raise ValueError("Project source scope is not registered")
+        terms = sources[0].get("terms_url")
+        sources += [
+            row for row in project["sources"] if row["role"] == "terms" and row["url"] == terms
+        ]
+        selected = ({**project, "sources": sources},)
     return selected
 
 
@@ -68,8 +91,21 @@ def project_urls(projects):
         raise ValueError("Expected a bounded reviewed project registry")
     registered = {row["slug"]: row for row in project_registry()}
     for project in projects:
-        if registered.get(project.get("slug")) != project:
+        full = registered.get(project.get("slug"))
+        if full is None or {**project, "sources": full["sources"]} != full:
             raise ValueError("Project configuration is not an exact reviewed registry entry")
+        if not project["sources"] or any(
+            source not in full["sources"] for source in project["sources"]
+        ):
+            raise ValueError("Project source is not an exact reviewed registry entry")
+        for source in project["sources"]:
+            terms = source.get("terms_url")
+            if any(
+                row["role"] == "terms" and row["url"] == terms for row in full["sources"]
+            ) and not any(
+                row["role"] == "terms" and row["url"] == terms for row in project["sources"]
+            ):
+                raise ValueError("Required reviewed source terms are absent")
     urls = tuple(dict.fromkeys(source["url"] for row in projects for source in row["sources"]))
     if len(urls) > 400 or any(not safe_url(url) for url in urls):
         raise ValueError("Invalid reviewed project source URLs")
@@ -210,7 +246,7 @@ def _media(project, nodes):
             if original.startswith("http://reportageuae.com/")
             else original
         )
-        url = urljoin(project["website_url"], url)
+        url = urljoin(project.get("media_base_url", project["website_url"]), url)
         parts = urlsplit(url)
         if (
             not safe_url(url)
@@ -341,17 +377,24 @@ def _reportage(project, source, root, nodes):
     counts = []
     for node in counters:
         items = tuple(node.walk())
-        if any(item.tag == "p" and item.text() == "Total Number of Units" for item in items):
+        labels = [
+            item.text()
+            for item in items
+            if item.tag == "p" and item.text() in {"Total Number of Units", "Total Apartments"}
+        ]
+        if labels:
+            if len(labels) != 1:
+                raise ValueError("Project unit count label is ambiguous")
             count = next((item.text() for item in items if item.tag == "h3"), "")
             if not re.fullmatch(r"[1-9]\d{0,5}", count):
                 raise ValueError("Invalid project total unit count")
-            counts.append(int(count))
+            counts.append((int(count), labels[0]))
     if len(counts) != 1:
         raise ValueError("Project unit count section changed or is ambiguous")
     result.update(
-        total_units=counts[0],
-        total_units_original=str(counts[0]),
-        total_units_pointer=".counter-card-inner:Total Number of Units > h3",
+        total_units=counts[0][0],
+        total_units_original=f"{counts[0][0]} {counts[0][1]}",
+        total_units_pointer=f".counter-card-inner:{counts[0][1]} > h3",
     )
     for index, node in enumerate(nodes):
         if node.tag == "li" and node.has_class("amenity-item"):
@@ -425,6 +468,18 @@ def extract_project_source(project, source, receipt):
         from .project_adapters import aldar_project
 
         return aldar_project(project, source, receipt, _base)
+    if source["parser"] == "psi_project_v1":
+        from .project_psi import psi_project
+
+        return psi_project(project, source, receipt, _base, _amenity)
+    if source["parser"] == "adrec_project_v1":
+        from .project_adrec import adrec_project
+
+        return adrec_project(project, source, receipt, _base)
+    if source["parser"] == "propertyfinder_project_v1":
+        from .project_propertyfinder import propertyfinder_project
+
+        return propertyfinder_project(project, source, receipt, _base)
     document = _Document(payload)
     nodes = tuple(document.root.walk())
     if not any(node.tag == "html" for node in nodes):
@@ -435,8 +490,18 @@ def extract_project_source(project, source, receipt):
         return None
     if source["parser"] == "official_project_v1":
         from .project_adapters import official_project
+        from .project_maryah import enrich_maryah
 
-        return official_project(project, source, nodes, _base, _media, _amenity)
+        return enrich_maryah(
+            project,
+            source,
+            receipt["payload"],
+            official_project(project, source, nodes, _base, _media, _amenity),
+        )
+    if source["parser"] == "bayut_guide_v1":
+        from .project_adapters import bayut_project
+
+        return bayut_project(project, source, nodes, _base, _media, _amenity)
     if urlsplit(source["url"]).hostname == "bloomholding.com":
         return _bloom(project, source, nodes)
     return _reportage(project, source, document.root, nodes)

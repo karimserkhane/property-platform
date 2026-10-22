@@ -32,10 +32,10 @@ def test_national_navigation_has_seven_emirates_and_an_explicit_pilot():
     assert "parcel_count" not in registry["territories"][0]
 
 
-def test_whole_area_only_composes_the_two_reviewed_collection_scopes():
+def test_whole_area_only_composes_the_three_reviewed_collection_scopes():
     from property_platform.modules.evidence.collection_profiles import COLLECTIONS
 
-    members = ("al-reem-island", "saadiyat-island")
+    members = ("al-reem-island", "saadiyat-island", "al-maryah-island")
     assert member_territories("abu-dhabi") == members
     assert member_territories("dubai") == ()
     # Navigation aggregation must not create or activate an emirate-wide acquisition.

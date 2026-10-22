@@ -7,6 +7,7 @@ import os
 import sys
 from pathlib import Path
 
+from .registry import TERRITORIES
 from .runtime import MAX_REQUEST, checked_receipt_path
 from .storage import stored_property_receipt
 
@@ -47,9 +48,118 @@ def execute(request):
             "receipt_name",
             "action",
             "error",
+            "archive_key",
         }
         if not isinstance(request, dict) or set(request) - allowed:
             raise ValueError("Unexpected domain request parameters")
+        if request.get("operation") == "prepare_catalogue_rebuild":
+            from uuid import UUID
+
+            from django.core.management import call_command
+            from property_platform.modules.catalog.models import Project
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Catalogue initialization requires an explicit Prefect run")
+            UUID(str(request["prefect_flow_run_id"]))
+            if not isinstance(request["actor"], str) or not request["actor"].strip():
+                raise ValueError("Catalogue initialization requires an operator")
+            # An explicit bootstrap pipeline, never a web/runner startup hook.
+            call_command("migrate", interactive=False, verbosity=0)
+            if Project.objects.exists():
+                raise ValueError("Catalogue rebuild requires an empty project catalogue")
+            return {"status": "succeeded", "summary": {"schema_ready": True, "projects": 0}}
+        if "archive_key" in request and request.get("operation") not in {
+            "project_details",
+            "project_discovery",
+        }:
+            raise ValueError("Only a reviewed project source can replay this archive")
+        if request.get("operation") in {"routing_graph", "walking_areas"}:
+            from property_platform.modules.evidence.accessibility import (
+                archive_graph,
+                archive_walking,
+            )
+
+            from .collectors.accessibility import acquire_graph, build_graph, compute_walking
+
+            if set(request) - {"operation", "actor", "prefect_flow_run_id", "scope"} or request.get(
+                "scope", "refresh"
+            ) not in {"refresh", "archive"}:
+                raise ValueError("Map analysis requires an audited Prefect run")
+            values = {
+                "actor": request["actor"],
+                "run_key": f"{request['operation']}:{request['prefect_flow_run_id']}",
+            }
+            if request["operation"] == "routing_graph":
+                return archive_graph(
+                    **values,
+                    acquire=acquire_graph,
+                    build=build_graph,
+                    from_history=request.get("scope") == "archive",
+                )
+            return archive_walking(**values, compute=compute_walking)
+        if request.get("operation") == "data_history":
+            from property_platform.modules.evidence.pipeline_inventory import check_history
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
+                raise ValueError("History inventory requires a Prefect run and operator")
+            return check_history(
+                actor=request["actor"], run_key=f"history:{request['prefect_flow_run_id']}"
+            )
+        if request.get("operation") == "basemap":
+            from datetime import timedelta
+
+            from django.db.models import Q
+            from django.utils import timezone
+            from property_platform.modules.catalog.territories import TERRITORY_BY_ID
+            from property_platform.modules.evidence.basemap_archive import (
+                archive_pending,
+                seed_area,
+            )
+            from property_platform.modules.evidence.models import BasemapRequest
+
+            from .collectors.basemaps import BasemapCollector
+
+            if set(request) != {"operation", "scope", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Basemap archive requires an audited provider scope")
+            provider = request["scope"]
+            if provider not in {
+                "openfreemap",
+                "sentinel-worldcover-2020",
+                "sentinel-worldcover-2021",
+            }:
+                raise ValueError("Unregistered basemap provider")
+            for territory in TERRITORIES:
+                seed_area(provider, TERRITORY_BY_ID[territory].bounds)
+            now = timezone.now()
+            pending = (
+                BasemapRequest.objects.filter(provider=provider)
+                .filter(Q(available=False) | Q(last_attempt_at__lt=now - timedelta(days=7)))
+                .filter(
+                    Q(last_attempt_at__isnull=True)
+                    | Q(last_attempt_at__lt=now - timedelta(hours=1))
+                )
+            )
+            if not pending.exists():
+                return {"status": "succeeded", "summary": {"saved": 0, "pending": 0}}
+            queued = list(
+                pending.order_by("available", "last_attempt_at", "created_at", "pk").values_list(
+                    "pk", "z", "x", "y"
+                )[:5000]
+            )
+            with BasemapCollector(provider, [row[1:] for row in queued]) as collector:
+                result = archive_pending(
+                    provider,
+                    actor=request["actor"],
+                    acquire=collector,
+                    run_key=f"tiles:{request['prefect_flow_run_id']}",
+                    request_ids=[row[0] for row in queued],
+                )
+            return {
+                "status": "succeeded"
+                if result["status"] in {"succeeded", "busy"}
+                else "quarantined",
+                "summary": result,
+            }
         if request.get("operation") == "project_media_files":
             from .media_files import ingest_files
 
@@ -77,14 +187,25 @@ def execute(request):
             if executor.migration_plan(executor.loader.graph.leaf_nodes()):
                 raise SchemaNotReady("Django migrations must be applied before ingestion")
             IngestionExecution.objects.exists()
-            rows = orchestration.reference_registry()
-            profiles, _ = property_import.registry()
+            from property_platform.modules.evidence.project_discovery import catalogue_registry
+            from property_platform.modules.evidence.project_protocol import project_registry
+
+            territories = {}
+            for territory in TERRITORIES:
+                rows = orchestration.reference_registry(territory)
+                profiles, _ = property_import.registry(territory)
+                territories[territory] = {
+                    "references": len(rows),
+                    "presentations": len(profiles),
+                    "projects": len(project_registry(territory)),
+                    "catalogues": len(catalogue_registry(territory)),
+                }
             return {
                 "status": "succeeded",
                 "summary": {
-                    "references": len(rows),
-                    "presentations": len(profiles),
+                    **territories[orchestration.TERRITORY],
                     "territory": orchestration.TERRITORY,
+                    "territories": territories,
                     "orchestration_schema": "ready",
                 },
             }
@@ -160,14 +281,31 @@ def execute(request):
 
                     replay._acquire(("map", osm_bootstrap.URL, _params(params)), collect)
             acquisition = replay.map
+        elif operation == "sdi_parcels":
+            from property_platform.modules.evidence.sdi_protocol import URL
+
+            from .collectors.sdi import precollect_sdi
+
+            with SourceHTTP([URL, URL + "/query"]) as transport:
+                replay = precollect_sdi(transport, territory)
+            acquisition = replay.map
         elif operation == "onwani":
             with SourceHTTP(OnwaniCollector.allowed_urls()) as transport:
                 replay = precollect_onwani(OnwaniCollector(transport, territory))
             acquisition = replay.onwani
         elif operation == "map":
             layer = request["scope"].split(":")[1]
-            with SourceHTTP(MapCollector.allowed_urls()) as transport:
-                replay = precollect_map(MapCollector(transport, territory), layer)
+            if layer == "overture":
+                from property_platform.modules.evidence.overture_places import URL
+
+                from .collectors.overture import acquire_places
+                from .collectors.snapshots import ReplayFetcher, _params
+
+                replay = ReplayFetcher()
+                replay._acquire(("map", URL, _params({})), lambda: acquire_places(territory))
+            else:
+                with SourceHTTP(MapCollector.allowed_urls()) as transport:
+                    replay = precollect_map(MapCollector(transport, territory), layer)
             acquisition = replay.map
         elif operation == "references":
             rows = orchestration.reference_registry(territory)
@@ -191,23 +329,31 @@ def execute(request):
         elif operation == "project_discovery":
             from property_platform.modules.evidence.project_discovery import (
                 candidates_for,
+                catalogue_byte_limit,
                 catalogue_for,
             )
+
+            from .project_archive import archive_catalogue_batch, read_catalogue_batch
 
             definition = catalogue_for(request["scope"])
 
             def collect_catalogue():
                 nonlocal transport
                 with SourceHTTP([definition["url"]]) as transport:
-                    item = transport.fetch(definition["url"], max_bytes=4 * 1024 * 1024)
+                    item = transport.fetch(
+                        definition["url"], max_bytes=catalogue_byte_limit(definition)
+                    )
                     candidates_for(definition, item.payload)
                     return [item.property_receipt()]
 
-            receipt = stored_property_receipt(
-                Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion")),
-                request["execution_key"],
-                collect_catalogue,
-            )
+            storage = Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion"))
+            if request.get("archive_key") is not None:
+                receipt = read_catalogue_batch(storage, request["scope"], request["archive_key"])
+            else:
+                receipt = stored_property_receipt(
+                    storage, request["execution_key"], collect_catalogue
+                )
+                archive_catalogue_batch(storage, request["scope"], receipt)
         elif operation == "project_details":
             from property_platform.modules.evidence.project_protocol import (
                 project_registry,
@@ -215,6 +361,7 @@ def execute(request):
             )
 
             from .collectors.projects import collect_project_receipts
+            from .project_archive import archive_project_batch, read_project_batch
 
             projects = project_registry(request["scope"])
 
@@ -223,11 +370,15 @@ def execute(request):
                 with SourceHTTP(project_urls(projects)) as transport:
                     return collect_project_receipts(transport, projects)
 
-            receipt = stored_property_receipt(
-                Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion")),
-                request["execution_key"],
-                collect_projects,
-            )
+            storage = Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion"))
+            if request.get("archive_key") is not None:
+                receipt = read_project_batch(storage, request["scope"], request["archive_key"])
+            else:
+                receipt = stored_property_receipt(
+                    storage, request["execution_key"], collect_projects
+                )
+                if len(request["scope"].split(":")) == 3:
+                    archive_project_batch(storage, request["scope"], receipt)
         elif operation == "imagery":
             storage = Path(os.environ.get("INGESTION_STORAGE_DIR", ".cache/ingestion"))
             path = checked_receipt_path(storage, request["receipt_name"])
@@ -257,6 +408,7 @@ def execute(request):
                 ]
                 if identity["operation"]
                 in {
+                    "sdi_parcels",
                     "onwani",
                     "map",
                     "osm_bootstrap",

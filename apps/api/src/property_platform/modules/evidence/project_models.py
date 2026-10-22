@@ -63,6 +63,10 @@ class ProjectSnapshot(models.Model):
     receipt_key = models.CharField(max_length=64, unique=True)
     extractor_version = models.CharField(max_length=80)
     source_role = models.CharField(max_length=20)
+    source_kind = models.CharField(max_length=20, default="developer")
+    source_name = models.CharField(max_length=255, blank=True)
+    source_developer_name = models.CharField(max_length=255, blank=True)
+    source_developer_role = models.CharField(max_length=20, blank=True)
     title = models.CharField(max_length=255)
     summary = models.CharField(max_length=1600, blank=True)
     language = models.CharField(max_length=20, default="en")
@@ -76,6 +80,7 @@ class ProjectSnapshot(models.Model):
     handover_original = models.CharField(max_length=500, blank=True)
     handover_pointer = models.CharField(max_length=500, blank=True)
     total_units = models.PositiveIntegerField(null=True)
+    total_units_basis = models.CharField(max_length=20, default="announced")
     total_units_original = models.CharField(max_length=500, blank=True)
     total_units_pointer = models.CharField(max_length=500, blank=True)
     actor = models.CharField(max_length=160)
@@ -93,6 +98,24 @@ class ProjectSnapshot(models.Model):
                     acquisition_scope="local_research",
                 ),
                 name="project_snapshot_identity_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    source_kind__in=["developer", "publisher", "broker", "authority", "media"]
+                ),
+                name="project_source_kind_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(total_units_basis__in=["announced", "registered"]),
+                name="project_total_basis_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(source_developer_name="", source_developer_role="")
+                | models.Q(
+                    source_developer_name__regex=r"\S",
+                    source_developer_role__in=["declared", "registered"],
+                ),
+                name="project_source_party_valid",
             ),
             models.CheckConstraint(
                 condition=(

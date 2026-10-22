@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from property_platform.modules.evidence.collection_profiles import COLLECTIONS
 from property_platform.modules.evidence.services import import_onwani
 
 
@@ -7,9 +8,7 @@ class Command(BaseCommand):
     help = "Acquire reviewed territory parcels directly from DMT/Onwani, with evidence and audit."
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            "--territory", choices=["al-reem-island", "saadiyat-island"], default="al-reem-island"
-        )
+        parser.add_argument("--territory", choices=tuple(COLLECTIONS), default="al-reem-island")
         parser.add_argument(
             "--actor", required=True, help="Operator identifier for the audit trail"
         )

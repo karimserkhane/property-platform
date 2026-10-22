@@ -14,8 +14,6 @@ MAX_BYTES = 16 * 1024 * 1024
 
 def boxes(territory):
     p = collection_for(territory)
-    if territory not in {"al-reem-island", "saadiyat-island"}:
-        raise ValueError("OSM API bootstrap requires a reviewed island")
     w, s, e, n = p.osm_bounds
     x, y = round((w + e) / 2, 8), round((s + n) / 2, 8)
     return tuple(

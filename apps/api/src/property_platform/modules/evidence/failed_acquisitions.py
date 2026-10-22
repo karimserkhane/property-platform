@@ -13,11 +13,19 @@ from . import (
     osm_bootstrap,
     project_discovery,
     project_protocol,
+    sdi_protocol,
 )
 from .collection_profiles import collection_for
 
 
 def source_definition(operation, scope):
+    if operation == "sdi_parcels":
+        return (
+            sdi_protocol.namespace(scope),
+            f"AD-SDI / Plots — {scope}",
+            sdi_protocol.URL,
+            sdi_protocol.VERSION,
+        )
     if operation == "project_discovery":
         row = project_discovery.catalogue_for(scope)
         return (
@@ -56,6 +64,15 @@ def source_definition(operation, scope):
     if operation != "map":
         raise ValueError("Failed raw receipts are only supported for GIS connectors")
     layer = scope.rsplit(":", 1)[1]
+    if layer == "overture":
+        from . import overture_places
+
+        return (
+            overture_places.namespace(profile.territory),
+            f"Overture Maps Places — {profile.name}",
+            overture_places.URL,
+            overture_places.VERSION,
+        )
     if layer == "osm":
         return (
             profile.map_namespace("osm"),
@@ -72,6 +89,12 @@ def source_definition(operation, scope):
 
 
 def _request_shape(url, operation, scope):
+    if operation == "map" and scope.endswith(":overture"):
+        from .overture_places import URL
+
+        if url != URL:
+            raise ValueError("Unexpected Overture extract URL")
+        return
     if operation == "project_discovery":
         if url != project_discovery.catalogue_for(scope)["url"]:
             raise ValueError("Failed catalogue receipt is outside its reviewed URL")
@@ -107,6 +130,8 @@ def _request_shape(url, operation, scope):
         return
     if operation == "onwani":
         expected, where, fields = onwani.BASE_URL, profile.parcel_where, onwani.FIELDS
+    elif operation == "sdi_parcels":
+        expected, where, fields = sdi_protocol.URL, sdi_protocol.where(scope), sdi_protocol.FIELDS
     else:
         expected, where, _, fields = profile.map_layers()[scope.rsplit(":", 1)[1]]
     if base == expected and params == {"f": "pjson"}:
@@ -146,6 +171,7 @@ def validate_received_acquisitions(operation, scope, rows):
     if not isinstance(rows, (list, tuple)) or len(rows) > 205:
         raise ValueError("Failed acquisition journal exceeds its budget")
     if rows and operation not in {
+        "sdi_parcels",
         "onwani",
         "map",
         "osm_bootstrap",
@@ -207,7 +233,12 @@ def validate_received_acquisitions(operation, scope, rows):
             or len(receipt["etag"]) > 500
             or not isinstance(receipt["last_modified_raw"], str)
             or len(receipt["last_modified_raw"]) > 160
-            or receipt["acquisition_method"] != "scheduled_https_collect"
+            or receipt["acquisition_method"]
+            != (
+                "overture_parquet_extract"
+                if scope.endswith(":overture")
+                else "scheduled_https_collect"
+            )
             or receipt["timestamp_basis"] != "collector_clock"
         ):
             raise ValueError("Invalid failed source receipt status, dates or provenance")

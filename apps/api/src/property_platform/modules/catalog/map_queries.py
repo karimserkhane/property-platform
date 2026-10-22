@@ -126,9 +126,14 @@ def nearby_place_rows(target, identity, *, namespaces=None, parcel_namespaces=No
         if target == "place":
             places = places.exclude(id=identity)
         rows = list(
-            places.annotate(distance=Distance("geometry", center, spheroid=True))
+            places.annotate(
+                distance=Distance("geometry", center, spheroid=True),
+                shape=AsGeoJSON("geometry", precision=8),
+            )
             .filter(distance__lte=1500)
             .order_by("distance", "id")
-            .values("id", "name", "name_ar", "kind", "distance")[:401]
+            .values("id", "name", "name_ar", "kind", "distance", "source_namespace", "shape")[:401]
         )
+    for row in rows:
+        row["geometry"] = json.loads(row.pop("shape"))
     return rows[:400], len(rows) > 400

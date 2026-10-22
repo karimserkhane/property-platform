@@ -3,6 +3,10 @@ import uuid
 from django.contrib.gis.db import models as gis_models
 from django.db import models
 
+from .accessibility_models import RoutingGraph, RoutingGraphPart, WalkingArea, WalkingRequest  # noqa: F401
+from .basemap_models import BasemapRequest, BasemapTile  # noqa: F401
+from .history_models import HistoryExclusion, RowRevision  # noqa: F401
+
 
 class Source(models.Model):
     key = models.CharField(max_length=120, unique=True)
@@ -348,7 +352,7 @@ class IngestionExecution(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     execution_key = models.CharField(max_length=64, unique=True)
     operation = models.CharField(max_length=40)
-    scope = models.CharField(max_length=100)
+    scope = models.CharField(max_length=255)
     actor = models.CharField(max_length=160)
     input_sha256 = models.CharField(max_length=64, null=True)
     prefect_flow_run_id = models.UUIDField(null=True)
@@ -392,6 +396,7 @@ class IngestionExecution(models.Model):
                     actor__regex=r"\S",
                     attempts__gte=1,
                     operation__in=[
+                        "sdi_parcels",
                         "onwani",
                         "map",
                         "references",

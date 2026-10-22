@@ -1,12 +1,14 @@
 from django.db import connection, transaction
 
 from property_platform.modules.catalog.map_queries import map_rows
+from property_platform.modules.evidence.catalogue_history import recover_display
 from property_platform.modules.evidence.queries import (
     map_provenances,
     map_usage_tags,
     property_presentations,
 )
 
+from .place_display import distinct_places
 from .uses import use_types
 
 
@@ -27,6 +29,9 @@ def _map_context(bbox, *, namespaces=None, parcel_namespaces=None):
         rows, truncated = map_rows(
             target, bbox, namespaces=namespaces, parcel_namespaces=parcel_namespaces
         )
+        if target == "place":
+            rows = distinct_places(rows)
+        recover_display(target, rows)
         sources = map_provenances(target, [row["id"] for row in rows], include_capture_id=True)
         tags = map_usage_tags(
             target,

@@ -761,6 +761,23 @@
               "type": "integer"
             },
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "snapshot_id",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Snapshot Id"
+            },
+            "required": false
           }
         ],
         "responses": {
@@ -974,7 +991,8 @@
                 {
                   "enum": [
                     "al-reem-island",
-                    "saadiyat-island"
+                    "saadiyat-island",
+                    "al-maryah-island"
                   ],
                   "type": "string"
                 },
@@ -983,6 +1001,41 @@
                 }
               ],
               "title": "Territory"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "default": "",
+              "maxLength": 120,
+              "title": "Q",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "maximum": 50000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 200,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
             },
             "required": false
           }
@@ -1205,6 +1258,286 @@
         },
         "tags": [
           "local-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/basemap/{provider}/{z}/{x}/{y}": {
+      "get": {
+        "operationId": "previewBasemapTile",
+        "summary": "Tile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "provider",
+            "schema": {
+              "title": "Provider",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "z",
+            "schema": {
+              "title": "Z",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "x",
+            "schema": {
+              "title": "X",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "y",
+            "schema": {
+              "title": "Y",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Archived, source-specific tile bytes",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/x-protobuf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/accessibility": {
+      "get": {
+        "operationId": "previewWalkingArea",
+        "summary": "Accessibility",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "longitude",
+            "schema": {
+              "title": "Longitude",
+              "type": "number"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "latitude",
+            "schema": {
+              "title": "Latitude",
+              "type": "number"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "minutes",
+            "schema": {
+              "default": 10,
+              "title": "Minutes",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "default": "abu-dhabi",
+              "title": "Territory",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalkingResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "map-analysis-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/market-map": {
+      "get": {
+        "operationId": "previewDistrictMarket",
+        "summary": "Market Map",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "default": "abu-dhabi",
+              "title": "Territory",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "snapshot_id",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Snapshot Id"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DistrictMarketResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "map-analysis-preview"
         ]
       }
     }
@@ -1557,6 +1890,31 @@
         "title": "ImageryResponse",
         "type": "object"
       },
+      "FieldHistory": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "retrieved_at",
+          "ingested_at"
+        ],
+        "title": "FieldHistory",
+        "type": "object"
+      },
       "Geometry": {
         "properties": {
           "type": {
@@ -1807,6 +2165,14 @@
                 "type": "null"
               }
             ]
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldHistory"
+            },
+            "default": {},
+            "title": "Field History",
+            "type": "object"
           }
         },
         "required": [
@@ -2173,6 +2539,14 @@
               }
             ],
             "title": "Source Name"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldHistory"
+            },
+            "default": {},
+            "title": "Field History",
+            "type": "object"
           }
         },
         "required": [
@@ -2300,6 +2674,14 @@
             },
             "title": "Overlapping Parcels",
             "type": "array"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldHistory"
+            },
+            "default": {},
+            "title": "Field History",
+            "type": "object"
           }
         },
         "required": [
@@ -2812,6 +3194,25 @@
               }
             ],
             "title": "Index Value"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
           }
         },
         "required": [
@@ -2819,7 +3220,11 @@
           "property_type",
           "period_end",
           "municipality",
-          "index_value"
+          "index_value",
+          "snapshot_id",
+          "retrieved_at",
+          "ingested_at",
+          "historical"
         ],
         "title": "AdrecIndexResponse",
         "type": "object"
@@ -2907,6 +3312,17 @@
           "index_review_needed": {
             "title": "Index Review Needed",
             "type": "boolean"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          },
+          "snapshots": {
+            "items": {
+              "$ref": "#/components/schemas/AdrecSnapshotResponse"
+            },
+            "title": "Snapshots",
+            "type": "array"
           }
         },
         "required": [
@@ -2920,7 +3336,9 @@
           "has_more",
           "sales",
           "indices",
-          "index_review_needed"
+          "index_review_needed",
+          "historical",
+          "snapshots"
         ],
         "title": "AdrecMarketResponse",
         "type": "object"
@@ -3039,6 +3457,43 @@
         "title": "AdrecSaleResponse",
         "type": "object"
       },
+      "AdrecSnapshotResponse": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "period_start": {
+            "format": "date",
+            "title": "Period Start",
+            "type": "string"
+          },
+          "period_end": {
+            "format": "date",
+            "title": "Period End",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "source_row_count": {
+            "title": "Source Row Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "period_start",
+          "period_end",
+          "ingested_at",
+          "source_row_count"
+        ],
+        "title": "AdrecSnapshotResponse",
+        "type": "object"
+      },
       "DistrictMapFeature": {
         "properties": {
           "type": {
@@ -3107,6 +3562,32 @@
             "title": "Name",
             "type": "string"
           },
+          "snapshot_id": {
+            "format": "uuid",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/HistoricalField"
+            },
+            "title": "Field History",
+            "type": "object"
+          },
           "name_ar": {
             "title": "Name Ar",
             "type": "string"
@@ -3168,6 +3649,11 @@
         "required": [
           "source_record_id",
           "name",
+          "snapshot_id",
+          "retrieved_at",
+          "ingested_at",
+          "historical",
+          "field_history",
           "name_ar",
           "municipality",
           "district_id",
@@ -3242,6 +3728,26 @@
         "title": "DistrictMapResponse",
         "type": "object"
       },
+      "HistoricalField": {
+        "properties": {
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "retrieved_at",
+          "ingested_at"
+        ],
+        "title": "HistoricalField",
+        "type": "object"
+      },
       "BusRouteResponse": {
         "properties": {
           "source_record_id": {
@@ -3251,6 +3757,32 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/HistoricalField"
+            },
+            "title": "Field History",
+            "type": "object"
           },
           "number": {
             "title": "Number",
@@ -3272,6 +3804,11 @@
         "required": [
           "source_record_id",
           "name",
+          "snapshot_id",
+          "retrieved_at",
+          "ingested_at",
+          "historical",
+          "field_history",
           "number",
           "origin",
           "destination",
@@ -3289,6 +3826,32 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/HistoricalField"
+            },
+            "title": "Field History",
+            "type": "object"
           },
           "reference_year": {
             "title": "Reference Year",
@@ -3325,6 +3888,11 @@
         "required": [
           "source_record_id",
           "name",
+          "snapshot_id",
+          "retrieved_at",
+          "ingested_at",
+          "historical",
+          "field_history",
           "reference_year",
           "region",
           "category",
@@ -3344,6 +3912,32 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/HistoricalField"
+            },
+            "title": "Field History",
+            "type": "object"
           },
           "name_ar": {
             "title": "Name Ar",
@@ -3381,6 +3975,11 @@
         "required": [
           "source_record_id",
           "name",
+          "snapshot_id",
+          "retrieved_at",
+          "ingested_at",
+          "historical",
+          "field_history",
           "name_ar",
           "municipality",
           "district_id",
@@ -3398,6 +3997,32 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "snapshot_id": {
+            "format": "uuid",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/HistoricalField"
+            },
+            "title": "Field History",
+            "type": "object"
           },
           "facility_type": {
             "title": "Facility Type",
@@ -3435,6 +4060,11 @@
         "required": [
           "source_record_id",
           "name",
+          "snapshot_id",
+          "retrieved_at",
+          "ingested_at",
+          "historical",
+          "field_history",
           "facility_type",
           "address",
           "planned",
@@ -3603,6 +4233,32 @@
             "title": "Name",
             "type": "string"
           },
+          "snapshot_id": {
+            "format": "uuid",
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/HistoricalField"
+            },
+            "title": "Field History",
+            "type": "object"
+          },
           "name_ar": {
             "title": "Name Ar",
             "type": "string"
@@ -3639,6 +4295,11 @@
         "required": [
           "source_record_id",
           "name",
+          "snapshot_id",
+          "retrieved_at",
+          "ingested_at",
+          "historical",
+          "field_history",
           "name_ar",
           "municipality",
           "district",
@@ -3692,11 +4353,21 @@
           "has_more": {
             "title": "Has More",
             "type": "boolean"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
           }
         },
         "required": [
           "items",
-          "has_more"
+          "has_more",
+          "total",
+          "offset"
         ],
         "title": "ProjectDirectoryResponse",
         "type": "object"
@@ -3806,6 +4477,16 @@
           "summary": {
             "title": "Summary",
             "type": "string"
+          },
+          "summary_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectSourceResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "language": {
             "title": "Language",
@@ -4167,6 +4848,15 @@
             "title": "Value",
             "type": "integer"
           },
+          "basis": {
+            "default": "announced",
+            "enum": [
+              "announced",
+              "registered"
+            ],
+            "title": "Basis",
+            "type": "string"
+          },
           "original_text": {
             "title": "Original Text",
             "type": "string"
@@ -4192,6 +4882,57 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "kind": {
+            "default": "developer",
+            "enum": [
+              "developer",
+              "publisher",
+              "broker",
+              "authority",
+              "media",
+              "community",
+              "reference"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "content_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Sha256"
+          },
+          "developer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Developer Name"
+          },
+          "developer_role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "declared",
+                  "registered"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Developer Role"
           },
           "retrieved_at": {
             "format": "date-time",
@@ -4222,6 +4963,23 @@
           "rights_status": {
             "title": "Rights Status",
             "type": "string"
+          },
+          "ingested_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ingested At"
+          },
+          "historical": {
+            "default": false,
+            "title": "Historical",
+            "type": "boolean"
           }
         },
         "required": [
@@ -4267,6 +5025,310 @@
           "source"
         ],
         "title": "ProjectTypologyResponse",
+        "type": "object"
+      },
+      "WalkingCollection": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/WalkingFeature"
+            },
+            "title": "Features",
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "features"
+        ],
+        "title": "WalkingCollection",
+        "type": "object"
+      },
+      "WalkingFeature": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/WalkingGeometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/WalkingProperties"
+          }
+        },
+        "required": [
+          "type",
+          "geometry",
+          "properties"
+        ],
+        "title": "WalkingFeature",
+        "type": "object"
+      },
+      "WalkingGeometry": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "coordinates": {
+            "items": {
+              "items": {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "title": "Coordinates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ],
+        "title": "WalkingGeometry",
+        "type": "object"
+      },
+      "WalkingProperties": {
+        "properties": {
+          "minutes": {
+            "title": "Minutes",
+            "type": "integer"
+          },
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "minutes",
+          "mode"
+        ],
+        "title": "WalkingProperties",
+        "type": "object"
+      },
+      "WalkingResponse": {
+        "properties": {
+          "collection": {
+            "$ref": "#/components/schemas/WalkingCollection"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "graph_id": {
+            "title": "Graph Id",
+            "type": "string"
+          },
+          "graph_fetched_at": {
+            "format": "date-time",
+            "title": "Graph Fetched At",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "collection",
+          "ingested_at",
+          "graph_id",
+          "graph_fetched_at",
+          "source_url",
+          "historical"
+        ],
+        "title": "WalkingResponse",
+        "type": "object"
+      },
+      "DistrictMarketFeature": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/components/schemas/WalkingGeometry"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/DistrictMarketProperties"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "geometry",
+          "properties"
+        ],
+        "title": "DistrictMarketFeature",
+        "type": "object"
+      },
+      "DistrictMarketProperties": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_ar": {
+            "title": "Name Ar",
+            "type": "string"
+          },
+          "sales": {
+            "title": "Sales",
+            "type": "integer"
+          },
+          "rate_samples": {
+            "title": "Rate Samples",
+            "type": "integer"
+          },
+          "median_rate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Rate"
+          },
+          "volume_aed": {
+            "title": "Volume Aed",
+            "type": "string"
+          },
+          "boundary_ingested_at": {
+            "format": "date-time",
+            "title": "Boundary Ingested At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "name_ar",
+          "sales",
+          "rate_samples",
+          "median_rate",
+          "volume_aed",
+          "boundary_ingested_at"
+        ],
+        "title": "DistrictMarketProperties",
+        "type": "object"
+      },
+      "DistrictMarketResponse": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/DistrictMarketFeature"
+            },
+            "title": "Features",
+            "type": "array"
+          },
+          "snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Id"
+          },
+          "boundary_snapshot_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boundary Snapshot Id"
+          },
+          "period_start": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Start"
+          },
+          "period_end": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period End"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "boundary_source_url": {
+            "title": "Boundary Source Url",
+            "type": "string"
+          },
+          "unmatched_sales": {
+            "title": "Unmatched Sales",
+            "type": "integer"
+          },
+          "mapped_sales": {
+            "title": "Mapped Sales",
+            "type": "integer"
+          },
+          "historical": {
+            "title": "Historical",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "features",
+          "snapshot_id",
+          "boundary_snapshot_id",
+          "period_start",
+          "period_end",
+          "source_url",
+          "boundary_source_url",
+          "unmatched_sales",
+          "mapped_sales",
+          "historical"
+        ],
+        "title": "DistrictMarketResponse",
         "type": "object"
       }
     }

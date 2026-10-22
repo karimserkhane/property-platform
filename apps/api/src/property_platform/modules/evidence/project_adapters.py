@@ -3,6 +3,7 @@
 import json
 import re
 from datetime import date
+from urllib.parse import urlsplit
 
 
 def aldar_project(project, source, receipt, base):
@@ -13,7 +14,11 @@ def aldar_project(project, source, receipt, base):
     if data.get("projectName") != project["name"]:
         raise ValueError("Aldar project name changed; identity review is required")
     location = data.get("communityLocation")
-    expected = "Saadiyat Island" if project["territory_id"] == "saadiyat-island" else "Reem Island"
+    expected = {
+        "saadiyat-island": "Saadiyat Island",
+        "al-reem-island": "Reem Island",
+        "al-maryah-island": "Al Maryah Island",
+    }[project["territory_id"]]
     if not isinstance(location, str) or expected.casefold() not in location.casefold():
         raise ValueError("Aldar project location changed")
     result = base(project, source)
@@ -22,6 +27,8 @@ def aldar_project(project, source, receipt, base):
         if type(count) is not int or not 0 <= count <= 100000:
             raise ValueError("Aldar programme count changed shape")
         if count:
+            # This is the publisher's programme-unit total, potentially mixed
+            # residential/retail. Only ADREC ResidentialUnits is labelled homes.
             result.update(
                 total_units=count,
                 total_units_original=str(count),
@@ -219,9 +226,21 @@ def official_project(project, source, nodes, base, media, amenity):
         return re.sub(r"[^a-z0-9]+", "", value.casefold())
 
     expected = [
-        normalize(value) for value in [project["name"], *project.get("heading_aliases", [])]
+        normalize(value)
+        for value in [
+            project["name"],
+            *project.get("heading_aliases", []),
+            *source.get("heading_aliases", []),
+        ]
     ]
     identities = [node.text() for node in nodes if node.tag in {"h1", "title"}]
+    if label := source.get("identity_label"):
+        # Some first-party pages use an exact Project | Name content label
+        # instead of a heading. A navigation link or generic site title cannot
+        # satisfy this explicitly reviewed label.
+        if not any(node.text() == label for node in _content_nodes(nodes)):
+            raise ValueError("Reviewed project identity label is absent")
+        identities.append(label)
     identities += [
         node.attrs.get("content", "")
         for node in nodes
@@ -239,11 +258,79 @@ def official_project(project, source, nodes, base, media, amenity):
         result["summary"] = descriptions[0].strip()[:450]
     nodes = _content_nodes(nodes)
     _publisher_facts(project, nodes, result)
-    result["media"] = media(project, nodes)
+    result["media"] = (
+        [
+            row
+            for row in media(project, nodes)
+            if row["source_url"] not in source.get("excluded_media_urls", [])
+        ]
+        if source.get("media_discovery", True)
+        else []
+    )
     # Only individually labelled amenity items are accepted, never footer/site-wide copy.
     for index, node in enumerate(nodes):
         if node.tag == "li" and node.has_class("amenity-item"):
             row = amenity(node.text(), f"li.amenity-item[{index}]")
             if row and not any(item["code"] == row["code"] for item in result["amenities"]):
                 result["amenities"].append(row)
+    return result
+
+
+def bayut_project(project, source, nodes, base, media, amenity):
+    def normalize(value):
+        return re.sub(r"[^a-z0-9]", "", value.casefold())
+
+    parts = urlsplit(source["url"])
+    labels = [n.text() for n in _content_nodes(nodes) if n.tag == "li" and len(n.text()) < 250]
+    developers = [
+        text.removeprefix("Developer:").strip() for text in labels if text.startswith("Developer:")
+    ]
+    locations = [
+        text.removeprefix("Location:").strip() for text in labels if text.startswith("Location:")
+    ]
+    island = {
+        "saadiyat-island": "Saadiyat Island",
+        "al-reem-island": "Al Reem Island",
+        "al-maryah-island": "Al Maryah Island",
+    }[project["territory_id"]]
+    if (
+        parts.hostname != "www.bayut.com"
+        or not parts.path.startswith("/buildings/")
+        or parts.query
+        or parts.fragment
+        or len(developers) != 1
+        or normalize(developers[0]) not in {normalize(v) for v in source["developer_aliases"]}
+        or not locations
+        or not all(normalize(island) in normalize(v) for v in locations)
+    ):
+        raise ValueError("Building guide developer or island changed")
+    result = official_project(project, source, nodes, base, media, amenity)
+    result.update(
+        parser_version="bayut-building-guide-v1",
+        media=[],
+        source_developer_name=developers[0],
+        source_developer_role="declared",
+    )
+    kinds = {"apartments": "apartment", "villas": "villa", "townhouses": "townhouse"}
+    for text in labels:
+        match = re.fullmatch(
+            r"Unit type:\s*((?:[0-9]{1,2})(?:,\s*[0-9]{1,2})*"
+            r"(?:\s+and\s+[0-9]{1,2})?)[ -]+bedroom (apartments|villas|townhouses)",
+            text,
+            re.I,
+        )
+        if not match:
+            continue
+        for bedroom in dict.fromkeys(int(v) for v in re.findall(r"[0-9]+", match[1])):
+            if 0 <= bedroom <= 20:
+                result["typologies"].append(
+                    {
+                        "property_type": kinds[match[2].lower()],
+                        "bedrooms": bedroom,
+                        "original_text": text,
+                        "evidence_pointer": "li:Unit type (single residential type)",
+                    }
+                )
+    # Completion years describe a past event, not an announced future handover.
+    # No agency listing total, apartment advert, price, rating or ROI is imported.
     return result

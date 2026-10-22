@@ -9,6 +9,7 @@ from property_platform.modules.catalog.territories import (
 )
 from property_platform.modules.evidence.collection_profiles import collection_for
 from property_platform.modules.evidence.onwani import SOURCE_KEY
+from property_platform.modules.evidence.sdi_protocol import namespace as sdi_namespace
 
 
 @dataclass(frozen=True)
@@ -25,7 +26,7 @@ class CoverageProfile:
 # Provider identities are retained; replacing them would create duplicate catalogue objects.
 PROFILES = {
     "al-reem-island": CoverageProfile(
-        (SOURCE_KEY,),
+        (SOURCE_KEY, sdi_namespace("al-reem-island")),
         (54.388, 24.47, 54.429, 24.519),
         (54.389, 24.493, 54.404, 24.507),
         (54.392, 24.491, 54.408, 24.502),
@@ -33,11 +34,18 @@ PROFILES = {
         ("S2C_40RBN_20261004_0_L2A", "S2C_40RBN_20260629_0_L2A"),
     ),
     "saadiyat-island": CoverageProfile(
-        (collection_for("saadiyat-island").parcel_namespace,),
+        (collection_for("saadiyat-island").parcel_namespace, sdi_namespace("saadiyat-island")),
         (54.386, 24.4886, 54.4812, 24.6019),
         (54.391, 24.524, 54.431, 24.553),
         (54.405, 24.534, 54.422, 24.548),
         "saadiyat_project_sources.json",
+    ),
+    "al-maryah-island": CoverageProfile(
+        (collection_for("al-maryah-island").parcel_namespace, sdi_namespace("al-maryah-island")),
+        (54.383, 24.488, 54.400, 24.517),
+        (54.385, 24.490, 54.398, 24.515),
+        (54.385, 24.490, 54.398, 24.515),
+        "maryah_project_sources.json",
     ),
 }
 
@@ -66,7 +74,7 @@ def union_bounds(bounds):
 
 
 # Whole area means the explicitly mapped islands, not every official district.
-PROFILES["abu-dhabi"] = combined_profile(("al-reem-island", "saadiyat-island"))
+PROFILES["abu-dhabi"] = combined_profile(tuple(PROFILES))
 
 
 def profile_for(territory_id):
@@ -151,13 +159,29 @@ def map_source_namespaces(territory_id):
             dict.fromkeys(
                 collection_for(member).map_namespace(layer)
                 for member in members
-                for layer in ("district", "community", "street", "osm")
+                for layer in ("district", "community", "street", "osm", "overture")
             )
         )
         + reference_source_keys(profile_for(territory_id))
         + tuple(
-            f"project:{project['slug']}"
+            namespace
             for project in project_registry()
             if project["territory_id"] in members
+            for namespace in (
+                f"project:{project['slug']}",
+                *(
+                    (f"project:{project['slug']}:broker:psi",)
+                    if any(source["parser"] == "psi_project_v1" for source in project["sources"])
+                    else ()
+                ),
+                *(
+                    (f"project:{project['slug']}:broker:propertyfinder",)
+                    if any(
+                        source["parser"] == "propertyfinder_project_v1"
+                        for source in project["sources"]
+                    )
+                    else ()
+                ),
+            )
         )
     )

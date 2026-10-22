@@ -1,6 +1,7 @@
 """Bounded reads of complete public snapshots, never an HTTP-time collection."""
 
 from ..evidence.abu_dhabi import FEEDS
+from ..evidence.history import context_rows, observation_history
 from ..evidence.models import (
     BusRouteObservation,
     CensusMeasureObservation,
@@ -54,7 +55,7 @@ def public_context(dataset, *, query="", offset=0, limit=40):
     }
     if not snapshot:
         return result
-    rows = MODELS[dataset].objects.filter(snapshot=snapshot)
+    rows = context_rows(MODELS[dataset], dataset)
     if query:
         from django.db.models import Q
 
@@ -75,7 +76,11 @@ def public_context(dataset, *, query="", offset=0, limit=40):
     result["total"] = rows.count()
     result["has_more"] = offset + limit < result["total"]
     for row in rows.order_by("name", "source_record_id")[offset : offset + limit]:
-        values = {"source_record_id": row.source_record_id, "name": row.name}
+        values = {
+            "source_record_id": row.source_record_id,
+            "name": row.name,
+            **observation_history(row, snapshot),
+        }
         if dataset == "districts":
             values.update(
                 name_ar=row.name_ar,
@@ -150,7 +155,7 @@ def district_map():
     if not snapshot:
         return result
     rows = list(
-        DistrictBoundaryObservation.objects.filter(snapshot=snapshot).order_by(
+        context_rows(DistrictBoundaryObservation, "districts").order_by(
             "municipality", "name", "source_record_id"
         )[:501]
     )
@@ -158,6 +163,7 @@ def district_map():
         raise ValueError("District navigation exceeds reviewed response budget")
     profiles = {("ADM", profile.district_id): profile.territory for profile in COLLECTIONS.values()}
     for row in rows:
+        history = observation_history(row, snapshot)
         shape = row.geometry.clone()
         shape.transform(3857)
         shape = shape.simplify(20, preserve_topology=True)
@@ -179,6 +185,7 @@ def district_map():
                     "bounds": row.geometry.extent,
                     "label_point": [point.x, point.y],
                     "explore_territory_id": profiles.get((row.municipality, row.district_id)),
+                    **history,
                 },
             }
         )

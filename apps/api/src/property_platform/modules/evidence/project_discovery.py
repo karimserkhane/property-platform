@@ -5,11 +5,18 @@ import json
 import re
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
+from xml.etree import ElementTree
 
 from .project_protocol import MAX_CAPTURE_BYTES, _Document, project_registry
 from .property_protocol import safe_url, validate_receipts
 
 VERSION = "project-catalogues-v1"
+
+
+def catalogue_byte_limit(definition):
+    # The reviewed multilingual PSI sitemap is ~11 MiB. Other catalogue and
+    # project HTML responses retain the ordinary 4 MiB acquisition boundary.
+    return 16 * 1024 * 1024 if definition["parser"] == "psi_sitemap_v1" else MAX_CAPTURE_BYTES
 
 
 def catalogue_registry(territory=None):
@@ -27,7 +34,7 @@ def catalogue_for(scope):
 
 
 def candidates_for(definition, payload):
-    if type(payload) is not bytes or not 0 < len(payload) <= MAX_CAPTURE_BYTES:
+    if type(payload) is not bytes or not 0 < len(payload) <= catalogue_byte_limit(definition):
         raise ValueError("Project catalogue exceeds its response budget")
     rows = []
     if definition["parser"] == "aldar_catalogue_v1":
@@ -75,6 +82,72 @@ def candidates_for(definition, payload):
                     "evidence_pointer": f"JSON:data.communities[{index}].communityId/projectName",
                 }
             )
+    elif definition["parser"] == "adrec_catalogue_v1":
+        envelope = json.loads(payload)
+        result = envelope.get("Data", {}).get("Result", {})
+        projects = result.get("Projects")
+        if (
+            envelope.get("Success") is not True
+            or not isinstance(projects, list)
+            or not 1 <= len(projects) <= 100
+            or result.get("RecordsTotal") != len(projects)
+            or result.get("TotalPages") != 1
+            or result.get("Number") != 0
+        ):
+            raise ValueError("ADREC catalogue pagination is incomplete or changed")
+        seen = set()
+        for index, project in enumerate(projects):
+            identifier = project.get("Id")
+            name, number = project.get("Name"), project.get("ProjectNumber")
+            if (
+                type(identifier) is not int
+                or not 0 < identifier < 10000000
+                or identifier in seen
+                or project.get("DistrictId") != definition["district_id"]
+                or project.get("MunicipalityId") != 1000
+                or not isinstance(name, str)
+                or not name.strip()
+                or not isinstance(number, str)
+                or not number.strip()
+            ):
+                raise ValueError("ADREC catalogue identity or territorial scope changed")
+            seen.add(identifier)
+            rows.append(
+                {
+                    "source_url": (
+                        "https://adrec.gov.ae/en/Directory/ProjectsDetails?projectId="
+                        + str(identifier)
+                    ),
+                    "source_record_id": str(identifier),
+                    "title": name.strip()[:255],
+                    "original_text": f"{name} | ProjectNumber: {number}"[:500],
+                    "evidence_pointer": f"JSON:Data.Result.Projects[{index}].Id/ProjectNumber",
+                }
+            )
+    elif definition["parser"] == "propertyfinder_catalogue_v1":
+        from .project_propertyfinder import propertyfinder_candidates
+
+        rows = propertyfinder_candidates(definition, payload)
+    elif definition["parser"] == "psi_sitemap_v1":
+        root = ElementTree.fromstring(payload)
+        for index, node in enumerate(root.iter("{http://www.sitemaps.org/schemas/sitemap/0.9}loc")):
+            url = node.text or ""
+            if not safe_url(url) or not any(
+                re.fullmatch(re.escape(prefix) + r"[a-z0-9-]+-[0-9]+", url)
+                for prefix in definition["prefixes"]
+            ):
+                continue
+            identifier = url.rsplit("-", 1)[1]
+            title = url.rsplit("/", 1)[1].rsplit("-", 1)[0].replace("-", " ")[:255]
+            rows.append(
+                {
+                    "source_url": url,
+                    "source_record_id": identifier,
+                    "title": title,
+                    "original_text": url,
+                    "evidence_pointer": f"sitemap:url[{index}]/loc",
+                }
+            )
     elif definition["parser"] == "html_catalogue_v1":
         document = _Document(payload)
         for index, node in enumerate(document.root.walk()):
@@ -110,6 +183,22 @@ def candidates_for(definition, payload):
     return result
 
 
+def registered_project_urls(territory):
+    """Reviewed exact URL identities, shared with the idempotency fingerprint."""
+    projects = project_registry(territory)
+    known = {
+        source["url"]: project["slug"]
+        for project in projects
+        for source in project["sources"]
+        if source["role"] != "terms"
+    }
+    known.update({project["website_url"]: project["slug"] for project in projects})
+    known.update(
+        {url: project["slug"] for project in projects for url in project.get("url_aliases", [])}
+    )
+    return known
+
+
 def import_catalogue(receipt_rows, *, scope, actor):
     from django.db import transaction
     from django.utils import timezone
@@ -121,29 +210,13 @@ def import_catalogue(receipt_rows, *, scope, actor):
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
         raise ValueError("Catalogue import actor is required")
     definition = catalogue_for(scope)
-    receipts = validate_receipts(receipt_rows, {definition["url"]})
+    receipts = validate_receipts(
+        receipt_rows, {definition["url"]}, max_bytes=catalogue_byte_limit(definition)
+    )
     receipt = receipts[definition["url"]]
     candidates = candidates_for(definition, receipt["payload"])
     # Only exact registered URLs in this territory can be linked automatically.
-    known = {
-        source["url"]: project["slug"]
-        for project in project_registry(definition["territory_scope"])
-        for source in project["sources"]
-        if source["role"] != "terms"
-    }
-    known.update(
-        {
-            project["website_url"]: project["slug"]
-            for project in project_registry(definition["territory_scope"])
-        }
-    )
-    known.update(
-        {
-            url: project["slug"]
-            for project in project_registry(definition["territory_scope"])
-            for url in project.get("url_aliases", [])
-        }
-    )
+    known = registered_project_urls(definition["territory_scope"])
     projects = {
         project.slug: project for project in Project.objects.filter(slug__in=known.values())
     }

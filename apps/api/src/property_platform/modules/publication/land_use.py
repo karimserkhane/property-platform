@@ -1,6 +1,6 @@
 """Versioned display taxonomy. Original usage remains visible; unknown is explicit."""
 
-VERSION = "land-use-v2"
+VERSION = "land-use-v3"
 CATEGORIES = {
     "mixed": "#d9bf95",
     "residential": "#eedfae",
@@ -17,6 +17,22 @@ def category(value):
     text = value.lower().replace(" ", "")
     if not text:
         return "unknown"
+    # AD-SDI publishes broad primary uses through its own reviewed subtype dictionary.
+    # Preserve those original words; do not infer a school, hospital or park subtype.
+    if text in {
+        "educational",
+        "health",
+        "governmental",
+        "cultural",
+        "religious",
+        "public",
+        "diplomatic",
+        "recreational",
+        "archaeological",
+    }:
+        return "public"
+    if text in {"utility", "industrial", "communication"}:
+        return "tech"
     if "projectlimit" in text:
         return "overlay"
     if any(term in text for term in ("rail", "tram")):

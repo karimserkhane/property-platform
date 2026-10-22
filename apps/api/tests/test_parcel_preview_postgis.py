@@ -38,6 +38,7 @@ def test_preview_geometry_filter_provenance_and_private_field_allowlist(client):
             "source_name",
             "use_types",
             "use_classification_version",
+            "field_history",
         }
         assert (
             item["properties"]["use_types"]

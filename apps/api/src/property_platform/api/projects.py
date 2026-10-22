@@ -4,7 +4,7 @@ from typing import Literal
 from uuid import UUID
 
 from django.db import DatabaseError
-from ninja import Router, Schema, Status
+from ninja import Query, Router, Schema, Status
 
 from .parcels import Error, Geometry, PointGeometry, enabled
 
@@ -14,11 +14,19 @@ router = Router(tags=["local-preview"])
 class ProjectSourceResponse(Schema):
     url: str
     name: str
+    kind: Literal[
+        "developer", "publisher", "broker", "authority", "media", "community", "reference"
+    ] = "developer"
+    content_sha256: str | None = None
+    developer_name: str | None = None
+    developer_role: Literal["declared", "registered"] | None = None
     retrieved_at: datetime
     published_at: datetime | None
     language: str
     evidence_pointer: str = ""
     rights_status: str
+    ingested_at: datetime | None = None
+    historical: bool = False
 
 
 class ProjectDeveloperResponse(Schema):
@@ -54,6 +62,7 @@ class ProjectAmenityResponse(Schema):
 
 class ProjectProgrammeResponse(Schema):
     value: int
+    basis: Literal["announced", "registered"] = "announced"
     original_text: str
     source: ProjectSourceResponse
 
@@ -94,6 +103,7 @@ class ProjectDetailResponse(Schema):
     developer: ProjectDeveloperResponse
     website_url: str
     summary: str
+    summary_source: ProjectSourceResponse | None = None
     language: str
     updated_at: datetime
     handover: ProjectHandoverResponse | None
@@ -119,6 +129,8 @@ class ProjectSummaryResponse(Schema):
 class ProjectDirectoryResponse(Schema):
     items: list[ProjectSummaryResponse]
     has_more: bool
+    total: int
+    offset: int
 
 
 @router.get(
@@ -126,13 +138,19 @@ class ProjectDirectoryResponse(Schema):
     response={200: ProjectDirectoryResponse, 403: Error, 503: Error},
     operation_id="previewProjectDirectory",
 )
-def projects(request, territory: Literal["al-reem-island", "saadiyat-island"] | None = None):
+def projects(
+    request,
+    territory: Literal["al-reem-island", "saadiyat-island", "al-maryah-island"] | None = None,
+    q: str = Query("", max_length=120),
+    offset: int = Query(0, ge=0, le=50000),
+    limit: int = Query(200, ge=1, le=200),
+):
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.evidence.project_queries import project_directory
 
     try:
-        return project_directory(territory)
+        return project_directory(territory, query=q, offset=offset, limit=limit)
     except DatabaseError:
         return Status(503, {"code": "data_unavailable"})
 

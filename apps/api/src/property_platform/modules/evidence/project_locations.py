@@ -18,9 +18,26 @@ VERSION = "project-map-v2"
 
 
 def extract_project_position(definition, source, receipt):
-    if source["role"] != "project" or definition["identity_links"]:
+    if (
+        source["role"] != "project"
+        or definition["identity_links"]
+        or source.get("location_policy") == "reference_only"
+    ):
         return None
-    marker = project_marker(receipt["payload"], source["url"], definition["name"])
+    if source["parser"] == "adrec_project_v1":
+        from .project_adrec import adrec_position
+
+        marker = adrec_position(definition, source, receipt["payload"])
+    elif source["parser"] == "propertyfinder_project_v1":
+        from .project_propertyfinder import propertyfinder_position
+
+        marker = propertyfinder_position(definition, source, receipt["payload"])
+    elif source["parser"] == "psi_project_v1":
+        from .project_psi import psi_position
+
+        marker = psi_position(definition, source, receipt["payload"])
+    else:
+        marker = project_marker(receipt["payload"], source["url"], definition["name"])
     if marker is None:
         return None
     area = TERRITORY_BY_ID[definition["territory_id"]]
@@ -35,6 +52,14 @@ def materialize_project_position(project, capture, marker, *, actor):
     if marker is None:
         return False
     namespace = capture.run.source.key
+    if marker.get("source_kind") == "broker":
+        namespace += ":broker:" + marker["publisher_key"]
+        if (
+            ProjectIdentityLink.objects.filter(project=project, active=True)
+            .exclude(place__source_namespace=namespace)
+            .exists()
+        ):
+            return False
     previous = ProjectIdentityLink.objects.filter(
         project=project,
         place__source_namespace=namespace,
@@ -42,6 +67,15 @@ def materialize_project_position(project, capture, marker, *, actor):
     )
     # A rejected identity is not recreated, even if the publisher still repeats it.
     if previous.filter(active=False).exists():
+        return False
+    if MapObservation.objects.filter(
+        place__source_namespace=namespace,
+        source_record_id="publisher-map",
+        capture__fetched_at__gt=capture.fetched_at,
+        capture__run__status="succeeded",
+    ).exists():
+        # Replaying an older receipt may recover facts, but must not move the
+        # current pin backwards over a newer source observation.
         return False
     if MapObservation.objects.filter(capture=capture, source_record_id="publisher-map").exists():
         return True

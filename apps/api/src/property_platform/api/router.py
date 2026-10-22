@@ -4,6 +4,8 @@ from django.conf import settings
 from django.db import DatabaseError, connection
 from ninja import NinjaAPI, Schema, Status
 
+from .accessibility import router as accessibility_router
+from .basemaps import router as basemaps_router
 from .parcels import router as parcels_router
 from .project_media import router as project_media_router
 from .projects import router as projects_router
@@ -19,6 +21,8 @@ api.add_router("/preview", parcels_router)
 api.add_router("/preview", context_router)
 api.add_router("/preview", projects_router)
 api.add_router("/preview", project_media_router)
+api.add_router("/preview", basemaps_router)
+api.add_router("/preview", accessibility_router)
 
 
 class Health(Schema):

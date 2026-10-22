@@ -80,6 +80,10 @@ def test_snapshots_preserve_multiplicity_retry_is_noop_and_latest_is_only_counte
     assert market("al-reem-island")["total"] == 1
     assert market("saadiyat-island")["total"] == 0
     assert market("al-reem-island", query="absent")["total"] == 0
+    previous = AdrecMarketSnapshot.objects.order_by("created_at").first()
+    archived = market("al-reem-island", snapshot_id=previous.pk)
+    assert archived["historical"] and archived["total"] == 2
+    assert len(archived["snapshots"]) == 2
     row = AdrecSaleObservation.objects.first()
     assert row.capture.run_id == row.snapshot.run_id and row.field_path == "content[0]"
 

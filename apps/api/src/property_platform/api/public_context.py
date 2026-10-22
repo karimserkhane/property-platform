@@ -7,14 +7,26 @@ from uuid import UUID
 from django.db import DatabaseError
 from ninja import Router, Schema, Status
 
+from property_platform.modules.publication.coverage import profile_for
+
 from .parcels import Error, enabled
 
 router = Router(tags=["public-context-preview"])
 
 
+class HistoricalField(Schema):
+    retrieved_at: datetime
+    ingested_at: datetime
+
+
 class ContextRow(Schema):
     source_record_id: str
     name: str
+    snapshot_id: UUID
+    retrieved_at: datetime
+    ingested_at: datetime
+    historical: bool
+    field_history: dict[str, HistoricalField]
 
 
 class FacilityResponse(ContextRow):
@@ -141,7 +153,7 @@ def context(
     if not enabled():
         return Status(403, {"code": "preview_disabled"})
     if (
-        territory not in {"abu-dhabi", "al-reem-island", "saadiyat-island"}
+        profile_for(territory) is None
         or len(q) > 80
         or not 0 <= offset <= 5000
         or not 1 <= limit <= 100

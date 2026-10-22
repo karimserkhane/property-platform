@@ -26,8 +26,10 @@ class CollectionProfile:
         return f"DISTRICTENG = '{self.district_name}' AND MUNICIPALITYENG = 'ADM'"
 
     def map_namespace(self, layer):
-        if layer not in {"district", "community", "street", "osm"}:
+        if layer not in {"district", "community", "street", "osm", "overture"}:
             raise ValueError("Unknown collection layer")
+        if layer == "overture":
+            return f"overture:{self.slug}:places"
         return f"osm:{self.slug}:osm" if layer == "osm" else f"dmt:onwani:{self.slug}:{layer}"
 
     def map_layers(self):
@@ -92,6 +94,17 @@ COLLECTIONS = {
         "saadiyat_project_sources.json",
         "saadiyat_property_presentations.json",
         "saadiyat_property_media.json",
+    ),
+    "al-maryah-island": CollectionProfile(
+        "al-maryah-island",
+        "maryah",
+        "Al Maryah Island",
+        "AL MARYAH ISLAND",
+        74,
+        (54.385, 24.490, 54.398, 24.515),
+        "maryah_project_sources.json",
+        "maryah_property_presentations.json",
+        "maryah_property_media.json",
     ),
 }
 

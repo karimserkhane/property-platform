@@ -28,6 +28,7 @@ from property_platform.modules.evidence.project_import import (  # noqa: E402
 )
 from property_platform.modules.evidence.project_queries import (  # noqa: E402
     project_detail,
+    project_directory,
     project_locations,
     project_references,
 )
@@ -36,7 +37,20 @@ pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
 
 @pytest.fixture
-def project_input():
+def project_input(monkeypatch):
+    original_registry = project_protocol.project_registry
+
+    def first_party_registry(scope=None):
+        rows = original_registry(scope)
+        for row in rows:
+            row["sources"] = [
+                s
+                for s in row["sources"]
+                if s["parser"] not in {"psi_project_v1", "adrec_project_v1"}
+            ]
+        return rows
+
+    monkeypatch.setattr(project_protocol, "project_registry", first_party_registry)
     definition = project_protocol.project_registry("saadiyat-island")[0]
     for link in definition["identity_links"]:
         Building.objects.create(
@@ -165,6 +179,53 @@ def test_map_locations_exclude_inactive_revoked_and_outside_identities(project_i
     links[2].building.geometry = MultiPolygon(Polygon.from_bbox((55, 25, 55.01, 25.01)), srid=4326)
     links[2].building.save(update_fields=["geometry"])
     assert project_locations(project) == []
+    assert project_directory()["items"][0]["has_map_identity"] is False
+
+
+def test_excluded_source_cannot_advertise_project_or_map_identity(project_input):
+    from property_platform.modules.evidence.models import HistoryExclusion
+
+    _, rows, _ = project_input
+    ingest(rows)
+    old = ProjectSnapshot.objects.get()
+    # A separately reviewed link cannot publish a dossier with no accepted facts.
+    ProjectIdentityLink.objects.update(capture=old.terms_capture)
+    HistoryExclusion.objects.create(
+        dataset="project:park-view",
+        record_key=old.capture.url,
+        capture=old.capture,
+        actor="reviewer",
+        reason="Source identity was incorrect",
+    )
+    assert project_detail("park-view") is None
+    assert project_directory()["total"] == 0
+    assert project_references("building", list(Building.objects.values_list("pk", flat=True))) == {}
+    assert ProjectSnapshot.objects.count() == 1  # Preserved, not deleted.
+
+
+@pytest.mark.parametrize("field_only", [False, True])
+def test_excluded_media_source_does_not_mask_accepted_reference(project_input, field_only):
+    from property_platform.modules.evidence.models import HistoryExclusion
+
+    _, rows, _ = project_input
+    ingest(rows)
+    accepted = ProjectSnapshot.objects.get()
+    ingest([receipt(row["url"], b"<html>Another observation</html>") for row in rows])
+    newer = ProjectSnapshot.objects.latest("id")
+    newer.capture.url = "https://bloomholding.com/rejected-source"
+    newer.capture.save(update_fields=["url"])
+    ProjectMedia.objects.filter(snapshot=newer).update(title="Incorrect attribution")
+    HistoryExclusion.objects.create(
+        dataset="project:park-view",
+        record_key=newer.capture.url + ("#media" if field_only else ""),
+        capture=newer.capture,
+        actor="reviewer",
+        reason="Media source attribution withdrawn",
+    )
+    result = project_detail("park-view")
+    assert len(result["media"]) == 1
+    assert result["media"][0]["source"]["url"] == accepted.capture.url
+    assert result["media"][0]["title"] == "Official video"
 
 
 def test_source_position_is_audited_idempotent_and_respects_revocation(project_input):
@@ -293,3 +354,71 @@ def test_missing_new_source_fields_preserves_other_source_evidence(project_input
     data = project_detail("park-view")
     assert data["handover"]["original_text"] == old.handover_original
     assert data["handover"]["source"]["url"] == rows[0]["url"]
+
+
+def test_same_source_losing_fields_recovers_the_last_known_values(project_input):
+    _, rows, parsed = project_input
+    ingest(rows)
+    old = ProjectSnapshot.objects.get()
+    parsed.update(
+        handover=None,
+        total_units=None,
+        total_units_original="",
+        total_units_pointer="",
+        typologies=[],
+        amenities=[],
+    )
+    ingest([receipt(row["url"], b"<html>Changed page with missing records</html>") for row in rows])
+    result = project_detail("park-view")
+    assert ProjectSnapshot.objects.count() == 2
+    assert result["handover"]["year"] == old.handover_year
+    assert result["programme_total"]["value"] == old.total_units
+    assert result["typologies"] and result["amenities"]
+    assert result["handover"]["source"]["historical"] is True
+    assert result["handover"]["source"]["retrieved_at"] == old.capture.fetched_at
+
+
+def test_confirmed_claim_withdrawal_and_blocked_media_are_not_revived(project_input):
+    from property_platform.modules.evidence.models import HistoryExclusion
+
+    _, rows, parsed = project_input
+    ingest(rows)
+    old = ProjectSnapshot.objects.get()
+    HistoryExclusion.objects.create(
+        dataset="project:park-view",
+        record_key=f"{old.capture.url}#handover",
+        capture=old.capture,
+        actor="reviewer",
+        reason="Publisher confirmed this delivery claim is withdrawn",
+    )
+    ingest([receipt(row["url"], b"<html>Media withdrawn by publisher</html>") for row in rows])
+    ProjectMedia.objects.filter(snapshot=ProjectSnapshot.objects.latest("id")).update(
+        rights_status="blocked"
+    )
+    result = project_detail("park-view")
+    assert result["handover"] is None and result["media"] == []
+
+
+def test_partial_project_lists_retain_missing_individual_records(project_input):
+    _, rows, parsed = project_input
+    parsed["typologies"].append(
+        {
+            "property_type": "apartment",
+            "bedrooms": 1,
+            "original_text": "One bedroom",
+            "evidence_pointer": "Types",
+        }
+    )
+    parsed["amenities"].append(
+        {"code": "gym", "label": "Gym", "original_text": "Gym", "evidence_pointer": "Amenities"}
+    )
+    ingest(rows)
+    parsed["typologies"] = parsed["typologies"][1:]
+    parsed["amenities"] = parsed["amenities"][1:]
+    ingest([receipt(row["url"], b"<html>Partial list update</html>") for row in rows])
+    result = project_detail("park-view")
+    assert {row["property_type"] for row in result["typologies"]} == {"studio", "apartment"}
+    assert {row["code"] for row in result["amenities"]} == {"swimming-pool", "gym"}
+    assert next(row for row in result["typologies"] if row["property_type"] == "studio")["source"][
+        "historical"
+    ]

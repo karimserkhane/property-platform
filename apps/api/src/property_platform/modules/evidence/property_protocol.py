@@ -32,7 +32,9 @@ def safe_url(value):
         return False
 
 
-def validate_receipts(rows, allowed_urls):
+def validate_receipts(rows, allowed_urls, *, max_bytes=MAX_CAPTURE_BYTES):
+    if type(max_bytes) is not int or not 1 <= max_bytes <= 16 * 1024 * 1024:
+        raise ValueError("Invalid receipt byte budget")
     result = {}
     for row in rows:
         url = row["url"]
@@ -51,7 +53,7 @@ def validate_receipts(rows, allowed_urls):
             raise ValueError("Invalid acquisition times")
         if (
             not payload
-            or len(payload) > MAX_CAPTURE_BYTES
+            or len(payload) > max_bytes
             or hashlib.sha256(payload).hexdigest() != row["sha256"]
         ):
             raise ValueError("Invalid property receipt hash or size")

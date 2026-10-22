@@ -21,9 +21,32 @@ from .models import (
     Source,
 )
 
-VERSION = "project-details-v3"
+VERSION = "project-details-v5"
 LOCK_KEY = 716548220
 TARGETS = {"building": Building, "place": Place, "parcel": Parcel}
+
+
+def _link_reviewed_targets(project, definition, identities, capture, actor):
+    count = 0
+    for link in definition["identity_links"]:
+        target = link["target"]
+        identity = identities[(project.slug, target, link["namespace"], link["record_id"])]
+        if identity is None:
+            continue
+        previous = ProjectIdentityLink.objects.filter(project=project, **{target: identity})
+        if previous.exists():
+            continue
+        if ProjectIdentityLink.objects.filter(active=True, **{target: identity}).exists():
+            raise ValueError("Map identity already belongs to a reviewed project")
+        ProjectIdentityLink.objects.create(
+            project=project,
+            capture=capture,
+            actor=actor.strip(),
+            reason=link["reason"],
+            **{target: identity},
+        )
+        count += 1
+    return count
 
 
 def _receipt_key(project, source, receipt, parsed, receipts):
@@ -102,7 +125,7 @@ def import_project_details(receipt_rows, *, territory, actor):
             filters = {"source_namespace": link["namespace"], "source_record_id": link["record_id"]}
             filters["superseded_by__isnull" if target == "parcel" else "active"] = True
             identities[(definition["slug"], target, link["namespace"], link["record_id"])] = (
-                TARGETS[target].objects.get(**filters)
+                TARGETS[target].objects.filter(**filters).first()
             )
         for source in definition["sources"]:
             parsed = extract_project_source(definition, source, receipts[source["url"]])
@@ -131,10 +154,24 @@ def import_project_details(receipt_rows, *, territory, actor):
         projects = {}
         for definition, source, parsed, handover in parsed_sources:
             project = projects.setdefault(definition["slug"], reconcile_project(definition))
+            if excluded := source.get("excluded_media_urls"):
+                if not source.get("media_review_reason"):
+                    raise ValueError("A reviewed media exclusion requires its reason")
+                # Explicit source review withdraws a wrong reference without
+                # deleting its capture or relying on source disappearance.
+                ProjectMedia.objects.filter(
+                    snapshot__project=project,
+                    snapshot__capture__url=source["url"],
+                    source_url__in=excluded,
+                    rights_status="reference_only",
+                ).update(rights_status="blocked")
             receipt = receipts[source["url"]]
             receipt_key = _receipt_key(definition, source, receipt, parsed, receipts)
             existing = ProjectSnapshot.objects.filter(receipt_key=receipt_key).first()
             if existing is not None:
+                summary["links"] += _link_reviewed_targets(
+                    project, definition, identities, existing.capture, actor
+                )
                 summary["reused"] += 1
                 summary["run_ids"].append(str(existing.capture.run_id))
                 continue
@@ -171,6 +208,10 @@ def import_project_details(receipt_rows, *, territory, actor):
                 receipt_key=receipt_key,
                 extractor_version=parsed["parser_version"],
                 source_role=source["role"],
+                source_kind=source.get("source_kind", "developer"),
+                source_name=source.get("source_name", definition["developer"]["name"]),
+                source_developer_name=parsed.get("source_developer_name", ""),
+                source_developer_role=parsed.get("source_developer_role", ""),
                 title=parsed["title"],
                 summary=parsed.get("summary", ""),
                 language=definition.get("language", "en"),
@@ -178,6 +219,7 @@ def import_project_details(receipt_rows, *, territory, actor):
                 acquisition_scope=source.get("acquisition_scope", "local_research"),
                 actor=actor.strip(),
                 total_units=parsed.get("total_units"),
+                total_units_basis=parsed.get("total_units_basis", "announced"),
                 total_units_original=parsed.get("total_units_original", ""),
                 total_units_pointer=parsed.get("total_units_pointer", ""),
                 **handover,
@@ -225,23 +267,9 @@ def import_project_details(receipt_rows, *, territory, actor):
                     },
                 )
                 summary["media_references"] += 1
-            for link in definition["identity_links"]:
-                target = link["target"]
-                identity = identities[(project.slug, target, link["namespace"], link["record_id"])]
-                # A revoked decision is never silently reactivated by the next acquisition.
-                previous = ProjectIdentityLink.objects.filter(project=project, **{target: identity})
-                if previous.exists():
-                    continue
-                if ProjectIdentityLink.objects.filter(active=True, **{target: identity}).exists():
-                    raise ValueError("Map identity already belongs to a reviewed project")
-                ProjectIdentityLink.objects.create(
-                    project=project,
-                    capture=evidence,
-                    actor=actor.strip(),
-                    reason=link["reason"],
-                    **{target: identity},
-                )
-                summary["links"] += 1
+            summary["links"] += _link_reviewed_targets(
+                project, definition, identities, evidence, actor
+            )
             summary["locations"] += int(
                 materialize_project_position(
                     project, evidence, parsed.get("map_position"), actor=actor.strip()

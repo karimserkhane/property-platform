@@ -50,5 +50,13 @@ TERRITORIES = (
         "جزيرة السعديات",
         (54.385, 24.488, 54.483, 24.603),
     ),
+    Territory(
+        "al-maryah-island",
+        "abu-dhabi",
+        "area",
+        "Al Maryah Island",
+        "جزيرة المارية",
+        (54.383, 24.488, 54.400, 24.517),
+    ),
 )
 TERRITORY_BY_ID = {territory.id: territory for territory in TERRITORIES}

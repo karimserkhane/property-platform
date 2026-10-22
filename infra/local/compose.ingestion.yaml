@@ -27,7 +27,8 @@ services:
     command: ["prefect", "server", "start", "--host", "0.0.0.0"]
     environment:
       PREFECT_SERVER_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect-local-only@prefect-db:5432/prefect
-      PREFECT_SERVER_UI_API_URL: http://localhost:4200/api
+      # Same-origin API works both on localhost and through private Tailscale Serve.
+      PREFECT_SERVER_UI_API_URL: /api
       PREFECT_SERVER_ANALYTICS_ENABLED: "false"
       PREFECT_SERVER_DATABASE_SQLALCHEMY_POOL_SIZE: "5"
       PREFECT_SERVER_DATABASE_SQLALCHEMY_MAX_OVERFLOW: "5"

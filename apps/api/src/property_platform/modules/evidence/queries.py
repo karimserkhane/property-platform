@@ -117,15 +117,37 @@ PARCEL_FIELDS = (
 )
 
 
-def parcel_attributes(parcel_id):
+def parcel_attributes(parcel_id, *, with_history=False):
     observation = (
         _parcel_observations([parcel_id])
         .order_by("-capture__fetched_at", "-id")
-        .values("raw_attributes")
+        .values("raw_attributes", "capture_id")
         .first()
     )
     raw = observation["raw_attributes"] if observation else {}
-    return {key: raw.get(key) for key in PARCEL_FIELDS}
+    result = {key: raw.get(key) for key in PARCEL_FIELDS}
+    history = {}
+    for key in PARCEL_FIELDS:
+        if result[key] not in (None, ""):
+            continue
+        prior = (
+            _parcel_observations([parcel_id])
+            .filter(raw_attributes__has_key=key)
+            .exclude(Q(**{f"raw_attributes__{key}": None}) | Q(**{f"raw_attributes__{key}": ""}))
+            .order_by("-capture__fetched_at", "-id")
+            .values("raw_attributes", "capture__url", "capture__fetched_at", "ingested_at")
+            .first()
+        )
+        if prior:
+            result[key] = prior["raw_attributes"][key]
+            history[key] = {
+                "url": prior["capture__url"],
+                "retrieved_at": prior["capture__fetched_at"],
+                "ingested_at": prior["ingested_at"],
+            }
+    if with_history:
+        result["_field_history"] = history
+    return result
 
 
 def map_usage_tags(target, ids, capture_ids):
@@ -164,6 +186,21 @@ def map_usage_tags(target, ids, capture_ids):
             if key in allowed and isinstance(value, str) and len(value) <= 255
         }
     return result
+
+
+def _project_source_kind(row):
+    kind = (
+        row["capture__projectsnapshot__source_kind"]
+        or row["capture__researchreference__source_kind"]
+    )
+    if kind in {"developer", "publisher", "broker", "authority", "media"}:
+        return kind
+    namespace = row["capture__run__source__key"]
+    if namespace.startswith("dmt:"):
+        return "authority"
+    if namespace.startswith(("osm:", "overture:")):
+        return "community"
+    return "reference"
 
 
 def map_provenances(target, ids, *, include_capture_id=False):
@@ -225,22 +262,28 @@ def map_provenances(target, ids, *, include_capture_id=False):
             "capture__acquisition_method",
             "capture__timestamp_basis",
             "capture__researchreference__source_kind",
+            "capture__projectsnapshot__source_kind",
+            "capture__projectsnapshot__source_name",
         )
     )
     return {
         str(row["_canonical_id"]): {
             **({"_capture_id": row["capture_id"]} if include_capture_id else {}),
             "url": row["source_url"],
-            "name": row["capture__run__source__name"],
+            "name": row["capture__projectsnapshot__source_name"]
+            or row["capture__run__source__name"],
+            "kind": _project_source_kind(row),
             "retrieved_at": row["capture__fetched_at"],
             "published_at": row["source_published_at"],
             "ingested_at": row["ingested_at"],
             "reliability": "official"
             if row["capture__run__source__key"].startswith("dmt:")
+            or row["capture__projectsnapshot__source_kind"] == "authority"
             else "community"
-            if row["capture__run__source__key"].startswith("osm:")
+            if row["capture__run__source__key"].startswith(("osm:", "overture:"))
             else "broker"
             if row["capture__researchreference__source_kind"] == "broker"
+            or row["capture__projectsnapshot__source_kind"] == "broker"
             else "publisher",
             "acquisition_method": row["capture__acquisition_method"],
             "timestamp_basis": row["capture__timestamp_basis"],

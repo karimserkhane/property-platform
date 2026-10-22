@@ -14,6 +14,7 @@ INDICES = {"sale": BASE + "ResiSalePriceIndexByArea", "rent": BASE + "ResiRentPr
 DISTRICTS = {
     "al-reem-island": "Al Reem Island",
     "saadiyat-island": "Al Saadiyat Island",
+    "al-maryah-island": "Al Maryah Island",
     "abu-dhabi": "all",
 }
 VERSION = "adrec-public-dashboard-v2"

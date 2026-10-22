@@ -1,18 +1,23 @@
 """Read only the newest complete provider snapshot; never add overlapping snapshots."""
 
-from django.db.models import Max
+from django.db.models import Max, OuterRef, Subquery
 
 from property_platform.modules.evidence import adrec
-from property_platform.modules.evidence.models import AdrecMarketSnapshot
+from property_platform.modules.evidence.models import AdrecIndexObservation, AdrecMarketSnapshot
 
 
-def market(territory, *, query="", offset=0, limit=40):
+def market(territory, *, query="", offset=0, limit=40, snapshot_id=None):
     base = AdrecMarketSnapshot.objects.filter(run__status__in=["succeeded", "quarantined"])
+    archive = base.filter(dataset="sales", territory=territory).order_by(
+        "-period_end", "-created_at", "-pk"
+    )
     snapshot = (
-        base.filter(dataset="sales", territory=territory)
+        (archive.filter(pk=snapshot_id) if snapshot_id is not None else archive)
         .order_by("-period_end", "-created_at", "-pk")
         .first()
     )
+    latest_snapshot_id = archive.values_list("pk", flat=True).first()
+    historical = bool(snapshot and snapshot.pk != latest_snapshot_id)
     rows, count = [], 0
     if snapshot:
         sales = snapshot.sales.all()
@@ -49,14 +54,22 @@ def market(territory, *, query="", offset=0, limit=40):
     )
     if index_snapshot:
         review = index_snapshot.indices.filter(usable=False).exists()
-        usable = index_snapshot.indices.filter(
-            usable=True, kind="sale", municipality="Abu Dhabi City", zone_label="(all zones)"
+        versions = AdrecIndexObservation.objects.filter(
+            snapshot__run__status__in=["succeeded", "quarantined"],
+            kind="sale",
+            municipality="Abu Dhabi City",
+            zone_label="(all zones)",
         )
-        period = usable.aggregate(latest=Max("period_end"))["latest"]
+        if historical:
+            versions = versions.filter(snapshot__created_at__lte=snapshot.created_at)
+        latest = versions.filter(property_type=OuterRef("property_type")).order_by(
+            "-period_end", "-snapshot__created_at", "-pk"
+        )
+        usable = versions.filter(pk=Subquery(latest.values("pk")[:1]), usable=True).select_related(
+            "capture"
+        )
         seen = set()
-        for row in usable.filter(period_end=period).order_by(
-            "kind", "property_type", "source_position"
-        ):
+        for row in usable.order_by("kind", "property_type", "source_position"):
             # Identical duplicate index values may be displayed once; sales retain multiplicity.
             key = (row.kind, row.property_type)
             if key in seen:
@@ -69,6 +82,10 @@ def market(territory, *, query="", offset=0, limit=40):
                     "period_end": row.period_end,
                     "municipality": row.municipality,
                     "index_value": str(row.index_value) if row.index_value is not None else None,
+                    "snapshot_id": row.snapshot_id,
+                    "retrieved_at": row.capture.fetched_at,
+                    "ingested_at": row.ingested_at,
+                    "historical": row.snapshot_id != index_snapshot.pk,
                 }
             )
     return {
@@ -85,4 +102,15 @@ def market(territory, *, query="", offset=0, limit=40):
         "sales": rows,
         "indices": indices,
         "index_review_needed": review,
+        "historical": historical,
+        "snapshots": [
+            {
+                "id": row.pk,
+                "period_start": row.period_start,
+                "period_end": row.period_end,
+                "ingested_at": row.created_at,
+                "source_row_count": row.source_row_count,
+            }
+            for row in archive[:100]
+        ],
     }

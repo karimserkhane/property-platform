@@ -140,6 +140,20 @@
         24.603
       ],
       "queryable": true
+    },
+    {
+      "id": "al-maryah-island",
+      "parent_id": "abu-dhabi",
+      "level": "area",
+      "name": "Al Maryah Island",
+      "name_ar": "جزيرة المارية",
+      "bounds": [
+        54.383,
+        24.488,
+        54.4,
+        24.517
+      ],
+      "queryable": true
     }
   ]
 }

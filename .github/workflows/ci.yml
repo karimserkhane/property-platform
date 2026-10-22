@@ -92,6 +92,7 @@ jobs:
       - run: uv run --project apps/ingestion ruff format --check apps/ingestion
       - run: uv run --project apps/ingestion pytest apps/ingestion/tests -c apps/ingestion/pyproject.toml
       - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion config --quiet
+      - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml -f infra/local/compose.map-analysis.yaml --profile ingestion --profile map-analysis config --quiet
       - name: Validate optional R2 storage configuration without contacting the cloud
         env:
           MEDIA_S3_ENDPOINT_URL: https://ci-account.r2.cloudflarestorage.com

@@ -21,7 +21,20 @@ from property_platform_ingestion.collectors.projects import collect_project_rece
 
 
 def project(slug):
-    return next(row for row in project_registry() if row["slug"] == slug)
+    row = next(row for row in project_registry() if row["slug"] == slug)
+    # These fixtures cover the original first-party adapters. Agency fixtures
+    # and mixed-source reconciliation are exercised in test_project_psi.py.
+    row["sources"] = [
+        s for s in row["sources"] if s["parser"] not in {"psi_project_v1", "adrec_project_v1"}
+    ]
+    return row
+
+
+def test_reviewed_media_exclusions_have_a_durable_reason_before_import():
+    for row in project_registry():
+        for source in row["sources"]:
+            if source.get("excluded_media_urls"):
+                assert source.get("media_review_reason"), (row["slug"], source["url"])
 
 
 def html(body):
@@ -29,6 +42,66 @@ def html(body):
 
 
 def source_html(row, source):
+    if source["parser"] == "bayut_guide_v1":
+        return html(
+            f"<h1>{row['name']}</h1><ul>"
+            f"<li>Developer: {source['developer_aliases'][0]}</li>"
+            "<li>Location: Al Reem Island</li>"
+            "<li>Unit type: 1, 2 and 3-bedroom apartments</li></ul>"
+        )
+    if source["parser"] == "propertyfinder_project_v1":
+        from test_project_propertyfinder import fixture, payload
+
+        _, _, data = fixture()
+        data.update(
+            id=source["record_id"],
+            title=source["heading_aliases"][0],
+            slug=source["url"].removeprefix("https://www.propertyfinder.ae/en/new-projects/"),
+            developer={"name": source["developer_aliases"][0]},
+            locationTree=[
+                {"id": 6, "type": "CITY"},
+                {
+                    "id": 279 if row["territory_id"] == "al-reem-island" else 310,
+                    "type": "COMMUNITY",
+                },
+            ],
+        )
+        return payload(data)
+    if source["parser"] == "adrec_project_v1":
+        return json.dumps(
+            {
+                "Success": True,
+                "Data": {
+                    "Result": {
+                        "Id": int(source["record_id"]),
+                        "ProjectNumber": source["registration_number"],
+                        "MunicipalityId": 1000,
+                        "DistrictId": source["district_id"],
+                        "DistrictEn": "Al Saadiyat Island",
+                        "Name": source["heading_aliases"][0],
+                        "DeveloperName": source["developer_aliases"][0],
+                        "ResidentialUnits": 42,
+                        "PropertyProjectUnits": [],
+                    }
+                },
+            }
+        ).encode()
+    if source["parser"] == "psi_project_v1":
+        from test_project_psi import payload
+
+        return payload(
+            {
+                "propertyId": int(source["record_id"]),
+                "propertyName": source["heading_aliases"][0],
+                "community": {
+                    "al-reem-island": "Al Reem Island",
+                    "saadiyat-island": "Saadiyat Island",
+                    "al-maryah-island": "Al Maryah Island",
+                }[row["territory_id"]],
+                "city": "Abu Dhabi",
+                "developerName": source["developer_aliases"][0],
+            }
+        )
     if source["role"] == "terms":
         return html("<h1>Terms of Use</h1><p>Personal, non-commercial use.</p>")
     if source["parser"] == "aldar_project_v1":
@@ -48,9 +121,27 @@ def source_html(row, source):
             }
         ).encode()
     if source["parser"] == "official_project_v1":
+        reviewed_body = {
+            "https://rcalmaryahisland.com/": (
+                '<div class="t480__uptitle">'
+                "The collection comprises 165 exquisite private homes</div>"
+            ),
+            "https://press.fourseasons.com/abudhabi/hotel-facts/": (
+                "<p>Residences: a mix of 124 residential units</p>"
+            ),
+            "https://www.mubadala.com/en/what-we-do/rosewood-abu-dhabi": (
+                "<p>Rosewood Abu Dhabi features 131 serviced residences.</p>"
+            ),
+            "https://jumeirah.emiratesdevelopments.com/the-project/": (
+                "<p>Jumeirah Residences Al Maryah Island offers "
+                "one to four bedroom apartments and five bedroom penthouses</p>"
+            ),
+        }.get(source["url"], "")
         return html(
             f"<h1>{row['name']}</h1>"
-            '<meta name="description" content="A reviewed project description">'
+            + (f"<div>{source['identity_label']}</div>" if source.get("identity_label") else "")
+            + '<meta name="description" content="A reviewed project description">'
+            + reviewed_body
         )
     if source["parser"] == "reportage_offer_v1":
         return html(
@@ -155,6 +246,18 @@ def test_reportage_adapter_extracts_same_typed_facts_for_separate_projects(slug,
     assert result["media"][0]["source_url"] == row["media_references"][0]["source_url"]
     assert result["media"][0]["rights_status"] == "reference_only"
     assert result["rights_status"] == "restricted"
+
+
+def test_reportage_apartment_counter_preserves_the_reviewed_label_and_rejects_ambiguity():
+    row = project("al-maryah-vista-2")
+    source = row["sources"][0]
+    payload = source_html(row, source).replace(b"Total Number of Units", b"Total Apartments")
+    result = extract_project_source(row, source, verified(row, source, payload))
+    assert result["total_units"] == 622
+    assert result["total_units_pointer"] == ".counter-card-inner:Total Apartments > h3"
+    conflicting = payload.replace(b"</p></div>", b"</p><p>Total Number of Units</p></div>")
+    with pytest.raises(ValueError, match="ambiguous"):
+        extract_project_source(row, source, verified(row, source, conflicting))
 
 
 def test_offer_preserves_quarter_precision_and_never_invents_a_delivery_day_or_price():
@@ -297,8 +400,14 @@ def test_project_flow_uses_scoped_durable_gateway_without_archiving_restricted_m
     monkeypatch.setattr(flows, "archive_media", lambda *args: pytest.fail("No promoter copies"))
     result = flows.project_details.fn(territory="saadiyat-island", actor="reviewer")
     assert calls == [
-        ("project_details", f"saadiyat-island:{row['slug']}", "reviewer")
+        (
+            "project_details",
+            f"saadiyat-island:{row['slug']}:" + hashlib.sha256(source["url"].encode()).hexdigest(),
+            "reviewer",
+        )
         for row in project_registry("saadiyat-island")
+        for source in row["sources"]
+        if source["role"] != "terms"
     ]
     assert len(result) == len(calls)
     assert all(item["summary"]["projects"] == 1 for item in result)
@@ -318,10 +427,11 @@ def test_project_flow_can_refresh_one_registered_project_without_changing_defaul
     gateway.with_options = lambda **kwargs: gateway
     monkeypatch.setattr(flows, "ingest_source", gateway)
     flows.project_details.fn(territory="al-reem-island", actor="reviewer", project_slug="reem-nine")
-    assert calls == [("project_details", "al-reem-island:reem-nine", "reviewer")]
+    assert len(calls) == 2
+    assert all(scope.startswith("al-reem-island:reem-nine:") for _, scope, _ in calls)
     with pytest.raises(ValueError, match="not registered"):
         flows.project_details.fn(territory="al-reem-island", project_slug="unknown-project")
-    assert len(calls) == 1
+    assert len(calls) == 2
 
 
 def test_project_and_presentations_checkpoints_cannot_collide_for_one_prefect_run(tmp_path):
@@ -353,7 +463,7 @@ def test_one_failed_project_does_not_prevent_other_project_imports(monkeypatch):
 
     def gateway(operation, scope, actor):
         calls.append(scope)
-        if scope.endswith(":" + rows[0]["slug"]):
+        if len(calls) == 1:
             raise flows.IngestionFailure({"status": "failed", "error": "SourceUnavailable"})
         return {"status": "succeeded"}
 
@@ -362,8 +472,9 @@ def test_one_failed_project_does_not_prevent_other_project_imports(monkeypatch):
     monkeypatch.setattr(flows, "get_run_logger", lambda: __import__("logging").getLogger(__name__))
     with pytest.raises(flows.IngestionFailure) as caught:
         flows.project_details.fn(territory="al-reem-island", actor="Karim")
-    assert len(calls) == len(rows)
+    count = sum(source["role"] != "terms" for row in rows for source in row["sources"])
+    assert len(calls) == count
     assert caught.value.result["summary"] == {
-        "succeeded": len(rows) - 1,
+        "succeeded": count - 1,
         "failed": [rows[0]["slug"]],
     }

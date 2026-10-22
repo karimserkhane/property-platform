@@ -1,0 +1,29 @@
+# Optional local graph engine. No external API, published port or Docker socket.
+services:
+  routing:
+    profiles: [map-analysis]
+    image: property-platform-routing
+    build:
+      context: ../..
+      dockerfile: infra/local/routing/Dockerfile
+    volumes:
+      - routing-data:/routing
+    init: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    mem_limit: 4g
+    cpus: 2
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8003/status', timeout=2)"]
+      interval: 15s
+      timeout: 3s
+      retries: 5
+  ingestion:
+    environment:
+      ROUTING_ORIGIN: http://routing:8003
+      ROUTING_STORAGE_DIR: /routing
+    volumes:
+      - routing-data:/routing
+volumes:
+  routing-data:
