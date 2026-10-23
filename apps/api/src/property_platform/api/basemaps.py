@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from ninja import Router, Status
 
-from .parcels import Error, enabled
+from .parcels import Error
 
 router = Router(tags=["local-preview"])
 
@@ -23,8 +23,6 @@ router = Router(tags=["local-preview"])
     },
 )
 def tile(request, provider: str, z: int, x: int, y: int):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.evidence.basemap_archive import archived_tile
 
     try:

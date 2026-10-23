@@ -3,12 +3,12 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from django.conf import settings
-from django.db import DatabaseError
 from ninja import Router, Schema, Status
 
 from property_platform.modules.publication.uses import VERSION as USE_VERSION
 from property_platform.modules.publication.uses import UseType
+
+from .preview import territory_profile
 
 router = Router(tags=["local-preview"])
 
@@ -161,23 +161,16 @@ def surroundings(
     identity: UUID,
     territory: str | None = None,
 ):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
-    from property_platform.modules.publication.coverage import map_source_namespaces, profile_for
+    profile = territory_profile(territory)
+    from property_platform.modules.publication.coverage import map_source_namespaces
     from property_platform.modules.publication.surroundings import surroundings as project
 
-    profile = profile_for(territory) if territory else None
-    if territory and profile is None:
-        return Status(409, {"code": "territory_not_configured"})
-    try:
-        result = project(
-            target,
-            identity,
-            namespaces=map_source_namespaces(territory) if territory else None,
-            parcel_namespaces=profile.parcel_namespaces if profile else None,
-        )
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    result = project(
+        target,
+        identity,
+        namespaces=map_source_namespaces(territory) if territory else None,
+        parcel_namespaces=profile.parcel_namespaces if profile else None,
+    )
     if result is None:
         return Status(404, {"code": "not_found"})
     return result
@@ -200,20 +193,11 @@ class ResearchReferenceResponse(Schema):
     operation_id="previewReferences",
 )
 def references(request, territory: str | None = None):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
-    from property_platform.modules.publication.coverage import profile_for, reference_source_keys
-
-    profile = profile_for(territory) if territory else None
-    if territory and profile is None:
-        return Status(409, {"code": "territory_not_configured"})
-
+    profile = territory_profile(territory)
     from property_platform.modules.evidence.queries import research_references
+    from property_platform.modules.publication.coverage import reference_source_keys
 
-    try:
-        return research_references(reference_source_keys(profile) if profile else None)
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    return research_references(reference_source_keys(profile) if profile else None)
 
 
 class ImageryResponse(Schema):
@@ -233,20 +217,10 @@ class ImageryResponse(Schema):
     operation_id="previewImagery",
 )
 def imagery(request, territory: str | None = None):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
-    from property_platform.modules.publication.coverage import profile_for
-
-    profile = profile_for(territory) if territory else None
-    if territory and profile is None:
-        return Status(409, {"code": "territory_not_configured"})
-
+    profile = territory_profile(territory)
     from property_platform.modules.evidence.queries import imagery_scenes
 
-    try:
-        return imagery_scenes(profile.imagery_ids if profile else None)
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    return imagery_scenes(profile.imagery_ids if profile else None)
 
 
 class PropertyPhoto(Schema):
@@ -298,23 +272,21 @@ PropertyPresentationResponse.model_rebuild()
     },
 )
 def property_media(request, media_id: UUID):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     from django.http import HttpResponse
 
     from property_platform.modules.evidence.queries import property_media_asset
 
     try:
         media = property_media_asset(media_id)
-        if media is None:
-            return Status(404, {"code": "not_found"})
-        payload, mime_type = media
-        response = HttpResponse(payload, content_type=mime_type)
-        response["Cache-Control"] = "no-store"
-        response["X-Content-Type-Options"] = "nosniff"
-        return response
-    except DatabaseError, ValueError:
+    except ValueError:
         return Status(503, {"code": "data_unavailable"})
+    if media is None:
+        return Status(404, {"code": "not_found"})
+    payload, mime_type = media
+    response = HttpResponse(payload, content_type=mime_type)
+    response["Cache-Control"] = "no-store"
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
 
 
 class MapProperties(Schema):
@@ -368,34 +340,21 @@ class MapContext(Schema):
     operation_id="previewMapContext",
 )
 def context(request, bbox: str, territory: str | None = None):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     bounds = parse_bbox(bbox)
     if bounds is None:
         return Status(422, {"code": "invalid_query"})
-    from property_platform.modules.publication.coverage import profile_for
-
-    if territory and profile_for(territory) is None:
-        return Status(409, {"code": "territory_not_configured"})
+    profile = territory_profile(territory)
     if territory and not within_territory(bounds, territory):
         return Status(422, {"code": "invalid_query"})
 
+    from property_platform.modules.publication.coverage import map_source_namespaces
     from property_platform.modules.publication.map_preview import map_context
 
-    try:
-        from property_platform.modules.publication.coverage import map_source_namespaces
-
-        return map_context(
-            bounds,
-            namespaces=map_source_namespaces(territory) if territory else None,
-            parcel_namespaces=profile_for(territory).parcel_namespaces if territory else None,
-        )
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
-
-
-def enabled():
-    return settings.DEBUG and getattr(settings, "PROPERTY_PLATFORM_PARCEL_PREVIEW", False)
+    return map_context(
+        bounds,
+        namespaces=map_source_namespaces(territory) if territory else None,
+        parcel_namespaces=profile.parcel_namespaces if profile else None,
+    )
 
 
 def within_territory(bounds, territory):
@@ -433,32 +392,23 @@ def parcels(
     territory: str | None = None,
     after: UUID | None = None,
 ):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     bounds = parse_bbox(bbox)
     query = q.strip()
     if bounds is None or not 1 <= limit <= 3000 or len(query) > 80:
         return Status(422, {"code": "invalid_query"})
-    from property_platform.modules.publication.coverage import profile_for
-
-    profile = profile_for(territory) if territory else None
-    if territory and profile is None:
-        return Status(409, {"code": "territory_not_configured"})
+    profile = territory_profile(territory)
     if territory and not within_territory(bounds, territory):
         return Status(422, {"code": "invalid_query"})
 
     from property_platform.modules.publication.preview import features
 
-    try:
-        return features(
-            bbox=bounds,
-            limit=limit,
-            query=query,
-            after=after,
-            namespaces=profile.parcel_namespaces if profile else None,
-        )
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    return features(
+        bbox=bounds,
+        limit=limit,
+        query=query,
+        after=after,
+        namespaces=profile.parcel_namespaces if profile else None,
+    )
 
 
 @router.get(
@@ -467,20 +417,10 @@ def parcels(
     operation_id="previewParcel",
 )
 def parcel(request, parcel_id: UUID, territory: str | None = None):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
-    from property_platform.modules.publication.coverage import profile_for
-
-    profile = profile_for(territory) if territory else None
-    if territory and profile is None:
-        return Status(409, {"code": "territory_not_configured"})
-
+    profile = territory_profile(territory)
     from property_platform.modules.publication.preview import detail
 
-    try:
-        result = detail(parcel_id, namespaces=profile.parcel_namespaces if profile else None)
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    result = detail(parcel_id, namespaces=profile.parcel_namespaces if profile else None)
     if result is None:
         return Status(404, {"code": "not_found"})
     return result
@@ -513,14 +453,9 @@ class TerritoryRegistry(Schema):
     operation_id="previewTerritories",
 )
 def territories(request):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.publication.coverage import coverage_registry
 
-    try:
-        return coverage_registry()
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    return coverage_registry()
 
 
 class AdrecSaleResponse(Schema):
@@ -589,8 +524,6 @@ def adrec_market(
     limit: int = 40,
     snapshot_id: UUID | None = None,
 ):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.evidence.adrec import DISTRICTS, MAX_ROWS
     from property_platform.modules.publication.adrec_preview import market
 
@@ -601,9 +534,4 @@ def adrec_market(
         or not 1 <= limit <= 100
     ):
         return Status(422, {"code": "invalid_query"})
-    try:
-        return market(
-            territory, query=q.strip(), offset=offset, limit=limit, snapshot_id=snapshot_id
-        )
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    return market(territory, query=q.strip(), offset=offset, limit=limit, snapshot_id=snapshot_id)

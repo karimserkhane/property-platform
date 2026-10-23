@@ -72,6 +72,21 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 X_FRAME_OPTIONS = "DENY"
 
+# Operator diagnostics go to stderr (container logs) in every environment. Stored run and
+# execution errors keep only the exception class; full tracebacks stay in these logs.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"plain": {"format": "%(asctime)s %(levelname)s %(name)s %(message)s"}},
+    "handlers": {"stderr": {"class": "logging.StreamHandler", "formatter": "plain"}},
+    "root": {"handlers": ["stderr"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO").upper()},
+    "loggers": {
+        # Replaces Django's DEBUG-only console and unconfigured mail_admins handlers, so
+        # unhandled request errors are logged once through the root handler.
+        "django": {"handlers": [], "level": "INFO", "propagate": True},
+    },
+}
+
 # Operator configuration only. Secrets never appear in OpenAPI or NEXT_PUBLIC_* variables.
 MEDIA_STORAGE = {
     "backend": os.environ.get("MEDIA_STORAGE_BACKEND", "local"),

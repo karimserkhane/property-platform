@@ -4,12 +4,11 @@ from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
 
-from django.db import DatabaseError
 from ninja import Router, Schema, Status
 
 from property_platform.modules.publication.coverage import profile_for
 
-from .parcels import Error, enabled
+from .parcels import Error
 
 router = Router(tags=["public-context-preview"])
 
@@ -127,13 +126,11 @@ class DistrictMapResponse(Schema):
     operation_id="previewDistrictMap",
 )
 def districts(request):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     from property_platform.modules.publication.context_preview import district_map
 
     try:
         return district_map()
-    except DatabaseError, ValueError:
+    except ValueError:
         return Status(503, {"code": "data_unavailable"})
 
 
@@ -150,8 +147,6 @@ def context(
     offset: int = 0,
     limit: int = 40,
 ):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     if (
         profile_for(territory) is None
         or len(q) > 80
@@ -161,7 +156,4 @@ def context(
         return Status(422, {"code": "invalid_query"})
     from property_platform.modules.publication.context_preview import public_context
 
-    try:
-        return public_context(dataset, query=q.strip(), offset=offset, limit=limit)
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
+    return public_context(dataset, query=q.strip(), offset=offset, limit=limit)

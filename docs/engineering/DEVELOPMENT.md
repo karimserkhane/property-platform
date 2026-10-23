@@ -1117,6 +1117,8 @@ docker compose -f infra/local/compose.yaml logs -f --tail 100 api
 
 Ctrl+C arrête le suivi des journaux, sans arrêter les conteneurs.
 
+Les journaux de l'API et de l'ingestion vont sur la sortie d'erreur du conteneur, au format `date niveau module message`. Le niveau par défaut est `INFO` ; la variable `DJANGO_LOG_LEVEL` le modifie (par exemple `DEBUG` ou `WARNING`). Une lecture qui échoue sur la base répond `503 data_unavailable` et écrit la trace complète dans ce journal. Un import qui échoue enregistre seulement la classe d'erreur dans `evidence.ingestion_run.error` (par exemple `KeyError`) : chercher le numéro du run dans ce journal pour lire la trace complète. Ces journaux sont réservés à l'opérateur ; ils ne sont recopiés ni dans les réponses HTTP, ni dans les résultats Prefect.
+
 <a id="arreter-les-services"></a>
 
 ### Tout arrêter en conservant les données

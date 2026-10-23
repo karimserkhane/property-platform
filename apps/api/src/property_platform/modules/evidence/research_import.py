@@ -16,6 +16,7 @@ from property_platform.modules.catalog.services import reconcile_map_record, ret
 from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .models import Capture, IngestionRun, MapObservation, ResearchReference, Source
 from .research_sources import page_metadata, project_marker
+from .runs import mark_failed
 
 VERSION = "district-references-v3"
 REGISTRY = Path(__file__).with_name("project_sources.json")
@@ -150,8 +151,7 @@ def reprocess_reference(reference, *, actor, territory=DEFAULT_TERRITORY):
             territory=territory,
         )
     except Exception as exc:
-        run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
-        run.save(update_fields=["status", "error", "finished_at"])
+        mark_failed(run, exc)
         return run
 
 
@@ -200,6 +200,5 @@ def import_reference(row, *, actor, acquisition=None, territory=DEFAULT_TERRITOR
         )
         return finish_reference(capture, row, run, territory=territory)
     except Exception as exc:
-        run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
-        run.save(update_fields=["status", "error", "finished_at"])
+        mark_failed(run, exc)
         return run

@@ -40,6 +40,8 @@ Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCH
 
 `features/projects/neighbourhood-focus.ts` possède le calcul pur de cadrage des points et contours explicitement liés au projet. La fiche API fournit ces `map_locations` via `evidence/project_queries.py`, indépendamment des limites des couches générales. `neighbourhood-map.tsx` les consomme pour son zoom initial et son accent visuel ; il ne déduit aucune identité par nom ou proximité et ne change pas la caméra de l’explorateur général. Direction : route → contrat projet → carte de quartier → calcul pur. `evidence/project_locations.py` possède la validation territoriale et la matérialisation atomique des positions déclarées extraites par `research_sources.py`, appelée par l’import projet après acquisition, sans réseau pendant la transaction. Les liens révoqués restent révoqués. Les géométries, captures, observations et liens réutilisent leurs tables propriétaires existantes. `publication/coverage.py` ajoute les namespaces des projets enregistrés à leur île ; la présentation de lecture peut utiliser le lien projet sans exiger de ligne `PropertyPresentation`. Aucun nouveau module de domaine ni migration. Voir [MAP_PROVIDERS.md](MAP_PROVIDERS.md).
 
+**Journaux et gardes communs — 22 octobre 2026.** `config/settings/base.py` envoie les journaux Python sur la sortie d'erreur, niveau réglable par `DJANGO_LOG_LEVEL`. `evidence/runs.py` possède l'enregistrement d'un run en échec : classe d'erreur seule en base, trace complète dans le journal. `api/preview.py` possède l'ouverture de la prévisualisation locale et la résolution du territoire ; `api/router.py` applique cette garde à chaque routeur `/preview` et traduit `DatabaseError` en `503 data_unavailable`. `ingestion/runtime.py` ne capture que la sortie standard du sous-processus Django, dont la sortie d'erreur rejoint le journal du conteneur. Direction inchangée ; contrat HTTP identique.
+
 **Extension stockage du 15 octobre 2026.** `property_platform.object_storage` est le paquet d’infrastructure des adaptateurs disque/S3. Il ne dépend ni des modules métier, ni de l’API, ni de la configuration Django ; Import Linter vérifie cette frontière. Le module **evidence** possède `StoredObject`, `CaptureObject`, `MediaPublication` et `media_storage.py`. La direction reste `publication/API → evidence → object_storage`, avec `evidence → catalog` pour les identités. L’application ingestion appelle ce service après l’import et hors transaction SQL ; elle ne possède pas les tables. Les secrets ne passent jamais dans les contrats clients. Voir [MEDIA_STORAGE.md](MEDIA_STORAGE.md) pour la reprise, les droits, le stockage persistant et le passage facultatif à R2/CDN.
 
 La **racine** est le dossier `property-platform`. Un élément terminé par `/` est un dossier ; les éléments indentés sont à l'intérieur de ce dossier. `src` contient le code source, `tests` les contrôles automatisés et `config` les réglages de l'application. Les noms qui commencent par un point, comme `.github`, sont aussi des fichiers ou dossiers ordinaires, parfois masqués par l'explorateur.
@@ -139,7 +141,8 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │       ├── testing.py       Réglages des tests
 │       │       │       └── production.py    Réglages et exigences de production
 │       │       ├── api/             Réception des demandes HTTP et formats des réponses
-│       │       │   └── router.py     API HTTP et contrôles de santé actuels
+│       │       │   ├── preview.py    Garde de prévisualisation locale et territoire demandé
+│       │       │   └── router.py     API HTTP, gardes communes et contrôles de santé
 │       │       ├── object_storage/  Adaptateurs de fichiers locaux et S3/R2, indépendants du métier
 │       │       │   ├── core.py       Flux bornés, SHA-256, formats et clés immuables
 │       │       │   └── adapters.py   Disque persistant et SDK S3, sans création de ressources cloud
@@ -167,6 +170,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── property_presentations.json, property_media.json  Identités examinées et médias autorisés
 │       │       │   │   ├── services.py  Import officiel des parcelles et transaction propriétaire
 │       │       │   │   ├── orchestration.py  Passerelle d'import, identité durable et résultat atomique
+│       │       │   │   ├── runs.py   Enregistrement commun d'un run en échec et de sa trace
 │       │       │   │   ├── media_storage.py  Captures archivées, licences et copies publiques contrôlées
 │       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
 │       │       │   │   ├── migrations/  Évolution du schéma des preuves

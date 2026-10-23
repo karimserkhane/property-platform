@@ -1,12 +1,11 @@
 from datetime import date, datetime
 from uuid import UUID
 
-from django.db import DatabaseError
 from ninja import Router, Schema, Status
 
 from property_platform.modules.publication.coverage import profile_for
 
-from .parcels import Error, enabled
+from .parcels import Error
 
 router = Router(tags=["map-analysis-preview"])
 
@@ -49,8 +48,6 @@ class WalkingResponse(Schema):
 def accessibility(
     request, longitude: float, latitude: float, minutes: int = 10, territory: str = "abu-dhabi"
 ):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     if profile_for(territory) is None:
         return Status(422, {"code": "invalid_territory"})
     from property_platform.modules.evidence.accessibility import walking_area
@@ -60,8 +57,6 @@ def accessibility(
         return result if result is not None else Status(202, {"code": "analysis_pending"})
     except ValueError:
         return Status(422, {"code": "invalid_scope"})
-    except DatabaseError:
-        return Status(503, {"code": "data_unavailable"})
 
 
 class DistrictMarketProperties(Schema):
@@ -101,13 +96,11 @@ class DistrictMarketResponse(Schema):
     operation_id="previewDistrictMarket",
 )
 def market_map(request, territory: str = "abu-dhabi", q: str = "", snapshot_id: UUID | None = None):
-    if not enabled():
-        return Status(403, {"code": "preview_disabled"})
     if profile_for(territory) is None or len(q) > 80:
         return Status(422, {"code": "invalid_scope"})
     from property_platform.modules.publication.market_map import district_market
 
     try:
         return district_market(territory, query=q.strip(), snapshot_id=snapshot_id)
-    except DatabaseError, ValueError:
+    except ValueError:
         return Status(503, {"code": "data_unavailable"})

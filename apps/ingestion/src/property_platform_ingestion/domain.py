@@ -3,6 +3,7 @@
 import contextlib
 import io
 import json
+import logging
 import os
 import sys
 from pathlib import Path
@@ -441,6 +442,8 @@ def main():
         with contextlib.redirect_stdout(io.StringIO()):
             result = execute(json.loads(raw))
     except Exception as exc:
+        # The traceback goes to stderr (operator logs); the flow result keeps the class only.
+        logging.getLogger(__name__).error("Domain request failed", exc_info=exc)
         result = {"status": "failed", "error": type(exc).__name__}
     print(json.dumps(result))
     return 1 if result["status"] == "failed" else 0

@@ -4,13 +4,13 @@ import hashlib
 import json
 
 from django.db import connection
-from django.utils import timezone
 
 from .collection_profiles import collection_for
 from .map_import import LOCK_KEY, materialize_map_records, osm_data_records
 from .models import Capture, IngestionRun, Source
 from .onwani import SourceError
 from .osm_api_protocol import URL, VERSION, boxes, decode
+from .runs import mark_failed
 
 
 def import_bootstrap(*, territory, actor, acquisition):
@@ -69,8 +69,7 @@ def import_bootstrap(*, territory, actor, acquisition):
         )
     except Exception as exc:
         if run:
-            run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
-            run.save(update_fields=["status", "error", "finished_at"])
+            mark_failed(run, exc)
         raise
     finally:
         with connection.cursor() as cursor:

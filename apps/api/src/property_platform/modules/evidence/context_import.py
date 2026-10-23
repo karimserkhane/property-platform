@@ -19,6 +19,7 @@ from .models import (
     SchoolObservation,
     Source,
 )
+from .runs import mark_failed
 
 MODELS = {
     "districts": DistrictBoundaryObservation,
@@ -110,6 +111,5 @@ def import_context(*, scope, actor, acquisition):
         run.save(update_fields=["status", "summary", "finished_at"])
         return run
     except Exception as exc:
-        run.status, run.error, run.finished_at = "failed", type(exc).__name__, timezone.now()
-        run.save(update_fields=["status", "error", "finished_at"])
+        mark_failed(run, exc)
         raise
