@@ -24,6 +24,8 @@
 - [Fichiers et médias : stockage local persistant, R2/S3, licences et CDN](engineering/MEDIA_STORAGE.md)
 - [Revue critique de structure](engineering/STRUCTURE_REVIEW.md)
 - [Feuille de route technique : performance, fiabilité et modularité](engineering/ENGINEERING_ROADMAP.md)
+- [Travail des agents (Codex, Claude Code…) : tâches, contrôles, prévisualisation](engineering/AGENT_WORKFLOW.md)
+- [Tableau des tâches](tasks/BOARD.md)
 - [Architecture précédente, archivée](archive/ARCHITECTURE_STACK_PROPERTY_PLATFORM.md)
 
 Les décisions actuelles et les archives sont séparées. Les documents historiques conservent leurs dates et leur contexte ; ils ne constituent pas une preuve que toutes les fonctionnalités sont implémentées.
