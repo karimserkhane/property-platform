@@ -57,6 +57,32 @@ class Collection(Schema):
     classification_version: str
 
 
+class NearbyProjectMarker(Schema):
+    place_id: UUID
+    distance_m: float
+
+
+class IndexProperties(Properties):
+    bounds: tuple[float, float, float, float]
+    label_point: tuple[float, float]
+    area_m2: float
+    nearby_projects: list[NearbyProjectMarker] = []
+
+
+class IndexFeature(Schema):
+    type: str
+    id: UUID
+    properties: IndexProperties
+
+
+class ParcelIndex(Schema):
+    type: str
+    features: list[IndexFeature]
+    truncated: bool
+    next_cursor: UUID | None = None
+    classification_version: str
+
+
 class Provenance(Schema):
     name: str
     url: str
@@ -392,6 +418,31 @@ def parcels(
     territory: str | None = None,
     after: UUID | None = None,
 ):
+    from property_platform.modules.publication.preview import features
+
+    return _parcel_rows(features, bbox, limit, q, territory, after)
+
+
+@router.get(
+    "/parcel-index",
+    response={200: ParcelIndex, 403: Error, 409: Error, 422: Error, 503: Error},
+    operation_id="previewParcelIndex",
+)
+def parcel_index(
+    request,
+    bbox: str,
+    limit: int = 3000,
+    q: str = "",
+    territory: str | None = None,
+    after: UUID | None = None,
+):
+    """Parcel rows without footprints; maps draw them from `parcel-tiles`."""
+    from property_platform.modules.publication.preview import parcel_index as read_index
+
+    return _parcel_rows(read_index, bbox, limit, q, territory, after)
+
+
+def _parcel_rows(read, bbox, limit, q, territory, after):
     bounds = parse_bbox(bbox)
     query = q.strip()
     if bounds is None or not 1 <= limit <= 3000 or len(query) > 80:
@@ -399,16 +450,49 @@ def parcels(
     profile = territory_profile(territory)
     if territory and not within_territory(bounds, territory):
         return Status(422, {"code": "invalid_query"})
-
-    from property_platform.modules.publication.preview import features
-
-    return features(
+    return read(
         bbox=bounds,
         limit=limit,
         query=query,
         after=after,
         namespaces=profile.parcel_namespaces if profile else None,
     )
+
+
+PARCEL_TILE_ZOOMS = range(8, 17)
+
+
+@router.get(
+    "/parcel-tiles/{z}/{x}/{y}",
+    response={204: None, 403: Error, 409: Error, 422: Error, 503: Error},
+    operation_id="previewParcelTile",
+    openapi_extra={
+        "responses": {
+            "200": {
+                "description": "Mapbox Vector Tile; layer `parcels`, property `id` only",
+                "content": {
+                    "application/vnd.mapbox-vector-tile": {
+                        "schema": {"type": "string", "format": "binary"}
+                    }
+                },
+            }
+        }
+    },
+)
+def parcel_tile(request, z: int, x: int, y: int, territory: str | None = None):
+    from django.http import HttpResponse
+
+    from property_platform.modules.catalog.queries import parcel_tile as read_tile
+
+    if z not in PARCEL_TILE_ZOOMS or not (0 <= x < 2**z and 0 <= y < 2**z):
+        return Status(422, {"code": "invalid_query"})
+    profile = territory_profile(territory)
+    payload = read_tile(z, x, y, namespaces=profile.parcel_namespaces if profile else None)
+    response = HttpResponse(payload, content_type="application/vnd.mapbox-vector-tile")
+    if not payload:
+        response.status_code = 204
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 @router.get(

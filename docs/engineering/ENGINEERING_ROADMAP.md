@@ -36,9 +36,9 @@ Autres constats :
 
 | # | Chantier | Gain attendu | État |
 | --- | --- | --- | --- |
-| 1 | Journaux et trace complète des échecs ; gardes communes des routes API | Diagnostic des imports ; moins de code recopié | PR #1 |
-| 2 | Compression brotli/gzip et relais partagé des lectures `/api/atlas/*` | 5 à 7 fois moins de données par affichage de carte | Cette PR |
-| 3 | Tuiles vectorielles PostGIS (`ST_AsMVT`) pour parcelles et bâtiments | Carte fluide à l'échelle des sept émirats ; fin de la limite de 12 000 parcelles | À faire |
+| 1 | Journaux et trace complète des échecs ; gardes communes des routes API | Diagnostic des imports ; moins de code recopié | Fusionné (PR #1) |
+| 2 | Compression brotli/gzip et relais partagé des lectures `/api/atlas/*` | 5 à 7 fois moins de données par affichage de carte | Fusionné (PR #2) |
+| 3 | Tuiles vectorielles PostGIS (`ST_AsMVT`) pour parcelles et bâtiments | Carte fluide à l'échelle des sept émirats ; fin de la limite de 12 000 parcelles | Parcelles de l'explorateur : PR #3 ; bâtiments et index par zone à suivre |
 | 4 | Cache des lectures lourdes avec `ETag` lié à la version des données (`evidence.row_revision`) | `district-map`, `market-map`, `map-context` instantanés en lecture répétée | À faire |
 | 5 | Simplification des contours en SQL et regroupement des requêtes de `map-context` | Temps serveur divisé avant même le cache | À faire |
 | 6 | Images satellite servies comme fichiers cachables au lieu de base64 dans le JSON | −850 Ko sur la vue imagerie | À faire |
@@ -50,6 +50,17 @@ Autres constats :
 | 12 | Chaîne d'approvisionnement : images et actions par digest, mises à jour automatisées, analyse de vulnérabilités | Builds reproductibles et sûrs | À faire |
 
 Ordre proposé : 3 et 4 d'abord (passage à l'échelle et temps de réponse), puis 7 et 8 (filets de sécurité), puis les chantiers de structure. Le chantier 4 doit traiter un cas limite : deux transactions concurrentes peuvent valider dans le désordre, donc une version fondée sur le seul maximum de `row_revision` doit être complétée (par exemple par l'horizon des transactions en cours) pour ne jamais servir une donnée exclue.
+
+## Tuiles vectorielles des parcelles — 23 octobre 2026
+
+L'explorateur dessine les contours de parcelles depuis des tuiles vectorielles PostGIS au lieu de télécharger toutes les géométries en GeoJSON.
+
+- `GET /api/v1/preview/parcel-tiles/{z}/{x}/{y}` (zooms 8 à 16, `territory` facultatif) renvoie une tuile Mapbox Vector Tile, couche `parcels`, avec la seule propriété `id`. Mêmes règles d'identité que `/parcels` : parcelles courantes (`superseded_by` nul) et espaces de noms du territoire.
+- `GET /api/v1/preview/parcel-index` renvoie les mêmes lignes publiées que `/parcels`, sans géométrie, avec `bounds`, `label_point`, `area_m2` et `nearby_projects`. Les distances aux repères de projet (50 m au plus, 0 à l'intérieur) sont calculées dans PostGIS ; le navigateur applique les mêmes règles de choix qu'avant (identité de projet, ambiguïté sous 10 m).
+- Côté carte, la catégorie et la visibilité de chaque parcelle sont posées en `feature-state` à partir de l'index : une tuile ne peut pas afficher une parcelle que l'index n'a pas publiée, ni une couleur différente. Les libellés viennent d'une petite source de points.
+- La carte de quartier des fiches projet garde ses parcelles GeoJSON (zone réduite) ; le style partagé n'est pas modifié.
+
+Mesures (vue « toute la zone » d'Abu Dhabi, réponses compressées) : une ligne d'index pèse environ 63 octets contre 135 avec sa géométrie ; une tuile vaut 37 Ko au zoom 14 et 175 Ko au zoom 10 à 12 pour toute l'île. Le gain actuel tient surtout au rendu (MapLibre ne découpe plus 10 000 polygones dans le navigateur) et au chargement progressif par zone ; il devient décisif à l'échelle nationale. Prochaines étapes : servir l'index par zone visible plutôt que pour tout le territoire, puis les bâtiments en tuiles.
 
 ## Ajouter une fonctionnalité sans dégrader la structure
 

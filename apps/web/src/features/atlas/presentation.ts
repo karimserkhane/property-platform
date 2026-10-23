@@ -4,6 +4,7 @@ import type {
   MapFeature,
   MapLabels,
   ParcelCollection,
+  ParcelRows,
 } from "./types";
 
 type PropertyIdentity = Pick<
@@ -78,7 +79,7 @@ export function preferredParcelProperty(
 
 export function parcelPropertyIndex(
   context: MapContext | null,
-  parcels?: ParcelCollection | null,
+  parcels?: ParcelRows | null,
 ) {
   const index = new Map<string, ParcelProperty[]>();
   // OSM exposes the same way as footprint and point. Enrich by exact source
@@ -122,7 +123,13 @@ export function parcelPropertyIndex(
       preferredParcelProperty(index.get(parcel.id) ?? [], "en")
     )
       continue;
-    const match = nearbyProject(parcel.geometry, projects);
+    const match =
+      "geometry" in parcel
+        ? nearbyProject(parcel.geometry, projects)
+        : nearbyProjectFromDistances(
+            parcel.properties.nearby_projects ?? [],
+            projects,
+          );
     if (!match) continue;
     const f = match.feature;
     index.set(parcel.id, [
@@ -200,20 +207,56 @@ export function nearbyProject(
       point[1] > bounds[1][1] + 0.0005
     )
       continue;
-    const distance_m = pointParcelDistance(geometry, point);
-    if (!Number.isFinite(distance_m) || distance_m > 50) continue;
-    // Only an explicit project identity can group separate source observations.
-    // Equal names alone never reconcile two project identities.
-    const slug = feature.properties.presentation?.project?.slug;
-    const key = slug ? `project:${slug}` : `feature:${feature.id}`;
-    const previous = candidates.get(key);
-    if (
-      !previous ||
-      distance_m < previous.distance_m ||
-      (distance_m === previous.distance_m && feature.id < previous.feature.id)
-    )
-      candidates.set(key, { feature, distance_m });
+    addNearbyCandidate(
+      candidates,
+      feature,
+      pointParcelDistance(geometry, point),
+    );
   }
+  return chooseNearbyProject(candidates);
+}
+
+// Same choice rules from boundary distances measured in PostGIS (`parcel-index`),
+// for maps that draw parcel footprints from vector tiles.
+export function nearbyProjectFromDistances(
+  nearby: readonly { place_id: string; distance_m: number }[],
+  projects: readonly MapFeature[],
+): { feature: MapFeature; distance_m: number } | null {
+  const distances = new Map(nearby.map((item) => [item.place_id, item]));
+  const candidates = new Map<
+    string,
+    { feature: MapFeature; distance_m: number }
+  >();
+  for (const feature of projects) {
+    const item = distances.get(feature.id);
+    if (item && feature.geometry.type === "Point")
+      addNearbyCandidate(candidates, feature, item.distance_m);
+  }
+  return chooseNearbyProject(candidates);
+}
+
+function addNearbyCandidate(
+  candidates: Map<string, { feature: MapFeature; distance_m: number }>,
+  feature: MapFeature,
+  distance_m: number,
+) {
+  if (!Number.isFinite(distance_m) || distance_m > 50) return;
+  // Only an explicit project identity can group separate source observations.
+  // Equal names alone never reconcile two project identities.
+  const slug = feature.properties.presentation?.project?.slug;
+  const key = slug ? `project:${slug}` : `feature:${feature.id}`;
+  const previous = candidates.get(key);
+  if (
+    !previous ||
+    distance_m < previous.distance_m ||
+    (distance_m === previous.distance_m && feature.id < previous.feature.id)
+  )
+    candidates.set(key, { feature, distance_m });
+}
+
+function chooseNearbyProject(
+  candidates: Map<string, { feature: MapFeature; distance_m: number }>,
+): { feature: MapFeature; distance_m: number } | null {
   const matches = [...candidates.values()].sort(
     (a, b) =>
       a.distance_m - b.distance_m || a.feature.id.localeCompare(b.feature.id),
@@ -224,8 +267,8 @@ export function nearbyProject(
   return matches[0] ?? null;
 }
 
-export function parcelMapLabels(
-  data: ParcelCollection,
+export function parcelMapLabels<T extends ParcelRows>(
+  data: T,
   candidates: Map<string, ParcelProperty[]>,
   locale: string,
   formatUse: (
@@ -233,10 +276,10 @@ export function parcelMapLabels(
       ParcelCollection["features"][number]["properties"]["use_types"]
     >[number],
   ) => string,
-): ParcelCollection {
+): T {
   return {
     ...data,
-    features: data.features.map((feature) => {
+    features: data.features.map((feature: T["features"][number]) => {
       const candidate = preferredParcelProperty(
         candidates.get(feature.id) ?? [],
         locale,

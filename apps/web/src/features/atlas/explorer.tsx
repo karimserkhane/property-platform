@@ -17,11 +17,12 @@ import { buildingViewSelection } from "./building-3d";
 import styles from "./explorer.module.css";
 import { imagerySelection } from "./imagery-sources";
 import { Inspector } from "./inspector";
+import { boundsGeometry } from "./map-analysis";
 import { MapLegend } from "./map-legend";
 import { MapViewControl } from "./map-view-control";
 import { AtlasPagination } from "./pagination";
 import type { MapOptions, MapView } from "./parcel-map";
-import { readParcelPages } from "./parcel-pages";
+import { readParcelIndex } from "./parcel-pages";
 import {
   csv,
   download,
@@ -37,8 +38,8 @@ import type {
   MapContext,
   MapFeature,
   MapLabels,
-  ParcelCollection,
   ParcelDetail,
+  ParcelIndex,
   ResearchReference,
   Territory,
 } from "./types";
@@ -46,7 +47,7 @@ import type {
 const ParcelMap = dynamic(() => import("./parcel-map"), { ssr: false });
 type Tab = "properties" | "context" | "sources";
 const TABS: Tab[] = ["properties", "context", "sources"];
-const EMPTY_PARCELS: ParcelCollection = {
+const EMPTY_PARCELS: ParcelIndex = {
   type: "FeatureCollection",
   features: [],
   truncated: false,
@@ -71,7 +72,7 @@ export function Explorer({
   const contextLabels = useTranslations("Context");
   const bbox = (territory.collection_bounds ?? territory.bounds).join(",");
   const territoryQuery = encodeURIComponent(territory.id);
-  const [collection, setCollection] = useState<ParcelCollection | null>(null);
+  const [collection, setCollection] = useState<ParcelIndex | null>(null);
   const [context, setContext] = useState<MapContext | null>(null);
   const [contextError, setContextError] = useState(false);
   const [references, setReferences] = useState<ResearchReference[]>([]);
@@ -190,7 +191,7 @@ export function Explorer({
       .catch(() => {
         if (!controller.signal.aborted) setReferenceError(true);
       });
-    readParcelPages(bbox, territory.id, controller.signal)
+    readParcelIndex(bbox, territory.id, controller.signal)
       .then((data) => {
         setCollection(data);
         setState("ready");
@@ -332,10 +333,11 @@ export function Explorer({
     setView((v) => ({ kind, token: v.token + 1 }));
   }
   function locate() {
+    const row = collection?.features.find((f) => f.id === selected);
     const target =
       feature ??
       projectFeature ??
-      collection?.features.find((f) => f.id === selected);
+      (row && { geometry: boundsGeometry(row.properties.bounds) });
     if (target)
       setView((v) => ({
         kind: "feature",

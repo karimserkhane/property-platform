@@ -137,3 +137,42 @@ def nearby_place_rows(target, identity, *, namespaces=None, parcel_namespaces=No
     for row in rows:
         row["geometry"] = json.loads(row.pop("shape"))
     return rows[:400], len(rows) > 400
+
+
+PROJECT_MARKER_RADIUS_M = 50
+
+
+def project_markers_near_parcels(parcel_ids, radius_m=PROJECT_MARKER_RADIUS_M):
+    """Active project marker points within `radius_m` of each parcel boundary (0 inside).
+
+    Clients keep their own naming and ambiguity rules; this only replaces the boundary
+    distance they used to compute from the full parcel geometry.
+    """
+    if not parcel_ids:
+        return {}
+    parcels = connection.ops.quote_name(Parcel._meta.db_table)
+    places = connection.ops.quote_name(Place._meta.db_table)
+    # A planar prefilter about 1.3 times the radius at UAE latitudes keeps the GiST index.
+    margin = radius_m * 1.3 / 111_320
+    sql = f"""
+        SELECT parcel.id::text, place.id::text,
+               ST_Distance(parcel.geometry::geography, place.geometry::geography)
+        FROM {parcels} AS parcel
+        JOIN {places} AS place
+          ON place.active
+         AND place.kind LIKE %s
+         AND place.geometry && ST_Expand(parcel.geometry, %s)
+         AND ST_DWithin(parcel.geometry::geography, place.geometry::geography, %s)
+        WHERE parcel.id = ANY(%s::uuid[])
+        ORDER BY parcel.id, 3, place.id
+    """
+    nearby = {}
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute("SET LOCAL statement_timeout='3000ms'")
+            cursor.execute(sql, [r"%\_project\_marker", margin, radius_m, list(parcel_ids)])
+            for parcel_id, place_id, distance in cursor.fetchall():
+                nearby.setdefault(parcel_id, []).append(
+                    {"place_id": place_id, "distance_m": round(distance, 2)}
+                )
+    return nearby

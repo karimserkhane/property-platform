@@ -20,11 +20,27 @@ export function territorySearch(
 
 // Only server configuration chooses the upstream; visitor input is never a URL.
 export async function readPreview(path: string, search = "") {
+  const result = await readPreviewBytes(path, search, "application/json");
+  return {
+    status: result.status,
+    data:
+      result.bytes === null
+        ? null
+        : (JSON.parse(result.bytes.toString("utf8")) as unknown),
+  };
+}
+
+// Bounded upstream body; null bytes for a disabled preview or an error status.
+export async function readPreviewBytes(
+  path: string,
+  search: string,
+  accept: string,
+) {
   if (
     process.env.NODE_ENV === "production" &&
     process.env.PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW !== "1"
   ) {
-    return { status: 403, data: null };
+    return { status: 403, bytes: null, contentType: null };
   }
   const origin =
     process.env.PROPERTY_PLATFORM_API_ORIGIN ?? "http://127.0.0.1:8000";
@@ -34,11 +50,12 @@ export async function readPreview(path: string, search = "") {
       signal: AbortSignal.timeout(5000),
       cache: "no-store",
       redirect: "error",
-      headers: { Accept: "application/json" },
+      headers: { Accept: accept },
     },
   );
+  const contentType = response.headers.get("content-type");
   if (!response.ok || !response.body)
-    return { status: response.status, data: null };
+    return { status: response.status, bytes: null, contentType };
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -53,11 +70,7 @@ export async function readPreview(path: string, search = "") {
   } finally {
     await reader.cancel();
   }
-  const bytes = Buffer.concat(chunks);
-  return {
-    status: response.status,
-    data: JSON.parse(bytes.toString("utf8")) as unknown,
-  };
+  return { status: response.status, bytes: Buffer.concat(chunks), contentType };
 }
 
 // Shared relay answer: upstream status, no shared caching, encoded JSON.

@@ -26,7 +26,7 @@ import styles from "./map-workbench.module.css";
 import { geometryBounds } from "./presentation";
 import { updateProjectClusters } from "./project-clusters";
 import { dubaiClock, shadowPolygons, solarInstant, sunlight } from "./solar";
-import type { MapContext, MapLabels, ParcelCollection } from "./types";
+import type { MapContext, MapLabels, ParcelRows } from "./types";
 
 export function MapWorkbench({
   map,
@@ -42,7 +42,7 @@ export function MapWorkbench({
 }: {
   map: LibreMap | null;
   context: MapContext | null;
-  parcels: ParcelCollection | null;
+  parcels: ParcelRows | null;
   locale: string;
   m: MapLabels;
   territory: string;

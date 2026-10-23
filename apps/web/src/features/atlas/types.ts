@@ -1,6 +1,11 @@
 import type { components } from "@property-platform/contracts";
 
 export type ParcelCollection = components["schemas"]["Collection"];
+// Footprint-free rows; the explorer draws parcels from vector tiles.
+export type ParcelIndex = components["schemas"]["ParcelIndex"];
+export type ParcelIndexFeature = ParcelIndex["features"][number];
+// Either collection shape: code needing footprints checks for `geometry`.
+export type ParcelRows = ParcelCollection | ParcelIndex;
 export type ParcelDetail = components["schemas"]["Detail"];
 export type MapContext = components["schemas"]["MapContext"];
 export type MapFeature = components["schemas"]["MapFeature"];

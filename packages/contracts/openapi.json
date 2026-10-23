@@ -587,6 +587,242 @@
         ]
       }
     },
+    "/api/v1/preview/parcel-index": {
+      "get": {
+        "operationId": "previewParcelIndex",
+        "summary": "Parcel Index",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "bbox",
+            "schema": {
+              "title": "Bbox",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 3000,
+              "title": "Limit",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "After"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParcelIndex"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Parcel rows without footprints; maps draw them from `parcel-tiles`.",
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
+    "/api/v1/preview/parcel-tiles/{z}/{x}/{y}": {
+      "get": {
+        "operationId": "previewParcelTile",
+        "summary": "Parcel Tile",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "z",
+            "schema": {
+              "title": "Z",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "x",
+            "schema": {
+              "title": "X",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "y",
+            "schema": {
+              "title": "Y",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Mapbox Vector Tile; layer `parcels`, property `id` only",
+            "content": {
+              "application/vnd.mapbox-vector-tile": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
     "/api/v1/preview/parcels/{parcel_id}": {
       "get": {
         "operationId": "previewParcel",
@@ -2560,6 +2796,254 @@
           "source_name"
         ],
         "title": "Properties",
+        "type": "object"
+      },
+      "IndexFeature": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "properties": {
+            "$ref": "#/components/schemas/IndexProperties"
+          }
+        },
+        "required": [
+          "type",
+          "id",
+          "properties"
+        ],
+        "title": "IndexFeature",
+        "type": "object"
+      },
+      "IndexProperties": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "community": {
+            "title": "Community",
+            "type": "string"
+          },
+          "land_use": {
+            "title": "Land Use",
+            "type": "string"
+          },
+          "construction_status": {
+            "title": "Construction Status",
+            "type": "string"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "use_types": {
+            "default": [],
+            "items": {
+              "enum": [
+                "school",
+                "university",
+                "nursery",
+                "mosque",
+                "worship",
+                "hospital",
+                "healthcare",
+                "rail_station",
+                "bus_station",
+                "bus_stop",
+                "rail",
+                "restaurant",
+                "cafe",
+                "retail",
+                "office",
+                "commercial",
+                "mixed_use",
+                "villa",
+                "townhouse",
+                "housing",
+                "hotel",
+                "park",
+                "open_space",
+                "beach",
+                "sports",
+                "parking",
+                "infrastructure",
+                "project_perimeter"
+              ],
+              "type": "string"
+            },
+            "title": "Use Types",
+            "type": "array"
+          },
+          "use_classification_version": {
+            "default": "source-use-v2",
+            "title": "Use Classification Version",
+            "type": "string"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Name"
+          },
+          "field_history": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldHistory"
+            },
+            "default": {},
+            "title": "Field History",
+            "type": "object"
+          },
+          "bounds": {
+            "maxItems": 4,
+            "minItems": 4,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Bounds",
+            "type": "array"
+          },
+          "label_point": {
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Label Point",
+            "type": "array"
+          },
+          "area_m2": {
+            "title": "Area M2",
+            "type": "number"
+          },
+          "nearby_projects": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/NearbyProjectMarker"
+            },
+            "title": "Nearby Projects",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "community",
+          "land_use",
+          "construction_status",
+          "category",
+          "source_url",
+          "source_name",
+          "bounds",
+          "label_point",
+          "area_m2"
+        ],
+        "title": "IndexProperties",
+        "type": "object"
+      },
+      "NearbyProjectMarker": {
+        "properties": {
+          "place_id": {
+            "format": "uuid",
+            "title": "Place Id",
+            "type": "string"
+          },
+          "distance_m": {
+            "title": "Distance M",
+            "type": "number"
+          }
+        },
+        "required": [
+          "place_id",
+          "distance_m"
+        ],
+        "title": "NearbyProjectMarker",
+        "type": "object"
+      },
+      "ParcelIndex": {
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "features": {
+            "items": {
+              "$ref": "#/components/schemas/IndexFeature"
+            },
+            "title": "Features",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "classification_version": {
+            "title": "Classification Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "features",
+          "truncated",
+          "classification_version"
+        ],
+        "title": "ParcelIndex",
         "type": "object"
       },
       "Detail": {

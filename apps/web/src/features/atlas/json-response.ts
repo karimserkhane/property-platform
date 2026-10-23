@@ -34,24 +34,39 @@ export function acceptedEncoding(header: string | null): JsonEncoding | null {
 
 // Next.js compresses rendered pages but not route handler bodies, so the
 // relays encode their JSON here. Payload contents are never altered.
-export async function jsonResponse(
+export function jsonResponse(
   request: Request,
   body: unknown,
   init: ResponseInit = {},
 ) {
-  const text = JSON.stringify(body);
+  return encodedResponse(
+    request,
+    Buffer.from(JSON.stringify(body)),
+    "application/json",
+    init,
+  );
+}
+
+// Same encoding for compressible binary relays such as vector tiles.
+export async function encodedResponse(
+  request: Request,
+  body: Uint8Array,
+  contentType: string,
+  init: ResponseInit = {},
+) {
   const headers = new Headers(init.headers);
-  headers.set("Content-Type", "application/json");
+  headers.set("Content-Type", contentType);
   headers.append("Vary", "Accept-Encoding");
   const encoding =
-    Buffer.byteLength(text) >= MIN_ENCODED_BYTES
+    body.byteLength >= MIN_ENCODED_BYTES
       ? acceptedEncoding(request.headers.get("accept-encoding"))
       : null;
-  if (encoding === null) return new Response(text, { ...init, headers });
+  if (encoding === null)
+    return new Response(new Uint8Array(body), { ...init, headers });
   const bytes =
     encoding === "br"
-      ? await brotli(text, BROTLI_OPTIONS)
-      : await gzipped(text);
+      ? await brotli(body, BROTLI_OPTIONS)
+      : await gzipped(body);
   headers.set("Content-Encoding", encoding);
   return new Response(new Uint8Array(bytes), { ...init, headers });
 }

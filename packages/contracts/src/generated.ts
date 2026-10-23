@@ -140,6 +140,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/parcel-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Parcel Index
+         * @description Parcel rows without footprints; maps draw them from `parcel-tiles`.
+         */
+        get: operations["previewParcelIndex"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/parcel-tiles/{z}/{x}/{y}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Parcel Tile */
+        get: operations["previewParcelTile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/parcels/{parcel_id}": {
         parameters: {
             query?: never;
@@ -691,6 +728,98 @@ export interface components {
             field_history: {
                 [key: string]: components["schemas"]["FieldHistory"];
             };
+        };
+        /** IndexFeature */
+        IndexFeature: {
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            properties: components["schemas"]["IndexProperties"];
+        };
+        /** IndexProperties */
+        IndexProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Community */
+            community: string;
+            /** Land Use */
+            land_use: string;
+            /** Construction Status */
+            construction_status: string;
+            /** Category */
+            category: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v2
+             */
+            use_classification_version: string;
+            /** Source Url */
+            source_url: string | null;
+            /** Source Name */
+            source_name: string | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Label Point */
+            label_point: [
+                number,
+                number
+            ];
+            /** Area M2 */
+            area_m2: number;
+            /**
+             * Nearby Projects
+             * @default []
+             */
+            nearby_projects: components["schemas"]["NearbyProjectMarker"][];
+        };
+        /** NearbyProjectMarker */
+        NearbyProjectMarker: {
+            /**
+             * Place Id
+             * Format: uuid
+             */
+            place_id: string;
+            /** Distance M */
+            distance_m: number;
+        };
+        /** ParcelIndex */
+        ParcelIndex: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["IndexFeature"][];
+            /** Truncated */
+            truncated: boolean;
+            /** Next Cursor */
+            next_cursor?: string | null;
+            /** Classification Version */
+            classification_version: string;
         };
         /** Detail */
         Detail: {
@@ -2058,6 +2187,137 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Collection"];
                 };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewParcelIndex: {
+        parameters: {
+            query: {
+                bbox: string;
+                limit?: number;
+                q?: string;
+                territory?: string | null;
+                after?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParcelIndex"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewParcelTile: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path: {
+                z: number;
+                x: number;
+                y: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Mapbox Vector Tile; layer `parcels`, property `id` only */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.mapbox-vector-tile": string;
+                };
+            };
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Forbidden */
             403: {
