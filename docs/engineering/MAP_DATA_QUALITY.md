@@ -18,6 +18,17 @@ sont jamais découpées, déplacées ou supprimées sur la seule foi du trait de
 Un cadastre peut inclure un terrain futur, une marina ou un périmètre marin ; deux
 sources de dates différentes peuvent aussi diverger. La légende signale cette limite.
 
+**Parcelles sur l'eau cartographiée — 23 octobre 2026.** Le masquage complet coupait de
+vraies parcelles : à Saadiyat, le polygone « océan » OSM couvre 240 parcelles du secteur
+du Cultural District, dont 152 entièrement (villas prévues, parcs, postes électriques,
+« non construits »), car le trait de côte OSM ne suit pas encore les terrains gagnés sur
+la mer. L'eau couvre toujours les surfaces et contours pleins, mais deux couches
+discrètes au-dessus (`parcel-water-fill`, teinte à 28 %, et `parcel-water-line`, contour
+en pointillés) gardent ces parcelles lisibles et sélectionnables, sans peindre la mer.
+Les périmètres de projet (`overlay`) restent invisibles et non sélectionnables sur
+l'eau. Ces couches sont masquées sur satellite ; l'option « Limites cadastrales en zone
+d'eau » remplace le pointillé par le contour plein.
+
 ## Source AD-SDI
 
 Le connecteur utilise exclusivement la publication officielle

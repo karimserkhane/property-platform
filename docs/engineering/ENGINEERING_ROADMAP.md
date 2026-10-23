@@ -62,6 +62,11 @@ L'explorateur dessine les contours de parcelles depuis des tuiles vectorielles P
 
 Mesures (vue « toute la zone » d'Abu Dhabi, réponses compressées) : une ligne d'index pèse environ 63 octets contre 135 avec sa géométrie ; une tuile vaut 37 Ko au zoom 14 et 175 Ko au zoom 10 à 12 pour toute l'île. Le gain actuel tient surtout au rendu (MapLibre ne découpe plus 10 000 polygones dans le navigateur) et au chargement progressif par zone ; il devient décisif à l'échelle nationale. Prochaines étapes : servir l'index par zone visible plutôt que pour tout le territoire, puis les bâtiments en tuiles.
 
+**Allègement du chargement — 23 octobre 2026.** Retour sur téléphone : la carte semblait plus lente. Deux corrections :
+
+- En dessous du zoom 12, une tuile omet les parcelles de moins d'un demi-pixel à l'écran (seuil d'aire en Web Mercator selon le zoom) ; à partir du zoom 12, toutes les parcelles sont dessinées. Tuiles mesurées au même endroit : zoom 8 191 → 12 Ko, zoom 9 340 → 31 Ko, zoom 10 356 → 76 Ko, zoom 11 361 → 240 Ko.
+- L'explorateur dessine l'index page par page (3 000 lignes) au lieu d'attendre la dernière page ; un échec d'une page suivante rejette toujours l'ensemble de la lecture.
+
 ## Cache des lectures et requêtes conditionnelles — 23 octobre 2026
 
 `api/read_cache.py` met en cache les lectures `/preview` sans effet de bord (parcelles, index, tuiles, contexte, quartiers, marché, projets, références, imagerie) et répond aux requêtes conditionnelles.
