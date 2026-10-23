@@ -446,6 +446,31 @@ def project_detail(slug):
     }
 
 
+# How a project position was obtained, from the most to the least precise. A
+# declared point is approximate by nature: it locates a project, not its plot.
+POINT_METHODS = {
+    "authority_registered_project_coordinates": "authority_point",
+    "broker_project_coordinates": "broker_point",
+    "publisher_map": "publisher_point",
+}
+LOCATION_PRECISION = {
+    "cadastral_parcel": "boundary",
+    "building_footprint": "footprint",
+    "authority_point": "point",
+    "broker_point": "point",
+    "publisher_point": "point",
+    "declared_point": "point",
+}
+
+
+def location_method(target, observed_method=None):
+    if target == "parcel":
+        return "cadastral_parcel"
+    if target == "building":
+        return "building_footprint"
+    return POINT_METHODS.get(observed_method, "declared_point")
+
+
 def project_locations(project, *, language="en"):
     """Explicit active identities only; never locate by a name or island centre."""
     area = TERRITORY_BY_ID.get(project.territory_id)
@@ -461,7 +486,9 @@ def project_locations(project, *, language="en"):
     )
     from .queries import map_provenances
 
-    points = map_provenances("place", [link.place_id for link in links if link.place_id])
+    points = map_provenances(
+        "place", [link.place_id for link in links if link.place_id], include_method=True
+    )
     result = []
     for link in links:
         target = "building" if link.building_id else "place" if link.place_id else "parcel"
@@ -478,10 +505,13 @@ def project_locations(project, *, language="en"):
         if not (west <= left <= right <= east and south <= bottom <= top <= north):
             continue
         point_source = points.get(str(record.id), {}) if target == "place" else {}
+        method = location_method(target, point_source.get("_method"))
         result.append(
             {
                 "id": record.id,
                 "target": target,
+                "method": method,
+                "precision": LOCATION_PRECISION[method],
                 "name": project.name,
                 "geometry": json.loads(geometry.geojson),
                 "source": {
@@ -499,3 +529,38 @@ def project_locations(project, *, language="en"):
             }
         )
     return result
+
+
+def project_location_gaps(territory=None):
+    """Published projects without a documented position, easiest to resolve first.
+
+    1: a parent or component is already located, so one review may place it.
+    2: a developer or authority page is published, the usual source of a plot.
+    3: only agency or media pages; a position needs new evidence.
+    """
+    accepted = _accepted_snapshots()
+    located = _visible_links().filter(project_id=OuterRef("pk"))
+    projects = Project.objects.filter(Exists(accepted.filter(project_id=OuterRef("pk"))))
+    if territory:
+        projects = projects.filter(territory_id=territory)
+    rows = list(
+        projects.filter(~Exists(located))
+        .annotate(
+            official=Exists(
+                accepted.filter(
+                    project_id=OuterRef("pk"), source_kind__in=["developer", "authority"]
+                )
+            ),
+            related=Exists(
+                ProjectRelation.objects.filter(active=True).filter(
+                    Q(child_id=OuterRef("pk"), parent__projectidentitylink__in=_visible_links())
+                    | Q(parent_id=OuterRef("pk"), child__projectidentitylink__in=_visible_links())
+                )
+            ),
+        )
+        .order_by("territory_id", "name")
+        .values("slug", "name", "territory_id", "official", "related")
+    )
+    for row in rows:
+        row["priority"] = 1 if row["related"] else 2 if row["official"] else 3
+    return sorted(rows, key=lambda row: (row["priority"], row["territory_id"], row["name"]))

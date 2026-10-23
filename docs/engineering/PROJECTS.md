@@ -166,6 +166,7 @@ Tous les chemins commencent par `C:\Users\Karim\Repositories\property-platform\`
 - `apps\api\src\property_platform\modules\catalog\project_services.py` : identités stables.
 - `apps\api\src\property_platform\modules\evidence\project_registry.json` : sources examinées, parseurs et rapprochements autorisés.
 - `apps\api\src\property_platform\modules\evidence\project_relations.json` et `project_relations.py` : liens relus « fait partie de » entre fiches (tours, phases), sourcés et révocables ; voir [la hiérarchie des projets](PROJECT_HIERARCHY.md).
+- `appspisrcproperty_platformmodulesevidenceproject_queries.py` (`location_method`, `project_location_gaps`) : méthode et précision de chaque position, et fiches sans position par priorité ; voir [la qualité des positions](PROJECT_POSITIONS.md).
 - `apps\api\src\property_platform\modules\evidence\project_protocol.py` : extraction et validation sans écriture SQL.
 - `apps\api\src\property_platform\modules\evidence\project_import.py` : snapshots, transaction, idempotence et audit.
 - `apps\api\src\property_platform\modules\evidence\project_queries.py` : projection bornée de l'observation courante par URL.

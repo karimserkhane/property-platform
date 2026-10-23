@@ -11,6 +11,7 @@ import {
   projectAmenityKey,
   projectEvidenceSources,
   projectMedia,
+  projectPositionQuality,
   projectRelations,
   projectWebsite,
   safeSourceUrl,
@@ -474,4 +475,26 @@ test("component links need a routable slug and keep only safe source references"
     [["the-gate-tower-1", "https://aldar.example/the-gate-tower-1"]],
   );
   assert.deepEqual(projectRelations({}), { parent: null, components: [] });
+});
+
+test("the most precise documented position decides the notice and points stay approximate", () => {
+  const at = (...methods) =>
+    projectPositionQuality(methods.map((method) => ({ method })));
+  assert.equal(at(), null);
+  assert.deepEqual(at("broker_point", "building_footprint"), {
+    method: "building_footprint",
+    label: "positionBuilding",
+    approximate: false,
+  });
+  assert.equal(at("cadastral_parcel").approximate, false);
+  assert.equal(
+    at("broker_point", "authority_point").label,
+    "positionAuthority",
+  );
+  assert.equal(
+    at("publisher_point", "broker_point").label,
+    "positionPublisher",
+  );
+  assert.equal(at("declared_point").approximate, true);
+  assert.equal(at("invented_method"), null);
 });

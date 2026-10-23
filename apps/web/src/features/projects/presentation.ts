@@ -270,3 +270,32 @@ export function projectRelations(
     }),
   };
 }
+
+type ProjectLocationMethod = ProjectDetail["map_locations"][number]["method"];
+
+const locationLabels = {
+  cadastral_parcel: "positionCadastral",
+  building_footprint: "positionBuilding",
+  authority_point: "positionAuthority",
+  publisher_point: "positionPublisher",
+  broker_point: "positionBroker",
+  declared_point: "positionDeclared",
+} as const satisfies Record<ProjectLocationMethod, string>;
+
+/** The best documented position decides the notice; a point never reads as a plot. */
+export function projectPositionQuality(
+  locations: Pick<ProjectDetail["map_locations"][number], "method">[],
+) {
+  const order = Object.keys(locationLabels);
+  const best = locations
+    .map((location) => location.method)
+    .filter((method) => order.includes(method))
+    .sort((left, right) => order.indexOf(left) - order.indexOf(right))[0];
+  return best
+    ? {
+        method: best,
+        label: locationLabels[best],
+        approximate: order.indexOf(best) > 1,
+      }
+    : null;
+}

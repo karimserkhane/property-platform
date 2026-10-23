@@ -419,6 +419,12 @@
     "amenitySecurity": "Security",
     "partOf": "Part of",
     "components": "Buildings & phases",
-    "relationNote": "Each building or phase keeps its own page and sources. The grouping is reviewed from the cited source."
+    "relationNote": "Each building or phase keeps its own page and sources. The grouping is reviewed from the cited source.",
+    "positionCadastral": "Position: cadastral plot boundary.",
+    "positionBuilding": "Position: reviewed building footprint.",
+    "positionAuthority": "Approximate position: point registered with the authority, not the plot boundary.",
+    "positionPublisher": "Approximate position: point from the developer’s or publisher’s map, not verified.",
+    "positionBroker": "Approximate position: point published by an agency, not verified.",
+    "positionDeclared": "Approximate position: point declared by a source, not verified."
   }
 }

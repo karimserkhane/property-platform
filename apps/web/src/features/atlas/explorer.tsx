@@ -712,7 +712,6 @@ export function Explorer({
                           locale={locale}
                           locate={projectFeature ? locate : undefined}
                           locateLabel={m.locate}
-                          unverifiedLabel={m.unverified}
                         />
                       ) : (
                         <SelectionPreview

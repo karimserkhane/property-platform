@@ -419,6 +419,12 @@
     "amenitySecurity": "Seguridad",
     "partOf": "Forma parte de",
     "components": "Edificios y fases",
-    "relationNote": "Cada edificio o fase conserva su propia página y sus fuentes. La agrupación se ha revisado a partir de la fuente citada."
+    "relationNote": "Cada edificio o fase conserva su propia página y sus fuentes. La agrupación se ha revisado a partir de la fuente citada.",
+    "positionCadastral": "Ubicación: límite de la parcela catastral.",
+    "positionBuilding": "Ubicación: huella del edificio revisada.",
+    "positionAuthority": "Ubicación aproximada: punto registrado ante la autoridad, no el límite de la parcela.",
+    "positionPublisher": "Ubicación aproximada: punto del mapa del promotor o del editor, sin verificar.",
+    "positionBroker": "Ubicación aproximada: punto publicado por una agencia, sin verificar.",
+    "positionDeclared": "Ubicación aproximada: punto declarado por una fuente, sin verificar."
   }
 }

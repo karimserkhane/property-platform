@@ -5216,6 +5216,27 @@
             "title": "Target",
             "type": "string"
           },
+          "method": {
+            "enum": [
+              "cadastral_parcel",
+              "building_footprint",
+              "authority_point",
+              "broker_point",
+              "publisher_point",
+              "declared_point"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "precision": {
+            "enum": [
+              "boundary",
+              "footprint",
+              "point"
+            ],
+            "title": "Precision",
+            "type": "string"
+          },
           "name": {
             "title": "Name",
             "type": "string"
@@ -5238,6 +5259,8 @@
         "required": [
           "id",
           "target",
+          "method",
+          "precision",
           "name",
           "geometry",
           "source"

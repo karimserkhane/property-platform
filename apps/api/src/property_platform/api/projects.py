@@ -91,6 +91,15 @@ class ProjectMediaResponse(Schema):
 class ProjectMapLocationResponse(Schema):
     id: UUID
     target: Literal["building", "place", "parcel"]
+    method: Literal[
+        "cadastral_parcel",
+        "building_footprint",
+        "authority_point",
+        "broker_point",
+        "publisher_point",
+        "declared_point",
+    ]
+    precision: Literal["boundary", "footprint", "point"]
     name: str
     geometry: Geometry | PointGeometry
     source: ProjectSourceResponse

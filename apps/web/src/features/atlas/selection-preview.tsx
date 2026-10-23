@@ -70,7 +70,6 @@ export function SelectionPreview({
           locale={locale}
           locate={locate}
           locateLabel={m.locate}
-          unverifiedLabel={m.unverified}
         />
       ) : (
         <>

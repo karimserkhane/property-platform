@@ -419,6 +419,12 @@
     "amenitySecurity": "Sécurité",
     "partOf": "Fait partie de",
     "components": "Bâtiments et phases",
-    "relationNote": "Chaque bâtiment ou phase garde sa propre page et ses sources. Le regroupement est vérifié à partir de la source citée."
+    "relationNote": "Chaque bâtiment ou phase garde sa propre page et ses sources. Le regroupement est vérifié à partir de la source citée.",
+    "positionCadastral": "Position : limite de la parcelle cadastrale.",
+    "positionBuilding": "Position : emprise du bâtiment vérifiée.",
+    "positionAuthority": "Position approximative : point enregistré auprès de l’autorité, pas la limite de la parcelle.",
+    "positionPublisher": "Position approximative : point issu de la carte du promoteur ou de l’éditeur, non vérifié.",
+    "positionBroker": "Position approximative : point publié par une agence, non vérifié.",
+    "positionDeclared": "Position approximative : point déclaré par une source, non vérifié."
   }
 }
