@@ -416,6 +416,9 @@
     "amenityBarbecue": "Khu nướng BBQ",
     "amenityParking": "Chỗ đỗ xe",
     "amenityRestaurants": "Nhà hàng",
-    "amenitySecurity": "An ninh"
+    "amenitySecurity": "An ninh",
+    "partOf": "Thuộc",
+    "components": "Tòa nhà & giai đoạn",
+    "relationNote": "Mỗi tòa nhà hoặc giai đoạn có trang và nguồn riêng. Việc nhóm này được xem xét dựa trên nguồn được trích dẫn."
   }
 }

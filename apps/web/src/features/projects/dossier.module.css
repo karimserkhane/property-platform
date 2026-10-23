@@ -145,3 +145,36 @@
     height: 220px;
   }
 }
+.parent {
+  margin-block-start: 14px;
+}
+.parent > a {
+  justify-self: start;
+  color: inherit;
+}
+.components {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+  padding: 0;
+  margin: 16px 0 0;
+  list-style: none;
+}
+.component {
+  min-width: 0;
+  padding: 16px 18px 4px;
+  border: 1px solid #e3ddd1;
+  border-radius: 12px;
+  background: #fffcf4d9;
+}
+.component > a {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: inherit;
+}
+.component > p {
+  margin-block: 0;
+}

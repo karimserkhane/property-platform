@@ -111,6 +111,7 @@ def import_project_details(receipt_rows, *, territory, actor):
         project_registry,
         validate_project_receipts,
     )
+    from .project_relations import apply_project_relations
 
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
         raise ValueError("Valid project import actor required")
@@ -286,6 +287,9 @@ def import_project_details(receipt_rows, *, territory, actor):
             summary["snapshots"] += 1
             summary["run_ids"].append(str(run.id))
         summary["projects"] = len(projects)
+        # Components link to their programme once both identities and the cited
+        # source capture exist, so archive rebuilds restore the hierarchy too.
+        summary["relations"] = apply_project_relations(territory=territory, actor=actor)
     summary["run_ids"] = sorted(set(summary["run_ids"]))
     return summary
 

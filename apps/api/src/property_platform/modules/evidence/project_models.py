@@ -234,6 +234,66 @@ class ProjectIdentityLink(models.Model):
         ]
 
 
+class ProjectRelation(models.Model):
+    """Reviewed link from a component (tower, phase, residence) to its programme.
+
+    Never a merge: both identities, their facts and their stock stay separate. Active
+    rows follow `project_relations.json`; removed entries are revoked, not deleted.
+    """
+
+    child = models.ForeignKey(
+        "catalog.Project", on_delete=models.PROTECT, related_name="parent_relations"
+    )
+    parent = models.ForeignKey(
+        "catalog.Project", on_delete=models.PROTECT, related_name="component_relations"
+    )
+    kind = models.CharField(max_length=20)
+    component = models.CharField(max_length=120)
+    capture = models.ForeignKey("evidence.Capture", on_delete=models.PROTECT)
+    basis = models.CharField(max_length=500)
+    reviewed_on = models.DateField()
+    actor = models.CharField(max_length=160)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True)
+    revoked_by = models.CharField(max_length=160, blank=True)
+    revocation_reason = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        db_table = "project_relation"
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(child=models.F("parent")), name="project_relation_distinct"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(kind__in=["part_of"]), name="project_relation_kind_valid"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(component__regex=r"\S", basis__regex=r"\S", actor__regex=r"\S"),
+                name="project_relation_review_present",
+            ),
+            # One active parent per component; a revoked link stays as history.
+            models.UniqueConstraint(
+                fields=["child"],
+                condition=models.Q(active=True),
+                name="project_relation_one_active_parent",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    active=True, revoked_at__isnull=True, revoked_by="", revocation_reason=""
+                )
+                | models.Q(
+                    active=False,
+                    revoked_at__isnull=False,
+                    revoked_at__gte=models.F("created_at"),
+                    revoked_by__regex=r"\S",
+                    revocation_reason__regex=r"\S",
+                ),
+                name="project_relation_revocation_valid",
+            ),
+        ]
+
+
 class ProjectTypology(models.Model):
     snapshot = models.ForeignKey(
         ProjectSnapshot, on_delete=models.PROTECT, related_name="typologies"

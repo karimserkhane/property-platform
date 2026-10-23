@@ -11,6 +11,7 @@ import {
   projectAmenityKey,
   projectEvidenceSources,
   projectMedia,
+  projectRelations,
   projectWebsite,
   safeSourceUrl,
 } from "../src/features/projects/presentation.ts";
@@ -447,4 +448,30 @@ test("project route preserves unavailable, disabled and missing states without l
       await readProjectData("park-view", async () => ({ status: 200, data })),
       { status: 503, project: null },
     );
+});
+
+test("component links need a routable slug and keep only safe source references", () => {
+  const relation = (slug, source_url = `https://aldar.example/${slug}`) => ({
+    slug,
+    name: slug,
+    component: "Tower 1",
+    basis: "Named by the source.",
+    source_url,
+    retrieved_at: "2026-10-23T08:00:00Z",
+  });
+  const { parent, components } = projectRelations({
+    parent: relation("gate-arc", "javascript:alert(1)"),
+    components: [
+      relation("the-gate-tower-1"),
+      relation("../admin"),
+      relation("Tower-2"),
+    ],
+  });
+  assert.equal(parent.slug, "gate-arc");
+  assert.equal(parent.source_url, null);
+  assert.deepEqual(
+    components.map((item) => [item.slug, item.source_url]),
+    [["the-gate-tower-1", "https://aldar.example/the-gate-tower-1"]],
+  );
+  assert.deepEqual(projectRelations({}), { parent: null, components: [] });
 });

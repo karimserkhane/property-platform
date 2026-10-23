@@ -416,6 +416,9 @@
     "amenityBarbecue": "باربی کیو کی جگہ",
     "amenityParking": "پارکنگ",
     "amenityRestaurants": "ریستوران",
-    "amenitySecurity": "سیکیورٹی"
+    "amenitySecurity": "سیکیورٹی",
+    "partOf": "اس کا حصہ",
+    "components": "عمارتیں اور مراحل",
+    "relationNote": "ہر عمارت یا مرحلے کا اپنا صفحہ اور ذرائع ہیں۔ یہ گروہ بندی حوالہ دیے گئے ذریعے سے جانچی گئی ہے۔"
   }
 }

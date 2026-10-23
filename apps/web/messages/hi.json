@@ -416,6 +416,9 @@
     "amenityBarbecue": "बारबेक्यू क्षेत्र",
     "amenityParking": "पार्किंग",
     "amenityRestaurants": "रेस्तराँ",
-    "amenitySecurity": "सुरक्षा"
+    "amenitySecurity": "सुरक्षा",
+    "partOf": "इसका हिस्सा",
+    "components": "इमारतें और चरण",
+    "relationNote": "हर इमारत या चरण का अपना पेज और स्रोत है। यह समूहन उद्धृत स्रोत के आधार पर जाँचा गया है।"
   }
 }

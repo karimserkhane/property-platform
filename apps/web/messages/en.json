@@ -416,6 +416,9 @@
     "amenityBarbecue": "Barbecue area",
     "amenityParking": "Parking",
     "amenityRestaurants": "Restaurants",
-    "amenitySecurity": "Security"
+    "amenitySecurity": "Security",
+    "partOf": "Part of",
+    "components": "Buildings & phases",
+    "relationNote": "Each building or phase keeps its own page and sources. The grouping is reviewed from the cited source."
   }
 }

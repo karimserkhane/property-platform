@@ -416,6 +416,9 @@
     "amenityBarbecue": "Área de churrasco",
     "amenityParking": "Estacionamento",
     "amenityRestaurants": "Restaurantes",
-    "amenitySecurity": "Segurança"
+    "amenitySecurity": "Segurança",
+    "partOf": "Faz parte de",
+    "components": "Edifícios e fases",
+    "relationNote": "Cada edifício ou fase mantém a sua própria página e fontes. O agrupamento foi revisto a partir da fonte citada."
   }
 }

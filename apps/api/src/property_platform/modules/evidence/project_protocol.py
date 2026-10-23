@@ -85,6 +85,64 @@ def project_registry(territory=None):
     return selected
 
 
+RELATION_KINDS = frozenset({"part_of"})
+
+
+def project_relations(territory=None):
+    """Reviewed parent/component links between registered projects; never a merge.
+
+    Each link cites a registered, non-terms source of either project, so its capture is
+    replayed by the catalogue pipelines. A project has at most one parent and the graph
+    has no cycle. A project scope such as `territory:slug` selects its territory.
+    """
+    rows = json.loads(Path(__file__).with_name("project_relations.json").read_text("utf-8"))
+    # The complete reviewed file, even when a caller narrows the registry it imports.
+    registry = json.loads(Path(__file__).with_name("project_registry.json").read_text("utf-8"))
+    projects = {row["slug"]: row for row in registry}
+    validate_project_relations(rows, projects)
+    territory = territory.split(":")[0] if territory else None
+    return tuple(
+        row
+        for row in rows
+        if territory is None or projects[row["child"]]["territory_id"] == territory
+    )
+
+
+def validate_project_relations(rows, projects):
+    parents = {}
+    for row in rows:
+        child, parent = projects.get(row.get("child")), projects.get(row.get("parent"))
+        if child is None or parent is None or child is parent:
+            raise ValueError("A project relation must join two registered projects")
+        if child["territory_id"] != parent["territory_id"]:
+            raise ValueError("A project relation stays within one territory")
+        if row.get("kind") not in RELATION_KINDS:
+            raise ValueError("Unknown project relation kind")
+        sources = {
+            source["url"]
+            for project in (child, parent)
+            for source in project["sources"]
+            if source["role"] != "terms"
+        }
+        if row.get("source_url") not in sources:
+            raise ValueError("A project relation must cite a registered project source")
+        if not all(
+            isinstance(row.get(key), str) and row[key].strip() and len(row[key]) <= limit
+            for key, limit in (("component", 120), ("basis", 500), ("reviewed_on", 10))
+        ):
+            raise ValueError("A project relation needs its component, basis and review date")
+        if row["child"] in parents:
+            raise ValueError("A project has at most one parent")
+        parents[row["child"]] = row["parent"]
+    for start in parents:
+        seen, slug = {start}, parents[start]
+        while slug in parents:
+            if slug in seen:
+                raise ValueError("Project relations must not form a cycle")
+            seen.add(slug)
+            slug = parents[slug]
+
+
 def project_urls(projects):
     """Only HTML/terms acquisition URLs; media references are deliberately excluded."""
     if not isinstance(projects, (tuple, list)) or not 1 <= len(projects) <= 200:

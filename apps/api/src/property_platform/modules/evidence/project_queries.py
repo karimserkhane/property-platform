@@ -26,6 +26,7 @@ from .models import (
     ProjectAmenity,
     ProjectIdentityLink,
     ProjectMedia,
+    ProjectRelation,
     ProjectSnapshot,
     ProjectTypology,
 )
@@ -40,6 +41,39 @@ def _accepted_snapshots():
     return ProjectSnapshot.objects.filter(capture__run__status="succeeded").filter(
         ~Exists(excluded)
     )
+
+
+def _relations(project_ids):
+    """Active component links whose two projects are both published."""
+    accepted = _accepted_snapshots()
+    rows = (
+        ProjectRelation.objects.filter(active=True)
+        .filter(Q(child_id__in=project_ids) | Q(parent_id__in=project_ids))
+        .filter(
+            Exists(accepted.filter(project_id=OuterRef("child_id"))),
+            Exists(accepted.filter(project_id=OuterRef("parent_id"))),
+        )
+        .select_related("child", "parent", "capture")
+        .defer("capture__payload")
+        .order_by("parent__name", "component", "child__name")
+    )
+    parents, components = {}, {}
+    for row in rows:
+        parents[row.child_id] = row
+        components.setdefault(row.parent_id, []).append(row)
+    return parents, components
+
+
+def _relation(row, project):
+    """The other project of a relation, with the reviewed component and its evidence."""
+    return {
+        "slug": project.slug,
+        "name": project.name,
+        "component": row.component,
+        "basis": row.basis,
+        "source_url": row.capture.url,
+        "retrieved_at": row.capture.fetched_at,
+    }
 
 
 def _visible_links():
@@ -95,6 +129,7 @@ def project_directory(territory=None, *, query="", offset=0, limit=200):
         )
         .order_by("name", "slug")[offset : offset + limit]
     )
+    parents, components = _relations([row.id for row in records])
     return {
         "items": [
             {
@@ -111,6 +146,10 @@ def project_directory(territory=None, *, query="", offset=0, limit=200):
                 "website_url": row.website_url,
                 "updated_at": row.checked_at,
                 "has_map_identity": row.mapped,
+                "parent": _relation(parents[row.id], parents[row.id].parent)
+                if row.id in parents
+                else None,
+                "component_count": len(components.get(row.id, [])),
             }
             for row in records
         ],
@@ -343,6 +382,7 @@ def project_detail(slug):
                     "source": _source(snapshot, asset.evidence_pointer),
                 }
             )
+    parents, components = _relations([project.id])
     return {
         "id": project.id,
         "slug": project.slug,
@@ -398,6 +438,10 @@ def project_detail(slug):
         ],
         "media": media[:60],
         "sources": _proof_sources(values),
+        "parent": _relation(parents[project.id], parents[project.id].parent)
+        if project.id in parents
+        else None,
+        "components": [_relation(row, row.child) for row in components.get(project.id, [])],
         "map_locations": project_locations(project, language=values[0].language),
     }
 

@@ -96,6 +96,17 @@ class ProjectMapLocationResponse(Schema):
     source: ProjectSourceResponse
 
 
+class ProjectRelationResponse(Schema):
+    """The other project of a reviewed component link, never a merged identity."""
+
+    slug: str
+    name: str
+    component: str
+    basis: str
+    source_url: str
+    retrieved_at: datetime
+
+
 class ProjectDetailResponse(Schema):
     id: UUID
     slug: str
@@ -114,6 +125,8 @@ class ProjectDetailResponse(Schema):
     media: list[ProjectMediaResponse]
     sources: list[ProjectSourceResponse]
     map_locations: list[ProjectMapLocationResponse]
+    parent: ProjectRelationResponse | None = None
+    components: list[ProjectRelationResponse] = []
 
 
 class ProjectSummaryResponse(Schema):
@@ -125,6 +138,8 @@ class ProjectSummaryResponse(Schema):
     website_url: str
     updated_at: datetime
     has_map_identity: bool
+    parent: ProjectRelationResponse | None = None
+    component_count: int = 0
 
 
 class ProjectDirectoryResponse(Schema):

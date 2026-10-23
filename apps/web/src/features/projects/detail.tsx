@@ -12,9 +12,11 @@ import {
   groupProjectTypologies,
   projectAmenityKey,
   projectMedia,
+  projectRelations,
   projectWebsite,
 } from "./presentation";
 import styles from "./project.module.css";
+import { ProjectComponents, ProjectParent } from "./relations";
 import type { ProjectDetail, ProjectLabels } from "./types";
 
 const typeKeys = new Set([
@@ -69,6 +71,9 @@ export function ProjectDetailView({
   };
   const sections = [
     ["project-overview", labels.overview],
+    ...(projectRelations(project).components.length
+      ? [["project-components", labels.components]]
+      : []),
     ...(project.typologies.length ? [["project-homes", labels.homes]] : []),
     ["project-documents", labels.documents],
     ...(project.amenities.length
@@ -121,6 +126,7 @@ export function ProjectDetailView({
             <span>{labels.developer}</span>
             <bdi>{project.developer.name}</bdi>
           </div>
+          <ProjectParent project={project} labels={labels} locale={locale} />
           <dl className={dossier.facts}>
             <div>
               <dt>{labels.location}</dt>
@@ -218,6 +224,11 @@ export function ProjectDetailView({
               )}
             </div>
           </section>
+          <ProjectComponents
+            project={project}
+            labels={labels}
+            locale={locale}
+          />
           {project.typologies.length > 0 && (
             <section className={styles.section} aria-labelledby="project-homes">
               <div className={styles.sectionHeading}>

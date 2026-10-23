@@ -416,6 +416,9 @@
     "amenityBarbecue": "বারবিকিউ এলাকা",
     "amenityParking": "পার্কিং",
     "amenityRestaurants": "রেস্তোরাঁ",
-    "amenitySecurity": "নিরাপত্তা"
+    "amenitySecurity": "নিরাপত্তা",
+    "partOf": "এর অংশ",
+    "components": "ভবন ও পর্যায়",
+    "relationNote": "প্রতিটি ভবন বা পর্যায়ের নিজস্ব পৃষ্ঠা ও উৎস রয়েছে। এই গোষ্ঠীকরণ উল্লিখিত উৎস থেকে যাচাই করা হয়েছে।"
   }
 }

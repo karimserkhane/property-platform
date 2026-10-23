@@ -416,6 +416,9 @@
     "amenityBarbecue": "Зона барбекю",
     "amenityParking": "Парковка",
     "amenityRestaurants": "Рестораны",
-    "amenitySecurity": "Охрана"
+    "amenitySecurity": "Охрана",
+    "partOf": "Входит в",
+    "components": "Здания и очереди",
+    "relationNote": "У каждого здания или очереди своя страница и свои источники. Группировка проверена по указанному источнику."
   }
 }

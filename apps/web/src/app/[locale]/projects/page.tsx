@@ -116,6 +116,8 @@ export default async function ProjectDirectory({
             previous: pagination("previous"),
             next: pagination("next"),
             pages: pagination("pages"),
+            partOf: t("partOf"),
+            components: t("components"),
           }}
         />
       ) : (
