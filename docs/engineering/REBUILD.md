@@ -145,7 +145,7 @@ les données ADREC, le contexte officiel et les tuiles sont retrouvés en effect
 Le flow échoue comme prévu sur les différences, et sa base temporaire est supprimée.
 
 **La reconstruction complète n'est pas démontrée.** Les divergences sont suivies
-dans [A11](../tasks/A11.md) (anciens protocoles Onwani/OSM et dépendances) et
+dans [A11](../tasks/A11.md) et [A14](../tasks/A14.md) (anciens protocoles Onwani/OSM, contrôle réel et dépendances) et
 [A12](../tasks/A12.md) (versions des interprétations de fiches/catalogues).
 Le contrôle ne corrige ni n'efface les lignes en service. Les sauvegardes A03 restent
 nécessaires ; un compte égal ne garantit pas à lui seul l'identité des valeurs.
