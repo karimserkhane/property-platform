@@ -15,10 +15,12 @@ export function readParcelPages(
   return readPages("parcels", 1000, MAX_FEATURES, bbox, territory, signal);
 }
 
+// `onPage` receives the rows read so far, so the map can draw them page by page.
 export function readParcelIndex(
   bbox: string,
   territory: string,
   signal: AbortSignal,
+  onPage?: (rows: ParcelIndex) => void,
 ): Promise<ParcelIndex> {
   return readPages(
     "parcel-index",
@@ -27,6 +29,7 @@ export function readParcelIndex(
     bbox,
     territory,
     signal,
+    onPage,
   );
 }
 
@@ -37,6 +40,7 @@ async function readPages<T extends ParcelRows>(
   bbox: string,
   territory: string,
   signal: AbortSignal,
+  onPage?: (rows: T) => void,
 ): Promise<T> {
   let result: T | null = null;
   const ids = new Set<string>();
@@ -60,6 +64,7 @@ async function readPages<T extends ParcelRows>(
     }
     result.truncated = data.truncated;
     result.next_cursor = data.next_cursor;
+    onPage?.({ ...result, features: [...result.features] });
     cursor = data.next_cursor ?? null;
     if (!data.truncated || !cursor || result.features.length >= maxFeatures)
       return result;

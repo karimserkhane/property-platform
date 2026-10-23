@@ -29,6 +29,24 @@ const sharedLayers = () => [
     },
   },
   { id: "parcel-line", type: "line", source: "parcels", paint: {} },
+  {
+    id: "parcel-water-fill",
+    type: "fill",
+    source: "parcels",
+    paint: {
+      "fill-color": parcelFillColor(),
+      "fill-opacity": ["case", ["==", ["get", "category"], "overlay"], 0, 0.28],
+    },
+  },
+  {
+    id: "parcel-water-line",
+    type: "line",
+    source: "parcels",
+    paint: {
+      "line-dasharray": [2, 2],
+      "line-opacity": ["case", ["==", ["get", "category"], "overlay"], 0, 1],
+    },
+  },
   { id: "selection", type: "line", source: "parcels" },
   { id: "parcel-project-names", type: "symbol", source: "parcels" },
   { id: "parcel-use-names", type: "symbol", source: "parcels" },
@@ -117,7 +135,13 @@ test("explorer layers draw tiled footprints and point labels", () => {
   const shared = sharedLayers();
   const tiled = tiledParcelLayers(shared);
   const byId = Object.fromEntries(tiled.map((layer) => [layer.id, layer]));
-  for (const id of ["parcel-fill", "parcel-line", "selection"]) {
+  for (const id of [
+    "parcel-fill",
+    "parcel-line",
+    "parcel-water-fill",
+    "parcel-water-line",
+    "selection",
+  ]) {
     assert.equal(byId[id].source, "parcels");
     assert.equal(byId[id]["source-layer"], "parcels");
   }
@@ -130,6 +154,14 @@ test("explorer layers draw tiled footprints and point labels", () => {
   assert.doesNotMatch(paint, /"get","category"/);
   assert.match(JSON.stringify(byId["parcel-line"].paint), /shown/);
   assert.match(JSON.stringify(byId.selection.paint), /shown/);
+  // Plots over mapped water keep their tint rules, now read from feature state.
+  for (const id of ["parcel-water-fill", "parcel-water-line"]) {
+    const water = JSON.stringify(byId[id].paint);
+    assert.match(water, /"feature-state","shown"/);
+    assert.match(water, /"feature-state","category"/);
+    assert.doesNotMatch(water, /"get","category"/);
+  }
+  assert.deepEqual(byId["parcel-water-line"].paint["line-dasharray"], [2, 2]);
   assert.deepEqual(byId.streets, shared.at(-1));
   // The shared style used by project neighbourhood maps is unchanged.
   assert.deepEqual(shared, sharedLayers());

@@ -122,3 +122,19 @@ def test_index_reports_active_project_markers_within_fifty_metres(client):
 def test_index_rejects_invalid_queries_like_parcels(client, query):
     with override_settings(**PREVIEW):
         assert client.get("/api/v1/preview/parcel-index", query).status_code == 422
+
+
+def test_overview_tiles_leave_out_sub_pixel_parcels_but_detail_tiles_keep_them(client):
+    tiny = residential(2, "RT1_TINY")
+    tiny["geometry"]["rings"] = [
+        [[54.405, 24.505], [54.4051, 24.505], [54.4051, 24.5051], [54.405, 24.505]]
+    ]
+    run([residential(1, "RT1_C1"), tiny])
+    large = Parcel.objects.get(code="RT1_C1")
+    small = Parcel.objects.get(code="RT1_TINY")
+    with override_settings(**PREVIEW):
+        overview = client.get(tile_path(54.405, 24.505, 11)).content
+        detail = client.get(tile_path(54.405, 24.505, 12)).content
+    assert str(large.pk).encode() in overview
+    assert str(small.pk).encode() not in overview
+    assert str(small.pk).encode() in detail and str(large.pk).encode() in detail

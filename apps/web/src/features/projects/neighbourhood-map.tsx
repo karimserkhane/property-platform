@@ -68,6 +68,8 @@ function updateView(
     land: !options.satellite,
     "plan-water": !options.satellite,
     "plan-waterways": !options.satellite,
+    "parcel-water-fill": !options.satellite,
+    "parcel-water-line": !options.satellite,
   }))
     if (map.getLayer(id))
       map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
@@ -277,6 +279,8 @@ export default function NeighbourhoodMap({
               "areas",
               "parcel-fill",
               "parcel-line",
+              "parcel-water-fill",
+              "parcel-water-line",
               "parcel-project-names",
               "parcel-use-names",
               "buildings",

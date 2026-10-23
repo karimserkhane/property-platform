@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readParcelPages } from "../src/features/atlas/parcel-pages.ts";
+import {
+  readParcelIndex,
+  readParcelPages,
+} from "../src/features/atlas/parcel-pages.ts";
 
 test("parcel pages retain the territory, advance the cursor and deduplicate overlap", async () => {
   const original = globalThis.fetch;
@@ -61,6 +64,42 @@ test("a partial acquisition is rejected when a later page fails", async () => {
         new AbortController().signal,
       ),
     );
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("index rows are handed over page by page before the read completes", async () => {
+  const original = globalThis.fetch;
+  const pages = [
+    { features: [{ id: "a" }], truncated: true, next_cursor: "a" },
+    { features: [{ id: "b" }], truncated: false, next_cursor: null },
+  ];
+  const requests = [];
+  globalThis.fetch = async (url) => {
+    requests.push(new URL(url, "http://localhost"));
+    return { ok: true, json: async () => pages.shift() };
+  };
+  const seen = [];
+  try {
+    const result = await readParcelIndex(
+      "54.4,24.5,54.48,24.6",
+      "abu-dhabi",
+      new AbortController().signal,
+      (rows) => seen.push([rows.truncated, rows.features.map((row) => row.id)]),
+    );
+    assert.deepEqual(seen, [
+      [true, ["a"]],
+      [false, ["a", "b"]],
+    ]);
+    assert.deepEqual(
+      result.features.map((row) => row.id),
+      ["a", "b"],
+    );
+    assert.ok(
+      requests.every((url) => url.pathname === "/api/atlas/parcel-index"),
+    );
+    assert.equal(requests[0].searchParams.get("limit"), "3000");
   } finally {
     globalThis.fetch = original;
   }

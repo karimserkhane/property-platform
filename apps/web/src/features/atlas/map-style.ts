@@ -82,9 +82,38 @@ export function mapLayers(locale: string): LayerSpecification[] {
       paint: { "line-color": "#8f9fa0", "line-width": 0.6 },
     },
     // Source cadastre can extend beyond the basemap coast (planned land, marinas).
-    // The quiet default masks BOTH parcel surfaces and outlines over water.
-    // Their surveyed geometry is preserved; the expert toggle restores outlines.
+    // Water covers the solid parcel surfaces and outlines so the sea is never
+    // painted; the expert toggle restores solid outlines above it.
     ...HYDROGRAPHY_LAYERS,
+    // OSM coastlines lag behind reclamation: whole planned districts (Saadiyat
+    // villas, parks, substations) lie in mapped "ocean". A faint tint and a
+    // dashed outline above the water keep those surveyed plots readable instead
+    // of cutting them at the coast. Project perimeters stay hidden over water.
+    {
+      id: "parcel-water-fill",
+      type: "fill",
+      source: "parcels",
+      paint: {
+        "fill-color": parcelFillColor(),
+        "fill-opacity": [
+          "case",
+          ["==", ["get", "category"], "overlay"],
+          0,
+          0.28,
+        ],
+      },
+    },
+    {
+      id: "parcel-water-line",
+      type: "line",
+      source: "parcels",
+      paint: {
+        "line-color": "#8f9fa0",
+        "line-width": 0.6,
+        "line-dasharray": [2, 2],
+        "line-opacity": ["case", ["==", ["get", "category"], "overlay"], 0, 1],
+      },
+    },
     {
       id: "buildings",
       type: "fill",

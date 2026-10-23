@@ -164,6 +164,12 @@ export default function ParcelMap({
   );
   const parcelAreasRef = useRef(parcelAreas);
   parcelAreasRef.current = parcelAreas;
+  const parcelCategories = useMemo(
+    () => new Map(data.features.map((f) => [f.id, f.properties.category])),
+    [data],
+  );
+  const parcelCategoriesRef = useRef(parcelCategories);
+  parcelCategoriesRef.current = parcelCategories;
   // Parcels currently listed by the index; tile features outside it stay hidden.
   const shownParcels = useRef<Set<string>>(new Set());
   const credits = useMemo(
@@ -354,12 +360,17 @@ export default function ParcelMap({
             item.source !== PARCEL_SOURCE ||
             shownParcels.current.has(String(item.properties.id)),
         );
+        // Plots drawn over mapped water stay selectable; project perimeters
+        // (not drawn there) do not capture a click on the open water.
         const hit = selectMapHit(
           overWater
             ? listed.filter(
                 (item) =>
-                  item.source !== PARCEL_SOURCE &&
-                  item.source !== PARCEL_LABEL_SOURCE,
+                  (item.source !== PARCEL_SOURCE &&
+                    item.source !== PARCEL_LABEL_SOURCE) ||
+                  parcelCategoriesRef.current.get(
+                    String(item.properties.id),
+                  ) !== "overlay",
               )
             : listed,
           parcelAreasRef.current,
@@ -709,6 +720,11 @@ export default function ParcelMap({
       const visibility: Record<string, boolean> = {
         "parcel-fill": options.parcels,
         "parcel-line": options.parcels,
+        // Faint plots over mapped water: plan only, and redundant once solid
+        // outlines are raised above the water by the expert toggle.
+        "parcel-water-fill": options.parcels && !options.satellite,
+        "parcel-water-line":
+          options.parcels && !options.satellite && !options.offshore,
         ...imageryVisibility(options.satellite, options.scene),
         "plan-water": !options.satellite,
         "plan-waterways": !options.satellite,
