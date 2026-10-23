@@ -15,7 +15,13 @@ export const PARCEL_SOURCE_LAYER = "parcels";
 export const PARCEL_LABEL_SOURCE = "parcel-labels";
 const TILE_ZOOMS = { minzoom: 8, maxzoom: 16 } as const;
 
-const FOOTPRINT_LAYERS = new Set(["parcel-fill", "parcel-line", "selection"]);
+const FOOTPRINT_LAYERS = new Set([
+  "parcel-fill",
+  "parcel-line",
+  "parcel-water-fill",
+  "parcel-water-line",
+  "selection",
+]);
 const LABEL_LAYERS = new Set([
   "parcel-project-names",
   "parcel-use-names",
@@ -70,21 +76,22 @@ export function tiledParcelLayers(
     if (LABEL_LAYERS.has(layer.id))
       return { ...layer, source: PARCEL_LABEL_SOURCE } as LayerSpecification;
     if (!FOOTPRINT_LAYERS.has(layer.id)) return layer;
-    const tiled = {
+    const paint = Object.fromEntries(
+      Object.entries(("paint" in layer ? layer.paint : undefined) ?? {}).map(
+        ([key, value]) => [key, fromState(value)],
+      ),
+    );
+    if (layer.type === "fill")
+      paint["fill-opacity"] = tiledParcelOpacity(
+        (paint["fill-opacity"] ?? 1) as ExpressionSpecification,
+      );
+    if (layer.type === "line")
+      paint["line-opacity"] = ["case", SHOWN, paint["line-opacity"] ?? 1, 0];
+    return {
       ...layer,
       "source-layer": PARCEL_SOURCE_LAYER,
-    } as LayerSpecification & { paint?: Record<string, unknown> };
-    if (layer.id === "parcel-fill")
-      tiled.paint = {
-        ...tiled.paint,
-        "fill-color": fromState(tiled.paint?.["fill-color"]),
-        "fill-opacity": tiledParcelOpacity(
-          tiled.paint?.["fill-opacity"] as ExpressionSpecification,
-        ),
-      };
-    if (layer.id === "parcel-line" || layer.id === "selection")
-      tiled.paint = { ...tiled.paint, "line-opacity": ["case", SHOWN, 1, 0] };
-    return tiled;
+      paint,
+    } as LayerSpecification;
   });
 }
 

@@ -191,13 +191,18 @@ export function Explorer({
       .catch(() => {
         if (!controller.signal.aborted) setReferenceError(true);
       });
-    readParcelIndex(bbox, territory.id, controller.signal)
+    readParcelIndex(bbox, territory.id, controller.signal, (rows) => {
+      if (!controller.signal.aborted) setCollection(rows);
+    })
       .then((data) => {
         setCollection(data);
         setState("ready");
       })
       .catch(() => {
-        if (!controller.signal.aborted) setState("error");
+        if (controller.signal.aborted) return;
+        // A failed later page rejects the whole read, as before page-by-page drawing.
+        setCollection(null);
+        setState("error");
       });
     fetch(`/api/atlas/map-context?bbox=${bbox}&territory=${territoryQuery}`, {
       signal: controller.signal,
