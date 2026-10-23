@@ -323,7 +323,7 @@ def _source_keys(operation, scope, reference):
     return ["sentinel:" + identity for identity in imagery_import.SCENES]
 
 
-def _dispatch(operation, scope, actor, acquisition, receipt, reference):
+def _dispatch(operation, scope, actor, acquisition, receipt, reference, historical=None):
     if operation == "sdi_parcels":
         run = sdi_import.import_parcels(territory=scope, actor=actor, acquisition=acquisition)
         return run.status, run.summary
@@ -345,11 +345,17 @@ def _dispatch(operation, scope, actor, acquisition, receipt, reference):
         )
         return run.status, run.summary
     if operation == "onwani":
-        run = services.import_onwani(actor=actor, acquisition=acquisition, territory=territory)
+        run = services.import_onwani(
+            actor=actor, acquisition=acquisition, territory=territory, historical=historical
+        )
         return run.status, run.summary
     if operation == "map":
         run = map_import.import_map_layer(
-            layer=scope.rsplit(":", 1)[1], actor=actor, acquisition=acquisition, territory=territory
+            layer=scope.rsplit(":", 1)[1],
+            actor=actor,
+            acquisition=acquisition,
+            territory=territory,
+            historical=historical,
         )
         return run.status, run.summary
     if operation == "references":
@@ -387,14 +393,18 @@ def execute_import(
     reference_key=None,
     prefect_flow_run_id=None,
     completion_check=None,
+    historical=None,
 ):
     """Execute one allowlisted operation, with durable retry and receipt identities.
 
     Failure is a returned terminal result, not an exception after successful writes.
     Delivery adapters must map failed/quarantined results to visible Prefect states.
     Busy/invalid identity errors are raised before creating an operational record.
+    `historical` (capture replay only) reissues a recorded legacy Onwani/OSM request.
     """
     reference = _validate_identity(operation, scope, execution_key, actor, reference_key)
+    if historical is not None and (operation not in {"onwani", "map"} or acquisition is None):
+        raise ValueError("A historical protocol requires a replayed Onwani or map acquisition")
     actor = actor.strip()
     if connection.vendor != "postgresql":
         raise ValueError("Ingestion orchestration requires PostgreSQL/PostGIS")
@@ -497,7 +507,7 @@ def execute_import(
                 error = ""
                 try:
                     status, summary = _dispatch(
-                        operation, scope, actor, acquisition, receipt, reference
+                        operation, scope, actor, acquisition, receipt, reference, historical
                     )
                 except Exception as exc:
                     if connection.needs_rollback:
