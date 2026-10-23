@@ -1516,6 +1516,27 @@ export interface components {
             /** Offset */
             offset: number;
         };
+        /**
+         * ProjectRelationResponse
+         * @description The other project of a reviewed component link, never a merged identity.
+         */
+        ProjectRelationResponse: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Component */
+            component: string;
+            /** Basis */
+            basis: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+        };
         /** ProjectSummaryResponse */
         ProjectSummaryResponse: {
             /**
@@ -1539,6 +1560,12 @@ export interface components {
             updated_at: string;
             /** Has Map Identity */
             has_map_identity: boolean;
+            parent?: components["schemas"]["ProjectRelationResponse"] | null;
+            /**
+             * Component Count
+             * @default 0
+             */
+            component_count: number;
         };
         /** ProjectAmenityResponse */
         ProjectAmenityResponse: {
@@ -1588,6 +1615,12 @@ export interface components {
             sources: components["schemas"]["ProjectSourceResponse"][];
             /** Map Locations */
             map_locations: components["schemas"]["ProjectMapLocationResponse"][];
+            parent?: components["schemas"]["ProjectRelationResponse"] | null;
+            /**
+             * Components
+             * @default []
+             */
+            components: components["schemas"]["ProjectRelationResponse"][];
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {

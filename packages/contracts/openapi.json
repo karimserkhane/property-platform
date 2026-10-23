@@ -4856,6 +4856,46 @@
         "title": "ProjectDirectoryResponse",
         "type": "object"
       },
+      "ProjectRelationResponse": {
+        "description": "The other project of a reviewed component link, never a merged identity.",
+        "properties": {
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "component": {
+            "title": "Component",
+            "type": "string"
+          },
+          "basis": {
+            "title": "Basis",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "component",
+          "basis",
+          "source_url",
+          "retrieved_at"
+        ],
+        "title": "ProjectRelationResponse",
+        "type": "object"
+      },
       "ProjectSummaryResponse": {
         "properties": {
           "id": {
@@ -4890,6 +4930,21 @@
           "has_map_identity": {
             "title": "Has Map Identity",
             "type": "boolean"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectRelationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "component_count": {
+            "default": 0,
+            "title": "Component Count",
+            "type": "integer"
           }
         },
         "required": [
@@ -5034,6 +5089,24 @@
               "$ref": "#/components/schemas/ProjectMapLocationResponse"
             },
             "title": "Map Locations",
+            "type": "array"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectRelationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "components": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ProjectRelationResponse"
+            },
+            "title": "Components",
             "type": "array"
           }
         },

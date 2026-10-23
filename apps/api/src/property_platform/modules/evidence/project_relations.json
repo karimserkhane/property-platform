@@ -1,0 +1,119 @@
+[
+  {
+    "child": "gate",
+    "parent": "gate-arc",
+    "kind": "part_of",
+    "component": "The Gate Towers",
+    "source_url": "https://www.aldar.com/properties/en/uae/reem-island/gate-arc",
+    "basis": "Aldar's Gate & Arc community page presents The Gate Towers (three towers joined by a sky bridge) as part of Gate & Arc.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "the-arc",
+    "parent": "gate-arc",
+    "kind": "part_of",
+    "component": "The Arc Towers",
+    "source_url": "https://www.aldar.com/properties/en/uae/reem-island/gate-arc",
+    "basis": "Aldar's Gate & Arc community page describes The Arc Towers, four residential buildings adjacent to The Gate Towers, within Gate & Arc. The PSI record names the same component The ARC.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "the-gate-tower-1",
+    "parent": "gate",
+    "kind": "part_of",
+    "component": "Tower 1",
+    "source_url": "https://www.aldar.com/properties/en/uae/reem-island/gate",
+    "basis": "Aldar's Gate page describes The Gate Towers as three towers joined by a sky bridge; the PSI record names this one The Gate Tower 1. Tower numbering is an agency label.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "the-gate-tower-2",
+    "parent": "gate",
+    "kind": "part_of",
+    "component": "Tower 2",
+    "source_url": "https://www.aldar.com/properties/en/uae/reem-island/gate",
+    "basis": "Aldar's Gate page describes The Gate Towers as three towers joined by a sky bridge; the PSI record names this one The Gate Tower 2. Tower numbering is an agency label.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "the-gate-tower-3",
+    "parent": "gate",
+    "kind": "part_of",
+    "component": "Tower 3",
+    "source_url": "https://www.aldar.com/properties/en/uae/reem-island/gate",
+    "basis": "Aldar's Gate page describes The Gate Towers as three towers joined by a sky bridge; the PSI record names this one The Gate Tower 3. Tower numbering is an agency label.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "mayar-in-maysan",
+    "parent": "maysan",
+    "kind": "part_of",
+    "component": "Mayar",
+    "source_url": "https://psinv.net/en/projects/abu-dhabi/abu-dhabi-district/al-reem-island/mayar-in-maysan-507636",
+    "basis": "The PSI record presents Mayar in Maysan by Modon on Al Reem Island; agency-declared component of Modon's Maysan, not an authority statement.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "radisson-residences-tower-2",
+    "parent": "radisson-residences",
+    "kind": "part_of",
+    "component": "Tower 2",
+    "source_url": "https://www.propertyfinder.ae/en/new-projects/royal-development-company/radisson-residences-2",
+    "basis": "Property Finder titles this listing Radisson Residences Tower 2 by Royal Development Holding, the developer of the Radisson Residences programme.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "radisson-residences-tower-3",
+    "parent": "radisson-residences",
+    "kind": "part_of",
+    "component": "Tower 3",
+    "source_url": "https://www.propertyfinder.ae/en/new-projects/royal-development-holding/radisson-residences-tower-3",
+    "basis": "Property Finder titles this listing Radisson Residences Tower 3 by Royal Development Holding, the developer of the Radisson Residences programme.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "rotana-residences-north-tower",
+    "parent": "rotana-residences",
+    "kind": "part_of",
+    "component": "North Tower",
+    "source_url": "https://www.propertyfinder.ae/en/new-projects/royal-development-company/rotana-residences-north-tower",
+    "basis": "Property Finder titles this listing Rotana Residences North Tower by Royal Development Holding, the developer of the Rotana Residences programme.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "rotana-residences-south-tower",
+    "parent": "rotana-residences",
+    "kind": "part_of",
+    "component": "South Tower",
+    "source_url": "https://www.propertyfinder.ae/en/new-projects/royal-development-company/rotana-residences-south-tower",
+    "basis": "Property Finder titles this listing Rotana Residences South Tower by Royal Development Holding, the developer of the Rotana Residences programme.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "seamont-phase-2",
+    "parent": "seamont",
+    "kind": "part_of",
+    "component": "Phase 2",
+    "source_url": "https://www.propertyfinder.ae/en/new-projects/saas-properties/seamont-autograph-collection-residences-phase-2",
+    "basis": "Property Finder titles this listing Seamont Autograph Collection Residences Phase 2 by Saas Properties, the developer of Seamont.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "the-row-saadiyat-phase-2",
+    "parent": "the-row-saadiyat",
+    "kind": "part_of",
+    "component": "Phase 2",
+    "source_url": "https://www.propertyfinder.ae/en/new-projects/aldar-properties-pjsc/the-row-phase-2-saadiyat",
+    "basis": "Property Finder titles this listing The Row Phase 2 Saadiyat by Aldar Properties, the developer of The Row Saadiyat.",
+    "reviewed_on": "2026-10-23"
+  },
+  {
+    "child": "tara-park-2",
+    "parent": "tara-park",
+    "kind": "part_of",
+    "component": "Tara Park 2",
+    "source_url": "https://www.propertyfinder.ae/en/new-projects/modon-properties/tara-park-2-by-modon",
+    "basis": "Property Finder titles this listing Tara Park 2 by Modon, the developer of Tara Park; the source does not say whether it is a phase or a building.",
+    "reviewed_on": "2026-10-23"
+  }
+]
