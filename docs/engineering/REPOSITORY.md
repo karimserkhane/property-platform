@@ -269,7 +269,7 @@ L'export backend génère `packages/contracts/territories.json` avec OpenAPI. Le
 
 Ce dossier possède les pages et interactions du site. `apps/web/src/app/` définit les routes ; les crochets de `[locale]` indiquent un paramètre variable, pas un dossier à créer pour chaque langue. Le même `apps/web/src/app/[locale]/page.tsx` peut donc servir `/en`, `/ar` ou `/fr`, avec des textes différents dans `apps/web/messages/`.
 
-`apps/web/src/components/` accueille les composants réellement réutilisables. `apps/web/src/i18n/` centralise les règles de traduction et de navigation pour éviter que chaque page réinvente la gestion des langues. Le site ne doit pas accéder directement aux tables PostgreSQL : les demandes métier passent par l'API.
+`apps/web/e2e/` et `apps/web/playwright.config.ts` possèdent les parcours navigateur ; ils lisent le site comme un visiteur, sans importer le code de `src/`, et sont exclus du contexte de build Docker (montés par `checks-e2e`, voir [E2E.md](E2E.md)). `apps/web/src/components/` accueille les composants réellement réutilisables. `apps/web/src/i18n/` centralise les règles de traduction et de navigation pour éviter que chaque page réinvente la gestion des langues. Le site ne doit pas accéder directement aux tables PostgreSQL : les demandes métier passent par l'API.
 
 ### `apps/api` : les données et les règles métier
 
