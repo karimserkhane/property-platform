@@ -27,9 +27,10 @@ Lancement direct depuis le runner, avec le même environnement que son service :
 docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion exec ingestion python -c "from property_platform_ingestion.flows import rebuild_check; rebuild_check(actor='operator-check')"
 ```
 
-Ne pas lancer un deuxième contrôle identique en parallèle. Prévoir au moins quelques
-Go libres : les octets dédupliqués des captures et une base de travail s'ajoutent à
-la base en service. Les originaux privés doivent être accessibles au même chemin que
+Ne pas lancer un deuxième contrôle identique en parallèle (rien ne l'empêche
+techniquement). Prévoir au moins quelques Go libres pendant le contrôle : les octets
+dédupliqués des captures et une base de travail s'ajoutent à la base en service.
+Les octets copiés sont supprimés à la fin du contrôle. Les originaux privés doivent être accessibles au même chemin que
 dans le runner ; un conteneur de contrôle les monte **en lecture seule**.
 
 Ordre du flow :
@@ -51,11 +52,23 @@ Ordre du flow :
    Une référence historiquement indisponible reste indisponible : son HTTP d'origine
    est conservé, sans transformer ce rejeu attendu en nouvelle erreur de collecte.
 5. Comparer chaque table, vérifier l'inventaire et écrire `report.json`.
-   Un import échoué, une table non couverte ou un écart sur une table comparée
-   exactement fait échouer le flow Prefect.
+   Un import échoué, un statut différent de l'exécution d'origine (`diverged_steps`,
+   par exemple une acquisition acceptée à l'origine et mise en quarantaine au rejeu),
+   une table non couverte ou un écart sur une table comparée exactement fait échouer
+   le flow Prefect. Seule exception attendue : une référence indisponible à l'origine
+   (`failed`) rejouée comme indisponible (`replayed_unavailable`).
 6. Supprimer uniquement la base créée par cette invocation, même si le rejeu échoue.
-   Aucun `DROP ... FORCE`, aucune suppression de volume. Le paquet et le rapport
-   restent disponibles à l'opérateur ; ils sont privés et ignorés par Git.
+   Aucun `DROP ... FORCE`, aucune suppression de volume. `manifest.json` et
+   `report.json` restent disponibles à l'opérateur, privés et ignorés par Git ; le
+   dossier `blobs/` est supprimé (les octets restent dans la base et les sauvegardes
+   A03). Un export interrompu supprime le dossier qu'il venait de créer.
+
+Si une base `rebuild_check_*` subsiste (par exemple après l'arrêt forcé d'un worker),
+la lister en lecture seule avec
+`SELECT datname FROM pg_database WHERE datname LIKE 'rebuild_check_%';`, vérifier
+qu'aucun contrôle n'est en cours dans Prefect, puis demander l'accord du propriétaire
+avant de la supprimer : aucun outil ne supprime automatiquement une base qu'il n'a
+pas créée dans la même invocation.
 
 Le SHA-256 du manifeste est fixé après l'export ; chaque lecture de capture vérifie
 sa taille et son empreinte. Une requête absente, différente ou une capture non
@@ -79,8 +92,9 @@ automatique.
 
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
-les captures sans adaptateur de rejeu ; le rapport ne prétend pas qu'elles ont été
-réimportées. Les anciens importateurs ne sont pas embarqués : une dérive du parseur
+les captures sans adaptateur de rejeu, ainsi que les captures d'une fiche projet non
+sélectionnées (URL répétée dans le même run ou retirée du registre) ; le rapport ne
+prétend pas qu'elles ont été réimportées. Les anciens importateurs ne sont pas embarqués : une dérive du parseur
 ou du registre est un écart à examiner, pas une preuve de perte dans la source.
 
 ## Ce qui exige une sauvegarde ou un autre pipeline

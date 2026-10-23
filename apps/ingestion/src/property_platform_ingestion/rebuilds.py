@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -71,7 +72,12 @@ def rebuild_check(*, actor: str, run_id: str, url: str | None = None) -> dict:
     # No overwrite of a previous report/bundle; retries are explicit new runs.
     root.mkdir(parents=True, exist_ok=False)
     actor = f"Prefect/{run_id}/{actor.strip()}"
-    worker("export", root, source, actor=actor, run_id=run_id)
+    try:
+        worker("export", root, source, actor=actor, run_id=run_id)
+    except BaseException:
+        # An interrupted export is not an operator bundle; remove only this new directory.
+        shutil.rmtree(root)
+        raise
     manifest_hash = hashlib.sha256((root / "manifest.json").read_bytes()).hexdigest()
     created = False
     try:
@@ -83,15 +89,22 @@ def rebuild_check(*, actor: str, run_id: str, url: str | None = None) -> dict:
         worker("replay", root, target, actor=actor, run_id=run_id, manifest_hash=manifest_hash)
         report = json.loads((root / "report.json").read_text("utf-8"))
     finally:
-        if created:
-            # No FORCE: an unexpected remaining session makes cleanup fail visibly.
-            # This exact name was created successfully in this invocation only.
-            with psycopg.connect(source, autocommit=True) as admin:
-                admin.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(name)))
+        try:
+            if created:
+                # No FORCE: an unexpected remaining session makes cleanup fail visibly.
+                # This exact name was created successfully in this invocation only.
+                with psycopg.connect(source, autocommit=True) as admin:
+                    admin.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(name)))
+        finally:
+            # The bytes remain in the source database and A03 backups. Keep the manifest
+            # and report for the operator, not a growing private copy of every capture.
+            if (root / "blobs").exists():
+                shutil.rmtree(root / "blobs")
     return {
         "ok": report["ok"],
         "tables": len(report["tables"]),
         "failed_steps": report["failed_steps"],
+        "diverged_steps": report["diverged_steps"],
         "mismatches": report["mismatches"],
         "source_snapshot_at": report["source_snapshot_at"],
         "archive": str(root),

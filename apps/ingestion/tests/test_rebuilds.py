@@ -52,6 +52,7 @@ def test_only_the_database_created_by_this_run_is_dropped(tmp_path, monkeypatch,
                     "ok": False,
                     "tables": [],
                     "failed_steps": 1,
+                    "diverged_steps": 0,
                     "mismatches": ["real_estate.parcel"],
                     "source_snapshot_at": "2026-10-23T00:00:00+00:00",
                 }
@@ -137,3 +138,51 @@ def test_worker_checks_the_actual_connection_and_emptiness_before_migrations(
     else:
         with pytest.raises(ValueError, match="own completely empty"):
             require_empty_target(connection, "rebuild_check_" + "a" * 32)
+
+
+@pytest.mark.parametrize("failure", [None, "export", "replay"])
+def test_private_capture_copies_do_not_outlive_their_check(tmp_path, monkeypatch, failure):
+    monkeypatch.setattr(rebuilds, "backup_root", lambda: tmp_path)
+    run_id = str(uuid4())
+    root = tmp_path / "rebuild-checks" / run_id
+
+    def worker(action, root, url, **kwargs):
+        (root / "blobs").mkdir(exist_ok=True)
+        (root / "blobs" / ("a" * 64)).write_bytes(b"private source bytes")
+        if action == "export":
+            if failure == "export":
+                raise RuntimeError("export interrupted")
+            (root / "manifest.json").write_text('{"version":1}')
+        elif failure == "replay":
+            raise RuntimeError("replay interrupted")
+        else:
+            (root / "report.json").write_text(
+                json.dumps(
+                    {
+                        "ok": False,
+                        "tables": [],
+                        "failed_steps": 0,
+                        "diverged_steps": 0,
+                        "mismatches": ["real_estate.parcel"],
+                        "source_snapshot_at": "2026-10-23T00:00:00+00:00",
+                    }
+                )
+            )
+
+    @contextmanager
+    def connect(url, **kwargs):
+        yield type("Admin", (), {"execute": lambda self, query: None})()
+
+    monkeypatch.setattr(rebuilds, "worker", worker)
+    monkeypatch.setattr(rebuilds.psycopg, "connect", connect)
+    if failure:
+        with pytest.raises(RuntimeError):
+            rebuilds.rebuild_check(actor="test", run_id=run_id, url=URL)
+    else:
+        rebuilds.rebuild_check(actor="test", run_id=run_id, url=URL)
+    if failure == "export":
+        assert not root.exists()  # An incomplete export is not an operator bundle.
+    else:
+        assert not (root / "blobs").exists()
+        assert (root / "manifest.json").exists()
+        assert (root / "report.json").exists() is (failure is None)

@@ -270,3 +270,101 @@ def test_historical_unavailable_reference_is_replayed_as_unavailable(tmp_path):
     assert result["ok"]
     assert not ResearchReference.objects.get().available
     assert Capture.objects.get().http_status == 404
+
+
+def test_repeated_query_keys_are_part_of_the_archived_request(tmp_path):
+    url = "https://example.com/data"
+    item = captured(tmp_path, {}, url + "?a=1&a=2")
+    with pytest.raises(ValueError, match="differs"):
+        archive.CaptureReplay(tmp_path, [item])(url, {"a": 2})
+    archive.CaptureReplay(tmp_path, [item])(url + "?a=1&a=2", {})
+    # A request parameter still replaces the same key carried by its base URL.
+    single = captured(tmp_path, {}, url + "?a=2&b=1")
+    archive.CaptureReplay(tmp_path, [single])(url + "?a=1", {"a": 2, "b": 1})
+
+
+@pytest.mark.parametrize(
+    ("original", "replayed", "ok"),
+    [
+        ("succeeded", "succeeded", True),
+        ("quarantined", "quarantined", True),
+        ("succeeded", "quarantined", False),
+        ("quarantined", "succeeded", False),
+        ("failed", "succeeded", False),
+    ],
+)
+def test_a_status_different_from_the_original_run_fails_the_check(
+    tmp_path, monkeypatch, original, replayed, ok
+):
+    monkeypatch.setattr(
+        archive.orchestration,
+        "execute_import",
+        lambda **kwargs: {"status": replayed, "run_ids": []},
+    )
+    archive.write_json(
+        tmp_path / "manifest.json",
+        {
+            "version": 1,
+            "snapshot_at": "2026-10-23T00:00:00+00:00",
+            "expected": archive.counts(),
+            "steps": [
+                {
+                    "operation": "map",
+                    "scope": "al-reem-island:osm",
+                    "run": "original",
+                    "original_status": original,
+                    "captures": [],
+                }
+            ],
+            "scenes": [],
+            "tiles": [],
+            "omitted": [],
+        },
+    )
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    report = json.loads((tmp_path / "report.json").read_text())
+    assert result["ok"] is ok
+    assert result["diverged_steps"] == (0 if ok else 1)
+    assert report["failed_steps"] == 0  # A divergence is reported apart from failed imports.
+    if not ok:
+        assert report["steps"][0]["diverged_from"] == original
+
+
+def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path):
+    from property_platform.modules.evidence import project_protocol
+
+    project = next(
+        row
+        for row in project_protocol.project_registry()
+        if any(source["role"] != "terms" for source in row["sources"])
+    )
+    registered = next(source for source in project["sources"] if source["role"] != "terms")
+    source = Source.objects.create(
+        key=f"project:{project['slug']}", name="Test", url=registered["url"]
+    )
+    run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
+    run.status, run.finished_at = "succeeded", datetime.now(UTC)
+    run.save(update_fields=["status", "finished_at"])
+    stamp = datetime(2026, 10, 1, tzinfo=UTC)
+    for url in (registered["url"], registered["url"], "https://example.com/retired-source"):
+        Capture.objects.create(
+            run=run,
+            payload=b"<html></html>",
+            url=url,
+            http_status=200,
+            fetched_at=stamp,
+            fetched_started_at=stamp,
+            byte_length=13,
+            content_sha256=hashlib.sha256(b"<html></html>").hexdigest(),
+        )
+    archive.export_archive(tmp_path)
+    manifest = json.loads((tmp_path / "manifest.json").read_text())
+    assert [len(step["captures"]) for step in manifest["steps"]] == [1]
+    assert manifest["omitted"] == [
+        {
+            "source": source.key,
+            "run": str(run.pk),
+            "captures": 2,
+            "reason": "Project capture not selected for replay: repeated or unregistered URL",
+        }
+    ]

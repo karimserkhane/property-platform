@@ -53,6 +53,8 @@ BACKUP_ONLY = {
     "walking_area": "Derived walking calculations require the routing worker",
     "basemap_request": "Demand queue includes requests without any acquired capture",
 }
+# A historically unavailable reference is reproduced as unavailable, not as a new failure.
+REPLAYED_STATUS = {"failed": "replayed_unavailable"}
 
 
 def counts():
@@ -185,6 +187,7 @@ def export_archive(root: Path):
             captures = list(Capture.objects.filter(run=run).order_by("ingested_at", "pk"))
             if key.startswith("project:") and key[8:] in projects:
                 project = projects[key[8:]]
+                used = set()
                 for source in project["sources"]:
                     if source["role"] == "terms":
                         continue
@@ -194,6 +197,7 @@ def export_archive(root: Path):
                     selected = [source_captures[0]]
                     if source.get("terms_url"):
                         selected += [c for c in captures if c.url == source["terms_url"]][:1]
+                    used.update(c.pk for c in selected)
                     steps.append(
                         {
                             "operation": "project_details",
@@ -201,6 +205,17 @@ def export_archive(root: Path):
                             + hashlib.sha256(source["url"].encode()).hexdigest(),
                             "run": str(run.pk),
                             "captures": [_capture(root, c) for c in selected],
+                        }
+                    )
+                unused = sum(c.pk not in used for c in captures)
+                if unused:
+                    omitted.append(
+                        {
+                            "source": key,
+                            "run": str(run.pk),
+                            "captures": unused,
+                            "reason": "Project capture not selected for replay: "
+                            "repeated or unregistered URL",
                         }
                     )
                 continue
@@ -328,12 +343,15 @@ def property_receipt(root, item):
 
 
 def request_identity(url, params=None):
+    # Keep repeated keys: `a=1&a=2` is not the request `a=2`. A request parameter
+    # replaces only the keys of its base URL that it provides.
+    params = {key: str(value) for key, value in (params or {}).items()}
     parts = urlsplit(url)
-    query = dict(parse_qsl(parts.query, keep_blank_values=True))
-    query.update({key: str(value) for key, value in (params or {}).items()})
-    return urlunsplit(
-        (parts.scheme, parts.netloc, parts.path, urlencode(sorted(query.items())), "")
-    )
+    query = [
+        pair for pair in parse_qsl(parts.query, keep_blank_values=True) if pair[0] not in params
+    ]
+    query += params.items()
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(sorted(query)), ""))
 
 
 class CaptureReplay:
@@ -540,9 +558,17 @@ def replay_archive(root: Path, actor: str, run_id: str):
                         ):
                             replay.assert_consumed()
                             status = "replayed_unavailable"
-            outcomes.append(
-                {"run": step["run"], "operation": operation, "scope": scope, "status": status}
-            )
+            outcome = {"run": step["run"], "operation": operation, "scope": scope, "status": status}
+            original = step.get("original_status")
+            if (
+                original
+                and status != "failed"
+                and status != REPLAYED_STATUS.get(original, original)
+            ):
+                # A reproduction keeps the original outcome; a new quarantine or a newly
+                # accepted acquisition is a divergence, even when table counts coincide.
+                outcome["diverged_from"] = original
+            outcomes.append(outcome)
         except Exception as exc:
             logger.exception("Rebuild step %s %s failed", operation, scope)
             outcomes.append(
@@ -573,6 +599,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
     tables = compare_tables(manifest["expected"], actual)
     coverage = inventory()
     failures = [r for r in outcomes if r["status"] == "failed"]
+    divergences = [r for r in outcomes if "diverged_from" in r]
     mismatches = [r["table"] for r in tables if r["policy"] == "exact" and not r["matches"]]
     report = {
         "version": VERSION,
@@ -583,12 +610,16 @@ def replay_archive(root: Path, actor: str, run_id: str):
         "omitted": manifest["omitted"],
         "coverage": coverage,
         "failed_steps": len(failures),
+        "diverged_steps": len(divergences),
         "mismatches": mismatches,
         "requires_backup": [
             r["table"] for r in tables if r["policy"] == "backup" and r["expected"]
         ],
-        "ok": not failures and not mismatches and not coverage["uncovered"],
+        "ok": not failures and not divergences and not mismatches and not coverage["uncovered"],
         "scope": "Source capture replay; backup-only state and new audit counts are separate",
     }
     write_json(root / "report.json", report)
-    return {key: report[key] for key in ("ok", "failed_steps", "mismatches", "source_snapshot_at")}
+    return {
+        key: report[key]
+        for key in ("ok", "failed_steps", "diverged_steps", "mismatches", "source_snapshot_at")
+    }
