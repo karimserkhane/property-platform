@@ -53,7 +53,7 @@ def test_tiles_draw_current_footprints_by_identity_only(client):
         response = client.get(tile_path(54.403, 24.503, 14))
         assert response.status_code == 200
         assert response["Content-Type"] == "application/vnd.mapbox-vector-tile"
-        assert response["Cache-Control"] == "no-store"
+        assert response["Cache-Control"] == "private, no-cache"
         payload = response.content
         assert b"parcels" in payload and str(kept.pk).encode() in payload
         # Attributes stay in the published rows; the tile carries no source fields.

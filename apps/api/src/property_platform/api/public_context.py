@@ -5,10 +5,12 @@ from typing import Literal
 from uuid import UUID
 
 from ninja import Router, Schema, Status
+from ninja.decorators import decorate_view
 
 from property_platform.modules.publication.coverage import profile_for
 
 from .parcels import Error
+from .read_cache import cached_read
 
 router = Router(tags=["public-context-preview"])
 
@@ -125,6 +127,7 @@ class DistrictMapResponse(Schema):
     response={200: DistrictMapResponse, 403: Error, 503: Error},
     operation_id="previewDistrictMap",
 )
+@decorate_view(cached_read)
 def districts(request):
     from property_platform.modules.publication.context_preview import district_map
 
@@ -139,6 +142,7 @@ def districts(request):
     response={200: PublicContextResponse, 403: Error, 422: Error, 503: Error},
     operation_id="previewPublicContext",
 )
+@decorate_view(cached_read)
 def context(
     request,
     dataset: Literal["health", "schools", "mobility", "statistics", "districts"],

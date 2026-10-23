@@ -30,17 +30,18 @@ export async function readPreview(path: string, search = "") {
   };
 }
 
-// Bounded upstream body; null bytes for a disabled preview or an error status.
+// Bounded upstream body; null bytes for a disabled preview, an error or a 304.
 export async function readPreviewBytes(
   path: string,
   search: string,
   accept: string,
+  ifNoneMatch: string | null = null,
 ) {
   if (
     process.env.NODE_ENV === "production" &&
     process.env.PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW !== "1"
   ) {
-    return { status: 403, bytes: null, contentType: null };
+    return { status: 403, bytes: null, contentType: null, etag: null };
   }
   const origin =
     process.env.PROPERTY_PLATFORM_API_ORIGIN ?? "http://127.0.0.1:8000";
@@ -50,12 +51,19 @@ export async function readPreviewBytes(
       signal: AbortSignal.timeout(5000),
       cache: "no-store",
       redirect: "error",
-      headers: { Accept: accept },
+      headers: {
+        Accept: accept,
+        // Only the API's own validators are useful; anything longer is not one.
+        ...(ifNoneMatch && ifNoneMatch.length <= 256
+          ? { "If-None-Match": ifNoneMatch }
+          : {}),
+      },
     },
   );
   const contentType = response.headers.get("content-type");
+  const etag = response.headers.get("etag");
   if (!response.ok || !response.body)
-    return { status: response.status, bytes: null, contentType };
+    return { status: response.status, bytes: null, contentType, etag };
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
@@ -70,22 +78,48 @@ export async function readPreviewBytes(
   } finally {
     await reader.cancel();
   }
-  return { status: response.status, bytes: Buffer.concat(chunks), contentType };
+  return {
+    status: response.status,
+    bytes: Buffer.concat(chunks),
+    contentType,
+    etag,
+  };
 }
 
-// Shared relay answer: upstream status, no shared caching, encoded JSON.
+// The API validates its reads against the data version; the browser may keep a
+// copy but must revalidate it. Without a validator nothing is stored.
+export function validatorHeaders(etag: string | null): HeadersInit {
+  return etag
+    ? { ETag: etag, "Cache-Control": "private, no-cache" }
+    : { "Cache-Control": "no-store" };
+}
+
+// Shared relay answer: upstream status and validator, encoded JSON.
 export async function relayPreview(
   request: Request,
   path: string,
   search = "",
 ) {
   try {
-    const result = await readPreview(path, search);
-    return await jsonResponse(
-      request,
-      result.data ?? { code: "data_unavailable" },
-      { status: result.status, headers: { "Cache-Control": "no-store" } },
+    const result = await readPreviewBytes(
+      path,
+      search,
+      "application/json",
+      request.headers.get("if-none-match"),
     );
+    if (result.status === 304)
+      return new Response(null, {
+        status: 304,
+        headers: validatorHeaders(result.etag),
+      });
+    const data =
+      result.bytes === null
+        ? null
+        : (JSON.parse(result.bytes.toString("utf8")) as unknown);
+    return await jsonResponse(request, data ?? { code: "data_unavailable" }, {
+      status: result.status,
+      headers: validatorHeaders(result.status === 200 ? result.etag : null),
+    });
   } catch {
     return Response.json({ code: "data_unavailable" }, { status: 503 });
   }

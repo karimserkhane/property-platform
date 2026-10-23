@@ -4,8 +4,10 @@ from typing import Literal
 from uuid import UUID
 
 from ninja import Query, Router, Schema, Status
+from ninja.decorators import decorate_view
 
 from .parcels import Error, Geometry, PointGeometry
+from .read_cache import cached_read
 
 router = Router(tags=["local-preview"])
 
@@ -137,6 +139,7 @@ class ProjectDirectoryResponse(Schema):
     response={200: ProjectDirectoryResponse, 403: Error, 503: Error},
     operation_id="previewProjectDirectory",
 )
+@decorate_view(cached_read)
 def projects(
     request,
     territory: Literal["al-reem-island", "saadiyat-island", "al-maryah-island"] | None = None,
@@ -154,6 +157,7 @@ def projects(
     response={200: ProjectDetailResponse, 403: Error, 404: Error, 503: Error},
     operation_id="previewProjectDetail",
 )
+@decorate_view(cached_read)
 def project_detail(request, slug: str):
     if len(slug) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
         return Status(404, {"code": "not_found"})

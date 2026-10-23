@@ -45,6 +45,8 @@ def test_every_preview_route_is_closed_outside_local_preview(client, path):
     assert response.json() == {"code": "preview_disabled"}
 
 
+# The read cache asks PostgreSQL for its snapshot before the patched read fails.
+@pytest.mark.django_db
 def test_database_failures_answer_503_and_keep_details_in_operator_logs(client, caplog):
     with (
         override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True),

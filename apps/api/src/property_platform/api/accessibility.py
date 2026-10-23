@@ -2,10 +2,12 @@ from datetime import date, datetime
 from uuid import UUID
 
 from ninja import Router, Schema, Status
+from ninja.decorators import decorate_view
 
 from property_platform.modules.publication.coverage import profile_for
 
 from .parcels import Error
+from .read_cache import cached_read
 
 router = Router(tags=["map-analysis-preview"])
 
@@ -95,6 +97,7 @@ class DistrictMarketResponse(Schema):
     response={200: DistrictMarketResponse, 403: Error, 422: Error, 503: Error},
     operation_id="previewDistrictMarket",
 )
+@decorate_view(cached_read)
 def market_map(request, territory: str = "abu-dhabi", q: str = "", snapshot_id: UUID | None = None):
     if profile_for(territory) is None or len(q) > 80:
         return Status(422, {"code": "invalid_scope"})

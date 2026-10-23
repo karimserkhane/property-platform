@@ -4,11 +4,13 @@ from typing import Literal
 from uuid import UUID
 
 from ninja import Router, Schema, Status
+from ninja.decorators import decorate_view
 
 from property_platform.modules.publication.uses import VERSION as USE_VERSION
 from property_platform.modules.publication.uses import UseType
 
 from .preview import territory_profile
+from .read_cache import cached_read
 
 router = Router(tags=["local-preview"])
 
@@ -181,6 +183,7 @@ class Surroundings(Schema):
     response={200: Surroundings, 403: Error, 404: Error, 409: Error, 503: Error},
     operation_id="previewSurroundings",
 )
+@decorate_view(cached_read)
 def surroundings(
     request,
     target: Literal["parcel", "building", "place", "street"],
@@ -218,6 +221,7 @@ class ResearchReferenceResponse(Schema):
     response={200: list[ResearchReferenceResponse], 403: Error, 409: Error, 503: Error},
     operation_id="previewReferences",
 )
+@decorate_view(cached_read)
 def references(request, territory: str | None = None):
     profile = territory_profile(territory)
     from property_platform.modules.evidence.queries import research_references
@@ -242,6 +246,7 @@ class ImageryResponse(Schema):
     response={200: list[ImageryResponse], 403: Error, 409: Error, 503: Error},
     operation_id="previewImagery",
 )
+@decorate_view(cached_read)
 def imagery(request, territory: str | None = None):
     profile = territory_profile(territory)
     from property_platform.modules.evidence.queries import imagery_scenes
@@ -365,6 +370,7 @@ class MapContext(Schema):
     response={200: MapContext, 403: Error, 409: Error, 422: Error, 503: Error},
     operation_id="previewMapContext",
 )
+@decorate_view(cached_read)
 def context(request, bbox: str, territory: str | None = None):
     bounds = parse_bbox(bbox)
     if bounds is None:
@@ -410,6 +416,7 @@ def parse_bbox(value):
     response={200: Collection, 403: Error, 409: Error, 422: Error, 503: Error},
     operation_id="previewParcels",
 )
+@decorate_view(cached_read)
 def parcels(
     request,
     bbox: str,
@@ -428,6 +435,7 @@ def parcels(
     response={200: ParcelIndex, 403: Error, 409: Error, 422: Error, 503: Error},
     operation_id="previewParcelIndex",
 )
+@decorate_view(cached_read)
 def parcel_index(
     request,
     bbox: str,
@@ -479,6 +487,7 @@ PARCEL_TILE_ZOOMS = range(8, 17)
         }
     },
 )
+@decorate_view(cached_read)
 def parcel_tile(request, z: int, x: int, y: int, territory: str | None = None):
     from django.http import HttpResponse
 
@@ -500,6 +509,7 @@ def parcel_tile(request, z: int, x: int, y: int, territory: str | None = None):
     response={200: Detail, 403: Error, 404: Error, 409: Error, 503: Error},
     operation_id="previewParcel",
 )
+@decorate_view(cached_read)
 def parcel(request, parcel_id: UUID, territory: str | None = None):
     profile = territory_profile(territory)
     from property_platform.modules.publication.preview import detail
@@ -536,6 +546,7 @@ class TerritoryRegistry(Schema):
     response={200: TerritoryRegistry, 403: Error, 503: Error},
     operation_id="previewTerritories",
 )
+@decorate_view(cached_read)
 def territories(request):
     from property_platform.modules.publication.coverage import coverage_registry
 
@@ -600,6 +611,7 @@ class AdrecMarketResponse(Schema):
     response={200: AdrecMarketResponse, 403: Error, 422: Error, 503: Error},
     operation_id="previewAdrecMarket",
 )
+@decorate_view(cached_read)
 def adrec_market(
     request,
     territory: str,
