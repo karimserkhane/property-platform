@@ -121,6 +121,22 @@ par action (`created`, `updated`, `unchanged`, `retired`), `parcel_observation` 
 pas de `ok` (les politiques de table ci-dessus le font). Un manifeste plus ancien,
 sans `original_rows`, n'a pas ce détail.
 
+**Divergences revues.** Le registre `REVIEWED_DIVERGENCES` (`rebuild_archive.py`)
+liste, une par une, les exécutions dont le statut d'origine n'est pas reproductible
+depuis le dépôt et qu'une exécution ultérieure des **mêmes octets** a déjà
+interprétées autrement. Une entrée n'est acceptée que si tout concorde : identifiant
+du run, statut d'origine et statut rejoué, empreintes des captures, aucune
+observation en quarantaine au rejeu, et observations par cible (toutes actions
+confondues) égales à celles de l'exécution ultérieure citée. L'étape porte alors
+`reviewed_divergence` au lieu de `diverged_from` (`reviewed_divergences` les compte) ;
+ses lignes mesurées sont reportées sur la table (`reviewed_delta`), qui reste
+comparée exactement pour tout le reste. Une divergence non listée, une nouvelle
+quarantaine ou un rejeu qui ne concorde pas échoue toujours.
+
+| Run d'origine | Statut d'origine → rejoué | Même capture que | Raison |
+| --- | --- | --- | --- |
+| `d7b5f4bc-3390-4e62-85ef-90e765e842c0` | `quarantined` → `succeeded` | `29a909a9-b094-40e2-aeca-f25b86a950be` | Interprétation `reem-map-v1` non commitée (antérieure à `087241d`), remplacée une minute plus tard sur la même capture `06a6dedd…` |
+
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
 les captures sans adaptateur de rejeu, ainsi que les captures d'une fiche projet non
@@ -155,7 +171,7 @@ les données ADREC, le contexte officiel et les tuiles sont retrouvés en effect
 Le flow échoue comme prévu sur les différences, et sa base temporaire est supprimée.
 
 **La reconstruction complète n'est pas démontrée.** Les divergences sont suivies
-dans [A11](../tasks/A11.md) et [A14](../tasks/A14.md) (anciens protocoles Onwani/OSM, contrôle réel et dépendances) et
+dans [A11](../tasks/A11.md), [A14](../tasks/A14.md) et [A15](../tasks/A15.md) (anciens protocoles Onwani/OSM, contrôle réel et dépendances) et
 [A12](../tasks/A12.md) (versions des interprétations de fiches/catalogues).
 Le contrôle ne corrige ni n'efface les lignes en service. Les sauvegardes A03 restent
 nécessaires ; un compte égal ne garantit pas à lui seul l'identité des valeurs.
@@ -199,5 +215,7 @@ protocole historique ([A14](../tasks/A14.md)).
   même version. Elle n'est pas reproductible depuis le dépôt ; ce n'est pas une
   perte de source. Au rejeu, `d7b5f4bc` reçoit l'interprétation de `29a909a9`, ce qui
   explique au plus 926 des 1 420 observations en plus ; le reste et l'écart `place`
-  seront situés par les comptes par étape du prochain contrôle.
+  seront situés par les comptes par étape du prochain contrôle. Cette divergence est
+  inscrite au registre des divergences revues ci-dessus ; le prochain contrôle réel
+  ([A15](../tasks/A15.md)) vérifiera qu'elle concorde avec `29a909a9`.
 - Écarts inchangés des fiches/catalogues : voir [A12](../tasks/A12.md).

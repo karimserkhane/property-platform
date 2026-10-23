@@ -105,6 +105,7 @@ def rebuild_check(*, actor: str, run_id: str, url: str | None = None) -> dict:
         "tables": len(report["tables"]),
         "failed_steps": report["failed_steps"],
         "diverged_steps": report["diverged_steps"],
+        "reviewed_divergences": report.get("reviewed_divergences", 0),
         "row_differences": report.get("row_differences", 0),
         "mismatches": report["mismatches"],
         "source_snapshot_at": report["source_snapshot_at"],
