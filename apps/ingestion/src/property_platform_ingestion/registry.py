@@ -119,6 +119,14 @@ DATASETS += (
         "30 1 * * *",
     ),
     Dataset(
+        "rebuild-check",
+        "property-platform-rebuild-check",
+        "Replay source captures in a disposable database and compare every owned table; "
+        "no live collection.",
+        {},
+        None,
+    ),
+    Dataset(
         "restore-check",
         "property-platform-restore-check",
         "Restore the newest dump into a throwaway database and compare its row counts.",

@@ -9,13 +9,15 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A01](A01.md) | A | Hiérarchie des identités de projet | 1 | — | non | done | claude |
 | [A02](A02.md) | A | Qualification des positions de projet | 1 | A01 | non | done | claude |
 | [A03](A03.md) | A | Sauvegardes automatiques et restauration testée | 1 | — | non | done | claude |
-| [A04](A04.md) | A | Reconstruction complète depuis les pipelines | 1 | A03 | non | todo | unassigned |
+| [A04](A04.md) | A | Contrôle de reconstruction depuis les pipelines | 1 | A03 | non | done | codex |
 | [A05](A05.md) | A | Tests de parcours navigateur (Playwright) | 1 | — | non | todo | unassigned |
 | [A06](A06.md) | A | Index des parcelles par zone visible | 2 | — | non | todo | unassigned |
 | [A07](A07.md) | A | Bâtiments et contexte en tuiles vectorielles | 2 | A06 | non | todo | unassigned |
 | [A08](A08.md) | A | Version de cache par famille de tables | 3 | — | non | todo | unassigned |
 | [A09](A09.md) | A | Découpage interne du module evidence | 3 | — | non | todo | unassigned |
 | [A10](A10.md) | A | Contenus bruts des captures vers le stockage objet | 3 | A03 | non | todo | unassigned |
+| [A11](A11.md) | A | Rejeu des anciens protocoles géographiques | 1 | A04 | non | todo | unassigned |
+| [A12](A12.md) | A | Reconstituer les versions historiques des interprétations | 1 | A04 | non | todo | unassigned |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | todo | unassigned |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | todo | unassigned |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | todo | unassigned |

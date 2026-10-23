@@ -44,3 +44,7 @@ Comparer ensuite les comptes avec le manifeste (le flow `restore-check` fait la 
 ## Ce que les sauvegardes ne remplacent pas
 
 La [reconstruction complète depuis les pipelines](../tasks/A04.md) reste l'objectif : une base vide, les migrations et les flows doivent suffire pour les données publiques. Les sauvegardes couvrent les décisions humaines et les originaux privés, et raccourcissent la reprise.
+
+Le flow manuel [rebuild-check](REBUILD.md) vérifie séparément le rejeu des captures
+dans une base vide migrée. Son rapport distingue les tables comparées exactement,
+les nouvelles traces d'exécution et les états qui nécessitent toujours A03.
