@@ -54,6 +54,6 @@ l'eau et les routes ne sont pas des parcelles, mais une parcelle doit être trou
 
 - Ces parcours dépendent de l'état de la base locale ; ils ne remplacent ni les tests
   PostGIS ni les tests web unitaires.
-- Pas encore exécutés en CI GitHub : l'intégration CI (pile API + base de démonstration)
-  reste à faire, comme l'indique la tâche.
+- Pas encore exécutés en CI GitHub : l'intégration CI (pile API + jeu de démonstration)
+  est suivie dans [A13](../tasks/A13.md).
 - Le rendu WebGL logiciel ne mesure pas les performances réelles d'un téléphone.

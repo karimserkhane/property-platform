@@ -39,12 +39,13 @@ test("clicking a parcel on the map opens its details", async ({ page }) => {
   expect(selected, "a parcel must be clickable near the map centre").toBe(true);
   const inspector = page.locator("section.parcel-inspector");
   await expect(inspector).toBeVisible();
-  await expect(inspector.getByText("Selected property")).toBeVisible();
+  // The "Selected property" label is visually hidden; the card itself must load.
+  await expect(inspector.getByRole("heading", { level: 2 })).toBeVisible();
+  await expect(inspector.getByText("Parcel reference")).toBeVisible();
   await expect(inspector.getByText("Loading parcels…")).toHaveCount(0);
   await expect(
     inspector.getByText("These details could not be loaded."),
   ).toHaveCount(0);
-  await expect(inspector.getByRole("heading").first()).toBeVisible();
   // The selection is addressable: reloading the URL restores the same parcel.
   const url = page.url();
   await page.reload();
