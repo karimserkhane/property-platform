@@ -55,6 +55,15 @@ BACKUP_ONLY = {
 }
 # A historically unavailable reference is reproduced as unavailable, not as a new failure.
 REPLAYED_STATUS = {"failed": "replayed_unavailable"}
+# Catalogue identities whose duplicates, created before import-time resolution existed,
+# were later superseded by a reviewed repair (kept by A03). The current importer resolves
+# the same provider records without creating the duplicate, so these tables compare
+# their active identities exactly and require every missing superseded row to be
+# accounted for by such a repair.
+REVIEWED_SUPERSESSIONS = {
+    "real_estate.parcel": ("parcel_source_alias", "superseded_parcel_id"),
+    "real_estate.administrative_area": ("administrative_area_source_alias", "superseded_area_id"),
+}
 
 
 def counts():
@@ -171,7 +180,7 @@ def export_archive(root: Path):
             cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             cursor.execute("SELECT transaction_timestamp(), pg_current_snapshot()::text")
             instant, snapshot = cursor.fetchone()
-        expected, coverage = counts(), inventory()
+        expected, coverage, identity = counts(), inventory(), identities()
         for run in (
             IngestionRun.objects.select_related("source")
             .filter(
@@ -303,6 +312,7 @@ def export_archive(root: Path):
             "snapshot_at": instant.isoformat(),
             "snapshot": snapshot,
             "expected": expected,
+            "identities": identity,
             "coverage": coverage,
             "steps": ordered_steps(steps),
             "scenes": scenes,
@@ -385,8 +395,50 @@ class CaptureReplay:
             raise ValueError("Importer did not consume its complete archived acquisition")
 
 
-def compare_tables(expected, actual):
+def identities():
+    """Active provider identities and reviewed supersessions of the identity tables."""
+    from psycopg import sql
+
+    result = {}
+    with connection.cursor() as cursor:
+        for table, (alias, column) in REVIEWED_SUPERSESSIONS.items():
+            cursor.execute(
+                sql.SQL(
+                    "SELECT count(*) FILTER (WHERE superseded_by_id IS NULL), "
+                    "count(*) FILTER (WHERE superseded_by_id IS NOT NULL), "
+                    "md5(coalesce(string_agg(source_namespace || chr(31) || source_record_id, "
+                    "chr(30) ORDER BY source_namespace, source_record_id) "
+                    "FILTER (WHERE superseded_by_id IS NULL), '')) FROM {}"
+                ).format(sql.Identifier(*table.split(".")))
+            )
+            active, superseded, fingerprint = cursor.fetchone()
+            cursor.execute(
+                sql.SQL("SELECT count(*) FROM {} WHERE active AND {} IS NOT NULL").format(
+                    sql.Identifier("evidence", alias), sql.Identifier(column)
+                )
+            )
+            result[table] = {
+                "active": active,
+                "superseded": superseded,
+                "reviewed_repairs": cursor.fetchone()[0],
+                "active_fingerprint": fingerprint,
+            }
+    return result
+
+
+def identity_matches(expected, actual):
+    """Same active identities; only reviewed duplicate repairs may be absent."""
+    return (
+        expected["active"] == actual["active"]
+        and expected["active_fingerprint"] == actual["active_fingerprint"]
+        and expected["superseded"] - actual["superseded"]
+        == expected["reviewed_repairs"] - actual["reviewed_repairs"]
+    )
+
+
+def compare_tables(expected, actual, expected_identities=None, actual_identities=None):
     result = []
+    expected_identities, actual_identities = expected_identities or {}, actual_identities or {}
     for table in sorted(set(expected) | set(actual)):
         name = table.split(".")[1]
         evidence_table = table.startswith("evidence.")
@@ -396,16 +448,23 @@ def compare_tables(expected, actual):
             if reason
             else ("new_audit" if evidence_table and name in TECHNICAL else "exact")
         )
-        result.append(
-            {
-                "table": table,
-                "expected": expected.get(table),
-                "actual": actual.get(table),
-                "policy": policy,
-                "reason": reason or "",
-                "matches": expected.get(table) == actual.get(table),
+        row = {
+            "table": table,
+            "expected": expected.get(table),
+            "actual": actual.get(table),
+            "policy": policy,
+            "reason": reason or "",
+            "matches": expected.get(table) == actual.get(table),
+        }
+        if table in expected_identities and table in actual_identities:
+            row["policy"] = "identity"
+            row["reason"] = "Active identities exact; reviewed duplicate repairs kept by A03"
+            row["identities"] = {
+                "expected": expected_identities[table],
+                "actual": actual_identities[table],
             }
-        )
+            row["matches"] = identity_matches(expected_identities[table], actual_identities[table])
+        result.append(row)
     return result
 
 
@@ -599,11 +658,14 @@ def replay_archive(root: Path, actor: str, run_id: str):
                 {"operation": operation, "status": "failed", "error": type(exc).__name__}
             )
     actual = counts()
-    tables = compare_tables(manifest["expected"], actual)
+    # A manifest exported before identity statistics keeps the plain exact comparison.
+    tables = compare_tables(manifest["expected"], actual, manifest.get("identities"), identities())
     coverage = inventory()
     failures = [r for r in outcomes if r["status"] == "failed"]
     divergences = [r for r in outcomes if "diverged_from" in r]
-    mismatches = [r["table"] for r in tables if r["policy"] == "exact" and not r["matches"]]
+    mismatches = [
+        r["table"] for r in tables if r["policy"] in ("exact", "identity") and not r["matches"]
+    ]
     report = {
         "version": VERSION,
         "checked_at": timezone.now().isoformat(),
