@@ -21,6 +21,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | next-intl | 4.14.9 | Déjà dernière version stable vérifiée |
 | React / React DOM / leurs types | 19.3.0 | Déjà dernières versions stables vérifiées |
 | Biome | 2.5.15 | Déjà dernière version stable vérifiée |
+| Playwright (`@playwright/test`, image `mcr.microsoft.com/playwright:v1.64.0-noble` par digest) | 1.64.0 | Parcours navigateur `checks-e2e` uniquement, jamais dans le runtime web ; version stable de plus de deux semaines au 23 octobre 2026 (1.64.1 plus récente non retenue). Le paquet npm et l'image doivent rester à la même version. Voir [E2E.md](E2E.md) |
 | openapi-typescript | 7.13.0 | Déjà dernière version stable vérifiée |
 | Python | 3.14.8 | Version compatible Django la plus récente ; .python-version, CI et image API |
 | uv | 0.13.0 | Déjà dernière version stable vérifiée |

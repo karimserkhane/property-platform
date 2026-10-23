@@ -41,6 +41,7 @@ docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --
 | `checks-api` | Ruff, frontières de modules, `manage.py check`, migrations manquantes, contrat OpenAPI à jour, tests PostGIS (base `test_property_platform` créée et supprimée par les tests) |
 | `checks-ingestion` | Ruff et tests d'ingestion |
 | `checks-web` | Installation Linux des dépendances dans des volumes, Biome, contrats, TypeScript, tests web, liens Markdown ; `CHECK_BUILD=1` ajoute la compilation et le smoke HTTP |
+| `checks-e2e` | Parcours navigateur Playwright (explorateur, recherche, RTL, mobile, fiche projet) contre l'API locale en lecture, sans identifiants de prévisualisation ; construire d'abord avec `... --profile checks build checks-e2e`. Voir [E2E.md](E2E.md) |
 
 Arguments pytest : `... run --rm --no-deps checks-api bash scripts/checks/api.sh -k parcel_tiles`. Après un changement de lockfile, reconstruire l'image avec `... --profile checks build checks-api` (ou `checks-ingestion`, `checks-web`). Dans un worktree, `docs:check` est sauté dans le conteneur : le lancer sur l'hôte avec `pnpm docs:check`.
 

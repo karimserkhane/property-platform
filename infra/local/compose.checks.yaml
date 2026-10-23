@@ -59,6 +59,26 @@ services:
       - checks-pnpm-store:/pnpm-store
     command: ["bash", "scripts/checks/web.sh"]
 
+  # Browser journeys against the running local API (read only), with a compiled web
+  # server started inside the container WITHOUT preview access control. Build first:
+  #   ... --profile checks build checks-e2e
+  #   ... --profile checks run --rm --no-deps checks-e2e
+  # Failure traces, screenshots and the HTML report are written to .cache/e2e/.
+  checks-e2e:
+    profiles: [checks]
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+      target: e2e
+    image: property-platform-checks-e2e
+    environment:
+      E2E_API_ORIGIN: http://api:8000
+    volumes:
+      - ../../apps/web/e2e:/repo/apps/web/e2e:ro
+      - ../../apps/web/playwright.config.ts:/repo/apps/web/playwright.config.ts:ro
+      - ../../.cache/e2e:/artifacts
+    ipc: host
+
 volumes:
   checks-node-modules:
   checks-web-node-modules:
