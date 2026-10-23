@@ -9,7 +9,23 @@ import type {
   Polygon,
 } from "geojson";
 import type { Map as LibreMap } from "maplibre-gl";
-import type { MapContext, MapFeature, ParcelCollection } from "./types";
+import type { MapContext, MapFeature, ParcelRows } from "./types";
+
+// Parcel footprints are not on the explorer client: frame them by published bounds.
+export function boundsGeometry([west, south, east, north]: readonly number[]) {
+  return {
+    type: "Polygon" as const,
+    coordinates: [
+      [
+        [west, south],
+        [east, south],
+        [east, north],
+        [west, north],
+        [west, south],
+      ],
+    ],
+  };
+}
 
 export type Coordinate = [number, number];
 export type AnalysisMode = "browse" | "distance" | "zone" | "walk";
@@ -74,7 +90,7 @@ const normalise = (value: string) =>
   value.normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase().trim();
 export function searchItems(
   context: MapContext | null,
-  parcels: ParcelCollection | null,
+  parcels: ParcelRows | null,
   locale: string,
 ): SearchItem[] {
   const items: SearchItem[] = [],
@@ -108,7 +124,10 @@ export function searchItems(
       key: `parcel:${parcel.id}`,
       name: parcel.properties.code,
       kind: "parcel",
-      geometry: parcel.geometry,
+      geometry:
+        "geometry" in parcel
+          ? parcel.geometry
+          : boundsGeometry(parcel.properties.bounds),
       parcelId: parcel.id,
     });
   return items;

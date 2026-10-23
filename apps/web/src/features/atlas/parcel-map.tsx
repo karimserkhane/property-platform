@@ -27,7 +27,6 @@ import {
   districtBounds,
   download,
   geometryBounds,
-  geometryClickArea,
   parcelFillOpacity,
   parcelMapLabels,
   parcelPropertyIndex,
@@ -38,7 +37,7 @@ import type {
   MapContext,
   MapFeature,
   MapLabels,
-  ParcelCollection,
+  ParcelIndex,
   Territory,
 } from "./types";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -49,8 +48,17 @@ import {
   setBuildingCamera,
 } from "./building-3d";
 import { showWorldBuilding } from "./building-popup";
-import { mapToolActive } from "./map-analysis";
+import { boundsGeometry, mapToolActive } from "./map-analysis";
 import { MapWorkbench } from "./map-workbench";
+import {
+  PARCEL_LABEL_SOURCE,
+  PARCEL_SOURCE,
+  parcelLabelPoints,
+  parcelTileSource,
+  syncParcelStates,
+  tiledParcelLayers,
+  tiledParcelOpacity,
+} from "./parcel-tiles";
 import { PROJECT_CLUSTER_LAYERS, zoomProjectCluster } from "./project-clusters";
 
 setWorkerUrl(
@@ -105,7 +113,7 @@ export default function ParcelMap({
   territory,
   countryBounds,
 }: {
-  data: ParcelCollection;
+  data: ParcelIndex;
   context: MapContext | null;
   selected: string | null;
   activeFeature: MapFeature | null;
@@ -151,12 +159,13 @@ export default function ParcelMap({
   const activeRef = useRef(activeFeature);
   activeRef.current = activeFeature;
   const parcelAreas = useMemo(
-    () =>
-      new Map(data.features.map((f) => [f.id, geometryClickArea(f.geometry)])),
+    () => new Map(data.features.map((f) => [f.id, f.properties.area_m2])),
     [data],
   );
   const parcelAreasRef = useRef(parcelAreas);
   parcelAreasRef.current = parcelAreas;
+  // Parcels currently listed by the index; tile features outside it stay hidden.
+  const shownParcels = useRef<Set<string>>(new Set());
   const credits = useMemo(
     () =>
       [
@@ -258,8 +267,12 @@ export default function ParcelMap({
     });
     instance.on("load", () => {
       instance.addSource("hydrography", HYDROGRAPHY_SOURCE);
+      instance.addSource(
+        PARCEL_SOURCE,
+        parcelTileSource(window.location.origin, territory.id),
+      );
       for (const id of [
-        "parcels",
+        PARCEL_LABEL_SOURCE,
         "street",
         "building",
         "place",
@@ -279,7 +292,8 @@ export default function ParcelMap({
           attribution: provider.attribution,
         });
       registerMapMarkers(instance);
-      for (const layer of mapLayers("en")) instance.addLayer(layer);
+      for (const layer of tiledParcelLayers(mapLayers("en")))
+        instance.addLayer(layer);
       setToolMap(instance);
       instance.on("click", (event) => {
         if (mapToolActive(instance) || zoomProjectCluster(instance, event))
@@ -335,8 +349,19 @@ export default function ParcelMap({
           instance.queryRenderedFeatures(event.point, {
             layers: ["plan-water"],
           }).length > 0;
+        const listed = hits.filter(
+          (item) =>
+            item.source !== PARCEL_SOURCE ||
+            shownParcels.current.has(String(item.properties.id)),
+        );
         const hit = selectMapHit(
-          overWater ? hits.filter((item) => item.source !== "parcels") : hits,
+          overWater
+            ? listed.filter(
+                (item) =>
+                  item.source !== PARCEL_SOURCE &&
+                  item.source !== PARCEL_LABEL_SOURCE,
+              )
+            : listed,
           parcelAreasRef.current,
         );
         const footprint =
@@ -416,7 +441,7 @@ export default function ParcelMap({
       instance.getCanvas().removeEventListener("webglcontextlost", lostContext);
       instance.remove();
     };
-  }, [countryBounds, territory.camera_bounds]);
+  }, [countryBounds, territory.camera_bounds, territory.id]);
 
   // Keep the selected object above the phone sheet without changing the zoom.
   // biome-ignore lint/correctness/useExhaustiveDependencies: a locate command must recheck phone-sheet occlusion after moving the camera.
@@ -427,9 +452,10 @@ export default function ParcelMap({
     let frame = 0;
     const reveal = () => {
       const root = element.current;
+      const row = data.features.find((item) => item.id === selected);
       const geometry =
         activeFeature?.geometry ??
-        data.features.find((item) => item.id === selected)?.geometry;
+        (row ? boundsGeometry(row.properties.bounds) : undefined);
       if (
         !root ||
         root.clientWidth > 760 ||
@@ -597,8 +623,13 @@ export default function ParcelMap({
     const instance = map.current;
     if (!instance) return;
     const update = () => {
+      shownParcels.current = syncParcelStates(
+        instance,
+        labelledParcels,
+        shownParcels.current,
+      );
       for (const [id, collection] of [
-        ["parcels", labelledParcels],
+        [PARCEL_LABEL_SOURCE, parcelLabelPoints(labelledParcels)],
         ...Object.entries(context ?? {}),
       ] as const) {
         const source = instance.getSource(id) as GeoJSONSource | undefined;
@@ -721,7 +752,7 @@ export default function ParcelMap({
         instance.setPaintProperty(
           "parcel-fill",
           "fill-opacity",
-          parcelFillOpacity(options.satellite),
+          tiledParcelOpacity(parcelFillOpacity(options.satellite)),
         );
       if (instance.getLayer("buildings"))
         instance.setPaintProperty(
