@@ -9,12 +9,31 @@ from property_platform.modules.evidence.queries import (
 )
 
 
-def features(*, bbox, limit, query, namespaces=None, after=None):
+def parcel_index(*, bbox, limit, query, namespaces=None, after=None):
+    """`features` without footprints, for maps drawing them from parcel tiles."""
+    from property_platform.modules.catalog.map_queries import project_markers_near_parcels
+
+    collection = features(
+        bbox=bbox, limit=limit, query=query, namespaces=namespaces, after=after, geometry=False
+    )
+    # Only residential and mixed parcels can receive a potential project name.
+    candidates = [
+        feature["id"]
+        for feature in collection["features"]
+        if feature["properties"]["category"] in {"mixed", "residential"}
+    ]
+    nearby = project_markers_near_parcels(candidates)
+    for feature in collection["features"]:
+        feature["properties"]["nearby_projects"] = nearby.get(feature["id"], [])
+    return collection
+
+
+def features(*, bbox, limit, query, namespaces=None, after=None, geometry=True):
     from .land_use import VERSION, category
     from .uses import use_types
 
     collection = parcel_features(
-        namespaces=namespaces, bbox=bbox, limit=limit, query=query, after=after
+        namespaces=namespaces, bbox=bbox, limit=limit, query=query, after=after, geometry=geometry
     )
     sources = parcel_sources([feature["id"] for feature in collection["features"]])
     recover_display("parcel", [feature["properties"] for feature in collection["features"]])
