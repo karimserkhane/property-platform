@@ -77,6 +77,27 @@ Les contrôles ETag sur le serveur partagé sont à exécuter après le rejeu lo
 le cache utilise encore un instantané PostgreSQL global et peut être invalidé par
 ses transactions, même dans une autre base ([A08](../tasks/A08.md)).
 
+## Anciens protocoles d'acquisition
+
+Une acquisition ancienne peut avoir envoyé d'autres requêtes que le connecteur actuel
+(autres `outFields` Onwani, autre requête Overpass). Le rejeu ne répond jamais à la
+requête actuelle avec les octets d'une autre requête : l'importateur réémet la
+**requête historique enregistrée**, le run rejoué porte la version de ce protocole
+(`connector_version`) et les observations gardent la version du **mappage actuel**
+(`mapping_version`). Aucun champ absent de l'ancienne requête n'est ajouté.
+
+Le registre `evidence/replay_protocols.py` liste uniquement les versions dont les
+requêtes diffèrent, recopiées depuis les commits cités ([A11](../tasks/A11.md)) :
+
+| Versions d'origine | Différence rejouée |
+| --- | --- |
+| `onwani-reem-v1` | 18 `outFields` (les champs d'usage détaillé et de planification arrivent en v2) |
+| `reem-map-v1` à `reem-map-v3`, `district-map-v4` (couche `osm`) | Requête Overpass limitée aux équipements et loisirs **nommés**, sans commerces ni transports |
+
+Une version absente du registre garde la requête actuelle : la comparaison stricte des
+URL fait alors échouer l'étape, comme avant. Ajouter une version exige de citer le
+commit du connecteur et un test PostGIS sur ses requêtes exactes.
+
 ## Lire le rapport
 
 Toutes les tables de `real_estate` et `evidence` figurent avec compte attendu,

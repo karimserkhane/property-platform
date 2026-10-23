@@ -24,8 +24,12 @@ from .runs import mark_failed
 LOCK_KEY = 716548219
 
 
-def import_onwani(*, actor, acquisition=None, territory=DEFAULT_TERRITORY):
+def import_onwani(*, actor, acquisition=None, territory=DEFAULT_TERRITORY, historical=None):
+    """`historical` reissues a recorded Onwani request during capture replay only."""
     profile = collection_for(territory)
+    if historical is not None and not historical.onwani_fields:
+        raise ValueError("A historical protocol applies to its own Onwani request only")
+    fields = historical.onwani_fields if historical else onwani.FIELDS
     if connection.vendor != "postgresql":
         raise ValueError("Onwani import requires PostgreSQL/PostGIS")
     with connection.cursor() as cursor:
@@ -39,7 +43,9 @@ def import_onwani(*, actor, acquisition=None, territory=DEFAULT_TERRITORY):
             defaults={"name": f"DMT / Onwani PLOT — {profile.name}", "url": onwani.BASE_URL},
         )
         run = IngestionRun.objects.create(
-            source=source, connector_version=onwani.VERSION, actor=actor
+            source=source,
+            connector_version=historical.version if historical else onwani.VERSION,
+            actor=actor,
         )
 
         def acquire(params=None):
@@ -71,7 +77,7 @@ def import_onwani(*, actor, acquisition=None, territory=DEFAULT_TERRITORY):
                 {
                     "where": profile.parcel_where,
                     "objectIds": ",".join(map(str, batch_ids)),
-                    "outFields": onwani.FIELDS,
+                    "outFields": fields,
                     "returnGeometry": "true",
                     "outSR": "4326",
                 }

@@ -19,7 +19,7 @@ from django.db import connection, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from . import abu_dhabi, orchestration, project_discovery, project_protocol
+from . import abu_dhabi, orchestration, project_discovery, project_protocol, replay_protocols
 from .collection_profiles import COLLECTIONS
 from .history import audit_context
 from .media_storage import read_capture
@@ -545,6 +545,9 @@ def replay_archive(root: Path, actor: str, run_id: str):
                         if inert
                         else None,
                         completion_check=None if inert else replay.assert_consumed,
+                        historical=replay_protocols.historical_protocol(
+                            operation, scope, step.get("original_version", "")
+                        ),
                     )
                     status = result["status"]
                     if operation == "references" and step.get("original_status") == "failed":

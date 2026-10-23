@@ -140,15 +140,15 @@ def number(value, maximum, *, integer=False):
     )
 
 
-def osm_records(run, replay=None, acquisition=None, territory=DEFAULT_TERRITORY):
-    profile = collection_for(territory)
+def osm_records(run, replay=None, acquisition=None, territory=DEFAULT_TERRITORY, query=None):
+    query = query or collection_for(territory).osm_query
     from urllib.error import URLError
 
     try:
         data, capture = acquire(
             run,
             protocol.OSM_URL,
-            {"data": profile.osm_query},
+            {"data": query},
             replay=replay,
             acquisition=acquisition,
         )
@@ -161,7 +161,7 @@ def osm_records(run, replay=None, acquisition=None, territory=DEFAULT_TERRITORY)
         data, capture = acquire(
             run,
             protocol.OSM_MIRROR,
-            {"data": profile.osm_query},
+            {"data": query},
             acquisition=acquisition,
         )
     return osm_data_records(data, capture, territory=territory)
@@ -279,8 +279,13 @@ def osm_data_records(data, capture, *, territory=DEFAULT_TERRITORY, xml_snapshot
     return staged, rejected
 
 
-def import_map_layer(*, layer, actor, replay=None, acquisition=None, territory=DEFAULT_TERRITORY):
+def import_map_layer(
+    *, layer, actor, replay=None, acquisition=None, territory=DEFAULT_TERRITORY, historical=None
+):
+    """`historical` reissues a recorded OSM request during capture replay only."""
     profile = collection_for(territory)
+    if historical is not None and (layer != "osm" or not historical.osm_query):
+        raise ValueError("A historical protocol applies to its own OSM request only")
     if connection.vendor != "postgresql":
         raise ValueError("Map acquisition requires PostGIS")
     if layer == "overture":
@@ -306,14 +311,25 @@ def import_map_layer(*, layer, actor, replay=None, acquisition=None, territory=D
             },
         )
         run = IngestionRun.objects.create(
-            source=source, actor=actor, connector_version=protocol.VERSION
+            source=source,
+            actor=actor,
+            connector_version=historical.version if historical else protocol.VERSION,
         )
         staged, rejected = (
-            osm_records(run, replay=replay, acquisition=acquisition, territory=territory)
+            osm_records(
+                run,
+                replay=replay,
+                acquisition=acquisition,
+                territory=territory,
+                query=historical.osm_query if historical else None,
+            )
             if layer == "osm"
             else official_records(run, layer, acquisition=acquisition, territory=territory)
         )
-        return materialize_map_records(run, namespace, staged, rejected, actor=actor)
+        # Observations name the current mapper, the run names the request it reissued.
+        return materialize_map_records(
+            run, namespace, staged, rejected, actor=actor, mapping_version=protocol.VERSION
+        )
     except Exception as exc:
         if run:
             mark_failed(run, exc)
@@ -331,6 +347,7 @@ def materialize_map_records(
     *,
     actor,
     quarantine_reason="Invalid OSM geometry or metadata; not repaired",
+    mapping_version=None,
 ):
     if not staged:
         raise SourceError("No valid map records; previous snapshot preserved")
@@ -388,7 +405,7 @@ def materialize_map_records(
                 source_record_id=f"{target}:{identity}",
                 source_url=url,
                 raw_attributes=attrs,
-                mapping_version=run.connector_version,
+                mapping_version=mapping_version or run.connector_version,
                 record_sha256=hashlib.sha256(
                     json.dumps(
                         {"attributes": attrs, "geometry": json.loads(shape.geojson)},
