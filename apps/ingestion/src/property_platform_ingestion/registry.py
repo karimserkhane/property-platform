@@ -111,6 +111,20 @@ DATASETS += (
         {},
         "0 1 * * *",
     ),
+    Dataset(
+        "backup-database",
+        "property-platform-backup",
+        "Snapshot dump, private file mirror and retention under BACKUP_DIR; never in Git.",
+        {},
+        "30 1 * * *",
+    ),
+    Dataset(
+        "restore-check",
+        "property-platform-restore-check",
+        "Restore the newest dump into a throwaway database and compare its row counts.",
+        {},
+        "0 5 * * 0",
+    ),
 )
 
 # Same reviewed connectors, distinct source identities and deployment scopes.

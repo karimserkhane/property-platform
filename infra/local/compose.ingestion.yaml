@@ -67,12 +67,15 @@ services:
       PREFECT_RUNNER_SERVER_HOST: "127.0.0.1"
       PREFECT_RUNNER_SERVER_PORT: "8080"
       INGESTION_STORAGE_DIR: /data
+      BACKUP_DIR: /backups
       MEDIA_STORAGE_BACKEND: local
       MEDIA_LOCAL_ROOT: /media
       MEDIA_PUBLICATION_ENABLED: "0"
     volumes:
       - ingestion-data:/data
       - media-data:/media
+      # Host folder (ignored by Git), so backups survive a Docker reset.
+      - ${PROPERTY_PLATFORM_BACKUP_DIR:-../../.cache/backups}:/backups
     networks: [default, prefect-private]
     depends_on:
       db:

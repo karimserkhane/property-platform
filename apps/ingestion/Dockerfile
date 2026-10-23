@@ -15,6 +15,9 @@ RUN --mount=type=secret,id=platform_extra_ca \
       && update-ca-certificates; \
     fi
 COPY --from=uv /uv /usr/local/bin/uv
+# PostgreSQL 18 client tools (pg_dump, pg_restore) matching the server, from the
+# PGDG repository; the signing key fingerprint is checked before it is trusted.
+RUN apt-get update && apt-get install -y --no-install-recommends curl gnupg     && curl -fsSL -o /tmp/pgdg.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc     && gpg --show-keys --with-colons /tmp/pgdg.asc        | grep -q '^fpr:::::::::B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8:'     && install -d /usr/share/postgresql-common/pgdg     && mv /tmp/pgdg.asc /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc     && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt trixie-pgdg main"        > /etc/apt/sources.list.d/pgdg.list     && apt-get update && apt-get install -y --no-install-recommends postgresql-client-18     && apt-get purge -y curl gnupg && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 RUN useradd --create-home --uid 1000 property_platform \
     && mkdir -p /data /media /home/property_platform/.prefect \
     && chown property_platform:property_platform /data /media /home/property_platform/.prefect
