@@ -29,6 +29,7 @@ from property_platform.modules.evidence.project_import import (  # noqa: E402
 from property_platform.modules.evidence.project_queries import (  # noqa: E402
     project_detail,
     project_directory,
+    project_location_gaps,
     project_locations,
     project_references,
 )
@@ -140,6 +141,9 @@ def test_project_import_is_typed_idempotent_and_retains_provider_identities(proj
     assert data["programme_total"]["value"] == 230
     assert len(data["map_locations"]) == 3
     assert all(location["target"] == "building" for location in data["map_locations"])
+    assert {(row["method"], row["precision"]) for row in data["map_locations"]} == {
+        ("building_footprint", "footprint")
+    }
     assert data["typologies"][0]["bedrooms"] == 0
     assert data["media"][0]["delivery_url"] is None
     assert data["media"][0]["rights_status"] == "reference_only"
@@ -171,6 +175,7 @@ def test_map_locations_exclude_inactive_revoked_and_outside_identities(project_i
     _, rows, _ = project_input
     ingest(rows)
     project = Project.objects.select_related("developer").get(slug="park-view")
+    assert project_location_gaps() == []
     links = list(ProjectIdentityLink.objects.select_related("building").order_by("id"))
     links[0].building.active = False
     links[0].building.save(update_fields=["active"])
@@ -180,6 +185,9 @@ def test_map_locations_exclude_inactive_revoked_and_outside_identities(project_i
     links[2].building.save(update_fields=["geometry"])
     assert project_locations(project) == []
     assert project_directory()["items"][0]["has_map_identity"] is False
+    gaps = project_location_gaps("saadiyat-island")
+    assert [(row["slug"], row["priority"]) for row in gaps] == [("park-view", 2)]
+    assert project_location_gaps("al-reem-island") == []
 
 
 def test_excluded_source_cannot_advertise_project_or_map_identity(project_input):

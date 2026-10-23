@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { MapLabels, UseLabels } from "../atlas/types";
+import { projectPositionQuality } from "./presentation";
 import styles from "./project.module.css";
 import type { ProjectLabels, ProjectMapLocation } from "./types";
 
@@ -34,6 +35,7 @@ export function ProjectNeighbourhood({
 }) {
   const [active, setActive] = useState(false);
   const [local, setLocal] = useState(!googleUrl);
+  const quality = projectPositionQuality(locations);
   return (
     <div className={styles.neighbourhood} data-neighbourhood={territory}>
       <p className={styles.mapIntro}>{labels.mapIntro}</p>
@@ -42,9 +44,7 @@ export function ProjectNeighbourhood({
           {labels.mapLocationPending}
         </p>
       )}
-      {locations.some((location) => location.source.kind === "broker") && (
-        <p className={styles.mapIntro}>{mapLabels.unverified}</p>
-      )}
+      {quality && <p className={styles.mapIntro}>{labels[quality.label]}</p>}
       <div className={styles.neighbourhoodCanvas}>
         {!active ? (
           <div className={styles.mapInvitation}>

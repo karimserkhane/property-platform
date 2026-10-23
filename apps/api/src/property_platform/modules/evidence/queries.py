@@ -203,7 +203,7 @@ def _project_source_kind(row):
     return "reference"
 
 
-def map_provenances(target, ids, *, include_capture_id=False):
+def map_provenances(target, ids, *, include_capture_id=False, include_method=False):
     observations = MapObservation.objects.filter(
         **{f"{target}_id__in": ids}, capture__run__status__in=["succeeded", "quarantined"]
     ).annotate(_canonical_id=F(f"{target}_id"))
@@ -264,11 +264,13 @@ def map_provenances(target, ids, *, include_capture_id=False):
             "capture__researchreference__source_kind",
             "capture__projectsnapshot__source_kind",
             "capture__projectsnapshot__source_name",
+            "raw_attributes__method",
         )
     )
     return {
         str(row["_canonical_id"]): {
             **({"_capture_id": row["capture_id"]} if include_capture_id else {}),
+            **({"_method": row["raw_attributes__method"]} if include_method else {}),
             "url": row["source_url"],
             "name": row["capture__projectsnapshot__source_name"]
             or row["capture__run__source__name"],

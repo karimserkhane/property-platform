@@ -1653,6 +1653,16 @@ export interface components {
              * @enum {string}
              */
             target: "building" | "place" | "parcel";
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "cadastral_parcel" | "building_footprint" | "authority_point" | "broker_point" | "publisher_point" | "declared_point";
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "boundary" | "footprint" | "point";
             /** Name */
             name: string;
             /** Geometry */

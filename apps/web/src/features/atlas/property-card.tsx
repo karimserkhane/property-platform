@@ -54,7 +54,6 @@ export function PropertyCard({
           locale={locale}
           locate={locate}
           locateLabel={m.locate}
-          unverifiedLabel={m.unverified}
         />
         {parcel && (
           <p className="parcel-reference">

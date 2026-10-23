@@ -12,6 +12,7 @@ import {
   groupProjectTypologies,
   projectAmenityKey,
   projectMedia,
+  projectPositionQuality,
   projectRelations,
   projectWebsite,
 } from "./presentation";
@@ -60,6 +61,7 @@ export function ProjectDetailView({
       ? labels.registeredHomes
       : labels.plannedHomes;
   const { documents, visuals } = projectMedia(project);
+  const quality = projectPositionQuality(project.map_locations);
   const typologies = groupProjectTypologies(project.typologies);
   const homeTypes = typologies.map((item) => item.property_type);
   const number = new Intl.NumberFormat(locale);
@@ -159,6 +161,9 @@ export function ProjectDetailView({
           </dl>
           {!project.map_locations.length && (
             <p className={dossier.locationNotice}>{labels.notMapped}</p>
+          )}
+          {quality && (
+            <p className={dossier.locationNotice}>{labels[quality.label]}</p>
           )}
           <div className={styles.actions}>
             <a className={styles.primaryAction} href="#project-documents">

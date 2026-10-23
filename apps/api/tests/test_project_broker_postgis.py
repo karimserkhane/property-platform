@@ -124,6 +124,8 @@ def test_agency_import_from_empty_catalogue_keeps_its_provenance_and_unverified_
     assert data["handover"]["source"]["kind"] == "broker"
     assert data["sources"][0]["name"] == "Property Shop Investment (PSI)"
     assert data["map_locations"][0]["source"]["kind"] == "broker"
+    assert data["map_locations"][0]["method"] == "broker_point"
+    assert data["map_locations"][0]["precision"] == "point"
     assert data["map_locations"][0]["source"]["name"] == "Property Shop Investment (PSI)"
     assert data["map_locations"][0]["geometry"]["coordinates"] == [54.394, 24.5003]
 
@@ -258,3 +260,26 @@ def test_reviewed_wrong_media_references_are_withdrawn_even_on_idempotent_reimpo
     assert legacy.rights_status == "blocked"
     assert ProjectSnapshot.objects.count() == 1  # Proof survives; no destructive replacement.
     assert project_detail("canal-residence")["media"] == []
+
+
+@pytest.mark.parametrize(
+    ("target", "observed", "method"),
+    [
+        ("parcel", None, "cadastral_parcel"),
+        ("building", "broker_project_coordinates", "building_footprint"),
+        ("place", "authority_registered_project_coordinates", "authority_point"),
+        ("place", "broker_project_coordinates", "broker_point"),
+        ("place", "publisher_map", "publisher_point"),
+        ("place", None, "declared_point"),
+    ],
+)
+def test_location_method_follows_the_identity_and_never_upgrades_a_point(target, observed, method):
+    from property_platform.modules.evidence.project_queries import (
+        LOCATION_PRECISION,
+        location_method,
+    )
+
+    assert location_method(target, observed) == method
+    assert LOCATION_PRECISION[method] == {"parcel": "boundary", "building": "footprint"}.get(
+        target, "point"
+    )

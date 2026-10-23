@@ -419,6 +419,12 @@
     "amenitySecurity": "Seguridad",
     "partOf": "Bahagi ng",
     "components": "Mga gusali at yugto",
-    "relationNote": "May sariling pahina at mga source ang bawat gusali o yugto. Sinuri ang pagpapangkat mula sa binanggit na source."
+    "relationNote": "May sariling pahina at mga source ang bawat gusali o yugto. Sinuri ang pagpapangkat mula sa binanggit na source.",
+    "positionCadastral": "Lokasyon: hangganan ng cadastral na lote.",
+    "positionBuilding": "Lokasyon: nasuring bakas ng gusali.",
+    "positionAuthority": "Tinatayang lokasyon: puntong nakarehistro sa awtoridad, hindi ang hangganan ng lote.",
+    "positionPublisher": "Tinatayang lokasyon: punto mula sa mapa ng developer o publisher, hindi pa beripikado.",
+    "positionBroker": "Tinatayang lokasyon: puntong inilathala ng isang ahensya, hindi pa beripikado.",
+    "positionDeclared": "Tinatayang lokasyon: puntong idineklara ng isang source, hindi pa beripikado."
   }
 }

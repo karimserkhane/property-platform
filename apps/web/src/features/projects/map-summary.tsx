@@ -7,7 +7,7 @@ import { MapLocateButton } from "@/components/map-locate-button";
 import { Link } from "@/i18n/navigation";
 import { ProjectCover } from "./cover";
 import { readProjectData } from "./data";
-import { formatHandover } from "./presentation";
+import { formatHandover, projectPositionQuality } from "./presentation";
 import styles from "./project.module.css";
 import type { ProjectDetail } from "./types";
 
@@ -19,7 +19,6 @@ export function ProjectMapSummary({
   locale,
   locate,
   locateLabel,
-  unverifiedLabel,
 }: {
   slug: string;
   name?: string;
@@ -27,7 +26,6 @@ export function ProjectMapSummary({
   locale: string;
   locate?: () => void;
   locateLabel?: string;
-  unverifiedLabel: string;
 }) {
   const t = useTranslations("Project");
   const [attempt, setAttempt] = useState(0);
@@ -57,6 +55,7 @@ export function ProjectMapSummary({
     return () => controller.abort();
   }, [slug, attempt]);
   const project = state.slug === slug ? state.project : null;
+  const quality = project && projectPositionQuality(project.map_locations);
   const loading = state.slug !== slug || state.loading;
   const handover = project?.handover
     ? formatHandover(project.handover, locale, t("quarter"))
@@ -116,9 +115,7 @@ export function ProjectMapSummary({
             {!project.map_locations.length && (
               <p className={styles.muted}>{t("notMapped")}</p>
             )}
-            {project.map_locations.some(
-              (location) => location.source.kind === "broker",
-            ) && <p className={styles.muted}>{unverifiedLabel}</p>}
+            {quality && <p className={styles.muted}>{t(quality.label)}</p>}
             <dl className={styles.summaryFacts}>
               {area && (
                 <div>
