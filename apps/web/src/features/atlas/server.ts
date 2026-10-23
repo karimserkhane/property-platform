@@ -1,4 +1,5 @@
 import "server-only";
+import { jsonResponse } from "./json-response";
 
 const MAX_BYTES = 8 * 1024 * 1024;
 
@@ -57,6 +58,24 @@ export async function readPreview(path: string, search = "") {
     status: response.status,
     data: JSON.parse(bytes.toString("utf8")) as unknown,
   };
+}
+
+// Shared relay answer: upstream status, no shared caching, encoded JSON.
+export async function relayPreview(
+  request: Request,
+  path: string,
+  search = "",
+) {
+  try {
+    const result = await readPreview(path, search);
+    return await jsonResponse(
+      request,
+      result.data ?? { code: "data_unavailable" },
+      { status: result.status, headers: { "Cache-Control": "no-store" } },
+    );
+  } catch {
+    return Response.json({ code: "data_unavailable" }, { status: 503 });
+  }
 }
 
 // A fixed, licensed-media endpoint only; no visitor-selected remote image URL.
