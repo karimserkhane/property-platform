@@ -248,3 +248,25 @@ export function formatHandover(
     timeZone: "UTC",
   }).format(date);
 }
+
+type ProjectRelation = NonNullable<ProjectDetail["parent"]>;
+
+// Same rule as isProjectSlug in data.ts; this module stays import-free for node tests.
+const relationSlug = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** Reviewed component links render only with a routable slug and a safe source. */
+export function projectRelations(
+  project: Pick<ProjectDetail, "parent" | "components">,
+) {
+  const usable = (relation: ProjectRelation | null | undefined) =>
+    relation && relation.slug.length <= 100 && relationSlug.test(relation.slug)
+      ? { ...relation, source_url: safeSourceUrl(relation.source_url) }
+      : null;
+  return {
+    parent: usable(project.parent),
+    components: (project.components ?? []).flatMap((relation) => {
+      const link = usable(relation);
+      return link ? [link] : [];
+    }),
+  };
+}

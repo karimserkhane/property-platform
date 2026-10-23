@@ -416,6 +416,9 @@
     "amenityBarbecue": "Grillbereich",
     "amenityParking": "Parkplätze",
     "amenityRestaurants": "Restaurants",
-    "amenitySecurity": "Sicherheitsdienst"
+    "amenitySecurity": "Sicherheitsdienst",
+    "partOf": "Teil von",
+    "components": "Gebäude & Bauabschnitte",
+    "relationNote": "Jedes Gebäude und jeder Bauabschnitt hat eine eigene Seite und eigene Quellen. Die Zuordnung wurde anhand der angegebenen Quelle geprüft."
   }
 }

@@ -6,7 +6,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 
 | Tâche | Phase | Titre | Priorité | Dépend de | Décision requise | Statut | Responsable |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| [A01](A01.md) | A | Hiérarchie des identités de projet | 1 | — | non | in-progress | claude |
+| [A01](A01.md) | A | Hiérarchie des identités de projet | 1 | — | non | done | claude |
 | [A02](A02.md) | A | Qualification des positions de projet | 1 | A01 | non | todo | unassigned |
 | [A03](A03.md) | A | Sauvegardes automatiques et restauration testée | 1 | — | non | todo | unassigned |
 | [A04](A04.md) | A | Reconstruction complète depuis les pipelines | 1 | A03 | non | todo | unassigned |

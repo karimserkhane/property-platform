@@ -416,6 +416,9 @@
     "amenityBarbecue": "烧烤区",
     "amenityParking": "停车位",
     "amenityRestaurants": "餐厅",
-    "amenitySecurity": "安保"
+    "amenitySecurity": "安保",
+    "partOf": "隶属于",
+    "components": "楼栋与分期",
+    "relationNote": "每栋楼或每一期都有独立的页面和来源。此分组已根据所引用的来源核实。"
   }
 }

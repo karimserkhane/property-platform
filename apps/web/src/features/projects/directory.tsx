@@ -26,6 +26,8 @@ type DirectoryLabels = {
   previous: string;
   next: string;
   pages: string;
+  partOf: string;
+  components: string;
 };
 
 export function ProjectDirectoryList({
@@ -142,6 +144,18 @@ export function ProjectDirectoryList({
                   <p className={styles.developer}>
                     <bdi>{project.developer.name}</bdi>
                   </p>
+                  {project.parent ? (
+                    <p className={styles.hierarchy}>
+                      {labels.partOf} · <bdi>{project.parent.name}</bdi>
+                    </p>
+                  ) : project.component_count > 0 ? (
+                    <p className={styles.hierarchy}>
+                      {labels.components} ·{" "}
+                      <bdi dir="ltr">
+                        {numbers.format(project.component_count)}
+                      </bdi>
+                    </p>
+                  ) : null}
                 </div>
                 <span className={styles.arrow} aria-hidden="true">
                   ↗

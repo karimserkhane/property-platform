@@ -416,6 +416,9 @@
     "amenityBarbecue": "Lugar para sa barbecue",
     "amenityParking": "Paradahan",
     "amenityRestaurants": "Mga restawran",
-    "amenitySecurity": "Seguridad"
+    "amenitySecurity": "Seguridad",
+    "partOf": "Bahagi ng",
+    "components": "Mga gusali at yugto",
+    "relationNote": "May sariling pahina at mga source ang bawat gusali o yugto. Sinuri ang pagpapangkat mula sa binanggit na source."
   }
 }

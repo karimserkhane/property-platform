@@ -318,3 +318,9 @@
     padding-inline: 12px;
   }
 }
+.hierarchy {
+  margin-block: 4px 0;
+  color: #597568;
+  font-size: 12px;
+  line-height: 1.55;
+}

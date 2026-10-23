@@ -416,6 +416,9 @@
     "amenityBarbecue": "فضای باربیکیو",
     "amenityParking": "پارکینگ",
     "amenityRestaurants": "رستوران‌ها",
-    "amenitySecurity": "امنیت"
+    "amenitySecurity": "امنیت",
+    "partOf": "بخشی از",
+    "components": "ساختمان‌ها و فازها",
+    "relationNote": "هر ساختمان یا فاز صفحه و منابع خود را دارد. این گروه‌بندی بر اساس منبع ذکرشده بررسی شده است."
   }
 }

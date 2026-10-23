@@ -416,6 +416,9 @@
     "amenityBarbecue": "منطقة للشواء",
     "amenityParking": "مواقف سيارات",
     "amenityRestaurants": "مطاعم",
-    "amenitySecurity": "الأمن"
+    "amenitySecurity": "الأمن",
+    "partOf": "جزء من",
+    "components": "المباني والمراحل",
+    "relationNote": "لكل مبنى أو مرحلة صفحته ومصادره الخاصة. تمت مراجعة هذا التجميع استنادًا إلى المصدر المذكور."
   }
 }
