@@ -398,6 +398,29 @@ def walking_areas(actor: str = "scheduled"):
     )
 
 
+@flow(name="property-platform-backup", retries=0)
+def backup(actor: str = "scheduled"):
+    """Dump the database from one snapshot, mirror private files, then apply retention."""
+    from . import backups
+
+    result = backups.create_backup()
+    result["pruned"] = backups.prune()
+    get_run_logger().info("Backup %s by %s: %s", result["name"], actor, result)
+    return result
+
+
+@flow(name="property-platform-restore-check", retries=0)
+def restore_check(actor: str = "scheduled"):
+    """Restore the newest dump into a throwaway database and compare row counts."""
+    from . import backups
+
+    result = backups.restore_check()
+    get_run_logger().info("Restore check by %s: %s", actor, result)
+    if not result["ok"]:
+        raise IngestionFailure({"status": "failed", "error": "RestoreMismatch", **result})
+    return result
+
+
 from .project_bootstrap import rebuild_projects  # noqa: E402
 
 FLOWS = {
@@ -423,5 +446,7 @@ FLOWS = {
         data_history,
         routing_graph,
         walking_areas,
+        backup,
+        restore_check,
     )
 }

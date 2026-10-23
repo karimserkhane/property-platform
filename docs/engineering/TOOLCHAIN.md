@@ -37,6 +37,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | Ruff / Import Linter | 0.17.0 / 2.15 | Dernières versions stables vérifiées |
 | Hatchling | 1.32.4 | Backend de construction Python fixé |
 | PostgreSQL / PostGIS | Tag 18-3.6 | Dernier couple stable fourni par l'image PostGIS ; versions mineures du tag évolutives |
+| Client PostgreSQL de l'ingestion | postgresql-client-18 (dépôt PGDG `trixie-pgdg`, clé vérifiée par empreinte) | `pg_dump`/`pg_restore` de même version majeure que le serveur, pour les [sauvegardes](BACKUPS.md) |
 | PostgreSQL des métadonnées Prefect | Image 18.6-trixie | Base distincte `prefect`, sans PostGIS ni port publié vers l'hôte |
 | Base des images applicatives | Debian Trixie | Node 26.11.1-trixie-slim / Python 3.14.8-slim-trixie |
 | GitHub checkout / setup-node | 7.0.1 / 7.1.0 | Releases stables vérifiées |

@@ -146,6 +146,10 @@ Les imports utilisent une seule exécution simultanée dans ce runner. Si une au
 
 Pour tester les références sans parcourir tout le registre, utiliser **Custom run** avec `limit: 1`. `reference_key` permet de choisir exactement une URL enregistrée par sa clé ; il n'accepte pas une URL libre. Les contrôles HTTP bornent les tailles et délais, vérifient TLS et ne suivent pas les redirections arbitraires.
 
+## Sauvegardes
+
+Les déploiements `backup-database` (chaque nuit) et `restore-check` (chaque semaine) sauvegardent la base, copient les fichiers privés et vérifient une restauration complète dans une base jetable. Voir [BACKUPS.md](BACKUPS.md).
+
 ## Configurer les horaires
 
 **Configuration locale activée à la demande de Karim le 13 octobre 2026 :** les sept collectes sont désormais programmées chaque **dimanche**, fuseau **Asia/Dubai** : présentations à 02:00, parcelles à 03:00, district à 04:00, communautés à 04:15, rues à 04:30, OSM à 04:45 et références à 05:00. Les références ne sont donc plus le lundi et les présentations ne sont plus quotidiennes sur ce poste. Le contrôle `ingestion-readiness` et les reçus historiques `sentinel-previews` restent manuels. Les tableaux d'horaires initiaux ci-dessus décrivent le premier enregistrement ; Prefect conserve la configuration active locale au redémarrage.

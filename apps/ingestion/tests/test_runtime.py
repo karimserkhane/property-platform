@@ -84,7 +84,7 @@ def test_two_attempts_cannot_overwrite_the_first_complete_receipt(tmp_path, monk
 
 
 def test_history_and_static_assets_are_not_recurring_jobs():
-    assert len({dataset.name for dataset in DATASETS}) == len(DATASETS) == 56
+    assert len({dataset.name for dataset in DATASETS}) == len(DATASETS) == 58
     imagery = next(dataset for dataset in DATASETS if dataset.name == "sentinel-previews")
     assert imagery.cron is None
     for territory in ("reem", "saadiyat", "maryah"):
@@ -215,3 +215,9 @@ def test_failed_reconciliation_keeps_precise_backend_diagnostic(monkeypatch):
             },
             timeout=5,
         )
+
+
+def test_backups_run_nightly_and_restore_checks_weekly_once_enabled():
+    flows = {d.name: (d.flow_name, d.cron) for d in DATASETS}
+    assert flows["backup-database"] == ("property-platform-backup", "30 1 * * *")
+    assert flows["restore-check"] == ("property-platform-restore-check", "0 5 * * 0")
