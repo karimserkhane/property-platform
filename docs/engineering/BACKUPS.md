@@ -21,6 +21,8 @@ Les identifiants de la base passent aux outils PostgreSQL par l'environnement (`
 | `backup-database` | `property-platform-backup` | Chaque nuit à 01:30 (Asia/Dubai) |
 | `restore-check` | `property-platform-restore-check` | Dimanche à 05:00 |
 
+**Activation** : après le déploiement de l'image d'ingestion, activer les deux horaires dans Prefect (interface sur le port 4200, ou `prefect deployment schedule resume`).
+
 **Rotation** : les 7 sauvegardes les plus récentes, plus la plus récente de chacune des 4 dernières semaines ISO. Seuls les fichiers `property_platform-<horodatage>.dump/.json` créés par ce mécanisme sont concernés ; les anciennes sauvegardes manuelles du même dossier ne sont jamais supprimées.
 
 **Contrôle de restauration** : vérifie le SHA-256 du fichier, restaure dans une base jetable `restore_check_<horodatage>` sur le même serveur, compare les comptes à ceux du manifeste, puis supprime toujours la base jetable. Un écart fait échouer le flow.
