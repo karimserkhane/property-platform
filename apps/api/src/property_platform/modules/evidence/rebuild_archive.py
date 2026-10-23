@@ -150,6 +150,42 @@ def _source_scopes():
     return result
 
 
+MAP_TARGETS = ("street", "building", "place", "administrative_area")
+
+
+def run_rows(run_ids):
+    """Observations written by the given runs, by target and action, plus quarantines.
+
+    Diagnostic only: it locates which acquisition explains a table difference (for
+    example a historical quarantine accepted at replay); the table policies decide `ok`.
+    """
+    from django.db.models import Case, CharField, Count, Value, When
+
+    from .models import MapObservation, ParcelObservation, QuarantinedObservation
+
+    result = {}
+    target = Case(
+        *(When(**{f"{name}__isnull": False}, then=Value(name)) for name in MAP_TARGETS),
+        output_field=CharField(),
+    )
+    for row in (
+        MapObservation.objects.filter(capture__run_id__in=run_ids)
+        .annotate(target=target)
+        .values("target", "action")
+        .annotate(total=Count("pk"))
+        .order_by()
+    ):
+        result[f"map_observation:{row['target']}:{row['action']}"] = row["total"]
+    for name, model in (
+        ("parcel_observation", ParcelObservation),
+        ("quarantined_observation", QuarantinedObservation),
+    ):
+        total = model.objects.filter(capture__run_id__in=run_ids).count()
+        if total:
+            result[name] = total
+    return result
+
+
 def ordered_steps(steps):
     """Keep history order inside each phase, with identities before their consumers."""
     phase = {
@@ -266,6 +302,7 @@ def export_archive(root: Path):
                         "run": str(run.pk),
                         "original_version": run.connector_version,
                         "original_status": run.status,
+                        "original_rows": run_rows([run.pk]),
                         "targets": targets,
                         "captures": [_capture(root, c) for c in captures],
                     }
@@ -570,6 +607,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
     outcomes = []
     for index, step in enumerate(manifest["steps"]):
         operation, scope = step["operation"], step["scope"]
+        rows = None
         try:
             execution_key = hashlib.sha256(f"rebuild:{run_id}:{index}".encode()).hexdigest()
             with audit_context(actor=actor, execution_key=execution_key):
@@ -609,6 +647,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
                         ),
                     )
                     status = result["status"]
+                    rows = run_rows(result.get("run_ids", []))
                     if operation == "references" and step.get("original_status") == "failed":
                         from .models import ResearchReference
 
@@ -630,6 +669,8 @@ def replay_archive(root: Path, actor: str, run_id: str):
                 # A reproduction keeps the original outcome; a new quarantine or a newly
                 # accepted acquisition is a divergence, even when table counts coincide.
                 outcome["diverged_from"] = original
+            if "original_rows" in step and rows is not None and rows != step["original_rows"]:
+                outcome["rows"] = {"expected": step["original_rows"], "actual": rows}
             outcomes.append(outcome)
         except Exception as exc:
             logger.exception("Rebuild step %s %s failed", operation, scope)
@@ -663,6 +704,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
     coverage = inventory()
     failures = [r for r in outcomes if r["status"] == "failed"]
     divergences = [r for r in outcomes if "diverged_from" in r]
+    row_differences = [r for r in outcomes if "rows" in r]
     mismatches = [
         r["table"] for r in tables if r["policy"] in ("exact", "identity") and not r["matches"]
     ]
@@ -676,6 +718,8 @@ def replay_archive(root: Path, actor: str, run_id: str):
         "coverage": coverage,
         "failed_steps": len(failures),
         "diverged_steps": len(divergences),
+        # Diagnostic: steps whose observations differ from their original run.
+        "row_differences": len(row_differences),
         "mismatches": mismatches,
         "requires_backup": [
             r["table"] for r in tables if r["policy"] == "backup" and r["expected"]
@@ -686,5 +730,12 @@ def replay_archive(root: Path, actor: str, run_id: str):
     write_json(root / "report.json", report)
     return {
         key: report[key]
-        for key in ("ok", "failed_steps", "diverged_steps", "mismatches", "source_snapshot_at")
+        for key in (
+            "ok",
+            "failed_steps",
+            "diverged_steps",
+            "row_differences",
+            "mismatches",
+            "source_snapshot_at",
+        )
     }

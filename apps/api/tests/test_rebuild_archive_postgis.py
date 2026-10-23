@@ -403,6 +403,78 @@ def test_a_status_different_from_the_original_run_fails_the_check(
         assert report["steps"][0]["diverged_from"] == original
 
 
+def test_observation_counts_per_step_locate_a_difference_without_deciding_ok(tmp_path, monkeypatch):
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import MapObservation, QuarantinedObservation
+
+    source = Source.objects.create(key="test:map", name="Test", url="https://example.com/map")
+    run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
+    stamp = datetime(2026, 10, 1, tzinfo=UTC)
+    capture = Capture.objects.create(
+        run=run,
+        payload=b"{}",
+        url=source.url,
+        http_status=200,
+        fetched_at=stamp,
+        fetched_started_at=stamp,
+        byte_length=2,
+        content_sha256=hashlib.sha256(b"{}").hexdigest(),
+    )
+    place = Place.objects.create(
+        source_namespace="test:place", source_record_id="1", geometry=Point(54.4, 24.5)
+    )
+    MapObservation.objects.create(
+        place=place,
+        capture=capture,
+        source_record_id="1",
+        source_url=source.url,
+        raw_attributes={},
+        record_sha256="b" * 64,
+        mapping_version="test",
+        action="created",
+        target_revision=1,
+    )
+    QuarantinedObservation.objects.create(
+        capture=capture, source_record_id="2", field_path="geometry", raw_attributes={}, reason="x"
+    )
+    rows = {"map_observation:place:created": 1, "quarantined_observation": 1}
+    assert archive.run_rows([run.pk]) == rows
+    monkeypatch.setattr(
+        archive.orchestration,
+        "execute_import",
+        lambda **kwargs: {"status": "succeeded", "run_ids": [str(run.pk)]},
+    )
+    expected = {"map_observation:place:created": 3}
+    archive.write_json(
+        tmp_path / "manifest.json",
+        {
+            "version": 1,
+            "snapshot_at": "2026-10-23T00:00:00+00:00",
+            "expected": archive.counts(),
+            "steps": [
+                {
+                    "operation": "map",
+                    "scope": "al-reem-island:osm",
+                    "run": "original",
+                    "original_status": "succeeded",
+                    "original_rows": expected,
+                    "captures": [],
+                }
+            ],
+            "scenes": [],
+            "tiles": [],
+            "omitted": [],
+        },
+    )
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    report = json.loads((tmp_path / "report.json").read_text())
+    # Table counts are equal here: the per-step difference is reported, not a failure.
+    assert result["ok"] and result["row_differences"] == 1
+    assert report["steps"][0]["rows"] == {"expected": expected, "actual": rows}
+
+
 def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path):
     from property_platform.modules.evidence import project_protocol
 

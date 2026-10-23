@@ -112,6 +112,15 @@ automatique.
 | `backup` | État non rétabli par le rejeu des captures : conserver/restaurer A03 ou relancer son pipeline dédié selon le tableau suivant. |
 | `identity` | Parcelles et zones administratives : les identités **actives** doivent être identiques (nombre et empreinte des couples espace de noms/identifiant source). Les lignes remplacées absentes du rejeu doivent correspondre exactement aux réparations revues de doublons (alias A03 avec `superseded_*`) ; l'importateur actuel résout ces enregistrements à l'import et ne recrée pas le doublon. Un manifeste plus ancien, sans ces statistiques, garde la comparaison `exact`. |
 
+Chaque étape rejouée porte aussi, quand ils diffèrent de l'exécution d'origine, les
+comptes d'observations écrites par cette étape (`rows.expected` / `rows.actual`) :
+`map_observation` par cible (`street`, `building`, `place`, `administrative_area`) et
+par action (`created`, `updated`, `unchanged`, `retired`), `parcel_observation` et
+`quarantined_observation`. `row_differences` donne le nombre de ces étapes. C'est un
+**diagnostic** qui situe l'acquisition à l'origine d'un écart de table ; il ne décide
+pas de `ok` (les politiques de table ci-dessus le font). Un manifeste plus ancien,
+sans `original_rows`, n'a pas ce détail.
+
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
 les captures sans adaptateur de rejeu, ainsi que les captures d'une fiche projet non
@@ -179,4 +188,16 @@ protocole historique ([A14](../tasks/A14.md)).
   attendues (6 883 au contrôle précédent) et `place` à 2 005 contre 2 012 : à
   qualifier dans A14 (hypothèse non vérifiée : mappage actuel différent de celui
   d'origine ; les comptes par étape ne sont pas encore dans le rapport).
+- Qualification de `d7b5f4bc` (24 octobre, lecture seule de la base en service) :
+  `d7b5f4bc` (18:53 UTC), `29a909a9` (18:54) et `ece1a59f` (19:17, `reem-map-v2`)
+  ont la **même capture** (`06a6dedd…`). À l'origine : `d7b5f4bc` crée 30 lieux et
+  met 1 093 éléments en quarantaine ; `29a909a9` crée 601 rues, 188 bâtiments,
+  137 lieux et retrouve les 30 lieux inchangés (956 observations) ; `ece1a59f` en
+  retrouve 956 inchangées. Le premier commit qui contient `reem-map-v1` (`087241d`,
+  12 octobre 01:41 UTC) est postérieur à ces runs : l'interprétation qui a refusé
+  les 1 093 éléments était du code non commité, modifié entre les deux runs sous la
+  même version. Elle n'est pas reproductible depuis le dépôt ; ce n'est pas une
+  perte de source. Au rejeu, `d7b5f4bc` reçoit l'interprétation de `29a909a9`, ce qui
+  explique au plus 926 des 1 420 observations en plus ; le reste et l'écart `place`
+  seront situés par les comptes par étape du prochain contrôle.
 - Écarts inchangés des fiches/catalogues : voir [A12](../tasks/A12.md).
