@@ -1,5 +1,9 @@
 import { encodedResponse } from "@/features/atlas/json-response";
-import { readPreviewBytes, territorySearch } from "@/features/atlas/server";
+import {
+  readPreviewBytes,
+  territorySearch,
+  validatorHeaders,
+} from "@/features/atlas/server";
 
 const MIME = "application/vnd.mapbox-vector-tile";
 const error = (status: number, code: string) =>
@@ -26,11 +30,12 @@ export async function GET(
       `parcel-tiles/${z}/${x}/${y}`,
       search,
       MIME,
+      request.headers.get("if-none-match"),
     );
-    if (result.status === 204)
+    if (result.status === 204 || result.status === 304)
       return new Response(null, {
-        status: 204,
-        headers: { "Cache-Control": "no-store" },
+        status: result.status,
+        headers: validatorHeaders(result.etag),
       });
     // An MVT layer message starts with field 3 (0x1a); anything else is refused.
     if (
@@ -43,7 +48,7 @@ export async function GET(
         "data_unavailable",
       );
     return await encodedResponse(request, result.bytes, MIME, {
-      headers: { "Cache-Control": "no-store" },
+      headers: validatorHeaders(result.etag),
     });
   } catch {
     return error(503, "data_unavailable");
