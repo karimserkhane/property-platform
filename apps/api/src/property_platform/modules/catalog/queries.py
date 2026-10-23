@@ -101,6 +101,11 @@ def _bounds(envelope):
 
 TILE_EXTENT = 4096
 TILE_BUFFER = 64
+# Web Mercator metres per 512-pixel tile at zoom 0, as drawn by MapLibre.
+MERCATOR_WORLD_M = 40_075_016.686
+# Below this zoom, parcels smaller than half a screen pixel are left out: they would
+# not be visible, yet they made overview tiles weigh about as much as detailed ones.
+DETAIL_ZOOM = 12
 
 
 def parcel_tile(z, x, y, *, namespaces=None):
@@ -108,6 +113,7 @@ def parcel_tile(z, x, y, *, namespaces=None):
 
     Attributes stay in `parcel_features`, so drawn footprints never diverge from the
     recovery, classification and provenance rules applied to the published rows.
+    Overview zooms omit sub-pixel parcels; from `DETAIL_ZOOM` every parcel is drawn.
     """
     table = connection.ops.quote_name(Parcel._meta.db_table)
     sql = f"""
@@ -124,15 +130,17 @@ def parcel_tile(z, x, y, *, namespaces=None):
             WHERE parcel.superseded_by_id IS NULL
               AND parcel.geometry && ST_Transform(tile.envelope, 4326)
               AND (%s::text[] IS NULL OR parcel.source_namespace = ANY(%s::text[]))
+              AND (%s OR ST_Area(ST_Transform(parcel.geometry, 3857)) >= %s)
         )
         SELECT ST_AsMVT(shapes, 'parcels', {TILE_EXTENT}, 'geom') FROM shapes
         WHERE geom IS NOT NULL
     """
     names = list(namespaces) if namespaces is not None else None
+    min_area = (MERCATOR_WORLD_M / (512 * 2**z)) ** 2 / 2
     with transaction.atomic():
         with connection.cursor() as cursor:
             cursor.execute("SET LOCAL statement_timeout = '2000ms'")
-            cursor.execute(sql, [z, x, y, z, x, y, names, names])
+            cursor.execute(sql, [z, x, y, z, x, y, names, names, z >= DETAIL_ZOOM, min_area])
             return bytes(cursor.fetchone()[0] or b"")
 
 
