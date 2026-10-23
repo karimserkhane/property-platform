@@ -23,7 +23,7 @@ from . import abu_dhabi, orchestration, project_discovery, project_protocol
 from .collection_profiles import COLLECTIONS
 from .history import audit_context
 from .media_storage import read_capture
-from .models import BasemapTile, Capture, ImageryScene, IngestionRun
+from .models import BasemapTile, Capture, ImageryScene, IngestionRun, PropertyPresentation
 from .pipeline_inventory import inventory
 
 logger = logging.getLogger(__name__)
@@ -221,6 +221,20 @@ def export_archive(root: Path):
             if operation == "map" and run.connector_version.startswith("osm-api-bootstrap"):
                 operation, scope = "osm_bootstrap", scope.split(":")[0]
             if operation and captures:
+                targets = []
+                if operation == "property_presentations":
+                    for presentation in PropertyPresentation.objects.filter(
+                        capture__run=run
+                    ).select_related("building", "place"):
+                        kind = "building" if presentation.building_id else "place"
+                        obj = getattr(presentation, kind)
+                        targets.append(
+                            {
+                                "target": kind,
+                                "namespace": obj.source_namespace,
+                                "record_id": obj.source_record_id,
+                            }
+                        )
                 steps.append(
                     {
                         "operation": operation,
@@ -228,6 +242,7 @@ def export_archive(root: Path):
                         "run": str(run.pk),
                         "original_version": run.connector_version,
                         "original_status": run.status,
+                        "targets": targets,
                         "captures": [_capture(root, c) for c in captures],
                     }
                 )
@@ -332,10 +347,6 @@ class CaptureReplay:
             raise ValueError("Importer requested a capture absent from the archive")
         item = self.queue.popleft()
         expected, actual = request_identity(url, params), request_identity(item["receipt"]["url"])
-        # The legacy Overpass transport used POST; its query body is defined by
-        # the reviewed territory scope, not present in the receipt URL.
-        if params and set(params) == {"data"}:
-            expected = request_identity(url)
         if expected != actual:
             raise ValueError("Importer request differs from the archived receipt URL")
         return load_capture(self.root, item)
@@ -451,6 +462,26 @@ def replay_tiles(root, tiles, actor):
             run.save(update_fields=["status", "finished_at"])
 
 
+def reviewed_presentations(scope, targets):
+    """A shared page cannot fan out a historical receipt to newly reviewed targets."""
+    from . import property_import
+
+    selected, photos = [], {}
+    identities = {(item["target"], item["namespace"], item["record_id"]) for item in targets}
+    for area in COLLECTIONS:
+        reviewed, media = property_import.registry(area)
+        selected += [
+            p
+            for p in reviewed
+            if p["source_url"] == scope
+            and (p["target"], p["namespace"], p["record_id"]) in identities
+        ]
+        photos.update(media)
+    if not selected:
+        raise ValueError("Historical presentation target is absent from the reviewed registry")
+    return selected, photos
+
+
 def replay_archive(root: Path, actor: str, run_id: str):
     """Called only against the database just created by the ingestion controller."""
     from . import property_import
@@ -466,13 +497,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
             execution_key = hashlib.sha256(f"rebuild:{run_id}:{index}".encode()).hexdigest()
             with audit_context(actor=actor, execution_key=execution_key):
                 if operation == "property_presentations":
-                    profiles, photos = [], {}
-                    for area in COLLECTIONS:
-                        reviewed, media = property_import.registry(area)
-                        profiles += [p for p in reviewed if p["source_url"] == scope]
-                        photos.update(media)
-                    if not profiles:
-                        raise ValueError("Presentation is absent from the reviewed registry")
+                    profiles, photos = reviewed_presentations(scope, step["targets"])
                     property_import.import_presentations(
                         [property_receipt(root, c) for c in step["captures"]],
                         actor=actor,

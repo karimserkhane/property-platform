@@ -60,6 +60,9 @@ Ordre du flow :
 Le SHA-256 du manifeste est fixé après l'export ; chaque lecture de capture vérifie
 sa taille et son empreinte. Une requête absente, différente ou une capture non
 consommée fait échouer son import. Il n'existe aucun repli réseau pendant le rejeu.
+Les contrôles ETag sur le serveur partagé sont à exécuter après le rejeu lourd :
+le cache utilise encore un instantané PostgreSQL global et peut être invalidé par
+ses transactions, même dans une autre base ([A08](../tasks/A08.md)).
 
 ## Lire le rapport
 
@@ -111,3 +114,11 @@ dans [A11](../tasks/A11.md) (anciens protocoles Onwani/OSM et dépendances) et
 [A12](../tasks/A12.md) (versions des interprétations de fiches/catalogues).
 Le contrôle ne corrige ni n'efface les lignes en service. Les sauvegardes A03 restent
 nécessaires ; un compte égal ne garantit pas à lui seul l'identité des valeurs.
+
+Après correction de l'ordre des dépendances, de la sélection des cibles de
+présentation et des références indisponibles, dernier run
+`2f579f83-9747-4629-b471-bca02dabb7ef`, instantané à
+`2026-10-23T14:03:23.446517+00:00` : **1 281 étapes, cinq acquisitions refusées,
+onze tables en écart**. Les 18 présentations, six médias associés et 230 références
+sont maintenant retrouvés exactement, en plus des familles déjà citées. A11/A12
+restent nécessaires pour démontrer la reconstruction complète.

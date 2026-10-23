@@ -132,6 +132,19 @@ def test_replay_rejects_missing_changed_or_unconsumed_bytes(tmp_path):
         archive.load_capture(tmp_path, {**item, "sha256": "../private"})
 
 
+def test_overpass_query_must_match_the_archived_query_exactly(tmp_path):
+    query = "[out:json];way[building](24.4,54.3,24.5,54.4);out geom;"
+    url = "https://overpass-api.de/api/interpreter"
+    item = captured(tmp_path, {}, url + "?" + urlencode({"data": query}))
+    archive.CaptureReplay(tmp_path, [item])(url, {"data": query})
+    for different in (query + " ", "[out:json];node;out;"):
+        with pytest.raises(ValueError, match="differs"):
+            archive.CaptureReplay(tmp_path, [item])(url, {"data": different})
+    missing_query = captured(tmp_path, {}, url)
+    with pytest.raises(ValueError, match="differs"):
+        archive.CaptureReplay(tmp_path, [missing_query])(url, {"data": query})
+
+
 def test_every_table_is_compared_and_unknown_tables_are_never_excused():
     result = archive.compare_tables(
         {"real_estate.parcel": 2, "evidence.row_revision": 20, "evidence.history_exclusion": 1},
@@ -175,6 +188,23 @@ def test_geography_precedes_presentations_and_projects_without_reordering_versio
         "project_details",
     ]
     assert [s["version"] for s in result if s["operation"] == "project_details"] == [1, 2]
+
+
+def test_a_shared_source_page_cannot_multiply_reviewed_presentation_targets(monkeypatch):
+    from property_platform.modules.evidence import property_import
+
+    url = "https://example.com/towers"
+    first = {"source_url": url, "target": "building", "namespace": "osm:reem:osm", "record_id": "1"}
+    second = {**first, "record_id": "2"}
+    monkeypatch.setattr(
+        property_import,
+        "registry",
+        lambda area: ([first, second], {}) if area == "al-reem-island" else ([], {}),
+    )
+    assert archive.reviewed_presentations(url, [first])[0] == [first]
+    assert archive.reviewed_presentations(url, [second])[0] == [second]
+    with pytest.raises(ValueError, match="target"):
+        archive.reviewed_presentations(url, [{**first, "record_id": "unknown"}])
 
 
 def test_export_does_not_mutate_the_source_and_counts_the_capture_snapshot(tmp_path):

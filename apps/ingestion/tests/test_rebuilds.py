@@ -108,3 +108,32 @@ def test_prefect_flow_fails_when_the_report_is_incomplete(monkeypatch):
     monkeypatch.setattr(rebuilds, "rebuild_check", lambda **kwargs: {"ok": False})
     with pytest.raises(IngestionFailure, match="IncompleteSourceRebuild"):
         flows.rebuild_check.fn()
+
+
+@pytest.mark.parametrize(
+    "actual_name,has_tables,accepted",
+    [
+        ("rebuild_check_" + "a" * 32, False, True),
+        ("rebuild_check_" + "a" * 32, True, False),
+        ("property_platform", False, False),
+    ],
+)
+def test_worker_checks_the_actual_connection_and_emptiness_before_migrations(
+    actual_name, has_tables, accepted
+):
+    from types import SimpleNamespace
+
+    from property_platform_ingestion.rebuild_worker import require_empty_target
+
+    @contextmanager
+    def cursor():
+        yield SimpleNamespace(
+            execute=lambda query: None, fetchone=lambda: (actual_name, has_tables)
+        )
+
+    connection = SimpleNamespace(cursor=cursor)
+    if accepted:
+        require_empty_target(connection, "rebuild_check_" + "a" * 32)
+    else:
+        with pytest.raises(ValueError, match="own completely empty"):
+            require_empty_target(connection, "rebuild_check_" + "a" * 32)

@@ -9,7 +9,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A01](A01.md) | A | Hiérarchie des identités de projet | 1 | — | non | done | claude |
 | [A02](A02.md) | A | Qualification des positions de projet | 1 | A01 | non | done | claude |
 | [A03](A03.md) | A | Sauvegardes automatiques et restauration testée | 1 | — | non | done | claude |
-| [A04](A04.md) | A | Reconstruction complète depuis les pipelines | 1 | A03 | non | in-progress | codex |
+| [A04](A04.md) | A | Contrôle de reconstruction depuis les pipelines | 1 | A03 | non | done | codex |
 | [A05](A05.md) | A | Tests de parcours navigateur (Playwright) | 1 | — | non | todo | unassigned |
 | [A06](A06.md) | A | Index des parcelles par zone visible | 2 | — | non | todo | unassigned |
 | [A07](A07.md) | A | Bâtiments et contexte en tuiles vectorielles | 2 | A06 | non | todo | unassigned |

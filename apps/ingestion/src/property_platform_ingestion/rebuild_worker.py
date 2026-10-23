@@ -7,6 +7,18 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 
+def require_empty_target(database, expected_name):
+    """Check the actual SQL connection too; environment parsing alone is insufficient."""
+    with database.cursor() as cursor:
+        cursor.execute(
+            "SELECT current_database(), EXISTS(SELECT 1 FROM information_schema.tables "
+            "WHERE table_schema IN ('public','real_estate','evidence'))"
+        )
+        actual_name, has_tables = cursor.fetchone()
+        if actual_name != expected_name or has_tables:
+            raise ValueError("Rebuild replay requires its own completely empty database")
+
+
 def main():
     import django
 
@@ -28,13 +40,7 @@ def main():
             digest = hashlib.sha256((root / "manifest.json").read_bytes()).hexdigest()
             if digest != os.environ["REBUILD_MANIFEST_SHA256"]:
                 raise ValueError("Replay manifest changed after export")
-            with connections["default"].cursor() as cursor:
-                cursor.execute(
-                    "SELECT EXISTS(SELECT 1 FROM information_schema.tables "
-                    "WHERE table_schema IN ('public','real_estate','evidence'))"
-                )
-                if cursor.fetchone()[0]:
-                    raise ValueError("Rebuild replay requires a completely empty database")
+            require_empty_target(connections["default"], name)
             # The controller created an empty template0 database. Migrate explicitly;
             # this is never a startup hook and is never run against the source.
             call_command("migrate", interactive=False, verbosity=0)
