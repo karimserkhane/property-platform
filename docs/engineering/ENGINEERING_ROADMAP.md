@@ -39,7 +39,7 @@ Autres constats :
 | 1 | Journaux et trace complète des échecs ; gardes communes des routes API | Diagnostic des imports ; moins de code recopié | Fusionné (PR #1) |
 | 2 | Compression brotli/gzip et relais partagé des lectures `/api/atlas/*` | 5 à 7 fois moins de données par affichage de carte | Fusionné (PR #2) |
 | 3 | Tuiles vectorielles PostGIS (`ST_AsMVT`) pour parcelles et bâtiments | Carte fluide à l'échelle des sept émirats ; fin de la limite de 12 000 parcelles | Parcelles de l'explorateur : PR #3 ; bâtiments et index par zone à suivre |
-| 4 | Cache des lectures lourdes avec `ETag` lié à la version des données (`evidence.row_revision`) | `district-map`, `market-map`, `map-context` instantanés en lecture répétée | À faire |
+| 4 | Cache des lectures lourdes avec `ETag` lié à la version des données (`evidence.row_revision`) | `district-map`, `market-map`, `map-context` instantanés en lecture répétée | PR #4 (instantané PostgreSQL) ; version par famille de tables à suivre |
 | 5 | Simplification des contours en SQL et regroupement des requêtes de `map-context` | Temps serveur divisé avant même le cache | À faire |
 | 6 | Images satellite servies comme fichiers cachables au lieu de base64 dans le JSON | −850 Ko sur la vue imagerie | À faire |
 | 7 | Sauvegarde automatique PostgreSQL + stockage privé, avec test de restauration planifié | Reprise après perte de données | À faire |
@@ -61,6 +61,17 @@ L'explorateur dessine les contours de parcelles depuis des tuiles vectorielles P
 - La carte de quartier des fiches projet garde ses parcelles GeoJSON (zone réduite) ; le style partagé n'est pas modifié.
 
 Mesures (vue « toute la zone » d'Abu Dhabi, réponses compressées) : une ligne d'index pèse environ 63 octets contre 135 avec sa géométrie ; une tuile vaut 37 Ko au zoom 14 et 175 Ko au zoom 10 à 12 pour toute l'île. Le gain actuel tient surtout au rendu (MapLibre ne découpe plus 10 000 polygones dans le navigateur) et au chargement progressif par zone ; il devient décisif à l'échelle nationale. Prochaines étapes : servir l'index par zone visible plutôt que pour tout le territoire, puis les bâtiments en tuiles.
+
+## Cache des lectures et requêtes conditionnelles — 23 octobre 2026
+
+`api/read_cache.py` met en cache les lectures `/preview` sans effet de bord (parcelles, index, tuiles, contexte, quartiers, marché, projets, références, imagerie) et répond aux requêtes conditionnelles.
+
+- **Version des données** : `pg_current_snapshot()` (prochain identifiant de transaction et écritures en cours) est lu *avant* les données. Toute validation qui pourrait changer une lecture change cet instantané ; une réponse ou un ETag n'est donc jamais servi après un changement, exclusion de source comprise. Aucune durée arbitraire.
+- **Validation d'abord** : pour une adresse jamais servie, l'instantané est relevé juste avant la première requête de données de la route ; une requête rejetée par la validation n'atteint toujours pas la base.
+- **Mémoire bornée** : une entrée par adresse (la plus récente), 64 Mo au total, 8 Mo par réponse, éviction LRU. Les erreurs et les flux (médias) ne sont jamais mis en cache.
+- **Navigateur** : les relais transmettent `If-None-Match`, renvoient `304` et `ETag` faible avec `Cache-Control: private, no-cache` ; sans ETag, la réponse reste `no-store`.
+
+Mesures par le relais (réponses brotli) : `district-map` 0,7 s → 0,08 s en relecture et 0,03 s en revalidation `304` sans corps ; `market-map` 0,8 s → 0,05 s ; index et tuiles de parcelles 0,02 s en `304`. Limite actuelle : n'importe quelle écriture renouvelle la version. Les collectes planifiées chaque minute (file des fonds de carte, zones de marche) la font donc changer environ une fois par minute en local ; une version par famille de tables (`evidence.row_revision.table_name`) permettrait de garder le cache des lectures non concernées.
 
 ## Ajouter une fonctionnalité sans dégrader la structure
 
