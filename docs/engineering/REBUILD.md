@@ -110,6 +110,7 @@ automatique.
 | `exact` | Le nombre de lignes doit être égal ; les différences et étapes échouées restent visibles. L'égalité des comptes ne prouve pas l'égalité des contenus. |
 | `new_audit` | Sources, captures, exécutions, jonctions, journaux, audits de mutation et quarantaines sont recréés par les importateurs actuels ; leurs comptes sont affichés séparément. Ils ne remplacent pas les traces originales conservées par A03. |
 | `backup` | État non rétabli par le rejeu des captures : conserver/restaurer A03 ou relancer son pipeline dédié selon le tableau suivant. |
+| `identity` | Parcelles et zones administratives : les identités **actives** doivent être identiques (nombre et empreinte des couples espace de noms/identifiant source). Les lignes remplacées absentes du rejeu doivent correspondre exactement aux réparations revues de doublons (alias A03 avec `superseded_*`) ; l'importateur actuel résout ces enregistrements à l'import et ne recrée pas le doublon. Un manifeste plus ancien, sans ces statistiques, garde la comparaison `exact`. |
 
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
@@ -157,3 +158,25 @@ présentation et des références indisponibles, dernier run
 onze tables en écart**. Les 18 présentations, six médias associés et 230 références
 sont maintenant retrouvés exactement, en plus des familles déjà citées. A11/A12
 restent nécessaires pour démontrer la reconstruction complète.
+
+## Contrôle réel après A11 — 23 octobre 2026
+
+Run Prefect `67566bed-e70d-4ff8-a7c8-dc0e53921958`, instantané à
+`2026-10-23T18:38:44.041852+00:00`, code A11 déployé dans l'ingestion : 1 281 étapes,
+**aucune étape refusée** ; les cinq acquisitions Onwani/OSM sont rejouées avec leur
+protocole historique ([A14](../tasks/A14.md)).
+
+- `parcel_observation` est maintenant exact (25 504). L'écart restant de 2 431
+  parcelles (10 808 contre 8 377) correspond aux 2 431 doublons Reem créés par la
+  version v2 d'Onwani avant la résolution d'identité à l'import, puis remplacés par
+  une réparation revue (2 431 alias actifs avec `superseded_parcel`). Les identités
+  actives de la base en service sont 8 377, comme le rejeu. Même cas pour 8 zones
+  administratives (77 contre 69, 69 actives). La politique `identity` ci-dessus
+  rend ce contrôle sémantique ; elle s'appliquera au prochain contrôle après fusion.
+- `d7b5f4bc` diverge comme prévu : mis en quarantaine à l'origine (30 observations,
+  1 093 éléments « géométrie ou métadonnées OSM invalides »), il est accepté au rejeu
+  avec les mêmes octets que `29a909a9`. `map_observation` passe à 9 820 contre 8 400
+  attendues (6 883 au contrôle précédent) et `place` à 2 005 contre 2 012 : à
+  qualifier dans A14 (hypothèse non vérifiée : mappage actuel différent de celui
+  d'origine ; les comptes par étape ne sont pas encore dans le rapport).
+- Écarts inchangés des fiches/catalogues : voir [A12](../tasks/A12.md).
