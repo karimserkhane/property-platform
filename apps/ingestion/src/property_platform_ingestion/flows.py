@@ -421,6 +421,20 @@ def restore_check(actor: str = "scheduled"):
     return result
 
 
+@flow(name="property-platform-rebuild-check", retries=0)
+def rebuild_check(actor: str = "manual-check"):
+    """Replay archived captures in a fresh database; fail on incomplete reconstruction."""
+    from . import rebuilds
+
+    if flow_run.id is None:
+        raise ValueError("An active Prefect run is required")
+    result = rebuilds.rebuild_check(actor=actor, run_id=str(flow_run.id))
+    get_run_logger().info("Source rebuild check: %s", result)
+    if not result["ok"]:
+        raise IngestionFailure({"status": "failed", "error": "IncompleteSourceRebuild", **result})
+    return result
+
+
 from .project_bootstrap import rebuild_projects  # noqa: E402
 
 FLOWS = {
@@ -448,5 +462,6 @@ FLOWS = {
         walking_areas,
         backup,
         restore_check,
+        rebuild_check,
     )
 }
