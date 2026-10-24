@@ -20,6 +20,7 @@ from .models import (
     ProjectMedia,
     ProjectSnapshot,
     ProjectTypology,
+    ProjectVerification,
     Source,
 )
 
@@ -162,6 +163,7 @@ def import_project_details(receipt_rows, *, territory, actor):
         validate_project_receipts,
     )
     from .project_relations import apply_project_relations
+    from .project_verification_links import apply_project_verification_links
 
     if not isinstance(actor, str) or not 1 <= len(actor.strip()) <= 160:
         raise ValueError("Valid project import actor required")
@@ -197,6 +199,7 @@ def import_project_details(receipt_rows, *, territory, actor):
         "typologies": 0,
         "amenities": 0,
         "media_references": 0,
+        "verifications": 0,
         "run_ids": [],
     }
     with transaction.atomic():
@@ -277,6 +280,9 @@ def import_project_details(receipt_rows, *, territory, actor):
                 total_units_pointer=parsed.get("total_units_pointer", ""),
                 **handover,
             )
+            if verification := parsed.get("verification"):
+                ProjectVerification.objects.create(snapshot=snapshot, **verification)
+                summary["verifications"] += 1
             for row in parsed.get("typologies", []):
                 ProjectTypology.objects.create(
                     snapshot=snapshot,
@@ -342,6 +348,9 @@ def import_project_details(receipt_rows, *, territory, actor):
         # Components link to their programme once both identities and the cited
         # source capture exist, so archive rebuilds restore the hierarchy too.
         summary["relations"] = apply_project_relations(territory=territory, actor=actor)
+        summary["verification_links"] = apply_project_verification_links(
+            territory=territory, actor=actor
+        )
     summary["run_ids"] = sorted(set(summary["run_ids"]))
     return summary
 
