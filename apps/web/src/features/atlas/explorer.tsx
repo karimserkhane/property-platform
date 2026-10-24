@@ -23,6 +23,7 @@ import { MapViewControl } from "./map-view-control";
 import { AtlasPagination } from "./pagination";
 import type { MapOptions, MapView } from "./parcel-map";
 import { readParcelIndex } from "./parcel-pages";
+import { type Bounds, ParcelCellCache, viewportCells } from "./parcel-viewport";
 import {
   csv,
   download,
@@ -72,7 +73,15 @@ export function Explorer({
   const contextLabels = useTranslations("Context");
   const bbox = (territory.collection_bounds ?? territory.bounds).join(",");
   const territoryQuery = encodeURIComponent(territory.id);
+  const collectionBounds = (territory.collection_bounds ??
+    territory.bounds) as unknown as Bounds;
   const [collection, setCollection] = useState<ParcelIndex | null>(null);
+  const [viewport, setViewport] = useState<Bounds | null>(null);
+  const [zoomedOut, setZoomedOut] = useState(false);
+  const parcelCells = useRef<ParcelCellCache | null>(null);
+  parcelCells.current ??= new ParcelCellCache((cell, signal) =>
+    readParcelIndex(cell, territory.id, signal),
+  );
   const [context, setContext] = useState<MapContext | null>(null);
   const [contextError, setContextError] = useState(false);
   const [references, setReferences] = useState<ResearchReference[]>([]);
@@ -191,19 +200,6 @@ export function Explorer({
       .catch(() => {
         if (!controller.signal.aborted) setReferenceError(true);
       });
-    readParcelIndex(bbox, territory.id, controller.signal, (rows) => {
-      if (!controller.signal.aborted) setCollection(rows);
-    })
-      .then((data) => {
-        setCollection(data);
-        setState("ready");
-      })
-      .catch(() => {
-        if (controller.signal.aborted) return;
-        // A failed later page rejects the whole read, as before page-by-page drawing.
-        setCollection(null);
-        setState("error");
-      });
     fetch(`/api/atlas/map-context?bbox=${bbox}&territory=${territoryQuery}`, {
       signal: controller.signal,
     })
@@ -216,6 +212,40 @@ export function Explorer({
       });
     return () => controller.abort();
   }, [attempt, bbox, territoryQuery, territory.id]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: attempt retries the same visible cells; the keyed explorer keeps one territory.
+  useEffect(() => {
+    if (!viewport) return;
+    const cells = viewportCells(viewport, collectionBounds);
+    setZoomedOut(cells.kind === "too-large");
+    if (cells.kind === "too-large") {
+      // Keep the rows already drawn; a wider read would exceed the API budget.
+      setState((current) => (current === "loading" ? "ready" : current));
+      return;
+    }
+    if (cells.kind === "outside") {
+      setCollection(EMPTY_PARCELS);
+      setState("ready");
+      return;
+    }
+    const controller = new AbortController();
+    setState("loading");
+    parcelCells.current
+      ?.rows(cells.cells, controller.signal, (rows) => {
+        if (!controller.signal.aborted) setCollection(rows);
+      })
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setCollection(data);
+        setState("ready");
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        // A failed cell rejects the visible read; cached cells stay for the retry.
+        setCollection(null);
+        setState("error");
+      });
+    return () => controller.abort();
+  }, [attempt, viewport]);
 
   async function select(id: string) {
     selectionOrigin.current =
@@ -552,6 +582,7 @@ export function Explorer({
                 onFeature={choose}
                 onContext={closeDetails}
                 onError={() => setMapFailed(true)}
+                onViewport={setViewport}
                 label={labels.map}
                 options={options}
                 view={view}
@@ -627,6 +658,7 @@ export function Explorer({
             </p>
           )}
           {(collection?.truncated ||
+            zoomedOut ||
             Object.values(context ?? {}).some((layer) => layer.truncated)) && (
             <p role="status" className={styles.dataNotice}>
               {labels.truncated}
