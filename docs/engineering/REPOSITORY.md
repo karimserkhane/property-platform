@@ -8,6 +8,16 @@ evidence → catalog, sans point d'entrée HTTP, nouveau modèle ni changement d
 La base de référence est lue sur un instantané en lecture seule ; aucune restauration
 SQL ne se substitue au rejeu. Voir [REBUILD.md](REBUILD.md).
 
+**Vérification de projet — B02, 24 octobre 2026.** `evidence/project_adrec.py`
+(`adrec_verification`, extraction pure) lit dans chaque fiche du registre ADREC déjà
+collectée les faits de vérification tels que publiés ; `project_import.py` les écrit
+dans `evidence.project_verification`, une ligne par lecture (`ProjectSnapshot`),
+journalisée (migration additive `0033`). L'historique est la suite des lectures ; la
+date d'observation est celle de la capture, la date de mesure celle de l'inspection
+donnée par le registre. Aucun collecteur DARI ([décision B01](../product/QUALIFICATION_REGISTRE_ADREC_20261024.md)).
+Direction : import evidence → catalog, sans point d'entrée HTTP ni changement de
+contrat ; l'affichage relève de B05.
+
 **État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild_published.py`
 possède la forme canonique de l'état publié (fiches projet, liens d'identité actifs),
 sa comparaison et l'explication de l'historique des lectures ; `rebuild_archive.py`
