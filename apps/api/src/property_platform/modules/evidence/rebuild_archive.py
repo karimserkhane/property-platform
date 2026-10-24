@@ -168,24 +168,29 @@ def _source_scopes():
 MAP_TARGETS = ("street", "building", "place", "administrative_area")
 
 
+def _map_target():
+    from django.db.models import Case, CharField, Value, When
+
+    return Case(
+        *(When(**{f"{name}__isnull": False}, then=Value(name)) for name in MAP_TARGETS),
+        output_field=CharField(),
+    )
+
+
 def run_rows(run_ids):
     """Observations written by the given runs, by target and action, plus quarantines.
 
     Diagnostic only: it locates which acquisition explains a table difference (for
     example a historical quarantine accepted at replay); the table policies decide `ok`.
     """
-    from django.db.models import Case, CharField, Count, Value, When
+    from django.db.models import Count
 
     from .models import MapObservation, ParcelObservation, QuarantinedObservation
 
     result = {}
-    target = Case(
-        *(When(**{f"{name}__isnull": False}, then=Value(name)) for name in MAP_TARGETS),
-        output_field=CharField(),
-    )
     for row in (
         MapObservation.objects.filter(capture__run_id__in=run_ids)
-        .annotate(target=target)
+        .annotate(target=_map_target())
         .values("target", "action")
         .annotate(total=Count("pk"))
         .order_by()
@@ -198,6 +203,36 @@ def run_rows(run_ids):
         total = model.objects.filter(capture__run_id__in=run_ids).count()
         if total:
             result[name] = total
+    return result
+
+
+def legacy_rows(rows, run_ids, selected):
+    """`rows` without the replayed observations a legacy OSM mapping could not produce.
+
+    Diagnostic for a recorded mapping change: the replay keeps the current mapping, and
+    only the observations it adds under the legacy selection rule are set apart.
+    """
+    from .models import MapObservation, QuarantinedObservation
+
+    result = dict(rows)
+
+    def drop(key):
+        result[key] -= 1
+        if not result[key]:
+            del result[key]
+
+    for row in (
+        MapObservation.objects.filter(capture__run_id__in=run_ids)
+        .annotate(target=_map_target())
+        .values("target", "action", "raw_attributes")
+    ):
+        if not selected(row["target"], (row["raw_attributes"] or {}).get("tags") or {}):
+            drop(f"map_observation:{row['target']}:{row['action']}")
+    for attributes in QuarantinedObservation.objects.filter(
+        capture__run_id__in=run_ids
+    ).values_list("raw_attributes", flat=True):
+        if not selected(None, (attributes or {}).get("tags") or {}):
+            drop("quarantined_observation")
     return result
 
 
@@ -673,7 +708,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
     reviewed_deltas = {}
     for index, step in enumerate(manifest["steps"]):
         operation, scope = step["operation"], step["scope"]
-        rows = None
+        rows = compared = None
         try:
             execution_key = hashlib.sha256(f"rebuild:{run_id}:{index}".encode()).hexdigest()
             with audit_context(actor=actor, execution_key=execution_key):
@@ -714,6 +749,11 @@ def replay_archive(root: Path, actor: str, run_id: str):
                     )
                     status = result["status"]
                     rows = run_rows(result.get("run_ids", []))
+                    selected = replay_protocols.legacy_osm_selection(
+                        operation, scope, step.get("original_version", "")
+                    )
+                    if selected and "original_rows" in step:
+                        compared = legacy_rows(rows, result.get("run_ids", []), selected)
                     if operation == "references" and step.get("original_status") == "failed":
                         from .models import ResearchReference
 
@@ -734,7 +774,9 @@ def replay_archive(root: Path, actor: str, run_id: str):
             ):
                 # A reproduction keeps the original outcome; a new quarantine or a newly
                 # accepted acquisition is a divergence, even when table counts coincide.
-                review = reviewed_divergence(step, status, rows, steps_by_run)
+                review = reviewed_divergence(
+                    step, status, rows if compared is None else compared, steps_by_run
+                )
                 if review:
                     outcome["reviewed_divergence"] = {
                         "original_status": original,
@@ -747,6 +789,22 @@ def replay_archive(root: Path, actor: str, run_id: str):
                     outcome["diverged_from"] = original
             if "original_rows" in step and rows is not None and rows != step["original_rows"]:
                 outcome["rows"] = {"expected": step["original_rows"], "actual": rows}
+                if compared is not None:
+                    # Recorded mapping change: only the observations the legacy rule
+                    # excludes are set apart, and the rest must equal the original run.
+                    matches = _target_totals(compared) == _target_totals(step["original_rows"])
+                    outcome["legacy_selection"] = {
+                        "version": step["original_version"],
+                        "excluded": {
+                            key: total - compared.get(key, 0)
+                            for key, total in rows.items()
+                            if total != compared.get(key, 0)
+                        },
+                        "matches": matches,
+                    }
+                    if matches and not ({"reviewed_divergence", "diverged_from"} & set(outcome)):
+                        for table, delta in table_deltas(rows, step["original_rows"]).items():
+                            reviewed_deltas[table] = reviewed_deltas.get(table, 0) + delta
             outcomes.append(outcome)
         except Exception as exc:
             logger.exception("Rebuild step %s %s failed", operation, scope)
@@ -797,6 +855,9 @@ def replay_archive(root: Path, actor: str, run_id: str):
         "failed_steps": len(failures),
         "diverged_steps": len(divergences),
         "reviewed_divergences": sum("reviewed_divergence" in r for r in outcomes),
+        "legacy_selections": sum(
+            r.get("legacy_selection", {}).get("matches", False) for r in outcomes
+        ),
         # Diagnostic: steps whose observations differ from their original run.
         "row_differences": len(row_differences),
         "mismatches": mismatches,
@@ -814,6 +875,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
             "failed_steps",
             "diverged_steps",
             "reviewed_divergences",
+            "legacy_selections",
             "row_differences",
             "mismatches",
             "source_snapshot_at",

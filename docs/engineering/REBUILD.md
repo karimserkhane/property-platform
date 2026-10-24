@@ -137,6 +137,21 @@ quarantaine ou un rejeu qui ne concorde pas échoue toujours.
 | --- | --- | --- | --- |
 | `d7b5f4bc-3390-4e62-85ef-90e765e842c0` | `quarantined` → `succeeded` | `29a909a9-b094-40e2-aeca-f25b86a950be` | Interprétation `reem-map-v1` non commitée (antérieure à `087241d`), remplacée une minute plus tard sur la même capture `06a6dedd…` |
 
+**Anciennes sélections OSM.** Le rejeu garde le mappage actuel. Avant `06af8b2`
+(`district-map-v5`, `osm-api-bootstrap-v2`), un lieu OSM exigeait un nom (`name:en` ou
+`name`) et une étiquette `amenity`, `leisure` ou `building` ; le décodeur
+`osm-api-bootstrap-v1` écartait aussi, avant le mappage, tout élément autre qu'un
+bâtiment ou une voie, un équipement ou un loisir portant `name`. Le registre
+`LEGACY_OSM_SELECTIONS` (`replay_protocols.py`, copié de `map_import.py` à `087241d`
+et `001b65c`, et de `osm_api_protocol.py` à `001b65c`) dit, pour ces versions, quelles
+observations rejouées l'ancien mappage ne pouvait pas produire, d'après les étiquettes
+enregistrées dans chaque observation ou quarantaine. L'étape porte
+`legacy_selection` (`version`, `excluded`, `matches`) ; si le reste concorde, par cible,
+avec l'exécution d'origine, ces lignes sont reportées sur la table (`reviewed_delta`) et
+`legacy_selections` les compte. Une observation d'origine absente au rejeu ne
+concorde jamais. Ce registre explique la différence, il ne fait pas rejouer l'ancien
+mappage.
+
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
 les captures sans adaptateur de rejeu, ainsi que les captures d'une fiche projet non
@@ -219,3 +234,38 @@ protocole historique ([A14](../tasks/A14.md)).
   inscrite au registre des divergences revues ci-dessus ; le prochain contrôle réel
   ([A15](../tasks/A15.md)) vérifiera qu'elle concorde avec `29a909a9`.
 - Écarts inchangés des fiches/catalogues : voir [A12](../tasks/A12.md).
+
+## Contrôle réel après A14 — 24 octobre 2026
+
+Run Prefect `64e6fb84-a745-4c52-af9a-5edb74e9308b`, instantané à
+`2026-10-24T05:17:30.208058+00:00`, code A14 déployé dans l'ingestion : 1 605 étapes,
+**aucune étape refusée**, 66 étapes avec des comptes d'observations différents.
+Parcelles et zones administratives passent avec la politique `identity`.
+Tables en écart : `map_observation` (9 949 contre 8 529), `place` (2 005 contre
+2 012) et les tables des fiches projet (A12).
+
+- `d7b5f4bc` **ne concorde pas** avec `29a909a9` et reste `diverged_from` : au rejeu,
+  `29a909a9`, `ece1a59f` et `d7b5f4bc` donnent tous 190 lieux contre 167 à l'origine.
+  Avec les mêmes octets (`06a6dedd…`), le mappage actuel ajoute 23 équipements **sans
+  nom** (10 abris, 7 parkings, 5 toilettes, 1 station de lavage) que `reem-map-v1/v2`
+  écartait (vérifié en lecture seule en appliquant les deux règles à la capture).
+- `osm_bootstrap` Saadiyat `c9ef804e` (`osm-api-bootstrap-v1`) : 734 lieux au rejeu
+  contre 202. Les 532 de plus sont exactement ceux que `716f40c2`
+  (`osm-api-bootstrap-v2`) a créés à l'origine (492 sans nom) ; la règle v1 retrouve
+  les 202 lieux d'origine, identifiant par identifiant, et les 26 quarantaines (les
+  deux de plus au rejeu sont des relations que le décodeur v1 écartait). Les autres
+  étapes OSM ne diffèrent que par leurs actions (`created`/`unchanged`), pas par leurs
+  totaux.
+- Ces deux cas sont désormais vérifiés par la règle `LEGACY_OSM_SELECTIONS`
+  ci-dessus (A15) ; le prochain contrôle réel dira si `d7b5f4bc`, `29a909a9`,
+  `ece1a59f` et `c9ef804e` concordent.
+- Reste de `map_observation`, hors géographie : 28 références `reem-references-v1`
+  qui n'avaient pas créé le repère de carte du projet, retrouvé ensuite par
+  `reem-references-v2` (au rejeu, v1 le crée et v2 le voit inchangé) ; le repère
+  « Marlin 1 » (`d8fec783…`) créé puis retiré à l'origine et que le code actuel ne crée
+  plus ; une référence Saadiyat (`601d9da4…`) qui en crée un au rejeu ; et 419
+  observations de lieux de projet écrites par les fiches projet (`project_details`,
+  sans comptes par étape), 285 au rejeu (déduit par différence des totaux).
+- `place` : la base en service compte 7 lieux de projet et un repère de référence
+  inactifs ; leur rapprochement ligne à ligne avec le rejeu reste à faire (comptes
+  par espace de noms à ajouter au rapport).

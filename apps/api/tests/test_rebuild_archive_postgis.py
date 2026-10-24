@@ -475,8 +475,8 @@ def test_observation_counts_per_step_locate_a_difference_without_deciding_ok(tmp
     assert report["steps"][0]["rows"] == {"expected": expected, "actual": rows}
 
 
-def _observed_run():
-    """One run whose capture holds one place observation."""
+def _observed_run(tags=(None,)):
+    """One run whose capture holds one place observation per OSM tag set."""
     from django.contrib.gis.geos import Point
 
     from property_platform.modules.catalog.models import Place
@@ -495,20 +495,23 @@ def _observed_run():
         byte_length=2,
         content_sha256=hashlib.sha256(b"{}").hexdigest(),
     )
-    place = Place.objects.create(
-        source_namespace="test:place", source_record_id="1", geometry=Point(54.4, 24.5)
-    )
-    MapObservation.objects.create(
-        place=place,
-        capture=capture,
-        source_record_id="1",
-        source_url=source.url,
-        raw_attributes={},
-        record_sha256="b" * 64,
-        mapping_version="test",
-        action="created",
-        target_revision=1,
-    )
+    for index, tag_set in enumerate(tags, start=1):
+        place = Place.objects.create(
+            source_namespace="test:place",
+            source_record_id=str(index),
+            geometry=Point(54.4, 24.5),
+        )
+        MapObservation.objects.create(
+            place=place,
+            capture=capture,
+            source_record_id=str(index),
+            source_url=source.url,
+            raw_attributes={} if tag_set is None else {"tags": tag_set},
+            record_sha256="b" * 64,
+            mapping_version="test",
+            action="created",
+            target_revision=1,
+        )
     return run
 
 
@@ -572,6 +575,96 @@ def test_only_a_reviewed_divergence_matching_its_later_run_is_counted_apart(
         assert result["diverged_steps"] == 1 and result["reviewed_divergences"] == 0
         assert report["steps"][0]["diverged_from"] == "quarantined"
         assert "reviewed_delta" not in table and not table["matches"]
+
+
+@pytest.mark.parametrize(
+    ("variant", "ok"),
+    [("legacy", True), ("missing_original", False), ("current_version", False)],
+)
+def test_only_places_the_legacy_osm_mapping_excluded_are_counted_apart(
+    tmp_path, monkeypatch, variant, ok
+):
+    # A named amenity existed under the legacy mapping; an unnamed shelter did not.
+    run = _observed_run(({"amenity": "cafe", "name": "Cafe"}, {"amenity": "shelter"}))
+    monkeypatch.setattr(
+        archive.orchestration,
+        "execute_import",
+        lambda **kwargs: {"status": "succeeded", "run_ids": [str(run.pk)]},
+    )
+    expected = archive.counts()
+    expected["evidence.map_observation"] -= 1
+    original = {"map_observation:place:created": 1}
+    if variant == "missing_original":
+        original["map_observation:street:created"] = 1
+    archive.write_json(
+        tmp_path / "manifest.json",
+        {
+            "version": 1,
+            "snapshot_at": "2026-10-23T00:00:00+00:00",
+            "expected": expected,
+            "steps": [
+                {
+                    "operation": "map",
+                    "scope": "al-reem-island:osm",
+                    "run": "original",
+                    "original_version": "district-map-v5"
+                    if variant == "current_version"
+                    else "reem-map-v2",
+                    "original_status": "succeeded",
+                    "original_rows": original,
+                    "captures": [],
+                }
+            ],
+            "scenes": [],
+            "tiles": [],
+            "omitted": [],
+        },
+    )
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    report = json.loads((tmp_path / "report.json").read_text())
+    table = next(r for r in report["tables"] if r["table"] == "evidence.map_observation")
+    step = report["steps"][0]
+    assert result["ok"] is ok and result["diverged_steps"] == 0
+    if variant == "legacy":
+        assert result["legacy_selections"] == 1
+        assert step["legacy_selection"] == {
+            "version": "reem-map-v2",
+            "excluded": {"map_observation:place:created": 1},
+            "matches": True,
+        }
+        assert table["reviewed_delta"] == 1 and table["matches"]
+    elif variant == "missing_original":
+        # A street the original run observed is missing: nothing is excused.
+        assert result["legacy_selections"] == 0 and not step["legacy_selection"]["matches"]
+        assert "reviewed_delta" not in table and not table["matches"]
+    else:
+        assert "legacy_selection" not in step and not table["matches"]
+
+
+def test_legacy_osm_selection_rules_are_copied_from_their_commits():
+    from property_platform.modules.evidence import replay_protocols as legacy
+
+    named = legacy.legacy_osm_selection("map", "al-reem-island:osm", "reem-map-v1")
+    bootstrap = legacy.legacy_osm_selection(
+        "osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v1"
+    )
+    assert legacy.legacy_osm_selection("map", "al-reem-island:community", "reem-map-v1") is None
+    assert (
+        legacy.legacy_osm_selection("osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v2")
+        is None
+    )
+    assert named("place", {"amenity": "cafe", "name:en": "Cafe"})
+    assert named("place", {"building": "yes", "name": "Tower"})
+    assert not named("place", {"amenity": "parking"})
+    assert not named("place", {"shop": "beauty", "name": "Salon"})
+    assert not named("place", {"amenity": "cafe", "name:ar": "مقهى"})
+    assert named("building", {"building": "yes"}) and named(None, {"leisure": "garden"})
+    # The v1 OSM API decoder read `name` only and dropped other elements before mapping.
+    assert not bootstrap("place", {"amenity": "cafe", "name:en": "Aptitude"})
+    assert bootstrap("place", {"amenity": "cafe", "name": "Aptitude"})
+    assert bootstrap("building", {"building": "yes"})
+    assert not bootstrap(None, {"leisure": "garden", "type": "multipolygon"})
+    assert not bootstrap(None, {"place": "island", "tourism": "yes", "name": "Al Reem Island"})
 
 
 def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path):
