@@ -67,6 +67,23 @@ Mesures (vue « toute la zone » d'Abu Dhabi, réponses compressées) : une lign
 - En dessous du zoom 12, une tuile omet les parcelles de moins d'un demi-pixel à l'écran (seuil d'aire en Web Mercator selon le zoom) ; à partir du zoom 12, toutes les parcelles sont dessinées. Tuiles mesurées au même endroit : zoom 8 191 → 12 Ko, zoom 9 340 → 31 Ko, zoom 10 356 → 76 Ko, zoom 11 361 → 240 Ko.
 - L'explorateur dessine l'index page par page (3 000 lignes) au lieu d'attendre la dernière page ; un échec d'une page suivante rejette toujours l'ensemble de la lecture.
 
+**Index par zone visible — 25 octobre 2026 (tâche A06).** L'explorateur ne lit plus l'index de tout le territoire au chargement :
+
+- `features/atlas/parcel-viewport.ts` découpe la vue en cellules fixes de 0,05° (au plus 16, soit la plus grande `bbox` acceptée par l'API), limitées à l'emprise de collecte, et garde les 48 dernières cellules lues (LRU, lectures en échec non conservées). Revenir sur une zone déjà vue ne coûte aucune requête. Vue plus large que 16 cellules : les lignes déjà dessinées restent et l'avis « limite de prévisualisation atteinte » s'affiche.
+- Recherche : `GET /api/v1/preview/parcel-search?q=&territory=&limit=` (relais `/api/atlas/parcel-search`) renvoie les lignes d'index dont le code commence par `q` dans tout le territoire ; la recherche de la carte complète les résultats visibles par ces lignes, et choisir une parcelle hors vue recadre la carte sur elle.
+- Export CSV : relit à la demande l'index de tout le territoire (pages de 3 000 lignes, filtre d'usage appliqué), comme avant ; la lecture n'a lieu qu'au clic.
+
+Mesures (API locale, Abu Dhabi, JSON décompressé, même méthode que la mesure « avant » du 24 octobre) :
+
+| Lecture | Avant | Après |
+| --- | --- | --- |
+| Chargement, vue type zoom 14 au centre | 3 requêtes, 8 377 lignes, 5,46 Mo, 1,8 à 2,1 s | 2 cellules, 3 requêtes, 5 193 lignes, 3,39 Mo, 0,1 à 1,2 s |
+| Déplacement de 0,03° puis retour | aucune (tout est déjà lu) | 0 requête (cellules en cache) |
+| Vue zoom 15, cache vide | 3 requêtes, 8 377 lignes | 1 cellule, 2 requêtes, 3 843 lignes, 2,51 Mo, 0,1 s |
+| Export CSV | sans lecture (index déjà chargé) | 3 requêtes, 8 377 lignes, 5,46 Mo, environ 3 s au clic |
+
+Le gain est modeste sur la seule zone collectée aujourd'hui (0,1° × 0,14°) : une cellule couvre plus que la vue au zoom 15. Il devient décisif avec F01 (émirat entier), où le chargement reste borné par les cellules visibles alors que la lecture complète croîtrait avec le territoire. Si la recherche ralentit à cette échelle, ajouter un index sur `code` ; si les cellules pèsent trop au zoom 15, les adapter au zoom.
+
 ## Cache des lectures et requêtes conditionnelles — 23 octobre 2026
 
 `api/read_cache.py` met en cache les lectures `/preview` sans effet de bord (parcelles, index, tuiles, contexte, quartiers, marché, projets, références, imagerie) et répond aux requêtes conditionnelles.

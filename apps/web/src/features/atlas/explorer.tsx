@@ -78,6 +78,9 @@ export function Explorer({
   const [collection, setCollection] = useState<ParcelIndex | null>(null);
   const [viewport, setViewport] = useState<Bounds | null>(null);
   const [zoomedOut, setZoomedOut] = useState(false);
+  const [exportState, setExportState] = useState<"idle" | "reading" | "error">(
+    "idle",
+  );
   const parcelCells = useRef<ParcelCellCache | null>(null);
   parcelCells.current ??= new ParcelCellCache((cell, signal) =>
     readParcelIndex(cell, territory.id, signal),
@@ -416,16 +419,32 @@ export function Explorer({
     window.addEventListener("keydown", dismiss);
     return () => window.removeEventListener("keydown", dismiss);
   }, [showSelection, tab, closeDetails, changeTab]);
-  function exportCSV() {
+  // The export reads the whole territory on demand, not only the visible cells.
+  async function exportCSV() {
+    setExportState("reading");
+    let index: ParcelIndex;
+    try {
+      index = await readParcelIndex(
+        bbox,
+        territory.id,
+        new AbortController().signal,
+      );
+    } catch {
+      setExportState("error");
+      return;
+    }
+    setExportState("idle");
     const rows = [
       [m.parcels, m.areas, m.landUse, m.construction, labels.source],
-      ...(filtered?.features ?? []).map((f) => [
-        f.properties.code,
-        f.properties.community,
-        f.properties.land_use,
-        f.properties.construction_status,
-        f.properties.source_url ?? "",
-      ]),
+      ...index.features
+        .filter((f) => !use || f.properties.category === use)
+        .map((f) => [
+          f.properties.code,
+          f.properties.community,
+          f.properties.land_use,
+          f.properties.construction_status,
+          f.properties.source_url ?? "",
+        ]),
     ];
     download(
       new Blob(["\uFEFF", csv(rows)], { type: "text/csv;charset=utf-8" }),
@@ -517,10 +536,17 @@ export function Explorer({
                 <button
                   type="button"
                   aria-label={m.exportCSV}
+                  aria-busy={exportState === "reading"}
+                  disabled={exportState === "reading"}
                   onClick={exportCSV}
                 >
                   {m.exportCSV}
                 </button>
+                {exportState === "error" && (
+                  <p role="status" className={styles.toolNote}>
+                    {labels.unavailable}
+                  </p>
+                )}
                 <button
                   type="button"
                   aria-label={m.exportPNG}
