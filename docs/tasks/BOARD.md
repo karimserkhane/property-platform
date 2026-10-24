@@ -20,7 +20,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A12](A12.md) | A | État publié reconstruit et historique des interprétations | 1 | A04 | non (décidée le 24/10) | done | claude-interactive |
 | [A13](A13.md) | A | Parcours navigateur en CI | 2 | A05 | non | todo | unassigned |
 | [A14](A14.md) | A | Contrôle réel du rejeu géographique : identités et divergence revue | 1 | A11 | non | done | claude |
-| [A15](A15.md) | A | Écarts restants du rejeu géographique et anciennes identités OSM | 1 | A14 | non | in-progress | claude |
+| [A15](A15.md) | A | Écarts restants du rejeu géographique et anciennes identités OSM | 1 | A14 | non | done | claude |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | todo | unassigned |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | todo | unassigned |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | todo | unassigned |

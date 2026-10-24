@@ -194,6 +194,13 @@ comparaison exacte.
 | `SUPERSEDED_INTERPRETATIONS` | `reem-references-v1` → `reem-references-v2` | Non commitée (antérieure à `087241d`) ; toutes ses captures relues 30 minutes plus tard (`stored_capture_reprocess`) |
 | `REVIEWED_REINTERPRETATIONS` | `a4ad9e09-6c40-4497-9522-f5732d35d8d5` (`research:601d9da4…`) | Analyseur `bloomholding.com` ajouté en `4d2c51f` sous la même version `district-references-v3` ; le run du 13 octobre est antérieur et la référence n'a jamais été relue |
 
+**Présentations.** Une présentation de bien est rattachée au rejeu à une identité OSM
+ou d'un autre fournisseur ; un nombre égal ne prouve pas le même rattachement. Le
+manifeste relève, pour chaque présentation, la cible, l'espace de noms, l'identifiant
+et la page (`presentation_bindings`) ; un rattachement absent (`missing`) ou nouveau
+(`extra`) au rejeu fait échouer le contrôle. Les liens des fiches projet vers une
+identité sont déjà comparés par l'[état publié](#état-publié-a12).
+
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
 les captures sans adaptateur de rejeu, ainsi que les captures d'une fiche projet non
@@ -382,6 +389,44 @@ supprimée par le contrôle). A12 est en service (migration `0032` appliquée).
 - `administrative_area` reste exacte par la politique `identity` ; son diagnostic par
   espace de noms liste les 8 doublons Reem remplacés par une réparation revue
   (`superseded_by`, conservés par A03), attendus.
+
+Deuxième passage (`598ce61a…`), avec les comptes par page des fiches projet : les
+−134 se décomposent en 123 relectures d'un reçu **identique** (`unchanged`) et 7
+retraits, que le rejeu ne recrée pas parce qu'il réutilise l'exécution du même reçu
+(il les comptait par erreur deux fois, 143 observations) ; 7 positions « centre de
+vue » créées par `project-map-v1`, version jamais commitée ; et +3 positions que la
+règle actuelle trouve dès la lecture `project-details-v1`, qui n'en écrivait aucune
+(`123900b`), la lecture v2 les voyant ensuite inchangées. Les +28 des références
+viennent de `reem-references-v1`, jamais commitée (premier commit `087241d` en v2) :
+ses 110 captures ont été relues 30 minutes plus tard sous v2. Bilan exact :
+`map_observation` 8 529 + 1 420 = 9 949 et `place` 2 012 − 8 + 1 = 2 005.
+
+## Premier contrôle réel vert — 24 octobre 2026
+
+Run Prefect `f523a2a3-59e1-4fdb-b925-f6d6af582ef2`, instantané à
+`2026-10-24T09:06:05Z`, même mode d'exécution (image temporaire de la branche A15) :
+**`ok: true`**, 1 605 étapes, aucune échouée ni divergente, **aucune table en écart**,
+état publié 0 différence bloquante (historique des lectures en alerte, non bloquant).
+
+| Règle | Étapes ou identités | Effet sur `map_observation` |
+| --- | --- | --- |
+| Divergence revue `d7b5f4bc` | 1 | +949 |
+| `legacy_selection` (OSM) | 3 | +578 |
+| `legacy_selection` (`project-details-v1`) | 3 | +3 |
+| `superseded_interpretation` (`reem-references-v1`) | 29 | +28 |
+| `reviewed_reinterpretation` (`601d9da4…`) | 1 | +1 (et +1 `place`) |
+| `reused_receipt` | 130 | −123 |
+| `withdrawn_attributions` | 8 identités | −16 (et −8 `place`) |
+
+Total reporté : +1 420 observations, −7 lieux. Sur les 209 étapes à comptes différents,
+167 relèvent d'une règle ; les 42 autres ne diffèrent que par leurs actions
+(`created`/`unchanged`, par exemple la lecture v2 qui voit inchangé ce que le rejeu a
+créé dès la v1), pas par leurs totaux. Les identités OSM, actives comme remplacées, sont identiques par espace de
+noms (empreintes égales) ; la base en service n'a retiré aucune identité OSM (16 mises
+à jour seulement), et les 156 liens projet vers une identité restent identiques dans
+l'état publié. Troisième passage (`4483a912…`, instantané `2026-10-24T09:21:40Z`) avec la
+comparaison des présentations : de nouveau **`ok: true`**, mêmes reports, et les 18
+présentations décrivent les mêmes identités (aucun rattachement absent ou nouveau).
 
 ## Contrôle réel de l'état publié (A12) — 24 octobre 2026
 
