@@ -30,6 +30,7 @@ GROUPS = {
         "ProjectMedia",
         "ProjectIdentityLink",
         "ProjectRelation",
+        "ProjectVerification",
     },
     "property-platform-project-discovery": {"ProjectSourceCandidate"},
     "property-platform-media-storage": {

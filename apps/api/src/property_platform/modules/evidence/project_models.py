@@ -457,3 +457,82 @@ class ProjectMediaPublication(models.Model):
                 condition=models.Q(actor__regex=r"\S"), name="project_media_publication_actor"
             )
         ]
+
+
+class ProjectVerification(models.Model):
+    """Authority register facts carried by one project reading (B02).
+
+    History is the sequence of readings: each collection or reinterpretation of the
+    register record adds a snapshot and its verification, older ones stay. Values are
+    the register's own; the observation date is the capture's, the measurement date
+    is the inspection date the register gives, never the collection date.
+    """
+
+    snapshot = models.OneToOneField(
+        ProjectSnapshot, on_delete=models.PROTECT, related_name="verification"
+    )
+    authority = models.CharField(max_length=20)
+    record_id = models.CharField(max_length=40)
+    # "project" describes the catalogue project; "identity_only" a registration that
+    # only identifies it (a component or phase) and must not be promoted to it.
+    fact_scope = models.CharField(max_length=20)
+    registration_number = models.CharField(max_length=40)
+    permit_number = models.CharField(max_length=40, blank=True)
+    register_status = models.CharField(max_length=40, blank=True)
+    off_plan = models.BooleanField(null=True)
+    registered_on = models.DateField(null=True)
+    progress_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    progress_inspected_on = models.DateField(null=True)
+    inspection_company = models.CharField(max_length=120, blank=True)
+    progress_report_valid_until = models.DateField(null=True)
+    progress_report_url = models.URLField(max_length=2000, blank=True)
+    sold_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    sold_original = models.CharField(max_length=40, blank=True)
+    escrow_bank_name = models.CharField(max_length=160, blank=True)
+    escrow_account_number = models.CharField(max_length=40, blank=True)
+    developer_licence = models.CharField(max_length=40, blank=True)
+    evidence_pointer = models.CharField(max_length=500)
+
+    class Meta:
+        db_table = "project_verification"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    authority__in=["adrec"],
+                    fact_scope__in=["project", "identity_only"],
+                    record_id__regex=r"\S",
+                    registration_number__regex=r"\S",
+                    evidence_pointer__regex=r"\S",
+                ),
+                name="project_verification_identity_valid",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(progress_percent__isnull=True)
+                    | models.Q(progress_percent__gte=0, progress_percent__lte=100)
+                )
+                & (
+                    models.Q(sold_percent__isnull=True)
+                    | models.Q(sold_percent__gte=0, sold_percent__lte=100)
+                )
+                & (
+                    models.Q(progress_inspected_on__isnull=True)
+                    | models.Q(progress_percent__isnull=False)
+                ),
+                name="project_verification_values_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    inspection_company="",
+                    progress_report_valid_until__isnull=True,
+                    progress_report_url="",
+                )
+                | models.Q(progress_inspected_on__isnull=False),
+                name="project_verification_report_dated",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(sold_percent__isnull=True)
+                | models.Q(sold_original__regex=r"\S"),
+                name="project_verification_sold_original",
+            ),
+        ]

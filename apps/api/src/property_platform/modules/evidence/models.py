@@ -932,4 +932,5 @@ from .project_models import (  # noqa: E402, F401
     ProjectSnapshot,
     ProjectSourceCandidate,
     ProjectTypology,
+    ProjectVerification,
 )

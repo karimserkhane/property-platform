@@ -20,6 +20,7 @@ from .models import (
     ProjectMedia,
     ProjectSnapshot,
     ProjectTypology,
+    ProjectVerification,
     Source,
 )
 
@@ -197,6 +198,7 @@ def import_project_details(receipt_rows, *, territory, actor):
         "typologies": 0,
         "amenities": 0,
         "media_references": 0,
+        "verifications": 0,
         "run_ids": [],
     }
     with transaction.atomic():
@@ -277,6 +279,9 @@ def import_project_details(receipt_rows, *, territory, actor):
                 total_units_pointer=parsed.get("total_units_pointer", ""),
                 **handover,
             )
+            if verification := parsed.get("verification"):
+                ProjectVerification.objects.create(snapshot=snapshot, **verification)
+                summary["verifications"] += 1
             for row in parsed.get("typologies", []):
                 ProjectTypology.objects.create(
                     snapshot=snapshot,
