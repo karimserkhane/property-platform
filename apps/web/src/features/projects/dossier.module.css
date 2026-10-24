@@ -178,3 +178,12 @@
 .component > p {
   margin-block: 0;
 }
+.developerHistory {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: 13px;
+  color: inherit;
+}

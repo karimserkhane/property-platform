@@ -8,6 +8,14 @@ evidence → catalog, sans point d'entrée HTTP, nouveau modèle ni changement d
 La base de référence est lue sur un instantané en lecture seule ; aucune restauration
 SQL ne se substitue au rejeu. Voir [REBUILD.md](REBUILD.md).
 
+**Historique de livraison — B03, 24 octobre 2026.** `evidence/delivery_history.py`
+possède le calcul en lecture, par promoteur, des dates de livraison annoncées
+successives (par source) et des lectures du registre ADREC, avec les retards prouvés
+comme bornes inférieures ; il réutilise les règles de publication et d'exclusion de
+`project_queries.py`. `api/projects.py` le livre (`/developers/{key}/delivery-history`,
+contrat régénéré). Aucune table, migration ni pipeline. Direction : api → evidence →
+catalog. Voir [l'historique de livraison](DELIVERY_HISTORY.md).
+
 **Vérification de projet — B02, 24 octobre 2026.** `evidence/project_adrec.py`
 (`adrec_verification`, extraction pure) lit dans chaque fiche du registre ADREC déjà
 collectée les faits de vérification tels que publiés ; `project_import.py` les écrit

@@ -189,3 +189,86 @@ def project_detail(request, slug: str):
 
     result = read_project(slug)
     return result if result is not None else Status(404, {"code": "not_found"})
+
+
+class DeliveryOutcomeResponse(Schema):
+    """Whether a register reading proves the announced period was met or missed."""
+
+    status: Literal["met", "late", "undetermined"]
+    late_by_at_least_days: int | None
+    source: ProjectSourceResponse | None
+
+
+class DeliveryAnnouncementResponse(Schema):
+    precision: Literal["year", "quarter", "month", "day"]
+    year: int
+    quarter: int | None
+    month: int | None
+    day: int | None
+    original_text: str
+    window_start: date
+    window_end: date
+    first_observed_at: datetime
+    last_observed_at: datetime
+    readings: int
+    change: Literal["first", "later", "earlier", "refined"]
+    outcome: DeliveryOutcomeResponse
+    source: ProjectSourceResponse
+
+
+class DeliveryRegisterResponse(Schema):
+    status: str
+    completed: bool
+    progress_percent: float | None
+    progress_inspected_on: date | None
+    first_observed_at: datetime
+    last_observed_at: datetime
+    readings: int
+    source: ProjectSourceResponse
+
+
+class DeliveryCompletionResponse(Schema):
+    observed_at: datetime
+    not_completed_until: datetime | None
+    source: ProjectSourceResponse
+
+
+class DeliveryProjectResponse(Schema):
+    slug: str
+    name: str
+    territory: str
+    announcements: list[DeliveryAnnouncementResponse]
+    register_readings: list[DeliveryRegisterResponse]
+    completion: DeliveryCompletionResponse | None
+
+
+class DeliverySummaryResponse(Schema):
+    projects: int
+    with_announcements: int
+    with_register: int
+    completed_observed: int
+    late_observed: int
+    announcement_moved_later: int
+
+
+class DeveloperDeliveryHistoryResponse(Schema):
+    developer: ProjectDeveloperResponse
+    summary: DeliverySummaryResponse
+    projects: list[DeliveryProjectResponse]
+
+
+@router.get(
+    "/developers/{key}/delivery-history",
+    response={200: DeveloperDeliveryHistoryResponse, 403: Error, 404: Error, 503: Error},
+    operation_id="previewDeveloperDeliveryHistory",
+)
+@decorate_view(cached_read)
+def developer_delivery_history(request, key: str):
+    if len(key) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", key):
+        return Status(404, {"code": "not_found"})
+    from property_platform.modules.evidence.delivery_history import (
+        developer_delivery_history as read_history,
+    )
+
+    result = read_history(key)
+    return result if result is not None else Status(404, {"code": "not_found"})

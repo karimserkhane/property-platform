@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { firstProject, projectCards } from "./support";
+import {
+  expectNoHorizontalScroll,
+  firstProject,
+  projectCards,
+} from "./support";
 
 test("directory search narrows the list and opens the matching project", async ({
   page,
@@ -75,4 +79,29 @@ test("a reviewed component links to its programme and back", async ({
   ).toBeVisible();
   const components = page.getByRole("region", { name: "Buildings & phases" });
   await expect(components.getByRole("link", { name: childName })).toBeVisible();
+});
+
+test("a project links to its developer's delivery history with cited points", async ({
+  page,
+}) => {
+  const { card } = await firstProject(page);
+  await card.click();
+  const developer = (
+    await page
+      .getByText("Developer", { exact: true })
+      .locator("xpath=following-sibling::bdi[1]")
+      .innerText()
+  ).trim();
+  await page.getByRole("link", { name: "Developer delivery history" }).click();
+  await expect(page).toHaveURL(/\/en\/developers\/[a-z0-9-]+$/);
+  await expect(
+    page.getByRole("heading", { level: 1, name: developer }),
+  ).toBeVisible();
+  const point = page.locator("[data-delivery-announcement]").first();
+  if (await point.count()) {
+    const proof = point.locator("[data-project-evidence]").first();
+    await proof.locator("summary").click();
+    await expect(proof).toHaveAttribute("open", "");
+  }
+  await expectNoHorizontalScroll(page);
 });
