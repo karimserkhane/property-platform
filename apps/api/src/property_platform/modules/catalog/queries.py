@@ -92,9 +92,11 @@ def parcel_features(
 
 
 def _bounds(envelope):
-    # ST_Envelope returns a point for a degenerate box; both forms give min/max corners.
+    # ST_Envelope returns a point or a line for a degenerate box; all give min/max corners.
     coordinates = envelope["coordinates"]
-    points = coordinates[0] if envelope["type"] == "Polygon" else [coordinates]
+    points = {"Polygon": coordinates and coordinates[0], "LineString": coordinates}.get(
+        envelope["type"], [coordinates]
+    )
     xs, ys = [point[0] for point in points], [point[1] for point in points]
     return (min(xs), min(ys), max(xs), max(ys))
 

@@ -365,6 +365,29 @@ class MapContext(Schema):
     administrative_area: MapCollection
 
 
+class ContextIndexProperties(MapProperties):
+    bounds: tuple[float, float, float, float]
+
+
+class ContextIndexFeature(Schema):
+    type: str
+    id: UUID
+    properties: ContextIndexProperties
+
+
+class ContextIndexCollection(Schema):
+    type: str
+    features: list[ContextIndexFeature]
+    truncated: bool
+
+
+class ContextIndex(Schema):
+    street: ContextIndexCollection
+    building: ContextIndexCollection
+    place: MapCollection
+    administrative_area: MapCollection
+
+
 @router.get(
     "/map-context",
     response={200: MapContext, 403: Error, 409: Error, 422: Error, 503: Error},
@@ -372,6 +395,22 @@ class MapContext(Schema):
 )
 @decorate_view(cached_read)
 def context(request, bbox: str, territory: str | None = None):
+    return _context(bbox, territory)
+
+
+@router.get(
+    "/context-index",
+    response={200: ContextIndex, 403: Error, 409: Error, 422: Error, 503: Error},
+    operation_id="previewContextIndex",
+)
+@decorate_view(cached_read)
+def context_index(request, bbox: str, territory: str | None = None):
+    """`map-context` rows; streets and buildings come with bounds instead of
+    geometry, for maps drawing them from `context-tiles`."""
+    return _context(bbox, territory, tiled=True)
+
+
+def _context(bbox, territory, *, tiled=False):
     bounds = parse_bbox(bbox)
     if bounds is None:
         return Status(422, {"code": "invalid_query"})
@@ -386,7 +425,48 @@ def context(request, bbox: str, territory: str | None = None):
         bounds,
         namespaces=map_source_namespaces(territory) if territory else None,
         parcel_namespaces=profile.parcel_namespaces if profile else None,
+        tiled=tiled,
     )
+
+
+CONTEXT_TILE_ZOOMS = range(11, 17)
+
+
+@router.get(
+    "/context-tiles/{z}/{x}/{y}",
+    response={204: None, 403: Error, 409: Error, 422: Error, 503: Error},
+    operation_id="previewContextTile",
+    openapi_extra={
+        "responses": {
+            "200": {
+                "description": (
+                    "Mapbox Vector Tile; layers `building` and `street`, property `id` only"
+                ),
+                "content": {
+                    "application/vnd.mapbox-vector-tile": {
+                        "schema": {"type": "string", "format": "binary"}
+                    }
+                },
+            }
+        }
+    },
+)
+@decorate_view(cached_read)
+def context_tile(request, z: int, x: int, y: int, territory: str | None = None):
+    from django.http import HttpResponse
+
+    from property_platform.modules.catalog.map_queries import context_tile as read_tile
+    from property_platform.modules.publication.coverage import map_source_namespaces
+
+    if z not in CONTEXT_TILE_ZOOMS or not (0 <= x < 2**z and 0 <= y < 2**z):
+        return Status(422, {"code": "invalid_query"})
+    territory_profile(territory)
+    payload = read_tile(z, x, y, namespaces=map_source_namespaces(territory) if territory else None)
+    response = HttpResponse(payload, content_type="application/vnd.mapbox-vector-tile")
+    if not payload:
+        response.status_code = 204
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 def within_territory(bounds, territory):

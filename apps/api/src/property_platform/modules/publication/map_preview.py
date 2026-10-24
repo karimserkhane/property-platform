@@ -11,23 +11,35 @@ from property_platform.modules.evidence.queries import (
 from .place_display import distinct_places
 from .uses import use_types
 
+# Families a context index lists without geometry; maps draw them from context tiles.
+TILED = ("street", "building")
 
-def map_context(bbox, *, namespaces=None, parcel_namespaces=None):
+
+def map_context(bbox, *, namespaces=None, parcel_namespaces=None, tiled=False):
     # Own a consistent read snapshot in an HTTP read; an existing transaction
     # remains the caller's responsibility and is never reconfigured here.
     if connection.in_atomic_block:
-        return _map_context(bbox, namespaces=namespaces, parcel_namespaces=parcel_namespaces)
+        return _map_context(
+            bbox, namespaces=namespaces, parcel_namespaces=parcel_namespaces, tiled=tiled
+        )
     with transaction.atomic():
         with connection.cursor() as cursor:
             cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-        return _map_context(bbox, namespaces=namespaces, parcel_namespaces=parcel_namespaces)
+        return _map_context(
+            bbox, namespaces=namespaces, parcel_namespaces=parcel_namespaces, tiled=tiled
+        )
 
 
-def _map_context(bbox, *, namespaces=None, parcel_namespaces=None):
+def _map_context(bbox, *, namespaces=None, parcel_namespaces=None, tiled=False):
     result = {}
     for target in ("street", "building", "place", "administrative_area"):
+        geometry = not (tiled and target in TILED)
         rows, truncated = map_rows(
-            target, bbox, namespaces=namespaces, parcel_namespaces=parcel_namespaces
+            target,
+            bbox,
+            namespaces=namespaces,
+            parcel_namespaces=parcel_namespaces,
+            geometry=geometry,
         )
         if target == "place":
             rows = distinct_places(rows)
@@ -45,13 +57,13 @@ def _map_context(bbox, *, namespaces=None, parcel_namespaces=None):
             source = sources.get(identity)
             if source is None:
                 continue
-            geometry = row.pop("geometry")
             row.pop("source_namespace")
+            feature = {"type": "Feature", "id": identity}
+            if geometry:
+                feature["geometry"] = row.pop("geometry")
             result[target]["features"].append(
                 {
-                    "type": "Feature",
-                    "id": identity,
-                    "geometry": geometry,
+                    **feature,
                     "properties": {
                         "id": identity,
                         **row,

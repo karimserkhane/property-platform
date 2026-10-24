@@ -123,6 +123,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/context-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Context Index
+         * @description `map-context` rows; streets and buildings come with bounds instead of
+         *     geometry, for maps drawing them from `context-tiles`.
+         */
+        get: operations["previewContextIndex"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/context-tiles/{z}/{x}/{y}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context Tile */
+        get: operations["previewContextTile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/parcels": {
         parameters: {
             query?: never;
@@ -702,6 +740,82 @@ export interface components {
             /** Media */
             media: components["schemas"]["PropertyPhoto"][];
             project?: components["schemas"]["ProjectReferenceResponse"] | null;
+        };
+        /** ContextIndex */
+        ContextIndex: {
+            street: components["schemas"]["ContextIndexCollection"];
+            building: components["schemas"]["ContextIndexCollection"];
+            place: components["schemas"]["MapCollection"];
+            administrative_area: components["schemas"]["MapCollection"];
+        };
+        /** ContextIndexCollection */
+        ContextIndexCollection: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["ContextIndexFeature"][];
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** ContextIndexFeature */
+        ContextIndexFeature: {
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            properties: components["schemas"]["ContextIndexProperties"];
+        };
+        /** ContextIndexProperties */
+        ContextIndexProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v2
+             */
+            use_classification_version: string;
+            /** Height M */
+            height_m?: number | null;
+            /** Levels */
+            levels?: number | null;
+            /**
+             * Parcel Ids
+             * @default []
+             */
+            parcel_ids: string[];
+            source: components["schemas"]["MapProvenance"];
+            presentation?: components["schemas"]["PropertyPresentationResponse"] | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
         };
         /** Collection */
         Collection: {
@@ -2338,6 +2452,134 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MapContext"];
                 };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewContextIndex: {
+        parameters: {
+            query: {
+                bbox: string;
+                territory?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContextIndex"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewContextTile: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path: {
+                z: number;
+                x: number;
+                y: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Mapbox Vector Tile; layers `building` and `street`, property `id` only */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.mapbox-vector-tile": string;
+                };
+            };
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Forbidden */
             403: {

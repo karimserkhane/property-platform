@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.gis.db.models.functions import AsGeoJSON, Centroid, Distance
+from django.contrib.gis.db.models.functions import AsGeoJSON, Centroid, Distance, Envelope
 from django.contrib.postgres.expressions import ArraySubquery
 from django.db import connection, transaction
 from django.db.models import OuterRef
@@ -15,8 +15,12 @@ MODELS = {
 }
 
 
-def map_rows(target, bbox, limit=3000, *, namespaces=None, parcel_namespaces=None):
+def map_rows(target, bbox, limit=3000, *, namespaces=None, parcel_namespaces=None, geometry=True):
+    """Active features of a family in a bbox. Without geometry, rows carry their bounds
+    instead, for clients drawing streets and buildings from `context_tile`."""
     from django.contrib.gis.geos import Polygon
+
+    from .queries import _bounds
 
     envelope = Polygon.from_bbox(bbox)
     envelope.srid = 4326
@@ -42,14 +46,65 @@ def map_rows(target, bbox, limit=3000, *, namespaces=None, parcel_namespaces=Non
                 parcel_ids=ArraySubquery(parcels.order_by("id").values("id")[:20])
             )
             fields += ["parcel_ids"]
-        rows = list(
-            records.order_by("id")
-            .annotate(shape=AsGeoJSON("geometry", precision=6))
-            .values(*fields)[: limit + 1]
-        )
+        if geometry:
+            records = records.annotate(shape=AsGeoJSON("geometry", precision=6))
+        else:
+            records = records.annotate(shape=AsGeoJSON(Envelope("geometry"), precision=6))
+        rows = list(records.order_by("id").values(*fields)[: limit + 1])
     for row in rows:
-        row["geometry"] = json.loads(row.pop("shape"))
+        shape = json.loads(row.pop("shape"))
+        if geometry:
+            row["geometry"] = shape
+        else:
+            row["bounds"] = _bounds(shape)
     return rows[:limit], len(rows) > limit
+
+
+CONTEXT_TILE_LAYERS = {"building": Building, "street": Street}
+
+
+def context_tile(z, x, y, *, namespaces=None):
+    """Mapbox Vector Tile of active buildings and streets, keyed by identity only.
+
+    Names, heights, uses and provenance stay in `map_rows` and the published
+    context index, as for parcel tiles. Overview zooms omit sub-pixel buildings.
+    """
+    from .queries import DETAIL_ZOOM, MERCATOR_WORLD_M, TILE_BUFFER, TILE_EXTENT
+
+    layers, params = [], []
+    names = list(namespaces) if namespaces is not None else None
+    min_area = (MERCATOR_WORLD_M / (512 * 2**z)) ** 2 / 2
+    for layer, model in CONTEXT_TILE_LAYERS.items():
+        table = connection.ops.quote_name(model._meta.db_table)
+        sized = "AND (%s OR ST_Area(ST_Transform(item.geometry, 3857)) >= %s)"
+        layers.append(
+            f"""
+            (SELECT COALESCE(ST_AsMVT(shapes, '{layer}', {TILE_EXTENT}, 'geom'), '')
+             FROM (
+                SELECT ST_AsMVTGeom(
+                           ST_Transform(item.geometry, 3857), ST_TileEnvelope(%s, %s, %s),
+                           {TILE_EXTENT}, {TILE_BUFFER}, true
+                       ) AS geom,
+                       item.id::text AS id
+                FROM {table} AS item
+                WHERE item.active
+                  AND item.geometry && ST_Transform(
+                      ST_TileEnvelope(%s, %s, %s, margin => {TILE_BUFFER / TILE_EXTENT}), 4326
+                  )
+                  AND (%s::text[] IS NULL OR item.source_namespace = ANY(%s::text[]))
+                  {sized if model is Building else ""}
+             ) AS shapes
+             WHERE geom IS NOT NULL)
+            """
+        )
+        params += [z, x, y, z, x, y, names, names]
+        if model is Building:
+            params += [z >= DETAIL_ZOOM, min_area]
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute("SET LOCAL statement_timeout = '2000ms'")
+            cursor.execute("SELECT " + " || ".join(layers), params)
+            return bytes(cursor.fetchone()[0] or b"")
 
 
 def parcel_surroundings(parcel_id):
