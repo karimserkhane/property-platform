@@ -4,6 +4,7 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass, field
+from datetime import date
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
@@ -49,6 +50,8 @@ _VOID = frozenset(
 def project_registry(territory=None):
     """Load a fresh copy of the closed, reviewed configuration, never a caller URL."""
     rows = json.loads(Path(__file__).with_name("project_registry.json").read_text("utf-8"))
+    for row in rows:
+        _validate_dated_links(row)
     scope = territory
     slug, source_key = None, None
     if territory is not None and ":" in territory:
@@ -83,6 +86,18 @@ def project_registry(territory=None):
         ]
         selected = ({**project, "sources": sources},)
     return selected
+
+
+def _validate_dated_links(project):
+    """A dated identity review cites one of its project's registered pages."""
+    pages = {row["url"] for row in project["sources"] if row["role"] != "terms"}
+    for link in project["identity_links"]:
+        dated = {"reviewed_on", "source_url"} & link.keys()
+        if not dated:
+            continue
+        if len(dated) != 2 or link["source_url"] not in pages:
+            raise ValueError("A dated identity link must cite a registered project page")
+        date.fromisoformat(link["reviewed_on"])
 
 
 RELATION_KINDS = frozenset({"part_of"})

@@ -38,8 +38,27 @@ def _accepted_snapshots():
         record_key=OuterRef("capture__url"),
         active=True,
     )
+    # A later reading of the same acquisition (new extractor or registry version)
+    # replaces the earlier one, which stays in history: publication follows the
+    # latest interpretation of each receipt, as a rebuild from archived bytes does.
+    reread = ProjectSnapshot.objects.filter(
+        project_id=OuterRef("project_id"),
+        capture__url=OuterRef("capture__url"),
+        capture__content_sha256=OuterRef("capture__content_sha256"),
+        capture__fetched_at=OuterRef("capture__fetched_at"),
+        capture__run__status="succeeded",
+        ingested_at__gt=OuterRef("ingested_at"),
+    )
     return ProjectSnapshot.objects.filter(capture__run__status="succeeded").filter(
-        ~Exists(excluded)
+        ~Exists(excluded), ~Exists(reread)
+    )
+
+
+def published_slugs():
+    """Projects the directory publishes, in a stable order."""
+    snapshots = _accepted_snapshots().filter(project_id=OuterRef("id"))
+    return list(
+        Project.objects.filter(Exists(snapshots)).order_by("slug").values_list("slug", flat=True)
     )
 
 

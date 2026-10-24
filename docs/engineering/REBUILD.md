@@ -111,6 +111,7 @@ automatique.
 | `new_audit` | Sources, captures, exécutions, jonctions, journaux, audits de mutation et quarantaines sont recréés par les importateurs actuels ; leurs comptes sont affichés séparément. Ils ne remplacent pas les traces originales conservées par A03. |
 | `backup` | État non rétabli par le rejeu des captures : conserver/restaurer A03 ou relancer son pipeline dédié selon le tableau suivant. |
 | `identity` | Parcelles et zones administratives : les identités **actives** doivent être identiques (nombre et empreinte des couples espace de noms/identifiant source). Les lignes remplacées absentes du rejeu doivent correspondre exactement aux réparations revues de doublons (alias A03 avec `superseded_*`) ; l'importateur actuel résout ces enregistrements à l'import et ne recrée pas le doublon. Un manifeste plus ancien, sans ces statistiques, garde la comparaison `exact`. |
+| `history` | Historique des lectures de fiches et de catalogues (`project_snapshot`, `project_typology`, `project_amenity`, `project_media`, `project_source_candidate`, liens révoqués de `project_identity_link`) : compte affiché et expliqué (`history_differences`, `interpretations`), **non bloquant**, parce que l'[état publié](#état-publié-a12) est comparé à sa place. Sans état publié dans le manifeste, ces tables restent `exact`. |
 
 Chaque étape rejouée porte aussi, quand ils diffèrent de l'exécution d'origine, les
 comptes d'observations écrites par cette étape (`rows.expected` / `rows.actual`) :
@@ -159,11 +160,55 @@ sélectionnées (URL répétée dans le même run ou retirée du registre) ; le 
 prétend pas qu'elles ont été réimportées. Les anciens importateurs ne sont pas embarqués : une dérive du parseur
 ou du registre est un écart à examiner, pas une preuve de perte dans la source.
 
+## État publié (A12)
+
+Décision du propriétaire du 24 octobre 2026 ([A12](../tasks/A12.md)) : le rejeu doit
+reproduire **ce que le site publie** ; l'historique des lectures est une alerte.
+
+- L'export relève, sur le même instantané que les captures, la fiche de chaque projet
+  publié (`project_detail`) et les liens d'identité actifs (projet, cible, espace de
+  noms, identifiant source, motif). Les identifiants de base (UUID), l'emplacement
+  privé d'un média et l'heure d'ingestion sont retirés ; l'ordre des listes est
+  ignoré, celui des coordonnées d'une géométrie conservé. Valeurs, sources (URL,
+  empreinte, date de collecte), positions et hiérarchie sont comparées.
+- Le rejeu recalcule le même état dans la base reconstruite (`rebuild_published.py`).
+  Le rapport `published` liste chaque fiche différente avec ses chemins (`.summary`,
+  `.typologies`…) ; `published_blocking` compte les différences bloquantes. Une fiche,
+  une valeur, une source, une position ou un lien manquant fait échouer le contrôle.
+  Rien n'est recopié de la base de référence vers la base reconstruite.
+- Une différence n'est mise à part (`requires_backup`) que si une décision d'opérateur
+  conservée par A03 l'explique, et seulement sur les champs qu'elle touche :
+  révocation d'un lien (positions, liens), publication d'un média (médias),
+  exclusion d'historique (toute la fiche).
+- `interpretations` explique l'alerte d'historique : lectures et reçus distincts par
+  version d'extracteur, lectures et identités distinctes des candidats de catalogue,
+  à l'origine et au rejeu.
+- **Lecture courante.** Une relecture des mêmes octets (même URL, empreinte et date de
+  collecte) par une nouvelle version d'extracteur ou de registre remplace la lecture
+  précédente pour la publication ; l'ancienne reste dans l'historique. Une collecte
+  différente ne masque toujours pas un fait déjà observé.
+- **Preuve d'une revue datée.** Une relation entre fiches (`reviewed_on`, `source_url`)
+  et un lien d'identité daté du registre des fiches (mêmes clés, facultatives) citent la
+  dernière capture HTTP 200 de leur page au plus tard à la fin du jour de revue (heure
+  des Émirats), et non la capture lue au moment où le lien est créé : le rejeu, qui
+  crée ces liens dès la première lecture, cite la même preuve. Un lien sans date garde
+  la lecture qui l'a créé.
+- **Identité d'interprétation.** Depuis la migration `0032`, chaque lecture garde
+  `registry_sha256` (entrée de registre) et `extractor_sha256` (code d'extraction, fins
+  de ligne normalisées), en plus de `extractor_version`. Les lectures antérieures les
+  laissent vides.
+- Après un changement d'extracteur ou de registre qui lit autrement des octets déjà
+  archivés, la base en service publie encore l'ancienne lecture et le contrôle le
+  signale. Relire alors les reçus conservés par l'import ordinaire (flow
+  `property-platform-project-details`, `acquisition_mode=archive_all`), puis relancer
+  le contrôle.
+
 ## Ce qui exige une sauvegarde ou un autre pipeline
 
 | État | Reprise |
 | --- | --- |
 | Exclusions et révocations, alias d'identité revus | Sauvegarde SQL A03 ; ne jamais inventer une décision opérateur à partir d'une proximité ou d'une absence. |
+| Lectures de fiches et de catalogues par d'anciennes versions d'extracteur ou de registre, recollectes identiques | Sauvegarde SQL A03 (décision du 24 octobre 2026). Les octets d'origine restent rejoués par le code actuel ; l'état publié est comparé. |
 | Originaux privés et objets stockés, liaisons, autorisations de publication | Sauvegarde SQL et miroir `files/media/` A03 ; les pipelines de stockage vérifient les originaux, ils n'inventent pas les droits. |
 | Graphe routier et fragments | Sauvegarde A03, ou pipeline `routing-osm-graph` puis reconstruction avec le worker Valhalla. Ce contrôle de sources n'appelle pas le moteur lourd. |
 | Demandes et contours de marche | Sauvegarde A03 ; recalcul possible par `walking-areas` après reprise du graphe et de la file. |
@@ -269,3 +314,30 @@ Tables en écart : `map_observation` (9 949 contre 8 529), `place` (2 005 contre
 - `place` : la base en service compte 7 lieux de projet et un repère de référence
   inactifs ; leur rapprochement ligne à ligne avec le rejeu reste à faire (comptes
   par espace de noms à ajouter au rapport).
+
+## Contrôle réel de l'état publié (A12) — 24 octobre 2026
+
+Code de la branche A12 exécuté depuis une image temporaire (sans déploiement ni
+migration de la base en service : la variante mesurée omettait les deux colonnes
+d'empreinte de la migration `0032`, sans effet sur l'état publié). Base en service lue
+en lecture seule, base de travail créée puis supprimée par le contrôle.
+
+- Premier passage (`e481cd0d…`, instantané `2026-10-24T07:08Z`) : 179 fiches sur 183
+  identiques, 156 liens d'identité actifs identiques, **2 différences bloquantes**. La
+  relation Gate / Gate ARC et les positions de `reem-eight` et `reem-nine` citaient la
+  capture lue à leur création ; le rejeu, qui les crée dès la première lecture, citait
+  une capture plus ancienne de la même page. Corrigé par la [preuve d'une revue
+  datée](#état-publié-a12) ; les deux liens reçoivent la date du commit qui les a
+  ajoutés (`4d2c51f`, 17 octobre). Les 13 relations en service citaient déjà la capture
+  que donne la règle.
+- Second passage (`897c0b09…`, instantané `2026-10-24T07:38Z`) : **183 fiches sur 183
+  identiques, 156 liens sur 156, 0 différence bloquante**, aucune différence ne
+  dépend d'une décision sauvegardée par A03.
+- Historique expliqué : chaque reçu de fiche est relu exactement une fois par la version
+  courante de son extracteur (par exemple `psi-project-v2` 427 reçus, 427 lectures) ;
+  les 146 lectures `psi-project-v1` et 4 `project-facts-v1` portent sur des reçus relus
+  ensuite, et les lectures en double d'un même reçu ne sont pas recréées (1 238 → 869
+  lectures). Candidats de catalogue : 423 identités distinctes à l'origine comme au
+  rejeu (1 236 → 804 lectures).
+- Écarts restants du rapport, hors A12 : `map_observation`, `place` et la divergence
+  `d7b5f4bc`, suivis dans [A15](../tasks/A15.md).

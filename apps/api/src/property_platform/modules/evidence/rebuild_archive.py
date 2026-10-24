@@ -20,6 +20,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from . import abu_dhabi, orchestration, project_discovery, project_protocol, replay_protocols
+from . import rebuild_published as published_level
 from .collection_profiles import COLLECTIONS
 from .history import audit_context
 from .media_storage import read_capture
@@ -307,6 +308,9 @@ def export_archive(root: Path):
             cursor.execute("SELECT transaction_timestamp(), pg_current_snapshot()::text")
             instant, snapshot = cursor.fetchone()
         expected, coverage, identity = counts(), inventory(), identities()
+        # What the site publishes, on the same snapshot as the exported captures (A12).
+        published = published_level.published_state()
+        interpretation = published_level.interpretations()
         for run in (
             IngestionRun.objects.select_related("source")
             .filter(
@@ -440,6 +444,8 @@ def export_archive(root: Path):
             "snapshot": snapshot,
             "expected": expected,
             "identities": identity,
+            "published": published,
+            "interpretations": interpretation,
             "coverage": coverage,
             "steps": ordered_steps(steps),
             "scenes": scenes,
@@ -564,11 +570,16 @@ def identity_matches(expected, actual):
 
 
 def compare_tables(
-    expected, actual, expected_identities=None, actual_identities=None, reviewed_deltas=None
+    expected,
+    actual,
+    expected_identities=None,
+    actual_identities=None,
+    reviewed_deltas=None,
+    history=None,
 ):
     result = []
     expected_identities, actual_identities = expected_identities or {}, actual_identities or {}
-    reviewed_deltas = reviewed_deltas or {}
+    reviewed_deltas, history = reviewed_deltas or {}, history or {}
     for table in sorted(set(expected) | set(actual)):
         name = table.split(".")[1]
         evidence_table = table.startswith("evidence.")
@@ -600,6 +611,9 @@ def compare_tables(
             row["matches"] = (expected.get(table) or 0) + reviewed_deltas[table] == actual.get(
                 table
             )
+        elif policy == "exact" and table in history:
+            # Owner decision (A12): reading history is an alert, published state decides.
+            row["policy"], row["reason"] = "history", history[table]
         result.append(row)
     return result
 
@@ -833,9 +847,26 @@ def replay_archive(root: Path, actor: str, run_id: str):
                 {"operation": operation, "status": "failed", "error": type(exc).__name__}
             )
     actual = counts()
-    # A manifest exported before identity statistics keeps the plain exact comparison.
+    published = None
+    if "published" in manifest:
+        try:
+            published = published_level.compare_published(
+                manifest["published"], published_level.published_state()
+            )
+        except Exception as exc:
+            logger.exception("Rebuild published state comparison failed")
+            outcomes.append(
+                {"operation": "published_state", "status": "failed", "error": type(exc).__name__}
+            )
+    # A manifest exported before identity statistics keeps the plain exact comparison,
+    # and history tables stay exact unless the published state was compared.
     tables = compare_tables(
-        manifest["expected"], actual, manifest.get("identities"), identities(), reviewed_deltas
+        manifest["expected"],
+        actual,
+        manifest.get("identities"),
+        identities(),
+        reviewed_deltas,
+        published_level.HISTORY_TABLES if published else None,
     )
     coverage = inventory()
     failures = [r for r in outcomes if r["status"] == "failed"]
@@ -844,6 +875,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
     mismatches = [
         r["table"] for r in tables if r["policy"] in ("exact", "identity") and not r["matches"]
     ]
+    history = [r["table"] for r in tables if r["policy"] == "history" and not r["matches"]]
     report = {
         "version": VERSION,
         "checked_at": timezone.now().isoformat(),
@@ -861,10 +893,24 @@ def replay_archive(root: Path, actor: str, run_id: str):
         # Diagnostic: steps whose observations differ from their original run.
         "row_differences": len(row_differences),
         "mismatches": mismatches,
+        # Owner decision (A12): published state blocks, reading history is an alert.
+        "published": published,
+        "published_blocking": published["blocking"] if published else None,
+        "history_differences": history,
+        "interpretations": {
+            "expected": manifest.get("interpretations"),
+            "actual": published_level.interpretations(),
+        }
+        if published
+        else None,
         "requires_backup": [
             r["table"] for r in tables if r["policy"] == "backup" and r["expected"]
         ],
-        "ok": not failures and not divergences and not mismatches and not coverage["uncovered"],
+        "ok": not failures
+        and not divergences
+        and not mismatches
+        and not coverage["uncovered"]
+        and (published is None or published["ok"]),
         "scope": "Source capture replay; backup-only state and new audit counts are separate",
     }
     write_json(root / "report.json", report)
@@ -878,6 +924,8 @@ def replay_archive(root: Path, actor: str, run_id: str):
             "legacy_selections",
             "row_differences",
             "mismatches",
+            "published_blocking",
+            "history_differences",
             "source_snapshot_at",
         )
     }
