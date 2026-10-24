@@ -296,6 +296,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/developers/{key}/delivery-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Developer Delivery History */
+        get: operations["previewDeveloperDeliveryHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/project-media/{media_id}": {
         parameters: {
             query?: never;
@@ -1780,6 +1797,138 @@ export interface components {
             original_text: string;
             source: components["schemas"]["ProjectSourceResponse"];
         };
+        /** DeliveryAnnouncementResponse */
+        DeliveryAnnouncementResponse: {
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "year" | "quarter" | "month" | "day";
+            /** Year */
+            year: number;
+            /** Quarter */
+            quarter: number | null;
+            /** Month */
+            month: number | null;
+            /** Day */
+            day: number | null;
+            /** Original Text */
+            original_text: string;
+            /**
+             * Window Start
+             * Format: date
+             */
+            window_start: string;
+            /**
+             * Window End
+             * Format: date
+             */
+            window_end: string;
+            /**
+             * First Observed At
+             * Format: date-time
+             */
+            first_observed_at: string;
+            /**
+             * Last Observed At
+             * Format: date-time
+             */
+            last_observed_at: string;
+            /** Readings */
+            readings: number;
+            /**
+             * Change
+             * @enum {string}
+             */
+            change: "first" | "later" | "earlier" | "refined";
+            outcome: components["schemas"]["DeliveryOutcomeResponse"];
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** DeliveryCompletionResponse */
+        DeliveryCompletionResponse: {
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /** Not Completed Until */
+            not_completed_until: string | null;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * DeliveryOutcomeResponse
+         * @description Whether a register reading proves the announced period was met or missed.
+         */
+        DeliveryOutcomeResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "met" | "late" | "undetermined";
+            /** Late By At Least Days */
+            late_by_at_least_days: number | null;
+            source: components["schemas"]["ProjectSourceResponse"] | null;
+        };
+        /** DeliveryProjectResponse */
+        DeliveryProjectResponse: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Territory */
+            territory: string;
+            /** Announcements */
+            announcements: components["schemas"]["DeliveryAnnouncementResponse"][];
+            /** Register Readings */
+            register_readings: components["schemas"]["DeliveryRegisterResponse"][];
+            completion: components["schemas"]["DeliveryCompletionResponse"] | null;
+        };
+        /** DeliveryRegisterResponse */
+        DeliveryRegisterResponse: {
+            /** Status */
+            status: string;
+            /** Completed */
+            completed: boolean;
+            /** Progress Percent */
+            progress_percent: number | null;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /**
+             * First Observed At
+             * Format: date-time
+             */
+            first_observed_at: string;
+            /**
+             * Last Observed At
+             * Format: date-time
+             */
+            last_observed_at: string;
+            /** Readings */
+            readings: number;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** DeliverySummaryResponse */
+        DeliverySummaryResponse: {
+            /** Projects */
+            projects: number;
+            /** With Announcements */
+            with_announcements: number;
+            /** With Register */
+            with_register: number;
+            /** Completed Observed */
+            completed_observed: number;
+            /** Late Observed */
+            late_observed: number;
+            /** Announcement Moved Later */
+            announcement_moved_later: number;
+        };
+        /** DeveloperDeliveryHistoryResponse */
+        DeveloperDeliveryHistoryResponse: {
+            developer: components["schemas"]["ProjectDeveloperResponse"];
+            summary: components["schemas"]["DeliverySummaryResponse"];
+            /** Projects */
+            projects: components["schemas"]["DeliveryProjectResponse"][];
+        };
         /** WalkingCollection */
         WalkingCollection: {
             /** Type */
@@ -2703,6 +2852,55 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectDetailResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewDeveloperDeliveryHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeveloperDeliveryHistoryResponse"];
                 };
             };
             /** @description Forbidden */
