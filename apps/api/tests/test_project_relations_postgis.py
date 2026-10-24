@@ -1,5 +1,6 @@
 import hashlib
 import os
+from datetime import UTC, datetime
 
 import pytest
 from django.db import IntegrityError, transaction
@@ -31,7 +32,11 @@ GATE = "https://www.aldar.com/properties/en/uae/reem-island/gate"
 ACTOR = "integration-test"
 
 
-def capture(url):
+# Captures of the registered relations' review day (2026-10-23, UAE time) or earlier.
+REVIEWED = datetime(2026, 10, 20, tzinfo=UTC)
+
+
+def capture(url, fetched_at=REVIEWED):
     source, _ = Source.objects.get_or_create(
         key="test:projects", defaults={"name": "Test", "url": "https://example.com/"}
     )
@@ -43,9 +48,9 @@ def capture(url):
         url=url,
         payload=b"<html></html>",
         byte_length=13,
-        content_sha256=hashlib.sha256(url.encode()).hexdigest(),
+        content_sha256=hashlib.sha256(f"{url}{fetched_at}".encode()).hexdigest(),
         http_status=200,
-        fetched_at=timezone.now(),
+        fetched_at=fetched_at,
     )
 
 
@@ -100,6 +105,22 @@ def test_relations_follow_the_registry_once_both_projects_and_evidence_exist(gat
     }
     again = sync.apply_project_relations(territory="al-reem-island", actor=ACTOR)
     assert (again["created"], again["kept"], again["revoked"]) == (0, 3, 0)
+
+
+def test_relation_evidence_is_the_page_as_reviewed_whatever_the_import_order(gate):
+    # The page captured after the review day (UAE time) is never the cited evidence.
+    capture(GATE_ARC, datetime(2026, 10, 23, 20, 30, tzinfo=UTC))
+    sync.apply_project_relations(territory="al-reem-island", actor=ACTOR)
+    relation = ProjectRelation.objects.get(child__slug="gate")
+    assert relation.capture_id == gate["evidence"].pk
+    # An archived capture of the review window imported later refines the citation in
+    # place: the same relation, no revoked copy.
+    later = capture(GATE_ARC, datetime(2026, 10, 23, 19, 0, tzinfo=UTC))
+    summary = sync.apply_project_relations(territory="al-reem-island", actor=ACTOR)
+    assert summary["created"] == summary["revoked"] == 0
+    relation.refresh_from_db()
+    assert relation.capture_id == later.pk and relation.active
+    assert ProjectRelation.objects.filter(child__slug="gate").count() == 1
 
 
 def test_a_relation_removed_from_the_registry_is_revoked_not_deleted(gate, monkeypatch):

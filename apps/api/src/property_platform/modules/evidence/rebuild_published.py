@@ -37,6 +37,8 @@ DECISION_FIELDS = {
     "link_revocation": {"map_locations"},
     "media_publication": {"media"},
 }
+# A revocation withdraws a position: a rebuild may show it again, never lose or change one.
+ONLY_ADDED = frozenset({"link_revocation"})
 
 
 def _dump(value):
@@ -180,13 +182,15 @@ def differences(expected, actual, path=""):
     return [{"path": path, "expected": _short(expected), "actual": _short(actual)}]
 
 
-def _covered(kinds, path):
-    """Decision kinds that can explain a difference at this published path."""
+def _covered(kinds, item):
+    """Decision kinds that can explain this published difference."""
+    path = item["path"]
     field = path.split(".")[1] if path.startswith(".") else ""
     return sorted(
         kind
         for kind in kinds
-        if (fields := DECISION_FIELDS.get(kind, set())) is None or field in fields
+        if ((fields := DECISION_FIELDS.get(kind, set())) is None or field in fields)
+        and (kind not in ONLY_ADDED or item.get("counts", {}).get("missing", 1) == 0)
     )
 
 
@@ -206,7 +210,7 @@ def compare_published(expected, actual):
             found = differences(before, after)
         for item in found:
             # A whole missing or unexpected dossier is explained only by a withdrawal.
-            item["requires_backup"] = _covered(kinds, item["path"])
+            item["requires_backup"] = _covered(kinds, item)
             blocking += not item["requires_backup"]
         projects.append(
             {
@@ -217,16 +221,19 @@ def compare_published(expected, actual):
             }
         )
     links = {"expected": len(expected["identity_links"]), "actual": len(actual["identity_links"])}
-    for name, rows, others in (
-        ("missing", expected["identity_links"], actual["identity_links"]),
-        ("added", actual["identity_links"], expected["identity_links"]),
+    for name, rows, others, explaining in (
+        ("missing", expected["identity_links"], actual["identity_links"], {"history_exclusion"}),
+        (
+            "added",
+            actual["identity_links"],
+            expected["identity_links"],
+            {"history_exclusion", "link_revocation"},
+        ),
     ):
         known = {_dump(row) for row in others}
         changed = [row for row in rows if _dump(row) not in known]
         unexplained = [
-            row
-            for row in changed
-            if not {"link_revocation", "history_exclusion"} & set(decisions.get(row["project"], []))
+            row for row in changed if not explaining & set(decisions.get(row["project"], []))
         ]
         blocking += len(unexplained)
         links[name] = [_short(row) for row in changed[:MAX_DIFFERENCES]]

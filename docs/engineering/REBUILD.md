@@ -172,6 +172,12 @@ reproduire **ce que le site publie** ; l'historique des lectures est une alerte.
   collecte) par une nouvelle version d'extracteur ou de registre remplace la lecture
   précédente pour la publication ; l'ancienne reste dans l'historique. Une collecte
   différente ne masque toujours pas un fait déjà observé.
+- **Preuve d'une revue datée.** Une relation entre fiches (`reviewed_on`, `source_url`)
+  et un lien d'identité daté du registre des fiches (mêmes clés, facultatives) citent la
+  dernière capture HTTP 200 de leur page au plus tard à la fin du jour de revue (heure
+  des Émirats), et non la capture lue au moment où le lien est créé : le rejeu, qui
+  crée ces liens dès la première lecture, cite la même preuve. Un lien sans date garde
+  la lecture qui l'a créé.
 - **Identité d'interprétation.** Depuis la migration `0032`, chaque lecture garde
   `registry_sha256` (entrée de registre) et `extractor_sha256` (code d'extraction, fins
   de ligne normalisées), en plus de `extractor_version`. Les lectures antérieures les

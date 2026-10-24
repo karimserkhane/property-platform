@@ -168,6 +168,35 @@ def test_project_import_is_typed_idempotent_and_retains_provider_identities(proj
         assert client.get(f"/api/v1/preview/projects/{definition['slug']}").status_code == 403
 
 
+@pytest.mark.parametrize(("reviewed_on", "links"), [("2099-01-01", 3), ("2026-01-01", 0)])
+def test_a_dated_link_cites_its_page_as_of_its_review_day(
+    project_input, monkeypatch, reviewed_on, links
+):
+    definition, rows, _ = project_input
+    registry = project_protocol.project_registry
+
+    def dated(scope=None):
+        result = registry(scope)
+        for row in result:
+            if row["slug"] != definition["slug"]:
+                continue
+            page = next(source["url"] for source in row["sources"] if source["role"] != "terms")
+            for link in row["identity_links"]:
+                link.update(reviewed_on=reviewed_on, source_url=page)
+        return result
+
+    monkeypatch.setattr(project_protocol, "project_registry", dated)
+    ingest(rows)
+    # No capture of the page by the review day yet: the link waits, nothing is invented.
+    assert ProjectIdentityLink.objects.count() == links
+    if links:
+        first = ProjectIdentityLink.objects.first().capture.fetched_at
+        ingest([receipt(row["url"], b"<html>Later page Terms</html>") for row in rows])
+        # Whatever the import order, the latest capture by the review day is cited.
+        assert ProjectIdentityLink.objects.count() == links
+        assert all(row.capture.fetched_at > first for row in ProjectIdentityLink.objects.all())
+
+
 def test_revoked_project_link_stays_revoked_after_fresh_acquisition(project_input):
     _, rows, _ = project_input
     ingest(rows)

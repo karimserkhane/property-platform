@@ -58,20 +58,39 @@ def registry_sha256(definition):
 
 
 def _link_reviewed_targets(project, definition, identities, capture, actor):
+    from .project_relations import reviewed_capture, same_receipt
+
     count = 0
     for link in definition["identity_links"]:
         target = link["target"]
         identity = identities[(project.slug, target, link["namespace"], link["record_id"])]
         if identity is None:
             continue
+        evidence = capture
+        if link.get("reviewed_on"):
+            # A dated review cites its page as it stood that day, whatever the import
+            # order: an archive rebuild then cites the same capture (A12).
+            evidence = reviewed_capture(link["source_url"], link["reviewed_on"])
+            if evidence is None:
+                continue
         previous = ProjectIdentityLink.objects.filter(project=project, **{target: identity})
         if previous.exists():
+            current = previous.filter(active=True).first()
+            if (
+                current is not None
+                and link.get("reviewed_on")
+                and not same_receipt(current.capture_id, evidence)
+            ):
+                # An archived capture of the review day imported later refines the
+                # citation; a revoked link stays revoked. The row journal keeps the old one.
+                current.capture = evidence
+                current.save(update_fields=["capture"])
             continue
         if ProjectIdentityLink.objects.filter(active=True, **{target: identity}).exists():
             raise ValueError("Map identity already belongs to a reviewed project")
         ProjectIdentityLink.objects.create(
             project=project,
-            capture=capture,
+            capture=evidence,
             actor=actor.strip(),
             reason=link["reason"],
             **{target: identity},

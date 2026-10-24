@@ -121,7 +121,14 @@ def test_only_an_operator_decision_kept_by_backups_explains_its_own_fields():
     result = compare_published(expected, actual)
     assert result["ok"] and result["requires_backup"] == ["tower"]
     assert result["identity_links"]["added"] and not result["identity_links"]["added_blocking"]
-    # The same decision never explains another published field.
+    # The same decision never explains another published field…
     actual = state(dossier(summary="Changed"), links=[link()])
     result = compare_published(expected, actual)
     assert not result["ok"] and result["blocking"] == 1
+    # …nor a kept position whose evidence changed: a revocation only withdraws.
+    cited = dossier()
+    cited["map_locations"][0]["source"] = SOURCE
+    expected = state(cited, links=[link()], decisions=decisions)
+    actual = state(dossier(), links=[link()])
+    result = compare_published(expected, actual)
+    assert not result["ok"] and result["different_projects"][0]["blocking"] == 1
