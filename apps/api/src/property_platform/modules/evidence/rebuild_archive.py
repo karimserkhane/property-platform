@@ -308,6 +308,7 @@ def export_archive(root: Path):
             cursor.execute("SELECT transaction_timestamp(), pg_current_snapshot()::text")
             instant, snapshot = cursor.fetchone()
         expected, coverage, identity = counts(), inventory(), identities()
+        namespace_stats = namespaces()
         # What the site publishes, on the same snapshot as the exported captures (A12).
         published = published_level.published_state()
         interpretation = published_level.interpretations()
@@ -444,6 +445,7 @@ def export_archive(root: Path):
             "snapshot": snapshot,
             "expected": expected,
             "identities": identity,
+            "namespaces": namespace_stats,
             "published": published,
             "interpretations": interpretation,
             "coverage": coverage,
@@ -556,6 +558,79 @@ def identities():
                 "reviewed_repairs": cursor.fetchone()[0],
                 "active_fingerprint": fingerprint,
             }
+    return result
+
+
+# Map identity namespaces this small carry their records in the manifest, so that a
+# count difference can be reconciled record by record (A15). Larger ones keep counts
+# and a fingerprint only.
+NAMESPACE_RECORDS = 200
+
+
+def namespaces():
+    """Map identities per provider namespace: active and inactive counts, fingerprint.
+
+    Diagnostic only: it locates which namespace explains a map table difference; the
+    table policies decide `ok`.
+    """
+    from psycopg import sql
+
+    result = {}
+    with connection.cursor() as cursor:
+        for target in MAP_TARGETS:
+            table = sql.Identifier("real_estate", target)
+            cursor.execute(
+                sql.SQL(
+                    "SELECT source_namespace, count(*) FILTER (WHERE active), "
+                    "count(*) FILTER (WHERE NOT active), "
+                    "md5(string_agg(source_record_id || chr(31) || active::text, "
+                    "chr(30) ORDER BY source_record_id)) FROM {} GROUP BY 1 ORDER BY 1"
+                ).format(table)
+            )
+            stats = {
+                namespace: {"active": active, "inactive": inactive, "fingerprint": fingerprint}
+                for namespace, active, inactive, fingerprint in cursor.fetchall()
+            }
+            small = [
+                n for n, s in stats.items() if s["active"] + s["inactive"] <= NAMESPACE_RECORDS
+            ]
+            if small:
+                cursor.execute(
+                    sql.SQL(
+                        "SELECT source_namespace, source_record_id, active FROM {} "
+                        "WHERE source_namespace = ANY(%s) ORDER BY 1, 2"
+                    ).format(table),
+                    [small],
+                )
+                for namespace, record_id, active in cursor.fetchall():
+                    stats[namespace].setdefault("records", []).append([record_id, active])
+            result[f"real_estate.{target}"] = stats
+    return result
+
+
+def namespace_differences(expected, actual):
+    """Namespaces whose identities differ, with the records when both sides list them."""
+    result = {}
+    for table in sorted(set(expected) | set(actual)):
+        before, after = expected.get(table, {}), actual.get(table, {})
+        for namespace in sorted(set(before) | set(after)):
+            old, new = before.get(namespace), after.get(namespace)
+            if old and new and old["fingerprint"] == new["fingerprint"]:
+                continue
+            empty = {"active": 0, "inactive": 0, "records": []}
+            old, new = old or empty, new or empty
+            entry = {
+                "expected": {"active": old["active"], "inactive": old["inactive"]},
+                "actual": {"active": new["active"], "inactive": new["inactive"]},
+            }
+            if "records" in old and "records" in new:
+                was, now = dict(old["records"]), dict(new["records"])
+                entry["missing"] = sorted(set(was) - set(now))
+                entry["extra"] = sorted(set(now) - set(was))
+                entry["activity_changed"] = sorted(
+                    r for r in set(was) & set(now) if was[r] != now[r]
+                )
+            result.setdefault(table, {})[namespace] = entry
     return result
 
 
@@ -868,6 +943,16 @@ def replay_archive(root: Path, actor: str, run_id: str):
         reviewed_deltas,
         published_level.HISTORY_TABLES if published else None,
     )
+    # Diagnostic (A15): which namespaces explain a map table difference. A manifest
+    # exported before these statistics has no such detail.
+    namespace_diff = (
+        namespace_differences(manifest["namespaces"], namespaces())
+        if "namespaces" in manifest
+        else {}
+    )
+    for row in tables:
+        if namespace_diff.get(row["table"]):
+            row["namespaces"] = namespace_diff[row["table"]]
     coverage = inventory()
     failures = [r for r in outcomes if r["status"] == "failed"]
     divergences = [r for r in outcomes if "diverged_from" in r]
@@ -892,6 +977,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
         ),
         # Diagnostic: steps whose observations differ from their original run.
         "row_differences": len(row_differences),
+        "namespace_differences": sum(len(v) for v in namespace_diff.values()),
         "mismatches": mismatches,
         # Owner decision (A12): published state blocks, reading history is an alert.
         "published": published,
@@ -923,6 +1009,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
             "reviewed_divergences",
             "legacy_selections",
             "row_differences",
+            "namespace_differences",
             "mismatches",
             "published_blocking",
             "history_differences",

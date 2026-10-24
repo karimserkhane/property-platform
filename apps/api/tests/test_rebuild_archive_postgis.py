@@ -705,3 +705,68 @@ def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path
             "reason": "Project capture not selected for replay: repeated or unregistered URL",
         }
     ]
+
+
+def test_namespace_counts_locate_place_differences_record_by_record(monkeypatch):
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
+
+    def place(namespace, record_id, active=True):
+        return Place.objects.create(
+            source_namespace=namespace,
+            source_record_id=record_id,
+            active=active,
+            geometry=Point(54.4, 24.5),
+        )
+
+    place("project:alpha", "marker")
+    place("project:beta", "marker", active=False)
+    place("osm:test:osm", "node/1")
+    place("osm:test:osm", "node/2")
+    expected = archive.namespaces()
+    stats = expected["real_estate.place"]
+    assert stats["project:beta"] | {"fingerprint": None} == {
+        "active": 0,
+        "inactive": 1,
+        "fingerprint": None,
+        "records": [["marker", False]],
+    }
+    assert set(expected) == {f"real_estate.{t}" for t in archive.MAP_TARGETS}
+
+    Place.objects.filter(source_namespace="project:beta").update(active=True)
+    Place.objects.filter(source_record_id="node/2").delete()
+    place("project:gamma", "marker")
+    differences = archive.namespace_differences(expected, archive.namespaces())
+    assert differences == {
+        "real_estate.place": {
+            "osm:test:osm": {
+                "expected": {"active": 2, "inactive": 0},
+                "actual": {"active": 1, "inactive": 0},
+                "missing": ["node/2"],
+                "extra": [],
+                "activity_changed": [],
+            },
+            "project:beta": {
+                "expected": {"active": 0, "inactive": 1},
+                "actual": {"active": 1, "inactive": 0},
+                "missing": [],
+                "extra": [],
+                "activity_changed": ["marker"],
+            },
+            "project:gamma": {
+                "expected": {"active": 0, "inactive": 0},
+                "actual": {"active": 1, "inactive": 0},
+                "missing": [],
+                "extra": ["marker"],
+                "activity_changed": [],
+            },
+        }
+    }
+
+    # A large namespace keeps counts and fingerprint only: located, not listed.
+    monkeypatch.setattr(archive, "NAMESPACE_RECORDS", 0)
+    actual = archive.namespaces()
+    assert "records" not in actual["real_estate.place"]["osm:test:osm"]
+    unlisted = archive.namespace_differences(expected, actual)
+    assert "missing" not in unlisted["real_estate.place"]["osm:test:osm"]

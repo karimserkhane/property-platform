@@ -107,6 +107,7 @@ def rebuild_check(*, actor: str, run_id: str, url: str | None = None) -> dict:
         "diverged_steps": report["diverged_steps"],
         "reviewed_divergences": report.get("reviewed_divergences", 0),
         "row_differences": report.get("row_differences", 0),
+        "namespace_differences": report.get("namespace_differences", 0),
         "mismatches": report["mismatches"],
         "published_blocking": report.get("published_blocking"),
         "history_differences": report.get("history_differences", []),
