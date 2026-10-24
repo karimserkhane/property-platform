@@ -952,6 +952,7 @@ export default function ParcelMap({
         territory={territory.id}
         places={true}
         names={options.names}
+        searchParcels
         onChoose={(item) => {
           if (item.feature) callbacks.current.onFeature(item.feature);
           else if (item.parcelId) callbacks.current.onSelect(item.parcelId);

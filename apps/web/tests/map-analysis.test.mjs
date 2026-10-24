@@ -6,6 +6,7 @@ import {
   projectsInZone,
   searchItems,
   searchMap,
+  withParcelMatches,
 } from "../src/features/atlas/map-analysis.ts";
 import { selectMapHit } from "../src/features/atlas/presentation.ts";
 import {
@@ -170,4 +171,24 @@ test("shadows require recorded heights and fall opposite the morning sun; none a
     0,
   );
   assert.equal(building.properties.height_m, 100);
+});
+test("server parcel matches fill free search slots after visible results without duplicates", () => {
+  const row = (id, code) => ({
+    id,
+    properties: { code, bounds: [54.4, 24.5, 54.41, 24.51] },
+  });
+  const visible = searchItems(context, { features: [row("a", "P-1")] }, "en");
+  const results = searchMap(visible, "p-");
+  const merged = withParcelMatches(results, {
+    features: [row("a", "P-1"), row("b", "P-2")],
+  });
+  assert.deepEqual(
+    merged.map((item) => item.key),
+    ["parcel:a", "parcel:b"],
+  );
+  assert.equal(merged[1].parcelId, "b");
+  assert.equal(merged[1].geometry.type, "Polygon");
+  const many = Array.from({ length: 20 }, (_, i) => row(`r${i}`, `P-${i}`));
+  assert.equal(withParcelMatches([], { features: many }).length, 12);
+  assert.deepEqual(withParcelMatches(results, null), results);
 });

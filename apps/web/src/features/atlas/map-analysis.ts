@@ -119,18 +119,37 @@ export function searchItems(
       feature,
     });
   }
-  for (const parcel of parcels?.features ?? [])
-    items.push({
-      key: `parcel:${parcel.id}`,
-      name: parcel.properties.code,
-      kind: "parcel",
-      geometry:
-        "geometry" in parcel
-          ? parcel.geometry
-          : boundsGeometry(parcel.properties.bounds),
-      parcelId: parcel.id,
-    });
+  for (const parcel of parcels?.features ?? []) items.push(parcelItem(parcel));
   return items;
+}
+function parcelItem(parcel: ParcelRows["features"][number]): SearchItem {
+  return {
+    key: `parcel:${parcel.id}`,
+    name: parcel.properties.code,
+    kind: "parcel",
+    geometry:
+      "geometry" in parcel
+        ? parcel.geometry
+        : boundsGeometry(parcel.properties.bounds),
+    parcelId: parcel.id,
+  };
+}
+// The map holds only its visible parcels; the server finds codes elsewhere in the
+// territory. Visible matches keep their rank and server rows fill the free slots.
+export function withParcelMatches(
+  results: SearchItem[],
+  matches: ParcelRows | null,
+) {
+  const merged = [...results];
+  const seen = new Set(merged.map((item) => item.key));
+  for (const parcel of matches?.features ?? []) {
+    if (merged.length >= 12) break;
+    const item = parcelItem(parcel);
+    if (seen.has(item.key)) continue;
+    seen.add(item.key);
+    merged.push(item);
+  }
+  return merged;
 }
 export function searchMap(items: SearchItem[], query: string) {
   const needle = normalise(query);
