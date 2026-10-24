@@ -99,11 +99,22 @@ LEGACY_OSM_SELECTIONS = {
 }
 
 
-def legacy_osm_selection(operation, scope, version):
-    """`(target, tags) -> bool` for a recorded legacy OSM mapping, or None.
+# `project_import.py` at 123900b (project-details-v1) wrote no project position: the
+# source-declared position arrives with `project_locations.py` in 4d2c51f (A15).
+def no_position_selection(target, tags):
+    return target != "place"
+
+
+LEGACY_PROJECT_SELECTIONS = {"project-details-v1": no_position_selection}
+
+
+def legacy_selection(operation, scope, version):
+    """`(target, tags) -> bool` for a recorded legacy OSM or project mapping, or None.
 
     `target` is the map target of an observation, or None for a quarantined element.
     """
     if operation == "osm_bootstrap" or (operation == "map" and scope.endswith(":osm")):
         return LEGACY_OSM_SELECTIONS.get(version)
+    if operation == "project_details":
+        return LEGACY_PROJECT_SELECTIONS.get(version)
     return None

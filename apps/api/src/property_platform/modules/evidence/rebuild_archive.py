@@ -80,6 +80,61 @@ REVIEWED_DIVERGENCES = {
         "minute later on the same capture; see REBUILD.md",
     },
 }
+# Map identities an unrecorded interpretation created and a later run of the same
+# source withdrew (A15). The current mapping never creates them. Each is accepted only
+# when the reference holds it inactive with exactly these two observations (mapping
+# version, action) and the replay has no such identity; its rows are then counted apart.
+_VIEWPOINT = {
+    "observations": (("project-map-v1", "created"), ("project-map-v2", "retired")),
+    "reason": "Uncommitted project-map-v1 took the publisher map camera centre for the "
+    "project pin; withdrawn by review_project_locations on 16 October (4d2c51f)",
+}
+WITHDRAWN_ATTRIBUTIONS = {
+    **{
+        ("place", f"project:{slug}", "publisher-map"): _VIEWPOINT
+        for slug in (
+            "one-reem-island",
+            "reem-eight",
+            "reem-eleven",
+            "reem-five",
+            "reem-nine",
+            "saas-heights",
+            "seamont",
+        )
+    },
+    ("place", "research:d8fec783bd5e949ef1b5103def6921a5bf1dcd76", "project-map-marker"): {
+        "observations": (("reem-references-v1", "created"), ("reem-references-v2", "retired")),
+        "reason": "Uncommitted reem-references-v1 marker (before 087241d); reem-references-v2 "
+        "retired it on the same bytes as a title mismatch",
+    },
+}
+# Unrecorded interpretations that a later run re-read on the SAME bytes (A15). The
+# replayed step must give what that first later run gave; no rule of the unrecorded
+# version is guessed.
+SUPERSEDED_INTERPRETATIONS = {
+    "reem-references-v1": {
+        "operation": "references",
+        "replaced_by": "reem-references-v2",
+        "reason": "Uncommitted (before 087241d); every capture re-read 30 minutes later by "
+        "stored_capture_reprocess under reem-references-v2",
+    },
+}
+# Runs whose bytes the current mapping reads more completely, while the reference never
+# re-read them (A15). Accepted only for these captures, original rows and replayed rows,
+# with the listed identity absent from the reference and active after the replay.
+REVIEWED_REINTERPRETATIONS = {
+    "a4ad9e09-6c40-4497-9522-f5732d35d8d5": {
+        "captures": ("729194b256b9b26f029ece852391212e8cd2edf76ea097f32c8124a638872475",),
+        "rows": {"map_observation:place:created": 1},
+        "identity": (
+            "place",
+            "research:601d9da4e13220bd26610a46a33ef374655fc770",
+            "project-map-marker",
+        ),
+        "reason": "bloomholding.com map parser added in 4d2c51f under the unchanged "
+        "district-references-v3 version; the 13 October run predates it",
+    },
+}
 
 
 def counts():
@@ -178,11 +233,12 @@ def _map_target():
     )
 
 
-def run_rows(run_ids=(), *, captures=None):
+def run_rows(run_ids=(), *, captures=None, identities=None):
     """Observations written by the given runs, by target and action, plus quarantines.
 
     `captures` restricts the count to those captures: a project run is replayed one
-    registered page at a time.
+    registered page at a time. `identities` (target, namespace, record id) keeps only
+    the map observations of those identities.
 
     Diagnostic only: it locates which acquisition explains a table difference (for
     example a historical quarantine accepted at replay); the table policies decide `ok`.
@@ -193,6 +249,8 @@ def run_rows(run_ids=(), *, captures=None):
 
     result = {}
     written = Q(capture__run_id__in=run_ids) if captures is None else Q(capture_id__in=captures)
+    if identities is not None:
+        written &= _identity_filter(identities)
     for row in (
         MapObservation.objects.filter(written)
         .annotate(target=_map_target())
@@ -201,6 +259,8 @@ def run_rows(run_ids=(), *, captures=None):
         .order_by()
     ):
         result[f"map_observation:{row['target']}:{row['action']}"] = row["total"]
+    if identities is not None:
+        return result
     for name, model in (
         ("parcel_observation", ParcelObservation),
         ("quarantined_observation", QuarantinedObservation),
@@ -209,6 +269,146 @@ def run_rows(run_ids=(), *, captures=None):
         if total:
             result[name] = total
     return result
+
+
+def _identity_filter(identities):
+    match = Q(pk__in=[])
+    for target, namespace, record_id in identities:
+        match |= Q(
+            **{f"{target}__source_namespace": namespace, f"{target}__source_record_id": record_id}
+        )
+    return match
+
+
+def _reviewed_identity_keys():
+    return [
+        *WITHDRAWN_ATTRIBUTIONS,
+        *(review["identity"] for review in REVIEWED_REINTERPRETATIONS.values()),
+    ]
+
+
+def reviewed_identities():
+    """State of the identities the A15 registries name: activity and observations."""
+    from .models import MapObservation
+
+    result = {}
+    for target, namespace, record_id in _reviewed_identity_keys():
+        model = MapObservation._meta.get_field(target).related_model
+        identity = model.objects.filter(
+            source_namespace=namespace, source_record_id=record_id
+        ).first()
+        result["|".join((target, namespace, record_id))] = (
+            None
+            if identity is None
+            else {
+                "active": identity.active,
+                "observations": sorted(
+                    list(row)
+                    for row in MapObservation.objects.filter(**{target: identity}).values_list(
+                        "mapping_version", "action"
+                    )
+                ),
+            }
+        )
+    return result
+
+
+def withdrawn_attributions(expected, actual):
+    """Each registered withdrawal, with whether it holds exactly in both databases."""
+    result = []
+    for key, review in WITHDRAWN_ATTRIBUTIONS.items():
+        before, after = expected.get("|".join(key)), actual.get("|".join(key))
+        result.append(
+            {
+                "target": key[0],
+                "namespace": key[1],
+                "record_id": key[2],
+                "observations": len(review["observations"]),
+                "matches": before is not None
+                and not before["active"]
+                and before["observations"] == sorted(list(row) for row in review["observations"])
+                and after is None,
+                "reason": review["reason"],
+            }
+        )
+    return result
+
+
+def _without(rows, removed):
+    """`rows` minus `removed`, both counts by key."""
+    result = {key: total - removed.get(key, 0) for key, total in rows.items()}
+    return {key: total for key, total in result.items() if total}
+
+
+def superseded_reference(step, steps, index):
+    """The first later step that re-read the same bytes under the replacing version."""
+    review = SUPERSEDED_INTERPRETATIONS.get(step.get("original_version", ""))
+    if review is None or step["operation"] != review["operation"]:
+        return None
+    captures = sorted(c["sha256"] for c in step["captures"])
+    return next(
+        (
+            later
+            for later in steps[index + 1 :]
+            if later["operation"] == step["operation"]
+            and later["scope"] == step["scope"]
+            and later.get("original_version") == review["replaced_by"]
+            and "original_rows" in later
+            and sorted(c["sha256"] for c in later["captures"]) == captures
+        ),
+        None,
+    )
+
+
+def explain_rows(step, rows, expected, compared, reused, steps, index, reference=None):
+    """The rule that accounts for a step's row difference, as (name, detail), or None.
+
+    `expected` is the original rows without registered withdrawn attributions. Each
+    rule states an exact condition; its table effect counts apart only when `matches`.
+    A difference no rule names stays in the table comparison and fails it.
+    """
+    if compared is not None:
+        # Recorded mapping change: only the observations the legacy rule excludes are
+        # set apart, and the rest must equal the original run.
+        return "legacy_selection", {
+            "version": step["original_version"],
+            "excluded": {
+                key: total - compared.get(key, 0)
+                for key, total in rows.items()
+                if total != compared.get(key, 0)
+            },
+            "matches": _target_totals(compared) == _target_totals(expected),
+        }
+    if reused:
+        # Owner decision (A12): a re-read of an identical receipt is not recreated. It
+        # can only have confirmed what the earlier read of the same receipt wrote.
+        return "reused_receipt", {
+            "not_recreated": expected,
+            "matches": all(key.endswith(":unchanged") for key in expected),
+        }
+    later = superseded_reference(step, steps, index)
+    if later is not None:
+        same = _without(later["original_rows"], later.get("withdrawn_rows", {}))
+        return "superseded_interpretation", {
+            "version": step["original_version"],
+            "same_as_run": later["run"],
+            "reason": SUPERSEDED_INTERPRETATIONS[step["original_version"]]["reason"],
+            "matches": _target_totals(rows) == _target_totals(same),
+        }
+    review = REVIEWED_REINTERPRETATIONS.get(step["run"])
+    if review is not None:
+        key = "|".join(review["identity"])
+        return "reviewed_reinterpretation", {
+            "reason": review["reason"],
+            "matches": reference is not None
+            and key in reference
+            and reference[key] is None
+            and (reviewed_identities().get(key) or {}).get("active", False)
+            and tuple(sorted(c["sha256"] for c in step["captures"])) == review["captures"]
+            and not expected
+            and rows == review["rows"],
+        }
+    return None
 
 
 def legacy_rows(rows, run_ids, selected):
@@ -281,6 +481,12 @@ def table_deltas(rows, original_rows):
     return {table: delta for table, delta in deltas.items() if delta}
 
 
+def _withdrawn(run_ids=(), *, captures=None):
+    """A step's observations of registered withdrawn attributions, when it has any."""
+    rows = run_rows(run_ids, captures=captures, identities=list(WITHDRAWN_ATTRIBUTIONS))
+    return {"withdrawn_rows": rows} if rows else {}
+
+
 def ordered_steps(steps):
     """Keep history order inside each phase, with identities before their consumers."""
     phase = {
@@ -313,6 +519,7 @@ def export_archive(root: Path):
             instant, snapshot = cursor.fetchone()
         expected, coverage, identity = counts(), inventory(), identities()
         namespace_stats = namespaces()
+        reviewed = reviewed_identities()
         # What the site publishes, on the same snapshot as the exported captures (A12).
         published = published_level.published_state()
         interpretation = published_level.interpretations()
@@ -352,6 +559,7 @@ def export_archive(root: Path):
                             # whole run; the status is compared through published state.
                             "original_version": run.connector_version,
                             "original_rows": run_rows(captures=[c.pk for c in selected]),
+                            **_withdrawn(captures=[c.pk for c in selected]),
                             "captures": [_capture(root, c) for c in selected],
                         }
                     )
@@ -406,6 +614,7 @@ def export_archive(root: Path):
                         "original_version": run.connector_version,
                         "original_status": run.status,
                         "original_rows": run_rows([run.pk]),
+                        **_withdrawn([run.pk]),
                         "targets": targets,
                         "captures": [_capture(root, c) for c in captures],
                     }
@@ -454,6 +663,7 @@ def export_archive(root: Path):
             "expected": expected,
             "identities": identity,
             "namespaces": namespace_stats,
+            "reviewed_identities": reviewed,
             "published": published,
             "interpretations": interpretation,
             "coverage": coverage,
@@ -806,6 +1016,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
     for index, step in enumerate(manifest["steps"]):
         operation, scope = step["operation"], step["scope"]
         rows = compared = None
+        reused = False
         try:
             execution_key = hashlib.sha256(f"rebuild:{run_id}:{index}".encode()).hexdigest()
             with audit_context(actor=actor, execution_key=execution_key):
@@ -845,11 +1056,14 @@ def replay_archive(root: Path, actor: str, run_id: str):
                         ),
                     )
                     status = result["status"]
-                    rows = run_rows(result.get("run_ids", []))
-                    selected = replay_protocols.legacy_osm_selection(
+                    # A reused execution wrote nothing: its runs belong to the earlier
+                    # identical receipt that this replay already imported.
+                    reused = bool(result.get("reused"))
+                    rows = {} if reused else run_rows(result.get("run_ids", []))
+                    selected = replay_protocols.legacy_selection(
                         operation, scope, step.get("original_version", "")
                     )
-                    if selected and "original_rows" in step:
+                    if selected and "original_rows" in step and not reused:
                         compared = legacy_rows(rows, result.get("run_ids", []), selected)
                     if operation == "references" and step.get("original_status") == "failed":
                         from .models import ResearchReference
@@ -886,21 +1100,33 @@ def replay_archive(root: Path, actor: str, run_id: str):
                     outcome["diverged_from"] = original
             if "original_rows" in step and rows is not None and rows != step["original_rows"]:
                 outcome["rows"] = {"expected": step["original_rows"], "actual": rows}
-                if compared is not None:
-                    # Recorded mapping change: only the observations the legacy rule
-                    # excludes are set apart, and the rest must equal the original run.
-                    matches = _target_totals(compared) == _target_totals(step["original_rows"])
-                    outcome["legacy_selection"] = {
-                        "version": step["original_version"],
-                        "excluded": {
-                            key: total - compared.get(key, 0)
-                            for key, total in rows.items()
-                            if total != compared.get(key, 0)
-                        },
-                        "matches": matches,
-                    }
-                    if matches and not ({"reviewed_divergence", "diverged_from"} & set(outcome)):
-                        for table, delta in table_deltas(rows, step["original_rows"]).items():
+                # Observations of registered withdrawn attributions are accounted for by
+                # identity (A15), after the replay; each rule below sees the rest.
+                expected = _without(step["original_rows"], step.get("withdrawn_rows", {}))
+                if step.get("withdrawn_rows"):
+                    outcome["rows"]["withdrawn"] = step["withdrawn_rows"]
+                explained = explain_rows(
+                    step,
+                    rows,
+                    expected,
+                    compared,
+                    reused,
+                    manifest["steps"],
+                    index,
+                    manifest.get("reviewed_identities"),
+                )
+                if explained:
+                    name, detail = explained
+                    outcome[name] = detail
+                    if detail["matches"] and not (
+                        {"reviewed_divergence", "diverged_from"} & set(outcome)
+                    ):
+                        deltas = table_deltas(rows, expected)
+                        if name == "reviewed_reinterpretation":
+                            # The identity it creates is checked by explain_rows.
+                            target = REVIEWED_REINTERPRETATIONS[step["run"]]["identity"][0]
+                            deltas[f"real_estate.{target}"] = 1
+                        for table, delta in deltas.items():
                             reviewed_deltas[table] = reviewed_deltas.get(table, 0) + delta
             outcomes.append(outcome)
         except Exception as exc:
@@ -929,6 +1155,18 @@ def replay_archive(root: Path, actor: str, run_id: str):
             outcomes.append(
                 {"operation": operation, "status": "failed", "error": type(exc).__name__}
             )
+    withdrawn = None
+    if "reviewed_identities" in manifest:
+        # Registered withdrawn attributions are absent from the replay as a whole
+        # identity: its row and all its observations count apart, only if exact.
+        withdrawn = withdrawn_attributions(manifest["reviewed_identities"], reviewed_identities())
+        for item in withdrawn:
+            if item["matches"]:
+                for table, delta in (
+                    (f"real_estate.{item['target']}", -1),
+                    ("evidence.map_observation", -item["observations"]),
+                ):
+                    reviewed_deltas[table] = reviewed_deltas.get(table, 0) + delta
     actual = counts()
     published = None
     if "published" in manifest:
@@ -983,6 +1221,15 @@ def replay_archive(root: Path, actor: str, run_id: str):
         "legacy_selections": sum(
             r.get("legacy_selection", {}).get("matches", False) for r in outcomes
         ),
+        **{
+            f"{name}s": sum(r.get(name, {}).get("matches", False) for r in outcomes)
+            for name in (
+                "reused_receipt",
+                "superseded_interpretation",
+                "reviewed_reinterpretation",
+            )
+        },
+        "withdrawn_attributions": withdrawn,
         # Diagnostic: steps whose observations differ from their original run.
         "row_differences": len(row_differences),
         "namespace_differences": sum(len(v) for v in namespace_diff.values()),
@@ -1016,6 +1263,9 @@ def replay_archive(root: Path, actor: str, run_id: str):
             "diverged_steps",
             "reviewed_divergences",
             "legacy_selections",
+            "reused_receipts",
+            "superseded_interpretations",
+            "reviewed_reinterpretations",
             "row_differences",
             "namespace_differences",
             "mismatches",

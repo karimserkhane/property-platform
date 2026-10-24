@@ -641,17 +641,14 @@ def test_only_places_the_legacy_osm_mapping_excluded_are_counted_apart(
         assert "legacy_selection" not in step and not table["matches"]
 
 
-def test_legacy_osm_selection_rules_are_copied_from_their_commits():
+def test_legacy_selection_rules_are_copied_from_their_commits():
     from property_platform.modules.evidence import replay_protocols as legacy
 
-    named = legacy.legacy_osm_selection("map", "al-reem-island:osm", "reem-map-v1")
-    bootstrap = legacy.legacy_osm_selection(
-        "osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v1"
-    )
-    assert legacy.legacy_osm_selection("map", "al-reem-island:community", "reem-map-v1") is None
+    named = legacy.legacy_selection("map", "al-reem-island:osm", "reem-map-v1")
+    bootstrap = legacy.legacy_selection("osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v1")
+    assert legacy.legacy_selection("map", "al-reem-island:community", "reem-map-v1") is None
     assert (
-        legacy.legacy_osm_selection("osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v2")
-        is None
+        legacy.legacy_selection("osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v2") is None
     )
     assert named("place", {"amenity": "cafe", "name:en": "Cafe"})
     assert named("place", {"building": "yes", "name": "Tower"})
@@ -665,6 +662,11 @@ def test_legacy_osm_selection_rules_are_copied_from_their_commits():
     assert bootstrap("building", {"building": "yes"})
     assert not bootstrap(None, {"leisure": "garden", "type": "multipolygon"})
     assert not bootstrap(None, {"place": "island", "tourism": "yes", "name": "Al Reem Island"})
+    # project-details-v1 (123900b) wrote no position; v2 onwards may.
+    scope = "al-reem-island:x:y"
+    project = legacy.legacy_selection("project_details", scope, "project-details-v1")
+    assert not project("place", {}) and project(None, {})
+    assert legacy.legacy_selection("project_details", scope, "project-details-v2") is None
 
 
 def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path):
@@ -795,3 +797,129 @@ def test_namespace_counts_locate_place_differences_record_by_record(monkeypatch)
     assert "records" not in actual["real_estate.place"]["osm:test:osm"]
     unlisted = archive.namespace_differences(expected, actual)
     assert "missing" not in unlisted["real_estate.place"]["osm:test:osm"]
+
+
+def _observed_place(namespace, record_id, observations, *, active=True):
+    """One place with (mapping version, action) observations on one capture each."""
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import MapObservation
+
+    source = Source.objects.create(key=namespace, name="Test", url="https://example.com/p")
+    run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
+    place = Place.objects.create(
+        source_namespace=namespace,
+        source_record_id=record_id,
+        active=active,
+        geometry=Point(54.4, 24.5),
+    )
+    stamp = datetime(2026, 10, 1, tzinfo=UTC)
+    for version, action in observations:
+        capture = Capture.objects.create(
+            run=run,
+            payload=b"{}",
+            url=source.url,
+            http_status=200,
+            fetched_at=stamp,
+            fetched_started_at=stamp,
+            byte_length=2,
+            content_sha256=hashlib.sha256(b"{}").hexdigest(),
+        )
+        MapObservation.objects.create(
+            place=place,
+            capture=capture,
+            source_record_id=record_id,
+            source_url=source.url,
+            raw_attributes={},
+            record_sha256="d" * 64,
+            mapping_version=version,
+            action=action,
+            target_revision=1,
+        )
+    return run
+
+
+def test_withdrawn_attribution_counts_apart_only_an_exact_absent_identity(monkeypatch):
+    key = ("place", "project:withdrawn", "publisher-map")
+    monkeypatch.setattr(
+        archive,
+        "WITHDRAWN_ATTRIBUTIONS",
+        {key: {"observations": (("v1", "created"), ("v2", "retired")), "reason": "test"}},
+    )
+    monkeypatch.setattr(archive, "REVIEWED_REINTERPRETATIONS", {})
+    run = _observed_place(*key[1:], (("v1", "created"), ("v2", "retired")), active=False)
+    _observed_place("project:kept", "publisher-map", (("v2", "created"),))
+    # Step rows of a withdrawn identity are set apart from the other observations.
+    assert archive.run_rows([run.pk], identities=[key]) == {
+        "map_observation:place:created": 1,
+        "map_observation:place:retired": 1,
+    }
+    assert archive.run_rows([run.pk], identities=[("place", "project:kept", "x")]) == {}
+    name = "|".join(key)
+    reference = archive.reviewed_identities()
+    state = {"active": False, "observations": [["v1", "created"], ["v2", "retired"]]}
+    assert reference == {name: state}
+
+    def matches(expected, actual):
+        return archive.withdrawn_attributions(expected, actual)[0]["matches"]
+
+    assert matches(reference, {name: None})
+    # Recreated at replay, still active in the reference or otherwise observed: not exact.
+    assert not matches(reference, reference)
+    assert not matches({name: state | {"active": True}}, {name: None})
+    assert not matches({name: state | {"observations": [["v1", "created"]]}}, {name: None})
+
+
+def test_row_differences_are_explained_only_by_their_exact_rule(monkeypatch):
+    def step(version, rows, sha="a", scope="al-reem-island:ref", run="r1", operation="references"):
+        return {
+            "operation": operation,
+            "scope": scope,
+            "run": run,
+            "original_version": version,
+            "original_rows": rows,
+            "captures": [{"sha256": sha}],
+        }
+
+    created = {"map_observation:place:created": 1}
+    unchanged = {"map_observation:place:unchanged": 1}
+
+    def explain(item, rows, *, reused=False, steps=(), reference=None):
+        steps = [item, *steps]
+        return archive.explain_rows(
+            item, rows, item["original_rows"], None, reused, steps, 0, reference
+        )
+
+    # An identical receipt is not re-read: only confirmations may be missing.
+    project = step("project-details-v5", unchanged, operation="project_details")
+    assert explain(project, {}, reused=True) == (
+        "reused_receipt",
+        {"not_recreated": unchanged, "matches": True},
+    )
+    recreated = step("project-details-v5", created, operation="project_details")
+    assert not explain(recreated, {}, reused=True)[1]["matches"]
+    # An unrecorded interpretation gives what the first later run of the same bytes gave.
+    v1 = step("reem-references-v1", {})
+    name, detail = explain(v1, created, steps=[step("reem-references-v2", created, run="r2")])
+    assert name == "superseded_interpretation" and detail["matches"]
+    assert detail["same_as_run"] == "r2"
+    assert not explain(v1, created, steps=[step("reem-references-v2", {}, run="r2")])[1]["matches"]
+    assert explain(v1, created, steps=[step("reem-references-v2", created, sha="b")]) is None
+    assert explain(step("reem-references-v2", {}), created) is None
+    # A reviewed reinterpretation needs its run, captures, rows and new active identity.
+    identity = ("place", "research:new", "project-map-marker")
+    monkeypatch.setattr(
+        archive,
+        "REVIEWED_REINTERPRETATIONS",
+        {"r9": {"captures": ("a",), "rows": created, "identity": identity, "reason": "test"}},
+    )
+    monkeypatch.setattr(archive, "WITHDRAWN_ATTRIBUTIONS", {})
+    reviewed = step("district-references-v3", {}, run="r9")
+    absent = {"|".join(identity): None}
+    assert not explain(reviewed, created, reference=absent)[1]["matches"]
+    _observed_place(*identity[1:], (("district-references-v3", "created"),))
+    assert explain(reviewed, created, reference=absent)[1]["matches"]
+    assert not explain(reviewed, created, reference={})[1]["matches"]
+    assert not explain(reviewed, {**created, **unchanged}, reference=absent)[1]["matches"]
+    assert explain(step("district-references-v3", {}, run="r8"), created) is None
