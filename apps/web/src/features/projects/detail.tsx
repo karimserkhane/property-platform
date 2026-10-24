@@ -2,6 +2,7 @@ import navigation from "@property-platform/contracts/territories";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { ProjectCover } from "./cover";
+import { developerHistoryHref, isDeveloperKey } from "./delivery";
 import { ProjectDocuments } from "./documents";
 import dossier from "./dossier.module.css";
 import { Proof, ProofGroup, SourceLink } from "./evidence";
@@ -127,6 +128,14 @@ export function ProjectDetailView({
           <div className={styles.developer}>
             <span>{labels.developer}</span>
             <bdi>{project.developer.name}</bdi>
+            {isDeveloperKey(project.developer.key) && (
+              <Link
+                className={dossier.developerHistory}
+                href={developerHistoryHref(project.developer.key)}
+              >
+                {labels.deliveryHistory} <span aria-hidden="true">↗</span>
+              </Link>
+            )}
           </div>
           <ProjectParent project={project} labels={labels} locale={locale} />
           <dl className={dossier.facts}>

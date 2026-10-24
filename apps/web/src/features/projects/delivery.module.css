@@ -1,0 +1,89 @@
+.header {
+  max-width: 980px;
+  margin-block-end: 48px;
+}
+.header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 500;
+  margin: 0 0 12px;
+}
+.project {
+  padding-block-start: 32px;
+  border-block-start: 1px solid #d8ddd5;
+}
+.projectLink {
+  color: inherit;
+}
+.project h3 {
+  margin-block: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #586b70;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+}
+.points {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.point {
+  padding-block: 12px;
+  border-block-end: 1px solid #e3e6df;
+}
+.point p {
+  margin-block: 4px;
+}
+.pointHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 12px;
+  font-size: 15px;
+}
+.badge {
+  font-size: 11px;
+  color: #7b6544;
+  border: 1px solid #d9c8aa;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.outcome {
+  font-weight: 600;
+}
+.outcome[data-delivery-outcome="late"] {
+  color: #8a3b1f;
+}
+.outcome[data-delivery-outcome="met"] {
+  color: #2f5d3a;
+}
+.outcomeProof {
+  margin-block-start: 4px;
+}
+.completion {
+  font-weight: 600;
+  margin-block: 0 16px;
+}
+.silent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.silent a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+@media (max-width: 760px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}
