@@ -55,6 +55,30 @@ BACKUP_ONLY = {
 }
 # A historically unavailable reference is reproduced as unavailable, not as a new failure.
 REPLAYED_STATUS = {"failed": "replayed_unavailable"}
+# Catalogue identities whose duplicates, created before import-time resolution existed,
+# were later superseded by a reviewed repair (kept by A03). The current importer resolves
+# the same provider records without creating the duplicate, so these tables compare
+# their active identities exactly and require every missing superseded row to be
+# accounted for by such a repair.
+REVIEWED_SUPERSESSIONS = {
+    "real_estate.parcel": ("parcel_source_alias", "superseded_parcel_id"),
+    "real_estate.administrative_area": ("administrative_area_source_alias", "superseded_area_id"),
+}
+# Status divergences reviewed one by one (A14). The original interpretation is not
+# reproducible from the repository, and a later run of the SAME bytes recorded the
+# outcome the current mapping gives. Each entry is accepted only when the replay matches
+# that later run's observations per target; its table effect is then counted apart.
+# Any other divergence, a new quarantine included, still fails the check.
+REVIEWED_DIVERGENCES = {
+    "d7b5f4bc-3390-4e62-85ef-90e765e842c0": {
+        "original_status": "quarantined",
+        "replayed_status": "succeeded",
+        "captures": ("06a6dedd2a03cb679e9dfcdf98145950b66c5b2ca5613d30ae386c56aab64065",),
+        "same_as_run": "29a909a9-b094-40e2-aeca-f25b86a950be",
+        "reason": "Uncommitted reem-map-v1 interpretation (before 087241d), replaced one "
+        "minute later on the same capture; see REBUILD.md",
+    },
+}
 
 
 def counts():
@@ -141,6 +165,82 @@ def _source_scopes():
     return result
 
 
+MAP_TARGETS = ("street", "building", "place", "administrative_area")
+
+
+def run_rows(run_ids):
+    """Observations written by the given runs, by target and action, plus quarantines.
+
+    Diagnostic only: it locates which acquisition explains a table difference (for
+    example a historical quarantine accepted at replay); the table policies decide `ok`.
+    """
+    from django.db.models import Case, CharField, Count, Value, When
+
+    from .models import MapObservation, ParcelObservation, QuarantinedObservation
+
+    result = {}
+    target = Case(
+        *(When(**{f"{name}__isnull": False}, then=Value(name)) for name in MAP_TARGETS),
+        output_field=CharField(),
+    )
+    for row in (
+        MapObservation.objects.filter(capture__run_id__in=run_ids)
+        .annotate(target=target)
+        .values("target", "action")
+        .annotate(total=Count("pk"))
+        .order_by()
+    ):
+        result[f"map_observation:{row['target']}:{row['action']}"] = row["total"]
+    for name, model in (
+        ("parcel_observation", ParcelObservation),
+        ("quarantined_observation", QuarantinedObservation),
+    ):
+        total = model.objects.filter(capture__run_id__in=run_ids).count()
+        if total:
+            result[name] = total
+    return result
+
+
+def _target_totals(rows):
+    """Observations per table and map target, whatever the action."""
+    totals = {}
+    for key, total in rows.items():
+        name = key.rsplit(":", 1)[0] if key.startswith("map_observation:") else key
+        totals[name] = totals.get(name, 0) + total
+    return totals
+
+
+def reviewed_divergence(step, status, rows, steps_by_run):
+    """The registry entry this replayed divergence matches exactly, or None."""
+    review = REVIEWED_DIVERGENCES.get(step["run"])
+    reference = steps_by_run.get(review["same_as_run"]) if review else None
+    if (
+        not review
+        or reference is None
+        or rows is None
+        or "original_rows" not in step
+        or "original_rows" not in reference
+        or step.get("original_status") != review["original_status"]
+        or status != review["replayed_status"]
+        or tuple(sorted(c["sha256"] for c in step["captures"])) != review["captures"]
+        or "quarantined_observation" in rows
+    ):
+        return None
+    if _target_totals(rows) != _target_totals(reference["original_rows"]):
+        return None
+    return review
+
+
+def table_deltas(rows, original_rows):
+    """Row count differences per owned table written by one step."""
+    actual, expected = _target_totals(rows), _target_totals(original_rows)
+    deltas = {}
+    for name in set(actual) | set(expected):
+        table = "evidence." + name.split(":", 1)[0]
+        deltas[table] = deltas.get(table, 0) + actual.get(name, 0) - expected.get(name, 0)
+    return {table: delta for table, delta in deltas.items() if delta}
+
+
 def ordered_steps(steps):
     """Keep history order inside each phase, with identities before their consumers."""
     phase = {
@@ -171,7 +271,7 @@ def export_archive(root: Path):
             cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             cursor.execute("SELECT transaction_timestamp(), pg_current_snapshot()::text")
             instant, snapshot = cursor.fetchone()
-        expected, coverage = counts(), inventory()
+        expected, coverage, identity = counts(), inventory(), identities()
         for run in (
             IngestionRun.objects.select_related("source")
             .filter(
@@ -257,6 +357,7 @@ def export_archive(root: Path):
                         "run": str(run.pk),
                         "original_version": run.connector_version,
                         "original_status": run.status,
+                        "original_rows": run_rows([run.pk]),
                         "targets": targets,
                         "captures": [_capture(root, c) for c in captures],
                     }
@@ -303,6 +404,7 @@ def export_archive(root: Path):
             "snapshot_at": instant.isoformat(),
             "snapshot": snapshot,
             "expected": expected,
+            "identities": identity,
             "coverage": coverage,
             "steps": ordered_steps(steps),
             "scenes": scenes,
@@ -385,8 +487,53 @@ class CaptureReplay:
             raise ValueError("Importer did not consume its complete archived acquisition")
 
 
-def compare_tables(expected, actual):
+def identities():
+    """Active provider identities and reviewed supersessions of the identity tables."""
+    from psycopg import sql
+
+    result = {}
+    with connection.cursor() as cursor:
+        for table, (alias, column) in REVIEWED_SUPERSESSIONS.items():
+            cursor.execute(
+                sql.SQL(
+                    "SELECT count(*) FILTER (WHERE superseded_by_id IS NULL), "
+                    "count(*) FILTER (WHERE superseded_by_id IS NOT NULL), "
+                    "md5(coalesce(string_agg(source_namespace || chr(31) || source_record_id, "
+                    "chr(30) ORDER BY source_namespace, source_record_id) "
+                    "FILTER (WHERE superseded_by_id IS NULL), '')) FROM {}"
+                ).format(sql.Identifier(*table.split(".")))
+            )
+            active, superseded, fingerprint = cursor.fetchone()
+            cursor.execute(
+                sql.SQL("SELECT count(*) FROM {} WHERE active AND {} IS NOT NULL").format(
+                    sql.Identifier("evidence", alias), sql.Identifier(column)
+                )
+            )
+            result[table] = {
+                "active": active,
+                "superseded": superseded,
+                "reviewed_repairs": cursor.fetchone()[0],
+                "active_fingerprint": fingerprint,
+            }
+    return result
+
+
+def identity_matches(expected, actual):
+    """Same active identities; only reviewed duplicate repairs may be absent."""
+    return (
+        expected["active"] == actual["active"]
+        and expected["active_fingerprint"] == actual["active_fingerprint"]
+        and expected["superseded"] - actual["superseded"]
+        == expected["reviewed_repairs"] - actual["reviewed_repairs"]
+    )
+
+
+def compare_tables(
+    expected, actual, expected_identities=None, actual_identities=None, reviewed_deltas=None
+):
     result = []
+    expected_identities, actual_identities = expected_identities or {}, actual_identities or {}
+    reviewed_deltas = reviewed_deltas or {}
     for table in sorted(set(expected) | set(actual)):
         name = table.split(".")[1]
         evidence_table = table.startswith("evidence.")
@@ -396,16 +543,29 @@ def compare_tables(expected, actual):
             if reason
             else ("new_audit" if evidence_table and name in TECHNICAL else "exact")
         )
-        result.append(
-            {
-                "table": table,
-                "expected": expected.get(table),
-                "actual": actual.get(table),
-                "policy": policy,
-                "reason": reason or "",
-                "matches": expected.get(table) == actual.get(table),
+        row = {
+            "table": table,
+            "expected": expected.get(table),
+            "actual": actual.get(table),
+            "policy": policy,
+            "reason": reason or "",
+            "matches": expected.get(table) == actual.get(table),
+        }
+        if table in expected_identities and table in actual_identities:
+            row["policy"] = "identity"
+            row["reason"] = "Active identities exact; reviewed duplicate repairs kept by A03"
+            row["identities"] = {
+                "expected": expected_identities[table],
+                "actual": actual_identities[table],
             }
-        )
+            row["matches"] = identity_matches(expected_identities[table], actual_identities[table])
+        elif policy == "exact" and reviewed_deltas.get(table):
+            # Only the measured rows of reviewed divergences are counted apart.
+            row["reviewed_delta"] = reviewed_deltas[table]
+            row["matches"] = (expected.get(table) or 0) + reviewed_deltas[table] == actual.get(
+                table
+            )
+        result.append(row)
     return result
 
 
@@ -509,8 +669,11 @@ def replay_archive(root: Path, actor: str, run_id: str):
     if manifest["version"] != VERSION:
         raise ValueError("Unsupported replay manifest")
     outcomes = []
+    steps_by_run = {step["run"]: step for step in manifest["steps"]}
+    reviewed_deltas = {}
     for index, step in enumerate(manifest["steps"]):
         operation, scope = step["operation"], step["scope"]
+        rows = None
         try:
             execution_key = hashlib.sha256(f"rebuild:{run_id}:{index}".encode()).hexdigest()
             with audit_context(actor=actor, execution_key=execution_key):
@@ -550,6 +713,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
                         ),
                     )
                     status = result["status"]
+                    rows = run_rows(result.get("run_ids", []))
                     if operation == "references" and step.get("original_status") == "failed":
                         from .models import ResearchReference
 
@@ -570,7 +734,19 @@ def replay_archive(root: Path, actor: str, run_id: str):
             ):
                 # A reproduction keeps the original outcome; a new quarantine or a newly
                 # accepted acquisition is a divergence, even when table counts coincide.
-                outcome["diverged_from"] = original
+                review = reviewed_divergence(step, status, rows, steps_by_run)
+                if review:
+                    outcome["reviewed_divergence"] = {
+                        "original_status": original,
+                        "same_as_run": review["same_as_run"],
+                        "reason": review["reason"],
+                    }
+                    for table, delta in table_deltas(rows, step["original_rows"]).items():
+                        reviewed_deltas[table] = reviewed_deltas.get(table, 0) + delta
+                else:
+                    outcome["diverged_from"] = original
+            if "original_rows" in step and rows is not None and rows != step["original_rows"]:
+                outcome["rows"] = {"expected": step["original_rows"], "actual": rows}
             outcomes.append(outcome)
         except Exception as exc:
             logger.exception("Rebuild step %s %s failed", operation, scope)
@@ -599,11 +775,17 @@ def replay_archive(root: Path, actor: str, run_id: str):
                 {"operation": operation, "status": "failed", "error": type(exc).__name__}
             )
     actual = counts()
-    tables = compare_tables(manifest["expected"], actual)
+    # A manifest exported before identity statistics keeps the plain exact comparison.
+    tables = compare_tables(
+        manifest["expected"], actual, manifest.get("identities"), identities(), reviewed_deltas
+    )
     coverage = inventory()
     failures = [r for r in outcomes if r["status"] == "failed"]
     divergences = [r for r in outcomes if "diverged_from" in r]
-    mismatches = [r["table"] for r in tables if r["policy"] == "exact" and not r["matches"]]
+    row_differences = [r for r in outcomes if "rows" in r]
+    mismatches = [
+        r["table"] for r in tables if r["policy"] in ("exact", "identity") and not r["matches"]
+    ]
     report = {
         "version": VERSION,
         "checked_at": timezone.now().isoformat(),
@@ -614,6 +796,9 @@ def replay_archive(root: Path, actor: str, run_id: str):
         "coverage": coverage,
         "failed_steps": len(failures),
         "diverged_steps": len(divergences),
+        "reviewed_divergences": sum("reviewed_divergence" in r for r in outcomes),
+        # Diagnostic: steps whose observations differ from their original run.
+        "row_differences": len(row_differences),
         "mismatches": mismatches,
         "requires_backup": [
             r["table"] for r in tables if r["policy"] == "backup" and r["expected"]
@@ -624,5 +809,13 @@ def replay_archive(root: Path, actor: str, run_id: str):
     write_json(root / "report.json", report)
     return {
         key: report[key]
-        for key in ("ok", "failed_steps", "diverged_steps", "mismatches", "source_snapshot_at")
+        for key in (
+            "ok",
+            "failed_steps",
+            "diverged_steps",
+            "reviewed_divergences",
+            "row_differences",
+            "mismatches",
+            "source_snapshot_at",
+        )
     }

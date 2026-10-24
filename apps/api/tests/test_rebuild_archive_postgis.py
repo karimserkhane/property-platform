@@ -164,6 +164,79 @@ def test_every_table_is_compared_and_unknown_tables_are_never_excused():
     assert by_table["evidence.history_exclusion"]["policy"] == "backup"
 
 
+def test_identity_tables_excuse_only_reviewed_duplicate_repairs():
+    def stats(active, superseded, repairs, fingerprint="same"):
+        return {
+            "active": active,
+            "superseded": superseded,
+            "reviewed_repairs": repairs,
+            "active_fingerprint": fingerprint,
+        }
+
+    def compare(actual_identities, expected_identities=None):
+        rows = archive.compare_tables(
+            {"real_estate.parcel": 4},
+            {"real_estate.parcel": 2},
+            expected_identities or {"real_estate.parcel": stats(2, 2, 2)},
+            {"real_estate.parcel": actual_identities},
+        )
+        return rows[0]
+
+    repaired = compare(stats(2, 0, 0))
+    assert repaired["policy"] == "identity"
+    assert repaired["matches"]
+    # Another active identity, a missing active row or an unreviewed duplicate is a gap.
+    assert not compare(stats(2, 0, 0, "other"))["matches"]
+    assert not compare(stats(1, 0, 0))["matches"]
+    assert not compare(stats(2, 0, 0), {"real_estate.parcel": stats(2, 2, 1)})["matches"]
+    # Without exported identity statistics the table stays an exact comparison.
+    legacy = archive.compare_tables({"real_estate.parcel": 4}, {"real_estate.parcel": 2})
+    assert legacy[0]["policy"] == "exact"
+    assert not legacy[0]["matches"]
+
+
+def test_identity_statistics_count_active_rows_and_reviewed_supersessions():
+    from django.contrib.gis.geos import MultiPolygon, Polygon
+
+    from property_platform.modules.evidence.models import ParcelSourceAlias
+
+    stamp = datetime(2026, 10, 1, tzinfo=UTC)
+    source = Source.objects.create(
+        key="dmt:onwani:smarthub:plot:adm:reem", name="Test", url=onwani.BASE_URL
+    )
+    run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
+    capture = Capture.objects.create(
+        run=run,
+        payload=b"{}",
+        url=onwani.BASE_URL,
+        http_status=200,
+        fetched_at=stamp,
+        fetched_started_at=stamp,
+        byte_length=2,
+        content_sha256=hashlib.sha256(b"{}").hexdigest(),
+    )
+    shape = MultiPolygon(
+        Polygon(((54.4, 24.5), (54.41, 24.5), (54.4, 24.51), (54.4, 24.5))), srid=4326
+    )
+    values = {"source_namespace": source.key, "official_plot_id": "RT1_C1", "code": "RT1_C1"}
+    values |= {"municipality": "ADM", "district": "AL REEM ISLAND", "geometry": shape}
+    canonical = Parcel.objects.create(source_record_id="1", **values)
+    before = archive.identities()["real_estate.parcel"]
+    duplicate = Parcel.objects.create(source_record_id="2", superseded_by=canonical, **values)
+    ParcelSourceAlias.objects.create(
+        source_namespace=source.key,
+        source_record_id="2",
+        parcel=canonical,
+        superseded_parcel=duplicate,
+        capture=capture,
+        actor="test",
+        reason="Reviewed existing duplicate",
+    )
+    after = archive.identities()["real_estate.parcel"]
+    assert after == before | {"superseded": 1, "reviewed_repairs": 1}
+    assert after["active"] == 1
+
+
 def test_geography_precedes_presentations_and_projects_without_reordering_versions():
     steps = [
         {"operation": operation, "version": version}
@@ -328,6 +401,177 @@ def test_a_status_different_from_the_original_run_fails_the_check(
     assert report["failed_steps"] == 0  # A divergence is reported apart from failed imports.
     if not ok:
         assert report["steps"][0]["diverged_from"] == original
+
+
+def test_observation_counts_per_step_locate_a_difference_without_deciding_ok(tmp_path, monkeypatch):
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import MapObservation, QuarantinedObservation
+
+    source = Source.objects.create(key="test:map", name="Test", url="https://example.com/map")
+    run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
+    stamp = datetime(2026, 10, 1, tzinfo=UTC)
+    capture = Capture.objects.create(
+        run=run,
+        payload=b"{}",
+        url=source.url,
+        http_status=200,
+        fetched_at=stamp,
+        fetched_started_at=stamp,
+        byte_length=2,
+        content_sha256=hashlib.sha256(b"{}").hexdigest(),
+    )
+    place = Place.objects.create(
+        source_namespace="test:place", source_record_id="1", geometry=Point(54.4, 24.5)
+    )
+    MapObservation.objects.create(
+        place=place,
+        capture=capture,
+        source_record_id="1",
+        source_url=source.url,
+        raw_attributes={},
+        record_sha256="b" * 64,
+        mapping_version="test",
+        action="created",
+        target_revision=1,
+    )
+    QuarantinedObservation.objects.create(
+        capture=capture, source_record_id="2", field_path="geometry", raw_attributes={}, reason="x"
+    )
+    rows = {"map_observation:place:created": 1, "quarantined_observation": 1}
+    assert archive.run_rows([run.pk]) == rows
+    monkeypatch.setattr(
+        archive.orchestration,
+        "execute_import",
+        lambda **kwargs: {"status": "succeeded", "run_ids": [str(run.pk)]},
+    )
+    expected = {"map_observation:place:created": 3}
+    archive.write_json(
+        tmp_path / "manifest.json",
+        {
+            "version": 1,
+            "snapshot_at": "2026-10-23T00:00:00+00:00",
+            "expected": archive.counts(),
+            "steps": [
+                {
+                    "operation": "map",
+                    "scope": "al-reem-island:osm",
+                    "run": "original",
+                    "original_status": "succeeded",
+                    "original_rows": expected,
+                    "captures": [],
+                }
+            ],
+            "scenes": [],
+            "tiles": [],
+            "omitted": [],
+        },
+    )
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    report = json.loads((tmp_path / "report.json").read_text())
+    # Table counts are equal here: the per-step difference is reported, not a failure.
+    assert result["ok"] and result["row_differences"] == 1
+    assert report["steps"][0]["rows"] == {"expected": expected, "actual": rows}
+
+
+def _observed_run():
+    """One run whose capture holds one place observation."""
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import MapObservation
+
+    source = Source.objects.create(key="test:map", name="Test", url="https://example.com/map")
+    run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
+    stamp = datetime(2026, 10, 1, tzinfo=UTC)
+    capture = Capture.objects.create(
+        run=run,
+        payload=b"{}",
+        url=source.url,
+        http_status=200,
+        fetched_at=stamp,
+        fetched_started_at=stamp,
+        byte_length=2,
+        content_sha256=hashlib.sha256(b"{}").hexdigest(),
+    )
+    place = Place.objects.create(
+        source_namespace="test:place", source_record_id="1", geometry=Point(54.4, 24.5)
+    )
+    MapObservation.objects.create(
+        place=place,
+        capture=capture,
+        source_record_id="1",
+        source_url=source.url,
+        raw_attributes={},
+        record_sha256="b" * 64,
+        mapping_version="test",
+        action="created",
+        target_revision=1,
+    )
+    return run
+
+
+@pytest.mark.parametrize(
+    ("variant", "ok"),
+    [("reviewed", True), ("other_capture", False), ("other_observations", False)],
+)
+def test_only_a_reviewed_divergence_matching_its_later_run_is_counted_apart(
+    tmp_path, monkeypatch, variant, ok
+):
+    reviewed_run = "d7b5f4bc-3390-4e62-85ef-90e765e842c0"
+    review = archive.REVIEWED_DIVERGENCES[reviewed_run]
+    run = _observed_run()
+    monkeypatch.setattr(
+        archive.orchestration,
+        "execute_import",
+        lambda **kwargs: {"status": "succeeded", "run_ids": [str(run.pk)]},
+    )
+    expected = archive.counts()
+    # The original quarantined run wrote no observation; replay writes one more.
+    expected["evidence.map_observation"] -= 1
+    sha = review["captures"][0] if variant != "other_capture" else "0" * 64
+    later = {"map_observation:place:created": 1 if variant != "other_observations" else 2}
+    step = {"operation": "map", "scope": "al-reem-island:osm", "captures": []}
+    archive.write_json(
+        tmp_path / "manifest.json",
+        {
+            "version": 1,
+            "snapshot_at": "2026-10-23T00:00:00+00:00",
+            "expected": expected,
+            "steps": [
+                step
+                | {
+                    "run": reviewed_run,
+                    "original_status": "quarantined",
+                    "original_rows": {"quarantined_observation": 1},
+                    "captures": [{"sha256": sha}],
+                },
+                step
+                | {
+                    "run": review["same_as_run"],
+                    "original_status": "succeeded",
+                    "original_rows": later,
+                },
+            ],
+            "scenes": [],
+            "tiles": [],
+            "omitted": [],
+        },
+    )
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    report = json.loads((tmp_path / "report.json").read_text())
+    table = next(r for r in report["tables"] if r["table"] == "evidence.map_observation")
+    assert result["ok"] is ok
+    if ok:
+        assert result["diverged_steps"] == 0 and result["reviewed_divergences"] == 1
+        assert report["steps"][0]["reviewed_divergence"]["same_as_run"] == review["same_as_run"]
+        assert table["reviewed_delta"] == 1 and table["matches"]
+    else:
+        # Another capture or other observations keep the plain divergence and table gap.
+        assert result["diverged_steps"] == 1 and result["reviewed_divergences"] == 0
+        assert report["steps"][0]["diverged_from"] == "quarantined"
+        assert "reviewed_delta" not in table and not table["matches"]
 
 
 def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path):
