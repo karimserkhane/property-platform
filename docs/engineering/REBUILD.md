@@ -324,6 +324,33 @@ Tables en écart : `map_observation` (9 949 contre 8 529), `place` (2 005 contre
   inactifs ; leur rapprochement ligne à ligne avec le rejeu reste à faire (comptes
   par espace de noms à ajouter au rapport).
 
+## Contrôle réel de la branche A15 — 24 octobre 2026
+
+Run Prefect `4debeeed-4e99-4766-8a37-9d26a8260d6f`, instantané à
+`2026-10-24T08:16:53Z`, code de la branche A15 exécuté depuis une image temporaire
+(sans déploiement ; base en service lue en lecture seule, base de travail créée puis
+supprimée par le contrôle). A12 est en service (migration `0032` appliquée).
+
+- Aucune étape échouée ni divergente ; état publié : 0 différence bloquante.
+- `d7b5f4bc` est accepté comme `reviewed_divergence` (979 observations, comme
+  `29a909a9` au rejeu). `legacy_selection` concorde pour `29a909a9`, `ece1a59f` (23
+  lieux sans nom chacun) et Saadiyat `c9ef804e` (532 lieux, 2 quarantaines). Pour
+  `d7b5f4bc` lui-même, la sélection ancienne ne concorde pas avec son exécution
+  d'origine (quarantaine) : c'est la divergence revue qui en rend compte.
+- `map_observation` : 9 949 obtenues pour 8 529 + 1 527 reportées (`reviewed_delta`,
+  soit 949 + 23 + 23 + 532), donc **107 de moins** que prévu. Les références en
+  expliquent +27 (28 repères `reem-references-v1` créés au rejeu, « Marlin 1 » créé
+  puis retiré à l'origine −2, Saadiyat `601d9da4…` +1) ; reste −134 pour les lieux
+  de projet écrits par `project_details` (sans comptes par étape).
+- `place` (2 012 contre 2 005) est **entièrement situé** par les espaces de noms : les
+  7 repères `publisher-map` **inactifs** de `one-reem-island`, `reem-eight`,
+  `reem-eleven`, `reem-five`, `reem-nine`, `saas-heights` et `seamont` (créés et
+  désactivés le 16 octobre) ne sont pas recréés ; le repère « Marlin 1 » (inactif)
+  non plus ; `601d9da4…` en crée un. −8 + 1 = −7.
+- `administrative_area` reste exacte par la politique `identity` ; son diagnostic par
+  espace de noms liste les 8 doublons Reem remplacés par une réparation revue
+  (`superseded_by`, conservés par A03), attendus.
+
 ## Contrôle réel de l'état publié (A12) — 24 octobre 2026
 
 Code de la branche A12 exécuté depuis une image temporaire (sans déploiement ni
