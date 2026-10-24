@@ -122,6 +122,15 @@ par action (`created`, `updated`, `unchanged`, `retired`), `parcel_observation` 
 pas de `ok` (les politiques de table ci-dessus le font). Un manifeste plus ancien,
 sans `original_rows`, n'a pas ce détail.
 
+**Espaces de noms.** Le manifeste relève aussi, pour `street`, `building`, `place` et
+`administrative_area`, les identités par espace de noms du fournisseur (actives,
+inactives, empreinte) ; un espace d'au plus 200 identités les liste une à une. Une table
+dont un espace diffère porte `namespaces` : comptes attendus et obtenus et, quand les
+deux côtés sont listés, identités absentes (`missing`), en plus (`extra`) ou dont
+l'état actif a changé (`activity_changed`). `namespace_differences` compte ces espaces.
+C'est aussi un **diagnostic** ([A15](../tasks/A15.md)) ; un manifeste plus ancien n'a
+pas ce détail.
+
 **Divergences revues.** Le registre `REVIEWED_DIVERGENCES` (`rebuild_archive.py`)
 liste, une par une, les exécutions dont le statut d'origine n'est pas reproductible
 depuis le dépôt et qu'une exécution ultérieure des **mêmes octets** a déjà
@@ -137,6 +146,60 @@ quarantaine ou un rejeu qui ne concorde pas échoue toujours.
 | Run d'origine | Statut d'origine → rejoué | Même capture que | Raison |
 | --- | --- | --- | --- |
 | `d7b5f4bc-3390-4e62-85ef-90e765e842c0` | `quarantined` → `succeeded` | `29a909a9-b094-40e2-aeca-f25b86a950be` | Interprétation `reem-map-v1` non commitée (antérieure à `087241d`), remplacée une minute plus tard sur la même capture `06a6dedd…` |
+
+**Anciennes sélections OSM.** Le rejeu garde le mappage actuel. Avant `06af8b2`
+(`district-map-v5`, `osm-api-bootstrap-v2`), un lieu OSM exigeait un nom (`name:en` ou
+`name`) et une étiquette `amenity`, `leisure` ou `building` ; le décodeur
+`osm-api-bootstrap-v1` écartait aussi, avant le mappage, tout élément autre qu'un
+bâtiment ou une voie, un équipement ou un loisir portant `name`. Le registre
+`LEGACY_OSM_SELECTIONS` (`replay_protocols.py`, copié de `map_import.py` à `087241d`
+et `001b65c`, et de `osm_api_protocol.py` à `001b65c`) dit, pour ces versions, quelles
+observations rejouées l'ancien mappage ne pouvait pas produire, d'après les étiquettes
+enregistrées dans chaque observation ou quarantaine. L'étape porte
+`legacy_selection` (`version`, `excluded`, `matches`) ; si le reste concorde, par cible,
+avec l'exécution d'origine, ces lignes sont reportées sur la table (`reviewed_delta`) et
+`legacy_selections` les compte. Une observation d'origine absente au rejeu ne
+concorde jamais. Ce registre explique la différence, il ne fait pas rejouer l'ancien
+mappage. `LEGACY_PROJECT_SELECTIONS` applique la même règle aux fiches projet :
+`project-details-v1` (`project_import.py` à `123900b`) n'écrivait aucune position de
+projet, qui n'arrive qu'avec `project_locations.py` (`4d2c51f`).
+
+**Autres écarts de lignes (A15).** Chaque étape d'une fiche projet porte désormais
+`original_rows` (observations de **sa** page, pas de tout le run). Quand une étape
+diffère, une seule des règles suivantes peut l'expliquer, chacune à une condition
+exacte (`matches`) ; sinon l'écart reste dans la comparaison de table et la fait
+échouer.
+
+| Règle | Condition | Effet |
+| --- | --- | --- |
+| `reused_receipt` | Le rejeu réutilise l'exécution d'un reçu de fiche **identique** déjà importé (empreinte du reçu) : la relecture n'est pas recréée ([décision A12](#état-publié-a12)). L'étape n'écrit rien ; ses observations d'origine doivent être uniquement des confirmations (`unchanged`). | Observations non recréées reportées (`reused_receipts`) |
+| `superseded_interpretation` | Version non commitée du registre `SUPERSEDED_INTERPRETATIONS` : l'étape rejouée doit donner, par cible, ce qu'a donné la **première** relecture des mêmes octets sous la version qui l'a remplacée. Aucune règle de l'ancienne version n'est devinée. | Différence reportée (`superseded_interpretations`) |
+| `reviewed_reinterpretation` | Run du registre `REVIEWED_REINTERPRETATIONS` : captures, lignes d'origine (aucune) et lignes rejouées exactement listées ; l'identité citée est absente de la base de référence et active après le rejeu. | Observation et identité reportées (`reviewed_reinterpretations`) |
+
+**Attributions retirées.** Le registre `WITHDRAWN_ATTRIBUTIONS` liste, identité par
+identité, des lieux qu'une interprétation non commitée a créés puis qu'une exécution
+ultérieure de la même source a retirés ; le mappage actuel ne les crée pas. Le
+manifeste relève leur état (`reviewed_identities`) et, pour chaque étape, leurs
+observations (`withdrawn_rows`), mises à part des règles ci-dessus. Une entrée est
+acceptée seulement si l'identité est inactive dans la base de référence avec
+exactement les observations listées (version de mappage, action) et absente après le
+rejeu ; la ligne de `place` et ses observations sont alors reportées
+(`withdrawn_attributions`). Un manifeste plus ancien n'a pas ces relevés et garde la
+comparaison exacte.
+
+| Registre | Entrée | Raison |
+| --- | --- | --- |
+| `WITHDRAWN_ATTRIBUTIONS` | `project:{one-reem-island, reem-eight, reem-eleven, reem-five, reem-nine, saas-heights, seamont}` / `publisher-map` | `project-map-v1` non commitée prenait le centre de la vue de carte de l'éditeur pour la position du projet ; retirées par `review_project_locations` le 16 octobre (`4d2c51f`) |
+| `WITHDRAWN_ATTRIBUTIONS` | `research:d8fec783…` / `project-map-marker` (« Marlin 1 ») | Repère `reem-references-v1` non commité, retiré par `reem-references-v2` sur les mêmes octets (titre discordant) |
+| `SUPERSEDED_INTERPRETATIONS` | `reem-references-v1` → `reem-references-v2` | Non commitée (antérieure à `087241d`) ; toutes ses captures relues 30 minutes plus tard (`stored_capture_reprocess`) |
+| `REVIEWED_REINTERPRETATIONS` | `a4ad9e09-6c40-4497-9522-f5732d35d8d5` (`research:601d9da4…`) | Analyseur `bloomholding.com` ajouté en `4d2c51f` sous la même version `district-references-v3` ; le run du 13 octobre est antérieur et la référence n'a jamais été relue |
+
+**Présentations.** Une présentation de bien est rattachée au rejeu à une identité OSM
+ou d'un autre fournisseur ; un nombre égal ne prouve pas le même rattachement. Le
+manifeste relève, pour chaque présentation, la cible, l'espace de noms, l'identifiant
+et la page (`presentation_bindings`) ; un rattachement absent (`missing`) ou nouveau
+(`extra`) au rejeu fait échouer le contrôle. Les liens des fiches projet vers une
+identité sont déjà comparés par l'[état publié](#état-publié-a12).
 
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
@@ -264,6 +327,106 @@ protocole historique ([A14](../tasks/A14.md)).
   inscrite au registre des divergences revues ci-dessus ; le prochain contrôle réel
   ([A15](../tasks/A15.md)) vérifiera qu'elle concorde avec `29a909a9`.
 - Écarts inchangés des fiches/catalogues : voir [A12](../tasks/A12.md).
+
+## Contrôle réel après A14 — 24 octobre 2026
+
+Run Prefect `64e6fb84-a745-4c52-af9a-5edb74e9308b`, instantané à
+`2026-10-24T05:17:30.208058+00:00`, code A14 déployé dans l'ingestion : 1 605 étapes,
+**aucune étape refusée**, 66 étapes avec des comptes d'observations différents.
+Parcelles et zones administratives passent avec la politique `identity`.
+Tables en écart : `map_observation` (9 949 contre 8 529), `place` (2 005 contre
+2 012) et les tables des fiches projet (A12).
+
+- `d7b5f4bc` **ne concorde pas** avec `29a909a9` et reste `diverged_from` : au rejeu,
+  `29a909a9`, `ece1a59f` et `d7b5f4bc` donnent tous 190 lieux contre 167 à l'origine.
+  Avec les mêmes octets (`06a6dedd…`), le mappage actuel ajoute 23 équipements **sans
+  nom** (10 abris, 7 parkings, 5 toilettes, 1 station de lavage) que `reem-map-v1/v2`
+  écartait (vérifié en lecture seule en appliquant les deux règles à la capture).
+- `osm_bootstrap` Saadiyat `c9ef804e` (`osm-api-bootstrap-v1`) : 734 lieux au rejeu
+  contre 202. Les 532 de plus sont exactement ceux que `716f40c2`
+  (`osm-api-bootstrap-v2`) a créés à l'origine (492 sans nom) ; la règle v1 retrouve
+  les 202 lieux d'origine, identifiant par identifiant, et les 26 quarantaines (les
+  deux de plus au rejeu sont des relations que le décodeur v1 écartait). Les autres
+  étapes OSM ne diffèrent que par leurs actions (`created`/`unchanged`), pas par leurs
+  totaux.
+- Ces deux cas sont désormais vérifiés par la règle `LEGACY_OSM_SELECTIONS`
+  ci-dessus (A15) ; le prochain contrôle réel dira si `d7b5f4bc`, `29a909a9`,
+  `ece1a59f` et `c9ef804e` concordent.
+- Reste de `map_observation`, hors géographie : 28 références `reem-references-v1`
+  qui n'avaient pas créé le repère de carte du projet, retrouvé ensuite par
+  `reem-references-v2` (au rejeu, v1 le crée et v2 le voit inchangé) ; le repère
+  « Marlin 1 » (`d8fec783…`) créé puis retiré à l'origine et que le code actuel ne crée
+  plus ; une référence Saadiyat (`601d9da4…`) qui en crée un au rejeu ; et 419
+  observations de lieux de projet écrites par les fiches projet (`project_details`,
+  sans comptes par étape), 285 au rejeu (déduit par différence des totaux).
+- `place` : la base en service compte 7 lieux de projet et un repère de référence
+  inactifs ; leur rapprochement ligne à ligne avec le rejeu reste à faire (comptes
+  par espace de noms à ajouter au rapport).
+
+## Contrôle réel de la branche A15 — 24 octobre 2026
+
+Run Prefect `4debeeed-4e99-4766-8a37-9d26a8260d6f`, instantané à
+`2026-10-24T08:16:53Z`, code de la branche A15 exécuté depuis une image temporaire
+(sans déploiement ; base en service lue en lecture seule, base de travail créée puis
+supprimée par le contrôle). A12 est en service (migration `0032` appliquée).
+
+- Aucune étape échouée ni divergente ; état publié : 0 différence bloquante.
+- `d7b5f4bc` est accepté comme `reviewed_divergence` (979 observations, comme
+  `29a909a9` au rejeu). `legacy_selection` concorde pour `29a909a9`, `ece1a59f` (23
+  lieux sans nom chacun) et Saadiyat `c9ef804e` (532 lieux, 2 quarantaines). Pour
+  `d7b5f4bc` lui-même, la sélection ancienne ne concorde pas avec son exécution
+  d'origine (quarantaine) : c'est la divergence revue qui en rend compte.
+- `map_observation` : 9 949 obtenues pour 8 529 + 1 527 reportées (`reviewed_delta`,
+  soit 949 + 23 + 23 + 532), donc **107 de moins** que prévu. Les références en
+  expliquent +27 (28 repères `reem-references-v1` créés au rejeu, « Marlin 1 » créé
+  puis retiré à l'origine −2, Saadiyat `601d9da4…` +1) ; reste −134 pour les lieux
+  de projet écrits par `project_details` (sans comptes par étape).
+- `place` (2 012 contre 2 005) est **entièrement situé** par les espaces de noms : les
+  7 repères `publisher-map` **inactifs** de `one-reem-island`, `reem-eight`,
+  `reem-eleven`, `reem-five`, `reem-nine`, `saas-heights` et `seamont` (créés et
+  désactivés le 16 octobre) ne sont pas recréés ; le repère « Marlin 1 » (inactif)
+  non plus ; `601d9da4…` en crée un. −8 + 1 = −7.
+- `administrative_area` reste exacte par la politique `identity` ; son diagnostic par
+  espace de noms liste les 8 doublons Reem remplacés par une réparation revue
+  (`superseded_by`, conservés par A03), attendus.
+
+Deuxième passage (`598ce61a…`), avec les comptes par page des fiches projet : les
+−134 se décomposent en 123 relectures d'un reçu **identique** (`unchanged`) et 7
+retraits, que le rejeu ne recrée pas parce qu'il réutilise l'exécution du même reçu
+(il les comptait par erreur deux fois, 143 observations) ; 7 positions « centre de
+vue » créées par `project-map-v1`, version jamais commitée ; et +3 positions que la
+règle actuelle trouve dès la lecture `project-details-v1`, qui n'en écrivait aucune
+(`123900b`), la lecture v2 les voyant ensuite inchangées. Les +28 des références
+viennent de `reem-references-v1`, jamais commitée (premier commit `087241d` en v2) :
+ses 110 captures ont été relues 30 minutes plus tard sous v2. Bilan exact :
+`map_observation` 8 529 + 1 420 = 9 949 et `place` 2 012 − 8 + 1 = 2 005.
+
+## Premier contrôle réel vert — 24 octobre 2026
+
+Run Prefect `f523a2a3-59e1-4fdb-b925-f6d6af582ef2`, instantané à
+`2026-10-24T09:06:05Z`, même mode d'exécution (image temporaire de la branche A15) :
+**`ok: true`**, 1 605 étapes, aucune échouée ni divergente, **aucune table en écart**,
+état publié 0 différence bloquante (historique des lectures en alerte, non bloquant).
+
+| Règle | Étapes ou identités | Effet sur `map_observation` |
+| --- | --- | --- |
+| Divergence revue `d7b5f4bc` | 1 | +949 |
+| `legacy_selection` (OSM) | 3 | +578 |
+| `legacy_selection` (`project-details-v1`) | 3 | +3 |
+| `superseded_interpretation` (`reem-references-v1`) | 29 | +28 |
+| `reviewed_reinterpretation` (`601d9da4…`) | 1 | +1 (et +1 `place`) |
+| `reused_receipt` | 130 | −123 |
+| `withdrawn_attributions` | 8 identités | −16 (et −8 `place`) |
+
+Total reporté : +1 420 observations, −7 lieux. Sur les 209 étapes à comptes différents,
+167 relèvent d'une règle ; les 42 autres ne diffèrent que par leurs actions
+(`created`/`unchanged`, par exemple la lecture v2 qui voit inchangé ce que le rejeu a
+créé dès la v1), pas par leurs totaux. Les identités OSM, actives comme remplacées, sont identiques par espace de
+noms (empreintes égales) ; la base en service n'a retiré aucune identité OSM (16 mises
+à jour seulement), et les 156 liens projet vers une identité restent identiques dans
+l'état publié. Troisième passage (`4483a912…`, instantané `2026-10-24T09:21:40Z`) avec la
+comparaison des présentations : de nouveau **`ok: true`**, mêmes reports, et les 18
+présentations décrivent les mêmes identités (aucun rattachement absent ou nouveau).
 
 ## Contrôle réel de l'état publié (A12) — 24 octobre 2026
 

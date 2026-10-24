@@ -59,3 +59,62 @@ def historical_protocol(operation, scope, version):
         territory = scope.split(":", 1)[0]
         return AcquisitionProtocol(version=version, osm_query=named_poi_osm_query(territory))
     return None
+
+
+# `map_import.py` at 087241d and 001b65c: a place needed a name (`name:en` or `name`)
+# and an amenity, leisure or building tag. Unnamed amenities and shop, tourism and
+# transport places arrive with `osm_place_kind` in district-map-v5/osm-api-bootstrap-v2
+# (06af8b2). `osm_api_protocol.py` at 001b65c (osm-api-bootstrap-v1) also dropped, before
+# mapping, every element other than buildings and named highways, amenities or leisure.
+# The replay keeps the current mapping; these rules only say which replayed observations
+# the original mapping could not have produced (A15).
+def _legacy_named(tags):
+    return bool(str(tags.get("name:en") or tags.get("name") or "").strip())
+
+
+def _legacy_place(tags):
+    return _legacy_named(tags) and bool(
+        tags.get("amenity") or tags.get("leisure") or tags.get("building")
+    )
+
+
+def _legacy_bootstrap_element(tags):
+    return bool(
+        tags.get("building")
+        or (tags.get("name") and any(tags.get(k) for k in ("highway", "amenity", "leisure")))
+    )
+
+
+def named_place_selection(target, tags):
+    return target != "place" or _legacy_place(tags)
+
+
+def bootstrap_v1_selection(target, tags):
+    return _legacy_bootstrap_element(tags) and named_place_selection(target, tags)
+
+
+LEGACY_OSM_SELECTIONS = {
+    **dict.fromkeys(NAMED_POI_OSM_VERSIONS, named_place_selection),
+    "osm-api-bootstrap-v1": bootstrap_v1_selection,
+}
+
+
+# `project_import.py` at 123900b (project-details-v1) wrote no project position: the
+# source-declared position arrives with `project_locations.py` in 4d2c51f (A15).
+def no_position_selection(target, tags):
+    return target != "place"
+
+
+LEGACY_PROJECT_SELECTIONS = {"project-details-v1": no_position_selection}
+
+
+def legacy_selection(operation, scope, version):
+    """`(target, tags) -> bool` for a recorded legacy OSM or project mapping, or None.
+
+    `target` is the map target of an observation, or None for a quarantined element.
+    """
+    if operation == "osm_bootstrap" or (operation == "map" and scope.endswith(":osm")):
+        return LEGACY_OSM_SELECTIONS.get(version)
+    if operation == "project_details":
+        return LEGACY_PROJECT_SELECTIONS.get(version)
+    return None

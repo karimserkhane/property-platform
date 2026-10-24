@@ -475,8 +475,8 @@ def test_observation_counts_per_step_locate_a_difference_without_deciding_ok(tmp
     assert report["steps"][0]["rows"] == {"expected": expected, "actual": rows}
 
 
-def _observed_run():
-    """One run whose capture holds one place observation."""
+def _observed_run(tags=(None,)):
+    """One run whose capture holds one place observation per OSM tag set."""
     from django.contrib.gis.geos import Point
 
     from property_platform.modules.catalog.models import Place
@@ -495,20 +495,23 @@ def _observed_run():
         byte_length=2,
         content_sha256=hashlib.sha256(b"{}").hexdigest(),
     )
-    place = Place.objects.create(
-        source_namespace="test:place", source_record_id="1", geometry=Point(54.4, 24.5)
-    )
-    MapObservation.objects.create(
-        place=place,
-        capture=capture,
-        source_record_id="1",
-        source_url=source.url,
-        raw_attributes={},
-        record_sha256="b" * 64,
-        mapping_version="test",
-        action="created",
-        target_revision=1,
-    )
+    for index, tag_set in enumerate(tags, start=1):
+        place = Place.objects.create(
+            source_namespace="test:place",
+            source_record_id=str(index),
+            geometry=Point(54.4, 24.5),
+        )
+        MapObservation.objects.create(
+            place=place,
+            capture=capture,
+            source_record_id=str(index),
+            source_url=source.url,
+            raw_attributes={} if tag_set is None else {"tags": tag_set},
+            record_sha256="b" * 64,
+            mapping_version="test",
+            action="created",
+            target_revision=1,
+        )
     return run
 
 
@@ -574,8 +577,104 @@ def test_only_a_reviewed_divergence_matching_its_later_run_is_counted_apart(
         assert "reviewed_delta" not in table and not table["matches"]
 
 
+@pytest.mark.parametrize(
+    ("variant", "ok"),
+    [("legacy", True), ("missing_original", False), ("current_version", False)],
+)
+def test_only_places_the_legacy_osm_mapping_excluded_are_counted_apart(
+    tmp_path, monkeypatch, variant, ok
+):
+    # A named amenity existed under the legacy mapping; an unnamed shelter did not.
+    run = _observed_run(({"amenity": "cafe", "name": "Cafe"}, {"amenity": "shelter"}))
+    monkeypatch.setattr(
+        archive.orchestration,
+        "execute_import",
+        lambda **kwargs: {"status": "succeeded", "run_ids": [str(run.pk)]},
+    )
+    expected = archive.counts()
+    expected["evidence.map_observation"] -= 1
+    original = {"map_observation:place:created": 1}
+    if variant == "missing_original":
+        original["map_observation:street:created"] = 1
+    archive.write_json(
+        tmp_path / "manifest.json",
+        {
+            "version": 1,
+            "snapshot_at": "2026-10-23T00:00:00+00:00",
+            "expected": expected,
+            "steps": [
+                {
+                    "operation": "map",
+                    "scope": "al-reem-island:osm",
+                    "run": "original",
+                    "original_version": "district-map-v5"
+                    if variant == "current_version"
+                    else "reem-map-v2",
+                    "original_status": "succeeded",
+                    "original_rows": original,
+                    "captures": [],
+                }
+            ],
+            "scenes": [],
+            "tiles": [],
+            "omitted": [],
+        },
+    )
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    report = json.loads((tmp_path / "report.json").read_text())
+    table = next(r for r in report["tables"] if r["table"] == "evidence.map_observation")
+    step = report["steps"][0]
+    assert result["ok"] is ok and result["diverged_steps"] == 0
+    if variant == "legacy":
+        assert result["legacy_selections"] == 1
+        assert step["legacy_selection"] == {
+            "version": "reem-map-v2",
+            "excluded": {"map_observation:place:created": 1},
+            "matches": True,
+        }
+        assert table["reviewed_delta"] == 1 and table["matches"]
+    elif variant == "missing_original":
+        # A street the original run observed is missing: nothing is excused.
+        assert result["legacy_selections"] == 0 and not step["legacy_selection"]["matches"]
+        assert "reviewed_delta" not in table and not table["matches"]
+    else:
+        assert "legacy_selection" not in step and not table["matches"]
+
+
+def test_legacy_selection_rules_are_copied_from_their_commits():
+    from property_platform.modules.evidence import replay_protocols as legacy
+
+    named = legacy.legacy_selection("map", "al-reem-island:osm", "reem-map-v1")
+    bootstrap = legacy.legacy_selection("osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v1")
+    assert legacy.legacy_selection("map", "al-reem-island:community", "reem-map-v1") is None
+    assert (
+        legacy.legacy_selection("osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v2") is None
+    )
+    assert named("place", {"amenity": "cafe", "name:en": "Cafe"})
+    assert named("place", {"building": "yes", "name": "Tower"})
+    assert not named("place", {"amenity": "parking"})
+    assert not named("place", {"shop": "beauty", "name": "Salon"})
+    assert not named("place", {"amenity": "cafe", "name:ar": "مقهى"})
+    assert named("building", {"building": "yes"}) and named(None, {"leisure": "garden"})
+    # The v1 OSM API decoder read `name` only and dropped other elements before mapping.
+    assert not bootstrap("place", {"amenity": "cafe", "name:en": "Aptitude"})
+    assert bootstrap("place", {"amenity": "cafe", "name": "Aptitude"})
+    assert bootstrap("building", {"building": "yes"})
+    assert not bootstrap(None, {"leisure": "garden", "type": "multipolygon"})
+    assert not bootstrap(None, {"place": "island", "tourism": "yes", "name": "Al Reem Island"})
+    # project-details-v1 (123900b) wrote no position; v2 onwards may.
+    scope = "al-reem-island:x:y"
+    project = legacy.legacy_selection("project_details", scope, "project-details-v1")
+    assert not project("place", {}) and project(None, {})
+    assert legacy.legacy_selection("project_details", scope, "project-details-v2") is None
+
+
 def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path):
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
     from property_platform.modules.evidence import project_protocol
+    from property_platform.modules.evidence.models import MapObservation
 
     project = next(
         row
@@ -589,21 +688,42 @@ def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path
     run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
     run.status, run.finished_at = "succeeded", datetime.now(UTC)
     run.save(update_fields=["status", "finished_at"])
+    captures = []
     stamp = datetime(2026, 10, 1, tzinfo=UTC)
     for url in (registered["url"], registered["url"], "https://example.com/retired-source"):
-        Capture.objects.create(
-            run=run,
-            payload=b"<html></html>",
-            url=url,
-            http_status=200,
-            fetched_at=stamp,
-            fetched_started_at=stamp,
-            byte_length=13,
-            content_sha256=hashlib.sha256(b"<html></html>").hexdigest(),
+        captures.append(
+            Capture.objects.create(
+                run=run,
+                payload=b"<html></html>",
+                url=url,
+                http_status=200,
+                fetched_at=stamp,
+                fetched_started_at=stamp,
+                byte_length=13,
+                content_sha256=hashlib.sha256(b"<html></html>").hexdigest(),
+            )
+        )
+    place = Place.objects.create(
+        source_namespace=source.key, source_record_id="publisher-map", geometry=Point(54.4, 24.5)
+    )
+    # Only the selected page counts, not a repeated capture of the same run.
+    for capture, action in zip(captures[:2], ("created", "unchanged"), strict=True):
+        MapObservation.objects.create(
+            place=place,
+            capture=capture,
+            source_record_id="publisher-map",
+            source_url=capture.url,
+            raw_attributes={},
+            record_sha256="c" * 64,
+            mapping_version="test",
+            action=action,
+            target_revision=1,
         )
     archive.export_archive(tmp_path)
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     assert [len(step["captures"]) for step in manifest["steps"]] == [1]
+    assert manifest["steps"][0]["original_rows"] == {"map_observation:place:created": 1}
+    assert manifest["steps"][0]["original_version"] == "test"
     assert manifest["omitted"] == [
         {
             "source": source.key,
@@ -612,3 +732,219 @@ def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path
             "reason": "Project capture not selected for replay: repeated or unregistered URL",
         }
     ]
+
+
+def test_namespace_counts_locate_place_differences_record_by_record(monkeypatch):
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
+
+    def place(namespace, record_id, active=True):
+        return Place.objects.create(
+            source_namespace=namespace,
+            source_record_id=record_id,
+            active=active,
+            geometry=Point(54.4, 24.5),
+        )
+
+    place("project:alpha", "marker")
+    place("project:beta", "marker", active=False)
+    place("osm:test:osm", "node/1")
+    place("osm:test:osm", "node/2")
+    expected = archive.namespaces()
+    stats = expected["real_estate.place"]
+    assert stats["project:beta"] | {"fingerprint": None} == {
+        "active": 0,
+        "inactive": 1,
+        "fingerprint": None,
+        "records": [["marker", False]],
+    }
+    assert set(expected) == {f"real_estate.{t}" for t in archive.MAP_TARGETS}
+
+    Place.objects.filter(source_namespace="project:beta").update(active=True)
+    Place.objects.filter(source_record_id="node/2").delete()
+    place("project:gamma", "marker")
+    differences = archive.namespace_differences(expected, archive.namespaces())
+    assert differences == {
+        "real_estate.place": {
+            "osm:test:osm": {
+                "expected": {"active": 2, "inactive": 0},
+                "actual": {"active": 1, "inactive": 0},
+                "missing": ["node/2"],
+                "extra": [],
+                "activity_changed": [],
+            },
+            "project:beta": {
+                "expected": {"active": 0, "inactive": 1},
+                "actual": {"active": 1, "inactive": 0},
+                "missing": [],
+                "extra": [],
+                "activity_changed": ["marker"],
+            },
+            "project:gamma": {
+                "expected": {"active": 0, "inactive": 0},
+                "actual": {"active": 1, "inactive": 0},
+                "missing": [],
+                "extra": ["marker"],
+                "activity_changed": [],
+            },
+        }
+    }
+
+    # A large namespace keeps counts and fingerprint only: located, not listed.
+    monkeypatch.setattr(archive, "NAMESPACE_RECORDS", 0)
+    actual = archive.namespaces()
+    assert "records" not in actual["real_estate.place"]["osm:test:osm"]
+    unlisted = archive.namespace_differences(expected, actual)
+    assert "missing" not in unlisted["real_estate.place"]["osm:test:osm"]
+
+
+def _observed_place(namespace, record_id, observations, *, active=True):
+    """One place with (mapping version, action) observations on one capture each."""
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import MapObservation
+
+    source = Source.objects.create(key=namespace, name="Test", url="https://example.com/p")
+    run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
+    place = Place.objects.create(
+        source_namespace=namespace,
+        source_record_id=record_id,
+        active=active,
+        geometry=Point(54.4, 24.5),
+    )
+    stamp = datetime(2026, 10, 1, tzinfo=UTC)
+    for version, action in observations:
+        capture = Capture.objects.create(
+            run=run,
+            payload=b"{}",
+            url=source.url,
+            http_status=200,
+            fetched_at=stamp,
+            fetched_started_at=stamp,
+            byte_length=2,
+            content_sha256=hashlib.sha256(b"{}").hexdigest(),
+        )
+        MapObservation.objects.create(
+            place=place,
+            capture=capture,
+            source_record_id=record_id,
+            source_url=source.url,
+            raw_attributes={},
+            record_sha256="d" * 64,
+            mapping_version=version,
+            action=action,
+            target_revision=1,
+        )
+    return run
+
+
+def test_withdrawn_attribution_counts_apart_only_an_exact_absent_identity(monkeypatch):
+    key = ("place", "project:withdrawn", "publisher-map")
+    monkeypatch.setattr(
+        archive,
+        "WITHDRAWN_ATTRIBUTIONS",
+        {key: {"observations": (("v1", "created"), ("v2", "retired")), "reason": "test"}},
+    )
+    monkeypatch.setattr(archive, "REVIEWED_REINTERPRETATIONS", {})
+    run = _observed_place(*key[1:], (("v1", "created"), ("v2", "retired")), active=False)
+    _observed_place("project:kept", "publisher-map", (("v2", "created"),))
+    # Step rows of a withdrawn identity are set apart from the other observations.
+    assert archive.run_rows([run.pk], identities=[key]) == {
+        "map_observation:place:created": 1,
+        "map_observation:place:retired": 1,
+    }
+    assert archive.run_rows([run.pk], identities=[("place", "project:kept", "x")]) == {}
+    name = "|".join(key)
+    reference = archive.reviewed_identities()
+    state = {"active": False, "observations": [["v1", "created"], ["v2", "retired"]]}
+    assert reference == {name: state}
+
+    def matches(expected, actual):
+        return archive.withdrawn_attributions(expected, actual)[0]["matches"]
+
+    assert matches(reference, {name: None})
+    # Recreated at replay, still active in the reference or otherwise observed: not exact.
+    assert not matches(reference, reference)
+    assert not matches({name: state | {"active": True}}, {name: None})
+    assert not matches({name: state | {"observations": [["v1", "created"]]}}, {name: None})
+
+
+def test_row_differences_are_explained_only_by_their_exact_rule(monkeypatch):
+    def step(version, rows, sha="a", scope="al-reem-island:ref", run="r1", operation="references"):
+        return {
+            "operation": operation,
+            "scope": scope,
+            "run": run,
+            "original_version": version,
+            "original_rows": rows,
+            "captures": [{"sha256": sha}],
+        }
+
+    created = {"map_observation:place:created": 1}
+    unchanged = {"map_observation:place:unchanged": 1}
+
+    def explain(item, rows, *, reused=False, steps=(), reference=None):
+        steps = [item, *steps]
+        return archive.explain_rows(
+            item, rows, item["original_rows"], None, reused, steps, 0, reference
+        )
+
+    # An identical receipt is not re-read: only confirmations may be missing.
+    project = step("project-details-v5", unchanged, operation="project_details")
+    assert explain(project, {}, reused=True) == (
+        "reused_receipt",
+        {"not_recreated": unchanged, "matches": True},
+    )
+    recreated = step("project-details-v5", created, operation="project_details")
+    assert not explain(recreated, {}, reused=True)[1]["matches"]
+    # An unrecorded interpretation gives what the first later run of the same bytes gave.
+    v1 = step("reem-references-v1", {})
+    name, detail = explain(v1, created, steps=[step("reem-references-v2", created, run="r2")])
+    assert name == "superseded_interpretation" and detail["matches"]
+    assert detail["same_as_run"] == "r2"
+    assert not explain(v1, created, steps=[step("reem-references-v2", {}, run="r2")])[1]["matches"]
+    assert explain(v1, created, steps=[step("reem-references-v2", created, sha="b")]) is None
+    assert explain(step("reem-references-v2", {}), created) is None
+    # A reviewed reinterpretation needs its run, captures, rows and new active identity.
+    identity = ("place", "research:new", "project-map-marker")
+    monkeypatch.setattr(
+        archive,
+        "REVIEWED_REINTERPRETATIONS",
+        {"r9": {"captures": ("a",), "rows": created, "identity": identity, "reason": "test"}},
+    )
+    monkeypatch.setattr(archive, "WITHDRAWN_ATTRIBUTIONS", {})
+    reviewed = step("district-references-v3", {}, run="r9")
+    absent = {"|".join(identity): None}
+    assert not explain(reviewed, created, reference=absent)[1]["matches"]
+    _observed_place(*identity[1:], (("district-references-v3", "created"),))
+    assert explain(reviewed, created, reference=absent)[1]["matches"]
+    assert not explain(reviewed, created, reference={})[1]["matches"]
+    assert not explain(reviewed, {**created, **unchanged}, reference=absent)[1]["matches"]
+    assert explain(step("district-references-v3", {}, run="r8"), created) is None
+
+
+def test_presentations_must_describe_the_same_provider_identities():
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import PropertyPresentation
+
+    run = _observed_place("osm:test:osm", "way/1", (("district-map-v5", "created"),))
+    place = Place.objects.get(source_record_id="way/1")
+    PropertyPresentation.objects.create(
+        place=place,
+        capture=Capture.objects.filter(run=run).first(),
+        display_name="Park View",
+        publisher_name="Bloom",
+        website_url="https://example.com/park-view",
+        review_version="test",
+    )
+    bound = ["place", "osm:test:osm", "way/1", "https://example.com/park-view"]
+    assert archive.presentation_bindings() == [bound]
+    assert archive.binding_differences([bound], [bound]) == {"missing": [], "extra": []}
+    # The same page bound to another OSM identity is never an equal count.
+    other = ["place", "osm:test:osm", "way/2", "https://example.com/park-view"]
+    assert archive.binding_differences([bound, bound], [bound, other]) == {
+        "missing": [bound],
+        "extra": [other],
+    }
