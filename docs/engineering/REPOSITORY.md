@@ -16,7 +16,11 @@ journalisée (migration additive `0033`). L'historique est la suite des lectures
 date d'observation est celle de la capture, la date de mesure celle de l'inspection
 donnée par le registre. Aucun collecteur DARI ([décision B01](../product/QUALIFICATION_REGISTRE_ADREC_20261024.md)).
 Direction : import evidence → catalog, sans point d'entrée HTTP ni changement de
-contrat ; l'affichage relève de B05.
+contrat ; l'affichage relève de B05. `project_verification_links.json` et
+`project_verification_links.py` possèdent les liens relus vers la fiche officielle DARI
+(table journalisée `evidence.project_verification_link`, migration additive `0034`),
+rattachés à un numéro porté par une source ADREC enregistrée, révoqués et jamais
+supprimés ; la page n'est jamais lue. Voir [la vérification des projets](PROJECT_VERIFICATION.md).
 
 **État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild_published.py`
 possède la forme canonique de l'état publié (fiches projet, liens d'identité actifs),
