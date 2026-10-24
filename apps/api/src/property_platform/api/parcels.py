@@ -450,6 +450,30 @@ def parcel_index(
     return _parcel_rows(read_index, bbox, limit, q, territory, after)
 
 
+@router.get(
+    "/parcel-search",
+    response={200: ParcelIndex, 403: Error, 409: Error, 422: Error, 503: Error},
+    operation_id="previewParcelSearch",
+)
+@decorate_view(cached_read)
+def parcel_search(request, q: str, territory: str, limit: int = 12):
+    """Index rows whose code starts with `q` anywhere in the territory, so a map
+    reading only its visible cells can still find a parcel outside the view."""
+    from property_platform.modules.catalog.territories import TERRITORY_BY_ID
+    from property_platform.modules.publication.preview import parcel_index as read_index
+
+    query = q.strip()
+    if territory not in TERRITORY_BY_ID or not 2 <= len(query) <= 80 or not 1 <= limit <= 50:
+        return Status(422, {"code": "invalid_query"})
+    profile = territory_profile(territory)
+    return read_index(
+        bbox=TERRITORY_BY_ID[territory].bounds,
+        limit=limit,
+        query=query,
+        namespaces=profile.parcel_namespaces,
+    )
+
+
 def _parcel_rows(read, bbox, limit, q, territory, after):
     bounds = parse_bbox(bbox)
     query = q.strip()

@@ -20,13 +20,14 @@ import {
   searchItems,
   searchMap,
   setMapTool,
+  withParcelMatches,
 } from "./map-analysis";
 import { MapComparison } from "./map-comparison";
 import styles from "./map-workbench.module.css";
 import { geometryBounds } from "./presentation";
 import { updateProjectClusters } from "./project-clusters";
 import { dubaiClock, shadowPolygons, solarInstant, sunlight } from "./solar";
-import type { MapContext, MapLabels, ParcelRows } from "./types";
+import type { MapContext, MapLabels, ParcelIndex, ParcelRows } from "./types";
 
 export function MapWorkbench({
   map,
@@ -38,6 +39,7 @@ export function MapWorkbench({
   compact = false,
   places = true,
   names = true,
+  searchParcels = false,
   onChoose,
 }: {
   map: LibreMap | null;
@@ -49,6 +51,8 @@ export function MapWorkbench({
   compact?: boolean;
   places?: boolean;
   names?: boolean;
+  // Also look up parcel codes outside the loaded rows, across the territory.
+  searchParcels?: boolean;
   onChoose?: (item: SearchItem) => void;
 }) {
   const root = useRef<HTMLDetailsElement>(null);
@@ -91,7 +95,38 @@ export function MapWorkbench({
     () => searchItems(context, parcels, locale),
     [context, parcels, locale],
   );
-  const results = useMemo(() => searchMap(inputs, query), [inputs, query]);
+  const [parcelMatches, setParcelMatches] = useState<{
+    query: string;
+    rows: ParcelIndex;
+  } | null>(null);
+  const needle = query.trim();
+  useEffect(() => {
+    if (!searchParcels || needle.length < 2) return;
+    const controller = new AbortController();
+    // Wait for a pause in typing; each keystroke would otherwise be a request.
+    const timer = window.setTimeout(() => {
+      const params = new URLSearchParams({ q: needle, territory });
+      fetch(`/api/atlas/parcel-search?${params}`, { signal: controller.signal })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((rows: ParcelIndex | null) => {
+          if (rows) setParcelMatches({ query: needle, rows });
+        })
+        // Visible matches still show; a failed lookup only leaves out distant parcels.
+        .catch(() => {});
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [searchParcels, needle, territory]);
+  const results = useMemo(
+    () =>
+      withParcelMatches(
+        searchMap(inputs, query),
+        parcelMatches?.query === needle ? parcelMatches.rows : null,
+      ),
+    [inputs, query, needle, parcelMatches],
+  );
   const measures = useMemo(
     () => measurement(points, finished && drawKind === "zone"),
     [points, finished, drawKind],

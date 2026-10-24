@@ -124,6 +124,43 @@ def test_index_rejects_invalid_queries_like_parcels(client, query):
         assert client.get("/api/v1/preview/parcel-index", query).status_code == 422
 
 
+def test_search_finds_codes_by_prefix_across_the_territory(client):
+    run([residential(1, "RT1_C1"), residential(2, "RT1_C2", offset=0.02), residential(3, "XX9")])
+    with override_settings(**PREVIEW):
+        found = client.get(
+            "/api/v1/preview/parcel-search", {"q": " rt1_", "territory": "al-reem-island"}
+        )
+        limited = client.get(
+            "/api/v1/preview/parcel-search",
+            {"q": "RT1", "territory": "al-reem-island", "limit": "1"},
+        ).json()
+        index = client.get("/api/v1/preview/parcel-index", BBOX).json()
+    assert found.status_code == 200
+    rows = found.json()["features"]
+    assert [row["properties"]["code"] for row in rows] == sorted(
+        ["RT1_C1", "RT1_C2"], key=lambda code: Parcel.objects.get(code=code).pk
+    )
+    published = {row["id"]: row for row in index["features"]}
+    for row in rows:
+        assert "geometry" not in row
+        assert row["properties"] == published[row["id"]]["properties"]
+    assert len(limited["features"]) == 1 and limited["truncated"]
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        {"q": "R", "territory": "al-reem-island"},
+        {"q": "RT1", "territory": "nowhere"},
+        {"q": "RT1"},
+        {"q": "RT1", "territory": "al-reem-island", "limit": "51"},
+    ],
+)
+def test_search_rejects_short_queries_and_unknown_territories(client, query):
+    with override_settings(**PREVIEW):
+        assert client.get("/api/v1/preview/parcel-search", query).status_code == 422
+
+
 def test_overview_tiles_leave_out_sub_pixel_parcels_but_detail_tiles_keep_them(client):
     tiny = residential(2, "RT1_TINY")
     tiny["geometry"]["rings"] = [

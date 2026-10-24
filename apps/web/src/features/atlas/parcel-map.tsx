@@ -105,6 +105,7 @@ export default function ParcelMap({
   onFeature,
   onError,
   onContext,
+  onViewport,
   label,
   options,
   view,
@@ -123,6 +124,8 @@ export default function ParcelMap({
   onFeature: (feature: MapFeature) => void;
   onError: () => void;
   onContext: () => void;
+  // Visible west, south, east, north after load and each move.
+  onViewport?: (bounds: [number, number, number, number]) => void;
   label: string;
   options: MapOptions;
   view: MapView;
@@ -150,8 +153,14 @@ export default function ParcelMap({
   const worldPopup = useRef<Popup | null>(null);
   const popupLabels = useRef({ m, locale });
   popupLabels.current = { m, locale };
-  const callbacks = useRef({ onSelect, onFeature, onError, onContext });
-  callbacks.current = { onSelect, onFeature, onError, onContext };
+  const callbacks = useRef({
+    onSelect,
+    onFeature,
+    onError,
+    onContext,
+    onViewport,
+  });
+  callbacks.current = { onSelect, onFeature, onError, onContext, onViewport };
   const contextRef = useRef(context);
   contextRef.current = context;
   const optionsRef = useRef(options);
@@ -301,6 +310,17 @@ export default function ParcelMap({
       for (const layer of tiledParcelLayers(mapLayers("en")))
         instance.addLayer(layer);
       setToolMap(instance);
+      const reportViewport = () => {
+        const b = instance.getBounds();
+        callbacks.current.onViewport?.([
+          b.getWest(),
+          b.getSouth(),
+          b.getEast(),
+          b.getNorth(),
+        ]);
+      };
+      reportViewport();
+      instance.on("moveend", reportViewport);
       instance.on("click", (event) => {
         if (mapToolActive(instance) || zoomProjectCluster(instance, event))
           return;
@@ -932,6 +952,7 @@ export default function ParcelMap({
         territory={territory.id}
         places={true}
         names={options.names}
+        searchParcels
         onChoose={(item) => {
           if (item.feature) callbacks.current.onFeature(item.feature);
           else if (item.parcelId) callbacks.current.onSelect(item.parcelId);
