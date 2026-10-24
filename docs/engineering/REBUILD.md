@@ -122,6 +122,15 @@ par action (`created`, `updated`, `unchanged`, `retired`), `parcel_observation` 
 pas de `ok` (les politiques de table ci-dessus le font). Un manifeste plus ancien,
 sans `original_rows`, n'a pas ce détail.
 
+**Espaces de noms.** Le manifeste relève aussi, pour `street`, `building`, `place` et
+`administrative_area`, les identités par espace de noms du fournisseur (actives,
+inactives, empreinte) ; un espace d'au plus 200 identités les liste une à une. Une table
+dont un espace diffère porte `namespaces` : comptes attendus et obtenus et, quand les
+deux côtés sont listés, identités absentes (`missing`), en plus (`extra`) ou dont
+l'état actif a changé (`activity_changed`). `namespace_differences` compte ces espaces.
+C'est aussi un **diagnostic** ([A15](../tasks/A15.md)) ; un manifeste plus ancien n'a
+pas ce détail.
+
 **Divergences revues.** Le registre `REVIEWED_DIVERGENCES` (`rebuild_archive.py`)
 liste, une par une, les exécutions dont le statut d'origine n'est pas reproductible
 depuis le dépôt et qu'une exécution ultérieure des **mêmes octets** a déjà
