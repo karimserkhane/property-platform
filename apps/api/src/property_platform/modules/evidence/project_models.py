@@ -536,3 +536,61 @@ class ProjectVerification(models.Model):
                 name="project_verification_sold_original",
             ),
         ]
+
+
+class ProjectVerificationLink(models.Model):
+    """Reviewed link from a project registration to its official verification page (B02).
+
+    The page is a reference the buyer opens; its content is never collected or copied
+    (B01). The registration number is one the project's registered ADREC source carries.
+    Active rows follow `project_verification_links.json`; removed entries are revoked.
+    """
+
+    project = models.ForeignKey(
+        "catalog.Project", on_delete=models.PROTECT, related_name="verification_links"
+    )
+    authority = models.CharField(max_length=20)
+    registration_number = models.CharField(max_length=40)
+    url = models.URLField(max_length=200)
+    basis = models.CharField(max_length=500)
+    reviewed_on = models.DateField()
+    actor = models.CharField(max_length=160)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True)
+    revoked_by = models.CharField(max_length=160, blank=True)
+    revocation_reason = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        db_table = "project_verification_link"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    authority__in=["adrec"],
+                    registration_number__regex=r"^[0-9][0-9/]{5,39}$",
+                    url__regex=r"^https://www\.dari\.ae/en/app/directory/project/[1-9][0-9]{0,9}$",
+                    basis__regex=r"\S",
+                    actor__regex=r"\S",
+                ),
+                name="project_verification_link_review_present",
+            ),
+            # One active page per registration; a revoked link stays as history.
+            models.UniqueConstraint(
+                fields=["project", "authority", "registration_number"],
+                condition=models.Q(active=True),
+                name="project_verification_link_one_active",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    active=True, revoked_at__isnull=True, revoked_by="", revocation_reason=""
+                )
+                | models.Q(
+                    active=False,
+                    revoked_at__isnull=False,
+                    revoked_at__gte=models.F("created_at"),
+                    revoked_by__regex=r"\S",
+                    revocation_reason__regex=r"\S",
+                ),
+                name="project_verification_link_revocation_valid",
+            ),
+        ]

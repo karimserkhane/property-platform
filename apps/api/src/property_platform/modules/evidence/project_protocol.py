@@ -158,6 +158,62 @@ def validate_project_relations(rows, projects):
             slug = parents[slug]
 
 
+VERIFICATION_PAGE = re.compile(r"https://www\.dari\.ae/en/app/directory/project/[1-9][0-9]{0,9}")
+
+
+def project_verification_links(territory=None):
+    """Reviewed official verification pages of registered project registrations.
+
+    An operator opens the page and records it; nothing is collected from it (B01). The
+    registration number must be one a registered ADREC source of the project carries,
+    so every link traces to a collected register record. `territory:slug` selects a
+    territory like the other registries.
+    """
+    rows = json.loads(
+        Path(__file__).with_name("project_verification_links.json").read_text("utf-8")
+    )
+    registry = json.loads(Path(__file__).with_name("project_registry.json").read_text("utf-8"))
+    projects = {row["slug"]: row for row in registry}
+    validate_project_verification_links(rows, projects)
+    territory = territory.split(":")[0] if territory else None
+    return tuple(
+        row
+        for row in rows
+        if territory is None or projects[row["project"]]["territory_id"] == territory
+    )
+
+
+def validate_project_verification_links(rows, projects):
+    if not isinstance(rows, list):
+        raise ValueError("Expected a list of reviewed verification links")
+    seen, pages = set(), {}
+    for row in rows:
+        project = projects.get(row.get("project"))
+        if project is None:
+            raise ValueError("A verification link must name a registered project")
+        numbers = {
+            source.get("registration_number")
+            for source in project["sources"]
+            if source.get("parser") == "adrec_project_v1"
+        }
+        number = row.get("registration_number")
+        if number not in numbers:
+            raise ValueError("A verification link must cite a registered ADREC registration")
+        url = row.get("url")
+        if not isinstance(url, str) or not VERIFICATION_PAGE.fullmatch(url):
+            raise ValueError("A verification link must be an official DARI project page")
+        basis = row.get("basis")
+        if not isinstance(basis, str) or not basis.strip() or len(basis) > 500:
+            raise ValueError("A verification link needs its basis")
+        date.fromisoformat(row.get("reviewed_on") or "")
+        key = (row["project"], number)
+        if key in seen:
+            raise ValueError("A registration has at most one verification page")
+        seen.add(key)
+        if pages.setdefault(url, number) != number:
+            raise ValueError("A verification page belongs to one registration")
+
+
 def project_urls(projects):
     """Only HTML/terms acquisition URLs; media references are deliberately excluded."""
     if not isinstance(projects, (tuple, list)) or not 1 <= len(projects) <= 200:

@@ -1031,6 +1031,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
     """Called only against the database just created by the ingestion controller."""
     from . import property_import
     from .project_relations import apply_project_relations
+    from .project_verification_links import apply_project_verification_links
 
     manifest = json.loads((root / "manifest.json").read_text("utf-8"))
     if manifest["version"] != VERSION:
@@ -1171,6 +1172,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
         ("basemap_tiles", lambda: replay_tiles(root, manifest["tiles"], actor)),
         ("imagery", lambda: replay_scenes(root, manifest["scenes"], actor)),
         ("project_relations", lambda: apply_project_relations(actor=actor)),
+        ("project_verification_links", lambda: apply_project_verification_links(actor=actor)),
     ):
         try:
             with audit_context(actor=actor):
