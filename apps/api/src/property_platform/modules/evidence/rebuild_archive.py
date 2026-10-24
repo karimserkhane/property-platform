@@ -178,8 +178,11 @@ def _map_target():
     )
 
 
-def run_rows(run_ids):
+def run_rows(run_ids=(), *, captures=None):
     """Observations written by the given runs, by target and action, plus quarantines.
+
+    `captures` restricts the count to those captures: a project run is replayed one
+    registered page at a time.
 
     Diagnostic only: it locates which acquisition explains a table difference (for
     example a historical quarantine accepted at replay); the table policies decide `ok`.
@@ -189,8 +192,9 @@ def run_rows(run_ids):
     from .models import MapObservation, ParcelObservation, QuarantinedObservation
 
     result = {}
+    written = Q(capture__run_id__in=run_ids) if captures is None else Q(capture_id__in=captures)
     for row in (
-        MapObservation.objects.filter(capture__run_id__in=run_ids)
+        MapObservation.objects.filter(written)
         .annotate(target=_map_target())
         .values("target", "action")
         .annotate(total=Count("pk"))
@@ -201,7 +205,7 @@ def run_rows(run_ids):
         ("parcel_observation", ParcelObservation),
         ("quarantined_observation", QuarantinedObservation),
     ):
-        total = model.objects.filter(capture__run_id__in=run_ids).count()
+        total = model.objects.filter(written).count()
         if total:
             result[name] = total
     return result
@@ -344,6 +348,10 @@ def export_archive(root: Path):
                             "scope": f"{project['territory_id']}:{project['slug']}:"
                             + hashlib.sha256(source["url"].encode()).hexdigest(),
                             "run": str(run.pk),
+                            # Diagnostic only (A15): this page's observations, not the
+                            # whole run; the status is compared through published state.
+                            "original_version": run.connector_version,
+                            "original_rows": run_rows(captures=[c.pk for c in selected]),
                             "captures": [_capture(root, c) for c in selected],
                         }
                     )

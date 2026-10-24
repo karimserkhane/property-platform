@@ -668,7 +668,11 @@ def test_legacy_osm_selection_rules_are_copied_from_their_commits():
 
 
 def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path):
+    from django.contrib.gis.geos import Point
+
+    from property_platform.modules.catalog.models import Place
     from property_platform.modules.evidence import project_protocol
+    from property_platform.modules.evidence.models import MapObservation
 
     project = next(
         row
@@ -682,21 +686,42 @@ def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path
     run = IngestionRun.objects.create(source=source, actor="test", connector_version="test")
     run.status, run.finished_at = "succeeded", datetime.now(UTC)
     run.save(update_fields=["status", "finished_at"])
+    captures = []
     stamp = datetime(2026, 10, 1, tzinfo=UTC)
     for url in (registered["url"], registered["url"], "https://example.com/retired-source"):
-        Capture.objects.create(
-            run=run,
-            payload=b"<html></html>",
-            url=url,
-            http_status=200,
-            fetched_at=stamp,
-            fetched_started_at=stamp,
-            byte_length=13,
-            content_sha256=hashlib.sha256(b"<html></html>").hexdigest(),
+        captures.append(
+            Capture.objects.create(
+                run=run,
+                payload=b"<html></html>",
+                url=url,
+                http_status=200,
+                fetched_at=stamp,
+                fetched_started_at=stamp,
+                byte_length=13,
+                content_sha256=hashlib.sha256(b"<html></html>").hexdigest(),
+            )
+        )
+    place = Place.objects.create(
+        source_namespace=source.key, source_record_id="publisher-map", geometry=Point(54.4, 24.5)
+    )
+    # Only the selected page counts, not a repeated capture of the same run.
+    for capture, action in zip(captures[:2], ("created", "unchanged"), strict=True):
+        MapObservation.objects.create(
+            place=place,
+            capture=capture,
+            source_record_id="publisher-map",
+            source_url=capture.url,
+            raw_attributes={},
+            record_sha256="c" * 64,
+            mapping_version="test",
+            action=action,
+            target_revision=1,
         )
     archive.export_archive(tmp_path)
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     assert [len(step["captures"]) for step in manifest["steps"]] == [1]
+    assert manifest["steps"][0]["original_rows"] == {"map_observation:place:created": 1}
+    assert manifest["steps"][0]["original_version"] == "test"
     assert manifest["omitted"] == [
         {
             "source": source.key,
