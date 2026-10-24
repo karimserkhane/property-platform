@@ -23,7 +23,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A15](A15.md) | A | Écarts restants du rejeu géographique et anciennes identités OSM | 1 | A14 | non | done | claude |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
-| [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | in-progress | claude |
+| [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
 | [B04](B04.md) | B | Calculateur de retenue en cas d'annulation | 2 | B02 | non | todo | unassigned |
 | [B05](B05.md) | B | Fiche « Vérification » d'un projet | 1 | B02, B03, B04 | non | todo | unassigned |
 | [B06](B06.md) | B | Indice d'activité de chantier par satellite | 2 | A02 | non | todo | unassigned |

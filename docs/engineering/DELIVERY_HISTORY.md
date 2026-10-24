@@ -2,7 +2,7 @@
 
 Pour un promoteur, la plateforme montre ce que chaque source a annoncé comme date de livraison au fil du temps, ce que le registre ADREC a publié lors de chaque lecture, et les retards que ces lectures prouvent. C'est un calcul en lecture sur les lectures déjà stockées (`evidence.project_snapshot`, `evidence.project_verification`) : pas de table, pas de migration, pas de pipeline.
 
-Code : `apps/api/src/property_platform/modules/evidence/delivery_history.py`. API : `GET /api/v1/preview/developers/{key}/delivery-history` (aperçu local, mêmes gardes que les fiches projet).
+Code : `apps/api/src/property_platform/modules/evidence/delivery_history.py`. API : `GET /api/v1/preview/developers/{key}/delivery-history` (aperçu local, mêmes gardes que les fiches projet). Page : `/[locale]/developers/[key]` (`apps/web/src/features/projects/delivery-history.tsx`, adaptateur `delivery.ts`, libellés `Delivery`), liée depuis chaque fiche projet.
 
 ## Règles
 
@@ -21,4 +21,5 @@ Code : `apps/api/src/property_platform/modules/evidence/delivery_history.py`. AP
 
 - Les captures datent d'octobre 2026 ; les changements d'annonce observés restent rares tant que les sources ne sont pas relues dans la durée.
 - Un projet sans source ADREC n'a aucune livraison constatée ; ses annonces restent `undetermined`.
-- L'affichage (page promoteur, fiche « Vérification ») relève de l'étape suivante de B03 et de [B05](../tasks/B05.md).
+- La fiche « Vérification » d'un projet relève de [B05](../tasks/B05.md).
+- Les lectures du registre n'apparaissent qu'une fois les reçus ADREC relus par le code de B02 (rejeu `archive_all`, voir [REBUILD.md](REBUILD.md)).
