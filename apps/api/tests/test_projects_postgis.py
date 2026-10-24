@@ -24,6 +24,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
 )
 from property_platform.modules.evidence.project_import import (  # noqa: E402
     import_project_details,
+    interpretation_sha256,
+    registry_sha256,
     revoke_project_link,
 )
 from property_platform.modules.evidence.project_queries import (  # noqa: E402
@@ -131,6 +133,15 @@ def test_project_import_is_typed_idempotent_and_retains_provider_identities(proj
     )
     assert ProjectIdentityLink.objects.count() == 3
     assert Capture.objects.count() == 2  # source + captured terms, no binary rehosting
+    # Each reading keeps the exact registry entry and extraction code that produced it.
+    snapshot = ProjectSnapshot.objects.get()
+    registered = next(
+        row
+        for row in project_protocol.project_registry("saadiyat-island:park-view")
+        if row["slug"] == definition["slug"]
+    )
+    assert snapshot.registry_sha256 == registry_sha256(registered)
+    assert snapshot.extractor_sha256 == interpretation_sha256()
     assert set(Building.objects.values_list("name", flat=True)) == {"Provider building"}
     with CaptureQueriesContext(connection) as queries:
         data = project_detail(definition["slug"])
