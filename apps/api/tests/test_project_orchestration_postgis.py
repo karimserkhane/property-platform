@@ -185,3 +185,21 @@ def test_project_fingerprint_is_bounded_and_unknown_scope_cannot_create_a_job():
             receipt=rows(),
         )
     assert not IngestionExecution.objects.exists()
+
+
+def test_changed_reading_code_reads_archived_bytes_again(monkeypatch):
+    # A replay of the same receipt after an extractor change (B02 register facts)
+    # must reach the importer instead of reusing the earlier execution.
+    monkeypatch.setattr(project_import, "import_project_details", source_write)
+    receipt = rows()
+    first = execute(receipt)
+    unchanged = execute(copy.deepcopy(receipt), "same-code")
+    assert unchanged["reused_from"] == first["execution_id"]
+    monkeypatch.setattr(project_import, "interpretation_sha256", lambda: "0" * 64)
+    importer = Mock(
+        return_value={"projects": 1, "snapshots": 1, "reused": 0, "run_ids": first["run_ids"]}
+    )
+    monkeypatch.setattr(project_import, "import_project_details", importer)
+    reread = execute(copy.deepcopy(receipt), "new-code")
+    assert reread["status"] == "succeeded" and not reread["reused"]
+    assert importer.call_count == 1

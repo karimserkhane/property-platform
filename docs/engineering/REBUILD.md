@@ -249,7 +249,10 @@ reproduire **ce que le site publie** ; l'historique des lectures est une alerte.
   archivés, la base en service publie encore l'ancienne lecture et le contrôle le
   signale. Relire alors les reçus conservés par l'import ordinaire (flow
   `property-platform-project-details`, `acquisition_mode=archive_all`), puis relancer
-  le contrôle.
+  le contrôle. L'empreinte d'un import de fiches inclut `interpretation_sha256` : un
+  rejeu des mêmes octets avec un code de lecture inchangé réutilise l'exécution
+  précédente, un code modifié les relit (correctif du 24 octobre 2026 ; avant lui, ce
+  rejeu était court-circuité).
 
 ## Ce qui exige une sauvegarde ou un autre pipeline
 

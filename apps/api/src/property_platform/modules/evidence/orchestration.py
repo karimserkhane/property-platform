@@ -280,6 +280,9 @@ def _fingerprint(operation, receipt, territory=DEFAULT_TERRITORY):
     elif operation == "project_details":
         value["review_version"] = project_import.VERSION
         value["parser_version"] = project_protocol.PARSER_VERSION
+        # Reading code changes without a version bump (A12): the same archived bytes
+        # must then be read again rather than reuse the earlier execution.
+        value["interpretation_sha256"] = project_import.interpretation_sha256()
         value["registry"] = project_protocol.project_registry(territory)
     else:
         value["render_version"] = "reem-sentinel-crop-v1"
