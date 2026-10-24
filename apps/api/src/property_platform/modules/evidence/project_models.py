@@ -62,6 +62,10 @@ class ProjectSnapshot(models.Model):
     )
     receipt_key = models.CharField(max_length=64, unique=True)
     extractor_version = models.CharField(max_length=80)
+    # Exact interpretation identity (A12): the registry entry and the extraction code
+    # that produced this reading. Readings made before it was recorded leave it blank.
+    registry_sha256 = models.CharField(max_length=64, blank=True, default="")
+    extractor_sha256 = models.CharField(max_length=64, blank=True, default="")
     source_role = models.CharField(max_length=20)
     source_kind = models.CharField(max_length=20, default="developer")
     source_name = models.CharField(max_length=255, blank=True)
@@ -98,6 +102,17 @@ class ProjectSnapshot(models.Model):
                     acquisition_scope="local_research",
                 ),
                 name="project_snapshot_identity_valid",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(registry_sha256="")
+                    | models.Q(registry_sha256__regex=r"^[a-f0-9]{64}$")
+                )
+                & (
+                    models.Q(extractor_sha256="")
+                    | models.Q(extractor_sha256__regex=r"^[a-f0-9]{64}$")
+                ),
+                name="project_snapshot_interpretation_valid",
             ),
             models.CheckConstraint(
                 condition=models.Q(

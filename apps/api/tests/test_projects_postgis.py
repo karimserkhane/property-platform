@@ -24,6 +24,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
 )
 from property_platform.modules.evidence.project_import import (  # noqa: E402
     import_project_details,
+    interpretation_sha256,
+    registry_sha256,
     revoke_project_link,
 )
 from property_platform.modules.evidence.project_queries import (  # noqa: E402
@@ -131,6 +133,15 @@ def test_project_import_is_typed_idempotent_and_retains_provider_identities(proj
     )
     assert ProjectIdentityLink.objects.count() == 3
     assert Capture.objects.count() == 2  # source + captured terms, no binary rehosting
+    # Each reading keeps the exact registry entry and extraction code that produced it.
+    snapshot = ProjectSnapshot.objects.get()
+    registered = next(
+        row
+        for row in project_protocol.project_registry("saadiyat-island:park-view")
+        if row["slug"] == definition["slug"]
+    )
+    assert snapshot.registry_sha256 == registry_sha256(registered)
+    assert snapshot.extractor_sha256 == interpretation_sha256()
     assert set(Building.objects.values_list("name", flat=True)) == {"Provider building"}
     with CaptureQueriesContext(connection) as queries:
         data = project_detail(definition["slug"])
@@ -155,6 +166,35 @@ def test_project_import_is_typed_idempotent_and_retains_provider_identities(proj
         assert client.get("/api/v1/preview/projects/not-registered").status_code == 404
     with override_settings(DEBUG=False, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         assert client.get(f"/api/v1/preview/projects/{definition['slug']}").status_code == 403
+
+
+@pytest.mark.parametrize(("reviewed_on", "links"), [("2099-01-01", 3), ("2026-01-01", 0)])
+def test_a_dated_link_cites_its_page_as_of_its_review_day(
+    project_input, monkeypatch, reviewed_on, links
+):
+    definition, rows, _ = project_input
+    registry = project_protocol.project_registry
+
+    def dated(scope=None):
+        result = registry(scope)
+        for row in result:
+            if row["slug"] != definition["slug"]:
+                continue
+            page = next(source["url"] for source in row["sources"] if source["role"] != "terms")
+            for link in row["identity_links"]:
+                link.update(reviewed_on=reviewed_on, source_url=page)
+        return result
+
+    monkeypatch.setattr(project_protocol, "project_registry", dated)
+    ingest(rows)
+    # No capture of the page by the review day yet: the link waits, nothing is invented.
+    assert ProjectIdentityLink.objects.count() == links
+    if links:
+        first = ProjectIdentityLink.objects.first().capture.fetched_at
+        ingest([receipt(row["url"], b"<html>Later page Terms</html>") for row in rows])
+        # Whatever the import order, the latest capture by the review day is cited.
+        assert ProjectIdentityLink.objects.count() == links
+        assert all(row.capture.fetched_at > first for row in ProjectIdentityLink.objects.all())
 
 
 def test_revoked_project_link_stays_revoked_after_fresh_acquisition(project_input):

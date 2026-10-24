@@ -108,6 +108,8 @@ def rebuild_check(*, actor: str, run_id: str, url: str | None = None) -> dict:
         "reviewed_divergences": report.get("reviewed_divergences", 0),
         "row_differences": report.get("row_differences", 0),
         "mismatches": report["mismatches"],
+        "published_blocking": report.get("published_blocking"),
+        "history_differences": report.get("history_differences", []),
         "source_snapshot_at": report["source_snapshot_at"],
         "archive": str(root),
         "report": str(root / "report.json"),

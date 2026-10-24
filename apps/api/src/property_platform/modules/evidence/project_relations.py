@@ -1,6 +1,7 @@
 """Make active project relations follow the reviewed registry; history is revoked, not lost."""
 
-from datetime import date
+from datetime import date, datetime, time, timedelta
+from zoneinfo import ZoneInfo
 
 from django.db import transaction
 from django.utils import timezone
@@ -12,6 +13,35 @@ from .project_models import ProjectRelation
 from .project_protocol import project_relations
 
 REVOCATION_REASON = "Removed from the reviewed project relation registry"
+# Reviews are dated in the territories' local time (UAE).
+REVIEW_TIMEZONE = ZoneInfo("Asia/Dubai")
+
+
+def reviewed_capture(url, reviewed_on):
+    """The latest successful capture of the cited page by the end of its review day.
+
+    It does not depend on when or in which order captures were imported, so a rebuild
+    from the archives cites the same evidence as the original database (A12).
+    """
+    until = datetime.combine(
+        date.fromisoformat(reviewed_on) + timedelta(days=1), time.min, tzinfo=REVIEW_TIMEZONE
+    )
+    return (
+        Capture.objects.filter(url=url, http_status=200, fetched_at__lt=until)
+        .defer("payload")
+        .order_by("-fetched_at", "-id")
+        .first()
+    )
+
+
+def same_receipt(capture_id, capture):
+    """Readings of one acquisition have distinct capture rows but the same receipt."""
+    return Capture.objects.filter(
+        pk=capture_id,
+        url=capture.url,
+        fetched_at=capture.fetched_at,
+        content_sha256=capture.content_sha256,
+    ).exists()
 
 
 def apply_project_relations(*, territory=None, actor):
@@ -35,11 +65,7 @@ def apply_project_relations(*, territory=None, actor):
         wanted = set()
         for row in rows:
             child, parent = projects.get(row["child"]), projects.get(row["parent"])
-            capture = (
-                Capture.objects.filter(url=row["source_url"], http_status=200)
-                .order_by("-fetched_at", "-id")
-                .first()
-            )
+            capture = reviewed_capture(row["source_url"], row["reviewed_on"])
             if child is None or parent is None or capture is None:
                 summary["waiting"] += 1
                 continue
@@ -53,6 +79,11 @@ def apply_project_relations(*, territory=None, actor):
                 and (current.kind, current.component, current.basis)
                 == (row["kind"], row["component"], row["basis"])
             ):
+                if not same_receipt(current.capture_id, capture):
+                    # Same reviewed relation: an archived capture of the review window
+                    # imported later refines its citation. The row journal keeps the old one.
+                    current.capture = capture
+                    current.save(update_fields=["capture"])
                 summary["kept"] += 1
                 continue
             if current is not None:

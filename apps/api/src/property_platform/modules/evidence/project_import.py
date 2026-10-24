@@ -1,8 +1,10 @@
 """All-or-nothing typed project extraction from registered, captured sources."""
 
+import functools
 import hashlib
 import json
 from datetime import date
+from pathlib import Path
 
 from django.db import connection, transaction
 from django.utils import timezone
@@ -24,23 +26,71 @@ from .models import (
 VERSION = "project-details-v5"
 LOCK_KEY = 716548220
 TARGETS = {"building": Building, "place": Place, "parcel": Parcel}
+# Code that turns a receipt into a reading. A declared extractor version can stay the
+# same across a code change; this digest identifies the exact code (A12).
+INTERPRETATION_MODULES = (
+    "project_import",
+    "project_protocol",
+    "property_protocol",
+    "project_adapters",
+    "project_psi",
+    "project_adrec",
+    "project_propertyfinder",
+    "project_maryah",
+    "project_locations",
+    "research_sources",
+)
+
+
+@functools.cache
+def interpretation_sha256():
+    digest = hashlib.sha256()
+    for name in INTERPRETATION_MODULES:
+        source = Path(__file__).with_name(f"{name}.py").read_bytes()
+        # Same commit, same digest, whatever the checkout's line endings.
+        digest.update(name.encode() + b"\0" + source.replace(b"\r\n", b"\n") + b"\0")
+    return digest.hexdigest()
+
+
+def registry_sha256(definition):
+    encoded = json.dumps(definition, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(encoded.encode()).hexdigest()
 
 
 def _link_reviewed_targets(project, definition, identities, capture, actor):
+    from .project_relations import reviewed_capture, same_receipt
+
     count = 0
     for link in definition["identity_links"]:
         target = link["target"]
         identity = identities[(project.slug, target, link["namespace"], link["record_id"])]
         if identity is None:
             continue
+        evidence = capture
+        if link.get("reviewed_on"):
+            # A dated review cites its page as it stood that day, whatever the import
+            # order: an archive rebuild then cites the same capture (A12).
+            evidence = reviewed_capture(link["source_url"], link["reviewed_on"])
+            if evidence is None:
+                continue
         previous = ProjectIdentityLink.objects.filter(project=project, **{target: identity})
         if previous.exists():
+            current = previous.filter(active=True).first()
+            if (
+                current is not None
+                and link.get("reviewed_on")
+                and not same_receipt(current.capture_id, evidence)
+            ):
+                # An archived capture of the review day imported later refines the
+                # citation; a revoked link stays revoked. The row journal keeps the old one.
+                current.capture = evidence
+                current.save(update_fields=["capture"])
             continue
         if ProjectIdentityLink.objects.filter(active=True, **{target: identity}).exists():
             raise ValueError("Map identity already belongs to a reviewed project")
         ProjectIdentityLink.objects.create(
             project=project,
-            capture=capture,
+            capture=evidence,
             actor=actor.strip(),
             reason=link["reason"],
             **{target: identity},
@@ -208,6 +258,8 @@ def import_project_details(receipt_rows, *, territory, actor):
                 terms_capture=terms,
                 receipt_key=receipt_key,
                 extractor_version=parsed["parser_version"],
+                registry_sha256=registry_sha256(definition),
+                extractor_sha256=interpretation_sha256(),
                 source_role=source["role"],
                 source_kind=source.get("source_kind", "developer"),
                 source_name=source.get("source_name", definition["developer"]["name"]),
