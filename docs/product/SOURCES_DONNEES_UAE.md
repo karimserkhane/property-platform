@@ -2,6 +2,8 @@
 
 **Complément du 22 octobre 2026 :** l'[enquête terrains, chantiers et permis](ENQUETE_FONCIER_PERMIS_20261022.md) qualifie ADGM/AccessRP, les QR MePS et plusieurs publications AD-SDI. Elle vérifie notamment 73 objets parcellaires avec identifiants distincts et polygones pour Maryah, via une autre publication que la couche Onwani existante. Les droits et l'import de cette nouvelle source restent à qualifier. Les observations ci-dessous conservent leur date de revue initiale.
 
+**Complément du 24 octobre 2026 :** la [qualification du registre des projets ADREC](QUALIFICATION_REGISTRE_ADREC_20261024.md) examine l'annuaire DARI (entrée 02) : consultable sans compte, mais collecte automatique et republication interdites par ses conditions. La plateforme n'en conserve que des liens de vérification.
+
 Revue du **13 octobre 2026**. Cet inventaire contient **44 entrées de sources, jeux de données ou pistes institutionnelles**. Plusieurs entrées appartiennent à une même autorité ; ce n’est pas une liste de 44 fournisseurs indépendants. Il couvre les sept émirats, avec des niveaux d’accès très différents. Il documente la recherche ; il n’active pas de nouveaux imports.
 
 La valeur recherchée est une fiche immobilière documentée : projet, promoteur, statut, avancement daté, caractéristiques, ventes, loyers, charges et environnement. Une carte cadastrale apporte la localisation ; les autres sources apportent les informations nécessaires pour comprendre le bien.
