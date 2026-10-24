@@ -313,6 +313,29 @@ def reviewed_identities():
     return result
 
 
+def presentation_bindings():
+    """The provider identity and page of every property presentation (A15)."""
+    rows = []
+    for presentation in PropertyPresentation.objects.select_related("building", "place"):
+        target = "building" if presentation.building_id else "place"
+        identity = getattr(presentation, target)
+        rows.append(
+            [target, identity.source_namespace, identity.source_record_id, presentation.website_url]
+        )
+    return sorted(rows)
+
+
+def binding_differences(expected, actual):
+    """Presentations bound to another identity, missing or added by the replay."""
+    from collections import Counter
+
+    before, after = Counter(map(tuple, expected)), Counter(map(tuple, actual))
+    return {
+        "missing": sorted(list(row) for row in (before - after).elements()),
+        "extra": sorted(list(row) for row in (after - before).elements()),
+    }
+
+
 def withdrawn_attributions(expected, actual):
     """Each registered withdrawal, with whether it holds exactly in both databases."""
     result = []
@@ -520,6 +543,7 @@ def export_archive(root: Path):
         expected, coverage, identity = counts(), inventory(), identities()
         namespace_stats = namespaces()
         reviewed = reviewed_identities()
+        bindings = presentation_bindings()
         # What the site publishes, on the same snapshot as the exported captures (A12).
         published = published_level.published_state()
         interpretation = published_level.interpretations()
@@ -664,6 +688,7 @@ def export_archive(root: Path):
             "identities": identity,
             "namespaces": namespace_stats,
             "reviewed_identities": reviewed,
+            "presentation_bindings": bindings,
             "published": published,
             "interpretations": interpretation,
             "coverage": coverage,
@@ -1199,6 +1224,13 @@ def replay_archive(root: Path, actor: str, run_id: str):
     for row in tables:
         if namespace_diff.get(row["table"]):
             row["namespaces"] = namespace_diff[row["table"]]
+    # Presentations must describe the same provider identities as in the reference;
+    # a manifest exported before A15 has no bindings to compare.
+    bindings = (
+        binding_differences(manifest["presentation_bindings"], presentation_bindings())
+        if "presentation_bindings" in manifest
+        else None
+    )
     coverage = inventory()
     failures = [r for r in outcomes if r["status"] == "failed"]
     divergences = [r for r in outcomes if "diverged_from" in r]
@@ -1230,6 +1262,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
             )
         },
         "withdrawn_attributions": withdrawn,
+        "presentation_bindings": bindings,
         # Diagnostic: steps whose observations differ from their original run.
         "row_differences": len(row_differences),
         "namespace_differences": sum(len(v) for v in namespace_diff.values()),
@@ -1251,6 +1284,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
         and not divergences
         and not mismatches
         and not coverage["uncovered"]
+        and not (bindings and (bindings["missing"] or bindings["extra"]))
         and (published is None or published["ok"]),
         "scope": "Source capture replay; backup-only state and new audit counts are separate",
     }

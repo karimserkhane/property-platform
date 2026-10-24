@@ -923,3 +923,28 @@ def test_row_differences_are_explained_only_by_their_exact_rule(monkeypatch):
     assert not explain(reviewed, created, reference={})[1]["matches"]
     assert not explain(reviewed, {**created, **unchanged}, reference=absent)[1]["matches"]
     assert explain(step("district-references-v3", {}, run="r8"), created) is None
+
+
+def test_presentations_must_describe_the_same_provider_identities():
+    from property_platform.modules.catalog.models import Place
+    from property_platform.modules.evidence.models import PropertyPresentation
+
+    run = _observed_place("osm:test:osm", "way/1", (("district-map-v5", "created"),))
+    place = Place.objects.get(source_record_id="way/1")
+    PropertyPresentation.objects.create(
+        place=place,
+        capture=Capture.objects.filter(run=run).first(),
+        display_name="Park View",
+        publisher_name="Bloom",
+        website_url="https://example.com/park-view",
+        review_version="test",
+    )
+    bound = ["place", "osm:test:osm", "way/1", "https://example.com/park-view"]
+    assert archive.presentation_bindings() == [bound]
+    assert archive.binding_differences([bound], [bound]) == {"missing": [], "extra": []}
+    # The same page bound to another OSM identity is never an equal count.
+    other = ["place", "osm:test:osm", "way/2", "https://example.com/park-view"]
+    assert archive.binding_differences([bound, bound], [bound, other]) == {
+        "missing": [bound],
+        "extra": [other],
+    }

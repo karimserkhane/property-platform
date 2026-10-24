@@ -160,7 +160,39 @@ enregistrées dans chaque observation ou quarantaine. L'étape porte
 avec l'exécution d'origine, ces lignes sont reportées sur la table (`reviewed_delta`) et
 `legacy_selections` les compte. Une observation d'origine absente au rejeu ne
 concorde jamais. Ce registre explique la différence, il ne fait pas rejouer l'ancien
-mappage.
+mappage. `LEGACY_PROJECT_SELECTIONS` applique la même règle aux fiches projet :
+`project-details-v1` (`project_import.py` à `123900b`) n'écrivait aucune position de
+projet, qui n'arrive qu'avec `project_locations.py` (`4d2c51f`).
+
+**Autres écarts de lignes (A15).** Chaque étape d'une fiche projet porte désormais
+`original_rows` (observations de **sa** page, pas de tout le run). Quand une étape
+diffère, une seule des règles suivantes peut l'expliquer, chacune à une condition
+exacte (`matches`) ; sinon l'écart reste dans la comparaison de table et la fait
+échouer.
+
+| Règle | Condition | Effet |
+| --- | --- | --- |
+| `reused_receipt` | Le rejeu réutilise l'exécution d'un reçu de fiche **identique** déjà importé (empreinte du reçu) : la relecture n'est pas recréée ([décision A12](#état-publié-a12)). L'étape n'écrit rien ; ses observations d'origine doivent être uniquement des confirmations (`unchanged`). | Observations non recréées reportées (`reused_receipts`) |
+| `superseded_interpretation` | Version non commitée du registre `SUPERSEDED_INTERPRETATIONS` : l'étape rejouée doit donner, par cible, ce qu'a donné la **première** relecture des mêmes octets sous la version qui l'a remplacée. Aucune règle de l'ancienne version n'est devinée. | Différence reportée (`superseded_interpretations`) |
+| `reviewed_reinterpretation` | Run du registre `REVIEWED_REINTERPRETATIONS` : captures, lignes d'origine (aucune) et lignes rejouées exactement listées ; l'identité citée est absente de la base de référence et active après le rejeu. | Observation et identité reportées (`reviewed_reinterpretations`) |
+
+**Attributions retirées.** Le registre `WITHDRAWN_ATTRIBUTIONS` liste, identité par
+identité, des lieux qu'une interprétation non commitée a créés puis qu'une exécution
+ultérieure de la même source a retirés ; le mappage actuel ne les crée pas. Le
+manifeste relève leur état (`reviewed_identities`) et, pour chaque étape, leurs
+observations (`withdrawn_rows`), mises à part des règles ci-dessus. Une entrée est
+acceptée seulement si l'identité est inactive dans la base de référence avec
+exactement les observations listées (version de mappage, action) et absente après le
+rejeu ; la ligne de `place` et ses observations sont alors reportées
+(`withdrawn_attributions`). Un manifeste plus ancien n'a pas ces relevés et garde la
+comparaison exacte.
+
+| Registre | Entrée | Raison |
+| --- | --- | --- |
+| `WITHDRAWN_ATTRIBUTIONS` | `project:{one-reem-island, reem-eight, reem-eleven, reem-five, reem-nine, saas-heights, seamont}` / `publisher-map` | `project-map-v1` non commitée prenait le centre de la vue de carte de l'éditeur pour la position du projet ; retirées par `review_project_locations` le 16 octobre (`4d2c51f`) |
+| `WITHDRAWN_ATTRIBUTIONS` | `research:d8fec783…` / `project-map-marker` (« Marlin 1 ») | Repère `reem-references-v1` non commité, retiré par `reem-references-v2` sur les mêmes octets (titre discordant) |
+| `SUPERSEDED_INTERPRETATIONS` | `reem-references-v1` → `reem-references-v2` | Non commitée (antérieure à `087241d`) ; toutes ses captures relues 30 minutes plus tard (`stored_capture_reprocess`) |
+| `REVIEWED_REINTERPRETATIONS` | `a4ad9e09-6c40-4497-9522-f5732d35d8d5` (`research:601d9da4…`) | Analyseur `bloomholding.com` ajouté en `4d2c51f` sous la même version `district-references-v3` ; le run du 13 octobre est antérieur et la référence n'a jamais été relue |
 
 `ok` concerne le périmètre du **rejeu des sources**, pas une restauration complète
 des comptes utilisateurs, décisions et états dérivés. Le détail `omitted` indique
