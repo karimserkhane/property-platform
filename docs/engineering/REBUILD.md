@@ -264,3 +264,30 @@ protocole historique ([A14](../tasks/A14.md)).
   inscrite au registre des divergences revues ci-dessus ; le prochain contrôle réel
   ([A15](../tasks/A15.md)) vérifiera qu'elle concorde avec `29a909a9`.
 - Écarts inchangés des fiches/catalogues : voir [A12](../tasks/A12.md).
+
+## Contrôle réel de l'état publié (A12) — 24 octobre 2026
+
+Code de la branche A12 exécuté depuis une image temporaire (sans déploiement ni
+migration de la base en service : la variante mesurée omettait les deux colonnes
+d'empreinte de la migration `0032`, sans effet sur l'état publié). Base en service lue
+en lecture seule, base de travail créée puis supprimée par le contrôle.
+
+- Premier passage (`e481cd0d…`, instantané `2026-10-24T07:08Z`) : 179 fiches sur 183
+  identiques, 156 liens d'identité actifs identiques, **2 différences bloquantes**. La
+  relation Gate / Gate ARC et les positions de `reem-eight` et `reem-nine` citaient la
+  capture lue à leur création ; le rejeu, qui les crée dès la première lecture, citait
+  une capture plus ancienne de la même page. Corrigé par la [preuve d'une revue
+  datée](#état-publié-a12) ; les deux liens reçoivent la date du commit qui les a
+  ajoutés (`4d2c51f`, 17 octobre). Les 13 relations en service citaient déjà la capture
+  que donne la règle.
+- Second passage (`897c0b09…`, instantané `2026-10-24T07:38Z`) : **183 fiches sur 183
+  identiques, 156 liens sur 156, 0 différence bloquante**, aucune différence ne
+  dépend d'une décision sauvegardée par A03.
+- Historique expliqué : chaque reçu de fiche est relu exactement une fois par la version
+  courante de son extracteur (par exemple `psi-project-v2` 427 reçus, 427 lectures) ;
+  les 146 lectures `psi-project-v1` et 4 `project-facts-v1` portent sur des reçus relus
+  ensuite, et les lectures en double d'un même reçu ne sont pas recréées (1 238 → 869
+  lectures). Candidats de catalogue : 423 identités distinctes à l'origine comme au
+  rejeu (1 236 → 804 lectures).
+- Écarts restants du rapport, hors A12 : `map_observation`, `place` et la divergence
+  `d7b5f4bc`, suivis dans [A15](../tasks/A15.md).
