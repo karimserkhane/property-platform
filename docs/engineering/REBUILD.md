@@ -111,6 +111,7 @@ automatique.
 | `new_audit` | Sources, captures, exécutions, jonctions, journaux, audits de mutation et quarantaines sont recréés par les importateurs actuels ; leurs comptes sont affichés séparément. Ils ne remplacent pas les traces originales conservées par A03. |
 | `backup` | État non rétabli par le rejeu des captures : conserver/restaurer A03 ou relancer son pipeline dédié selon le tableau suivant. |
 | `identity` | Parcelles et zones administratives : les identités **actives** doivent être identiques (nombre et empreinte des couples espace de noms/identifiant source). Les lignes remplacées absentes du rejeu doivent correspondre exactement aux réparations revues de doublons (alias A03 avec `superseded_*`) ; l'importateur actuel résout ces enregistrements à l'import et ne recrée pas le doublon. Un manifeste plus ancien, sans ces statistiques, garde la comparaison `exact`. |
+| `history` | Historique des lectures de fiches et de catalogues (`project_snapshot`, `project_typology`, `project_amenity`, `project_media`, `project_source_candidate`, liens révoqués de `project_identity_link`) : compte affiché et expliqué (`history_differences`, `interpretations`), **non bloquant**, parce que l'[état publié](#état-publié-a12) est comparé à sa place. Sans état publié dans le manifeste, ces tables restent `exact`. |
 
 Chaque étape rejouée porte aussi, quand ils diffèrent de l'exécution d'origine, les
 comptes d'observations écrites par cette étape (`rows.expected` / `rows.actual`) :
@@ -144,11 +145,49 @@ sélectionnées (URL répétée dans le même run ou retirée du registre) ; le 
 prétend pas qu'elles ont été réimportées. Les anciens importateurs ne sont pas embarqués : une dérive du parseur
 ou du registre est un écart à examiner, pas une preuve de perte dans la source.
 
+## État publié (A12)
+
+Décision du propriétaire du 24 octobre 2026 ([A12](../tasks/A12.md)) : le rejeu doit
+reproduire **ce que le site publie** ; l'historique des lectures est une alerte.
+
+- L'export relève, sur le même instantané que les captures, la fiche de chaque projet
+  publié (`project_detail`) et les liens d'identité actifs (projet, cible, espace de
+  noms, identifiant source, motif). Les identifiants de base (UUID), l'emplacement
+  privé d'un média et l'heure d'ingestion sont retirés ; l'ordre des listes est
+  ignoré, celui des coordonnées d'une géométrie conservé. Valeurs, sources (URL,
+  empreinte, date de collecte), positions et hiérarchie sont comparées.
+- Le rejeu recalcule le même état dans la base reconstruite (`rebuild_published.py`).
+  Le rapport `published` liste chaque fiche différente avec ses chemins (`.summary`,
+  `.typologies`…) ; `published_blocking` compte les différences bloquantes. Une fiche,
+  une valeur, une source, une position ou un lien manquant fait échouer le contrôle.
+  Rien n'est recopié de la base de référence vers la base reconstruite.
+- Une différence n'est mise à part (`requires_backup`) que si une décision d'opérateur
+  conservée par A03 l'explique, et seulement sur les champs qu'elle touche :
+  révocation d'un lien (positions, liens), publication d'un média (médias),
+  exclusion d'historique (toute la fiche).
+- `interpretations` explique l'alerte d'historique : lectures et reçus distincts par
+  version d'extracteur, lectures et identités distinctes des candidats de catalogue,
+  à l'origine et au rejeu.
+- **Lecture courante.** Une relecture des mêmes octets (même URL, empreinte et date de
+  collecte) par une nouvelle version d'extracteur ou de registre remplace la lecture
+  précédente pour la publication ; l'ancienne reste dans l'historique. Une collecte
+  différente ne masque toujours pas un fait déjà observé.
+- **Identité d'interprétation.** Depuis la migration `0032`, chaque lecture garde
+  `registry_sha256` (entrée de registre) et `extractor_sha256` (code d'extraction, fins
+  de ligne normalisées), en plus de `extractor_version`. Les lectures antérieures les
+  laissent vides.
+- Après un changement d'extracteur ou de registre qui lit autrement des octets déjà
+  archivés, la base en service publie encore l'ancienne lecture et le contrôle le
+  signale. Relire alors les reçus conservés par l'import ordinaire (flow
+  `property-platform-project-details`, `acquisition_mode=archive_all`), puis relancer
+  le contrôle.
+
 ## Ce qui exige une sauvegarde ou un autre pipeline
 
 | État | Reprise |
 | --- | --- |
 | Exclusions et révocations, alias d'identité revus | Sauvegarde SQL A03 ; ne jamais inventer une décision opérateur à partir d'une proximité ou d'une absence. |
+| Lectures de fiches et de catalogues par d'anciennes versions d'extracteur ou de registre, recollectes identiques | Sauvegarde SQL A03 (décision du 24 octobre 2026). Les octets d'origine restent rejoués par le code actuel ; l'état publié est comparé. |
 | Originaux privés et objets stockés, liaisons, autorisations de publication | Sauvegarde SQL et miroir `files/media/` A03 ; les pipelines de stockage vérifient les originaux, ils n'inventent pas les droits. |
 | Graphe routier et fragments | Sauvegarde A03, ou pipeline `routing-osm-graph` puis reconstruction avec le worker Valhalla. Ce contrôle de sources n'appelle pas le moteur lourd. |
 | Demandes et contours de marche | Sauvegarde A03 ; recalcul possible par `walking-areas` après reprise du graphe et de la file. |

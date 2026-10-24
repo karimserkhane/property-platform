@@ -8,6 +8,15 @@ evidence → catalog, sans point d'entrée HTTP, nouveau modèle ni changement d
 La base de référence est lue sur un instantané en lecture seule ; aucune restauration
 SQL ne se substitue au rejeu. Voir [REBUILD.md](REBUILD.md).
 
+**État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild_published.py`
+possède la forme canonique de l'état publié (fiches projet, liens d'identité actifs),
+sa comparaison et l'explication de l'historique des lectures ; `rebuild_archive.py`
+l'appelle à l'export et au rejeu. `project_queries.py` garde les règles de publication,
+dont la lecture courante d'un même reçu et `published_slugs`. `project_import.py`
+calcule les empreintes de registre et de code d'extraction ; migration additive `0032`
+sur `project_snapshot`. Direction : rebuild → projection evidence → catalog, sans point
+d'entrée HTTP ni changement de contrat. Voir [REBUILD.md](REBUILD.md#état-publié-a12).
+
 **Accès d'aperçu sans VPN — 22 octobre 2026.** `web/src/preview-access.ts` possède la vérification d'une clé temporaire à forte entropie, comparée en temps constant à une empreinte SHA-256. `proxy.ts` l'applique avant les pages, API et fichiers statiques, puis conserve le middleware de langue existant. L'aperçu de recherche compilé refuse les requêtes si son secret manque ; le développement ordinaire reste indépendant. Les secrets opérateur restent hors Git et hors images. Direction : contrôle HTTP web → présentation, sans identité métier, migration ou nouvelle dépendance. Voir [REMOTE_PREVIEW.md](REMOTE_PREVIEW.md).
 
 **Qualité cartographique — 22 octobre 2026.** `evidence/sdi_protocol.py` possède le protocole public AD-SDI et son dictionnaire propre ; `sdi_import.py` possède les preuves et la comparaison métrique au catalogue existant. Le collecteur `ingestion/collectors/sdi.py` acquiert hors transaction et rejoue les reçus via le gateway. Direction : ingestion → evidence → catalog ; `publication/coverage.py` lit les namespaces des deux sources. Aucun nouveau modèle métier ; migration additive 0030 sur les opérations autorisées. `atlas/map-markers.ts` possède les filtres indépendants des lieux utiles et commerces ; `map-style.ts` possède le masque d'eau partagé avec les cartes de quartier. Les géométries originales restent intactes. Voir [MAP_DATA_QUALITY.md](MAP_DATA_QUALITY.md).
