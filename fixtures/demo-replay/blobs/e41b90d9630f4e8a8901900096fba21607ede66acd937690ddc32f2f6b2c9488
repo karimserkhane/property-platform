@@ -1,0 +1,407 @@
+{
+ "currentVersion": 11.2,
+ "cimVersion": "3.2.0",
+ "id": 2,
+ "name": "COMMUNITY",
+ "type": "Feature Layer",
+ "description": "",
+ "geometryType": "esriGeometryPolygon",
+ "sourceSpatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326,
+  "xyTolerance": 8.983152841195215E-9,
+  "zTolerance": 0.001,
+  "mTolerance": 0.001,
+  "falseX": -400,
+  "falseY": -400,
+  "xyUnits": 9.999999999999999E8,
+  "falseZ": 0,
+  "zUnits": 1,
+  "falseM": 0,
+  "mUnits": 1
+ },
+ "copyrightText": "",
+ "parentLayer": null,
+ "subLayers": [],
+ "minScale": 0,
+ "maxScale": 0,
+ "referenceScale": 0.0,
+ "drawingInfo": {
+  "renderer": {
+   "type": "simple",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "color": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      104,
+      104,
+      104,
+      255
+     ],
+     "width": 0.4
+    }
+   }
+  },
+  "scaleSymbols": true,
+  "transparency": 0,
+  "labelingInfo": null
+ },
+ "defaultVisibility": false,
+ "extent": {
+  "xmin": 51.455594000000076,
+  "ymin": 22.631511971000066,
+  "xmax": 56.01812603400003,
+  "ymax": 25.637942503000033,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326,
+   "xyTolerance": 8.983152841195215E-9,
+   "zTolerance": 2,
+   "mTolerance": 0.001,
+   "falseX": -400,
+   "falseY": -400,
+   "xyUnits": 1.125899906842624E13,
+   "falseZ": 0,
+   "zUnits": 1,
+   "falseM": -100000,
+   "mUnits": 10000
+  }
+ },
+ "hasAttachments": false,
+ "htmlPopupType": "esriServerHTMLPopupTypeAsHTMLText",
+ "displayField": "COMMUNITYNAMEENG",
+ "typeIdField": null,
+ "subtypeFieldName": null,
+ "subtypeField": null,
+ "defaultSubtypeCode": null,
+ "fields": [
+  {
+   "name": "OBJECTID",
+   "type": "esriFieldTypeOID",
+   "alias": "OBJECTID",
+   "domain": null
+  },
+  {
+   "name": "TYPEOFDATASOURCE",
+   "type": "esriFieldTypeString",
+   "alias": "TYPEOFDATASOURCE",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "SOURCEOFORIGIN",
+   "type": "esriFieldTypeString",
+   "alias": "SOURCEOFORIGIN",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "EMIRATESNATIONALGRID",
+   "type": "esriFieldTypeString",
+   "alias": "EMIRATESNATIONALGRID",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "NATIONAL_",
+   "type": "esriFieldTypeString",
+   "alias": "NATIONAL_",
+   "length": 25,
+   "domain": null
+  },
+  {
+   "name": "EMIRATES",
+   "type": "esriFieldTypeString",
+   "alias": "EMIRATES",
+   "length": 25,
+   "domain": null
+  },
+  {
+   "name": "MUNICIPALITY",
+   "type": "esriFieldTypeString",
+   "alias": "MUNICIPALITY",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "DISTRICTID",
+   "type": "esriFieldTypeString",
+   "alias": "DISTRICTID",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "COMMUNITYID",
+   "type": "esriFieldTypeString",
+   "alias": "COMMUNITYID",
+   "length": 25,
+   "domain": null
+  },
+  {
+   "name": "COMMUNITYNAMEENG",
+   "type": "esriFieldTypeString",
+   "alias": "COMMUNITYNAMEENG",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "COMMUNITYNAMEARA",
+   "type": "esriFieldTypeString",
+   "alias": "COMMUNITYNAMEARA",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "COMMPOPNAMEENG",
+   "type": "esriFieldTypeString",
+   "alias": "COMMPOPNAMEENG",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "COMMPOPNAMEARA",
+   "type": "esriFieldTypeString",
+   "alias": "COMMPOPNAMEARA",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "DISTRICTNAMEENG",
+   "type": "esriFieldTypeString",
+   "alias": "DISTRICTNAMEENG",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "COMNAMECOMPOSITEENG",
+   "type": "esriFieldTypeString",
+   "alias": "COMNAMECOMPOSITEENG",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "COMNAMECOMPOSITEARA",
+   "type": "esriFieldTypeString",
+   "alias": "COMNAMECOMPOSITEARA",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "MUNICIPALITYARA",
+   "type": "esriFieldTypeString",
+   "alias": "MUNICIPALITYARA",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "DISTRICTARA",
+   "type": "esriFieldTypeString",
+   "alias": "DISTRICTARA",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "SHAPE",
+   "type": "esriFieldTypeGeometry",
+   "alias": "SHAPE",
+   "domain": null
+  },
+  {
+   "name": "DISTRICTID_OID",
+   "type": "esriFieldTypeInteger",
+   "alias": "DISTRICTID_OID",
+   "domain": null
+  },
+  {
+   "name": "created_user",
+   "type": "esriFieldTypeString",
+   "alias": "created_user",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "created_date",
+   "type": "esriFieldTypeDate",
+   "alias": "created_date",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "last_edited_user",
+   "type": "esriFieldTypeString",
+   "alias": "last_edited_user",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "last_edited_date",
+   "type": "esriFieldTypeDate",
+   "alias": "last_edited_date",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "SHAPE.STArea()",
+   "type": "esriFieldTypeDouble",
+   "alias": "SHAPE.STArea()",
+   "domain": null
+  },
+  {
+   "name": "SHAPE.STLength()",
+   "type": "esriFieldTypeDouble",
+   "alias": "SHAPE.STLength()",
+   "domain": null
+  }
+ ],
+ "geometryField": {
+  "name": "SHAPE",
+  "type": "esriFieldTypeGeometry",
+  "alias": "SHAPE"
+ },
+ "indexes": [
+  {
+   "name": "R23_pk",
+   "fields": "OBJECTID",
+   "isAscending": true,
+   "isUnique": true,
+   "description": ""
+  },
+  {
+   "name": "I22MUNICIPALITY7",
+   "fields": "MUNICIPALITY,DISTRICTID,COMMUNITYID",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I22COMMUNITYNAME",
+   "fields": "COMMUNITYNAMEENG",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I22COMMUNITYNAME_1",
+   "fields": "COMMUNITYNAMEARA",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I22DISTRICTARA",
+   "fields": "DISTRICTARA",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I22DISTRICTNAMEE",
+   "fields": "DISTRICTNAMEENG",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I22MUNICIPALITY",
+   "fields": "MUNICIPALITY",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I22MUNICIPALITYA",
+   "fields": "MUNICIPALITYARA",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "S13_idx",
+   "fields": "SHAPE",
+   "isAscending": true,
+   "isUnique": true,
+   "description": ""
+  }
+ ],
+ "subtypes": [],
+ "relationships": [],
+ "canModifyLayer": true,
+ "canScaleSymbols": false,
+ "hasLabels": false,
+ "capabilities": "Query,Map,Data",
+ "maxRecordCount": 2000,
+ "supportsStatistics": true,
+ "supportsExceedsLimitStatistics": true,
+ "supportsAdvancedQueries": true,
+ "supportedQueryFormats": "JSON, geoJSON, PBF",
+ "isDataVersioned": false,
+ "ownershipBasedAccessControlForFeatures": {"allowOthersToQuery": true},
+ "useStandardizedQueries": true,
+ "supportedSpatialRelationships": [
+  "esriSpatialRelIntersects",
+  "esriSpatialRelContains",
+  "esriSpatialRelCrosses",
+  "esriSpatialRelEnvelopeIntersects",
+  "esriSpatialRelIndexIntersects",
+  "esriSpatialRelOverlaps",
+  "esriSpatialRelTouches",
+  "esriSpatialRelWithin",
+  "esriSpatialRelRelation"
+ ],
+ "advancedQueryCapabilities": {
+  "useStandardizedQueries": true,
+  "supportsStatistics": true,
+  "supportsPercentileStatistics": true,
+  "supportsHavingClause": true,
+  "supportsOrderBy": true,
+  "supportsDistinct": true,
+  "supportsCountDistinct": true,
+  "supportsAdvancedQueryRelated": true,
+  "supportsQueryRelatedPagination": true,
+  "supportsPagination": true,
+  "supportsLod": false,
+  "supportsQueryWithLodSR": false,
+  "supportsTrueCurve": true,
+  "supportsQueryWithDatumTransformation": true,
+  "supportsReturningQueryExtent": true,
+  "supportsQueryWithDistance": true,
+  "supportsSqlExpression": true,
+  "supportsTimeRelation": true,
+  "supportsSqlFormat": false,
+  "supportsQueryAnalytic": true,
+  "supportsCurrentUserQueries": true
+ },
+ "supportsDatumTransformation": true,
+ "advancedQueryAnalyticCapabilities": {
+  "supportsLinearRegression": true,
+  "supportsAsync": false,
+  "supportsPercentileAnalytic": true
+ },
+ "dateFieldsTimeReference": null,
+ "preferredTimeReference": null,
+ "datesInUnknownTimezone": false,
+ "hasGeometryProperties": true,
+ "geometryProperties": {
+  "shapeAreaFieldName": "SHAPE.STArea()",
+  "shapeLengthFieldName": "SHAPE.STLength()",
+  "units": "esriDecimalDegrees",
+  "mapUnits": {"uwkid": 9102}
+ },
+ "hasMetadata": true,
+ "isDataArchived": false,
+ "archivingInfo": {
+  "supportsQueryWithHistoricMoment": false,
+  "startArchivingMoment": -1
+ },
+ "supportsCoordinatesQuantization": true,
+ "supportsDynamicLegends": true
+}
