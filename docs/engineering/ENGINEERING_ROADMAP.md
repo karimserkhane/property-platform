@@ -38,7 +38,7 @@ Autres constats :
 | --- | --- | --- | --- |
 | 1 | Journaux et trace complète des échecs ; gardes communes des routes API | Diagnostic des imports ; moins de code recopié | Fusionné (PR #1) |
 | 2 | Compression brotli/gzip et relais partagé des lectures `/api/atlas/*` | 5 à 7 fois moins de données par affichage de carte | Fusionné (PR #2) |
-| 3 | Tuiles vectorielles PostGIS (`ST_AsMVT`) pour parcelles et bâtiments | Carte fluide à l'échelle des sept émirats ; fin de la limite de 12 000 parcelles | Parcelles de l'explorateur : PR #3 ; bâtiments et index par zone à suivre |
+| 3 | Tuiles vectorielles PostGIS (`ST_AsMVT`) pour parcelles et bâtiments | Carte fluide à l'échelle des sept émirats ; fin de la limite de 12 000 parcelles | Parcelles de l'explorateur : PR #3 ; index par zone : A06 ; bâtiments et rues : A07 |
 | 4 | Cache des lectures lourdes avec `ETag` lié à la version des données (`evidence.row_revision`) | `district-map`, `market-map`, `map-context` instantanés en lecture répétée | PR #4 (instantané PostgreSQL) ; version par famille de tables à suivre |
 | 5 | Simplification des contours en SQL et regroupement des requêtes de `map-context` | Temps serveur divisé avant même le cache | À faire |
 | 6 | Images satellite servies comme fichiers cachables au lieu de base64 dans le JSON | −850 Ko sur la vue imagerie | À faire |
@@ -83,6 +83,15 @@ Mesures (API locale, Abu Dhabi, JSON décompressé, même méthode que la mesure
 | Export CSV | sans lecture (index déjà chargé) | 3 requêtes, 8 377 lignes, 5,46 Mo, environ 3 s au clic |
 
 Le gain est modeste sur la seule zone collectée aujourd'hui (0,1° × 0,14°) : une cellule couvre plus que la vue au zoom 15. Il devient décisif avec F01 (émirat entier), où le chargement reste borné par les cellules visibles alors que la lecture complète croîtrait avec le territoire. Si la recherche ralentit à cette échelle, ajouter un index sur `code` ; si les cellules pèsent trop au zoom 15, les adapter au zoom.
+
+**Bâtiments et rues en tuiles — 25 octobre 2026 (tâche A07).** L’explorateur ne lit plus `map-context` :
+
+- `GET /api/v1/preview/context-tiles/{z}/{x}/{y}` (zooms 11 à 16, relais `/api/atlas/context-tiles`) : couches `building` (propriété `id`) et `street` (`id`, `name`, `name_ar` : un libellé placé le long d’une ligne lit les propriétés de la tuile, pas l’état d’élément). Mêmes sources et éléments actifs que `map-context` ; sous le zoom 12, les bâtiments de moins d’un demi-pixel sont omis.
+- `GET /api/v1/preview/context-index` (relais `/api/atlas/context-index`) : les lignes de `map-context`, rues et bâtiments sans géométrie mais avec `bounds` ; lieux et zones inchangés. L’explorateur marque chaque ligne de sa couche (`IndexedFeature`) ; le code partagé lit `featureShape`, `featureBounds` et `frameGeometry` au lieu de la géométrie. Les `bounds` ne servent qu’au cadrage, jamais au dessin ni au clic.
+- Hauteurs en état d’élément ; la vue 3D « hauteurs relevées seulement » filtre sur la liste des identités à hauteur relevée (un filtre ne lit pas l’état d’élément). Clic : l’emprise rendue sous le pointeur, rattachée à sa ligne d’index par identité ; un élément de tuile absent de l’index n’est pas sélectionnable. Ombres solaires : emprises des tuiles chargées (une emprise coupée par un bord de tuile donne un morceau par tuile), hauteurs de l’index.
+- La carte de voisinage des fiches projet garde `map-context` (rayon réduit, outils fondés sur la géométrie) ; le style partagé reste compatible avec ses sources GeoJSON.
+
+Mesures (base locale, lecture seule) : Al Reem 0,04 × 0,03° — `map-context` 1 488 Kio brut / 197 Kio gzip, `context-index` 1 286 / 150 Kio, 16 tuiles z15 = 78 Kio ; Saadiyat 0,06 × 0,04° — 1 734 / 210 Kio contre 1 456 / 153 Kio, 35 tuiles z15 = 94 Kio. La géométrie ne pèse qu’environ 15 % du brut : l’essentiel vient des métadonnées `source` répétées par élément (210 Kio pour les rues et 277 Kio pour les lieux à Al Reem). Publier chaque provenance une fois par réponse est la prochaine piste, à proposer comme tâche séparée. Le gain principal est le rendu : MapLibre ne découpe plus les emprises GeoJSON dans le navigateur et les tuiles se chargent par zone.
 
 ## Cache des lectures et requêtes conditionnelles — 23 octobre 2026
 

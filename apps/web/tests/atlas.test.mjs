@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  buildingAtPoint,
   csv,
   districtBounds,
   geometryBounds,
@@ -265,46 +264,6 @@ test("large RT7 TMP2 cannot hide a smaller overlapping parcel, regardless of pai
     ],
   };
   assert.equal(geometryClickArea(shape), 15);
-});
-
-test("building clicks use exact footprints at low zoom, preserving courtyards and separate parts", () => {
-  const building = {
-    geometry: {
-      type: "MultiPolygon",
-      coordinates: [
-        [
-          [
-            [0, 0],
-            [4, 0],
-            [4, 4],
-            [0, 4],
-            [0, 0],
-          ],
-          [
-            [1, 1],
-            [1, 2],
-            [2, 2],
-            [2, 1],
-            [1, 1],
-          ],
-        ],
-        [
-          [
-            [6, 6],
-            [7, 6],
-            [7, 7],
-            [6, 7],
-            [6, 6],
-          ],
-        ],
-      ],
-    },
-  };
-  assert.equal(buildingAtPoint([building], [3, 3]), building);
-  assert.equal(buildingAtPoint([building], [6.5, 6.5]), building);
-  assert.equal(buildingAtPoint([building], [4, 3]), building);
-  assert.equal(buildingAtPoint([building], [1.5, 1.5]), null);
-  assert.equal(buildingAtPoint([building], [5, 5]), null);
 });
 
 test("property discovery prioritizes documented records without inventing point-to-building links", () => {

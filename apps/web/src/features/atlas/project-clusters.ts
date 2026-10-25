@@ -5,7 +5,7 @@ import type {
 } from "maplibre-gl";
 import { clusteredProjects } from "./map-analysis";
 import { PROJECT_MARKER_FILTER, PROJECT_MARKER_IMAGE } from "./map-markers";
-import type { MapContext } from "./types";
+import type { AtlasContext } from "./types";
 
 export const PROJECT_CLUSTER_LAYERS = [
   "cluster-projects",
@@ -15,7 +15,7 @@ export const PROJECT_CLUSTER_LAYERS = [
 const project = PROJECT_MARKER_FILTER;
 export function updateProjectClusters(
   map: LibreMap,
-  context: MapContext | null,
+  context: AtlasContext | null,
   visible = true,
   names = true,
 ) {

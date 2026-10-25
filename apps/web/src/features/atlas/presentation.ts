@@ -1,6 +1,7 @@
 import type { ExpressionSpecification } from "maplibre-gl";
 import type {
-  MapContext,
+  AtlasContext,
+  AtlasFeature,
   MapFeature,
   MapLabels,
   ParcelCollection,
@@ -13,7 +14,7 @@ type PropertyIdentity = Pick<
 >;
 export type ParcelProperty = PropertyIdentity & {
   id: string;
-  feature: MapFeature | null;
+  feature: AtlasFeature | null;
   spatial_match?: {
     method: "boundary-proximity-v1";
     distance_m: number;
@@ -49,7 +50,7 @@ const buildingKinds = new Set([
 ]);
 const isProperty = (p: ParcelProperty) =>
   p.kind.endsWith("_project_marker") ||
-  p.feature?.geometry.type === "MultiPolygon" ||
+  (p.feature && featureShape(p.feature) === "MultiPolygon") ||
   buildingKinds.has(p.kind);
 
 export function preferredParcelProperty(
@@ -78,7 +79,7 @@ export function preferredParcelProperty(
 }
 
 export function parcelPropertyIndex(
-  context: MapContext | null,
+  context: AtlasContext | null,
   parcels?: ParcelRows | null,
 ) {
   const index = new Map<string, ParcelProperty[]>();
@@ -311,7 +312,7 @@ export function readableParcelCode(code: string): string {
   return code.replace(/_to_/gi, "–").replaceAll("_", " · ");
 }
 
-export function propertyFeatures(context: MapContext | null): MapFeature[] {
+export function propertyFeatures(context: AtlasContext | null): AtlasFeature[] {
   return [
     ...(context?.building.features ?? []),
     ...(context?.place.features.filter((feature) =>
@@ -419,45 +420,6 @@ export function geometryClickArea(geometry: MapFeature["geometry"]): number {
   return area > 0 ? area : Infinity;
 }
 
-// Test the actual footprint, even below its rendering minzoom. No nearest-name
-// match: holes remain empty land and a boundary counts as part of the building.
-export function buildingAtPoint(
-  features: readonly MapFeature[],
-  point: readonly [number, number],
-): MapFeature | null {
-  function ringContains(ring: number[][]): boolean {
-    let inside = false;
-    const [x, y] = point;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-      const [ax, ay] = ring[j];
-      const [bx, by] = ring[i];
-      const cross = (x - ax) * (by - ay) - (y - ay) * (bx - ax);
-      if (
-        Math.abs(cross) < 1e-14 &&
-        x >= Math.min(ax, bx) &&
-        x <= Math.max(ax, bx) &&
-        y >= Math.min(ay, by) &&
-        y <= Math.max(ay, by)
-      )
-        return true;
-      if (ay > y !== by > y && x < ((bx - ax) * (y - ay)) / (by - ay) + ax)
-        inside = !inside;
-    }
-    return inside;
-  }
-  return (
-    features.find((feature) => {
-      if (feature.geometry.type !== "MultiPolygon") return false;
-      return (feature.geometry.coordinates as number[][][][]).some(
-        (rings) =>
-          Boolean(rings[0]) &&
-          ringContains(rings[0]) &&
-          !rings.slice(1).some(ringContains),
-      );
-    }) ?? null
-  );
-}
-
 export function geometryBounds(
   geometry: MapFeature["geometry"],
 ): [[number, number], [number, number]] | null {
@@ -473,6 +435,23 @@ export function geometryBounds(
     south = Math.min(south, numbers[i + 1]);
     north = Math.max(north, numbers[i + 1]);
   }
+  return [
+    [west, south],
+    [east, north],
+  ];
+}
+
+// The geometry type a feature is drawn with, whether or not it carries it.
+export function featureShape(feature: AtlasFeature): string {
+  if ("geometry" in feature) return feature.geometry.type;
+  return feature.family === "building" ? "MultiPolygon" : "MultiLineString";
+}
+
+export function featureBounds(
+  feature: AtlasFeature,
+): [[number, number], [number, number]] | null {
+  if ("geometry" in feature) return geometryBounds(feature.geometry);
+  const [west, south, east, north] = feature.properties.bounds;
   return [
     [west, south],
     [east, north],

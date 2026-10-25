@@ -4,12 +4,18 @@ import { MapLocateButton } from "@/components/map-locate-button";
 import { ProjectCover } from "@/features/projects/cover";
 import { ProjectMapSummary } from "@/features/projects/map-summary";
 import {
+  featureShape,
   type ParcelProperty,
   preferredParcelProperty,
   propertyName,
   readableParcelCode,
 } from "./presentation";
-import type { AtlasLabels, MapFeature, MapLabels, ParcelDetail } from "./types";
+import type {
+  AtlasFeature,
+  AtlasLabels,
+  MapLabels,
+  ParcelDetail,
+} from "./types";
 
 // A spatial candidate is an indication, never an implicit project identity.
 export function SelectionPreview({
@@ -23,7 +29,7 @@ export function SelectionPreview({
   children,
 }: {
   detail: ParcelDetail | null;
-  feature: MapFeature | null;
+  feature: AtlasFeature | null;
   labels: AtlasLabels;
   m: MapLabels;
   locale: string;
@@ -53,9 +59,9 @@ export function SelectionPreview({
       ? m.project
       : use
         ? usage(use)
-        : feature?.geometry.type === "MultiLineString"
+        : (feature && featureShape(feature)) === "MultiLineString"
           ? m.streets
-          : feature?.geometry.type === "Point"
+          : (feature && featureShape(feature)) === "Point"
             ? m.places
             : m.building;
   const title = identity && propertyName(identity, locale);

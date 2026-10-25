@@ -8,7 +8,28 @@ export type ParcelIndexFeature = ParcelIndex["features"][number];
 export type ParcelRows = ParcelCollection | ParcelIndex;
 export type ParcelDetail = components["schemas"]["Detail"];
 export type MapContext = components["schemas"]["MapContext"];
+// Streets and buildings with bounds only; the explorer draws them from tiles.
+export type ContextIndex = components["schemas"]["ContextIndex"];
+export type ContextIndexFeature = ContextIndex["building"]["features"][number];
 export type MapFeature = components["schemas"]["MapFeature"];
+// An index row tagged with its tile layer; code needing a shape reads
+// `geometry` when present and otherwise the rendered tile or `bounds`.
+export type IndexedFeature = ContextIndexFeature & {
+  family: "building" | "street";
+};
+export type AtlasFeature = MapFeature | IndexedFeature;
+type AtlasCollection = {
+  type: string;
+  features: AtlasFeature[];
+  truncated: boolean;
+};
+// Either `map-context` or the explorer's tagged `context-index`.
+export type AtlasContext = {
+  street: AtlasCollection;
+  building: AtlasCollection;
+  place: MapContext["place"];
+  administrative_area: MapContext["administrative_area"];
+};
 export type ResearchReference =
   components["schemas"]["ResearchReferenceResponse"];
 export type ImageryScene = components["schemas"]["ImageryResponse"];

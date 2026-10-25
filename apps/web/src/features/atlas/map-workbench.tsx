@@ -6,9 +6,11 @@ import type {
   GeoJSONSource,
   Map as LibreMap,
   MapMouseEvent,
+  MapSourceDataEvent,
 } from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { UiIcon } from "@/components/ui-icon";
+import { CONTEXT_SOURCE, tiledFootprints } from "./context-tiles";
 import { BASEMAP_IMAGERY } from "./imagery-sources";
 import {
   type AnalysisMode,
@@ -27,7 +29,7 @@ import styles from "./map-workbench.module.css";
 import { geometryBounds } from "./presentation";
 import { updateProjectClusters } from "./project-clusters";
 import { dubaiClock, shadowPolygons, solarInstant, sunlight } from "./solar";
-import type { MapContext, MapLabels, ParcelIndex, ParcelRows } from "./types";
+import type { AtlasContext, MapLabels, ParcelIndex, ParcelRows } from "./types";
 
 export function MapWorkbench({
   map,
@@ -43,7 +45,7 @@ export function MapWorkbench({
   onChoose,
 }: {
   map: LibreMap | null;
-  context: MapContext | null;
+  context: AtlasContext | null;
   parcels: ParcelRows | null;
   locale: string;
   m: MapLabels;
@@ -139,17 +141,44 @@ export function MapWorkbench({
     () => sunlight(clock, center[0], center[1]),
     [clock, center],
   );
+  // Explorer buildings come without geometry: read footprints from the tiles
+  // loaded for the view, again whenever more of them arrive.
+  const tiled = Boolean(
+    context?.building.features.some((feature) => !("geometry" in feature)),
+  );
+  const [tileLoads, setTileLoads] = useState(0);
+  useEffect(() => {
+    if (!map || !tiled || !solar || !shadows) return;
+    let timer = 0;
+    const loaded = (event: MapSourceDataEvent) => {
+      if (event.sourceId !== CONTEXT_SOURCE || !event.tile) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setTileLoads((count) => count + 1), 200);
+    };
+    map.on("sourcedata", loaded);
+    return () => {
+      window.clearTimeout(timer);
+      map.off("sourcedata", loaded);
+    };
+  }, [map, tiled, solar, shadows]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tileLoads rereads footprints from newly loaded tiles.
   const shadowData = useMemo(
     () =>
       solar && shadows
         ? shadowPolygons(
-            context?.building.features ?? [],
+            tiled
+              ? map
+                ? tiledFootprints(map, context)
+                : []
+              : (context?.building.features ?? []).filter(
+                  (feature) => "geometry" in feature,
+                ),
             clock,
             center[0],
             center[1],
           )
         : emptyAnalysis(),
-    [solar, shadows, context, clock, center],
+    [solar, shadows, tiled, map, context, clock, center, tileLoads],
   );
   const modeRef = useRef({ mode, finished });
   modeRef.current = { mode, finished };
