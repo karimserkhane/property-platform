@@ -1,8 +1,13 @@
 import navigation from "@property-platform/contracts/territories";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
+import { CancellationRetentionCard } from "./cancellation-retention";
 import { ProjectCover } from "./cover";
-import { developerHistoryHref, isDeveloperKey } from "./delivery";
+import {
+  type DeliveryLabels,
+  developerHistoryHref,
+  isDeveloperKey,
+} from "./delivery";
 import { ProjectDocuments } from "./documents";
 import dossier from "./dossier.module.css";
 import { Proof, ProofGroup, SourceLink } from "./evidence";
@@ -19,7 +24,10 @@ import {
 } from "./presentation";
 import styles from "./project.module.css";
 import { ProjectComponents, ProjectParent } from "./relations";
+import type { RetentionLabels } from "./retention";
 import type { ProjectDetail, ProjectLabels } from "./types";
+import type { VerificationLabels } from "./verification";
+import { ProjectVerificationSection } from "./verification-sheet";
 
 const typeKeys = new Set([
   "apartment",
@@ -34,11 +42,17 @@ export function ProjectDetailView({
   project,
   locale,
   labels,
+  retentionLabels,
+  verificationLabels,
+  deliveryLabels,
   neighbourhood,
 }: {
   project: ProjectDetail;
   locale: string;
   labels: ProjectLabels;
+  retentionLabels: RetentionLabels;
+  verificationLabels: VerificationLabels;
+  deliveryLabels: DeliveryLabels;
   neighbourhood?: ReactNode;
 }) {
   const territory = navigation.territories.find(
@@ -74,6 +88,9 @@ export function ProjectDetailView({
   };
   const sections = [
     ["project-overview", labels.overview],
+    ...(project.verification
+      ? [["project-verification", verificationLabels.title]]
+      : []),
     ...(projectRelations(project).components.length
       ? [["project-components", labels.components]]
       : []),
@@ -238,6 +255,16 @@ export function ProjectDetailView({
               )}
             </div>
           </section>
+          {project.verification && (
+            <ProjectVerificationSection
+              project={project}
+              verification={project.verification}
+              locale={locale}
+              labels={verificationLabels}
+              deliveryLabels={deliveryLabels}
+              projectLabels={labels}
+            />
+          )}
           <ProjectComponents
             project={project}
             labels={labels}
@@ -382,6 +409,14 @@ export function ProjectDetailView({
                 </div>
               ))}
             </dl>
+            {project.cancellation_retention && (
+              <CancellationRetentionCard
+                retention={project.cancellation_retention}
+                labels={retentionLabels}
+                projectLabels={labels}
+                locale={locale}
+              />
+            )}
             {website && (
               <a
                 className={styles.textAction}

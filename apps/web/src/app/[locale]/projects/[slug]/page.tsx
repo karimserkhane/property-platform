@@ -4,11 +4,14 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { MapLabels, UseLabels } from "@/features/atlas/types";
+import type { DeliveryLabels } from "@/features/projects/delivery";
 import { ProjectDetailView } from "@/features/projects/detail";
 import { ProjectNeighbourhood } from "@/features/projects/neighbourhood";
 import { googleNeighbourhoodUrl } from "@/features/projects/neighbourhood-config";
+import type { RetentionLabels } from "@/features/projects/retention";
 import { readProject } from "@/features/projects/server";
 import type { ProjectLabels } from "@/features/projects/types";
+import type { VerificationLabels } from "@/features/projects/verification";
 import { isLocale } from "@/i18n/locales";
 import { Link } from "@/i18n/navigation";
 import english from "../../../../../messages/en.json";
@@ -58,6 +61,33 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const mapText = await getTranslations({ locale, namespace: "Map" });
   const usageText = await getTranslations({ locale, namespace: "Use" });
   const atlasText = await getTranslations({ locale, namespace: "Atlas" });
+  const retentionText = await getTranslations({
+    locale,
+    namespace: "Retention",
+  });
+  const retentionLabels = Object.fromEntries(
+    Object.keys(english.Retention).map((key) => [
+      key,
+      retentionText(key as keyof typeof english.Retention),
+    ]),
+  ) as RetentionLabels;
+  const verificationText = await getTranslations({
+    locale,
+    namespace: "Verification",
+  });
+  const verificationLabels = Object.fromEntries(
+    Object.keys(english.Verification).map((key) => [
+      key,
+      verificationText(key as keyof typeof english.Verification),
+    ]),
+  ) as VerificationLabels;
+  const deliveryText = await getTranslations({ locale, namespace: "Delivery" });
+  const deliveryLabels = Object.fromEntries(
+    Object.keys(english.Delivery).map((key) => [
+      key,
+      deliveryText(key as keyof typeof english.Delivery),
+    ]),
+  ) as DeliveryLabels;
   const useLabels = Object.fromEntries(
     Object.keys(english.Use).map((key) => [
       key,
@@ -75,6 +105,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       project={result.project}
       locale={locale}
       labels={labels}
+      retentionLabels={retentionLabels}
+      verificationLabels={verificationLabels}
+      deliveryLabels={deliveryLabels}
       neighbourhood={
         area ? (
           <ProjectNeighbourhood

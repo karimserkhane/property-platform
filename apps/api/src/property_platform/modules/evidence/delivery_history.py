@@ -181,19 +181,11 @@ def summarise(projects):
     }
 
 
-def developer_delivery_history(key):
-    """Published projects of one developer with their dated, cited delivery points."""
-    developer = Developer.objects.filter(key=key).first()
-    if developer is None:
-        return None
-    accepted = _accepted_snapshots()
-    projects = list(
-        Project.objects.filter(developer=developer)
-        .filter(Exists(accepted.filter(project_id=OuterRef("id"))))
-        .order_by("name", "slug")
-    )
-    if not projects:
-        return None
+def delivery_readings(accepted, projects):
+    """Announced handovers, project-scope register readings and the latest such snapshot.
+
+    All three are keyed by project id; the snapshots are read once, oldest first.
+    """
     excluded = {
         (dataset.removeprefix("project:"), record_key)
         for dataset, record_key in HistoryExclusion.objects.filter(
@@ -207,7 +199,7 @@ def developer_delivery_history(key):
         .defer("capture__payload")
         .order_by("capture__fetched_at", "id")
     )
-    announcements, register = {}, {}
+    announcements, register, latest = {}, {}, {}
     for snapshot in snapshots:
         slug = snapshot.project.slug
         if snapshot.handover_precision and (
@@ -230,7 +222,10 @@ def developer_delivery_history(key):
             )
         facts = getattr(snapshot, "verification", None)
         # A registration that only identifies a component never describes the project.
-        if facts is not None and facts.fact_scope == "project" and facts.register_status:
+        if facts is None or facts.fact_scope != "project":
+            continue
+        latest[snapshot.project_id] = snapshot
+        if facts.register_status:
             register.setdefault(snapshot.project_id, []).append(
                 {
                     "authority": facts.authority,
@@ -241,6 +236,23 @@ def developer_delivery_history(key):
                     "source": _source(snapshot, facts.evidence_pointer),
                 }
             )
+    return announcements, register, latest
+
+
+def developer_delivery_history(key):
+    """Published projects of one developer with their dated, cited delivery points."""
+    developer = Developer.objects.filter(key=key).first()
+    if developer is None:
+        return None
+    accepted = _accepted_snapshots()
+    projects = list(
+        Project.objects.filter(developer=developer)
+        .filter(Exists(accepted.filter(project_id=OuterRef("id"))))
+        .order_by("name", "slug")
+    )
+    if not projects:
+        return None
+    announcements, register, _ = delivery_readings(accepted, projects)
     rows = []
     for project in projects:
         history = project_history(announcements.get(project.id, []), register.get(project.id, []))

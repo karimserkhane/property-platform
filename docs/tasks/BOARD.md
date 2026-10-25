@@ -24,8 +24,8 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
-| [B04](B04.md) | B | Calculateur de retenue en cas d'annulation | 2 | B02 | non | todo | unassigned |
-| [B05](B05.md) | B | Fiche « Vérification » d'un projet | 1 | B02, B03, B04 | non | todo | unassigned |
+| [B04](B04.md) | B | Calculateur de retenue en cas d'annulation | 2 | B02 | non | done | claude |
+| [B05](B05.md) | B | Fiche « Vérification » d'un projet | 1 | B02, B03, B04 | non | done | claude |
 | [B06](B06.md) | B | Indice d'activité de chantier par satellite | 2 | A02 | non | todo | unassigned |
 | [C01](C01.md) | C | Prix observés contre prix demandés | 2 | A01 | non | todo | unassigned |
 | [C02](C02.md) | C | Simulateur d'échéancier et coût total | 2 | B02 | non | todo | unassigned |

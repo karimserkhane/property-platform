@@ -236,6 +236,9 @@ def _project_website(project, snapshots):
 
 
 def project_detail(slug):
+    # The sheet reads delivery history, which builds on this module's publication rules.
+    from .verification_sheet import project_verification_sheet
+
     project = Project.objects.select_related("developer").filter(slug=slug).first()
     if project is None:
         return None
@@ -462,6 +465,33 @@ def project_detail(slug):
         else None,
         "components": [_relation(row, row.child) for row in components.get(project.id, [])],
         "map_locations": project_locations(project, language=values[0].language),
+        "declared_progress": _declared_progress(accepted),
+        "verification": project_verification_sheet(project, accepted),
+    }
+
+
+def _declared_progress(accepted):
+    """Latest completion the authority register declares for the project itself."""
+    # A registration that only identifies a component never describes the project.
+    snapshot = (
+        accepted.filter(
+            verification__fact_scope="project", verification__progress_percent__isnull=False
+        )
+        .select_related("capture", "project__developer", "verification")
+        .defer("capture__payload")
+        .order_by("-capture__fetched_at", "-id")
+        .first()
+    )
+    if snapshot is None:
+        return None
+    facts = snapshot.verification
+    return {
+        "authority": facts.authority,
+        "progress_percent": facts.progress_percent,
+        "progress_inspected_on": facts.progress_inspected_on,
+        "register_status": facts.register_status,
+        "off_plan": facts.off_plan,
+        "source": _source(snapshot, facts.evidence_pointer),
     }
 
 
