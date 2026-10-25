@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import Decimal
 
 from django.db import connection, transaction
@@ -50,6 +51,18 @@ RESULT_FIELDS = (
     "median_difference",
     "level",
 )
+# What a replay must reproduce exactly, besides the project and parcel identities.
+RECORD_FIELDS = (
+    "area_basis",
+    "position_method",
+    "parcel_area_m2",
+    "tile",
+    "before_scene_id",
+    "after_scene_id",
+    "before_acquired_at",
+    "after_acquired_at",
+    *RESULT_FIELDS,
+)
 
 
 @dataclass(frozen=True)
@@ -88,7 +101,7 @@ def measurement_targets(territory=None):
             | Q(place__active=True)
             | Q(building__active=True)
         )
-        .select_related("place", "building")
+        .select_related("project", "place", "building")
         .order_by("id")
     )
     if territory:
@@ -315,3 +328,118 @@ def _capture(run, payload, receipt, parent=None):
         content_sha256=hashlib.sha256(payload).hexdigest(),
         **receipt,
     )
+
+
+def measurement_record(measurement):
+    """Comparable values of one stored measurement, keyed by source identities, not UUIDs."""
+    values = {}
+    for field in RECORD_FIELDS:
+        value = getattr(measurement, field)
+        if isinstance(value, datetime):
+            value = value.isoformat()
+        elif isinstance(value, Decimal):
+            value = str(value)
+        values[field] = value
+    return {
+        "project": measurement.project.slug,
+        "parcel": [measurement.parcel.source_namespace, measurement.parcel.source_record_id],
+        "values": values,
+    }
+
+
+def export_run(run, archive_capture):
+    """Rebuild-check step of one measuring run: its captures and the measurements to redo.
+
+    ``archive_capture`` stores the verified bytes of a capture and returns its manifest
+    item; each item names the index of its parent capture (the search page of a window).
+    """
+    captures = list(Capture.objects.filter(run=run).order_by("ingested_at", "pk"))
+    # Search pages before the windows that cite them, whatever the clock resolution.
+    captures.sort(key=lambda capture: capture.parent_capture_id is not None)
+    index = {capture.pk: position for position, capture in enumerate(captures)}
+    items = [
+        {**archive_capture(capture), "parent": index.get(capture.parent_capture_id)}
+        for capture in captures
+    ]
+    measurements = [
+        {
+            **measurement_record(measurement),
+            "before_capture": index[measurement.before_capture_id],
+            "after_capture": index[measurement.after_capture_id],
+        }
+        for measurement in ConstructionActivityMeasurement.objects.filter(run=run)
+        .select_related("project", "parcel")
+        .order_by("created_at", "pk")
+    ]
+    return {
+        "operation": "construction_activity",
+        "scope": "all",
+        "run": str(run.pk),
+        "original_version": run.connector_version,
+        "captures": items,
+        "measurements": measurements,
+    }
+
+
+def replay_run(step, *, load, actor, run_key, signal):
+    """Measure again, from archived window bytes only, what one original run measured.
+
+    The parcel must still be a measurement target of the rebuilt catalogue for the same
+    reason, and ``signal`` (the ingestion change signal) must give the same result.
+    Returns the measurements that differ; nothing is copied from the original values.
+    """
+    source, _ = Source.objects.get_or_create(
+        key=SOURCE_KEY,
+        defaults={"name": "Copernicus Sentinel-2 L2A (Earth Search)", "url": SOURCE_URL},
+    )
+    run = IngestionRun.objects.create(source=source, actor=actor, connector_version=run_key)
+    captures = []
+    for position, item in enumerate(step["captures"]):
+        parent = item.get("parent")
+        if parent is not None and not 0 <= parent < position:
+            raise ValueError("An archived capture must follow its parent")
+        payload, receipt = load(item)
+        captures.append(
+            _capture(run, payload, receipt, None if parent is None else captures[parent])
+        )
+    targets = {}
+    for target in measurement_targets():
+        key = target.parcel.source_namespace, target.parcel.source_record_id
+        targets[(target.link.project.slug, *key)] = target
+    differences = []
+    for expected in step["measurements"]:
+        values = expected["values"]
+        identity = {"project": expected["project"], "parcel": expected["parcel"]}
+        target = targets.get((expected["project"], *expected["parcel"]))
+        if target is None:
+            differences.append({**identity, "reason": "not_a_measurement_target"})
+            continue
+        before, after = captures[expected["before_capture"]], captures[expected["after_capture"]]
+        result = signal(
+            bytes(before.payload), bytes(after.payload), json.loads(target.parcel.geometry.geojson)
+        )
+        measurement, _ = record_measurement(
+            run=run,
+            target=target,
+            before={"scene": _archived_scene(values, "before"), "capture": before},
+            after={"scene": _archived_scene(values, "after"), "capture": after},
+            result=result,
+        )
+        # Compare what the database keeps (rounded decimals), not the Python values.
+        measurement.refresh_from_db()
+        actual = measurement_record(measurement)["values"]
+        if actual != values:
+            differences.append({**identity, "expected": values, "actual": actual})
+    run.status = "failed" if differences else "succeeded"
+    run.summary = {"replayed": len(step["measurements"]), "differences": len(differences)}
+    run.finished_at = timezone.now()
+    run.save(update_fields=["status", "summary", "finished_at"])
+    return differences
+
+
+def _archived_scene(values, side):
+    return {
+        "scene_id": values[f"{side}_scene_id"],
+        "acquired_at": datetime.fromisoformat(values[f"{side}_acquired_at"]),
+        "tile": values["tile"],
+    }

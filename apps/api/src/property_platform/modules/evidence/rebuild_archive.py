@@ -19,7 +19,14 @@ from django.db import connection, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from . import abu_dhabi, orchestration, project_discovery, project_protocol, replay_protocols
+from . import (
+    abu_dhabi,
+    activity_import,
+    orchestration,
+    project_discovery,
+    project_protocol,
+    replay_protocols,
+)
 from . import rebuild_published as published_level
 from .collection_profiles import COLLECTIONS
 from .history import audit_context
@@ -521,6 +528,8 @@ def ordered_steps(steps):
         "property_presentations": 4,
         "project_details": 5,
         "project_discovery": 6,
+        # Measured parcels are chosen from reviewed project links and positions (B06).
+        "construction_activity": 8,
     }
     return sorted(steps, key=lambda step: phase.get(step["operation"], 7))
 
@@ -597,6 +606,12 @@ def export_archive(root: Path, runs=None):
                             "reason": "Project capture not selected for replay: "
                             "repeated or unregistered URL",
                         }
+                    )
+                continue
+            if key == activity_import.SOURCE_KEY:
+                if captures:
+                    steps.append(
+                        activity_import.export_run(run, lambda capture: _capture(root, capture))
                     )
                 continue
             if key.startswith("property:"):
@@ -1035,8 +1050,19 @@ def reviewed_presentations(scope, targets):
     return selected, photos
 
 
-def replay_archive(root: Path, actor: str, run_id: str, report_root: Path | None = None):
-    """Called only against the database just created by the ingestion controller."""
+def replay_archive(
+    root: Path,
+    actor: str,
+    run_id: str,
+    report_root: Path | None = None,
+    *,
+    activity_signal=None,
+):
+    """Called only against the database just created by the ingestion controller.
+
+    ``activity_signal`` is the ingestion change signal of two Sentinel-2 window
+    captures (B06): the API runtime never reads rasters itself.
+    """
     from . import property_import
     from .project_relations import apply_project_relations
     from .project_verification_links import apply_project_verification_links
@@ -1051,6 +1077,7 @@ def replay_archive(root: Path, actor: str, run_id: str, report_root: Path | None
         operation, scope = step["operation"], step["scope"]
         rows = compared = None
         reused = False
+        detail = {}
         try:
             execution_key = hashlib.sha256(f"rebuild:{run_id}:{index}".encode()).hexdigest()
             with audit_context(actor=actor, execution_key=execution_key):
@@ -1063,6 +1090,19 @@ def replay_archive(root: Path, actor: str, run_id: str, report_root: Path | None
                         photos=photos,
                     )
                     status = "succeeded"
+                elif operation == "construction_activity":
+                    if activity_signal is None:
+                        raise ValueError("Activity replay requires the ingestion change signal")
+                    differences = activity_import.replay_run(
+                        step,
+                        load=lambda item: load_capture(root, item),
+                        actor=actor,
+                        run_key=f"construction_activity:{run_id}",
+                        signal=activity_signal,
+                    )
+                    status = "failed" if differences else "succeeded"
+                    if differences:
+                        detail["measurements"] = differences
                 else:
                     replay = CaptureReplay(root, step["captures"])
                     inert = operation in {"project_details", "project_discovery"}
@@ -1110,7 +1150,13 @@ def replay_archive(root: Path, actor: str, run_id: str, report_root: Path | None
                         ):
                             replay.assert_consumed()
                             status = "replayed_unavailable"
-            outcome = {"run": step["run"], "operation": operation, "scope": scope, "status": status}
+            outcome = {
+                "run": step["run"],
+                "operation": operation,
+                "scope": scope,
+                "status": status,
+                **detail,
+            }
             original = step.get("original_status")
             if (
                 original

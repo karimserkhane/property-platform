@@ -399,3 +399,73 @@ def test_a_run_without_measurable_parcels_reads_nothing(db):
         actor=ACTOR, run_key="t:1", collector=FakeCollector(failing=True)
     )
     assert (result["status"], result["summary"]["targets"]) == ("succeeded", 0)
+
+
+def _forget_measuring_runs():
+    """Leave the catalogue and its links, as a rebuilt database has them before B06.
+
+    Original captures cannot be deleted; the replay writes its own run and captures.
+    """
+    ConstructionActivityMeasurement.objects.all().delete()
+
+
+def _replayed(tmp_path, signal):
+    from uuid import uuid4
+
+    from property_platform.modules.evidence import rebuild_archive as archive
+
+    activity_import.measure_activity(actor=ACTOR, run_key="t:1", collector=FakeCollector())
+    archive.export_archive(tmp_path)
+    manifest = archive.json.loads((tmp_path / "manifest.json").read_text("utf-8"))
+    step = next(s for s in manifest["steps"] if s["operation"] == "construction_activity")
+    _forget_measuring_runs()
+    archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()), activity_signal=signal)
+    return step, archive.json.loads((tmp_path / "report.json").read_text("utf-8"))
+
+
+def test_rebuild_check_measures_again_from_archived_windows_only(linked, tmp_path):
+    seen = []
+
+    def signal(before, after, geometry):
+        seen.append((before, after))
+        return FakeCollector().signal(before, after, geometry)
+
+    step, report = _replayed(tmp_path, signal)
+    assert step["measurements"][0]["project"] == "tower"
+    assert step["measurements"][0]["parcel"] == ["test:parcels", "1"]
+    assert [item["parent"] for item in step["captures"]] == [None, None, 0, 1]
+    assert seen == [(BEFORE.encode(), AFTER.encode())]
+    outcome = next(s for s in report["steps"] if s["operation"] == "construction_activity")
+    assert outcome["status"] == "succeeded", outcome
+    table = next(
+        t for t in report["tables"] if t["table"] == "evidence.construction_activity_measurement"
+    )
+    assert (table["expected"], table["actual"], table["matches"]) == (1, 1, True)
+    measurement = ConstructionActivityMeasurement.objects.get()
+    assert measurement.before_capture.parent_capture.run_id == measurement.run_id
+    assert measurement.run.actor == "integration-rebuild"
+
+
+def test_a_different_replayed_signal_fails_the_rebuild_check(linked, tmp_path):
+    step, report = _replayed(tmp_path, lambda *args: MEASURED | {"changed_pixels": 41})
+    outcome = next(s for s in report["steps"] if s["operation"] == "construction_activity")
+    assert outcome["status"] == "failed"
+    (difference,) = outcome["measurements"]
+    assert (difference["expected"]["changed_pixels"], difference["actual"]["changed_pixels"]) == (
+        40,
+        41,
+    )
+    assert report["ok"] is False
+
+
+def test_activity_replay_without_the_ingestion_signal_fails(linked, tmp_path):
+    from uuid import uuid4
+
+    from property_platform.modules.evidence import rebuild_archive as archive
+
+    activity_import.measure_activity(actor=ACTOR, run_key="t:1", collector=FakeCollector())
+    archive.export_archive(tmp_path)
+    _forget_measuring_runs()
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    assert result["failed_steps"] == 1
+    assert not ConstructionActivityMeasurement.objects.exists()
