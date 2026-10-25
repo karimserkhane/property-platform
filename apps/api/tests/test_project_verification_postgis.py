@@ -110,6 +110,7 @@ def test_project_detail_reads_retention_at_the_latest_declared_progress(client):
     assert data["declared_progress"]["progress_percent"] == 30
     assert data["declared_progress"]["progress_inspected_on"] == "2026-08-21"
     assert data["declared_progress"]["source"]["kind"] == "authority"
+    assert data["declared_progress"]["off_plan"] is True
     retention = data["cancellation_retention"]
     # 30 % is a boundary the cited commentaries leave open: both rates, never a guess.
     assert retention["status"] == "boundary" and retention["rates"] == [15, 25]

@@ -5671,6 +5671,17 @@
             "title": "Register Status",
             "type": "string"
           },
+          "off_plan": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Off Plan"
+          },
           "source": {
             "$ref": "#/components/schemas/ProjectSourceResponse"
           }
@@ -5680,6 +5691,7 @@
           "progress_percent",
           "progress_inspected_on",
           "register_status",
+          "off_plan",
           "source"
         ],
         "title": "ProjectDeclaredProgressResponse",

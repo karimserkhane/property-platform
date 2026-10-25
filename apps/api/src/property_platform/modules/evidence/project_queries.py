@@ -486,6 +486,7 @@ def _declared_progress(accepted):
         "progress_percent": facts.progress_percent,
         "progress_inspected_on": facts.progress_inspected_on,
         "register_status": facts.register_status,
+        "off_plan": facts.off_plan,
         "source": _source(snapshot, facts.evidence_pointer),
     }
 

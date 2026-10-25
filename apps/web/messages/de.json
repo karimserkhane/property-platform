@@ -463,5 +463,23 @@
     "completionObserved": "Erste Abfrage mit Fertigstellung:",
     "notCompletedUntil": "Letzte frühere Abfrage ohne Fertigstellung:",
     "withoutObservations": "Projekte ohne datierte Beobachtungen"
+  },
+  "Retention": {
+    "title": "Einbehalt bei Stornierung des Kaufs",
+    "atDeclaredStage": "Einbehalt des Bauträgers beim derzeit gemeldeten Baustand",
+    "ofPrice": "des Kaufvertragswerts, wenn der Käufer in Verzug ist und die Einheit storniert wird.",
+    "or": "oder",
+    "unreadable": "Der gemeldete Baufortschritt lässt sich der Staffel nicht zuordnen.",
+    "declaredProgress": "Im ADREC-Register gemeldeter Baufortschritt",
+    "inspectedOn": "geprüft am",
+    "inspectionUnknown": "Prüfdatum nicht angegeben",
+    "boundary": "Der gemeldete Baufortschritt liegt genau auf einer Stufengrenze. Die zitierten Kommentare sagen nicht, welche Stufe gilt; daher werden beide Sätze angezeigt.",
+    "fullRefund": "Arbeiten nicht begonnen: Der Käufer erhält den vollen Betrag zurück, wenn die Verzögerung auf Ursachen außerhalb des Einflusses des Bauträgers beruht. Das Register zeigt die Ursache nicht.",
+    "paidShare": "ADREC legt den Einbehalt im Einzelfall fest, sobald der Käufer mehr als diesen Anteil des Preises gezahlt hat:",
+    "stageAssessed": "Der Satz gilt für den Baustand, den ADREC oder seine Berater bei der Stornierung feststellen; er kann vom zuletzt gemeldeten Fortschritt abweichen.",
+    "rule": "Regel und Quellen",
+    "officialTextMissing": "Der amtliche Text war nicht erhältlich. Die Staffel stammt aus diesen juristischen Kommentaren:",
+    "publishedOn": "veröffentlicht am",
+    "notAdvice": "Nur eine Lesehilfe, keine Rechtsberatung. Maßgeblich sind der Beschluss und ADREC."
   }
 }

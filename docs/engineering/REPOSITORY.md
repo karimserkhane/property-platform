@@ -11,7 +11,9 @@ SQL ne se substitue au rejeu. Voir [REBUILD.md](REBUILD.md).
 **Retenue en cas d'annulation — B04, 25 octobre 2026.** `publication/cancellation_retention.py`
 possède le barème daté et cité de la décision n° 165 de 2025 et sa lecture pure pour un
 avancement déclaré, sans base ni réseau. Direction : API/publication → evidence (avancement
-déclaré de `project_verification`). Aucun modèle ni migration. Voir
+déclaré de `project_verification`, lu par `evidence/project_queries.py`). L'API compose la
+fiche projet ; côté web, `features/projects/retention.ts` possède la mise en forme pure et
+`cancellation-retention.tsx` le rendu dans le volet achat. Aucun modèle ni migration. Voir
 [PROJECT_VERIFICATION.md](PROJECT_VERIFICATION.md).
 
 **Historique de livraison — B03, 24 octobre 2026.** `evidence/delivery_history.py`

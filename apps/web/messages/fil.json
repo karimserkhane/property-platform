@@ -463,5 +463,23 @@
     "completionObserved": "Unang pagbasa na nagsasabing tapos na:",
     "notCompletedUntil": "Huling naunang pagbasa na hindi pa tapos:",
     "withoutObservations": "Mga proyektong walang may-petsang obserbasyon"
+  },
+  "Retention": {
+    "title": "Halagang maaaring ibawas kapag kinansela ang pagbili",
+    "atDeclaredStage": "Bawas ng developer sa yugtong kasalukuyang idineklara",
+    "ofPrice": "ng halaga ng kontrata ng bentahan, kung hindi tumupad ang mamimili at kinansela ang unit.",
+    "or": "o",
+    "unreadable": "Hindi mabasa ang idineklarang progreso batay sa talaan ng antas.",
+    "declaredProgress": "Progresong idineklara sa rehistro ng ADREC",
+    "inspectedOn": "siniyasat noong",
+    "inspectionUnknown": "hindi nakasaad ang petsa ng inspeksiyon",
+    "boundary": "Eksaktong nasa hangganan ng dalawang antas ang idineklarang progreso. Hindi sinasabi ng mga binanggit na komentaryo kung aling antas ang ilalapat, kaya ipinapakita ang dalawang porsiyento.",
+    "fullRefund": "Hindi pa nasisimulan ang konstruksiyon: buong ibabalik ang bayad sa mamimili kung ang pagkaantala ay dahil sa mga sanhing labas sa kontrol ng developer. Hindi ipinapakita ng rehistro ang sanhi.",
+    "paidShare": "Ang ADREC ang nagtatakda ng bawas ayon sa bawat kaso kapag nakabayad na ang mamimili nang higit sa bahaging ito ng presyo:",
+    "stageAssessed": "Ang porsiyento ay para sa yugtong tinatasa ng ADREC o ng mga consultant nito sa pagkansela, na maaaring iba sa pinakahuling idineklarang progreso.",
+    "rule": "Patakaran at mga pinagmulan",
+    "officialTextMissing": "Hindi nakuha ang opisyal na teksto. Ang talaan ng antas ay mula sa mga legal na komentaryong ito:",
+    "publishedOn": "inilathala noong",
+    "notAdvice": "Gabay lamang sa pagbasa, hindi legal na payo. Sumangguni sa desisyon at sa ADREC."
   }
 }

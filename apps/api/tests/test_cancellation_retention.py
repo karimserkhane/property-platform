@@ -8,6 +8,7 @@ from property_platform.modules.publication.cancellation_retention import (
     PAID_SHARE_DISCRETION_PERCENT,
     SOURCE,
     VERSION,
+    project_retention,
     retention,
 )
 
@@ -83,3 +84,24 @@ def test_every_reading_cites_its_dated_sources_and_the_paid_share_case():
     for reference in SOURCE["references"]:
         assert reference["url"].startswith("https://")
         assert reference["published_on"] and reference["consulted_on"]
+
+
+def test_project_retention_cites_the_declared_reading_of_an_off_plan_project():
+    source = {"url": "https://adrec.gov.ae/project", "kind": "authority"}
+    declared = {
+        "progress_percent": Decimal("8.50"),
+        "progress_inspected_on": "2026-06-29",
+        "off_plan": True,
+        "source": source,
+    }
+    result = project_retention(declared)
+    assert result["rates"] == [10]
+    assert result["progress_inspected_on"] == "2026-06-29"
+    assert result["progress_source"] is source
+
+
+@pytest.mark.parametrize("off_plan", [False, None])
+def test_project_retention_is_not_read_outside_off_plan_sales(off_plan):
+    declared = {"progress_percent": 50, "progress_inspected_on": None, "off_plan": off_plan}
+    assert project_retention(declared) is None
+    assert project_retention(None) is None

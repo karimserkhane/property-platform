@@ -52,3 +52,14 @@ Règles de lecture :
   toujours signalé, puisque la part payée est propre à chaque acheteur.
 - Avancement absent ou hors de 0 à 100 % : aucun taux. Aucun conseil juridique ; la
   fiche renvoie aux sources.
+- Le barème régit la vente sur plan : aucune retenue n'est lue pour un projet que le
+  registre ne déclare pas sur plan (`off_plan` faux ou absent).
+
+Sur la fiche projet, `GET /projects/{slug}` porte `declared_progress` (dernière lecture
+ADREC de portée projet ayant un avancement : taux, date d'inspection, statut, vente sur
+plan, source) et `cancellation_retention` (lecture du barème à cet avancement, avec la
+source de l'avancement et les références du barème). Le web
+(`features/projects/cancellation-retention.tsx`, namespace `Retention`) affiche, dans le
+volet achat, la retenue au stade actuel déclaré, l'avancement et sa date d'inspection,
+le cas des 60 % payés, le remboursement intégral possible à 0 %, puis la règle et ses
+sources datées.

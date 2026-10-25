@@ -7,6 +7,7 @@ import type { MapLabels, UseLabels } from "@/features/atlas/types";
 import { ProjectDetailView } from "@/features/projects/detail";
 import { ProjectNeighbourhood } from "@/features/projects/neighbourhood";
 import { googleNeighbourhoodUrl } from "@/features/projects/neighbourhood-config";
+import type { RetentionLabels } from "@/features/projects/retention";
 import { readProject } from "@/features/projects/server";
 import type { ProjectLabels } from "@/features/projects/types";
 import { isLocale } from "@/i18n/locales";
@@ -58,6 +59,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const mapText = await getTranslations({ locale, namespace: "Map" });
   const usageText = await getTranslations({ locale, namespace: "Use" });
   const atlasText = await getTranslations({ locale, namespace: "Atlas" });
+  const retentionText = await getTranslations({
+    locale,
+    namespace: "Retention",
+  });
+  const retentionLabels = Object.fromEntries(
+    Object.keys(english.Retention).map((key) => [
+      key,
+      retentionText(key as keyof typeof english.Retention),
+    ]),
+  ) as RetentionLabels;
   const useLabels = Object.fromEntries(
     Object.keys(english.Use).map((key) => [
       key,
@@ -75,6 +86,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       project={result.project}
       locale={locale}
       labels={labels}
+      retentionLabels={retentionLabels}
       neighbourhood={
         area ? (
           <ProjectNeighbourhood

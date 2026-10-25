@@ -78,8 +78,12 @@ def retention(progress_percent):
 
 
 def project_retention(declared_progress):
-    """Retention at the latest completion the register declares, cited and dated."""
-    if declared_progress is None:
+    """Retention at the latest completion the register declares, cited and dated.
+
+    The schedule governs off-plan sales: nothing is read for a project the register
+    does not declare off-plan.
+    """
+    if declared_progress is None or declared_progress["off_plan"] is not True:
         return None
     return retention(declared_progress["progress_percent"]) | {
         "progress_inspected_on": declared_progress["progress_inspected_on"],

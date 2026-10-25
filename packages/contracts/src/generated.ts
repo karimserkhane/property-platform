@@ -1772,6 +1772,8 @@ export interface components {
             progress_inspected_on: string | null;
             /** Register Status */
             register_status: string;
+            /** Off Plan */
+            off_plan: boolean | null;
             source: components["schemas"]["ProjectSourceResponse"];
         };
         /** ProjectDetailResponse */

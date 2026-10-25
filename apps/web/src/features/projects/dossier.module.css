@@ -187,3 +187,31 @@
   font-size: 13px;
   color: inherit;
 }
+.retention {
+  margin-block: 20px;
+  overflow-wrap: anywhere;
+}
+.retentionFacts {
+  display: grid;
+  gap: 14px;
+  margin-block: 0 8px;
+}
+.retentionFacts dt {
+  font-size: 12px;
+  color: #6c7478;
+}
+.retentionFacts dd {
+  margin-inline: 0;
+}
+.retentionReferences {
+  margin: 8px 0 0;
+  padding-inline-start: 18px;
+}
+.retentionReferences a {
+  color: inherit;
+}
+.retentionFacts .retentionRate {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.3;
+}

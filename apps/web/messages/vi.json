@@ -463,5 +463,23 @@
     "completionObserved": "Lần đọc đầu tiên ghi hoàn thành:",
     "notCompletedUntil": "Lần đọc trước gần nhất chưa hoàn thành:",
     "withoutObservations": "Dự án không có quan sát có ngày"
+  },
+  "Retention": {
+    "title": "Khoản khấu trừ khi hủy giao dịch mua",
+    "atDeclaredStage": "Mức khấu trừ của chủ đầu tư ở giai đoạn đang được khai báo",
+    "ofPrice": "giá trị hợp đồng mua bán, nếu người mua vi phạm nghĩa vụ và căn hộ bị hủy.",
+    "or": "hoặc",
+    "unreadable": "Không thể đối chiếu tiến độ đã khai báo với biểu mức.",
+    "declaredProgress": "Tiến độ khai báo trong sổ đăng ký ADREC",
+    "inspectedOn": "kiểm tra ngày",
+    "inspectionUnknown": "không có ngày kiểm tra",
+    "boundary": "Tiến độ khai báo nằm đúng ranh giới giữa hai bậc. Các bình luận được trích dẫn không nói bậc nào được áp dụng, nên cả hai mức đều được hiển thị.",
+    "fullRefund": "Chưa khởi công: người mua được hoàn lại toàn bộ nếu sự chậm trễ do nguyên nhân ngoài tầm kiểm soát của chủ đầu tư. Sổ đăng ký không cho biết nguyên nhân.",
+    "paidShare": "ADREC quyết định mức khấu trừ theo từng trường hợp khi người mua đã trả nhiều hơn tỷ lệ này của giá:",
+    "stageAssessed": "Mức áp dụng cho giai đoạn do ADREC hoặc tư vấn của cơ quan này xác định khi hủy, có thể khác tiến độ khai báo gần nhất.",
+    "rule": "Quy định và nguồn",
+    "officialTextMissing": "Không lấy được văn bản chính thức. Biểu mức được lấy từ các bình luận pháp lý sau:",
+    "publishedOn": "đăng ngày",
+    "notAdvice": "Chỉ là công cụ hỗ trợ đọc, không phải tư vấn pháp lý. Hãy tham khảo quyết định và ADREC."
   }
 }

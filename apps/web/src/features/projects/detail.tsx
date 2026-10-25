@@ -1,6 +1,7 @@
 import navigation from "@property-platform/contracts/territories";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
+import { CancellationRetentionCard } from "./cancellation-retention";
 import { ProjectCover } from "./cover";
 import { developerHistoryHref, isDeveloperKey } from "./delivery";
 import { ProjectDocuments } from "./documents";
@@ -19,6 +20,7 @@ import {
 } from "./presentation";
 import styles from "./project.module.css";
 import { ProjectComponents, ProjectParent } from "./relations";
+import type { RetentionLabels } from "./retention";
 import type { ProjectDetail, ProjectLabels } from "./types";
 
 const typeKeys = new Set([
@@ -34,11 +36,13 @@ export function ProjectDetailView({
   project,
   locale,
   labels,
+  retentionLabels,
   neighbourhood,
 }: {
   project: ProjectDetail;
   locale: string;
   labels: ProjectLabels;
+  retentionLabels: RetentionLabels;
   neighbourhood?: ReactNode;
 }) {
   const territory = navigation.territories.find(
@@ -382,6 +386,14 @@ export function ProjectDetailView({
                 </div>
               ))}
             </dl>
+            {project.cancellation_retention && (
+              <CancellationRetentionCard
+                retention={project.cancellation_retention}
+                labels={retentionLabels}
+                projectLabels={labels}
+                locale={locale}
+              />
+            )}
             {website && (
               <a
                 className={styles.textAction}

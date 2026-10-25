@@ -123,6 +123,7 @@ class ProjectDeclaredProgressResponse(Schema):
     progress_percent: float
     progress_inspected_on: date | None
     register_status: str
+    off_plan: bool | None
     source: ProjectSourceResponse
 
 

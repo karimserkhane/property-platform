@@ -463,5 +463,23 @@
     "completionObserved": "First reading stating completion:",
     "notCompletedUntil": "Last earlier reading without completion:",
     "withoutObservations": "Projects without dated observations"
+  },
+  "Retention": {
+    "title": "Retention if the purchase is cancelled",
+    "atDeclaredStage": "Developer retention at the stage currently declared",
+    "ofPrice": "of the sale contract value, if the purchaser defaults and the unit is cancelled.",
+    "or": "or",
+    "unreadable": "The declared progress cannot be read against the schedule.",
+    "declaredProgress": "Progress declared in the ADREC register",
+    "inspectedOn": "inspected on",
+    "inspectionUnknown": "inspection date not given",
+    "boundary": "The declared progress sits exactly on a band limit. The cited commentaries do not say which band applies, so both rates are shown.",
+    "fullRefund": "Works not started: the purchaser is fully refunded if the delay is due to causes outside the developer's control. The register does not show the cause.",
+    "paidShare": "ADREC sets the retention case by case once the purchaser has paid more than this share of the price:",
+    "stageAssessed": "The rate applies to the stage ADREC or its consultants assess at cancellation, which may differ from the latest declared progress.",
+    "rule": "Rule and sources",
+    "officialTextMissing": "The official text could not be obtained. The schedule is taken from these legal commentaries:",
+    "publishedOn": "published on",
+    "notAdvice": "Reading aid only, not legal advice. Refer to the decision and to ADREC."
   }
 }
