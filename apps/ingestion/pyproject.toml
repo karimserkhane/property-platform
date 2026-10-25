@@ -9,6 +9,10 @@ dependencies = [
   "sqlalchemy[asyncio]==2.0.55",
   "httpx==0.28.1",
   "pyarrow==26.0.0",
+  # Raster arithmetic of the Sentinel-2 activity signal (B06); never in the API runtime.
+  "numpy==2.5.4",
+  # Bounded COG window reads of the same signal (B06); GDAL ships inside the wheel.
+  "rasterio==1.5.2",
   "property-platform-api",
 ]
 

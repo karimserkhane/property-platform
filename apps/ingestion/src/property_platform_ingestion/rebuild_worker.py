@@ -44,7 +44,14 @@ def main():
             # The controller created an empty template0 database. Migrate explicitly;
             # this is never a startup hook and is never run against the source.
             call_command("migrate", interactive=False, verbosity=0)
-            replay_archive(root, os.environ["REBUILD_ACTOR"], os.environ["REBUILD_RUN_ID"])
+            from .collectors.sentinel_measure import replay_signal
+
+            replay_archive(
+                root,
+                os.environ["REBUILD_ACTOR"],
+                os.environ["REBUILD_RUN_ID"],
+                activity_signal=replay_signal,
+            )
         else:
             raise ValueError("Unknown rebuild worker action")
     finally:

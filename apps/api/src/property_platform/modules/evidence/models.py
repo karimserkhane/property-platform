@@ -4,6 +4,7 @@ from django.contrib.gis.db import models as gis_models
 from django.db import models
 
 from .accessibility_models import RoutingGraph, RoutingGraphPart, WalkingArea, WalkingRequest  # noqa: F401
+from .activity_models import ConstructionActivityMeasurement  # noqa: F401
 from .basemap_models import BasemapRequest, BasemapTile  # noqa: F401
 from .history_models import HistoryExclusion, RowRevision  # noqa: F401
 

@@ -8,6 +8,18 @@ evidence → catalog, sans point d'entrée HTTP, nouveau modèle ni changement d
 La base de référence est lue sur un instantané en lecture seule ; aucune restauration
 SQL ne se substitue au rejeu. Voir [REBUILD.md](REBUILD.md).
 
+**Indice d'activité satellite — B06, 25 octobre 2026 (en cours).** `ingestion/collectors/sentinel_activity.py`
+possède la vérification des items STAC Sentinel-2 L2A, le choix d'une scène par tuile et par mois
+et le calcul pur de l'indice de changement (NumPy, dépendance d'ingestion uniquement) ;
+`ingestion/collectors/sentinel_windows.py` possède la recherche STAC paginée, les plages HTTPS
+bornées et la lecture des fenêtres COG (Rasterio, ingestion uniquement), ainsi que leur encodage
+en capture rejouable ; `ingestion/collectors/sentinel_measure.py` les assemble pour l'opération
+de domaine (recherche, fenêtres, signal recalculé depuis les octets capturés).
+`evidence/activity_import.py` possède le choix des parcelles, les captures et les mesures ; il
+reçoit le collecteur en paramètre et n'importe jamais l'ingestion. Aucun
+traitement raster dans l'API ou le web. Direction prévue : ingestion → evidence (mesures, captures)
+→ catalog (parcelles). Voir [CONSTRUCTION_ACTIVITY.md](CONSTRUCTION_ACTIVITY.md).
+
 **Fiche « Vérification » — B05, 25 octobre 2026.** `evidence/verification_sheet.py`
 possède l'assemblage en lecture de la fiche : dernière lecture du registre, liens officiels
 actifs et contradictions entre lectures citées. Il réutilise `delivery_history.delivery_readings`

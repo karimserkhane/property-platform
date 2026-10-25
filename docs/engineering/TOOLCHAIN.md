@@ -104,3 +104,9 @@ Rasterio 1.5.2 est utilisé uniquement par `scripts/acquire_reem_imagery.py`, da
 ## Lecture Parquet des lieux — 17 octobre 2026
 
 [PyArrow 26.0.0](https://pypi.org/project/pyarrow/26.0.0/) est fixé uniquement dans `apps/ingestion/pyproject.toml` et `apps/ingestion/uv.lock`. Ses wheels CPython 3.14/Linux ont été vérifiées. Il lit les fragments régionaux Overture en flux, sans GeoPandas, DuckDB ni extension téléchargée au lancement. Les versions et dépendances de compatibilité web/API restent inchangées. L’image ingestion existante est réutilisée ; aucun nouveau conteneur permanent ou abonnement n’est ajouté.
+
+## Indice d'activité satellite — 25 octobre 2026
+
+[NumPy 2.5.4](https://pypi.org/project/numpy/2.5.4/) est fixé dans `apps/ingestion/pyproject.toml` et `apps/ingestion/uv.lock` pour l'arithmétique raster de B06 (`collectors/sentinel_activity.py`). C'est la version déjà retenue par `scripts/imagery-requirements.txt` ; wheel CPython 3.14 manylinux. Aucune dépendance API/web, aucun nouveau service. Méthode : [CONSTRUCTION_ACTIVITY.md](CONSTRUCTION_ACTIVITY.md).
+
+[Rasterio 1.5.2](https://pypi.org/project/rasterio/1.5.2/) (même version que `scripts/imagery-requirements.txt`) est ajouté à l'ingestion seulement, avec ses dépendances `affine` 3.0.1 et `pyparsing` 3.3.3, pour lire les fenêtres COG des parcelles (`collectors/sentinel_windows.py`). Sa wheel manylinux CPython 3.14 embarque GDAL 3.12.2 : aucun paquet système ni service ajouté. GDAL ne fait aucun accès réseau lui-même : il lit un objet fichier Python qui demande des plages HTTPS bornées avec la vérification TLS du système. Une exception Python levée pendant une lecture GDAL arrête le processus : le lecteur garde l'erreur et la relève après le retour de GDAL. Alternatives écartées : GDAL `/vsicurl/` (réseau, mandataires et en-têtes hors du contrôle du collecteur), `rio-tiler` ou `stackstac` (dépendances plus lourdes pour cinq lectures de fenêtre).

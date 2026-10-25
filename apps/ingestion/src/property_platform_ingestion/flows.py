@@ -383,6 +383,26 @@ def routing_graph(actor: str = "scheduled", refresh: bool = True):
     return result
 
 
+@flow(name="property-platform-construction-activity", retries=0)
+def construction_activity(territory: str = "all", actor: str = "scheduled"):
+    """Measure ground change of reviewed project parcels on recent Sentinel-2 scenes."""
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    result = invoke_domain(
+        {
+            "operation": "construction_activity",
+            "scope": territory,
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        },
+        timeout=1200,
+    )
+    if result["status"] == "failed":
+        raise IngestionFailure(result)
+    return result
+
+
 @flow(name="property-platform-walking-areas", retries=0)
 def walking_areas(actor: str = "scheduled"):
     """Compute queued 5/10/15-minute walking areas from the archived graph."""
@@ -460,6 +480,7 @@ FLOWS = {
         data_history,
         routing_graph,
         walking_areas,
+        construction_activity,
         backup,
         restore_check,
         rebuild_check,
