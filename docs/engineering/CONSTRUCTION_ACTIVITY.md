@@ -17,6 +17,17 @@ Code : `apps/ingestion/src/property_platform_ingestion/collectors/sentinel_activ
 
 Les seuils sont des choix heuristiques de la version 1, non calibrés sur des chantiers vérifiés. Toute modification change `METHOD_VERSION` ; les anciennes mesures restent attachées à leur version.
 
+## Acquisition
+
+Code : `apps/ingestion/src/property_platform_ingestion/collectors/sentinel_windows.py`.
+
+- **Recherche.** `GET https://earth-search.aws.element84.com/v1/search` (collection, emprise WGS84, six mois avant la date de fin, 100 items par page) par `SourceHTTP` : chaque page est une acquisition avec son reçu. Earth Search donne un lien « page suivante » même après le dernier item ; le total `numberMatched` décide de la complétude. Une recherche incomplète, répétée ou au-delà de 5 pages échoue au lieu d'être tronquée. Six mois sur une petite emprise de Reem couvrent deux tuiles MGRS (`39RZH`, `40RBN`) et 187 items, en deux pages (3,9 Mo).
+- **Paires.** Les scènes retenues (une par tuile et par mois) sont comparées deux à deux dans l'ordre chronologique, sur la même tuile.
+- **Fenêtres.** Rasterio lit chaque fichier par un objet fichier Python : blocs alignés de 64 Kio, demandés en plages HTTPS (`206` obligatoire, encodage `identity`), conservés pour la session car GDAL relit souvent l'en-tête. Budgets : 8 Mio par requête, 32 Mio par fichier, 512 Mio par session. La fenêtre est l'emprise de la parcelle sur la grille 10 m de B04, au plus 256 × 256 pixels ; une parcelle hors de la tuile ou plus grande est refusée. SCL (20 m) est rééchantillonnée au plus proche sur cette grille.
+- **Capture.** Une fenêtre est encodée en JSON déterministe (`sentinel-activity-window-v1`) : scène, tuile, date de prise de vue, système de coordonnées, transformation, fichiers sources avec échelle et décalage, puis les nombres numériques d'origine (`uint16`, SCL `uint8`) en base64. Le rejeu décode la capture en réflectance et recalcule le masque de la parcelle (centre du pixel dans la parcelle) ; aucun réseau n'est nécessaire.
+
+Essai réel du 25 octobre 2026 (carré de 300 m à Reem, tuile `40RBN`) : 19 requêtes, environ 11 s et 6,7 Mo par scène pour une fenêtre de 32 × 34 pixels (capture de 15 Ko). Août → septembre 2026 : 42 % de pixels changés (`high`) avec une différence médiane de 0,043 ; septembre → octobre : 4,5 % (`low`). L'écart d'août tient probablement à la saison et à l'atmosphère autant qu'au sol : c'est une limite connue des seuils non calibrés de la version 1, à revoir avant tout changement de `METHOD_VERSION`.
+
 ## Stockage
 
 Table `evidence.construction_activity_measurement` (modèle `ConstructionActivityMeasurement`, migration `0035`), journalisée comme les autres tables de preuves et rattachée au flow `property-platform-construction-activity` dans `pipeline_inventory.py`. Une ligne par parcelle, paire de scènes et version de méthode ; une seconde lecture de la même paire garde la première mesure. Chaque ligne cite le projet, la parcelle, le lien d'identité relu qui place le projet sur cette parcelle, l'exécution, les captures des fenêtres des deux dates, la tuile MGRS, les identifiants et dates de prise de vue, puis les nombres de pixels, la part changée et le niveau. La base refuse une part hors de [0, 1], un niveau autre que `low`, `moderate` ou `high`, une date « après » qui ne suit pas la date « avant », et un niveau sur une mesure `insufficient_clear_pixels`.

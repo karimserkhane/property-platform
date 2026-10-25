@@ -10,7 +10,10 @@ SQL ne se substitue au rejeu. Voir [REBUILD.md](REBUILD.md).
 
 **Indice d'activité satellite — B06, 25 octobre 2026 (en cours).** `ingestion/collectors/sentinel_activity.py`
 possède la vérification des items STAC Sentinel-2 L2A, le choix d'une scène par tuile et par mois
-et le calcul pur de l'indice de changement (NumPy, dépendance d'ingestion uniquement). Aucun
+et le calcul pur de l'indice de changement (NumPy, dépendance d'ingestion uniquement) ;
+`ingestion/collectors/sentinel_windows.py` possède la recherche STAC paginée, les plages HTTPS
+bornées et la lecture des fenêtres COG (Rasterio, ingestion uniquement), ainsi que leur encodage
+en capture rejouable. `evidence/activity_import.py` possède les mesures. Aucun
 traitement raster dans l'API ou le web. Direction prévue : ingestion → evidence (mesures, captures)
 → catalog (parcelles). Voir [CONSTRUCTION_ACTIVITY.md](CONSTRUCTION_ACTIVITY.md).
 
