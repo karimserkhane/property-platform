@@ -98,6 +98,23 @@ def execute(request):
                     from_history=request.get("scope") == "archive",
                 )
             return archive_walking(**values, compute=compute_walking)
+        if request.get("operation") == "construction_activity":
+            from property_platform.modules.catalog.territories import TERRITORY_BY_ID
+            from property_platform.modules.evidence.activity_import import measure_activity
+
+            from .collectors.sentinel_measure import ActivityCollector
+
+            if set(request) != {"operation", "scope", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Activity measurement requires an audited Prefect run")
+            if request["scope"] != "all" and request["scope"] not in TERRITORY_BY_ID:
+                raise ValueError("Unregistered activity territory")
+            with ActivityCollector() as collector:
+                return measure_activity(
+                    actor=request["actor"],
+                    run_key=f"construction_activity:{request['prefect_flow_run_id']}",
+                    collector=collector,
+                    territory=None if request["scope"] == "all" else request["scope"],
+                )
         if request.get("operation") == "data_history":
             from property_platform.modules.evidence.pipeline_inventory import check_history
 

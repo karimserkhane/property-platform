@@ -202,3 +202,92 @@ def test_window_captures_must_come_from_the_measuring_run(linked):
         activity_import.record_measurement(
             run=run, link=linked, before=before, after=after, result=MEASURED
         )
+
+
+class FakeCollector:
+    """Stands in for the ingestion collector: two pages, one tile, one window per scene."""
+
+    method_version = "sentinel-activity-v1"
+
+    def __init__(self, *, readable=True, failing=False):
+        self.readable, self.failing, self.windows = readable, failing, []
+
+    def scenes(self, bbox):
+        assert bbox[0] < bbox[2] and bbox[1] < bbox[3]
+        receipt = {
+            "url": "https://earth-search.aws.element84.com/v1/search?collections=x",
+            "fetched_started_at": timezone.now(),
+            "fetched_at": timezone.now(),
+            "http_status": 200,
+            "acquisition_method": "scheduled_https_collect",
+        }
+        scenes = [
+            {"scene_id": BEFORE, "acquired_at": datetime(2026, 6, 29, tzinfo=UTC), "page": 0},
+            {"scene_id": AFTER, "acquired_at": datetime(2026, 10, 4, tzinfo=UTC), "page": 1},
+        ]
+        return {
+            "pages": [{"payload": b'{"page":1}', "receipt": receipt}] * 2,
+            "scenes": [scene | {"tile": "MGRS-40RBN"} for scene in scenes],
+        }
+
+    def window(self, scene, geometry):
+        if self.failing:
+            raise ValueError("Source transport failed")
+        self.windows.append(scene["scene_id"])
+        if not self.readable:
+            return None
+        return {
+            "payload": scene["scene_id"].encode(),
+            "receipt": {
+                "url": "https://earth-search.aws.element84.com/v1/items/" + scene["scene_id"],
+                "fetched_started_at": timezone.now(),
+                "fetched_at": timezone.now(),
+                "http_status": 206,
+                "acquisition_method": "sentinel_cog_window_ranges",
+            },
+        }
+
+    def signal(self, before, after, geometry):
+        assert (before, after) == (BEFORE.encode(), AFTER.encode())
+        assert geometry["type"] == "MultiPolygon"
+        return MEASURED
+
+
+def test_a_run_measures_the_latest_pair_from_captured_windows_once(linked):
+    collector = FakeCollector()
+    result = activity_import.measure_activity(actor=ACTOR, run_key="t:1", collector=collector)
+    assert result["status"] == "succeeded"
+    assert (result["summary"]["measured"], result["summary"]["pairs"]) == (1, 1)
+    measurement = ConstructionActivityMeasurement.objects.get()
+    assert measurement.before_capture.parent_capture.run_id == measurement.run_id
+    assert bytes(measurement.after_capture.payload) == AFTER.encode()
+    assert measurement.after_capture.http_status == 206
+    again = activity_import.measure_activity(actor=ACTOR, run_key="t:2", collector=collector)
+    assert (again["summary"]["existing"], again["summary"]["measured"]) == (1, 0)
+    assert collector.windows == [BEFORE, AFTER]
+
+
+def test_unreadable_windows_and_budgets_leave_no_measurement(linked):
+    unreadable = activity_import.measure_activity(
+        actor=ACTOR, run_key="t:1", collector=FakeCollector(readable=False)
+    )
+    assert (unreadable["status"], unreadable["summary"]["unreadable"]) == ("succeeded", 1)
+    deferred = activity_import.measure_activity(
+        actor=ACTOR, run_key="t:2", collector=FakeCollector(), limit=0
+    )
+    assert deferred["summary"]["deferred"] == 1
+    failed = activity_import.measure_activity(
+        actor=ACTOR, run_key="t:3", collector=FakeCollector(failing=True)
+    )
+    assert (failed["status"], failed["summary"]["failed"]) == ("quarantined", 1)
+    assert not ConstructionActivityMeasurement.objects.exists()
+    runs = IngestionRun.objects.filter(source__key=activity_import.SOURCE_KEY)
+    statuses = sorted(runs.values_list("status", flat=True))
+    assert statuses == ["quarantined", "succeeded", "succeeded"]
+
+
+def test_a_run_without_measurable_parcels_reads_nothing(db):
+    result = activity_import.measure_activity(
+        actor=ACTOR, run_key="t:1", collector=FakeCollector(failing=True)
+    )
+    assert (result["status"], result["summary"]["links"]) == ("succeeded", 0)

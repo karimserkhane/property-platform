@@ -151,6 +151,13 @@ DATASETS += (
         {},
         "* * * * *",
     ),
+    Dataset(
+        "construction-activity",
+        "property-platform-construction-activity",
+        "Sentinel-2 ground change of reviewed project parcels; a dated signal, never progress.",
+        {"territory": "all"},
+        "0 4 5 * *",
+    ),
 )
 
 # Same reviewed connectors, distinct source identities and deployment scopes.
