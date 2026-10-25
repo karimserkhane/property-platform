@@ -463,5 +463,23 @@
     "completionObserved": "Primeira leitura indicando conclusão:",
     "notCompletedUntil": "Última leitura anterior sem conclusão:",
     "withoutObservations": "Projetos sem observações datadas"
+  },
+  "Retention": {
+    "title": "Retenção em caso de cancelamento",
+    "atDeclaredStage": "Retenção do promotor na fase atualmente declarada",
+    "ofPrice": "do valor do contrato de compra e venda, se o comprador incumprir e a unidade for cancelada.",
+    "or": "ou",
+    "unreadable": "O avanço declarado não pode ser lido na tabela.",
+    "declaredProgress": "Avanço declarado no registo da ADREC",
+    "inspectedOn": "inspecionado em",
+    "inspectionUnknown": "data de inspeção não indicada",
+    "boundary": "O avanço declarado cai exatamente no limite entre dois escalões. Os comentários citados não dizem qual se aplica, por isso ambas as taxas são mostradas.",
+    "fullRefund": "Obras não iniciadas: o comprador é reembolsado na totalidade se o atraso se dever a causas alheias ao promotor. O registo não indica a causa.",
+    "paidShare": "A ADREC fixa a retenção caso a caso quando o comprador já pagou mais do que esta parte do preço:",
+    "stageAssessed": "A taxa aplica-se à fase que a ADREC ou os seus consultores constatam no cancelamento, que pode diferir do último avanço declarado.",
+    "rule": "Regra e fontes",
+    "officialTextMissing": "Não foi possível obter o texto oficial. A tabela vem destes comentários jurídicos:",
+    "publishedOn": "publicado em",
+    "notAdvice": "Apenas uma ajuda de leitura, não aconselhamento jurídico. Consulte a decisão e a ADREC."
   }
 }

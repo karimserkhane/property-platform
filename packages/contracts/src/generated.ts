@@ -1719,6 +1719,33 @@ export interface components {
              */
             component_count: number;
         };
+        /**
+         * CancellationRetentionResponse
+         * @description Developer retention on cancellation at the declared stage; a reading aid, not advice.
+         */
+        CancellationRetentionResponse: {
+            /** Version */
+            version: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "rate" | "boundary" | "unknown" | "out_of_range";
+            /** Progress Percent */
+            progress_percent: number | null;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /** Rates */
+            rates: number[];
+            /** Bands */
+            bands: components["schemas"]["RetentionBandResponse"][];
+            /** Full Refund Possible */
+            full_refund_possible: boolean;
+            /** Paid Share Discretion Percent */
+            paid_share_discretion_percent: number;
+            source: components["schemas"]["RetentionSourceResponse"];
+            progress_source: components["schemas"]["ProjectSourceResponse"];
+        };
         /** ProjectAmenityResponse */
         ProjectAmenityResponse: {
             /** Code */
@@ -1727,6 +1754,26 @@ export interface components {
             label: string;
             /** Original Text */
             original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * ProjectDeclaredProgressResponse
+         * @description Latest completion the authority register declares, dated by its inspection.
+         */
+        ProjectDeclaredProgressResponse: {
+            /**
+             * Authority
+             * @constant
+             */
+            authority: "adrec";
+            /** Progress Percent */
+            progress_percent: number;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /** Register Status */
+            register_status: string;
+            /** Off Plan */
+            off_plan: boolean | null;
             source: components["schemas"]["ProjectSourceResponse"];
         };
         /** ProjectDetailResponse */
@@ -1773,6 +1820,8 @@ export interface components {
              * @default []
              */
             components: components["schemas"]["ProjectRelationResponse"][];
+            declared_progress?: components["schemas"]["ProjectDeclaredProgressResponse"] | null;
+            cancellation_retention?: components["schemas"]["CancellationRetentionResponse"] | null;
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {
@@ -1931,6 +1980,41 @@ export interface components {
             /** Original Text */
             original_text: string;
             source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** RetentionBandResponse */
+        RetentionBandResponse: {
+            /** Lower Percent */
+            lower_percent: number;
+            /** Upper Percent */
+            upper_percent: number;
+        };
+        /** RetentionReferenceResponse */
+        RetentionReferenceResponse: {
+            /** Publisher */
+            publisher: string;
+            /**
+             * Published On
+             * Format: date
+             */
+            published_on: string;
+            /** Url */
+            url: string;
+            /**
+             * Consulted On
+             * Format: date
+             */
+            consulted_on: string;
+            /** Covers */
+            covers: string;
+        };
+        /** RetentionSourceResponse */
+        RetentionSourceResponse: {
+            /** Decision */
+            decision: string;
+            /** Official Text Obtained */
+            official_text_obtained: boolean;
+            /** References */
+            references: components["schemas"]["RetentionReferenceResponse"][];
         };
         /** DeliveryAnnouncementResponse */
         DeliveryAnnouncementResponse: {

@@ -463,5 +463,23 @@
     "completionObserved": "Première lecture indiquant l'achèvement :",
     "notCompletedUntil": "Dernière lecture antérieure sans achèvement :",
     "withoutObservations": "Projets sans observation datée"
+  },
+  "Retention": {
+    "title": "Retenue en cas d'annulation",
+    "atDeclaredStage": "Retenue du promoteur au stade actuel déclaré",
+    "ofPrice": "du prix du contrat de vente, si l'acheteur est défaillant et l'unité annulée.",
+    "or": "ou",
+    "unreadable": "L'avancement déclaré ne peut pas être lu dans le barème.",
+    "declaredProgress": "Avancement déclaré au registre ADREC",
+    "inspectedOn": "inspecté le",
+    "inspectionUnknown": "date d'inspection non indiquée",
+    "boundary": "L'avancement déclaré tombe exactement sur une limite de tranche. Les commentaires cités ne disent pas quelle tranche s'applique : les deux taux sont affichés.",
+    "fullRefund": "Travaux non commencés : l'acheteur est remboursé intégralement si le retard tient à des causes extérieures au promoteur. Le registre n'indique pas la cause.",
+    "paidShare": "L'ADREC fixe la retenue au cas par cas dès que l'acheteur a payé plus que cette part du prix :",
+    "stageAssessed": "Le taux s'applique au stade constaté par l'ADREC ou ses consultants à l'annulation, qui peut différer du dernier avancement déclaré.",
+    "rule": "Règle et sources",
+    "officialTextMissing": "Le texte officiel n'a pas pu être obtenu. Le barème vient de ces commentaires juridiques :",
+    "publishedOn": "publié le",
+    "notAdvice": "Aide à la lecture, pas un conseil juridique. Se reporter à la décision et à l'ADREC."
   }
 }

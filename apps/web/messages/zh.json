@@ -463,5 +463,23 @@
     "completionObserved": "首次显示竣工的读取：",
     "notCompletedUntil": "此前最后一次未竣工的读取：",
     "withoutObservations": "没有带日期观察记录的项目"
+  },
+  "Retention": {
+    "title": "取消购买时的扣留比例",
+    "atDeclaredStage": "按当前申报阶段，开发商可扣留",
+    "ofPrice": "的销售合同价值（买方违约且单位被取消时）。",
+    "or": "或",
+    "unreadable": "申报进度无法对应到比例表。",
+    "declaredProgress": "ADREC 登记中申报的工程进度",
+    "inspectedOn": "检查日期",
+    "inspectionUnknown": "未提供检查日期",
+    "boundary": "申报进度正好位于两个区间的分界处。所引评论未说明适用哪个区间，因此两个比例都予以显示。",
+    "fullRefund": "工程尚未开工：若延误由开发商无法控制的原因造成，买方可获全额退款。登记信息不显示原因。",
+    "paidShare": "买方已支付超过以下价格比例时，由 ADREC 逐案确定扣留比例：",
+    "stageAssessed": "该比例适用于取消时 ADREC 或其顾问评估的阶段，可能与最新申报的进度不同。",
+    "rule": "规则与来源",
+    "officialTextMissing": "未能取得官方文本。比例表取自以下法律评论：",
+    "publishedOn": "发布于",
+    "notAdvice": "仅供阅读参考，并非法律意见。请以该决定及 ADREC 为准。"
   }
 }

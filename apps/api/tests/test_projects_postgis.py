@@ -145,7 +145,7 @@ def test_project_import_is_typed_idempotent_and_retains_provider_identities(proj
     assert set(Building.objects.values_list("name", flat=True)) == {"Provider building"}
     with CaptureQueriesContext(connection) as queries:
         data = project_detail(definition["slug"])
-    assert len(queries) <= 7
+    assert len(queries) <= 8  # One bounded read of the latest declared progress (B04).
     assert all('"payload"' not in query["sql"] for query in queries)
     assert data["handover"]["precision"] == "quarter"
     assert data["handover"]["day"] is None and data["handover"]["month"] is None

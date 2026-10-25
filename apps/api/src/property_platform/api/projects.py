@@ -116,6 +116,51 @@ class ProjectRelationResponse(Schema):
     retrieved_at: datetime
 
 
+class ProjectDeclaredProgressResponse(Schema):
+    """Latest completion the authority register declares, dated by its inspection."""
+
+    authority: Literal["adrec"]
+    progress_percent: float
+    progress_inspected_on: date | None
+    register_status: str
+    off_plan: bool | None
+    source: ProjectSourceResponse
+
+
+class RetentionBandResponse(Schema):
+    lower_percent: float
+    upper_percent: float
+
+
+class RetentionReferenceResponse(Schema):
+    publisher: str
+    published_on: date
+    url: str
+    consulted_on: date
+    covers: str
+
+
+class RetentionSourceResponse(Schema):
+    decision: str
+    official_text_obtained: bool
+    references: list[RetentionReferenceResponse]
+
+
+class CancellationRetentionResponse(Schema):
+    """Developer retention on cancellation at the declared stage; a reading aid, not advice."""
+
+    version: str
+    status: Literal["rate", "boundary", "unknown", "out_of_range"]
+    progress_percent: float | None
+    progress_inspected_on: date | None
+    rates: list[int]
+    bands: list[RetentionBandResponse]
+    full_refund_possible: bool
+    paid_share_discretion_percent: int
+    source: RetentionSourceResponse
+    progress_source: ProjectSourceResponse
+
+
 class ProjectDetailResponse(Schema):
     id: UUID
     slug: str
@@ -136,6 +181,8 @@ class ProjectDetailResponse(Schema):
     map_locations: list[ProjectMapLocationResponse]
     parent: ProjectRelationResponse | None = None
     components: list[ProjectRelationResponse] = []
+    declared_progress: ProjectDeclaredProgressResponse | None = None
+    cancellation_retention: CancellationRetentionResponse | None = None
 
 
 class ProjectSummaryResponse(Schema):
@@ -186,9 +233,12 @@ def project_detail(request, slug: str):
     if len(slug) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
         return Status(404, {"code": "not_found"})
     from property_platform.modules.evidence.project_queries import project_detail as read_project
+    from property_platform.modules.publication.cancellation_retention import project_retention
 
     result = read_project(slug)
-    return result if result is not None else Status(404, {"code": "not_found"})
+    if result is None:
+        return Status(404, {"code": "not_found"})
+    return result | {"cancellation_retention": project_retention(result["declared_progress"])}
 
 
 class DeliveryOutcomeResponse(Schema):
