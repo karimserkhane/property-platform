@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import type { MapLabels, UseLabels } from "@/features/atlas/types";
+import type { ActivityLabels } from "@/features/projects/activity";
 import type { DeliveryLabels } from "@/features/projects/delivery";
 import { ProjectDetailView } from "@/features/projects/detail";
 import { ProjectNeighbourhood } from "@/features/projects/neighbourhood";
@@ -81,6 +82,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       verificationText(key as keyof typeof english.Verification),
     ]),
   ) as VerificationLabels;
+  const activityText = await getTranslations({ locale, namespace: "Activity" });
+  const activityLabels = Object.fromEntries(
+    Object.keys(english.Activity).map((key) => [
+      key,
+      activityText(key as keyof typeof english.Activity),
+    ]),
+  ) as ActivityLabels;
   const deliveryText = await getTranslations({ locale, namespace: "Delivery" });
   const deliveryLabels = Object.fromEntries(
     Object.keys(english.Delivery).map((key) => [
@@ -107,6 +115,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       labels={labels}
       retentionLabels={retentionLabels}
       verificationLabels={verificationLabels}
+      activityLabels={activityLabels}
       deliveryLabels={deliveryLabels}
       neighbourhood={
         area ? (

@@ -284,3 +284,10 @@
   gap: 4px 20px;
   margin-block: 16px 4px;
 }
+.activityParcels {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

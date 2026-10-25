@@ -258,6 +258,53 @@ class ProjectVerificationResponse(Schema):
     contradictions: list[VerificationContradictionResponse]
 
 
+class ActivityWindowResponse(Schema):
+    """Captured Sentinel-2 file window that one date of a measurement was computed from."""
+
+    url: str
+    content_sha256: str
+
+
+class ActivityMeasurementResponse(Schema):
+    """Ground change between two scenes of a parcel; a signal, never a progress share."""
+
+    status: Literal["measured", "insufficient_clear_pixels"]
+    level: Literal["low", "moderate", "high"] | None
+    method_version: str
+    tile: str
+    before_scene_id: str
+    after_scene_id: str
+    before_acquired_at: datetime
+    after_acquired_at: datetime
+    parcel_pixels: int
+    clear_pixels: int
+    measured_at: datetime
+    before_window: ActivityWindowResponse
+    after_window: ActivityWindowResponse
+
+
+class ActivityParcelResponse(Schema):
+    source_namespace: str
+    source_record_id: str
+    official_plot_id: str | None
+    area_m2: int
+    area_basis: Literal["reviewed_parcel", "parcel_containing_position"]
+    position_method: Literal["cadastral_parcel", "authority_point", "building_footprint"]
+    latest: ActivityMeasurementResponse
+
+
+class ActivitySourceResponse(Schema):
+    name: str
+    url: str
+
+
+class ProjectConstructionActivityResponse(Schema):
+    """Latest satellite measurement of each measured parcel of the project."""
+
+    source: ActivitySourceResponse
+    parcels: list[ActivityParcelResponse]
+
+
 class ProjectDetailResponse(Schema):
     id: UUID
     slug: str
@@ -281,6 +328,7 @@ class ProjectDetailResponse(Schema):
     declared_progress: ProjectDeclaredProgressResponse | None = None
     cancellation_retention: CancellationRetentionResponse | None = None
     verification: ProjectVerificationResponse | None = None
+    construction_activity: ProjectConstructionActivityResponse | None = None
 
 
 class ProjectSummaryResponse(Schema):

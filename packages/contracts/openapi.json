@@ -5532,6 +5532,192 @@
         "title": "ProjectSummaryResponse",
         "type": "object"
       },
+      "ActivityMeasurementResponse": {
+        "description": "Ground change between two scenes of a parcel; a signal, never a progress share.",
+        "properties": {
+          "status": {
+            "enum": [
+              "measured",
+              "insufficient_clear_pixels"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "moderate",
+                  "high"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "method_version": {
+            "title": "Method Version",
+            "type": "string"
+          },
+          "tile": {
+            "title": "Tile",
+            "type": "string"
+          },
+          "before_scene_id": {
+            "title": "Before Scene Id",
+            "type": "string"
+          },
+          "after_scene_id": {
+            "title": "After Scene Id",
+            "type": "string"
+          },
+          "before_acquired_at": {
+            "format": "date-time",
+            "title": "Before Acquired At",
+            "type": "string"
+          },
+          "after_acquired_at": {
+            "format": "date-time",
+            "title": "After Acquired At",
+            "type": "string"
+          },
+          "parcel_pixels": {
+            "title": "Parcel Pixels",
+            "type": "integer"
+          },
+          "clear_pixels": {
+            "title": "Clear Pixels",
+            "type": "integer"
+          },
+          "measured_at": {
+            "format": "date-time",
+            "title": "Measured At",
+            "type": "string"
+          },
+          "before_window": {
+            "$ref": "#/components/schemas/ActivityWindowResponse"
+          },
+          "after_window": {
+            "$ref": "#/components/schemas/ActivityWindowResponse"
+          }
+        },
+        "required": [
+          "status",
+          "level",
+          "method_version",
+          "tile",
+          "before_scene_id",
+          "after_scene_id",
+          "before_acquired_at",
+          "after_acquired_at",
+          "parcel_pixels",
+          "clear_pixels",
+          "measured_at",
+          "before_window",
+          "after_window"
+        ],
+        "title": "ActivityMeasurementResponse",
+        "type": "object"
+      },
+      "ActivityParcelResponse": {
+        "properties": {
+          "source_namespace": {
+            "title": "Source Namespace",
+            "type": "string"
+          },
+          "source_record_id": {
+            "title": "Source Record Id",
+            "type": "string"
+          },
+          "official_plot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Official Plot Id"
+          },
+          "area_m2": {
+            "title": "Area M2",
+            "type": "integer"
+          },
+          "area_basis": {
+            "enum": [
+              "reviewed_parcel",
+              "parcel_containing_position"
+            ],
+            "title": "Area Basis",
+            "type": "string"
+          },
+          "position_method": {
+            "enum": [
+              "cadastral_parcel",
+              "authority_point",
+              "building_footprint"
+            ],
+            "title": "Position Method",
+            "type": "string"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/ActivityMeasurementResponse"
+          }
+        },
+        "required": [
+          "source_namespace",
+          "source_record_id",
+          "official_plot_id",
+          "area_m2",
+          "area_basis",
+          "position_method",
+          "latest"
+        ],
+        "title": "ActivityParcelResponse",
+        "type": "object"
+      },
+      "ActivitySourceResponse": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ],
+        "title": "ActivitySourceResponse",
+        "type": "object"
+      },
+      "ActivityWindowResponse": {
+        "description": "Captured Sentinel-2 file window that one date of a measurement was computed from.",
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "content_sha256": {
+            "title": "Content Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "content_sha256"
+        ],
+        "title": "ActivityWindowResponse",
+        "type": "object"
+      },
       "CancellationRetentionResponse": {
         "description": "Developer retention on cancellation at the declared stage; a reading aid, not advice.",
         "properties": {
@@ -5893,6 +6079,27 @@
         "title": "ProjectAmenityResponse",
         "type": "object"
       },
+      "ProjectConstructionActivityResponse": {
+        "description": "Latest satellite measurement of each measured parcel of the project.",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/ActivitySourceResponse"
+          },
+          "parcels": {
+            "items": {
+              "$ref": "#/components/schemas/ActivityParcelResponse"
+            },
+            "title": "Parcels",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source",
+          "parcels"
+        ],
+        "title": "ProjectConstructionActivityResponse",
+        "type": "object"
+      },
       "ProjectDeclaredProgressResponse": {
         "description": "Latest completion the authority register declares, dated by its inspection.",
         "properties": {
@@ -6093,6 +6300,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ProjectVerificationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "construction_activity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectConstructionActivityResponse"
               },
               {
                 "type": "null"

@@ -155,3 +155,31 @@ test("a registered project shows its verification sheet with cited checks", asyn
   await expect(page.getByRole("region", { name: "التحقق" })).toBeVisible();
   await expectNoHorizontalScroll(page);
 });
+
+test("the satellite signal states its method and limits, also right to left", async ({
+  page,
+}) => {
+  const { href } = await firstProject(page);
+  await page.goto(href);
+  const signal = page.getByRole("region", {
+    name: "Ground change seen by satellite",
+  });
+  await expect(signal).toBeVisible();
+  // A measured parcel shows a level and two image dates, never a percentage.
+  for (const parcel of await signal.locator("[data-activity-parcel]").all()) {
+    await expect(parcel.getByText("Earlier image").first()).toBeVisible();
+    await expect(parcel).not.toContainText("%");
+  }
+  const method = signal.locator("details").last();
+  await method.locator("summary").click();
+  await expect(method).toContainText("Copernicus");
+  await expectNoHorizontalScroll(page);
+  await page.goto(href.replace("/en/", "/ar/"));
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(
+    page.getByRole("region", {
+      name: "التغير على الأرض كما يُرى من القمر الصناعي",
+    }),
+  ).toBeVisible();
+  await expectNoHorizontalScroll(page);
+});
