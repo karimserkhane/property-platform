@@ -34,6 +34,20 @@ Table `evidence.construction_activity_measurement` (modèle `ConstructionActivit
 
 Seuls les liens actifs vers une parcelle cadastrale courante sont mesurés (`activity_import.measurable_links`) : un point déclaré ou une emprise de bâtiment ne donne pas de limite de parcelle. Code : `apps/api/src/property_platform/modules/evidence/activity_import.py`.
 
+## Exécution
+
+Flow Prefect `property-platform-construction-activity`, déploiement `construction-activity` (paramètre `territory` : `all` ou un territoire enregistré), horaire `0 4 5 * *` (Asia/Dubai) enregistré **inactif**. L'opération de domaine `construction_activity` ouvre un `ActivityCollector` (`collectors/sentinel_measure.py`) et appelle `activity_import.measure_activity` :
+
+1. Exécution `IngestionRun` sur la source `sentinel-2-l2a-earth-search`, sous le verrou consultatif `8473303` (une seule mesure à la fois).
+2. Une seule recherche sur l'emprise de toutes les parcelles mesurables ; chaque page est une capture.
+3. Par tuile, la paire des deux dernières scènes retenues ; la paire la plus récente d'abord, si bien qu'une parcelle dans le recouvrement de deux tuiles n'est mesurée qu'une fois.
+4. Par parcelle : une mesure déjà enregistrée pour cette paire et cette version arrête la parcelle (`existing`) ; sinon les deux fenêtres sont lues puis capturées (`sentinel_cog_window_ranges`, statut HTTP 206, capture parente = page de recherche qui listait la scène), et le signal est recalculé depuis les octets capturés (`replay_signal`), jamais depuis la mémoire de lecture. Une parcelle illisible sur la tuile (hors tuile, trop grande) passe à la paire suivante, puis compte `unreadable`.
+5. Au plus 20 nouvelles mesures par exécution (`deferred` au-delà) ; l'exécution suivante reprend. Une erreur de transport ou de budget sur une parcelle compte `failed` et l'exécution finit `quarantined` ; les captures déjà reçues restent.
+
+Chaque exécution mensuelle ajoute la paire la plus récente ; l'historique se construit donc mois après mois, sans relire les mois passés.
+
+**Constat du 25 octobre 2026 (base locale, lecture seule).** Aucun des 156 liens d'identité actifs ne vise une parcelle : 151 visent un lieu (point) et 5 un bâtiment. Le flow ne mesure donc encore rien. Le point relu d'un projet tombe dans exactement une parcelle courante pour 116 liens (108 projets) ; 23 points tombent dans plusieurs parcelles et 12 dans aucune ; parmi les 116, quatre parcelles font moins de 0,2 ha et plusieurs dépassent 14 ha (plans d'ensemble). Choisir la zone mesurée sans lien de parcelle relu est une décision du propriétaire, notée dans [B06](../tasks/B06.md).
+
 ## Limites à afficher
 
 - 10 m par pixel : une petite parcelle compte peu de pixels ; une parcelle de moins de 0,2 ha ne peut pas être mesurée.
