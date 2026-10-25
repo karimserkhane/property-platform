@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { MapLocateButton } from "@/components/map-locate-button";
 import {
+  featureShape,
   type ParcelProperty,
   preferredParcelProperty,
   propertyName,
@@ -10,9 +11,9 @@ import {
 import { PropertyCard } from "./property-card";
 import { Surroundings } from "./surroundings";
 import type {
+  AtlasContext,
+  AtlasFeature,
   AtlasLabels,
-  MapContext,
-  MapFeature,
   MapLabels,
   ParcelDetail,
   ResearchReference,
@@ -35,8 +36,8 @@ export function Inspector({
   showIdentity = true,
 }: {
   detail: ParcelDetail | null;
-  feature: MapFeature | null;
-  context: MapContext | null;
+  feature: AtlasFeature | null;
+  context: AtlasContext | null;
   labels: AtlasLabels;
   m: MapLabels;
   locale: string;
@@ -44,7 +45,7 @@ export function Inspector({
   parcelCodes: Record<string, string>;
   references: ResearchReference[];
   locate: () => void;
-  choose: (feature: MapFeature) => void;
+  choose: (feature: AtlasFeature) => void;
   parcelProperties: Map<string, ParcelProperty[]>;
   territory: string;
   showIdentity?: boolean;
@@ -98,7 +99,7 @@ export function Inspector({
         </details>
       )}
       {(showIdentity || !presented?.properties.presentation?.project) &&
-        (presented && presented.geometry.type !== "MultiLineString" ? (
+        (presented && featureShape(presented) !== "MultiLineString" ? (
           <PropertyCard
             key={`property-card:${presented.id}`}
             feature={presented}
@@ -201,7 +202,7 @@ export function Inspector({
               →
             </button>
           ))}
-          {feature.geometry.type === "Point" && (
+          {"geometry" in feature && feature.geometry.type === "Point" && (
             <p>
               <span>{m.coordinates} </span>
               <bdi>
@@ -347,14 +348,14 @@ export function Inspector({
           feature?.properties.kind ?? "",
         ) && (
           <Surroundings
-            key={`surroundings:${territory}:${detail ? "parcel" : feature?.geometry.type}:${detail?.id ?? feature?.id}`}
+            key={`surroundings:${territory}:${detail ? "parcel" : feature && featureShape(feature)}:${detail?.id ?? feature?.id}`}
             identity={(detail?.id ?? feature?.id) as string}
             target={
               detail
                 ? "parcel"
-                : feature?.geometry.type === "Point"
+                : (feature && featureShape(feature)) === "Point"
                   ? "place"
-                  : feature?.geometry.type === "MultiPolygon"
+                  : (feature && featureShape(feature)) === "MultiPolygon"
                     ? "building"
                     : "street"
             }

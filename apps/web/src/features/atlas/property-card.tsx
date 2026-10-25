@@ -2,8 +2,13 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { MapLocateButton } from "@/components/map-locate-button";
 import { ProjectMapSummary } from "@/features/projects/map-summary";
-import { propertyName, readableParcelCode, sourceLabel } from "./presentation";
-import type { MapFeature, MapLabels, ResearchReference } from "./types";
+import {
+  featureShape,
+  propertyName,
+  readableParcelCode,
+  sourceLabel,
+} from "./presentation";
+import type { AtlasFeature, MapLabels, ResearchReference } from "./types";
 
 export function PropertyCard({
   feature,
@@ -13,7 +18,7 @@ export function PropertyCard({
   locate,
   parcel,
 }: {
-  feature: MapFeature;
+  feature: AtlasFeature;
   references: ResearchReference[];
   m: MapLabels;
   locale: string;
@@ -30,7 +35,7 @@ export function PropertyCard({
     ? m.project
     : p.use_types?.length
       ? usageText(p.use_types[0])
-      : feature.geometry.type === "Point"
+      : featureShape(feature) === "Point"
         ? m.places
         : m.building;
   const links = references.filter(

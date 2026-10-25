@@ -47,17 +47,23 @@ export function displayHeight(
   return { metres: 3, basis: "footprint" as const };
 }
 
-const height: ExpressionSpecification = ["to-number", ["get", "height_m"], 0];
+// GeoJSON rows carry heights as properties; context tiles as feature state.
+type Read = "get" | "feature-state";
+const height = (read: Read): ExpressionSpecification => [
+  "to-number",
+  [read, "height_m"],
+  0,
+];
 const levels: ExpressionSpecification = ["to-number", ["get", "levels"], 0];
-const recorded: ExpressionSpecification = [
+const recorded = (read: Read): ExpressionSpecification => [
   "all",
-  [">", height, 0],
-  ["<=", height, 1500],
+  [">", height(read), 0],
+  ["<=", height(read), 1500],
 ];
 const heightExpression: ExpressionSpecification = [
   "case",
-  recorded,
-  height,
+  recorded("get"),
+  height("get"),
   ["all", [">", levels, 0], ["<=", levels, 300]],
   ["*", levels, 3],
   3,
@@ -78,7 +84,7 @@ export function building3DLayers(): LayerSpecification[] {
       layout: { visibility: "none" },
       paint: {
         "fill-extrusion-height": heightExpression,
-        "fill-extrusion-color": catalogueColor(null),
+        "fill-extrusion-color": catalogueColor(null, "get"),
         "fill-extrusion-opacity": 0.94,
         "fill-extrusion-vertical-gradient": true,
       },
@@ -114,12 +120,15 @@ export function building3DLayers(): LayerSpecification[] {
   ];
 }
 
-function catalogueColor(selected: string | null): ExpressionSpecification {
+function catalogueColor(
+  selected: string | null,
+  read: Read,
+): ExpressionSpecification {
   return [
     "case",
     ["==", ["get", "id"], selected ?? ""],
     BUILDING_3D_COLORS.selected,
-    recorded,
+    recorded(read),
     BUILDING_3D_COLORS.recorded,
     BUILDING_3D_COLORS.estimated,
   ];
@@ -130,6 +139,9 @@ export function applyBuildingView(
   view: BuildingView,
   buildings = true,
   selected: string | null = null,
+  // Tiled buildings: heights are feature state, which a filter cannot read,
+  // so "recorded only" keeps the listed identities with a recorded height.
+  tiled: { recorded: readonly string[] } | null = null,
 ) {
   const enabled = view.dimension === "3d" && buildings;
   for (const [id, visible] of [
@@ -141,11 +153,18 @@ export function applyBuildingView(
       map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
   }
   if (map.getLayer("buildings-3d")) {
-    map.setFilter("buildings-3d", view.estimatedHeights ? null : recorded);
+    map.setFilter(
+      "buildings-3d",
+      view.estimatedHeights
+        ? null
+        : tiled
+          ? ["in", ["get", "id"], ["literal", [...tiled.recorded]]]
+          : recorded("get"),
+    );
     map.setPaintProperty(
       "buildings-3d",
       "fill-extrusion-color",
-      catalogueColor(selected),
+      catalogueColor(selected, tiled ? "feature-state" : "get"),
     );
   }
 }

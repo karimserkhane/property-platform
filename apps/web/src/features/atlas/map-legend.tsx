@@ -9,7 +9,7 @@ import {
   presentMarkerCategories,
 } from "./map-markers";
 import { type Category, COLORS } from "./presentation";
-import type { MapContext, MapLabels } from "./types";
+import type { AtlasContext, MapLabels } from "./types";
 
 function MarkerSymbol({ category }: { category: MapMarkerCategory }) {
   const marker = MAP_MARKERS[category];
@@ -69,7 +69,7 @@ export function MapLegend({
   onUseChange,
 }: {
   m: MapLabels;
-  context: MapContext | null;
+  context: AtlasContext | null;
   options: BuildingView & {
     satellite: boolean;
     parcels?: boolean;

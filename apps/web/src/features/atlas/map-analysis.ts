@@ -9,7 +9,12 @@ import type {
   Polygon,
 } from "geojson";
 import type { Map as LibreMap } from "maplibre-gl";
-import type { MapContext, MapFeature, ParcelRows } from "./types";
+import type {
+  AtlasContext,
+  AtlasFeature,
+  MapFeature,
+  ParcelRows,
+} from "./types";
 
 // Parcel footprints are not on the explorer client: frame them by published bounds.
 export function boundsGeometry([west, south, east, north]: readonly number[]) {
@@ -25,6 +30,13 @@ export function boundsGeometry([west, south, east, north]: readonly number[]) {
       ],
     ],
   };
+}
+
+// Framing only: an index row without geometry is framed by its bounds.
+export function frameGeometry(feature: AtlasFeature) {
+  return "geometry" in feature
+    ? feature.geometry
+    : boundsGeometry(feature.properties.bounds);
 }
 
 export type Coordinate = [number, number];
@@ -83,13 +95,13 @@ export type SearchItem = {
   name: string;
   kind: "project" | "place" | "parcel";
   geometry: MapFeature["geometry"];
-  feature?: MapFeature;
+  feature?: AtlasFeature;
   parcelId?: string;
 };
 const normalise = (value: string) =>
   value.normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase().trim();
 export function searchItems(
-  context: MapContext | null,
+  context: AtlasContext | null,
   parcels: ParcelRows | null,
   locale: string,
 ): SearchItem[] {
@@ -115,7 +127,7 @@ export function searchItems(
       key,
       name,
       kind: p.kind.endsWith("_project_marker") ? "project" : "place",
-      geometry: feature.geometry,
+      geometry: frameGeometry(feature),
       feature,
     });
   }
@@ -184,7 +196,7 @@ export function projectsInZone(
 }
 
 export function clusteredProjects(
-  context: MapContext | null,
+  context: AtlasContext | null,
 ): FeatureCollection<Point> {
   const seen = new Set<string>();
   return {

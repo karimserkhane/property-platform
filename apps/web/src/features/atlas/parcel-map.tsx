@@ -21,11 +21,11 @@ import { BASEMAP_IMAGERY, imageryVisibility } from "./imagery-sources";
 import { mapPlaceFilter, registerMapMarkers } from "./map-markers";
 import { mapControlLabels, mapLayers, mapName } from "./map-style";
 import {
-  buildingAtPoint,
   type Category,
   COLORS,
   districtBounds,
   download,
+  featureShape,
   geometryBounds,
   parcelFillOpacity,
   parcelMapLabels,
@@ -34,7 +34,8 @@ import {
 } from "./presentation";
 import { projectPulseFrame } from "./project-pulse";
 import type {
-  MapContext,
+  AtlasContext,
+  AtlasFeature,
   MapFeature,
   MapLabels,
   ParcelIndex,
@@ -48,7 +49,14 @@ import {
   setBuildingCamera,
 } from "./building-3d";
 import { showWorldBuilding } from "./building-popup";
-import { boundsGeometry, mapToolActive } from "./map-analysis";
+import {
+  CONTEXT_SOURCE,
+  contextTileSource,
+  recordedBuildings,
+  syncContextStates,
+  tiledContextLayers,
+} from "./context-tiles";
+import { boundsGeometry, frameGeometry, mapToolActive } from "./map-analysis";
 import { MapWorkbench } from "./map-workbench";
 import {
   PARCEL_LABEL_SOURCE,
@@ -115,13 +123,13 @@ export default function ParcelMap({
   countryBounds,
 }: {
   data: ParcelIndex;
-  context: MapContext | null;
+  context: AtlasContext | null;
   selected: string | null;
-  activeFeature: MapFeature | null;
+  activeFeature: AtlasFeature | null;
   selectionPanel: RefObject<HTMLElement | null>;
   selectionVisible: boolean;
   onSelect: (id: string) => void;
-  onFeature: (feature: MapFeature) => void;
+  onFeature: (feature: AtlasFeature) => void;
   onError: () => void;
   onContext: () => void;
   // Visible west, south, east, north after load and each move.
@@ -181,6 +189,8 @@ export default function ParcelMap({
   parcelCategoriesRef.current = parcelCategories;
   // Parcels currently listed by the index; tile features outside it stay hidden.
   const shownParcels = useRef<Set<string>>(new Set());
+  // Buildings and streets carrying index state on the context tiles.
+  const shownContext = useRef<Map<string, "building" | "street">>(new Map());
   const credits = useMemo(
     () =>
       [
@@ -286,13 +296,11 @@ export default function ParcelMap({
         PARCEL_SOURCE,
         parcelTileSource(window.location.origin, territory.id),
       );
-      for (const id of [
-        PARCEL_LABEL_SOURCE,
-        "street",
-        "building",
-        "place",
-        "administrative_area",
-      ])
+      instance.addSource(
+        CONTEXT_SOURCE,
+        contextTileSource(window.location.origin, territory.id),
+      );
+      for (const id of [PARCEL_LABEL_SOURCE, "place", "administrative_area"])
         instance.addSource(id, {
           type: "geojson",
           data: { type: "FeatureCollection", features: [] },
@@ -307,7 +315,9 @@ export default function ParcelMap({
           attribution: provider.attribution,
         });
       registerMapMarkers(instance);
-      for (const layer of tiledParcelLayers(mapLayers("en")))
+      for (const layer of tiledContextLayers(
+        tiledParcelLayers(mapLayers("en")),
+      ))
         instance.addLayer(layer);
       setToolMap(instance);
       const reportViewport = () => {
@@ -375,10 +385,11 @@ export default function ParcelMap({
           instance.queryRenderedFeatures(event.point, {
             layers: ["plan-water"],
           }).length > 0;
-        const listed = hits.filter(
-          (item) =>
-            item.source !== PARCEL_SOURCE ||
-            shownParcels.current.has(String(item.properties.id)),
+        const listed = hits.filter((item) =>
+          item.source === PARCEL_SOURCE
+            ? shownParcels.current.has(String(item.properties.id))
+            : item.source !== CONTEXT_SOURCE ||
+              shownContext.current.has(String(item.properties.id)),
         );
         // Plots drawn over mapped water stay selectable; project perimeters
         // (not drawn there) do not capture a click on the open water.
@@ -395,12 +406,20 @@ export default function ParcelMap({
             : listed,
           parcelAreasRef.current,
         );
-        const footprint =
+        // The rendered footprint under the pointer, matched to its index row
+        // by identity; a building missing from the index is not selectable.
+        const footprintId =
           optionsRef.current.buildings &&
-          buildingAtPoint(contextRef.current?.building.features ?? [], [
-            event.lngLat.lng,
-            event.lngLat.lat,
-          ]);
+          instance.queryRenderedFeatures(event.point, {
+            layers: ["buildings", "buildings-3d"].filter((id) =>
+              instance.getLayer(id),
+            ),
+          })[0]?.properties.id;
+        const footprint =
+          footprintId &&
+          contextRef.current?.building.features.find(
+            (f) => f.properties.id === String(footprintId),
+          );
         const projectHit = String(hit?.properties.kind).endsWith(
           "_project_marker",
         );
@@ -485,7 +504,7 @@ export default function ParcelMap({
       const root = element.current;
       const row = data.features.find((item) => item.id === selected);
       const geometry =
-        activeFeature?.geometry ??
+        (activeFeature && frameGeometry(activeFeature)) ??
         (row ? boundsGeometry(row.properties.bounds) : undefined);
       if (
         !root ||
@@ -659,10 +678,18 @@ export default function ParcelMap({
         labelledParcels,
         shownParcels.current,
       );
+      if (context)
+        shownContext.current = syncContextStates(
+          instance,
+          context,
+          shownContext.current,
+        );
       for (const [id, collection] of [
         [PARCEL_LABEL_SOURCE, parcelLabelPoints(labelledParcels)],
-        ...Object.entries(context ?? {}),
+        ["place", context?.place],
+        ["administrative_area", context?.administrative_area],
       ] as const) {
+        if (!collection) continue;
         const source = instance.getSource(id) as GeoJSONSource | undefined;
         source?.setData(
           collection as unknown as Parameters<GeoJSONSource["setData"]>[0],
@@ -705,16 +732,19 @@ export default function ParcelMap({
           instance.setFilter(id, [
             "==",
             ["get", "id"],
-            activeFeature?.geometry.type === type ? activeFeature.id : "",
+            activeFeature && featureShape(activeFeature) === type
+              ? activeFeature.id
+              : "",
           ]);
       }
       applyBuildingView(
         instance,
         optionsRef.current,
         optionsRef.current.buildings,
-        activeFeature?.geometry.type === "MultiPolygon"
+        activeFeature && featureShape(activeFeature) === "MultiPolygon"
           ? activeFeature.id
           : null,
+        { recorded: recordedBuildings(context) },
       );
     };
     if (instance.getSource("parcels")) update();
@@ -722,7 +752,7 @@ export default function ParcelMap({
     return () => {
       instance.off("load", update);
     };
-  }, [selected, activeFeature]);
+  }, [selected, activeFeature, context]);
 
   useEffect(() => {
     const instance = map.current;
@@ -800,9 +830,10 @@ export default function ParcelMap({
         instance,
         options,
         options.buildings,
-        activeRef.current?.geometry.type === "MultiPolygon"
+        activeRef.current && featureShape(activeRef.current) === "MultiPolygon"
           ? activeRef.current.id
           : null,
+        { recorded: recordedBuildings(contextRef.current) },
       );
     };
     if (instance.getSource("parcels")) update();

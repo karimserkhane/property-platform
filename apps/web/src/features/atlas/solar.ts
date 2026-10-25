@@ -53,8 +53,13 @@ export function sunlight(local: string, longitude: number, latitude: number) {
   };
 }
 
+// A footprint from map-context rows or from loaded context tiles.
+export type ShadowBuilding = Pick<MapFeature, "id" | "geometry"> & {
+  properties: Pick<MapFeature["properties"], "height_m">;
+};
+
 export function shadowPolygons(
-  buildings: MapFeature[],
+  buildings: readonly ShadowBuilding[],
   local: string,
   longitude: number,
   latitude: number,

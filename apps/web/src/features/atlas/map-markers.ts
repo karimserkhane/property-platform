@@ -1,5 +1,5 @@
 import type { ExpressionSpecification, Map as LibreMap } from "maplibre-gl";
-import type { MapContext, MapFeature } from "./types";
+import type { AtlasContext, MapFeature } from "./types";
 
 const circle = "M12 1a11 11 0 1 0 0 22 11 11 0 0 0 0-22Z";
 const square =
@@ -212,7 +212,7 @@ export function mapPlaceFilter(
 }
 
 export function presentMarkerCategories(
-  context: MapContext | null,
+  context: AtlasContext | null,
   options?: { places?: boolean; commerce?: boolean },
 ): MapMarkerCategory[] {
   const present = new Set(

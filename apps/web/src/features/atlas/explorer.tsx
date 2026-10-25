@@ -14,10 +14,11 @@ import { UiIcon } from "@/components/ui-icon";
 import { isProjectSlug } from "@/features/projects/data";
 import { ProjectMapSummary } from "@/features/projects/map-summary";
 import { buildingViewSelection } from "./building-3d";
+import { indexedContext } from "./context-tiles";
 import styles from "./explorer.module.css";
 import { imagerySelection } from "./imagery-sources";
 import { Inspector } from "./inspector";
-import { boundsGeometry } from "./map-analysis";
+import { boundsGeometry, frameGeometry } from "./map-analysis";
 import { MapLegend } from "./map-legend";
 import { MapViewControl } from "./map-view-control";
 import { AtlasPagination } from "./pagination";
@@ -35,9 +36,10 @@ import { PublicContext } from "./public-context";
 import { References } from "./references";
 import { SelectionPreview } from "./selection-preview";
 import type {
+  AtlasContext,
+  AtlasFeature,
   AtlasLabels,
-  MapContext,
-  MapFeature,
+  ContextIndex,
   MapLabels,
   ParcelDetail,
   ParcelIndex,
@@ -85,12 +87,12 @@ export function Explorer({
   parcelCells.current ??= new ParcelCellCache((cell, signal) =>
     readParcelIndex(cell, territory.id, signal),
   );
-  const [context, setContext] = useState<MapContext | null>(null);
+  const [context, setContext] = useState<AtlasContext | null>(null);
   const [contextError, setContextError] = useState(false);
   const [references, setReferences] = useState<ResearchReference[]>([]);
   const [referenceError, setReferenceError] = useState(false);
   const [detail, setDetail] = useState<ParcelDetail | null>(null);
-  const [feature, setFeature] = useState<MapFeature | null>(null);
+  const [feature, setFeature] = useState<AtlasFeature | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [use, setUse] = useState("");
   const [tab, setTab] = useState<Tab>("properties");
@@ -203,12 +205,12 @@ export function Explorer({
       .catch(() => {
         if (!controller.signal.aborted) setReferenceError(true);
       });
-    fetch(`/api/atlas/map-context?bbox=${bbox}&territory=${territoryQuery}`, {
+    fetch(`/api/atlas/context-index?bbox=${bbox}&territory=${territoryQuery}`, {
       signal: controller.signal,
     })
       .then(async (r) => {
         if (!r.ok) throw new Error("unavailable");
-        setContext((await r.json()) as MapContext);
+        setContext(indexedContext((await r.json()) as ContextIndex));
       })
       .catch(() => {
         if (!controller.signal.aborted) setContextError(true);
@@ -297,7 +299,7 @@ export function Explorer({
       if (current === requestId.current) setDetailState("error");
     }
   }
-  function choose(f: MapFeature) {
+  function choose(f: AtlasFeature) {
     selectionOrigin.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
@@ -372,9 +374,9 @@ export function Explorer({
   }
   function locate() {
     const row = collection?.features.find((f) => f.id === selected);
+    const located = feature ?? projectFeature;
     const target =
-      feature ??
-      projectFeature ??
+      (located && { geometry: frameGeometry(located) }) ||
       (row && { geometry: boundsGeometry(row.properties.bounds) });
     if (target)
       setView((v) => ({

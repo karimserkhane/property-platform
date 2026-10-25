@@ -1,6 +1,7 @@
 import type { ExpressionSpecification } from "maplibre-gl";
 import type {
-  MapContext,
+  AtlasContext,
+  AtlasFeature,
   MapFeature,
   MapLabels,
   ParcelCollection,
@@ -13,7 +14,7 @@ type PropertyIdentity = Pick<
 >;
 export type ParcelProperty = PropertyIdentity & {
   id: string;
-  feature: MapFeature | null;
+  feature: AtlasFeature | null;
   spatial_match?: {
     method: "boundary-proximity-v1";
     distance_m: number;
@@ -49,7 +50,7 @@ const buildingKinds = new Set([
 ]);
 const isProperty = (p: ParcelProperty) =>
   p.kind.endsWith("_project_marker") ||
-  p.feature?.geometry.type === "MultiPolygon" ||
+  (p.feature && featureShape(p.feature) === "MultiPolygon") ||
   buildingKinds.has(p.kind);
 
 export function preferredParcelProperty(
@@ -78,7 +79,7 @@ export function preferredParcelProperty(
 }
 
 export function parcelPropertyIndex(
-  context: MapContext | null,
+  context: AtlasContext | null,
   parcels?: ParcelRows | null,
 ) {
   const index = new Map<string, ParcelProperty[]>();
@@ -311,7 +312,7 @@ export function readableParcelCode(code: string): string {
   return code.replace(/_to_/gi, "–").replaceAll("_", " · ");
 }
 
-export function propertyFeatures(context: MapContext | null): MapFeature[] {
+export function propertyFeatures(context: AtlasContext | null): AtlasFeature[] {
   return [
     ...(context?.building.features ?? []),
     ...(context?.place.features.filter((feature) =>
@@ -473,6 +474,23 @@ export function geometryBounds(
     south = Math.min(south, numbers[i + 1]);
     north = Math.max(north, numbers[i + 1]);
   }
+  return [
+    [west, south],
+    [east, north],
+  ];
+}
+
+// The geometry type a feature is drawn with, whether or not it carries it.
+export function featureShape(feature: AtlasFeature): string {
+  if ("geometry" in feature) return feature.geometry.type;
+  return feature.family === "building" ? "MultiPolygon" : "MultiLineString";
+}
+
+export function featureBounds(
+  feature: AtlasFeature,
+): [[number, number], [number, number]] | null {
+  if ("geometry" in feature) return geometryBounds(feature.geometry);
+  const [west, south, east, north] = feature.properties.bounds;
   return [
     [west, south],
     [east, north],

@@ -1,12 +1,23 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { building3DLayers } from "../src/features/atlas/building-3d.ts";
+import {
+  applyBuildingView,
+  building3DLayers,
+} from "../src/features/atlas/building-3d.ts";
 import {
   CONTEXT_SOURCE,
   contextTileSource,
+  indexedContext,
+  recordedBuildings,
   syncContextStates,
   tiledContextLayers,
+  tiledFootprints,
 } from "../src/features/atlas/context-tiles.ts";
+import { frameGeometry } from "../src/features/atlas/map-analysis.ts";
+import {
+  featureBounds,
+  featureShape,
+} from "../src/features/atlas/presentation.ts";
 
 const sharedLayers = () => [
   { id: "buildings", type: "fill", source: "building", paint: {} },
@@ -111,4 +122,132 @@ test("index rows become feature state and stale rows are cleared", () => {
     "remove",
     { source: CONTEXT_SOURCE, sourceLayer: "building", id: "b1" },
   ]);
+});
+
+const indexRow = (id, properties = {}) => ({
+  id,
+  type: "Feature",
+  properties: { id, bounds: [54.39, 24.49, 54.41, 24.5], ...properties },
+});
+const index = () => ({
+  building: {
+    type: "FeatureCollection",
+    truncated: false,
+    features: [
+      indexRow("b1", { height_m: 42 }),
+      indexRow("b2", { height_m: null, levels: 20 }),
+      indexRow("b3", { height_m: 2000 }),
+    ],
+  },
+  street: {
+    type: "FeatureCollection",
+    truncated: true,
+    features: [indexRow("s1")],
+  },
+  place: { type: "FeatureCollection", truncated: false, features: [] },
+  administrative_area: {
+    type: "FeatureCollection",
+    truncated: false,
+    features: [],
+  },
+});
+
+test("index rows keep their family; shape and frame never invent a footprint", () => {
+  const context = indexedContext(index());
+  const [building] = context.building.features;
+  const [street] = context.street.features;
+  assert.equal(building.family, "building");
+  assert.equal(context.street.truncated, true);
+  assert.equal("geometry" in building, false);
+  assert.equal(featureShape(building), "MultiPolygon");
+  assert.equal(featureShape(street), "MultiLineString");
+  assert.deepEqual(featureBounds(street), [
+    [54.39, 24.49],
+    [54.41, 24.5],
+  ]);
+  // Bounds only frame the camera; drawing and hits use the tiles.
+  assert.equal(frameGeometry(building).type, "Polygon");
+  const point = {
+    id: "p1",
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [54.4, 24.5] },
+    properties: {},
+  };
+  assert.equal(featureShape(point), "Point");
+  assert.equal(frameGeometry(point), point.geometry);
+});
+
+test("recorded-only 3D keeps listed identities with a recorded height", () => {
+  const recorded = recordedBuildings(indexedContext(index()));
+  assert.deepEqual(recorded, ["b1"]);
+  const calls = {};
+  const map = {
+    getLayer: () => true,
+    setLayoutProperty: () => {},
+    setFilter: (id, value) => {
+      calls[id] = value;
+    },
+    setPaintProperty: (id, key, value) => {
+      calls[`${id}:${key}`] = value;
+    },
+  };
+  const view = {
+    dimension: "3d",
+    buildingSource: "catalogue",
+    estimatedHeights: false,
+  };
+  applyBuildingView(map, view, true, "b1", { recorded });
+  assert.deepEqual(calls["buildings-3d"], [
+    "in",
+    ["get", "id"],
+    ["literal", ["b1"]],
+  ]);
+  const color = JSON.stringify(calls["buildings-3d:fill-extrusion-color"]);
+  assert.match(color, /["feature-state","height_m"]/);
+  applyBuildingView(map, { ...view, estimatedHeights: true }, true, null, {
+    recorded,
+  });
+  assert.equal(calls["buildings-3d"], null);
+});
+
+test("shadow footprints come from loaded tiles with index heights", () => {
+  const square = [
+    [
+      [54.4, 24.5],
+      [54.401, 24.5],
+      [54.401, 24.501],
+      [54.4, 24.5],
+    ],
+  ];
+  const map = {
+    getSource: (id) => (id === CONTEXT_SOURCE ? {} : undefined),
+    querySourceFeatures: (source, options) => {
+      assert.equal(source, CONTEXT_SOURCE);
+      assert.equal(options.sourceLayer, "building");
+      return [
+        {
+          properties: { id: "b1" },
+          geometry: { type: "Polygon", coordinates: square },
+        },
+        {
+          properties: { id: "b9" },
+          geometry: { type: "Polygon", coordinates: square },
+        },
+        {
+          properties: { id: "b2" },
+          geometry: { type: "MultiPolygon", coordinates: [square] },
+        },
+      ];
+    },
+  };
+  const footprints = tiledFootprints(map, indexedContext(index()));
+  assert.deepEqual(
+    footprints.map((f) => [f.id, f.geometry.type, f.properties.height_m]),
+    [
+      ["b1", "MultiPolygon", 42],
+      ["b2", "MultiPolygon", null],
+    ],
+  );
+  assert.deepEqual(footprints[0].geometry.coordinates, [square]);
+  assert.deepEqual(tiledFootprints({ getSource: () => undefined }, null), []);
 });
