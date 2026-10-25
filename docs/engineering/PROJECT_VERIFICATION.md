@@ -63,3 +63,27 @@ source de l'avancement et les références du barème). Le web
 volet achat, la retenue au stade actuel déclaré, l'avancement et sa date d'inspection,
 le cas des 60 % payés, le remboursement intégral possible à 0 %, puis la règle et ses
 sources datées.
+
+## Fiche « Vérification » (B05)
+
+`GET /projects/{slug}` porte `verification`, assemblé par `evidence/verification_sheet.py`
+en lecture seule, sur les mêmes lectures que l'[historique de livraison](DELIVERY_HISTORY.md)
+(`delivery_history.delivery_readings`, une seule lecture des fiches du projet) :
+
+- `latest_reading` : dernière lecture ADREC de portée projet, valeurs telles que publiées
+  (numéro, permis, statut, vente sur plan, date d'enregistrement, avancement, date et
+  société d'inspection, rapport et sa validité, part vendue et texte d'origine, banque et
+  numéro de séquestre, licence du promoteur) avec sa source. `progress_report_expired` est
+  jugé à la date de la lecture, jamais à celle du visiteur.
+- `register_readings` et `completion` : la suite des statuts lus et le premier achèvement,
+  comme pour la page promoteur.
+- `official_links` : liens actifs vers la fiche officielle (numéro, URL, date de revue) ;
+  la note de l'opérateur et son nom ne sont pas publiés, un lien révoqué disparaît.
+- `contradictions` : deux lectures citées mises côte à côte, sans cause déduite ni source
+  désignée comme juste. Seule la dernière valeur annoncée par chaque source est comparée.
+  - `announced_after_completion` : une source annonce encore, après le premier achèvement
+    lu au registre, une période qui commence plus tard ;
+  - `announced_period_passed` : la période annoncée est terminée et une lecture postérieure
+    ne dit pas « achevé » (retard minimal en jours) ;
+  - `sources_disagree` : deux sources annoncent des périodes qui ne se recouvrent pas ;
+  - `progress_decreased` : une fiche du registre déclare plus tard un avancement plus bas.

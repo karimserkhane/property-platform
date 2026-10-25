@@ -5616,6 +5616,256 @@
         "title": "CancellationRetentionResponse",
         "type": "object"
       },
+      "DeliveryAnnouncementResponse": {
+        "properties": {
+          "precision": {
+            "enum": [
+              "year",
+              "quarter",
+              "month",
+              "day"
+            ],
+            "title": "Precision",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          },
+          "quarter": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quarter"
+          },
+          "month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Month"
+          },
+          "day": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Day"
+          },
+          "original_text": {
+            "title": "Original Text",
+            "type": "string"
+          },
+          "window_start": {
+            "format": "date",
+            "title": "Window Start",
+            "type": "string"
+          },
+          "window_end": {
+            "format": "date",
+            "title": "Window End",
+            "type": "string"
+          },
+          "first_observed_at": {
+            "format": "date-time",
+            "title": "First Observed At",
+            "type": "string"
+          },
+          "last_observed_at": {
+            "format": "date-time",
+            "title": "Last Observed At",
+            "type": "string"
+          },
+          "readings": {
+            "title": "Readings",
+            "type": "integer"
+          },
+          "change": {
+            "enum": [
+              "first",
+              "later",
+              "earlier",
+              "refined"
+            ],
+            "title": "Change",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/DeliveryOutcomeResponse"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProjectSourceResponse"
+          }
+        },
+        "required": [
+          "precision",
+          "year",
+          "quarter",
+          "month",
+          "day",
+          "original_text",
+          "window_start",
+          "window_end",
+          "first_observed_at",
+          "last_observed_at",
+          "readings",
+          "change",
+          "outcome",
+          "source"
+        ],
+        "title": "DeliveryAnnouncementResponse",
+        "type": "object"
+      },
+      "DeliveryCompletionResponse": {
+        "properties": {
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "not_completed_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Not Completed Until"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProjectSourceResponse"
+          }
+        },
+        "required": [
+          "observed_at",
+          "not_completed_until",
+          "source"
+        ],
+        "title": "DeliveryCompletionResponse",
+        "type": "object"
+      },
+      "DeliveryOutcomeResponse": {
+        "description": "Whether a register reading proves the announced period was met or missed.",
+        "properties": {
+          "status": {
+            "enum": [
+              "met",
+              "late",
+              "undetermined"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "late_by_at_least_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Late By At Least Days"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectSourceResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "late_by_at_least_days",
+          "source"
+        ],
+        "title": "DeliveryOutcomeResponse",
+        "type": "object"
+      },
+      "DeliveryRegisterResponse": {
+        "properties": {
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "progress_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Percent"
+          },
+          "progress_inspected_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Inspected On"
+          },
+          "first_observed_at": {
+            "format": "date-time",
+            "title": "First Observed At",
+            "type": "string"
+          },
+          "last_observed_at": {
+            "format": "date-time",
+            "title": "Last Observed At",
+            "type": "string"
+          },
+          "readings": {
+            "title": "Readings",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProjectSourceResponse"
+          }
+        },
+        "required": [
+          "status",
+          "completed",
+          "progress_percent",
+          "progress_inspected_on",
+          "first_observed_at",
+          "last_observed_at",
+          "readings",
+          "source"
+        ],
+        "title": "DeliveryRegisterResponse",
+        "type": "object"
+      },
       "ProjectAmenityResponse": {
         "properties": {
           "code": {
@@ -5833,6 +6083,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CancellationRetentionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "verification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectVerificationResponse"
               },
               {
                 "type": "null"
@@ -6337,6 +6597,60 @@
         "title": "ProjectTypologyResponse",
         "type": "object"
       },
+      "ProjectVerificationResponse": {
+        "properties": {
+          "latest_reading": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VerificationRegisterResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "register_readings": {
+            "items": {
+              "$ref": "#/components/schemas/DeliveryRegisterResponse"
+            },
+            "title": "Register Readings",
+            "type": "array"
+          },
+          "completion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DeliveryCompletionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "official_links": {
+            "items": {
+              "$ref": "#/components/schemas/VerificationLinkResponse"
+            },
+            "title": "Official Links",
+            "type": "array"
+          },
+          "contradictions": {
+            "items": {
+              "$ref": "#/components/schemas/VerificationContradictionResponse"
+            },
+            "title": "Contradictions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "latest_reading",
+          "register_readings",
+          "completion",
+          "official_links",
+          "contradictions"
+        ],
+        "title": "ProjectVerificationResponse",
+        "type": "object"
+      },
       "RetentionBandResponse": {
         "properties": {
           "lower_percent": {
@@ -6416,160 +6730,17 @@
         "title": "RetentionSourceResponse",
         "type": "object"
       },
-      "DeliveryAnnouncementResponse": {
+      "VerificationContradictionResponse": {
+        "description": "Two cited readings that disagree; no cause is inferred.",
         "properties": {
-          "precision": {
+          "code": {
             "enum": [
-              "year",
-              "quarter",
-              "month",
-              "day"
+              "announced_after_completion",
+              "announced_period_passed",
+              "sources_disagree",
+              "progress_decreased"
             ],
-            "title": "Precision",
-            "type": "string"
-          },
-          "year": {
-            "title": "Year",
-            "type": "integer"
-          },
-          "quarter": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Quarter"
-          },
-          "month": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Month"
-          },
-          "day": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Day"
-          },
-          "original_text": {
-            "title": "Original Text",
-            "type": "string"
-          },
-          "window_start": {
-            "format": "date",
-            "title": "Window Start",
-            "type": "string"
-          },
-          "window_end": {
-            "format": "date",
-            "title": "Window End",
-            "type": "string"
-          },
-          "first_observed_at": {
-            "format": "date-time",
-            "title": "First Observed At",
-            "type": "string"
-          },
-          "last_observed_at": {
-            "format": "date-time",
-            "title": "Last Observed At",
-            "type": "string"
-          },
-          "readings": {
-            "title": "Readings",
-            "type": "integer"
-          },
-          "change": {
-            "enum": [
-              "first",
-              "later",
-              "earlier",
-              "refined"
-            ],
-            "title": "Change",
-            "type": "string"
-          },
-          "outcome": {
-            "$ref": "#/components/schemas/DeliveryOutcomeResponse"
-          },
-          "source": {
-            "$ref": "#/components/schemas/ProjectSourceResponse"
-          }
-        },
-        "required": [
-          "precision",
-          "year",
-          "quarter",
-          "month",
-          "day",
-          "original_text",
-          "window_start",
-          "window_end",
-          "first_observed_at",
-          "last_observed_at",
-          "readings",
-          "change",
-          "outcome",
-          "source"
-        ],
-        "title": "DeliveryAnnouncementResponse",
-        "type": "object"
-      },
-      "DeliveryCompletionResponse": {
-        "properties": {
-          "observed_at": {
-            "format": "date-time",
-            "title": "Observed At",
-            "type": "string"
-          },
-          "not_completed_until": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Not Completed Until"
-          },
-          "source": {
-            "$ref": "#/components/schemas/ProjectSourceResponse"
-          }
-        },
-        "required": [
-          "observed_at",
-          "not_completed_until",
-          "source"
-        ],
-        "title": "DeliveryCompletionResponse",
-        "type": "object"
-      },
-      "DeliveryOutcomeResponse": {
-        "description": "Whether a register reading proves the announced period was met or missed.",
-        "properties": {
-          "status": {
-            "enum": [
-              "met",
-              "late",
-              "undetermined"
-            ],
-            "title": "Status",
+            "title": "Code",
             "type": "string"
           },
           "late_by_at_least_days": {
@@ -6583,23 +6754,272 @@
             ],
             "title": "Late By At Least Days"
           },
-          "source": {
+          "announcements": {
+            "items": {
+              "$ref": "#/components/schemas/DeliveryAnnouncementResponse"
+            },
+            "title": "Announcements",
+            "type": "array"
+          },
+          "register_readings": {
+            "items": {
+              "$ref": "#/components/schemas/DeliveryRegisterResponse"
+            },
+            "title": "Register Readings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "code",
+          "late_by_at_least_days",
+          "announcements",
+          "register_readings"
+        ],
+        "title": "VerificationContradictionResponse",
+        "type": "object"
+      },
+      "VerificationLinkResponse": {
+        "description": "Official register page an operator matched to the project; never read by the platform.",
+        "properties": {
+          "authority": {
+            "const": "adrec",
+            "title": "Authority",
+            "type": "string"
+          },
+          "registration_number": {
+            "title": "Registration Number",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "reviewed_on": {
+            "format": "date",
+            "title": "Reviewed On",
+            "type": "string"
+          }
+        },
+        "required": [
+          "authority",
+          "registration_number",
+          "url",
+          "reviewed_on"
+        ],
+        "title": "VerificationLinkResponse",
+        "type": "object"
+      },
+      "VerificationRegisterResponse": {
+        "description": "Latest project-scope register reading, values as published.",
+        "properties": {
+          "authority": {
+            "const": "adrec",
+            "title": "Authority",
+            "type": "string"
+          },
+          "registration_number": {
+            "title": "Registration Number",
+            "type": "string"
+          },
+          "permit_number": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ProjectSourceResponse"
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Permit Number"
+          },
+          "register_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Register Status"
+          },
+          "off_plan": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Off Plan"
+          },
+          "registered_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registered On"
+          },
+          "progress_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Percent"
+          },
+          "progress_inspected_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Inspected On"
+          },
+          "inspection_company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inspection Company"
+          },
+          "progress_report_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Report Url"
+          },
+          "progress_report_valid_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Report Valid Until"
+          },
+          "progress_report_expired": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Report Expired"
+          },
+          "sold_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sold Percent"
+          },
+          "sold_original": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sold Original"
+          },
+          "escrow_bank_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escrow Bank Name"
+          },
+          "escrow_account_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escrow Account Number"
+          },
+          "developer_licence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Developer Licence"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProjectSourceResponse"
           }
         },
         "required": [
-          "status",
-          "late_by_at_least_days",
+          "authority",
+          "registration_number",
+          "permit_number",
+          "register_status",
+          "off_plan",
+          "registered_on",
+          "progress_percent",
+          "progress_inspected_on",
+          "inspection_company",
+          "progress_report_url",
+          "progress_report_valid_until",
+          "progress_report_expired",
+          "sold_percent",
+          "sold_original",
+          "escrow_bank_name",
+          "escrow_account_number",
+          "developer_licence",
+          "observed_at",
           "source"
         ],
-        "title": "DeliveryOutcomeResponse",
+        "title": "VerificationRegisterResponse",
         "type": "object"
       },
       "DeliveryProjectResponse": {
@@ -6650,70 +7070,6 @@
           "completion"
         ],
         "title": "DeliveryProjectResponse",
-        "type": "object"
-      },
-      "DeliveryRegisterResponse": {
-        "properties": {
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "completed": {
-            "title": "Completed",
-            "type": "boolean"
-          },
-          "progress_percent": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Progress Percent"
-          },
-          "progress_inspected_on": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Progress Inspected On"
-          },
-          "first_observed_at": {
-            "format": "date-time",
-            "title": "First Observed At",
-            "type": "string"
-          },
-          "last_observed_at": {
-            "format": "date-time",
-            "title": "Last Observed At",
-            "type": "string"
-          },
-          "readings": {
-            "title": "Readings",
-            "type": "integer"
-          },
-          "source": {
-            "$ref": "#/components/schemas/ProjectSourceResponse"
-          }
-        },
-        "required": [
-          "status",
-          "completed",
-          "progress_percent",
-          "progress_inspected_on",
-          "first_observed_at",
-          "last_observed_at",
-          "readings",
-          "source"
-        ],
-        "title": "DeliveryRegisterResponse",
         "type": "object"
       },
       "DeliverySummaryResponse": {

@@ -236,6 +236,9 @@ def _project_website(project, snapshots):
 
 
 def project_detail(slug):
+    # The sheet reads delivery history, which builds on this module's publication rules.
+    from .verification_sheet import project_verification_sheet
+
     project = Project.objects.select_related("developer").filter(slug=slug).first()
     if project is None:
         return None
@@ -463,6 +466,7 @@ def project_detail(slug):
         "components": [_relation(row, row.child) for row in components.get(project.id, [])],
         "map_locations": project_locations(project, language=values[0].language),
         "declared_progress": _declared_progress(accepted),
+        "verification": project_verification_sheet(project, accepted),
     }
 
 
