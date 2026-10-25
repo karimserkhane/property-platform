@@ -1720,6 +1720,87 @@ export interface components {
             component_count: number;
         };
         /**
+         * ActivityMeasurementResponse
+         * @description Ground change between two scenes of a parcel; a signal, never a progress share.
+         */
+        ActivityMeasurementResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "measured" | "insufficient_clear_pixels";
+            /** Level */
+            level: ("low" | "moderate" | "high") | null;
+            /** Method Version */
+            method_version: string;
+            /** Tile */
+            tile: string;
+            /** Before Scene Id */
+            before_scene_id: string;
+            /** After Scene Id */
+            after_scene_id: string;
+            /**
+             * Before Acquired At
+             * Format: date-time
+             */
+            before_acquired_at: string;
+            /**
+             * After Acquired At
+             * Format: date-time
+             */
+            after_acquired_at: string;
+            /** Parcel Pixels */
+            parcel_pixels: number;
+            /** Clear Pixels */
+            clear_pixels: number;
+            /**
+             * Measured At
+             * Format: date-time
+             */
+            measured_at: string;
+            before_window: components["schemas"]["ActivityWindowResponse"];
+            after_window: components["schemas"]["ActivityWindowResponse"];
+        };
+        /** ActivityParcelResponse */
+        ActivityParcelResponse: {
+            /** Source Namespace */
+            source_namespace: string;
+            /** Source Record Id */
+            source_record_id: string;
+            /** Official Plot Id */
+            official_plot_id: string | null;
+            /** Area M2 */
+            area_m2: number;
+            /**
+             * Area Basis
+             * @enum {string}
+             */
+            area_basis: "reviewed_parcel" | "parcel_containing_position";
+            /**
+             * Position Method
+             * @enum {string}
+             */
+            position_method: "cadastral_parcel" | "authority_point" | "building_footprint";
+            latest: components["schemas"]["ActivityMeasurementResponse"];
+        };
+        /** ActivitySourceResponse */
+        ActivitySourceResponse: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+        };
+        /**
+         * ActivityWindowResponse
+         * @description Captured Sentinel-2 file window that one date of a measurement was computed from.
+         */
+        ActivityWindowResponse: {
+            /** Url */
+            url: string;
+            /** Content Sha256 */
+            content_sha256: string;
+        };
+        /**
          * CancellationRetentionResponse
          * @description Developer retention on cancellation at the declared stage; a reading aid, not advice.
          */
@@ -1853,6 +1934,15 @@ export interface components {
             source: components["schemas"]["ProjectSourceResponse"];
         };
         /**
+         * ProjectConstructionActivityResponse
+         * @description Latest satellite measurement of each measured parcel of the project.
+         */
+        ProjectConstructionActivityResponse: {
+            source: components["schemas"]["ActivitySourceResponse"];
+            /** Parcels */
+            parcels: components["schemas"]["ActivityParcelResponse"][];
+        };
+        /**
          * ProjectDeclaredProgressResponse
          * @description Latest completion the authority register declares, dated by its inspection.
          */
@@ -1919,6 +2009,7 @@ export interface components {
             declared_progress?: components["schemas"]["ProjectDeclaredProgressResponse"] | null;
             cancellation_retention?: components["schemas"]["CancellationRetentionResponse"] | null;
             verification?: components["schemas"]["ProjectVerificationResponse"] | null;
+            construction_activity?: components["schemas"]["ProjectConstructionActivityResponse"] | null;
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {

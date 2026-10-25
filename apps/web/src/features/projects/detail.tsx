@@ -1,7 +1,9 @@
 import navigation from "@property-platform/contracts/territories";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
+import { type ActivityLabels, describedParcels } from "./activity";
 import { CancellationRetentionCard } from "./cancellation-retention";
+import { ProjectActivitySection } from "./construction-activity";
 import { ProjectCover } from "./cover";
 import {
   type DeliveryLabels,
@@ -44,6 +46,7 @@ export function ProjectDetailView({
   labels,
   retentionLabels,
   verificationLabels,
+  activityLabels,
   deliveryLabels,
   neighbourhood,
 }: {
@@ -52,6 +55,7 @@ export function ProjectDetailView({
   labels: ProjectLabels;
   retentionLabels: RetentionLabels;
   verificationLabels: VerificationLabels;
+  activityLabels: ActivityLabels;
   deliveryLabels: DeliveryLabels;
   neighbourhood?: ReactNode;
 }) {
@@ -90,6 +94,10 @@ export function ProjectDetailView({
     ["project-overview", labels.overview],
     ...(project.verification
       ? [["project-verification", verificationLabels.title]]
+      : []),
+    ...(project.construction_activity &&
+    describedParcels(project.construction_activity).length
+      ? [["project-activity", activityLabels.short]]
       : []),
     ...(projectRelations(project).components.length
       ? [["project-components", labels.components]]
@@ -263,6 +271,13 @@ export function ProjectDetailView({
               labels={verificationLabels}
               deliveryLabels={deliveryLabels}
               projectLabels={labels}
+            />
+          )}
+          {project.construction_activity && (
+            <ProjectActivitySection
+              activity={project.construction_activity}
+              locale={locale}
+              labels={activityLabels}
             />
           )}
           <ProjectComponents

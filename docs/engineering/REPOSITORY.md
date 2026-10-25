@@ -19,6 +19,10 @@ de domaine (recherche, fenêtres, signal recalculé depuis les octets capturés)
 reçoit le collecteur en paramètre et n'importe jamais l'ingestion. Aucun
 traitement raster dans l'API ou le web. Direction prévue : ingestion → evidence (mesures, captures)
 → catalog (parcelles). Voir [CONSTRUCTION_ACTIVITY.md](CONSTRUCTION_ACTIVITY.md).
+Affichage (B07) : `evidence/activity_sheet.py` lit les mesures pour la fiche projet (une
+requête, jamais la part changée) ; `project_queries.project_detail` l'appelle. Côté web,
+`features/projects/activity.ts` possède les règles pures (niveaux et bases connus) et
+`construction-activity.tsx` le rendu de la section.
 
 **Fiche « Vérification » — B05, 25 octobre 2026.** `evidence/verification_sheet.py`
 possède l'assemblage en lecture de la fiche : dernière lecture du registre, liens officiels
