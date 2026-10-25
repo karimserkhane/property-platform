@@ -64,10 +64,12 @@ CONTEXT_TILE_LAYERS = {"building": Building, "street": Street}
 
 
 def context_tile(z, x, y, *, namespaces=None):
-    """Mapbox Vector Tile of active buildings and streets, keyed by identity only.
+    """Mapbox Vector Tile of active buildings and streets, keyed by identity.
 
-    Names, heights, uses and provenance stay in `map_rows` and the published
-    context index, as for parcel tiles. Overview zooms omit sub-pixel buildings.
+    Heights, uses and provenance stay in `map_rows` and the published context
+    index, as for parcel tiles. Streets also carry their display names: labels
+    placed along a line read tile properties and cannot use feature state.
+    Overview zooms omit sub-pixel buildings.
     """
     from .queries import DETAIL_ZOOM, MERCATOR_WORLD_M, TILE_BUFFER, TILE_EXTENT
 
@@ -85,7 +87,7 @@ def context_tile(z, x, y, *, namespaces=None):
                            ST_Transform(item.geometry, 3857), ST_TileEnvelope(%s, %s, %s),
                            {TILE_EXTENT}, {TILE_BUFFER}, true
                        ) AS geom,
-                       item.id::text AS id
+                       item.id::text AS id{", item.name, item.name_ar" if model is Street else ""}
                 FROM {table} AS item
                 WHERE item.active
                   AND item.geometry && ST_Transform(

@@ -40,7 +40,7 @@ def with_street():
     return data
 
 
-def test_tiles_draw_active_buildings_and_streets_by_identity_only(client):
+def test_tiles_draw_active_buildings_and_streets_by_identity(client):
     district()
     collect(with_street())
     building, street = Building.objects.get(), Street.objects.get()
@@ -51,8 +51,9 @@ def test_tiles_draw_active_buildings_and_streets_by_identity_only(client):
         payload = response.content
         assert b"building" in payload and str(building.pk).encode() in payload
         assert b"street" in payload and str(street.pk).encode() in payload
-        # Names, heights and sources stay in the context index.
-        assert b"Real source" not in payload and b"apartments" not in payload
+        # Street names label lines; building names, heights and sources stay in the index.
+        assert b"Real source street" in payload
+        assert b"Real source building" not in payload and b"apartments" not in payload
         assert client.get(tile_path(54.1, 24.1, 15)).status_code == 204
         Building.objects.update(active=False)
         Street.objects.update(active=False)

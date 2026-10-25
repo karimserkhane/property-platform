@@ -8,6 +8,9 @@ export type ParcelIndexFeature = ParcelIndex["features"][number];
 export type ParcelRows = ParcelCollection | ParcelIndex;
 export type ParcelDetail = components["schemas"]["Detail"];
 export type MapContext = components["schemas"]["MapContext"];
+// Streets and buildings with bounds only; the explorer draws them from tiles.
+export type ContextIndex = components["schemas"]["ContextIndex"];
+export type ContextIndexFeature = ContextIndex["building"]["features"][number];
 export type MapFeature = components["schemas"]["MapFeature"];
 export type ResearchReference =
   components["schemas"]["ResearchReferenceResponse"];

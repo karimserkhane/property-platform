@@ -2565,7 +2565,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Mapbox Vector Tile; layers `building` and `street`, property `id` only */
+            /** @description Mapbox Vector Tile; layers `building` (`id`) and `street` (`id`, `name`, `name_ar`) */
             200: {
                 headers: {
                     [name: string]: unknown;

@@ -440,7 +440,8 @@ CONTEXT_TILE_ZOOMS = range(11, 17)
         "responses": {
             "200": {
                 "description": (
-                    "Mapbox Vector Tile; layers `building` and `street`, property `id` only"
+                    "Mapbox Vector Tile; layers `building` (`id`)"
+                    " and `street` (`id`, `name`, `name_ar`)"
                 ),
                 "content": {
                     "application/vnd.mapbox-vector-tile": {
