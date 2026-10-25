@@ -70,6 +70,18 @@ Le contrôle `rebuild-check` ([REBUILD.md](REBUILD.md#mesures-dactivité-de-chan
 - Saison, poussière, ombres d'immeubles voisins et angle solaire modifient la réflectance.
 - Une scène par mois au plus ; les dates affichées sont celles des prises de vue.
 
+## Fiche projet (B07)
+
+Section « Changement au sol vu par satellite » de la fiche projet, après la vérification ; lecture seule par `evidence.activity_sheet.project_activity` (une requête), champ `construction_activity` de `GET /api/v1/preview/projects/{slug}`.
+
+- **Une carte par parcelle mesurée**, avec sa dernière mesure (paire de scènes la plus récente) tant que le lien d'identité relu qui la justifie est actif : niveau (`low`, `moderate`, `high` → « peu de changement », « changement modéré », « changement marqué »), dates des deux prises de vue, pixels clairs sur pixels de la parcelle, raison du choix de la parcelle (lien relu, point du registre, emprise de bâtiment), surface au moment de la mesure. Une parcelle déduite d'une position le dit : le signal décrit toute la parcelle.
+- **Jamais de pourcentage.** L'API n'expose ni la part de pixels changés, ni leur nombre, ni la différence médiane : seulement le niveau. Les identifiants des scènes, la version de méthode et les fenêtres capturées (adresse et empreinte SHA-256) sont dans un bloc dépliable.
+- **Mesure impossible** (`insufficient_clear_pixels`) : « mesure impossible : trop peu de pixels clairs (nuages, ombres, ou parcelle trop petite) », sans niveau. Un statut ou un niveau inconnu, ou une base incohérente, n'est pas affiché.
+- **Aucune mesure** : la section dit qu'il n'y a pas encore de mesure et rappelle la règle de choix des parcelles (lien relu, ou point du registre ou emprise de bâtiment dans une seule parcelle de 0,2 à 10 ha) et le rythme mensuel. Les parcelles cibles sans mesure ne sont pas listées : les calculer coûterait plusieurs requêtes géographiques à chaque fiche.
+- **Méthode et limites** (bloc dépliable) : comparaison pixel par pixel avec masque nuages et ombres, seuils non calibrés, les quatre limites ci-dessus, source Copernicus Sentinel-2 L2A (Earth Search) et attribution « Contient des données Copernicus Sentinel modifiées ». Messages `Activity` en 16 langues ; identifiants en `<bdi dir="ltr">` pour l'arabe, l'ourdou et le persan.
+
+Code web : `apps/web/src/features/projects/activity.ts` et `construction-activity.tsx`. Tests : `test_activity_sheet_postgis.py`, `tests/activity.test.mjs`, parcours `e2e/projects.spec.ts` (anglais et arabe).
+
 ## Découpage
 
 - **B06** : flow Prefect (scènes récentes par parcelle, fenêtres conservées en captures, mesures datées en base, journal des lignes, inventaire des pipelines).
