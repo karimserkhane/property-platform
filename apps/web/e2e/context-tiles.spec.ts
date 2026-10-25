@@ -1,8 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("buildings and streets come from tiles and stay selectable", async ({
+test("buildings and streets come from tiles and the map stays selectable", async ({
   page,
 }) => {
+  // Software WebGL renders 3D slowly; each probe waits for a card.
+  test.setTimeout(150_000);
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
   const tiles = page.waitForResponse(
@@ -31,29 +33,30 @@ test("buildings and streets come from tiles and stay selectable", async ({
   const box = await canvas.boundingBox();
   expect(box).not.toBeNull();
   if (!box) return;
-  // Probe from the centre outwards until a building card opens; which building
-  // is data dependent, but Al Reem must have one near its centre.
-  const inspector = page.locator("section.parcel-inspector");
+  // A click near the centre selects a tiled building or street, or a place,
+  // through its index row; the card must load. Which one is data dependent.
+  const kicker = page.locator("section.parcel-inspector .property-kicker");
   let found = false;
-  for (const dy of [0, -0.1, 0.1, -0.2, 0.2])
-    for (const dx of [0, -0.1, 0.1, -0.2, 0.2, -0.3, 0.3]) {
+  for (const dy of [-0.15, 0, 0.15])
+    for (const dx of [-0.2, -0.1, 0, 0.1]) {
       if (found) break;
       await page.mouse.click(
         box.x + box.width * (0.5 + dx),
         box.y + box.height * (0.5 + dy),
       );
       try {
-        await expect(inspector.getByText("Building").first()).toBeVisible({
-          timeout: 1200,
-        });
+        await expect(kicker.first()).toBeVisible({ timeout: 1500 });
         found = true;
       } catch {
-        const close = page.getByRole("button", { name: "Close details" });
-        if (await close.first().isVisible()) await close.first().click();
+        await page.keyboard.press("Escape");
       }
     }
-  test.skip(!found, "no catalogue building rendered near the Al Reem centre");
+  expect(found, "a map object must be selectable near the centre").toBe(true);
+  test.info().annotations.push({
+    type: "selected",
+    description: await kicker.first().innerText(),
+  });
   await expect(
-    inspector.getByText("These details could not be loaded."),
+    page.getByText("These details could not be loaded."),
   ).toHaveCount(0);
 });
