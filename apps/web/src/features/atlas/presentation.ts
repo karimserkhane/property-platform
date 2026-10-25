@@ -420,45 +420,6 @@ export function geometryClickArea(geometry: MapFeature["geometry"]): number {
   return area > 0 ? area : Infinity;
 }
 
-// Test the actual footprint, even below its rendering minzoom. No nearest-name
-// match: holes remain empty land and a boundary counts as part of the building.
-export function buildingAtPoint(
-  features: readonly MapFeature[],
-  point: readonly [number, number],
-): MapFeature | null {
-  function ringContains(ring: number[][]): boolean {
-    let inside = false;
-    const [x, y] = point;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-      const [ax, ay] = ring[j];
-      const [bx, by] = ring[i];
-      const cross = (x - ax) * (by - ay) - (y - ay) * (bx - ax);
-      if (
-        Math.abs(cross) < 1e-14 &&
-        x >= Math.min(ax, bx) &&
-        x <= Math.max(ax, bx) &&
-        y >= Math.min(ay, by) &&
-        y <= Math.max(ay, by)
-      )
-        return true;
-      if (ay > y !== by > y && x < ((bx - ax) * (y - ay)) / (by - ay) + ax)
-        inside = !inside;
-    }
-    return inside;
-  }
-  return (
-    features.find((feature) => {
-      if (feature.geometry.type !== "MultiPolygon") return false;
-      return (feature.geometry.coordinates as number[][][][]).some(
-        (rings) =>
-          Boolean(rings[0]) &&
-          ringContains(rings[0]) &&
-          !rings.slice(1).some(ringContains),
-      );
-    }) ?? null
-  );
-}
-
 export function geometryBounds(
   geometry: MapFeature["geometry"],
 ): [[number, number], [number, number]] | null {
