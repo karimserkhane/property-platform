@@ -27,7 +27,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [B04](B04.md) | B | Calculateur de retenue en cas d'annulation | 2 | B02 | non | done | claude |
 | [B05](B05.md) | B | Fiche « Vérification » d'un projet | 1 | B02, B03, B04 | non | done | claude |
 | [B06](B06.md) | B | Indice d'activité de chantier par satellite | 2 | A02 | non (décidée le 26/10 : option 3) | done | claude |
-| [B07](B07.md) | B | Signal d'activité satellite sur la fiche projet | 2 | B06 | non | todo | unassigned |
+| [B07](B07.md) | B | Signal d'activité satellite sur la fiche projet | 2 | B06 | non | in-progress | claude |
 | [C01](C01.md) | C | Prix observés contre prix demandés | 2 | A01 | non | todo | unassigned |
 | [C02](C02.md) | C | Simulateur d'échéancier et coût total | 2 | B02 | non | todo | unassigned |
 | [D01](D01.md) | D | Comptes utilisateurs | 2 | — | oui | todo | unassigned |
