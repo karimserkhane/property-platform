@@ -525,11 +525,13 @@ def ordered_steps(steps):
     return sorted(steps, key=lambda step: phase.get(step["operation"], 7))
 
 
-def export_archive(root: Path):
+def export_archive(root: Path, runs=None):
     """One read-only repeatable-read snapshot for captures AND expected counts.
 
     The private bundle contains source bytes and replay instructions, never arbitrary
-    table rows, passwords, user credentials or a SQL dump.
+    table rows, passwords, user credentials or a SQL dump. `runs` limits the steps to
+    these acquisitions (demonstration package, A13); raster scenes and tiles are then
+    left out.
     """
     (root / "blobs").mkdir(parents=True, exist_ok=True)
     scopes = _source_scopes()
@@ -547,15 +549,13 @@ def export_archive(root: Path):
         # What the site publishes, on the same snapshot as the exported captures (A12).
         published = published_level.published_state()
         interpretation = published_level.interpretations()
-        for run in (
-            IngestionRun.objects.select_related("source")
-            .filter(
-                Q(status__in=["succeeded", "quarantined"])
-                | Q(status="failed", source__key__startswith="research:")
-            )
-            .order_by("started_at", "pk")
-            .iterator(chunk_size=50)
-        ):
+        selected_runs = IngestionRun.objects.select_related("source").filter(
+            Q(status__in=["succeeded", "quarantined"])
+            | Q(status="failed", source__key__startswith="research:")
+        )
+        if runs is not None:
+            selected_runs = selected_runs.filter(pk__in=runs)
+        for run in selected_runs.order_by("started_at", "pk").iterator(chunk_size=50):
             key = run.source.key
             selection = scopes.get(key)
             operation, scope = selection or (None, None)
@@ -654,7 +654,11 @@ def export_archive(root: Path):
                 )
         # Raster render bytes are source derivatives, not obtainable from STAC JSON alone.
         scenes = []
-        for scene in ImageryScene.objects.select_related("capture").order_by("scene_id"):
+        for scene in (
+            ImageryScene.objects.select_related("capture").order_by("scene_id")
+            if runs is None
+            else ()
+        ):
             scenes.append(
                 {
                     "capture": _capture(root, scene.capture),
@@ -664,8 +668,12 @@ def export_archive(root: Path):
                 }
             )
         tiles = []
-        for tile in BasemapTile.objects.select_related("capture", "request").order_by(
-            "capture__fetched_at", "pk"
+        for tile in (
+            BasemapTile.objects.select_related("capture", "request").order_by(
+                "capture__fetched_at", "pk"
+            )
+            if runs is None
+            else ()
         ):
             tiles.append(
                 {
@@ -1027,7 +1035,7 @@ def reviewed_presentations(scope, targets):
     return selected, photos
 
 
-def replay_archive(root: Path, actor: str, run_id: str):
+def replay_archive(root: Path, actor: str, run_id: str, report_root: Path | None = None):
     """Called only against the database just created by the ingestion controller."""
     from . import property_import
     from .project_relations import apply_project_relations
@@ -1208,8 +1216,9 @@ def replay_archive(root: Path, actor: str, run_id: str):
             )
     # A manifest exported before identity statistics keeps the plain exact comparison,
     # and history tables stay exact unless the published state was compared.
+    # A demonstration package (A13) has no expected totals: its tables are reported only.
     tables = compare_tables(
-        manifest["expected"],
+        manifest.get("expected", {}),
         actual,
         manifest.get("identities"),
         identities(),
@@ -1290,7 +1299,7 @@ def replay_archive(root: Path, actor: str, run_id: str):
         and (published is None or published["ok"]),
         "scope": "Source capture replay; backup-only state and new audit counts are separate",
     }
-    write_json(root / "report.json", report)
+    write_json((report_root or root) / "report.json", report)
     return {
         key: report[key]
         for key in (

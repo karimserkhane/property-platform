@@ -3,6 +3,7 @@ import {
   expectNoHorizontalScroll,
   firstProject,
   projectCards,
+  skipWithoutData,
 } from "./support";
 
 test("directory search narrows the list and opens the matching project", async ({
@@ -64,7 +65,7 @@ test("a reviewed component links to its programme and back", async ({
     const withParent = cards.filter({ hasText: /Part of ·/ });
     if (await withParent.count()) child = withParent.first();
   }
-  test.skip(!child, "The local data has no reviewed project hierarchy");
+  skipWithoutData(!child, "The local data has no reviewed project hierarchy");
   if (!child) return;
   const childName = (await child.locator("h2").innerText()).trim();
   await child.click();
@@ -129,7 +130,7 @@ test("a registered project shows its verification sheet with cited checks", asyn
       }
     }
   }
-  test.skip(!found, "The local data has no ADREC register reading");
+  skipWithoutData(!found, "The local data has no ADREC register reading");
   const sheet = page.getByRole("region", { name: "Verification" });
   await expect(
     sheet.getByText("Registration number", { exact: true }),
