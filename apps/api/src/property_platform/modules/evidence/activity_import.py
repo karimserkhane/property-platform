@@ -1,4 +1,4 @@
-"""Persist Sentinel-2 ground-change measurements of reviewed project parcels (B06).
+"""Persist Sentinel-2 ground-change measurements of project parcels (B06).
 
 Raster reading and the change index run in ingestion; this module only selects the
 parcels to measure and stores a dated, versioned result with its window captures.
@@ -8,14 +8,28 @@ A measurement is a signal of ground change, never a progress percentage.
 import hashlib
 import json
 import logging
+from dataclasses import dataclass
 from decimal import Decimal
 
 from django.db import connection, transaction
+from django.db.models import Q
+from django.db.models.expressions import RawSQL
 from django.utils import timezone
 
-from .activity_models import ACTIVITY_LEVELS, ACTIVITY_STATUSES, ConstructionActivityMeasurement
+from property_platform.modules.catalog.models import Parcel
+
+from .activity_models import (
+    ACTIVITY_LEVELS,
+    ACTIVITY_STATUSES,
+    AREA_BASES,
+    DERIVED_AREA_M2,
+    DERIVING_METHODS,
+    ConstructionActivityMeasurement,
+)
 from .history import audit_context
 from .models import Capture, IngestionRun, ProjectIdentityLink, Source
+from .project_queries import location_method
+from .queries import map_provenances
 
 logger = logging.getLogger(__name__)
 
@@ -38,21 +52,82 @@ RESULT_FIELDS = (
 )
 
 
-def measurable_links(territory=None):
-    """Active, reviewed project-to-parcel links on current parcels, oldest first.
+@dataclass(frozen=True)
+class Target:
+    """One project parcel to measure, with the reviewed link that justifies it."""
 
-    Only a cadastral parcel gives the boundary a measurement needs; a declared point
-    or a building footprint never stands in for it.
+    link: ProjectIdentityLink
+    parcel: Parcel
+    area_basis: str
+    position_method: str
+    area_m2: int
+
+    @property
+    def project_id(self):
+        return self.link.project_id
+
+
+def _parcels(**filters):
+    return Parcel.objects.filter(superseded_by__isnull=True, **filters).annotate(
+        area_m2=RawSQL("ST_Area(geometry::geography)", ())
+    )
+
+
+def measurement_targets(territory=None):
+    """Project parcels to measure, in the order of the links that justify them.
+
+    A reviewed project-to-parcel link always wins. A project without one is measured
+    on the single current parcel containing its reviewed authority point or building
+    footprint, when that parcel is between 0.2 and 10 ha (owner decision of 25 October
+    2026). Broker, publisher and declared points never stand for a plot.
     """
-    links = ProjectIdentityLink.objects.filter(
-        active=True,
-        parcel__isnull=False,
-        parcel__superseded_by__isnull=True,
-        capture__run__status="succeeded",
-    ).select_related("project", "parcel")
+    links = (
+        ProjectIdentityLink.objects.filter(active=True, capture__run__status="succeeded")
+        .filter(
+            Q(parcel__isnull=False, parcel__superseded_by__isnull=True)
+            | Q(place__active=True)
+            | Q(building__active=True)
+        )
+        .select_related("place", "building")
+        .order_by("id")
+    )
     if territory:
         links = links.filter(project__territory_id=territory)
-    return list(links.order_by("id"))
+    links = list(links)
+    targets, reviewed = {}, set()
+    for link in links:
+        if link.parcel_id is not None:
+            parcel = _parcels(pk=link.parcel_id).get()
+            reviewed.add(link.project_id)
+            targets.setdefault(
+                (link.project_id, parcel.pk),
+                Target(link, parcel, "reviewed_parcel", "cadastral_parcel", round(parcel.area_m2)),
+            )
+    points = map_provenances(
+        "place", [link.place_id for link in links if link.place_id], include_method=True
+    )
+    for link in links:
+        if link.parcel_id is not None or link.project_id in reviewed:
+            continue
+        if link.place_id is not None:
+            method = location_method("place", points.get(str(link.place_id), {}).get("_method"))
+            position = link.place.geometry
+        else:
+            method, position = "building_footprint", link.building.geometry.point_on_surface
+        if method not in DERIVING_METHODS:
+            continue
+        # A position on a shared boundary, or outside every parcel, has no single plot.
+        found = list(_parcels(geometry__intersects=position)[:2])
+        if len(found) != 1:
+            continue
+        parcel, area = found[0], round(found[0].area_m2)
+        if not DERIVED_AREA_M2[0] <= area <= DERIVED_AREA_M2[1]:
+            continue
+        targets.setdefault(
+            (link.project_id, parcel.pk),
+            Target(link, parcel, "parcel_containing_position", method, area),
+        )
+    return sorted(targets.values(), key=lambda target: (target.link.id, str(target.parcel.pk)))
 
 
 def _scene(window):
@@ -60,14 +135,14 @@ def _scene(window):
     return scene["scene_id"], scene["acquired_at"], scene["tile"], window["capture"]
 
 
-def record_measurement(*, run, link, before, after, result):
+def record_measurement(*, run, target, before, after, result):
     """Store one comparison; an identical pair and method version is kept, not redone.
 
     ``before`` and ``after`` hold the selected ``scene`` record and the window
     ``capture`` of each date; ``result`` is the ingestion change signal.
     """
-    if not link.active or link.parcel_id is None:
-        raise ValueError("A measurement needs an active parcel link")
+    if not target.link.active or target.area_basis not in AREA_BASES:
+        raise ValueError("A measurement needs an active reviewed link and a known area")
     if set(result) != set(RESULT_FIELDS):
         raise ValueError("Unexpected measurement fields")
     if result["status"] not in ACTIVITY_STATUSES or (
@@ -88,13 +163,16 @@ def record_measurement(*, run, link, before, after, result):
     }
     with transaction.atomic():
         measurement, created = ConstructionActivityMeasurement.objects.get_or_create(
-            parcel_id=link.parcel_id,
+            project_id=target.project_id,
+            parcel_id=target.parcel.pk,
             before_scene_id=before_id,
             after_scene_id=after_id,
             method_version=result["method_version"],
             defaults={
-                "project_id": link.project_id,
-                "identity_link": link,
+                "identity_link": target.link,
+                "area_basis": target.area_basis,
+                "position_method": target.position_method,
+                "parcel_area_m2": target.area_m2,
                 "run": run,
                 "before_capture": before_capture,
                 "after_capture": after_capture,
@@ -130,7 +208,8 @@ def measure_activity(*, actor, run_key, collector, territory=None, limit=MAX_NEW
         with audit_context(actor=actor):
             run = IngestionRun.objects.create(source=source, actor=actor, connector_version=run_key)
             summary = {
-                "links": 0,
+                "targets": 0,
+                "derived": 0,
                 "pairs": 0,
                 "measured": 0,
                 "existing": 0,
@@ -139,7 +218,7 @@ def measure_activity(*, actor, run_key, collector, territory=None, limit=MAX_NEW
                 "deferred": 0,
             }
             try:
-                _measure(run, collector, measurable_links(territory), summary, limit)
+                _measure(run, collector, measurement_targets(territory), summary, limit)
                 run.status = "quarantined" if summary["failed"] else "succeeded"
             except Exception as exc:
                 logger.error("Construction activity run %s failed", run.pk, exc_info=exc)
@@ -153,11 +232,12 @@ def measure_activity(*, actor, run_key, collector, territory=None, limit=MAX_NEW
             cursor.execute("SELECT pg_advisory_unlock(%s)", [LOCK])
 
 
-def _measure(run, collector, links, summary, limit):
-    summary["links"] = len(links)
-    if not links:
+def _measure(run, collector, targets, summary, limit):
+    summary["targets"] = len(targets)
+    summary["derived"] = sum(target.area_basis != "reviewed_parcel" for target in targets)
+    if not targets:
         return
-    extents = [link.parcel.geometry.extent for link in links]
+    extents = [target.parcel.geometry.extent for target in targets]
     bbox = (
         min(row[0] for row in extents),
         min(row[1] for row in extents),
@@ -178,13 +258,14 @@ def _measure(run, collector, links, summary, limit):
     )
     summary["pairs"] = len(pairs)
     windows = {}
-    for link in links:
-        geometry = json.loads(link.parcel.geometry.geojson)
+    for target in targets:
+        geometry = json.loads(target.parcel.geometry.geojson)
         outcome = "unreadable"
         try:
             for before, after in pairs:
                 if ConstructionActivityMeasurement.objects.filter(
-                    parcel_id=link.parcel_id,
+                    project_id=target.project_id,
+                    parcel_id=target.parcel.pk,
                     before_scene_id=before["scene_id"],
                     after_scene_id=after["scene_id"],
                     method_version=collector.method_version,
@@ -196,7 +277,7 @@ def _measure(run, collector, links, summary, limit):
                     break
                 captured = []
                 for scene in (before, after):
-                    key = (scene["scene_id"], link.parcel_id)
+                    key = (scene["scene_id"], target.parcel.pk)
                     if key not in windows:
                         window = collector.window(scene, geometry)
                         windows[key] = window and _capture(
@@ -212,7 +293,7 @@ def _measure(run, collector, links, summary, limit):
                 )
                 record_measurement(
                     run=run,
-                    link=link,
+                    target=target,
                     before={"scene": before, "capture": captured[0]},
                     after={"scene": after, "capture": captured[1]},
                     result=result,
@@ -220,7 +301,7 @@ def _measure(run, collector, links, summary, limit):
                 outcome = "measured"
                 break
         except Exception as exc:
-            logger.warning("Activity of parcel %s was not measured", link.parcel_id, exc_info=exc)
+            logger.warning("Activity of parcel %s was not measured", target.parcel.pk, exc_info=exc)
             outcome = "failed"
         summary[outcome] += 1
 

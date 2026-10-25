@@ -20,6 +20,9 @@ class Migration(migrations.Migration):
                         auto_created=True, primary_key=True, serialize=False, verbose_name="ID"
                     ),
                 ),
+                ("area_basis", models.CharField(max_length=30)),
+                ("position_method", models.CharField(max_length=30)),
+                ("parcel_area_m2", models.PositiveIntegerField()),
                 ("tile", models.CharField(max_length=20)),
                 ("before_scene_id", models.CharField(max_length=100)),
                 ("after_scene_id", models.CharField(max_length=100)),
@@ -83,7 +86,13 @@ class Migration(migrations.Migration):
                 "db_table": "construction_activity_measurement",
                 "constraints": [
                     models.UniqueConstraint(
-                        fields=("parcel", "before_scene_id", "after_scene_id", "method_version"),
+                        fields=(
+                            "project",
+                            "parcel",
+                            "before_scene_id",
+                            "after_scene_id",
+                            "method_version",
+                        ),
                         name="construction_activity_one_per_pair",
                     ),
                     models.CheckConstraint(
@@ -103,6 +112,22 @@ class Migration(migrations.Migration):
                             ("tile__regex", "^MGRS-[0-9]{2}[A-Z]{3}$"),
                         ),
                         name="construction_activity_scenes_valid",
+                    ),
+                    models.CheckConstraint(
+                        condition=models.Q(
+                            models.Q(
+                                ("area_basis", "reviewed_parcel"),
+                                ("position_method", "cadastral_parcel"),
+                            ),
+                            models.Q(
+                                ("area_basis", "parcel_containing_position"),
+                                ("parcel_area_m2__gte", 2000),
+                                ("parcel_area_m2__lte", 100000),
+                                ("position_method__in", ("authority_point", "building_footprint")),
+                            ),
+                            _connector="OR",
+                        ),
+                        name="construction_activity_area_valid",
                     ),
                     models.CheckConstraint(
                         condition=models.Q(

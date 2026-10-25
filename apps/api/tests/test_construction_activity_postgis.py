@@ -9,16 +9,22 @@ import pytest
 if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Construction activity requires real PostGIS", allow_module_level=True)
 
-from django.contrib.gis.geos import MultiPolygon, Polygon  # noqa: E402
+from django.contrib.gis.geos import MultiPolygon, Point, Polygon  # noqa: E402
 from django.db import IntegrityError, connection, transaction  # noqa: E402
 from django.utils import timezone  # noqa: E402
 
-from property_platform.modules.catalog.models import Developer, Parcel, Project  # noqa: E402
+from property_platform.modules.catalog.models import (  # noqa: E402
+    Developer,
+    Parcel,
+    Place,
+    Project,
+)
 from property_platform.modules.evidence import activity_import  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     ConstructionActivityMeasurement,
     IngestionRun,
+    MapObservation,
     ProjectIdentityLink,
     Source,
 )
@@ -100,9 +106,20 @@ def windows(run):
     )
 
 
-def test_only_active_links_on_current_parcels_are_measured(linked):
-    assert activity_import.measurable_links() == [linked]
-    assert activity_import.measurable_links("saadiyat-island") == []
+def reviewed(link):
+    return activity_import.Target(link, link.parcel, "reviewed_parcel", "cadastral_parcel", 11_000)
+
+
+def test_reviewed_parcel_links_on_current_parcels_are_measured(linked):
+    [target] = activity_import.measurement_targets()
+    assert (target.link, target.parcel, target.area_basis, target.position_method) == (
+        linked,
+        linked.parcel,
+        "reviewed_parcel",
+        "cadastral_parcel",
+    )
+    assert 10_000 < target.area_m2 < 12_000
+    assert activity_import.measurement_targets("saadiyat-island") == []
     replacement = Parcel.objects.create(
         source_namespace="test:parcels",
         source_record_id="2",
@@ -112,14 +129,91 @@ def test_only_active_links_on_current_parcels_are_measured(linked):
     )
     linked.parcel.superseded_by = replacement
     linked.parcel.save(update_fields=["superseded_by"])
-    assert activity_import.measurable_links() == []
+    assert activity_import.measurement_targets() == []
+
+
+def located(slug, point, method):
+    """A project placed by a reviewed link on a source point observed with a given method."""
+    project = Project.objects.create(
+        slug=slug,
+        name=slug,
+        territory_id="al-reem-island",
+        developer=Developer.objects.get_or_create(
+            key="aldar", defaults={"name": "Aldar", "website_url": "https://x.ae/"}
+        )[0],
+        website_url="https://x.ae/" + slug,
+    )
+    place = Place.objects.create(
+        source_namespace="test:points", source_record_id=slug, geometry=Point(*point, srid=4326)
+    )
+    run = finished_run("points:" + slug)
+    MapObservation.objects.create(
+        place=place,
+        capture=capture(run, "https://x.ae/register/" + slug),
+        source_record_id=slug,
+        source_url="https://x.ae/register/" + slug,
+        raw_attributes={"method": method},
+        record_sha256="0" * 64,
+        mapping_version="test",
+        action="created",
+        target_revision=1,
+    )
+    return ProjectIdentityLink.objects.create(
+        project=project,
+        place=place,
+        capture=capture(finished_run("project:" + slug), "https://x.ae/" + slug),
+        actor=ACTOR,
+        reason="Reviewed project point",
+    )
+
+
+def plot(record, box):
+    return Parcel.objects.create(
+        source_namespace="test:parcels",
+        source_record_id=record,
+        municipality="Abu Dhabi",
+        district="Al Reem",
+        geometry=MultiPolygon(Polygon.from_bbox(box), srid=4326),
+    )
+
+
+def test_a_reliable_point_stands_for_the_single_parcel_that_contains_it(linked):
+    registered = "authority_registered_project_coordinates"
+    authority = located("registered", (54.4005, 24.4905), registered)
+    located("brokered", (54.4005, 24.4905), "broker_project_coordinates")
+    # On a shared boundary, two parcels contain the point: none is chosen.
+    plot("west", (54.41, 24.49, 54.411, 24.491))
+    plot("east", (54.411, 24.49, 54.412, 24.491))
+    located("boundary", (54.411, 24.4905), registered)
+    # A master plan of about 1 km a side is larger than one building site.
+    plot("master", (54.42, 24.49, 54.43, 24.50))
+    located("master", (54.425, 24.495), registered)
+    targets = activity_import.measurement_targets()
+    assert [(t.link.project.slug, t.area_basis, t.position_method) for t in targets] == [
+        ("tower", "reviewed_parcel", "cadastral_parcel"),
+        ("registered", "parcel_containing_position", "authority_point"),
+    ]
+    assert targets[1].link == authority and targets[1].parcel == linked.parcel
+    # A project with a reviewed parcel is never measured on a derived one as well.
+    ProjectIdentityLink.objects.create(
+        project=linked.project,
+        place=Place.objects.create(
+            source_namespace="test:points",
+            source_record_id="tower",
+            geometry=Point(54.425, 24.495, srid=4326),
+        ),
+        capture=linked.capture,
+        actor=ACTOR,
+        reason="Reviewed project point",
+    )
+    assert len(activity_import.measurement_targets()) == 2
 
 
 def test_a_measurement_is_stored_once_per_scene_pair_and_journalled(linked):
     run = finished_run("sentinel-activity:al-reem-island")
     before, after = windows(run)
     measurement, created = activity_import.record_measurement(
-        run=run, link=linked, before=before, after=after, result=MEASURED
+        run=run, target=reviewed(linked), before=before, after=after, result=MEASURED
     )
     assert created
     measurement.refresh_from_db()
@@ -129,7 +223,11 @@ def test_a_measurement_is_stored_once_per_scene_pair_and_journalled(linked):
         "MGRS-40RBN",
     )
     again, created = activity_import.record_measurement(
-        run=run, link=linked, before=before, after=after, result=MEASURED | {"level": "low"}
+        run=run,
+        target=reviewed(linked),
+        before=before,
+        after=after,
+        result=MEASURED | {"level": "low"},
     )
     assert (again.pk, again.level, created) == (measurement.pk, "high", False)
     with connection.cursor() as cursor:
@@ -155,7 +253,7 @@ def test_an_unmeasurable_parcel_keeps_no_level(linked):
         "level": None,
     }
     measurement, _ = activity_import.record_measurement(
-        run=run, link=linked, before=before, after=after, result=insufficient
+        run=run, target=reviewed(linked), before=before, after=after, result=insufficient
     )
     assert (measurement.level, measurement.changed_share) == ("", None)
 
@@ -167,6 +265,9 @@ def test_the_database_rejects_a_progress_like_or_inverted_measurement(linked):
         "project": linked.project,
         "parcel": linked.parcel,
         "identity_link": linked,
+        "area_basis": "reviewed_parcel",
+        "position_method": "cadastral_parcel",
+        "parcel_area_m2": 11_000,
         "run": run,
         "before_capture": before["capture"],
         "after_capture": after["capture"],
@@ -190,6 +291,13 @@ def test_the_database_rejects_a_progress_like_or_inverted_measurement(linked):
         {"after_acquired_at": before["scene"]["acquired_at"]},
         {"status": "insufficient_clear_pixels"},
         {"clear_pixels": 130},
+        {"position_method": "authority_point"},
+        {"area_basis": "parcel_containing_position", "position_method": "broker_point"},
+        {
+            "area_basis": "parcel_containing_position",
+            "position_method": "authority_point",
+            "parcel_area_m2": 1_500,
+        },
     ):
         with pytest.raises(IntegrityError), transaction.atomic():
             ConstructionActivityMeasurement.objects.create(**(common | changes))
@@ -200,7 +308,7 @@ def test_window_captures_must_come_from_the_measuring_run(linked):
     before, after = windows(finished_run("other"))
     with pytest.raises(ValueError):
         activity_import.record_measurement(
-            run=run, link=linked, before=before, after=after, result=MEASURED
+            run=run, target=reviewed(linked), before=before, after=after, result=MEASURED
         )
 
 
@@ -290,4 +398,4 @@ def test_a_run_without_measurable_parcels_reads_nothing(db):
     result = activity_import.measure_activity(
         actor=ACTOR, run_key="t:1", collector=FakeCollector(failing=True)
     )
-    assert (result["status"], result["summary"]["links"]) == ("succeeded", 0)
+    assert (result["status"], result["summary"]["targets"]) == ("succeeded", 0)
