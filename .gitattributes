@@ -4,3 +4,5 @@
 *.pdf binary
 *.glb binary
 *.mp4 binary
+# Archived source bytes are checked by SHA-256: never normalise line endings (A13).
+fixtures/demo-replay/blobs/** binary

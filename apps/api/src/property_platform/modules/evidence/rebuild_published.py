@@ -9,6 +9,7 @@ ever written to the rebuilt database.
 
 import json
 from datetime import date, datetime
+from decimal import Decimal
 from uuid import UUID
 
 from django.db import connection
@@ -70,6 +71,9 @@ def canonical(value, ordered=False):
         return value.isoformat()
     if isinstance(value, UUID):
         # Not a durable identity: kept so that it fails the comparison, never trusted.
+        return str(value)
+    if isinstance(value, Decimal):
+        # Register values (B05) keep their exact decimal text, never a binary float.
         return str(value)
     return value
 

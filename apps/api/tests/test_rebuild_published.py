@@ -3,6 +3,7 @@
 import copy
 import re
 from datetime import UTC, datetime
+from decimal import Decimal
 from uuid import uuid4
 
 from property_platform.modules.evidence.project_import import (
@@ -80,6 +81,12 @@ def test_canonical_drops_database_identities_and_ingestion_clocks_only():
     reversed_line = dossier()
     reversed_line["map_locations"][0]["geometry"]["coordinates"].reverse()
     assert canonical(reversed_line) != value
+
+
+def test_canonical_register_values_are_exact_json_text():
+    # B05 verification facts are decimals; the manifest is JSON and keeps their text.
+    value = canonical({"verification": [{"progress_percent": Decimal("42.50")}, {"x": 1}]})
+    assert value["verification"][0] == {"progress_percent": "42.50"}
 
 
 def test_identical_published_state_passes():
