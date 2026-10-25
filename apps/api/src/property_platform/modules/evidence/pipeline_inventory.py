@@ -42,6 +42,7 @@ GROUPS = {
     },
     "property-platform-references": {"ResearchReference"},
     "property-platform-imagery": {"ImageryScene"},
+    "property-platform-construction-activity": {"ConstructionActivityMeasurement"},
     "property-platform-adrec-sales": {"AdrecMarketSnapshot", "AdrecSaleObservation"},
     "property-platform-adrec-indices": {"AdrecMarketSnapshot", "AdrecIndexObservation"},
     "property-platform-public-context": {

@@ -17,6 +17,12 @@ Code : `apps/ingestion/src/property_platform_ingestion/collectors/sentinel_activ
 
 Les seuils sont des choix heuristiques de la version 1, non calibrés sur des chantiers vérifiés. Toute modification change `METHOD_VERSION` ; les anciennes mesures restent attachées à leur version.
 
+## Stockage
+
+Table `evidence.construction_activity_measurement` (modèle `ConstructionActivityMeasurement`, migration `0035`), journalisée comme les autres tables de preuves et rattachée au flow `property-platform-construction-activity` dans `pipeline_inventory.py`. Une ligne par parcelle, paire de scènes et version de méthode ; une seconde lecture de la même paire garde la première mesure. Chaque ligne cite le projet, la parcelle, le lien d'identité relu qui place le projet sur cette parcelle, l'exécution, les captures des fenêtres des deux dates, la tuile MGRS, les identifiants et dates de prise de vue, puis les nombres de pixels, la part changée et le niveau. La base refuse une part hors de [0, 1], un niveau autre que `low`, `moderate` ou `high`, une date « après » qui ne suit pas la date « avant », et un niveau sur une mesure `insufficient_clear_pixels`.
+
+Seuls les liens actifs vers une parcelle cadastrale courante sont mesurés (`activity_import.measurable_links`) : un point déclaré ou une emprise de bâtiment ne donne pas de limite de parcelle. Code : `apps/api/src/property_platform/modules/evidence/activity_import.py`.
+
 ## Limites à afficher
 
 - 10 m par pixel : une petite parcelle compte peu de pixels ; une parcelle de moins de 0,2 ha ne peut pas être mesurée.
