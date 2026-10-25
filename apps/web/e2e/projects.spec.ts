@@ -92,7 +92,11 @@ test("a project links to its developer's delivery history with cited points", as
       .locator("xpath=following-sibling::bdi[1]")
       .innerText()
   ).trim();
-  await page.getByRole("link", { name: "Developer delivery history" }).click();
+  // The hero and the verification sheet both link to the history.
+  await page
+    .getByRole("link", { name: "Developer delivery history" })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/en\/developers\/[a-z0-9-]+$/);
   await expect(
     page.getByRole("heading", { level: 1, name: developer }),
@@ -127,8 +131,10 @@ test("a registered project shows its verification sheet with cited checks", asyn
   }
   test.skip(!found, "The local data has no ADREC register reading");
   const sheet = page.getByRole("region", { name: "Verification" });
-  await expect(sheet.getByText("Registration number")).toBeVisible();
-  await expect(sheet.getByText("Escrow bank")).toBeVisible();
+  await expect(
+    sheet.getByText("Registration number", { exact: true }),
+  ).toBeVisible();
+  await expect(sheet.getByText("Escrow bank", { exact: true })).toBeVisible();
   const proof = sheet.locator("[data-project-evidence]").first();
   await proof.locator("summary").click();
   await expect(proof).toHaveAttribute("open", "");
@@ -141,5 +147,10 @@ test("a registered project shows its verification sheet with cited checks", asyn
     .getByRole("link", { name: "Verification" })
     .click();
   await expect(page).toHaveURL(/#project-verification$/);
+  await expectNoHorizontalScroll(page);
+  // The same sheet reads right to left in Arabic.
+  await page.goto(page.url().replace("/en/", "/ar/").split("#")[0]);
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(page.getByRole("region", { name: "التحقق" })).toBeVisible();
   await expectNoHorizontalScroll(page);
 });
