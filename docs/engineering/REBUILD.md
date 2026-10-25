@@ -208,6 +208,18 @@ sélectionnées (URL répétée dans le même run ou retirée du registre) ; le 
 prétend pas qu'elles ont été réimportées. Les anciens importateurs ne sont pas embarqués : une dérive du parseur
 ou du registre est un écart à examiner, pas une preuve de perte dans la source.
 
+## Mesures d'activité de chantier (B06)
+
+Chaque exécution de `property-platform-construction-activity` devient une étape
+`construction_activity`, rejouée en dernier (après les fiches projet et leurs liens).
+Le worker de reconstruction recrée ses captures (pages de recherche STAC, fenêtres de
+parcelle avec leur capture parente), vérifie que chaque parcelle mesurée est encore
+une cible pour la même raison, recalcule le signal depuis les deux fenêtres avec le
+code d'ingestion actuel et compare les valeurs enregistrées. Une mesure différente ou
+une parcelle qui n'est plus une cible fait échouer l'étape (`measurements` dans le
+rapport) ; la table `construction_activity_measurement` reste comparée exactement.
+Détail : [CONSTRUCTION_ACTIVITY.md](CONSTRUCTION_ACTIVITY.md#rejeu-dans-le-contrôle-de-reconstruction).
+
 ## État publié (A12)
 
 Décision du propriétaire du 24 octobre 2026 ([A12](../tasks/A12.md)) : le rejeu doit

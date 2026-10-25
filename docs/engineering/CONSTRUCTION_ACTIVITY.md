@@ -55,6 +55,14 @@ Chaque exécution mensuelle ajoute la paire la plus récente ; l'historique se c
 
 **Constat du 25 octobre 2026 (base locale, lecture seule).** Aucun des 156 liens d'identité actifs ne vise une parcelle : 151 visent un lieu (point) et 5 un bâtiment. Le flow ne mesure donc encore rien. Le point relu d'un projet tombe dans exactement une parcelle courante pour 116 liens (108 projets) ; 23 points tombent dans plusieurs parcelles et 12 dans aucune ; parmi les 116, quatre parcelles font moins de 0,2 ha et plusieurs dépassent 14 ha (plans d'ensemble). Karim a choisi le 26 octobre la règle ci-dessus ([B06](../tasks/B06.md)) : elle retient aujourd'hui **7 projets sur 7 parcelles** (5 liens à un point du registre, 4 à une emprise de bâtiment, certains pour le même projet). Les 67 points de courtier qui tombent dans une seule parcelle de 0,2 à 10 ha restent exclus.
 
+## Rejeu dans le contrôle de reconstruction
+
+Le contrôle `rebuild-check` ([REBUILD.md](REBUILD.md#mesures-dactivité-de-chantier-b06)) refait chaque mesure sans réseau :
+
+- **Export.** Une étape `construction_activity` par exécution réussie ou en quarantaine de la source `sentinel-2-l2a-earth-search` : toutes ses captures (pages de recherche puis fenêtres, chacune avec l'indice de sa capture parente) et, pour chaque mesure, le projet (slug), la parcelle (espace de noms et identifiant source), les captures des deux dates et les valeurs à reproduire (base de surface, méthode de position, surface, tuile, scènes, dates de prise de vue, version de méthode, pixels, part, différence médiane, niveau).
+- **Rejeu.** Après les fiches projet et leurs liens, une nouvelle exécution recrée les captures depuis leurs octets vérifiés ; la parcelle doit être une cible de `measurement_targets` dans la base reconstruite **pour la même raison** ; le signal est recalculé par `replay_signal` de l'ingestion depuis les deux fenêtres, puis enregistré par `record_measurement`. Les valeurs relues en base (décimales arrondies) doivent être identiques ; sinon l'étape échoue avec le détail `measurements` (attendu, obtenu, ou `not_a_measurement_target`). Rien n'est recopié de la base de référence.
+- L'API ne lit jamais de raster : le worker de reconstruction (ingestion) fournit `replay_signal` à `replay_archive(..., activity_signal=...)` ; sans lui, l'étape échoue.
+
 ## Limites à afficher
 
 - 10 m par pixel : une petite parcelle compte peu de pixels ; une parcelle de moins de 0,2 ha ne peut pas être mesurée.
