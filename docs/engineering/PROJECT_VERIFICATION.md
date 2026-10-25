@@ -21,3 +21,34 @@ Deux tables portent ce que la plateforme sait du statut officiel d'un projet. Au
 1. Ouvrir à la main la fiche de l'annuaire DARI et vérifier que son numéro de projet est celui de la source ADREC du projet.
 2. Ajouter la ligne dans `project_verification_links.json`.
 3. `pytest apps/api/tests/test_project_verification_links.py` valide le registre ; le prochain passage du pipeline de fiches (ou la commande) crée le lien.
+
+## Retenue en cas d'annulation (B04)
+
+`publication/cancellation_retention.py` lit, pour un avancement déclaré, la part du prix
+qu'un promoteur peut retenir quand l'unité d'un acheteur défaillant est annulée
+(décision administrative n° 165 de 2025, Abu Dhabi). Le texte officiel n'a pas été
+obtenu : le barème est recopié des commentaires cités dans le module, avec leur date de
+publication et de consultation ([A&O Shearman, 8 septembre 2026](https://www.aoshearman.com/en/insights/abu-dhabis-new-escrow-and-off-plan-sales-regime-from-momentum-to-regulated-delivery),
+[Trowers & Hamlins, 22 avril 2026](https://www.trowers.com/insights/2026/april/four-key-decisions-reshaping-abu-dhabi)).
+
+| Avancement | Retenue du prix de vente |
+| --- | --- |
+| Travaux non commencés pour une cause extérieure au promoteur | 0 % (remboursement intégral) |
+| Moins de 10 % | 10 % |
+| De 10 à 30 % | 15 % |
+| De 30 à 60 % | 25 % |
+| De 60 à 100 % | 40 % |
+
+Règles de lecture :
+
+- Les sources ne disent pas à quelle tranche appartiennent 10, 30 et 60 % : à ces valeurs
+  exactes, les deux taux sont rendus (`status: boundary`), jamais un seul choisi.
+- Un avancement de 0 % donne 10 % et signale le cas du remboursement intégral : sa cause
+  ne se lit pas dans le registre, l'ADREC l'apprécie.
+- L'avancement retenu par la décision est celui que l'ADREC ou ses consultants
+  constatent à l'annulation ; la fiche n'affiche que le dernier avancement déclaré et sa
+  date.
+- Au-delà de 60 % du prix payés par l'acheteur, l'ADREC fixe la retenue au cas par cas :
+  toujours signalé, puisque la part payée est propre à chaque acheteur.
+- Avancement absent ou hors de 0 à 100 % : aucun taux. Aucun conseil juridique ; la
+  fiche renvoie aux sources.
