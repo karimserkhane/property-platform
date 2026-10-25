@@ -35,6 +35,34 @@ Arguments Playwright : `... run --rm --no-deps checks-e2e node node_modules/@pla
   Ouvrir le rapport avec `pnpm exec playwright show-report .cache/e2e/report` après
   installation des dépendances, ou ouvrir `.cache/e2e/report/index.html`.
 
+## Contre le paquet de démonstration (CI)
+
+Le job CI `e2e` (et n'importe quel poste) lance les mêmes parcours contre une pile
+**jetable et isolée**, `infra/local/compose.e2e-demo.yaml` (projet Compose
+`property-platform-e2e-demo`) : PostGIS et fichiers privés en mémoire, aucun volume,
+réseau ni port partagé avec la pile locale.
+
+```bash
+docker compose -f infra/local/compose.e2e-demo.yaml build
+docker compose -f infra/local/compose.e2e-demo.yaml up -d --wait api
+docker compose -f infra/local/compose.e2e-demo.yaml run --rm checks-e2e
+docker compose -f infra/local/compose.e2e-demo.yaml down
+```
+
+Au démarrage, l'API applique les migrations puis `load_demo_package` rejoue
+`fixtures/demo-replay/` avec les importateurs actuels (aucun dump : 9 acquisitions
+revues, parcelles, rues et bâtiments de Reem, trois projets dont une hiérarchie relue,
+une lecture du registre ADREC) ; elle n'est prête qu'après un rejeu sans étape échouée
+ni divergente (environ 1 min 30). `E2E_REQUIRE_DATA=1` transforme tout parcours
+« ignoré faute de données » en **échec**. En CI, si un parcours échoue, les journaux de
+l'API sont affichés et `.cache/e2e/` (traces, captures, rapport HTML) est publié comme
+artefact `e2e-traces` (14 jours). Durée mesurée en local : environ 1 min 30 de rejeu et
+1 min 30 de parcours, hors construction des images.
+
+Le paquet se régénère depuis la base locale de référence avec `export_demo_package`
+(lecture seule) ; la sélection, les raisons et les licences sont dans
+`fixtures/demo-replay/selection.json`.
+
 ## Parcours
 
 | Fichier | Parcours | Projet |
@@ -47,14 +75,14 @@ Arguments Playwright : `... run --rm --no-deps checks-e2e node node_modules/@pla
 
 Les parcours découvrent leurs données (premier projet de l'annuaire, première carte
 portant un parent) au lieu de figer des noms. Si les données locales ne contiennent
-aucune hiérarchie relue, le parcours correspondant est **marqué ignoré avec sa raison**,
-jamais compté comme réussi. Le clic sur la carte sonde une grille autour du centre :
+aucune hiérarchie relue, le parcours correspondant est **marqué ignoré avec sa raison**
+(échec en CI, voir plus haut), jamais compté comme réussi. Le clic sur la carte sonde une grille autour du centre :
 l'eau et les routes ne sont pas des parcelles, mais une parcelle doit être trouvée.
 
 ## Limites
 
 - Ces parcours dépendent de l'état de la base locale ; ils ne remplacent ni les tests
   PostGIS ni les tests web unitaires.
-- Pas encore exécutés en CI GitHub : l'intégration CI (pile API + jeu de démonstration)
-  est suivie dans [A13](../tasks/A13.md).
+- En CI GitHub, ils tournent contre le paquet de démonstration (A13), pas contre la
+  base locale : un parcours qui dépend d'autres données doit enrichir le paquet.
 - Le rendu WebGL logiciel ne mesure pas les performances réelles d'un téléphone.
