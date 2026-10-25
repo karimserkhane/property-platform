@@ -157,6 +157,7 @@ def _handover_values(value):
 def import_project_details(receipt_rows, *, territory, actor):
     """Pure extraction precedes SQL. No promoter images, PDFs or video bodies are fetched here."""
     from .project_locations import extract_project_position, materialize_project_position
+    from .project_market_labels import apply_project_market_labels
     from .project_protocol import (
         extract_project_source,
         project_registry,
@@ -351,6 +352,7 @@ def import_project_details(receipt_rows, *, territory, actor):
         summary["verification_links"] = apply_project_verification_links(
             territory=territory, actor=actor
         )
+        summary["market_labels"] = apply_project_market_labels(territory=territory, actor=actor)
     summary["run_ids"] = sorted(set(summary["run_ids"]))
     return summary
 

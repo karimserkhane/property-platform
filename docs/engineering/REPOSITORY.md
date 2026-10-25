@@ -64,6 +64,15 @@ contrat ; l'affichage relève de B05. `project_verification_links.json` et
 rattachés à un numéro porté par une source ADREC enregistrée, révoqués et jamais
 supprimés ; la page n'est jamais lue. Voir [la vérification des projets](PROJECT_VERIFICATION.md).
 
+**Libellés de ventes ADREC — C01, 26 octobre 2026.** `project_market_labels.json`
+(registre relu), `project_protocol.validate_project_market_labels` (règles pures) et
+`project_market_labels.py` possèdent le rapprochement entre une fiche et le texte
+`project_name` des ventes ADREC d'un district : égalité normalisée avec le nom de la
+fiche ou d'un de ses enregistrements ADREC, jamais une ressemblance. Table journalisée
+`evidence.project_market_label` (migration additive `0036`), liens révoqués et jamais
+supprimés ; les ventes ne sont pas recopiées. Direction : import evidence → catalog,
+sans point d'entrée HTTP ni changement de contrat. Voir [les prix observés](MARKET_PRICES.md).
+
 **État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild_published.py`
 possède la forme canonique de l'état publié (fiches projet, liens d'identité actifs),
 sa comparaison et l'explication de l'historique des lectures ; `rebuild_archive.py`

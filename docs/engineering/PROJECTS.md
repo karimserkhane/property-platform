@@ -167,6 +167,7 @@ Tous les chemins commencent par `C:\Users\Karim\Repositories\property-platform\`
 - `apps\api\src\property_platform\modules\evidence\project_registry.json` : sources examinées, parseurs et rapprochements autorisés.
 - `apps\api\src\property_platform\modules\evidence\project_relations.json` et `project_relations.py` : liens relus « fait partie de » entre fiches (tours, phases), sourcés et révocables ; voir [la hiérarchie des projets](PROJECT_HIERARCHY.md).
 - `project_verification_links.json` et `project_verification_links.py` : liens relus vers la fiche officielle de vérification d'un enregistrement ADREC, révocables, sans lecture de la page ; voir [la vérification des projets](PROJECT_VERIFICATION.md).
+- `project_market_labels.json` et `project_market_labels.py` : libellés relus des ventes ADREC qui désignent une fiche (nom enregistré ou nom d'enregistrement ADREC, même district), révocables ; voir [les prix observés](MARKET_PRICES.md).
 - `apps\api\src\property_platform\modules\evidence\project_queries.py` (`location_method`, `project_location_gaps`) : méthode et précision de chaque position, et fiches sans position par priorité ; voir [la qualité des positions](PROJECT_POSITIONS.md).
 - `apps\api\src\property_platform\modules\evidence\project_protocol.py` : extraction et validation sans écriture SQL.
 - `apps\api\src\property_platform\modules\evidence\project_import.py` : snapshots, transaction, idempotence et audit.

@@ -214,6 +214,74 @@ def validate_project_verification_links(rows, projects):
             raise ValueError("A verification page belongs to one registration")
 
 
+MARKET_LABEL_EVIDENCE = frozenset({"project_name", "register_name"})
+
+
+def _label_key(value):
+    return re.sub(r"[^a-z0-9]", "", value.casefold()) if isinstance(value, str) else ""
+
+
+def project_market_labels(territory=None):
+    """Reviewed ADREC sales labels of registered projects (C01); never a fuzzy match.
+
+    ADREC sales name a project by free text within a district, without a register
+    number. A label links to a project only when it equals, ignoring case, spaces and
+    punctuation, the project's registered name or the name of one of its registered
+    ADREC registrations, in the same district. `territory:slug` selects a territory.
+    """
+    rows = json.loads(Path(__file__).with_name("project_market_labels.json").read_text("utf-8"))
+    registry = json.loads(Path(__file__).with_name("project_registry.json").read_text("utf-8"))
+    projects = {row["slug"]: row for row in registry}
+    validate_project_market_labels(rows, projects)
+    territory = territory.split(":")[0] if territory else None
+    return tuple(
+        row
+        for row in rows
+        if territory is None or projects[row["project"]]["territory_id"] == territory
+    )
+
+
+def validate_project_market_labels(rows, projects):
+    from .adrec import DISTRICTS
+
+    if not isinstance(rows, list):
+        raise ValueError("Expected a list of reviewed market labels")
+    seen = set()
+    for row in rows:
+        project = projects.get(row.get("project"))
+        if project is None:
+            raise ValueError("A market label must name a registered project")
+        district = DISTRICTS.get(project["territory_id"])
+        if district in (None, "all") or row.get("district") != district:
+            raise ValueError("A market label belongs to the ADREC district of its project")
+        label = row.get("label")
+        if not isinstance(label, str) or label != label.strip() or not 1 <= len(label) <= 255:
+            raise ValueError("A market label must be the exact ADREC project name")
+        evidence = row.get("evidence")
+        number = row.get("registration_number", "")
+        if evidence == "project_name":
+            names, valid = {project["name"]}, number == ""
+        elif evidence == "register_name":
+            sources = [
+                source
+                for source in project["sources"]
+                if source.get("parser") == "adrec_project_v1"
+                and source.get("registration_number") == number
+            ]
+            names, valid = {alias for s in sources for alias in s["heading_aliases"]}, bool(sources)
+        else:
+            raise ValueError("Unknown market label evidence")
+        if not valid or _label_key(label) not in {_label_key(name) for name in names}:
+            raise ValueError("A market label must equal its cited registered name")
+        basis = row.get("basis")
+        if not isinstance(basis, str) or not basis.strip() or len(basis) > 500:
+            raise ValueError("A market label needs its basis")
+        date.fromisoformat(row.get("reviewed_on") or "")
+        if (district, label) in seen:
+            raise ValueError("An ADREC label designates at most one project")
+        seen.add((district, label))
+
+
 def project_urls(projects):
     """Only HTML/terms acquisition URLs; media references are deliberately excluded."""
     if not isinstance(projects, (tuple, list)) or not 1 <= len(projects) <= 200:

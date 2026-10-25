@@ -30,6 +30,7 @@ GROUPS = {
         "ProjectMedia",
         "ProjectIdentityLink",
         "ProjectRelation",
+        "ProjectMarketLabel",
         "ProjectVerification",
         "ProjectVerificationLink",
     },

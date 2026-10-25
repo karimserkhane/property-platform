@@ -927,6 +927,7 @@ class CensusMeasureObservation(PublicContextObservation):
 from .project_models import (  # noqa: E402, F401
     ProjectAmenity,
     ProjectIdentityLink,
+    ProjectMarketLabel,
     ProjectMedia,
     ProjectMediaPublication,
     ProjectRelation,
