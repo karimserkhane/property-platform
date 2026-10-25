@@ -161,6 +161,103 @@ class CancellationRetentionResponse(Schema):
     progress_source: ProjectSourceResponse
 
 
+class DeliveryOutcomeResponse(Schema):
+    """Whether a register reading proves the announced period was met or missed."""
+
+    status: Literal["met", "late", "undetermined"]
+    late_by_at_least_days: int | None
+    source: ProjectSourceResponse | None
+
+
+class DeliveryAnnouncementResponse(Schema):
+    precision: Literal["year", "quarter", "month", "day"]
+    year: int
+    quarter: int | None
+    month: int | None
+    day: int | None
+    original_text: str
+    window_start: date
+    window_end: date
+    first_observed_at: datetime
+    last_observed_at: datetime
+    readings: int
+    change: Literal["first", "later", "earlier", "refined"]
+    outcome: DeliveryOutcomeResponse
+    source: ProjectSourceResponse
+
+
+class DeliveryRegisterResponse(Schema):
+    status: str
+    completed: bool
+    progress_percent: float | None
+    progress_inspected_on: date | None
+    first_observed_at: datetime
+    last_observed_at: datetime
+    readings: int
+    source: ProjectSourceResponse
+
+
+class DeliveryCompletionResponse(Schema):
+    observed_at: datetime
+    not_completed_until: datetime | None
+    source: ProjectSourceResponse
+
+
+class VerificationRegisterResponse(Schema):
+    """Latest project-scope register reading, values as published."""
+
+    authority: Literal["adrec"]
+    registration_number: str
+    permit_number: str | None
+    register_status: str | None
+    off_plan: bool | None
+    registered_on: date | None
+    progress_percent: float | None
+    progress_inspected_on: date | None
+    inspection_company: str | None
+    progress_report_url: str | None
+    progress_report_valid_until: date | None
+    progress_report_expired: bool | None
+    sold_percent: float | None
+    sold_original: str | None
+    escrow_bank_name: str | None
+    escrow_account_number: str | None
+    developer_licence: str | None
+    observed_at: datetime
+    source: ProjectSourceResponse
+
+
+class VerificationLinkResponse(Schema):
+    """Official register page an operator matched to the project; never read by the platform."""
+
+    authority: Literal["adrec"]
+    registration_number: str
+    url: str
+    reviewed_on: date
+
+
+class VerificationContradictionResponse(Schema):
+    """Two cited readings that disagree; no cause is inferred."""
+
+    code: Literal[
+        "announced_after_completion",
+        "announced_period_passed",
+        "sources_disagree",
+        "progress_decreased",
+    ]
+    late_by_at_least_days: int | None
+    announcements: list[DeliveryAnnouncementResponse]
+    register_readings: list[DeliveryRegisterResponse]
+
+
+class ProjectVerificationResponse(Schema):
+    latest_reading: VerificationRegisterResponse | None
+    register_readings: list[DeliveryRegisterResponse]
+    completion: DeliveryCompletionResponse | None
+    official_links: list[VerificationLinkResponse]
+    contradictions: list[VerificationContradictionResponse]
+
+
 class ProjectDetailResponse(Schema):
     id: UUID
     slug: str
@@ -183,6 +280,7 @@ class ProjectDetailResponse(Schema):
     components: list[ProjectRelationResponse] = []
     declared_progress: ProjectDeclaredProgressResponse | None = None
     cancellation_retention: CancellationRetentionResponse | None = None
+    verification: ProjectVerificationResponse | None = None
 
 
 class ProjectSummaryResponse(Schema):
@@ -239,48 +337,6 @@ def project_detail(request, slug: str):
     if result is None:
         return Status(404, {"code": "not_found"})
     return result | {"cancellation_retention": project_retention(result["declared_progress"])}
-
-
-class DeliveryOutcomeResponse(Schema):
-    """Whether a register reading proves the announced period was met or missed."""
-
-    status: Literal["met", "late", "undetermined"]
-    late_by_at_least_days: int | None
-    source: ProjectSourceResponse | None
-
-
-class DeliveryAnnouncementResponse(Schema):
-    precision: Literal["year", "quarter", "month", "day"]
-    year: int
-    quarter: int | None
-    month: int | None
-    day: int | None
-    original_text: str
-    window_start: date
-    window_end: date
-    first_observed_at: datetime
-    last_observed_at: datetime
-    readings: int
-    change: Literal["first", "later", "earlier", "refined"]
-    outcome: DeliveryOutcomeResponse
-    source: ProjectSourceResponse
-
-
-class DeliveryRegisterResponse(Schema):
-    status: str
-    completed: bool
-    progress_percent: float | None
-    progress_inspected_on: date | None
-    first_observed_at: datetime
-    last_observed_at: datetime
-    readings: int
-    source: ProjectSourceResponse
-
-
-class DeliveryCompletionResponse(Schema):
-    observed_at: datetime
-    not_completed_until: datetime | None
-    source: ProjectSourceResponse
 
 
 class DeliveryProjectResponse(Schema):

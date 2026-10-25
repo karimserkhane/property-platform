@@ -40,7 +40,7 @@ Arguments Playwright : `... run --rm --no-deps checks-e2e node node_modules/@pla
 | Fichier | Parcours | Projet |
 | --- | --- | --- |
 | `explorer.spec.ts` | Explorateur de Reem → clic sur une parcelle de la carte → fiche de sélection chargée → l'URL rouvre la même parcelle | ordinateur |
-| `projects.spec.ts` | Recherche dans l'annuaire → ouverture du projet trouvé ; recherche sans résultat ; fiche avec preuves dépliables et retour à l'annuaire ; composant → programme parent → liste « Bâtiments et phases » ; fiche → historique de livraison du promoteur (preuve dépliable) | ordinateur |
+| `projects.spec.ts` | Recherche dans l'annuaire → ouverture du projet trouvé ; recherche sans résultat ; fiche avec preuves dépliables et retour à l'annuaire ; composant → programme parent → liste « Bâtiments et phases » ; fiche → historique de livraison du promoteur (preuve dépliable) ; fiche d'un projet lu au registre ADREC → section « Vérification » (numéro, séquestre, preuve dépliable, liens officiels, entrée de navigation), sans défilement horizontal | ordinateur |
 | `locales.spec.ts` | Arabe, persan et ourdou en `dir="rtl"` sans défilement horizontal, accueil et fiche ; anglais et français en `ltr` | ordinateur |
 | `context-tiles.spec.ts` | Explorateur de Reem en 3D catalogue → tuiles `context-tiles` et index `context-index` lus, aucun `map-context` → un clic près du centre ouvre une fiche sans erreur | ordinateur |
 | `mobile.spec.ts` | Accueil, annuaire, fiche et carte sur un écran Pixel 7, sans défilement horizontal | mobile |

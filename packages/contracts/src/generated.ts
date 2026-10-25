@@ -1746,6 +1746,102 @@ export interface components {
             source: components["schemas"]["RetentionSourceResponse"];
             progress_source: components["schemas"]["ProjectSourceResponse"];
         };
+        /** DeliveryAnnouncementResponse */
+        DeliveryAnnouncementResponse: {
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "year" | "quarter" | "month" | "day";
+            /** Year */
+            year: number;
+            /** Quarter */
+            quarter: number | null;
+            /** Month */
+            month: number | null;
+            /** Day */
+            day: number | null;
+            /** Original Text */
+            original_text: string;
+            /**
+             * Window Start
+             * Format: date
+             */
+            window_start: string;
+            /**
+             * Window End
+             * Format: date
+             */
+            window_end: string;
+            /**
+             * First Observed At
+             * Format: date-time
+             */
+            first_observed_at: string;
+            /**
+             * Last Observed At
+             * Format: date-time
+             */
+            last_observed_at: string;
+            /** Readings */
+            readings: number;
+            /**
+             * Change
+             * @enum {string}
+             */
+            change: "first" | "later" | "earlier" | "refined";
+            outcome: components["schemas"]["DeliveryOutcomeResponse"];
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** DeliveryCompletionResponse */
+        DeliveryCompletionResponse: {
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /** Not Completed Until */
+            not_completed_until: string | null;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * DeliveryOutcomeResponse
+         * @description Whether a register reading proves the announced period was met or missed.
+         */
+        DeliveryOutcomeResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "met" | "late" | "undetermined";
+            /** Late By At Least Days */
+            late_by_at_least_days: number | null;
+            source: components["schemas"]["ProjectSourceResponse"] | null;
+        };
+        /** DeliveryRegisterResponse */
+        DeliveryRegisterResponse: {
+            /** Status */
+            status: string;
+            /** Completed */
+            completed: boolean;
+            /** Progress Percent */
+            progress_percent: number | null;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /**
+             * First Observed At
+             * Format: date-time
+             */
+            first_observed_at: string;
+            /**
+             * Last Observed At
+             * Format: date-time
+             */
+            last_observed_at: string;
+            /** Readings */
+            readings: number;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
         /** ProjectAmenityResponse */
         ProjectAmenityResponse: {
             /** Code */
@@ -1822,6 +1918,7 @@ export interface components {
             components: components["schemas"]["ProjectRelationResponse"][];
             declared_progress?: components["schemas"]["ProjectDeclaredProgressResponse"] | null;
             cancellation_retention?: components["schemas"]["CancellationRetentionResponse"] | null;
+            verification?: components["schemas"]["ProjectVerificationResponse"] | null;
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {
@@ -1981,6 +2078,17 @@ export interface components {
             original_text: string;
             source: components["schemas"]["ProjectSourceResponse"];
         };
+        /** ProjectVerificationResponse */
+        ProjectVerificationResponse: {
+            latest_reading: components["schemas"]["VerificationRegisterResponse"] | null;
+            /** Register Readings */
+            register_readings: components["schemas"]["DeliveryRegisterResponse"][];
+            completion: components["schemas"]["DeliveryCompletionResponse"] | null;
+            /** Official Links */
+            official_links: components["schemas"]["VerificationLinkResponse"][];
+            /** Contradictions */
+            contradictions: components["schemas"]["VerificationContradictionResponse"][];
+        };
         /** RetentionBandResponse */
         RetentionBandResponse: {
             /** Lower Percent */
@@ -2016,77 +2124,91 @@ export interface components {
             /** References */
             references: components["schemas"]["RetentionReferenceResponse"][];
         };
-        /** DeliveryAnnouncementResponse */
-        DeliveryAnnouncementResponse: {
+        /**
+         * VerificationContradictionResponse
+         * @description Two cited readings that disagree; no cause is inferred.
+         */
+        VerificationContradictionResponse: {
             /**
-             * Precision
+             * Code
              * @enum {string}
              */
-            precision: "year" | "quarter" | "month" | "day";
-            /** Year */
-            year: number;
-            /** Quarter */
-            quarter: number | null;
-            /** Month */
-            month: number | null;
-            /** Day */
-            day: number | null;
-            /** Original Text */
-            original_text: string;
-            /**
-             * Window Start
-             * Format: date
-             */
-            window_start: string;
-            /**
-             * Window End
-             * Format: date
-             */
-            window_end: string;
-            /**
-             * First Observed At
-             * Format: date-time
-             */
-            first_observed_at: string;
-            /**
-             * Last Observed At
-             * Format: date-time
-             */
-            last_observed_at: string;
-            /** Readings */
-            readings: number;
-            /**
-             * Change
-             * @enum {string}
-             */
-            change: "first" | "later" | "earlier" | "refined";
-            outcome: components["schemas"]["DeliveryOutcomeResponse"];
-            source: components["schemas"]["ProjectSourceResponse"];
+            code: "announced_after_completion" | "announced_period_passed" | "sources_disagree" | "progress_decreased";
+            /** Late By At Least Days */
+            late_by_at_least_days: number | null;
+            /** Announcements */
+            announcements: components["schemas"]["DeliveryAnnouncementResponse"][];
+            /** Register Readings */
+            register_readings: components["schemas"]["DeliveryRegisterResponse"][];
         };
-        /** DeliveryCompletionResponse */
-        DeliveryCompletionResponse: {
+        /**
+         * VerificationLinkResponse
+         * @description Official register page an operator matched to the project; never read by the platform.
+         */
+        VerificationLinkResponse: {
+            /**
+             * Authority
+             * @constant
+             */
+            authority: "adrec";
+            /** Registration Number */
+            registration_number: string;
+            /** Url */
+            url: string;
+            /**
+             * Reviewed On
+             * Format: date
+             */
+            reviewed_on: string;
+        };
+        /**
+         * VerificationRegisterResponse
+         * @description Latest project-scope register reading, values as published.
+         */
+        VerificationRegisterResponse: {
+            /**
+             * Authority
+             * @constant
+             */
+            authority: "adrec";
+            /** Registration Number */
+            registration_number: string;
+            /** Permit Number */
+            permit_number: string | null;
+            /** Register Status */
+            register_status: string | null;
+            /** Off Plan */
+            off_plan: boolean | null;
+            /** Registered On */
+            registered_on: string | null;
+            /** Progress Percent */
+            progress_percent: number | null;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /** Inspection Company */
+            inspection_company: string | null;
+            /** Progress Report Url */
+            progress_report_url: string | null;
+            /** Progress Report Valid Until */
+            progress_report_valid_until: string | null;
+            /** Progress Report Expired */
+            progress_report_expired: boolean | null;
+            /** Sold Percent */
+            sold_percent: number | null;
+            /** Sold Original */
+            sold_original: string | null;
+            /** Escrow Bank Name */
+            escrow_bank_name: string | null;
+            /** Escrow Account Number */
+            escrow_account_number: string | null;
+            /** Developer Licence */
+            developer_licence: string | null;
             /**
              * Observed At
              * Format: date-time
              */
             observed_at: string;
-            /** Not Completed Until */
-            not_completed_until: string | null;
             source: components["schemas"]["ProjectSourceResponse"];
-        };
-        /**
-         * DeliveryOutcomeResponse
-         * @description Whether a register reading proves the announced period was met or missed.
-         */
-        DeliveryOutcomeResponse: {
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "met" | "late" | "undetermined";
-            /** Late By At Least Days */
-            late_by_at_least_days: number | null;
-            source: components["schemas"]["ProjectSourceResponse"] | null;
         };
         /** DeliveryProjectResponse */
         DeliveryProjectResponse: {
@@ -2101,30 +2223,6 @@ export interface components {
             /** Register Readings */
             register_readings: components["schemas"]["DeliveryRegisterResponse"][];
             completion: components["schemas"]["DeliveryCompletionResponse"] | null;
-        };
-        /** DeliveryRegisterResponse */
-        DeliveryRegisterResponse: {
-            /** Status */
-            status: string;
-            /** Completed */
-            completed: boolean;
-            /** Progress Percent */
-            progress_percent: number | null;
-            /** Progress Inspected On */
-            progress_inspected_on: string | null;
-            /**
-             * First Observed At
-             * Format: date-time
-             */
-            first_observed_at: string;
-            /**
-             * Last Observed At
-             * Format: date-time
-             */
-            last_observed_at: string;
-            /** Readings */
-            readings: number;
-            source: components["schemas"]["ProjectSourceResponse"];
         };
         /** DeliverySummaryResponse */
         DeliverySummaryResponse: {

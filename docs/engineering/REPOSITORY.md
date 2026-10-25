@@ -8,6 +8,16 @@ evidence → catalog, sans point d'entrée HTTP, nouveau modèle ni changement d
 La base de référence est lue sur un instantané en lecture seule ; aucune restauration
 SQL ne se substitue au rejeu. Voir [REBUILD.md](REBUILD.md).
 
+**Fiche « Vérification » — B05, 25 octobre 2026.** `evidence/verification_sheet.py`
+possède l'assemblage en lecture de la fiche : dernière lecture du registre, liens officiels
+actifs et contradictions entre lectures citées. Il réutilise `delivery_history.delivery_readings`
+(une seule lecture des fiches) ; `project_queries.project_detail` l'appelle. Aucune table,
+migration ni pipeline ; contrat régénéré. Direction : api → evidence → catalog. Côté web,
+`features/projects/verification.ts` possède les règles pures (codes de contradiction connus,
+dédoublonnage) et `verification-sheet.tsx` le rendu de la section, qui réutilise
+`Announcement` et `RegisterReadings` de `delivery-history.tsx`. Voir
+[PROJECT_VERIFICATION.md](PROJECT_VERIFICATION.md#fiche--vérification--b05).
+
 **Retenue en cas d'annulation — B04, 25 octobre 2026.** `publication/cancellation_retention.py`
 possède le barème daté et cité de la décision n° 165 de 2025 et sa lecture pure pour un
 avancement déclaré, sans base ni réseau. Direction : API/publication → evidence (avancement
