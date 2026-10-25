@@ -87,3 +87,21 @@ en lecture seule, sur les mêmes lectures que l'[historique de livraison](DELIVE
     ne dit pas « achevé » (retard minimal en jours) ;
   - `sources_disagree` : deux sources annoncent des périodes qui ne se recouvrent pas ;
   - `progress_decreased` : une fiche du registre déclare plus tard un avancement plus bas.
+
+Sur la fiche projet, la section « Vérification » (`#project-verification`, juste après la
+présentation, entrée dans la navigation de la fiche) affiche, sur une colonne au téléphone :
+
+- la dernière lecture : statut au registre (texte d'origine, en anglais), numéro, permis,
+  vente sur plan, avancement et date d'inspection, rapport et validité (« expiré à la date
+  de la lecture » si l'API le juge ainsi), part vendue, banque et numéro de séquestre,
+  licence, avec la preuve dépliable ; une valeur absente est dite « non indiquée au
+  registre », jamais déduite ;
+- le premier achèvement lu, puis les « points à vérifier » : chaque contradiction connue
+  avec son explication et les annonces ou lectures citées, comme sur la page promoteur.
+  Un code inconnu n'est pas affiché ; une même contradiction n'apparaît qu'une fois ;
+- les lectures successives du registre (repliées), les liens officiels relus ou, à défaut,
+  l'invitation à chercher le numéro sur le registre de l'ADREC ;
+- des renvois vers l'historique de livraison du promoteur et la retenue en cas
+  d'annulation (B04), puis l'avertissement « pas un conseil ».
+
+Un projet sans lecture du registre affiche seulement que rien ne lui est encore rattaché.

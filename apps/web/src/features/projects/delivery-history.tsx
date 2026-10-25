@@ -15,7 +15,7 @@ import { formatHandover, formatProjectDate } from "./presentation";
 import project from "./project.module.css";
 import type { ProjectLabels } from "./types";
 
-type Shared = {
+export type Shared = {
   locale: string;
   labels: DeliveryLabels;
   projectLabels: ProjectLabels;
@@ -51,7 +51,7 @@ function Observed({
   );
 }
 
-function Announcement({
+export function Announcement({
   point,
   locale,
   labels,
@@ -109,18 +109,18 @@ function Announcement({
   );
 }
 
-function RegisterReadings({
-  item,
+export function RegisterReadings({
+  readings,
   locale,
   labels,
   projectLabels,
-}: Shared & { item: DeliveryProject }) {
-  if (!item.register_readings.length)
+}: Shared & { readings: DeliveryProject["register_readings"] }) {
+  if (!readings.length)
     return <p className={project.muted}>{labels.noRegister}</p>;
   const percent = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
   return (
     <ul className={styles.points}>
-      {item.register_readings.map((reading) => (
+      {readings.map((reading) => (
         <li
           className={styles.point}
           key={`${reading.first_observed_at}:${reading.status}`}
@@ -227,7 +227,7 @@ function ProjectHistory({
         </div>
         <div>
           <h3>{labels.register}</h3>
-          <RegisterReadings item={item} {...shared} />
+          <RegisterReadings readings={item.register_readings} {...shared} />
         </div>
       </div>
     </section>
