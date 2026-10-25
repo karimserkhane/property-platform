@@ -90,3 +90,31 @@ def test_each_register_reading_keeps_its_verification_and_history():
     )
     assert history == [Decimal("12.50"), Decimal("20.00")]
     assert ProjectSnapshot.objects.filter(project__slug="sensi").count() == 2
+
+
+def test_project_detail_reads_retention_at_the_latest_declared_progress(client):
+    from django.test import override_settings
+
+    project = project_registry("saadiyat-island:sensi")[0]
+    source = next(s for s in project["sources"] if s["parser"] == "adrec_project_v1")
+    scope = "saadiyat-island:sensi:" + hashlib.sha256(source["url"].encode()).hexdigest()
+    earlier = adrec_receipt(source, progress=12.5, fetched_at=timezone.now() - timedelta(days=30))
+    later = adrec_receipt(source, progress=30, fetched_at=timezone.now())
+    for row in (earlier, later):
+        import_project_details([row], territory=scope, actor="verification-test")
+
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+        response = client.get("/api/v1/preview/projects/sensi")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["declared_progress"]["progress_percent"] == 30
+    assert data["declared_progress"]["progress_inspected_on"] == "2026-08-21"
+    assert data["declared_progress"]["source"]["kind"] == "authority"
+    retention = data["cancellation_retention"]
+    # 30 % is a boundary the cited commentaries leave open: both rates, never a guess.
+    assert retention["status"] == "boundary" and retention["rates"] == [15, 25]
+    assert retention["progress_inspected_on"] == "2026-08-21"
+    assert retention["progress_source"]["url"] == source["url"]
+    assert retention["paid_share_discretion_percent"] == 60
+    assert retention["source"]["official_text_obtained"] is False
+    assert retention["source"]["references"][0]["published_on"] == "2026-09-08"

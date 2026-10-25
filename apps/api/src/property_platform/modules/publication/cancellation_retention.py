@@ -72,6 +72,16 @@ def retention(progress_percent):
         **result,
         "status": "rate" if len(bands) == 1 else "boundary",
         "rates": [band[2] for band in bands],
-        "bands": [{"from": band[0], "to": band[1]} for band in bands],
+        "bands": [{"lower_percent": band[0], "upper_percent": band[1]} for band in bands],
         "full_refund_possible": progress == 0,
+    }
+
+
+def project_retention(declared_progress):
+    """Retention at the latest completion the register declares, cited and dated."""
+    if declared_progress is None:
+        return None
+    return retention(declared_progress["progress_percent"]) | {
+        "progress_inspected_on": declared_progress["progress_inspected_on"],
+        "progress_source": declared_progress["source"],
     }

@@ -5532,6 +5532,90 @@
         "title": "ProjectSummaryResponse",
         "type": "object"
       },
+      "CancellationRetentionResponse": {
+        "description": "Developer retention on cancellation at the declared stage; a reading aid, not advice.",
+        "properties": {
+          "version": {
+            "title": "Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "rate",
+              "boundary",
+              "unknown",
+              "out_of_range"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "progress_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Percent"
+          },
+          "progress_inspected_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Inspected On"
+          },
+          "rates": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Rates",
+            "type": "array"
+          },
+          "bands": {
+            "items": {
+              "$ref": "#/components/schemas/RetentionBandResponse"
+            },
+            "title": "Bands",
+            "type": "array"
+          },
+          "full_refund_possible": {
+            "title": "Full Refund Possible",
+            "type": "boolean"
+          },
+          "paid_share_discretion_percent": {
+            "title": "Paid Share Discretion Percent",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/RetentionSourceResponse"
+          },
+          "progress_source": {
+            "$ref": "#/components/schemas/ProjectSourceResponse"
+          }
+        },
+        "required": [
+          "version",
+          "status",
+          "progress_percent",
+          "progress_inspected_on",
+          "rates",
+          "bands",
+          "full_refund_possible",
+          "paid_share_discretion_percent",
+          "source",
+          "progress_source"
+        ],
+        "title": "CancellationRetentionResponse",
+        "type": "object"
+      },
       "ProjectAmenityResponse": {
         "properties": {
           "code": {
@@ -5557,6 +5641,48 @@
           "source"
         ],
         "title": "ProjectAmenityResponse",
+        "type": "object"
+      },
+      "ProjectDeclaredProgressResponse": {
+        "description": "Latest completion the authority register declares, dated by its inspection.",
+        "properties": {
+          "authority": {
+            "const": "adrec",
+            "title": "Authority",
+            "type": "string"
+          },
+          "progress_percent": {
+            "title": "Progress Percent",
+            "type": "number"
+          },
+          "progress_inspected_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Inspected On"
+          },
+          "register_status": {
+            "title": "Register Status",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ProjectSourceResponse"
+          }
+        },
+        "required": [
+          "authority",
+          "progress_percent",
+          "progress_inspected_on",
+          "register_status",
+          "source"
+        ],
+        "title": "ProjectDeclaredProgressResponse",
         "type": "object"
       },
       "ProjectDetailResponse": {
@@ -5680,6 +5806,26 @@
             },
             "title": "Components",
             "type": "array"
+          },
+          "declared_progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectDeclaredProgressResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cancellation_retention": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CancellationRetentionResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6177,6 +6323,85 @@
           "source"
         ],
         "title": "ProjectTypologyResponse",
+        "type": "object"
+      },
+      "RetentionBandResponse": {
+        "properties": {
+          "lower_percent": {
+            "title": "Lower Percent",
+            "type": "number"
+          },
+          "upper_percent": {
+            "title": "Upper Percent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lower_percent",
+          "upper_percent"
+        ],
+        "title": "RetentionBandResponse",
+        "type": "object"
+      },
+      "RetentionReferenceResponse": {
+        "properties": {
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "published_on": {
+            "format": "date",
+            "title": "Published On",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "consulted_on": {
+            "format": "date",
+            "title": "Consulted On",
+            "type": "string"
+          },
+          "covers": {
+            "title": "Covers",
+            "type": "string"
+          }
+        },
+        "required": [
+          "publisher",
+          "published_on",
+          "url",
+          "consulted_on",
+          "covers"
+        ],
+        "title": "RetentionReferenceResponse",
+        "type": "object"
+      },
+      "RetentionSourceResponse": {
+        "properties": {
+          "decision": {
+            "title": "Decision",
+            "type": "string"
+          },
+          "official_text_obtained": {
+            "title": "Official Text Obtained",
+            "type": "boolean"
+          },
+          "references": {
+            "items": {
+              "$ref": "#/components/schemas/RetentionReferenceResponse"
+            },
+            "title": "References",
+            "type": "array"
+          }
+        },
+        "required": [
+          "decision",
+          "official_text_obtained",
+          "references"
+        ],
+        "title": "RetentionSourceResponse",
         "type": "object"
       },
       "DeliveryAnnouncementResponse": {
