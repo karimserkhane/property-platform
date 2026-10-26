@@ -22,6 +22,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A14](A14.md) | A | Contrôle réel du rejeu géographique : identités et divergence revue | 1 | A11 | non | done | claude |
 | [A15](A15.md) | A | Écarts restants du rejeu géographique et anciennes identités OSM | 1 | A14 | non | done | claude |
 | [A16](A16.md) | A | Version de cache des tables de provenance par source | 3 | A08 | non | done | claude |
+| [A17](A17.md) | A | Délai dépassé de l'index des parcelles dans le job CI e2e | 1 | A13 | non | in-progress | claude |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
