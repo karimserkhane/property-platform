@@ -20,7 +20,7 @@ puis `history` (journaux de lignes, exclusions réversibles,
 reprises de champs, couverture des tables : `history/journals.py`,
 `catalogue_history.py`, `pipeline_inventory.py`). Les modules à la racine
 (`models.py` et `*_models.py`, `apps.py`, `checks.py`, `runs.py`,
-`collection_profiles.py`, `media_storage.py`) forment le socle commun. Le contrat
+`collection_profiles.py`, `media_storage.py`, `capture_storage.py`) forment le socle commun. Le contrat
 Import Linter « Evidence sub-packages follow their dependency direction » interdit qu'un
 sous-paquet importe un sous-paquet plus haut ; « Evidence base modules never import its
 sub-packages » interdit au socle d'importer un sous-paquet. Les anciens chemins à la
@@ -279,6 +279,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── rebuild/orchestration.py  Passerelle d'import, identité durable et résultat atomique
 │       │       │   │   ├── runs.py   Enregistrement commun d'un run en échec et de sa trace
 │       │       │   │   ├── media_storage.py  Captures archivées, licences et copies publiques contrôlées
+│       │       │   │   ├── capture_storage.py  Corps bruts des captures déplacés vers le stockage privé après copie vérifiée
 │       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
 │       │       │   │   ├── migrations/  Évolution du schéma des preuves
 │       │       │   │   ├── management/commands/  Imports Onwani, couches Reem, références et satellite
