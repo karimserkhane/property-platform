@@ -22,7 +22,7 @@ from test_reem_map_postgis import district, osm  # noqa: E402
 from test_reem_map_postgis import receipt as map_receipt
 
 from property_platform.modules.catalog.models import Parcel  # noqa: E402
-from property_platform.modules.evidence import onwani, services  # noqa: E402
+from property_platform.modules.evidence.maps import onwani, services  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     ImageryScene,

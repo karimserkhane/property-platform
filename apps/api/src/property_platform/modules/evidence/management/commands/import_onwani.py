@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from property_platform.modules.evidence.collection_profiles import COLLECTIONS
-from property_platform.modules.evidence.services import import_onwani
+from property_platform.modules.evidence.maps.services import import_onwani
 
 
 class Command(BaseCommand):

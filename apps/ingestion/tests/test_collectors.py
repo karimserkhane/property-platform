@@ -11,7 +11,7 @@ from urllib.parse import parse_qs
 
 import httpx
 import pytest
-from property_platform.modules.evidence import map_sources, onwani
+from property_platform.modules.evidence.maps import map_sources, onwani
 from property_platform.modules.evidence.property_protocol import validate_receipts
 
 from property_platform_ingestion.collectors import (

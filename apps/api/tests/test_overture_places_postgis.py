@@ -16,7 +16,7 @@ from django.contrib.gis.geos import Point  # noqa: E402
 from test_reem_map_postgis import district  # noqa: E402
 
 from property_platform.modules.catalog.models import Place  # noqa: E402
-from property_platform.modules.evidence import overture_places as protocol  # noqa: E402
+from property_platform.modules.evidence.maps import overture_places as protocol  # noqa: E402
 from property_platform.modules.evidence.models import Capture, MapObservation  # noqa: E402
 from property_platform.modules.evidence.orchestration import execute_import  # noqa: E402
 from property_platform.modules.publication.place_display import distinct_places  # noqa: E402

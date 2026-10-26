@@ -75,7 +75,7 @@ def execute(request):
         }:
             raise ValueError("Only a reviewed project source can replay this archive")
         if request.get("operation") in {"routing_graph", "walking_areas"}:
-            from property_platform.modules.evidence.accessibility import (
+            from property_platform.modules.evidence.maps.accessibility import (
                 archive_graph,
                 archive_walking,
             )
@@ -129,7 +129,7 @@ def execute(request):
             from django.db.models import Q
             from django.utils import timezone
             from property_platform.modules.catalog.territories import TERRITORY_BY_ID
-            from property_platform.modules.evidence.basemap_archive import (
+            from property_platform.modules.evidence.maps.basemap_archive import (
                 archive_pending,
                 seed_area,
             )
@@ -277,7 +277,7 @@ def execute(request):
         elif operation == "osm_bootstrap":
             from urllib.parse import urlencode
 
-            from property_platform.modules.evidence import osm_api_protocol as osm_bootstrap
+            from property_platform.modules.evidence.maps import osm_api_protocol as osm_bootstrap
 
             from .collectors.snapshots import ReplayFetcher, _params
 
@@ -300,7 +300,7 @@ def execute(request):
                     replay._acquire(("map", osm_bootstrap.URL, _params(params)), collect)
             acquisition = replay.map
         elif operation == "sdi_parcels":
-            from property_platform.modules.evidence.sdi_protocol import URL
+            from property_platform.modules.evidence.maps.sdi_protocol import URL
 
             from .collectors.sdi import precollect_sdi
 
@@ -314,7 +314,7 @@ def execute(request):
         elif operation == "map":
             layer = request["scope"].split(":")[1]
             if layer == "overture":
-                from property_platform.modules.evidence.overture_places import URL
+                from property_platform.modules.evidence.maps.overture_places import URL
 
                 from .collectors.overture import acquire_places
                 from .collectors.snapshots import ReplayFetcher, _params

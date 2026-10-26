@@ -19,10 +19,10 @@ from property_platform.modules.catalog.models import (  # noqa: E402
     Building,
     Parcel,
 )
-from property_platform.modules.evidence import map_sources, onwani  # noqa: E402
 from property_platform.modules.evidence import rebuild_archive as archive  # noqa: E402
 from property_platform.modules.evidence import replay_protocols as legacy  # noqa: E402
 from property_platform.modules.evidence.collection_profiles import collection_for  # noqa: E402
+from property_platform.modules.evidence.maps import map_sources, onwani  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     IngestionRun,
     MapObservation,

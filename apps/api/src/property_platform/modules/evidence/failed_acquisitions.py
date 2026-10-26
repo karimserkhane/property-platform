@@ -6,16 +6,12 @@ from urllib.parse import parse_qs, urlparse
 from django.utils import timezone
 
 from . import (
-    abu_dhabi,
-    adrec,
-    map_sources,
-    onwani,
-    osm_bootstrap,
     project_discovery,
     project_protocol,
-    sdi_protocol,
 )
 from .collection_profiles import collection_for
+from .maps import map_sources, onwani, osm_bootstrap, sdi_protocol
+from .sources import abu_dhabi, adrec
 
 
 def source_definition(operation, scope):
@@ -65,7 +61,7 @@ def source_definition(operation, scope):
         raise ValueError("Failed raw receipts are only supported for GIS connectors")
     layer = scope.rsplit(":", 1)[1]
     if layer == "overture":
-        from . import overture_places
+        from .maps import overture_places
 
         return (
             overture_places.namespace(profile.territory),
@@ -90,7 +86,7 @@ def source_definition(operation, scope):
 
 def _request_shape(url, operation, scope):
     if operation == "map" and scope.endswith(":overture"):
-        from .overture_places import URL
+        from .maps.overture_places import URL
 
         if url != URL:
             raise ValueError("Unexpected Overture extract URL")

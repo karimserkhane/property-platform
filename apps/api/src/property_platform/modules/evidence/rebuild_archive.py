@@ -206,7 +206,7 @@ def _capture(root, capture):
 
 
 def _source_scopes():
-    from . import sdi_protocol
+    from .maps import sdi_protocol
 
     result = {}
     for area, profile in COLLECTIONS.items():
@@ -781,7 +781,7 @@ class CaptureReplay:
         return load_capture(self.root, item)
 
     def onwani(self, params=None):
-        from .onwani import BASE_URL
+        from .maps.onwani import BASE_URL
 
         return self(
             BASE_URL + ("/query" if params else ""),
@@ -987,7 +987,7 @@ def replay_scenes(root, scenes, actor):
 
 def replay_tiles(root, tiles, actor):
     """Revalidate archived tile bytes. No demand queue or failed HTTP response is invented."""
-    from .basemap_archive import checked_tile, validate_tile
+    from .maps.basemap_archive import checked_tile, validate_tile
     from .models import BasemapRequest, Source
 
     for item in tiles:

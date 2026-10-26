@@ -13,8 +13,8 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Capture rebuild requires real PostGIS", allow_module_level=True)
 
 from property_platform.modules.catalog.models import Parcel  # noqa: E402
-from property_platform.modules.evidence import onwani  # noqa: E402
 from property_platform.modules.evidence import rebuild_archive as archive
+from property_platform.modules.evidence.maps import onwani  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     IngestionRun,

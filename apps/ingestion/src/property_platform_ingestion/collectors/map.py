@@ -2,8 +2,8 @@
 
 from urllib.parse import urlencode
 
-from property_platform.modules.evidence import map_sources, onwani
 from property_platform.modules.evidence.collection_profiles import DEFAULT_TERRITORY, collection_for
+from property_platform.modules.evidence.maps import map_sources, onwani
 
 from .http import AcquisitionError, SourceHTTP
 

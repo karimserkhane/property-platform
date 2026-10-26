@@ -6,7 +6,7 @@ queue of captures. A replay never issues a request and never invents fetch times
 
 from collections import defaultdict, deque
 
-from property_platform.modules.evidence import map_sources, onwani
+from property_platform.modules.evidence.maps import map_sources, onwani
 
 from .http import AcquisitionError
 from .map import MapCollector, OnwaniCollector

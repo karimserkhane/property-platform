@@ -8,8 +8,8 @@ from property_platform.modules.catalog.territories import (
     TERRITORY_BY_ID,
 )
 from property_platform.modules.evidence.collection_profiles import collection_for
-from property_platform.modules.evidence.onwani import SOURCE_KEY
-from property_platform.modules.evidence.sdi_protocol import namespace as sdi_namespace
+from property_platform.modules.evidence.maps.onwani import SOURCE_KEY
+from property_platform.modules.evidence.maps.sdi_protocol import namespace as sdi_namespace
 
 
 @dataclass(frozen=True)

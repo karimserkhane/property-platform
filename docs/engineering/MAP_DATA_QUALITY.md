@@ -55,8 +55,8 @@ snapshot n'effacent aucune parcelle historique.
 
 ## Propriétaires et exécution
 
-`evidence/sdi_protocol.py` possède le protocole pur et les sous-types ;
-`evidence/sdi_import.py` possède les captures, observations, quarantaines et mutations
+`evidence/maps/sdi_protocol.py` possède le protocole pur et les sous-types ;
+`evidence/maps/sdi_import.py` possède les captures, observations, quarantaines et mutations
 via les services du catalogue. `ingestion/collectors/sdi.py` acquiert hors transaction
 puis rejoue les mêmes réponses dans la passerelle durable. Direction : ingestion →
 evidence → catalog ; publication lit les deux namespaces. Aucun nouveau schéma ou

@@ -15,11 +15,11 @@ from django.utils import timezone  # noqa: E402
 from test_public_context_postgis import execute  # noqa: E402
 from test_public_context_protocol import facility  # noqa: E402
 
-from property_platform.modules.evidence.basemap_archive import (  # noqa: E402
+from property_platform.modules.evidence.history.pipeline_inventory import inventory  # noqa: E402
+from property_platform.modules.evidence.maps.basemap_archive import (  # noqa: E402
     archive_pending,
     archived_tile,
 )
-from property_platform.modules.evidence.history.pipeline_inventory import inventory  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     BasemapRequest,
     Capture,

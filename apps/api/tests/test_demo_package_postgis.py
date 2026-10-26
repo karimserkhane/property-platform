@@ -12,8 +12,9 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Demonstration replay requires real PostGIS", allow_module_level=True)
 
 from property_platform.modules.catalog.models import Parcel  # noqa: E402
-from property_platform.modules.evidence import demo_package, onwani  # noqa: E402
+from property_platform.modules.evidence import demo_package  # noqa: E402
 from property_platform.modules.evidence import rebuild_archive as archive  # noqa: E402
+from property_platform.modules.evidence.maps import onwani  # noqa: E402
 from property_platform.modules.evidence.models import Capture, IngestionRun, Source  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]

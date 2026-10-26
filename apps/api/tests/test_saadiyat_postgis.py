@@ -12,7 +12,7 @@ from test_osm_api_protocol import XML  # noqa: E402
 from property_platform.modules.catalog.models import AdministrativeArea, Building, Parcel  # noqa: E402
 from property_platform.modules.catalog.queries import parcel_features  # noqa: E402
 from property_platform.modules.evidence.collection_profiles import collection_for  # noqa: E402
-from property_platform.modules.evidence.services import import_onwani  # noqa: E402
+from property_platform.modules.evidence.maps.services import import_onwani  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -23,7 +23,7 @@ def test_whole_area_reads_both_islands_without_leaking_other_sources(client):
     from django.test import override_settings
     from test_reem_map_postgis import osm, receipt
 
-    from property_platform.modules.evidence.map_import import import_map_layer
+    from property_platform.modules.evidence.maps.map_import import import_map_layer
     from property_platform.modules.publication.coverage import coverage_registry
 
     bounds = (54.4, 24.5, 54.42, 24.52)
@@ -152,9 +152,9 @@ def test_cursor_pages_are_complete_stable_and_isolated():
 def test_bootstrap_retains_raw_windows_and_deduplicates_shared_objects():
     from datetime import UTC, datetime
 
+    from property_platform.modules.evidence.maps.osm_api_protocol import URL
+    from property_platform.modules.evidence.maps.osm_bootstrap import import_bootstrap
     from property_platform.modules.evidence.models import Capture
-    from property_platform.modules.evidence.osm_api_protocol import URL
-    from property_platform.modules.evidence.osm_bootstrap import import_bootstrap
 
     profile = collection_for("saadiyat-island")
     AdministrativeArea.objects.create(
