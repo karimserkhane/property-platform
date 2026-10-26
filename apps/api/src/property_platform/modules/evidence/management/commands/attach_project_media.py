@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from property_platform.modules.evidence.project_media_storage import attach_project_media_file
+from property_platform.modules.evidence.projects.project_media_storage import (
+    attach_project_media_file,
+)
 
 
 class Command(BaseCommand):

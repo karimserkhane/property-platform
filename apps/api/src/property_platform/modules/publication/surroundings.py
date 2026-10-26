@@ -3,7 +3,7 @@
 from django.db import connection, transaction
 
 from property_platform.modules.catalog.map_queries import nearby_place_rows
-from property_platform.modules.evidence.queries import map_provenances, map_usage_tags
+from property_platform.modules.evidence.projects.queries import map_provenances, map_usage_tags
 
 from .place_display import distinct_places
 from .uses import use_types

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from property_platform.modules.evidence.project_media_storage import publish_project_media
+from property_platform.modules.evidence.projects.project_media_storage import publish_project_media
 
 
 class Command(BaseCommand):

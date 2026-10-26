@@ -2,7 +2,7 @@
 
 Pour un promoteur, la plateforme montre ce que chaque source a annoncé comme date de livraison au fil du temps, ce que le registre ADREC a publié lors de chaque lecture, et les retards que ces lectures prouvent. C'est un calcul en lecture sur les lectures déjà stockées (`evidence.project_snapshot`, `evidence.project_verification`) : pas de table, pas de migration, pas de pipeline.
 
-Code : `apps/api/src/property_platform/modules/evidence/delivery_history.py`. API : `GET /api/v1/preview/developers/{key}/delivery-history` (aperçu local, mêmes gardes que les fiches projet). Page : `/[locale]/developers/[key]` (`apps/web/src/features/projects/delivery-history.tsx`, adaptateur `delivery.ts`, libellés `Delivery`), liée depuis chaque fiche projet.
+Code : `apps/api/src/property_platform/modules/evidence/projects/delivery_history.py`. API : `GET /api/v1/preview/developers/{key}/delivery-history` (aperçu local, mêmes gardes que les fiches projet). Page : `/[locale]/developers/[key]` (`apps/web/src/features/projects/delivery-history.tsx`, adaptateur `delivery.ts`, libellés `Delivery`), liée depuis chaque fiche projet.
 
 ## Règles
 

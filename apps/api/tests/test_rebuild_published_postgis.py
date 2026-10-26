@@ -15,8 +15,6 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 from django.contrib.gis.geos import MultiPolygon, Polygon  # noqa: E402
 
 from property_platform.modules.catalog.models import Building, Developer, Project  # noqa: E402
-from property_platform.modules.evidence import rebuild_archive as archive  # noqa: E402
-from property_platform.modules.evidence import rebuild_published as published  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     IngestionRun,
@@ -25,8 +23,10 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ProjectTypology,
     Source,
 )
-from property_platform.modules.evidence.project_import import revoke_project_link  # noqa: E402
-from property_platform.modules.evidence.project_queries import project_detail  # noqa: E402
+from property_platform.modules.evidence.projects.project_import import revoke_project_link  # noqa: E402
+from property_platform.modules.evidence.projects.project_queries import project_detail  # noqa: E402
+from property_platform.modules.evidence.rebuild import rebuild_archive as archive  # noqa: E402
+from property_platform.modules.evidence.rebuild import rebuild_published as published  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

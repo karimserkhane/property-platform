@@ -21,7 +21,7 @@ RESPONSES = {200: None, 206: None, 403: Error, 404: Error, 416: None, 503: Error
 
 def _download(request, media_id):
     from property_platform.modules.evidence.media_storage import receipt_store
-    from property_platform.modules.evidence.project_media_storage import authorized_asset
+    from property_platform.modules.evidence.projects.project_media_storage import authorized_asset
 
     try:
         asset = authorized_asset(media_id)

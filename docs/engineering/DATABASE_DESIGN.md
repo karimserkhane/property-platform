@@ -181,7 +181,7 @@ La migration evidence 0010 ajoute `property_platform.evidence.property_presentat
 
 ## Orchestration des imports — 13 octobre 2026
 
-Le code [evidence/orchestration.py](../../apps/api/src/property_platform/modules/evidence/orchestration.py) fournit une passerelle propriétaire pour les imports Onwani, couches géographiques, références, présentations et reçus satellite existants. Prefect les déclenche dans `apps/ingestion` ; il ne remplace pas leurs modèles, captures ou invariants. L'enregistrement de neuf déploiements ne collecte aucune nouvelle donnée immobilière. Les programmes et commandes d'exploitation sont décrits dans [INGESTION.md](INGESTION.md).
+Le code [evidence/rebuild/orchestration.py](../../apps/api/src/property_platform/modules/evidence/rebuild/orchestration.py) fournit une passerelle propriétaire pour les imports Onwani, couches géographiques, références, présentations et reçus satellite existants. Prefect les déclenche dans `apps/ingestion` ; il ne remplace pas leurs modèles, captures ou invariants. L'enregistrement de neuf déploiements ne collecte aucune nouvelle donnée immobilière. Les programmes et commandes d'exploitation sont décrits dans [INGESTION.md](INGESTION.md).
 
 La migration additive [0011_ingestion_orchestration.py](../../apps/api/src/property_platform/modules/evidence/migrations/0011_ingestion_orchestration.py) ajoute deux tables dans `evidence`, avec contrôle des collisions et placement explicite du schéma :
 

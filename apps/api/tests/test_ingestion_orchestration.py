@@ -22,7 +22,7 @@ from test_reem_map_postgis import district, osm  # noqa: E402
 from test_reem_map_postgis import receipt as map_receipt
 
 from property_platform.modules.catalog.models import Parcel  # noqa: E402
-from property_platform.modules.evidence import onwani, services  # noqa: E402
+from property_platform.modules.evidence.maps import onwani, services  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     ImageryScene,
@@ -34,7 +34,7 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     PropertyPresentation,
     Source,
 )
-from property_platform.modules.evidence.orchestration import (  # noqa: E402
+from property_platform.modules.evidence.rebuild.orchestration import (  # noqa: E402
     ImportBusy,
     execute_import,
     execution_result,
@@ -210,7 +210,7 @@ def test_property_retry_can_bind_first_receipt_after_transport_failure():
         error="TimeoutError",
     )
     with patch(
-        "property_platform.modules.evidence.property_import.registry",
+        "property_platform.modules.evidence.projects.property_import.registry",
         return_value=([profile], {"example": photo}),
     ):
         result = execute("property_presentations", receipt=receipts)
@@ -308,7 +308,7 @@ def test_map_injected_acquisition_retains_source_owned_identity():
 def test_exact_property_receipt_replay_reuses_history_but_fresh_check_does_not():
     _, profile, photo, receipts = sample()
     with patch(
-        "property_platform.modules.evidence.property_import.registry",
+        "property_platform.modules.evidence.projects.property_import.registry",
         return_value=([profile], {"example": photo}),
     ):
         first = execute("property_presentations", receipt=receipts)

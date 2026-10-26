@@ -66,7 +66,7 @@ sources datées.
 
 ## Fiche « Vérification » (B05)
 
-`GET /projects/{slug}` porte `verification`, assemblé par `evidence/verification_sheet.py`
+`GET /projects/{slug}` porte `verification`, assemblé par `evidence/projects/verification_sheet.py`
 en lecture seule, sur les mêmes lectures que l'[historique de livraison](DELIVERY_HISTORY.md)
 (`delivery_history.delivery_readings`, une seule lecture des fiches du projet) :
 

@@ -11,8 +11,8 @@ from urllib.parse import parse_qs
 
 import httpx
 import pytest
-from property_platform.modules.evidence import map_sources, onwani
-from property_platform.modules.evidence.property_protocol import validate_receipts
+from property_platform.modules.evidence.maps import map_sources, onwani
+from property_platform.modules.evidence.projects.property_protocol import validate_receipts
 
 from property_platform_ingestion.collectors import (
     AcquisitionError,
@@ -229,27 +229,29 @@ def test_journal_is_bounded_even_for_empty_actual_responses():
 def test_domain_source_failure_passes_only_real_complete_responses_to_audit(monkeypatch):
     import django
     import property_platform.modules.evidence as evidence
+    import property_platform.modules.evidence.projects as projects
+    import property_platform.modules.evidence.rebuild as rebuild
 
     import property_platform_ingestion.collectors as collectors
     from property_platform_ingestion.domain import execute
 
-    gateway = ModuleType("property_platform.modules.evidence.orchestration")
+    gateway = ModuleType("property_platform.modules.evidence.rebuild.orchestration")
     gateway.execution_result = Mock(return_value=None)
     gateway.record_acquisition_failure = Mock(return_value={"status": "failed"})
-    profiles = ModuleType("property_platform.modules.evidence.property_import")
+    profiles = ModuleType("property_platform.modules.evidence.projects.property_import")
     models = ModuleType("property_platform.modules.evidence.models")
     models.IngestionExecution = object
     db = ModuleType("django.db")
     db.connections = SimpleNamespace(close_all=Mock())
     monkeypatch.setattr(django, "setup", lambda: None)
     monkeypatch.setitem(sys.modules, "django.db", db)
-    for name, module in (
-        ("orchestration", gateway),
-        ("property_import", profiles),
-        ("models", models),
+    for package, name, module in (
+        (rebuild, "orchestration", gateway),
+        (projects, "property_import", profiles),
+        (evidence, "models", models),
     ):
-        monkeypatch.setitem(sys.modules, "property_platform.modules.evidence." + name, module)
-        monkeypatch.setattr(evidence, name, module, raising=False)
+        monkeypatch.setitem(sys.modules, f"{package.__name__}.{name}", module)
+        monkeypatch.setattr(package, name, module, raising=False)
 
     def handler(request):
         if request.url.host == "overpass-api.de":

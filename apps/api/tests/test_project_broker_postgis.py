@@ -15,16 +15,16 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 
 from property_platform.modules.catalog.models import Place  # noqa: E402
 from property_platform.modules.evidence.models import Capture, ProjectSnapshot  # noqa: E402
-from property_platform.modules.evidence.project_import import import_project_details  # noqa: E402
-from property_platform.modules.evidence.project_protocol import project_registry  # noqa: E402
-from property_platform.modules.evidence.project_queries import project_detail  # noqa: E402
+from property_platform.modules.evidence.projects.project_import import import_project_details  # noqa: E402
+from property_platform.modules.evidence.projects.project_protocol import project_registry  # noqa: E402
+from property_platform.modules.evidence.projects.project_queries import project_detail  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
 
 def test_a_long_project_and_source_identity_is_audited_without_truncation():
     from property_platform.modules.evidence.models import IngestionExecution
-    from property_platform.modules.evidence.orchestration import execute_import
+    from property_platform.modules.evidence.rebuild.orchestration import execute_import
 
     slug = "bab-al-qasr-beach-resort-residence-77"
     project = project_registry("al-reem-island:" + slug)[0]
@@ -274,7 +274,7 @@ def test_reviewed_wrong_media_references_are_withdrawn_even_on_idempotent_reimpo
     ],
 )
 def test_location_method_follows_the_identity_and_never_upgrades_a_point(target, observed, method):
-    from property_platform.modules.evidence.project_queries import (
+    from property_platform.modules.evidence.projects.project_queries import (
         LOCATION_PRECISION,
         location_method,
     )

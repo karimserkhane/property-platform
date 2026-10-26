@@ -1,7 +1,7 @@
 import pytest
 
-from property_platform.modules.evidence import map_sources, onwani
 from property_platform.modules.evidence.collection_profiles import collection_for
+from property_platform.modules.evidence.maps import map_sources, onwani
 
 
 def test_default_protocol_identity_and_queries_are_preserved():

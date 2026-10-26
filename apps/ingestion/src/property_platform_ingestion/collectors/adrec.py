@@ -2,7 +2,7 @@
 
 from urllib.parse import urlencode
 
-from property_platform.modules.evidence import adrec
+from property_platform.modules.evidence.sources import adrec
 
 from .snapshots import ReplayFetcher, _params
 

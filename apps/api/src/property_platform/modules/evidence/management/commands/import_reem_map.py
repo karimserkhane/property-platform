@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from property_platform.modules.evidence.collection_profiles import COLLECTIONS
-from property_platform.modules.evidence.map_import import import_map_layer
+from property_platform.modules.evidence.maps.map_import import import_map_layer
 
 
 class Command(BaseCommand):
@@ -29,8 +29,8 @@ class Command(BaseCommand):
 
         from django.utils import timezone
 
-        from property_platform.modules.evidence import map_sources as protocol
         from property_platform.modules.evidence.collection_profiles import collection_for
+        from property_platform.modules.evidence.maps import map_sources as protocol
 
         actor = options["actor"].strip()
         if not actor or len(actor) > 160:

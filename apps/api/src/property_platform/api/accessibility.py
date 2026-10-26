@@ -52,7 +52,7 @@ def accessibility(
 ):
     if profile_for(territory) is None:
         return Status(422, {"code": "invalid_territory"})
-    from property_platform.modules.evidence.accessibility import walking_area
+    from property_platform.modules.evidence.maps.accessibility import walking_area
 
     try:
         result = walking_area(longitude, latitude, minutes)

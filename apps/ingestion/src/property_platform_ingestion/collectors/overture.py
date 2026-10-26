@@ -7,7 +7,7 @@ import os
 from datetime import UTC, datetime
 
 from property_platform.modules.evidence.collection_profiles import collection_for
-from property_platform.modules.evidence.overture_protocol import (
+from property_platform.modules.evidence.maps.overture_protocol import (
     MAX_BYTES,
     MAX_ROWS,
     RELEASE,

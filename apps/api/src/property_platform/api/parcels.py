@@ -224,7 +224,7 @@ class ResearchReferenceResponse(Schema):
 @decorate_view(cached_read)
 def references(request, territory: str | None = None):
     profile = territory_profile(territory)
-    from property_platform.modules.evidence.queries import research_references
+    from property_platform.modules.evidence.projects.queries import research_references
     from property_platform.modules.publication.coverage import reference_source_keys
 
     return research_references(reference_source_keys(profile) if profile else None)
@@ -249,7 +249,7 @@ class ImageryResponse(Schema):
 @decorate_view(cached_read)
 def imagery(request, territory: str | None = None):
     profile = territory_profile(territory)
-    from property_platform.modules.evidence.queries import imagery_scenes
+    from property_platform.modules.evidence.projects.queries import imagery_scenes
 
     return imagery_scenes(profile.imagery_ids if profile else None)
 
@@ -305,7 +305,7 @@ PropertyPresentationResponse.model_rebuild()
 def property_media(request, media_id: UUID):
     from django.http import HttpResponse
 
-    from property_platform.modules.evidence.queries import property_media_asset
+    from property_platform.modules.evidence.projects.queries import property_media_asset
 
     try:
         media = property_media_asset(media_id)
@@ -725,7 +725,7 @@ def adrec_market(
     limit: int = 40,
     snapshot_id: UUID | None = None,
 ):
-    from property_platform.modules.evidence.adrec import DISTRICTS, MAX_ROWS
+    from property_platform.modules.evidence.sources.adrec import DISTRICTS, MAX_ROWS
     from property_platform.modules.publication.adrec_preview import market
 
     if (

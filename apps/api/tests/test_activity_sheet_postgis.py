@@ -16,8 +16,8 @@ from test_construction_activity_postgis import (  # noqa: E402
     windows,
 )
 
-from property_platform.modules.evidence import activity_import  # noqa: E402
-from property_platform.modules.evidence.activity_sheet import project_activity  # noqa: E402
+from property_platform.modules.evidence.projects import activity_import  # noqa: E402
+from property_platform.modules.evidence.projects.activity_sheet import project_activity  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
