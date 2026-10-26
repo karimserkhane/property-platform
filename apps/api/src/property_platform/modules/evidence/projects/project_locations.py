@@ -11,6 +11,7 @@ from property_platform.modules.catalog.models import Place
 from property_platform.modules.catalog.services import reconcile_map_record, retire_map_record
 from property_platform.modules.catalog.territories import TERRITORY_BY_ID
 
+from ..capture_storage import inherited_body
 from ..models import Capture, IngestionRun, MapObservation, ProjectIdentityLink
 from ..sources.research_sources import project_marker
 
@@ -155,7 +156,7 @@ def withdraw_camera_positions(*, actor):
             run=run,
             parent_capture=parent,
             url=parent.url,
-            payload=parent.payload,
+            **inherited_body(parent),
             byte_length=parent.byte_length,
             content_sha256=parent.content_sha256,
             http_status=parent.http_status,

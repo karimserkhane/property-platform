@@ -13,8 +13,10 @@ from property_platform.modules.catalog.services import (
     supersede_administrative_area,
     supersede_parcel,
 )
+from property_platform.object_storage.core import MAX_BYTES
 
 from ..collection_profiles import COLLECTIONS
+from ..media_storage import read_capture
 from ..models import (
     AdministrativeAreaSourceAlias,
     IngestionRun,
@@ -43,7 +45,7 @@ def _actor(actor):
 
 def _features(capture, cache):
     if capture.id not in cache:
-        payload = bytes(capture.payload)
+        payload = read_capture(capture, max_bytes=MAX_BYTES)
         if (
             capture.http_status != 200
             or hashlib.sha256(payload).hexdigest() != capture.content_sha256

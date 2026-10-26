@@ -13,7 +13,9 @@ from django.utils import timezone
 from property_platform.modules.catalog.models import AdministrativeArea, Place
 from property_platform.modules.catalog.services import reconcile_map_record, retire_map_record
 
+from ..capture_storage import inherited_body
 from ..collection_profiles import DEFAULT_TERRITORY, collection_for
+from ..media_storage import read_capture
 from ..models import Capture, IngestionRun, MapObservation, ResearchReference, Source
 from ..runs import mark_failed
 from .research_sources import page_metadata, project_marker
@@ -25,7 +27,7 @@ MAX_BYTES = 4 * 1024 * 1024
 
 def finish_reference(capture, row, run, *, territory=DEFAULT_TERRITORY):
     profile = collection_for(territory)
-    payload, url = bytes(capture.payload), row["url"]
+    payload, url = read_capture(capture, max_bytes=MAX_BYTES), row["url"]
     title, markers = page_metadata(payload)
     marker = project_marker(payload, url, title) if capture.http_status == 200 else None
     place = None
@@ -132,7 +134,7 @@ def reprocess_reference(reference, *, actor, territory=DEFAULT_TERRITORY):
             run=run,
             parent_capture=parent,
             url=parent.url,
-            payload=parent.payload,
+            **inherited_body(parent),
             byte_length=parent.byte_length,
             http_status=parent.http_status,
             content_sha256=parent.content_sha256,

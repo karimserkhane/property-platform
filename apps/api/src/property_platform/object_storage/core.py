@@ -19,6 +19,8 @@ MIME_TYPES = {
     "video/mp4": "mp4",
     "video/webm": "webm",
     "model/gltf-binary": "glb",
+    # Raw source responses (JSON, HTML, protobuf, tiles): bytes only, never served or published.
+    "application/octet-stream": "bin",
 }
 
 
@@ -86,7 +88,7 @@ def validate_bucket(value):
 
 def validate_key(value):
     if not isinstance(value, str) or not re.fullmatch(
-        r"(?:objects/sha256/[a-f0-9]{2}|published/[a-f0-9-]{36})/[a-f0-9]{64}\.(?:jpg|png|webp|pdf|mp4|webm|glb)",
+        r"(?:objects/sha256/[a-f0-9]{2}|published/[a-f0-9-]{36})/[a-f0-9]{64}\.(?:jpg|png|webp|pdf|mp4|webm|glb|bin)",
         value,
     ):
         raise StorageError("Invalid immutable object key")
@@ -136,6 +138,7 @@ def validate_magic(prefix, mime):
         "video/mp4": prefix[4:8] == b"ftyp",
         "video/webm": prefix.startswith(b"\x1aE\xdf\xa3"),
         "model/gltf-binary": prefix.startswith(b"glTF\x02\x00\x00\x00"),
+        "application/octet-stream": True,
     }.get(mime, False)
     if not valid:
         raise StorageError("Content does not match the allowed media type")
