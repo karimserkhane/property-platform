@@ -175,3 +175,54 @@ def test_restore_check_refuses_a_dump_whose_checksum_changed(tmp_path, monkeypat
         "ok": False,
         "mismatches": ["dump checksum differs from manifest"],
     }
+
+
+class ObjectCursor:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def execute(self, query, params=None):
+        assert "evidence.stored_object" in query
+
+    def fetchall(self):
+        return self.rows
+
+
+def test_objects_referenced_by_the_dump_must_be_mirrored_with_size_and_checksum(tmp_path):
+    from hashlib import sha256
+
+    mirror = tmp_path / "files" / "media"
+    good, changed = b"capture body", b"other body"
+    (mirror / "objects" / "sha256" / "ab").mkdir(parents=True)
+    (mirror / "objects" / "sha256" / "ab" / "good.bin").write_bytes(good)
+    (mirror / "objects" / "sha256" / "ab" / "changed.bin").write_bytes(b"XXXXX body")
+    (mirror / "objects" / "sha256" / "ab" / "short.bin").write_bytes(b"x")
+    rows = [
+        ("local", "objects/sha256/ab/changed.bin", len(changed), sha256(changed).hexdigest()),
+        ("local", "objects/sha256/ab/good.bin", len(good), sha256(good).hexdigest()),
+        ("local", "objects/sha256/ab/missing.bin", 4, "0" * 64),
+        ("local", "objects/sha256/ab/short.bin", 3, "0" * 64),
+        ("local", "../outside.bin", 3, "0" * 64),
+        ("s3", "objects/sha256/cd/remote.bin", 9, "1" * 64),
+    ]
+    summary, mismatches = backups.object_mismatches(ObjectCursor(rows), mirror)
+    assert summary == {
+        "local": 5,
+        "local_bytes": len(changed) + len(good) + 4 + 3 + 3,
+        "remote": 1,
+    }
+    assert mismatches == [
+        "object objects/sha256/ab/changed.bin: mirrored copy differs from its SHA-256",
+        "object objects/sha256/ab/missing.bin: missing from the mirror",
+        "object objects/sha256/ab/short.bin: mirrored with 1 bytes, expected 3",
+        "object ../outside.bin: escapes the mirror",
+    ]
+
+
+def test_object_mismatch_lines_are_capped_but_counted(tmp_path, monkeypatch):
+    monkeypatch.setattr(backups, "MISMATCH_LINES", 2)
+    rows = [("local", f"objects/{index}.bin", 1, "0" * 64) for index in range(5)]
+    summary, mismatches = backups.object_mismatches(ObjectCursor(rows), tmp_path)
+    assert summary["local"] == 5
+    assert mismatches[-1] == "3 more object mismatches"
+    assert len(mismatches) == 3

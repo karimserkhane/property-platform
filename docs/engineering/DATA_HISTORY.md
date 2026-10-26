@@ -12,7 +12,7 @@ Les octets ne sont pas dupliqués dans le JSON du journal : les originaux resten
 
 Le journal refuse UPDATE/DELETE. Les opérations administrateur telles que TRUNCATE, restauration ou désactivation des triggers demandent une procédure de maintenance et une sauvegarde externe de PostgreSQL et du stockage privé. Les credentials/sessions Django et la base interne distincte de Prefect sont hors du journal immobilier.
 
-Les colonnes binaires apparaissent dans le journal sous forme de SHA-256 calculé par PostgreSQL. Les captures originales refusent la suppression et le remplacement de leurs octets/empreintes ; déplacer des octets SQL vers le stockage privé exige une copie vérifiée de même empreinte et même taille.
+Les colonnes binaires apparaissent dans le journal sous forme de SHA-256 calculé par PostgreSQL. Les captures originales refusent la suppression et le remplacement de leurs octets/empreintes ; déplacer des octets SQL vers le stockage privé exige une copie vérifiée de même empreinte et même taille. La commande `capture_storage relocate` applique cette règle ([MEDIA_STORAGE.md](MEDIA_STORAGE.md#7-bis-contenus-bruts-des-captures-hors-de-postgresql-tâche-a10)).
 
 ## Reprise dans les lectures
 

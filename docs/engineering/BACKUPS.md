@@ -25,7 +25,7 @@ Les identifiants de la base passent aux outils PostgreSQL par l'environnement (`
 
 **Rotation** : les 7 sauvegardes les plus récentes, plus la plus récente de chacune des 4 dernières semaines ISO. Seuls les fichiers `property_platform-<horodatage>.dump/.json` créés par ce mécanisme sont concernés ; les anciennes sauvegardes manuelles du même dossier ne sont jamais supprimées.
 
-**Contrôle de restauration** : vérifie le SHA-256 du fichier, restaure dans une base jetable `restore_check_<horodatage>` sur le même serveur, compare les comptes à ceux du manifeste, puis supprime toujours la base jetable. Un écart fait échouer le flow.
+**Contrôle de restauration** : vérifie le SHA-256 du fichier, restaure dans une base jetable `restore_check_<horodatage>` sur le même serveur, compare les comptes à ceux du manifeste, vérifie que chaque objet local de `evidence.stored_object` restauré (médias privés, corps bruts de captures déplacés par A10) existe dans le miroir `files/media` avec sa taille et son SHA-256 (les objets S3 sont seulement comptés), puis supprime toujours la base jetable. Un écart fait échouer le flow ; au plus 50 lignes d'écart sont listées, le reste est compté.
 
 Mesures du premier essai réel (23 octobre 2026) : sauvegarde de 468 Mo en 2 min 30 (49 tables, 196 521 lignes) et première copie de 1 208 reçus (682 Mo) ; restauration contrôlée en 1 min 40, sans écart.
 

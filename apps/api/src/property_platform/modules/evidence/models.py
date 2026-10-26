@@ -264,6 +264,7 @@ class StoredObject(models.Model):
                         "video/mp4",
                         "video/webm",
                         "model/gltf-binary",
+                        "application/octet-stream",
                     ],
                 ),
                 name="stored_object_metadata_valid",

@@ -18,6 +18,7 @@ from django.db.models.expressions import RawSQL
 from django.utils import timezone
 
 from property_platform.modules.catalog.models import Parcel
+from property_platform.object_storage.core import MAX_BYTES as OBJECT_MAX_BYTES
 
 from ..activity_models import (
     ACTIVITY_LEVELS,
@@ -28,6 +29,7 @@ from ..activity_models import (
     ConstructionActivityMeasurement,
 )
 from ..history.journals import audit_context
+from ..media_storage import read_capture
 from ..models import Capture, IngestionRun, ProjectIdentityLink, Source
 from .project_queries import location_method
 from .queries import map_provenances
@@ -301,9 +303,7 @@ def _measure(run, collector, targets, summary, limit):
                     captured.append(windows[key])
                 if len(captured) < 2:
                     continue
-                result = collector.signal(
-                    bytes(captured[0].payload), bytes(captured[1].payload), geometry
-                )
+                result = collector.signal(_body(captured[0]), _body(captured[1]), geometry)
                 record_measurement(
                     run=run,
                     target=target,
@@ -317,6 +317,11 @@ def _measure(run, collector, targets, summary, limit):
             logger.warning("Activity of parcel %s was not measured", target.parcel.pk, exc_info=exc)
             outcome = "failed"
         summary[outcome] += 1
+
+
+def _body(capture):
+    """Window bytes from SQL or from their verified archived copy."""
+    return read_capture(capture, max_bytes=OBJECT_MAX_BYTES)
 
 
 def _capture(run, payload, receipt, parent=None):
@@ -415,9 +420,7 @@ def replay_run(step, *, load, actor, run_key, signal):
             differences.append({**identity, "reason": "not_a_measurement_target"})
             continue
         before, after = captures[expected["before_capture"]], captures[expected["after_capture"]]
-        result = signal(
-            bytes(before.payload), bytes(after.payload), json.loads(target.parcel.geometry.geojson)
-        )
+        result = signal(_body(before), _body(after), json.loads(target.parcel.geometry.geojson))
         measurement, _ = record_measurement(
             run=run,
             target=target,
