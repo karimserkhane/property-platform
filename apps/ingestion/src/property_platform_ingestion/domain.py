@@ -249,7 +249,7 @@ def execute(request):
         acquisition, receipt, replay = None, None, None
         acquiring = True
         if operation == "public_context":
-            from property_platform.modules.evidence import abu_dhabi
+            from property_platform.modules.evidence.sources import abu_dhabi
 
             from .collectors.context import precollect_context, replay_school_archive
 
@@ -267,7 +267,7 @@ def execute(request):
                     replay = precollect_context(transport, request["scope"])
             acquisition = replay.map
         elif operation in {"adrec_sales", "adrec_indices"}:
-            from property_platform.modules.evidence import adrec
+            from property_platform.modules.evidence.sources import adrec
 
             from .collectors.adrec import precollect_adrec
 

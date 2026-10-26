@@ -95,8 +95,8 @@ Tous ces chemins partent de `C:\Users\Karim\Repositories\property-platform\` :
 
 | Chemin complet | Responsabilité |
 |---|---|
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\abu_dhabi.py` | URLs fermées, parsing inerte, formats, périmètres et validation des archives |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\context_import.py` | Transactions, snapshots, modèles propriétaires, garde de couverture |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\abu_dhabi.py` | URLs fermées, parsing inerte, formats, périmètres et validation des archives |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\context_import.py` | Transactions, snapshots, modèles propriétaires, garde de couverture |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\models.py` et `migrations\` | Tables, relations et contraintes |
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\collectors\context.py` | Acquisition HTTPS et replay des reçus avant la transaction SQL |
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\flows.py`, `registry.py`, `domain.py` | Ordonnancement, paramètres et passerelle Django |

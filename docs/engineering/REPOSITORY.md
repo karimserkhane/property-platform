@@ -5,7 +5,9 @@ seule application Django (même `app_label`, mêmes migrations) mais se range en
 sous-paquets, du plus haut au plus bas : `rebuild` (reconstruction et rejeu, peut tout
 lire), `projects` (fiches, rapprochements et lectures de projets), `maps` (couches
 cartographiques, identités géographiques, contexte), `sources` (collecteurs et imports
-de sources hors carte), puis `history` (journaux de lignes, exclusions réversibles,
+de sources hors carte : `sources/adrec.py`, `adrec_import.py`, `abu_dhabi.py`,
+`context_import.py`, `research_sources.py`, `research_import.py`, `imagery_import.py`),
+puis `history` (journaux de lignes, exclusions réversibles,
 reprises de champs, couverture des tables : `history/journals.py`,
 `catalogue_history.py`, `pipeline_inventory.py`). Les modules à la racine
 (`models.py` et `*_models.py`, `runs.py`, `collection_profiles.py`, `media_storage.py`)
@@ -258,7 +260,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── models.py Sources, acquisitions, captures, observations et audit
 │       │       │   │   ├── onwani.py Protocole parcellaire officiel
 │       │       │   │   ├── map_sources.py, map_import.py  Couches officielles et OSM
-│       │       │   │   ├── research_sources.py, research_import.py  Pages et repères déclarés
+│       │       │   │   ├── sources/research_sources.py, research_import.py  Pages et repères déclarés
 │       │       │   │   ├── project_sources.json  Registre de références à collecter
 │       │       │   │   ├── property_protocol.py, property_import.py  Reçus validés et premières présentations de biens
 │       │       │   │   ├── property_presentations.json, property_media.json  Identités examinées et médias autorisés
@@ -514,14 +516,14 @@ Le module evidence possède collection_profiles.py (configuration immuable exami
 
 ## Observations de marché ADREC
 
-Les données source ADREC appartiennent au module `evidence` : [ADREC.md](ADREC.md) décrit les modèles typés, captures et règles de snapshots. Le collecteur `apps/ingestion/src/property_platform_ingestion/collectors/adrec.py` acquiert uniquement les endpoints examinés ; `evidence/adrec.py` valide leur protocole et `evidence/adrec_import.py` matérialise les observations via la passerelle durable existante. Les trois tables `adrec_market_snapshot`, `adrec_sale_observation`, `adrec_index_observation` sont dans le schéma `evidence`, avec noms non qualifiés uniques et migration explicite depuis `public`.
+Les données source ADREC appartiennent au module `evidence` : [ADREC.md](ADREC.md) décrit les modèles typés, captures et règles de snapshots. Le collecteur `apps/ingestion/src/property_platform_ingestion/collectors/adrec.py` acquiert uniquement les endpoints examinés ; `evidence/sources/adrec.py` valide leur protocole et `evidence/sources/adrec_import.py` matérialise les observations via la passerelle durable existante. Les trois tables `adrec_market_snapshot`, `adrec_sale_observation`, `adrec_index_observation` sont dans le schéma `evidence`, avec noms non qualifiés uniques et migration explicite depuis `public`.
 
 La lecture appartient à `publication/adrec_preview.py`, puis à l’adaptateur HTTP et au composant web `features/atlas/adrec-market.tsx`. La dépendance reste `publication → evidence → catalog` ; Prefect ne possède pas les écritures métier. Il n’existe pas de module commercial `market` normalisé supplémentaire ni de rapprochement par nom seul. Les positions de lignes et hashes sont des identités d’observation, jamais des identifiants de transaction. Les séries ambiguës sont conservées mais écartées de la publication.
 
 
 ## Extension du contexte Abu Dhabi — 14 octobre 2026
 
-Le guide [ABU_DHABI.md](ABU_DHABI.md) documente les six nouveaux déploiements et leurs limites. `evidence/abu_dhabi.py` possède les URLs/protocoles publics DoH, ADEK Charter, Mobility, SCAD et Onwani districts ; `context_import.py` possède leurs snapshots et mutations. `models.py` conserve un header d’audit et cinq tables d’observations typées dans le schéma evidence. Aucun objet n’est fusionné avec un bâtiment sur son nom ou sa proximité. Les 216 limites de districts ne prétendent pas ajouter toutes leurs parcelles.
+Le guide [ABU_DHABI.md](ABU_DHABI.md) documente les six nouveaux déploiements et leurs limites. `evidence/sources/abu_dhabi.py` possède les URLs/protocoles publics DoH, ADEK Charter, Mobility, SCAD et Onwani districts ; `context_import.py` possède leurs snapshots et mutations. `models.py` conserve un header d’audit et cinq tables d’observations typées dans le schéma evidence. Aucun objet n’est fusionné avec un bâtiment sur son nom ou sa proximité. Les 216 limites de districts ne prétendent pas ajouter toutes leurs parcelles.
 
 `ingestion/collectors/context.py` acquiert puis rejoue les réponses avant la transaction. Le flow public_context et registry.py possèdent planification et paramètres fermés ; domain.py reste la passerelle synchrone. L’archive ADEK refusée en acquisition automatique passe par un reçu privé explicitement fourni, avec horodatage de fichier indiqué comme approximatif. Son calendrier reste inactif. Le script scripts/prepare_context_archive.py prépare ce reçu sans collecter ni écrire en base.
 

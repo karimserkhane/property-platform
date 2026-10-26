@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
-from property_platform.modules.evidence import abu_dhabi
+from property_platform.modules.evidence.sources import abu_dhabi
 
 from property_platform_ingestion import flows
 from property_platform_ingestion.collectors.context import precollect_context

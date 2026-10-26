@@ -725,7 +725,7 @@ def adrec_market(
     limit: int = 40,
     snapshot_id: UUID | None = None,
 ):
-    from property_platform.modules.evidence.adrec import DISTRICTS, MAX_ROWS
+    from property_platform.modules.evidence.sources.adrec import DISTRICTS, MAX_ROWS
     from property_platform.modules.publication.adrec_preview import market
 
     if (

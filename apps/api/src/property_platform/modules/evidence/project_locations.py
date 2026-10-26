@@ -12,7 +12,7 @@ from property_platform.modules.catalog.services import reconcile_map_record, ret
 from property_platform.modules.catalog.territories import TERRITORY_BY_ID
 
 from .models import Capture, IngestionRun, MapObservation, ProjectIdentityLink
-from .research_sources import project_marker
+from .sources.research_sources import project_marker
 
 VERSION = "project-map-v2"
 

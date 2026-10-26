@@ -13,7 +13,6 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 
 from test_public_context_protocol import district, facility, school_archive  # noqa: E402
 
-from property_platform.modules.evidence import abu_dhabi  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     HealthFacilityObservation,
@@ -23,6 +22,7 @@ from property_platform.modules.evidence.orchestration import (  # noqa: E402
     execute_import,
     record_acquisition_failure,
 )
+from property_platform.modules.evidence.sources import abu_dhabi  # noqa: E402
 from property_platform.modules.publication.context_preview import public_context  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]

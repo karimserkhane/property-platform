@@ -1002,8 +1002,8 @@ Ce retraitement ajoute son propre historique, conserve la date de collecte origi
 |---|---|
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_sources.py` | URL fixes, requêtes bornées, contrôle des réponses/coordonnées |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_import.py` | Préparation, filtrage de Reem, réconciliation et observations typées |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\research_sources.py` | Extraction inerte et contrôlée des titres et repères par fournisseur |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\research_import.py` | Collecte/retraitement des pages et audit |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\research_sources.py` | Extraction inerte et contrôlée des titres et repères par fournisseur |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\research_import.py` | Collecte/retraitement des pages et audit |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\project_sources.json` | Registre de liens publics à relire ; pas une liste de périmètres certifiés |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\catalog\models.py` | Modèles Parcel, Street, Building, Place, AdministrativeArea |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\catalog\map_queries.py` | Lectures spatiales et distances/surfaces calculées dans PostGIS |

@@ -6,7 +6,7 @@ from django.db import connection
 
 from property_platform.modules.evidence.collection_profiles import COLLECTIONS, collection_for
 from property_platform.modules.evidence.models import ResearchReference
-from property_platform.modules.evidence.research_import import (
+from property_platform.modules.evidence.sources.research_import import (
     REGISTRY,
     import_reference,
     reprocess_reference,

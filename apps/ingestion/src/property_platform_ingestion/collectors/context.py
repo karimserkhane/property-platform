@@ -1,6 +1,6 @@
 """Acquire registered public feeds before the SQL transaction; preserve exact bytes."""
 
-from property_platform.modules.evidence import abu_dhabi
+from property_platform.modules.evidence.sources import abu_dhabi
 
 from .snapshots import ReplayFetcher, _params
 

@@ -960,7 +960,7 @@ def compare_tables(
 
 
 def replay_scenes(root, scenes, actor):
-    from . import imagery_import
+    from .sources import imagery_import
 
     if not scenes:
         return

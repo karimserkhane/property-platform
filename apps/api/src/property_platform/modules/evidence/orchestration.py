@@ -16,18 +16,12 @@ from django.db.models import F
 from django.utils import timezone
 
 from . import (
-    abu_dhabi,
-    adrec,
-    adrec_import,
-    context_import,
-    imagery_import,
     map_import,
     osm_bootstrap,
     project_discovery,
     project_import,
     project_protocol,
     property_import,
-    research_import,
     sdi_import,
     sdi_protocol,
     services,
@@ -35,6 +29,14 @@ from . import (
 from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .failed_acquisitions import source_definition, validate_received_acquisitions
 from .models import Capture, IngestionExecution, IngestionRun, Source
+from .sources import (
+    abu_dhabi,
+    adrec,
+    adrec_import,
+    context_import,
+    imagery_import,
+    research_import,
+)
 
 logger = logging.getLogger(__name__)
 

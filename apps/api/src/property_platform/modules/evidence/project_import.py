@@ -39,7 +39,7 @@ INTERPRETATION_MODULES = (
     "project_propertyfinder",
     "project_maryah",
     "project_locations",
-    "research_sources",
+    "sources/research_sources",
 )
 
 
@@ -47,7 +47,7 @@ INTERPRETATION_MODULES = (
 def interpretation_sha256():
     digest = hashlib.sha256()
     for name in INTERPRETATION_MODULES:
-        source = Path(__file__).with_name(f"{name}.py").read_bytes()
+        source = Path(__file__).parent.joinpath(f"{name}.py").read_bytes()
         # Same commit, same digest, whatever the checkout's line endings.
         digest.update(name.encode() + b"\0" + source.replace(b"\r\n", b"\n") + b"\0")
     return digest.hexdigest()

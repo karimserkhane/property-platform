@@ -278,7 +278,7 @@ def adrec_sales(
     actor: str = "scheduled",
 ):
     """Snapshot 90 completed Dubai days. Scheduled run time fixes the retry scope."""
-    from property_platform.modules.evidence.adrec import sales_scope
+    from property_platform.modules.evidence.sources.adrec import sales_scope
 
     scheduled = flow_run.scheduled_start_time
     if isinstance(scheduled, str):
