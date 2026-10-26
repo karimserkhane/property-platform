@@ -1,4 +1,9 @@
-from property_platform.api.read_cache import ByteBudgetLRU, FirstReadSnapshot
+from property_platform.api.read_cache import (
+    ACCESSED_SQL,
+    FIRST_READ_SQL,
+    ByteBudgetLRU,
+    ReadProbe,
+)
 
 
 def test_store_evicts_least_recently_used_bodies_beyond_its_byte_budget():
@@ -16,22 +21,49 @@ def test_store_evicts_least_recently_used_bodies_beyond_its_byte_budget():
     assert (store.size, store.get("a")) == (0, None)
 
 
+class Database:
+    alias = "default"
+    in_atomic_block = True  # The view opened its own transaction.
+
+    def __init__(self, cursor):
+        self.own = cursor
+
+    def cursor(self):
+        return self.own
+
+
 class Cursor:
+    """Answers the probe's own statements; the scans grow with each data statement."""
+
     def __init__(self):
+        self.db = Database(self)
         self.statements = []
+        self.scans = {"parcel": 0, "place": 0}
 
     def execute(self, sql):
         self.statements.append(sql)
+        self.last = sql
 
     def fetchone(self):
-        return ("100:105:101",)
+        return ("2026-10-26",) if self.last == "SELECT now()" else ("100:105:101", 7)
+
+    def fetchall(self):
+        return [("real_estate", table, scans) for table, scans in self.scans.items()]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        return False
 
 
-def test_snapshot_is_recorded_after_session_settings_and_before_the_first_read():
-    snapshot, cursor, executed = FirstReadSnapshot(), Cursor(), []
+def test_probe_records_the_snapshot_before_the_first_read_and_the_tables_it_scans():
+    probe, cursor, executed = ReadProbe(), Cursor(), []
 
     def execute(sql, params, many, context):
         executed.append(sql)
+        if sql.startswith("SELECT"):
+            cursor.scans[sql.rsplit(" ", 1)[1]] += 1
 
     context = {"cursor": cursor}
     for sql in [
@@ -40,7 +72,10 @@ def test_snapshot_is_recorded_after_session_settings_and_before_the_first_read()
         "SELECT id FROM parcel",
         "SELECT id FROM place",
     ]:
-        snapshot(execute, sql, None, False, context)
-    assert snapshot.version == "100:105:101"
-    assert cursor.statements == ["SELECT pg_current_snapshot()::text"]
+        probe(execute, sql, None, False, context)
+    assert (probe.version, probe.revision) == ("100:105:101", 7)
+    assert probe.tables == {("real_estate", "parcel"), ("real_estate", "place")}
+    assert probe.atomic is None
+    assert cursor.statements[:3] == [FIRST_READ_SQL, "SELECT now()", ACCESSED_SQL]
+    assert cursor.statements.count(FIRST_READ_SQL) == 1
     assert len(executed) == 4

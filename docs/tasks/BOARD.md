@@ -13,7 +13,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A05](A05.md) | A | Tests de parcours navigateur (Playwright) | 1 | — | non | done | claude |
 | [A06](A06.md) | A | Index des parcelles par zone visible | 2 | — | non | done | claude |
 | [A07](A07.md) | A | Bâtiments et contexte en tuiles vectorielles | 2 | A06 | non | done | claude |
-| [A08](A08.md) | A | Version de cache par famille de tables | 3 | — | non | in-progress | claude |
+| [A08](A08.md) | A | Version de cache par famille de tables | 3 | — | non | done | claude |
 | [A09](A09.md) | A | Découpage interne du module evidence | 3 | — | non | todo | unassigned |
 | [A10](A10.md) | A | Contenus bruts des captures vers le stockage objet | 3 | A03 | non | todo | unassigned |
 | [A11](A11.md) | A | Rejeu des anciens protocoles géographiques | 1 | A04 | non | done | claude |
@@ -21,6 +21,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A13](A13.md) | A | Parcours navigateur en CI | 2 | A05 | non (décidée le 25/10 : option 1) | done | claude |
 | [A14](A14.md) | A | Contrôle réel du rejeu géographique : identités et divergence revue | 1 | A11 | non | done | claude |
 | [A15](A15.md) | A | Écarts restants du rejeu géographique et anciennes identités OSM | 1 | A14 | non | done | claude |
+| [A16](A16.md) | A | Version de cache des tables de provenance par source | 3 | A08 | non | todo | unassigned |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
