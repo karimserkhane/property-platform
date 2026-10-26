@@ -264,7 +264,7 @@ def test_geography_precedes_presentations_and_projects_without_reordering_versio
 
 
 def test_a_shared_source_page_cannot_multiply_reviewed_presentation_targets(monkeypatch):
-    from property_platform.modules.evidence import property_import
+    from property_platform.modules.evidence.projects import property_import
 
     url = "https://example.com/towers"
     first = {"source_url": url, "target": "building", "namespace": "osm:reem:osm", "record_id": "1"}
@@ -673,8 +673,8 @@ def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path
     from django.contrib.gis.geos import Point
 
     from property_platform.modules.catalog.models import Place
-    from property_platform.modules.evidence import project_protocol
     from property_platform.modules.evidence.models import MapObservation
+    from property_platform.modules.evidence.projects import project_protocol
 
     project = next(
         row

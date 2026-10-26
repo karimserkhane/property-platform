@@ -19,7 +19,6 @@ from property_platform.modules.catalog.models import (  # noqa: E402
     Place,
     Project,
 )
-from property_platform.modules.evidence import activity_import  # noqa: E402
 from property_platform.modules.evidence.history.pipeline_inventory import inventory  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
@@ -29,6 +28,7 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ProjectIdentityLink,
     Source,
 )
+from property_platform.modules.evidence.projects import activity_import  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

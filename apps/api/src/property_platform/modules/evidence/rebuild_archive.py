@@ -19,20 +19,14 @@ from django.db import connection, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from . import (
-    abu_dhabi,
-    activity_import,
-    orchestration,
-    project_discovery,
-    project_protocol,
-    replay_protocols,
-)
+from . import abu_dhabi, orchestration, replay_protocols
 from . import rebuild_published as published_level
 from .collection_profiles import COLLECTIONS
 from .history.journals import audit_context
 from .history.pipeline_inventory import inventory
 from .media_storage import read_capture
 from .models import BasemapTile, Capture, ImageryScene, IngestionRun, PropertyPresentation
+from .projects import activity_import, project_discovery, project_protocol
 
 logger = logging.getLogger(__name__)
 VERSION = 1
@@ -1032,7 +1026,7 @@ def replay_tiles(root, tiles, actor):
 
 def reviewed_presentations(scope, targets):
     """A shared page cannot fan out a historical receipt to newly reviewed targets."""
-    from . import property_import
+    from .projects import property_import
 
     selected, photos = [], {}
     identities = {(item["target"], item["namespace"], item["record_id"]) for item in targets}
@@ -1063,9 +1057,9 @@ def replay_archive(
     ``activity_signal`` is the ingestion change signal of two Sentinel-2 window
     captures (B06): the API runtime never reads rasters itself.
     """
-    from . import property_import
-    from .project_relations import apply_project_relations
-    from .project_verification_links import apply_project_verification_links
+    from .projects import property_import
+    from .projects.project_relations import apply_project_relations
+    from .projects.project_verification_links import apply_project_verification_links
 
     manifest = json.loads((root / "manifest.json").read_text("utf-8"))
     if manifest["version"] != VERSION:

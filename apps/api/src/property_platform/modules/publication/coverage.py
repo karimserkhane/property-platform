@@ -151,7 +151,7 @@ def reference_source_keys(profile):
 
 
 def map_source_namespaces(territory_id):
-    from property_platform.modules.evidence.project_protocol import project_registry
+    from property_platform.modules.evidence.projects.project_protocol import project_registry
 
     members = member_territories(territory_id)
     return (

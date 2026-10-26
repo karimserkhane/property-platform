@@ -4,12 +4,12 @@ import copy
 import json
 
 import pytest
-from property_platform.modules.evidence.project_discovery import (
+from property_platform.modules.evidence.projects.project_discovery import (
     candidates_for,
     catalogue_byte_limit,
     catalogue_for,
 )
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_protocol import (
     extract_project_source,
     project_registry,
 )

@@ -4,7 +4,10 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from property_platform.modules.evidence.property_protocol import safe_url, validate_receipts
+from property_platform.modules.evidence.projects.property_protocol import (
+    safe_url,
+    validate_receipts,
+)
 
 
 def receipt(url="https://www.aldar.com/example", payload=b"Reviewed page"):

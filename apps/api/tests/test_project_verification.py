@@ -3,7 +3,7 @@
 from datetime import date
 from decimal import Decimal
 
-from property_platform.modules.evidence.project_adrec import adrec_verification
+from property_platform.modules.evidence.projects.project_adrec import adrec_verification
 
 POINTER = "JSON:Data.Result[Id=436,ProjectNumber=2022/128971]"
 

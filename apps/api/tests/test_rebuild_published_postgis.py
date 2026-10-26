@@ -25,8 +25,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ProjectTypology,
     Source,
 )
-from property_platform.modules.evidence.project_import import revoke_project_link  # noqa: E402
-from property_platform.modules.evidence.project_queries import project_detail  # noqa: E402
+from property_platform.modules.evidence.projects.project_import import revoke_project_link  # noqa: E402
+from property_platform.modules.evidence.projects.project_queries import project_detail  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

@@ -15,16 +15,11 @@ from django.db import connection, transaction
 from django.db.models import F
 from django.utils import timezone
 
-from . import (
-    project_discovery,
-    project_import,
-    project_protocol,
-    property_import,
-)
 from .collection_profiles import DEFAULT_TERRITORY, collection_for
 from .failed_acquisitions import source_definition, validate_received_acquisitions
 from .maps import map_import, osm_bootstrap, sdi_import, sdi_protocol, services
 from .models import Capture, IngestionExecution, IngestionRun, Source
+from .projects import project_discovery, project_import, project_protocol, property_import
 from .sources import (
     abu_dhabi,
     adrec,

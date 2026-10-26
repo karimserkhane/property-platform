@@ -140,7 +140,7 @@ def project_details(
     acquisition_mode: Literal["live", "archive_latest", "archive_all"] = "live",
 ):
     """Reviewed factual project observations; promoter media remain external references."""
-    from property_platform.modules.evidence.project_protocol import project_registry
+    from property_platform.modules.evidence.projects.project_protocol import project_registry
 
     from .project_archive import project_batches
 
@@ -197,7 +197,7 @@ def project_details(
 
 @flow(name="property-platform-project-discovery", retries=0)
 def project_discovery(territory: Territory = TERRITORY, actor: str = "manual"):
-    from property_platform.modules.evidence.project_discovery import catalogue_registry
+    from property_platform.modules.evidence.projects.project_discovery import catalogue_registry
 
     results, failures = [], []
     for catalogue in catalogue_registry(territory):

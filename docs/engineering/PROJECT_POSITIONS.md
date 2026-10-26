@@ -15,7 +15,7 @@ Un point publié par une agence n'est pas une emprise cadastrale. Chaque positio
 
 La fiche, la carte de quartier et le résumé de l'explorateur affichent la meilleure méthode disponible, dans l'ordre du tableau. Un point ne se présente jamais comme une parcelle. Sans position documentée, le message existant (« position exacte en attente de vérification ») reste affiché ; aucune position n'est inventée (ni centre d'île, ni rapprochement par le nom).
 
-Code : `location_method` et `LOCATION_PRECISION` dans `apps/api/src/property_platform/modules/evidence/project_queries.py` ; `projectPositionQuality` dans `apps/web/src/features/projects/presentation.ts`.
+Code : `location_method` et `LOCATION_PRECISION` dans `apps/api/src/property_platform/modules/evidence/projects/project_queries.py` ; `projectPositionQuality` dans `apps/web/src/features/projects/presentation.ts`.
 
 ## Fiches sans position, par priorité
 

@@ -4,8 +4,8 @@ import copy
 import json
 
 import pytest
-from property_platform.modules.evidence.project_adrec import adrec_position, adrec_project
-from property_platform.modules.evidence.project_protocol import _base
+from property_platform.modules.evidence.projects.project_adrec import adrec_position, adrec_project
+from property_platform.modules.evidence.projects.project_protocol import _base
 
 
 def fixture():

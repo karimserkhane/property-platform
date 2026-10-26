@@ -22,8 +22,9 @@ def execute(request):
 
     django.setup()
     from django.db import connections
-    from property_platform.modules.evidence import orchestration, property_import
+    from property_platform.modules.evidence import orchestration
     from property_platform.modules.evidence.models import IngestionExecution
+    from property_platform.modules.evidence.projects import property_import
 
     from .collectors import (
         MapCollector,
@@ -100,7 +101,7 @@ def execute(request):
             return archive_walking(**values, compute=compute_walking)
         if request.get("operation") == "construction_activity":
             from property_platform.modules.catalog.territories import TERRITORY_BY_ID
-            from property_platform.modules.evidence.activity_import import measure_activity
+            from property_platform.modules.evidence.projects.activity_import import measure_activity
 
             from .collectors.sentinel_measure import ActivityCollector
 
@@ -205,8 +206,12 @@ def execute(request):
             if executor.migration_plan(executor.loader.graph.leaf_nodes()):
                 raise SchemaNotReady("Django migrations must be applied before ingestion")
             IngestionExecution.objects.exists()
-            from property_platform.modules.evidence.project_discovery import catalogue_registry
-            from property_platform.modules.evidence.project_protocol import project_registry
+            from property_platform.modules.evidence.projects.project_discovery import (
+                catalogue_registry,
+            )
+            from property_platform.modules.evidence.projects.project_protocol import (
+                project_registry,
+            )
 
             territories = {}
             for territory in TERRITORIES:
@@ -345,7 +350,7 @@ def execute(request):
                 collect,
             )
         elif operation == "project_discovery":
-            from property_platform.modules.evidence.project_discovery import (
+            from property_platform.modules.evidence.projects.project_discovery import (
                 candidates_for,
                 catalogue_byte_limit,
                 catalogue_for,
@@ -373,7 +378,7 @@ def execute(request):
                 )
                 archive_catalogue_batch(storage, request["scope"], receipt)
         elif operation == "project_details":
-            from property_platform.modules.evidence.project_protocol import (
+            from property_platform.modules.evidence.projects.project_protocol import (
                 project_registry,
                 project_urls,
             )

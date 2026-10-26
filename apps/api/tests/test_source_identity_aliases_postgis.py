@@ -32,7 +32,7 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ParcelObservation,
     ParcelSourceAlias,
 )
-from property_platform.modules.evidence.queries import (  # noqa: E402
+from property_platform.modules.evidence.projects.queries import (  # noqa: E402
     map_provenances,
     parcel_attributes,
     parcel_provenance,

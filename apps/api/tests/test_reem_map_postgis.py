@@ -172,7 +172,7 @@ def test_building_usage_comes_from_preserved_amenity_tags_not_its_generic_kind(c
     assert feature["properties"]["use_classification_version"] == "source-use-v2"
     assert "tags" not in feature["properties"]
     assert "_capture_id" not in feature["properties"]["source"]
-    from property_platform.modules.evidence.queries import map_provenances, map_usage_tags
+    from property_platform.modules.evidence.projects.queries import map_provenances, map_usage_tags
 
     identity = feature["id"]
     metadata = map_provenances("building", [identity], include_capture_id=True)

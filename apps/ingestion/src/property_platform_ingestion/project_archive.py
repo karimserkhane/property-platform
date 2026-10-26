@@ -12,7 +12,7 @@ import re
 import tempfile
 from pathlib import Path
 
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_protocol import (
     extract_project_source,
     project_registry,
     project_urls,
@@ -113,7 +113,7 @@ def project_batches(root, scope):
 def index_project_checkpoints(root):
     """Adopt existing validated collector checkpoints without needing the old DB."""
     root = Path(root).resolve()
-    from property_platform.modules.evidence.project_discovery import catalogue_registry
+    from property_platform.modules.evidence.projects.project_discovery import catalogue_registry
 
     catalogues = {}
     for definition in catalogue_registry():
@@ -156,7 +156,7 @@ def index_project_checkpoints(root):
 
 
 def _catalogue_folder(root, scope):
-    from property_platform.modules.evidence.project_discovery import catalogue_for
+    from property_platform.modules.evidence.projects.project_discovery import catalogue_for
 
     definition = catalogue_for(scope)
     archive = Path(root).resolve() / "project-catalogue-archive"
@@ -167,11 +167,11 @@ def _catalogue_folder(root, scope):
 
 
 def _validate_catalogue(rows, definition):
-    from property_platform.modules.evidence.project_discovery import (
+    from property_platform.modules.evidence.projects.project_discovery import (
         candidates_for,
         catalogue_byte_limit,
     )
-    from property_platform.modules.evidence.property_protocol import validate_receipts
+    from property_platform.modules.evidence.projects.property_protocol import validate_receipts
 
     receipts = validate_receipts(
         rows, {definition["url"]}, max_bytes=catalogue_byte_limit(definition)

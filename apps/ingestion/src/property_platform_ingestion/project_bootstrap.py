@@ -7,7 +7,7 @@ from typing import Literal
 from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
 from prefect.runtime import flow_run
-from property_platform.modules.evidence.project_protocol import project_registry
+from property_platform.modules.evidence.projects.project_protocol import project_registry
 
 from .project_archive import (
     catalogue_batches,
@@ -107,7 +107,7 @@ def rebuild_projects(
                 failures.append(scope)
     catalogue_versions = 0
     if include_catalogues:
-        from property_platform.modules.evidence.project_discovery import catalogue_registry
+        from property_platform.modules.evidence.projects.project_discovery import catalogue_registry
 
         for definition in catalogue_registry(territory):
             scope = f"{definition['territory_scope']}:{definition['key']}"

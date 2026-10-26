@@ -39,7 +39,7 @@ Table `evidence.construction_activity_measurement` (modèle `ConstructionActivit
 1. **`reviewed_parcel`** : un lien relu actif relie le projet à une parcelle cadastrale courante (`position_method = cadastral_parcel`). Il l'emporte toujours : un projet qui en a un n'est jamais mesuré sur une parcelle déduite.
 2. **`parcel_containing_position`** : sinon, la parcelle courante **unique** qui contient la position relue du projet, si cette position est fiable selon A02 — point de l'autorité (`authority_point`, coordonnées du registre) ou emprise de bâtiment (`building_footprint`, point intérieur de l'emprise) — et si la parcelle fait **de 0,2 à 10 ha** (surface géodésique PostGIS).
 
-Ne sont jamais mesurés sans lien de parcelle relu : les points de courtier, d'éditeur ou déclarés ; une position sur une limite commune à deux parcelles ou hors de toute parcelle ; une parcelle de moins de 0,2 ha (trop peu de pixels) ou de plus de 10 ha (plan d'ensemble). Ces projets attendent un lien relu. Une mesure déduite reste une mesure de la parcelle, pas du projet : B07 doit afficher sa base (« parcelle qui contient le point du registre »). Code : `apps/api/src/property_platform/modules/evidence/activity_import.py`.
+Ne sont jamais mesurés sans lien de parcelle relu : les points de courtier, d'éditeur ou déclarés ; une position sur une limite commune à deux parcelles ou hors de toute parcelle ; une parcelle de moins de 0,2 ha (trop peu de pixels) ou de plus de 10 ha (plan d'ensemble). Ces projets attendent un lien relu. Une mesure déduite reste une mesure de la parcelle, pas du projet : B07 doit afficher sa base (« parcelle qui contient le point du registre »). Code : `apps/api/src/property_platform/modules/evidence/projects/activity_import.py`.
 
 ## Exécution
 
@@ -72,7 +72,7 @@ Le contrôle `rebuild-check` ([REBUILD.md](REBUILD.md#mesures-dactivité-de-chan
 
 ## Fiche projet (B07)
 
-Section « Changement au sol vu par satellite » de la fiche projet, après la vérification ; lecture seule par `evidence.activity_sheet.project_activity` (une requête), champ `construction_activity` de `GET /api/v1/preview/projects/{slug}`.
+Section « Changement au sol vu par satellite » de la fiche projet, après la vérification ; lecture seule par `evidence.projects.activity_sheet.project_activity` (une requête), champ `construction_activity` de `GET /api/v1/preview/projects/{slug}`.
 
 - **Une carte par parcelle mesurée**, avec sa dernière mesure (paire de scènes la plus récente) tant que le lien d'identité relu qui la justifie est actif : niveau (`low`, `moderate`, `high` → « peu de changement », « changement modéré », « changement marqué »), dates des deux prises de vue, pixels clairs sur pixels de la parcelle, raison du choix de la parcelle (lien relu, point du registre, emprise de bâtiment), surface au moment de la mesure. Une parcelle déduite d'une position le dit : le signal décrit toute la parcelle.
 - **Jamais de pourcentage.** L'API n'expose ni la part de pixels changés, ni leur nombre, ni la différence médiane : seulement le niveau. Les identifiants des scènes, la version de méthode et les fenêtres capturées (adresse et empreinte SHA-256) sont dans un bloc dépliable.

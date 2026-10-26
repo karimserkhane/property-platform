@@ -5,12 +5,9 @@ from urllib.parse import parse_qs, urlparse
 
 from django.utils import timezone
 
-from . import (
-    project_discovery,
-    project_protocol,
-)
 from .collection_profiles import collection_for
 from .maps import map_sources, onwani, osm_bootstrap, sdi_protocol
+from .projects import project_discovery, project_protocol
 from .sources import abu_dhabi, adrec
 
 

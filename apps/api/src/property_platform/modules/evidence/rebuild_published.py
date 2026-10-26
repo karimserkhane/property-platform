@@ -124,7 +124,7 @@ def operator_decisions():
 
 def published_state():
     """Canonical dossiers of every published project and the active identity links."""
-    from .project_queries import project_detail, published_slugs
+    from .projects.project_queries import project_detail, published_slugs
 
     return {
         "version": VERSION,

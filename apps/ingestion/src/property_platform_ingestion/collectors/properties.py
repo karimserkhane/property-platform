@@ -3,7 +3,7 @@
 import json
 from collections.abc import Sequence
 
-from property_platform.modules.evidence.property_protocol import (
+from property_platform.modules.evidence.projects.property_protocol import (
     MAX_CAPTURE_BYTES,
     MAX_IMAGE_BYTES,
     validate_photo,
