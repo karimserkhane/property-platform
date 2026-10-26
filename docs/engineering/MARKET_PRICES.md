@@ -41,7 +41,8 @@ Lecture seule par `evidence.market_sheet.project_market`, champ `observed_sales`
 
 Tests : `test_market_sheet_postgis.py` (fenêtre la plus récente seule, parts partielles, libellé révoqué, fiche sans libellé).
 
+Affichage : section « Ventes enregistrées » de la fiche projet (`apps/web/src/features/projects/observed-sales-section.tsx`, règles pures dans `observed-sales.ts`, 16 langues). Une carte par type × typologie × off-plan/prêt × primaire/secondaire : effectif, fourchettes (une seule valeur si min = max), dates d'enregistrement, nombre de parts partielles. Off-plan/prêt/décision de justice et primaire/secondaire sont traduits ; type et typologie gardent le libellé ADREC (`lang="en"`), une valeur inconnue garde son texte d'origine. Les libellés rattachés, la date de collecte, les captures et la source sont cités ; la section dit qu'aucun prix demandé sourcé n'existe encore et qu'aucun écart n'est calculé.
+
 ## 6. Reste à faire dans C01
 
-- Affichage de la section sur la fiche projet (16 langues), avec nature « observé », fenêtre et source.
 - Prix demandé : aucun n'est collecté aujourd'hui (les extracteurs de fiches projet l'excluent volontairement, par exemple `project_propertyfinder.py` et `project_psi.py`). Le plan n'autorise à citer un prix demandé que lié à une annonce porteuse d'un permis Madhmoun vérifié ; la source de ces annonces reste à qualifier.
