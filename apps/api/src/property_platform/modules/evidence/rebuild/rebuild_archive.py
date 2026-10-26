@@ -1061,6 +1061,12 @@ def replay_archive(
     from ..projects import property_import
     from ..projects.project_relations import apply_project_relations
     from ..projects.project_verification_links import apply_project_verification_links
+    from ..search.index import rebuild_search_index
+
+    def index_search():
+        result = rebuild_search_index(actor=actor, run_key="rebuild")
+        if result["status"] != "succeeded":
+            raise RuntimeError(result.get("error") or "EvidenceSearchFailed")
 
     manifest = json.loads((root / "manifest.json").read_text("utf-8"))
     if manifest["version"] != VERSION:
@@ -1222,6 +1228,8 @@ def replay_archive(
         ("imagery", lambda: replay_scenes(root, manifest["scenes"], actor)),
         ("project_relations", lambda: apply_project_relations(actor=actor)),
         ("project_verification_links", lambda: apply_project_verification_links(actor=actor)),
+        # Last: the index reads the published dossiers the stages above produce (E01).
+        ("evidence_search", index_search),
     ):
         try:
             with audit_context(actor=actor):

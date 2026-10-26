@@ -29,6 +29,8 @@ HISTORY_TABLES = {
     "evidence.project_source_candidate": "Catalogue readings; a review queue, not published",
     "evidence.project_identity_link": "Revocations are operator decisions (A03); "
     "active links are compared",
+    "evidence.evidence_search_entry": "Statements of the published dossiers (E01), which are "
+    "compared",
 }
 # Database identities and this execution's clock, never source facts.
 VOLATILE = frozenset({"id", "ingested_at"})

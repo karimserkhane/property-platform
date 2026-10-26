@@ -124,6 +124,15 @@ def execute(request):
             return check_history(
                 actor=request["actor"], run_key=f"history:{request['prefect_flow_run_id']}"
             )
+        if request.get("operation") == "evidence_search":
+            from property_platform.modules.evidence.search.index import rebuild_search_index
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Evidence search requires a Prefect run and operator")
+            return rebuild_search_index(
+                actor=request["actor"],
+                run_key=f"evidence_search:{request['prefect_flow_run_id']}",
+            )
         if request.get("operation") == "basemap":
             from datetime import timedelta
 
