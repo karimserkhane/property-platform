@@ -22,9 +22,9 @@ def execute(request):
 
     django.setup()
     from django.db import connections
-    from property_platform.modules.evidence import orchestration
     from property_platform.modules.evidence.models import IngestionExecution
     from property_platform.modules.evidence.projects import property_import
+    from property_platform.modules.evidence.rebuild import orchestration
 
     from .collectors import (
         MapCollector,

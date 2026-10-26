@@ -225,7 +225,7 @@ def test_reference_reprocessing_is_scoped_to_its_registry():
     from django.core.management import call_command
 
     from property_platform.modules.evidence.models import ResearchReference
-    from property_platform.modules.evidence.orchestration import reference_registry
+    from property_platform.modules.evidence.rebuild.orchestration import reference_registry
     from property_platform.modules.evidence.sources.research_import import import_reference
 
     now = datetime.now(UTC)

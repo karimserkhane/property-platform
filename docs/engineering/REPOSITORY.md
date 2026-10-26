@@ -2,8 +2,10 @@
 
 **Sous-paquets d'evidence — A09, 26 octobre 2026 (en cours).** `evidence` reste une
 seule application Django (même `app_label`, mêmes migrations) mais se range en
-sous-paquets, du plus haut au plus bas : `rebuild` (reconstruction et rejeu, peut tout
-lire), `projects` (fiches, rapprochements et lectures de projets :
+sous-paquets, du plus haut au plus bas : `rebuild` (reconstruction, rejeu et passerelle
+d'import, peut tout lire : `rebuild/rebuild_archive.py`, `rebuild_published.py`,
+`replay_protocols.py`, `demo_package.py`, `orchestration.py`, `failed_acquisitions.py`),
+`projects` (fiches, rapprochements et lectures de projets :
 `projects/project_*.py` hors modèles, `property_protocol.py`, `property_import.py`,
 `queries.py`, `verification_sheet.py`, `delivery_history.py`, `activity_import.py`,
 `activity_sheet.py` ; les registres JSON restent à la racine), `maps` (couches
@@ -19,12 +21,12 @@ reprises de champs, couverture des tables : `history/journals.py`,
 `catalogue_history.py`, `pipeline_inventory.py`). Les modules à la racine
 (`models.py` et `*_models.py`, `runs.py`, `collection_profiles.py`, `media_storage.py`)
 forment le socle commun. Le contrat Import Linter « Evidence sub-packages follow their
-dependency direction » interdit qu'un sous-paquet importe un sous-paquet plus haut ; les
-couches pas encore créées y sont facultatives. Un ancien chemin déplacé reste un alias
+dependency direction » interdit qu'un sous-paquet importe un sous-paquet plus haut.
+Un ancien chemin déplacé reste un alias
 temporaire (`sys.modules`) du nouveau module, pour les branches ouvertes ; il sera
 supprimé à la fin d'A09.
 
-**Contrôle de reconstruction — A04.** `evidence/rebuild_archive.py` possède le paquet
+**Contrôle de reconstruction — A04.** `evidence/rebuild/rebuild_archive.py` possède le paquet
 privé de captures, le rejeu par les importateurs typés et la comparaison exhaustive
 des tables. `ingestion/rebuilds.py` possède la création/suppression d'une base jetable ;
 `rebuild_worker.py` isole l'ORM synchrone du moteur Prefect. Direction : ingestion →
@@ -88,7 +90,7 @@ contrat ; l'affichage relève de B05. `project_verification_links.json` et
 rattachés à un numéro porté par une source ADREC enregistrée, révoqués et jamais
 supprimés ; la page n'est jamais lue. Voir [la vérification des projets](PROJECT_VERIFICATION.md).
 
-**État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild_published.py`
+**État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild/rebuild_published.py`
 possède la forme canonique de l'état publié (fiches projet, liens d'identité actifs),
 sa comparaison et l'explication de l'historique des lectures ; `rebuild_archive.py`
 l'appelle à l'export et au rejeu. `project_queries.py` garde les règles de publication,
@@ -139,7 +141,7 @@ Les versions exécutables ont ensuite été actualisées ; [TOOLCHAIN.md](TOOLCH
 
 **Sauvegardes — 23 octobre 2026.** `apps/ingestion/.../backups.py` possède la sauvegarde de la base (instantané exporté, `pg_dump` 18), la copie incrémentale des fichiers privés, la rotation et le contrôle de restauration ; les flows `property-platform-backup` et `property-platform-restore-check` l'exécutent hors de Django, avec `psycopg` et les outils PostgreSQL. Voir [BACKUPS.md](BACKUPS.md).
 
-**Paquet de démonstration et parcours en CI — 25 octobre 2026.** `fixtures/demo-replay/` contient un paquet de rejeu A04 restreint (sélection revue, manifeste, provenance et licence par capture, octets) ; ce ne sont pas des lignes de base mais des captures que les importateurs actuels rejouent. `evidence/demo_package.py` et les commandes `export_demo_package` / `load_demo_package` en sont propriétaires ; le chargement refuse toute base qui contient déjà une capture. `infra/local/compose.e2e-demo.yaml` est un projet Compose distinct et jetable (PostGIS et fichiers en mémoire, ni volume ni port partagé) utilisé par le job CI `e2e` ; voir [E2E.md](E2E.md).
+**Paquet de démonstration et parcours en CI — 25 octobre 2026.** `fixtures/demo-replay/` contient un paquet de rejeu A04 restreint (sélection revue, manifeste, provenance et licence par capture, octets) ; ce ne sont pas des lignes de base mais des captures que les importateurs actuels rejouent. `evidence/rebuild/demo_package.py` et les commandes `export_demo_package` / `load_demo_package` en sont propriétaires ; le chargement refuse toute base qui contient déjà une capture. `infra/local/compose.e2e-demo.yaml` est un projet Compose distinct et jetable (PostGIS et fichiers en mémoire, ni volume ni port partagé) utilisé par le job CI `e2e` ; voir [E2E.md](E2E.md).
 
 **Collaboration des agents et contrôles — 23 octobre 2026.** `docs/tasks/` contient une tâche par fichier et le tableau `BOARD.md` ; `docs/engineering/AGENT_WORKFLOW.md` décrit leur réservation et leur clôture. `infra/local/compose.checks.yaml`, `infra/local/checks/Dockerfile` et `scripts/checks/*.sh` exécutent les contrôles de la CI dans Docker (API sur PostGIS, ingestion, site sous Linux), sans dépendance ni effet sur les services partagés.
 
@@ -272,7 +274,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │       │       │   │   ├── property_protocol.py, property_import.py  Reçus validés et premières présentations de biens
 │       │       │   │   ├── property_presentations.json, property_media.json  Identités examinées et médias autorisés
 │       │       │   │   ├── services.py  Import officiel des parcelles et transaction propriétaire
-│       │       │   │   ├── orchestration.py  Passerelle d'import, identité durable et résultat atomique
+│       │       │   │   ├── rebuild/orchestration.py  Passerelle d'import, identité durable et résultat atomique
 │       │       │   │   ├── runs.py   Enregistrement commun d'un run en échec et de sa trace
 │       │       │   │   ├── media_storage.py  Captures archivées, licences et copies publiques contrôlées
 │       │       │   │   ├── queries.py   Provenance limitée destinée à l'affichage
@@ -390,7 +392,7 @@ Ce dossier est une application Python exécutable séparément. Il possède les 
 
 Le registre contient désormais **vingt-six déploiements** : neuf procédures initiales Reem, huit Saadiyat, trois ADREC des îles/indices, puis six nouvelles procédures Abu Dhabi décrites dans [ABU_DHABI.md](ABU_DHABI.md). Les ventes enregistrées ADREC et les observations de quartier sont désormais structurées. Les prix demandés, stocks de logements, avis et génération vidéo restent à implémenter. L’import historique Sentinel, le contrôle de disponibilité et le bootstrap OSM restent manuels ; l’actualisation ADEK refusée reste inactivée.
 
-La direction est **`ingestion → services/protocoles evidence → catalog`**. `collectors/` utilise les constantes et protocoles portables du paquet API, sans ORM, sans copie des modèles et sans collecte d'une URL libre. Les acquisitions ont des budgets par réponse et par lot ; un replay conserve les octets et dates réelles de collecte. `domain.py` initialise Django dans un sous-processus synchrone et transmet les captures préparées à `evidence/orchestration.py`. Cette passerelle possède l'identité durable, les transactions et les liens vers les acquisitions ; les collecteurs ne modifient aucune table directement. Le réseau est utilisé avant la transaction de mutation canonique.
+La direction est **`ingestion → services/protocoles evidence → catalog`**. `collectors/` utilise les constantes et protocoles portables du paquet API, sans ORM, sans copie des modèles et sans collecte d'une URL libre. Les acquisitions ont des budgets par réponse et par lot ; un replay conserve les octets et dates réelles de collecte. `domain.py` initialise Django dans un sous-processus synchrone et transmet les captures préparées à `evidence/rebuild/orchestration.py`. Cette passerelle possède l'identité durable, les transactions et les liens vers les acquisitions ; les collecteurs ne modifient aucune table directement. Le réseau est utilisé avant la transaction de mutation canonique.
 
 **Le paquet API et ses migrations restent propriétaires des données métier.** `apps/ingestion/pyproject.toml` installe ce paquet depuis `../api` ; le serveur API n'installe ni Prefect ni HTTPX et n'importe pas `property_platform_ingestion`. Le registre métier des URLs et présentations reste dans `apps/api/src/property_platform/modules/evidence/`, tandis que `ingestion/registry.py` décrit seulement les jobs déployés et leurs paramètres. Une nouvelle source doit avoir protocole, identité, tests et propriétaire documentés avant d'être ajoutée à un horaire.
 

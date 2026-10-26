@@ -230,11 +230,12 @@ def test_domain_source_failure_passes_only_real_complete_responses_to_audit(monk
     import django
     import property_platform.modules.evidence as evidence
     import property_platform.modules.evidence.projects as projects
+    import property_platform.modules.evidence.rebuild as rebuild
 
     import property_platform_ingestion.collectors as collectors
     from property_platform_ingestion.domain import execute
 
-    gateway = ModuleType("property_platform.modules.evidence.orchestration")
+    gateway = ModuleType("property_platform.modules.evidence.rebuild.orchestration")
     gateway.execution_result = Mock(return_value=None)
     gateway.record_acquisition_failure = Mock(return_value={"status": "failed"})
     profiles = ModuleType("property_platform.modules.evidence.projects.property_import")
@@ -245,7 +246,7 @@ def test_domain_source_failure_passes_only_real_complete_responses_to_audit(monk
     monkeypatch.setattr(django, "setup", lambda: None)
     monkeypatch.setitem(sys.modules, "django.db", db)
     for package, name, module in (
-        (evidence, "orchestration", gateway),
+        (rebuild, "orchestration", gateway),
         (projects, "property_import", profiles),
         (evidence, "models", models),
     ):

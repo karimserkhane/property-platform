@@ -190,7 +190,7 @@ Tous les chemins ci-dessous partent de **`C:\Users\Karim\Repositories\property-p
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\storage.py` | Reçus privés persistants ; publication sans écrasement d'un reçu concurrent |
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\runtime.py` | Processus Django isolé, délais et réconciliation d'un résultat incertain |
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\domain.py` | Collecte puis appel des services Django partagés |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\orchestration.py` | Registre durable, verrous, transaction et rapprochement des résultats |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\rebuild\orchestration.py` | Registre durable, verrous, transaction et rapprochement des résultats |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\migrations\0011_ingestion_orchestration.py` | Création additive des deux tables d'orchestration |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\identity_resolution.py` | Correspondances exactes et décisions typées pour les identifiants Onwani renouvelés |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\identity_repair.py` | Réparation explicite des doublons déjà créés et révocation auditée |

@@ -13,11 +13,11 @@ from django.utils import timezone
 if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Project directory requires PostGIS", allow_module_level=True)
 
-from property_platform.modules.evidence import orchestration
 from property_platform.modules.evidence.models import ProjectSourceCandidate  # noqa: E402
 from property_platform.modules.evidence.projects import project_discovery, project_protocol
 from property_platform.modules.evidence.projects.project_import import import_project_details  # noqa: E402
 from property_platform.modules.evidence.projects.project_queries import project_directory  # noqa: E402
+from property_platform.modules.evidence.rebuild import orchestration
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

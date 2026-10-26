@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
-from property_platform.modules.evidence.demo_package import export_package
+from property_platform.modules.evidence.rebuild.demo_package import export_package
 
 
 class Command(BaseCommand):

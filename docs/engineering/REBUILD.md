@@ -86,7 +86,7 @@ requête actuelle avec les octets d'une autre requête : l'importateur réémet 
 (`connector_version`) et les observations gardent la version du **mappage actuel**
 (`mapping_version`). Aucun champ absent de l'ancienne requête n'est ajouté.
 
-Le registre `evidence/replay_protocols.py` liste uniquement les versions dont les
+Le registre `evidence/rebuild/replay_protocols.py` liste uniquement les versions dont les
 requêtes diffèrent, recopiées depuis les commits cités ([A11](../tasks/A11.md)) :
 
 | Versions d'origine | Différence rejouée |

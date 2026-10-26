@@ -13,7 +13,6 @@ from django.utils import timezone
 if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Project orchestration requires real PostGIS", allow_module_level=True)
 
-from property_platform.modules.evidence import orchestration  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     IngestionExecution,
@@ -21,6 +20,7 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     Source,
 )
 from property_platform.modules.evidence.projects import project_import, project_protocol  # noqa: E402
+from property_platform.modules.evidence.rebuild import orchestration  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

@@ -412,7 +412,7 @@ def _forget_measuring_runs():
 def _replayed(tmp_path, signal):
     from uuid import uuid4
 
-    from property_platform.modules.evidence import rebuild_archive as archive
+    from property_platform.modules.evidence.rebuild import rebuild_archive as archive
 
     activity_import.measure_activity(actor=ACTOR, run_key="t:1", collector=FakeCollector())
     archive.export_archive(tmp_path)
@@ -461,7 +461,7 @@ def test_a_different_replayed_signal_fails_the_rebuild_check(linked, tmp_path):
 def test_activity_replay_without_the_ingestion_signal_fails(linked, tmp_path):
     from uuid import uuid4
 
-    from property_platform.modules.evidence import rebuild_archive as archive
+    from property_platform.modules.evidence.rebuild import rebuild_archive as archive
 
     activity_import.measure_activity(actor=ACTOR, run_key="t:1", collector=FakeCollector())
     archive.export_archive(tmp_path)

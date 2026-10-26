@@ -25,7 +25,10 @@ def main():
     django.setup()
     from django.core.management import call_command
     from django.db import connections
-    from property_platform.modules.evidence.rebuild_archive import export_archive, replay_archive
+    from property_platform.modules.evidence.rebuild.rebuild_archive import (
+        export_archive,
+        replay_archive,
+    )
 
     from .rebuilds import SCRATCH
 

@@ -19,8 +19,6 @@ from property_platform.modules.catalog.models import (  # noqa: E402
     Building,
     Parcel,
 )
-from property_platform.modules.evidence import rebuild_archive as archive  # noqa: E402
-from property_platform.modules.evidence import replay_protocols as legacy  # noqa: E402
 from property_platform.modules.evidence.collection_profiles import collection_for  # noqa: E402
 from property_platform.modules.evidence.maps import map_sources, onwani  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
@@ -28,6 +26,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     MapObservation,
     ParcelObservation,
 )
+from property_platform.modules.evidence.rebuild import rebuild_archive as archive  # noqa: E402
+from property_platform.modules.evidence.rebuild import replay_protocols as legacy  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -235,7 +235,7 @@ def test_named_poi_overpass_receipt_replays_with_its_recorded_query(tmp_path):
 
 
 def test_historical_protocol_is_refused_outside_a_replayed_onwani_or_map_import():
-    from property_platform.modules.evidence import orchestration
+    from property_platform.modules.evidence.rebuild import orchestration
 
     historical = legacy.historical_protocol("onwani", REEM, "onwani-reem-v1")
     with pytest.raises(ValueError, match="historical protocol"):

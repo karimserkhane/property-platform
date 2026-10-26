@@ -18,7 +18,7 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     HealthFacilityObservation,
     PublicContextSnapshot,
 )
-from property_platform.modules.evidence.orchestration import (  # noqa: E402
+from property_platform.modules.evidence.rebuild.orchestration import (  # noqa: E402
     execute_import,
     record_acquisition_failure,
 )

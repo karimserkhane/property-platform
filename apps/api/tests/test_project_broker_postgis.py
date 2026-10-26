@@ -24,7 +24,7 @@ pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
 def test_a_long_project_and_source_identity_is_audited_without_truncation():
     from property_platform.modules.evidence.models import IngestionExecution
-    from property_platform.modules.evidence.orchestration import execute_import
+    from property_platform.modules.evidence.rebuild.orchestration import execute_import
 
     slug = "bab-al-qasr-beach-resort-residence-77"
     project = project_registry("al-reem-island:" + slug)[0]

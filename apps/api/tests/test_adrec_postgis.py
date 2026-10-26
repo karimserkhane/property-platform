@@ -18,7 +18,7 @@ from property_platform.modules.evidence.models import (
     AdrecSaleObservation,
     Capture,
 )  # noqa: E402
-from property_platform.modules.evidence.orchestration import (
+from property_platform.modules.evidence.rebuild.orchestration import (
     execute_import,
     record_acquisition_failure,
 )  # noqa: E402
