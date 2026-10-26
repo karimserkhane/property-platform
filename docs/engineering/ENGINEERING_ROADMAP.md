@@ -115,6 +115,26 @@ Une réponse en mémoire reste valable tant qu'aucune validation n'écrit dans *
 
 Familles relevées sur la base locale le 26 octobre : tuiles de parcelles `real_estate.parcel` seule ; liste des parcelles `parcel`, `parcel_observation`, `parcel_source_alias`, `source`, `capture`, `ingestion_run`, `audit_event` ; `district-map` et `market-map` lisent aussi `capture` et `ingestion_run`. Ces deux tables de provenance reçoivent une ligne à chaque collecte planifiée : les tuiles gardent désormais leur cache entre les collectes, mais les lectures qui citent leurs captures sont encore relues après chacune. Affiner leur granularité (par source ou par jeu de données) est la tâche [A16](../tasks/A16.md).
 
+### Tables de provenance validées par rejeu — 26 octobre 2026 (A16)
+
+Mesure de départ (base locale, 24 heures) : `evidence.ingestion_run` reçoit 2 882 révisions, toutes de la source `walking-analysis` (une exécution par minute, ouverte puis close) ; `evidence.capture` une seule ; aucune autre table journalisée ne change. Avec A08 seul, chaque route qui cite ses captures (`district-map`, `market-map`, liste des parcelles) était donc relue environ toutes les 30 secondes pour une source qu'elle ne lit pas.
+
+- **Version plus fine que la table, sans liste par route** : une version « par source » supposerait de savoir quelles sources une route lit, donc une déclaration à tenir à jour. À la place, chaque requête SQL de la route qui parcourt `capture` ou `ingestion_run` (relevé par `pg_stat_xact_user_tables`, requête par requête) est gardée avec ses paramètres et une empreinte SHA-256 de ses lignes. La granularité est celle des lignes réellement lues, y compris « le dernier run réussi d'un jeu de données ».
+- **Rejeu** : quand une validation n'a touché que ces deux tables, un seul instantané `REPEATABLE READ, READ ONLY` vérifie que les autres tables de la famille n'ont pas changé, puis rejoue ces requêtes. Mêmes lignes : le corps et l'ETag sont gardés, et les versions de l'entrée avancent (le contrôle suivant ne rejoue plus rien). Les autres requêtes de la route ne lisent que des tables inchangées avec les mêmes arguments, puisque ces arguments viennent de lignes identiques. Lignes différentes : la route est relue.
+- **Repli sûr** : un parcours de ces tables qui ne peut pas être attribué à une requête (curseur serveur qui lit entre deux requêtes, `executemany`) désactive le rejeu ; l'entrée est alors relue à la première écriture de sa famille, comme avec A08. Une exclusion (`history_exclusion`) ou toute autre table de la famille l'invalide toujours.
+- **Correctif A08, écrivain au-dessus de l'horizon** : `pg_snapshot_xip` ne liste pas une transaction en cours dont l'identifiant est supérieur ou égal au `xmax` de l'instantané (aucune transaction plus récente n'était terminée). Si une transaction plus ancienne avait validé entre-temps un identifiant de journal plus grand, la validation tardive de cette écrivaine passait inaperçue. L'entrée garde donc cet horizon et chaque contrôle vérifie aussi tous les identifiants de transaction de l'horizon au `xmax` courant (au-delà de 100 000, l'entrée est simplement relue).
+- **Tests** (`test_read_cache_postgis.py`) : une collecte d'une autre source garde le corps et l'ETag sans relancer la route ; un run de la source lue qui change de statut l'invalide ; une écrivaine de `ingestion_run` en cours lors de la mise en cache, validée après une collecte d'une autre source, l'invalide ; une exclusion l'invalide même avec des collectes en parallèle ; l'écrivaine au-dessus de l'horizon est détectée. Les deux derniers mécanismes ont été vérifiés par mutation (plage d'horizon vide, rejeu sans comparaison : les tests échouent).
+
+Mesure après (API de cette branche sur la base locale partagée, lectures seules, 18 tours de lecture espacés de 20 secondes pendant que `walking-analysis` collectait chaque minute) :
+
+| Lecture | Famille relevée | Requêtes rejouées | Première lecture | Avec A08 seul | Avec A16 |
+| --- | --- | --- | --- | --- | --- |
+| `district-map` | `capture`, `district_boundary_observation`, `history_exclusion`, `ingestion_run`, `public_context_snapshot` | 2 | 1,2 s | 6 relectures sur 18 | 0 relecture, 6 rejeux (au plus 0,14 s) |
+| `market-map` | les mêmes + `adrec_index_observation`, `adrec_market_snapshot`, `adrec_sale_observation` | 9 | 2,2 s | 6 relectures sur 18 | 0 relecture, 6 rejeux (au plus 0,81 s) |
+| liste des parcelles (Reem, `bbox`) | `audit_event`, `capture`, `ingestion_run`, `parcel`, `parcel_observation`, `parcel_source_alias`, `source` | 2 | 0,37 s | 6 relectures sur 18 | 0 relecture, 6 rejeux (au plus 0,30 s) |
+
+Médiane de toutes les lectures servies : 2 ms. Le rejeu de `market-map` reste coûteux (neuf requêtes sur les ventes ADREC), mais il n'a lieu qu'une fois par collecte d'une autre source et sans calcul Python ni sérialisation ; le contrôle suivant, sans nouvelle collecte, ne rejoue rien.
+
 ## Ajouter une fonctionnalité sans dégrader la structure
 
 - **Nouvelle lecture HTTP** : route dans `apps/api/src/property_platform/api/` sur un routeur `/preview` existant ou enregistré dans `router.py` (gardes communes automatiques), service dans `publication`, contrat régénéré, relais web de trois lignes avec `relayPreview`.
