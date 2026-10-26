@@ -1,6 +1,6 @@
 # Structure et règles de dépendance
 
-**Sous-paquets d'evidence — A09, 26 octobre 2026 (en cours).** `evidence` reste une
+**Sous-paquets d'evidence — A09, 26 octobre 2026.** `evidence` reste une
 seule application Django (même `app_label`, mêmes migrations) mais se range en
 sous-paquets, du plus haut au plus bas : `rebuild` (reconstruction, rejeu et passerelle
 d'import, peut tout lire : `rebuild/rebuild_archive.py`, `rebuild_published.py`,
@@ -19,12 +19,14 @@ de sources hors carte : `sources/adrec.py`, `adrec_import.py`, `abu_dhabi.py`,
 puis `history` (journaux de lignes, exclusions réversibles,
 reprises de champs, couverture des tables : `history/journals.py`,
 `catalogue_history.py`, `pipeline_inventory.py`). Les modules à la racine
-(`models.py` et `*_models.py`, `runs.py`, `collection_profiles.py`, `media_storage.py`)
-forment le socle commun. Le contrat Import Linter « Evidence sub-packages follow their
-dependency direction » interdit qu'un sous-paquet importe un sous-paquet plus haut.
-Un ancien chemin déplacé reste un alias
-temporaire (`sys.modules`) du nouveau module, pour les branches ouvertes ; il sera
-supprimé à la fin d'A09.
+(`models.py` et `*_models.py`, `apps.py`, `checks.py`, `runs.py`,
+`collection_profiles.py`, `media_storage.py`) forment le socle commun. Le contrat
+Import Linter « Evidence sub-packages follow their dependency direction » interdit qu'un
+sous-paquet importe un sous-paquet plus haut ; « Evidence base modules never import its
+sub-packages » interdit au socle d'importer un sous-paquet. Les anciens chemins à la
+racine (`evidence.<module>`) n'existent plus : une branche ouverte avant A09 importe
+le nouveau chemin (`evidence.<sous-paquet>.<module>`, `evidence.history.journals` pour
+`audit_context`, `context_rows` et `observation_history`).
 
 **Contrôle de reconstruction — A04.** `evidence/rebuild/rebuild_archive.py` possède le paquet
 privé de captures, le rejeu par les importateurs typés et la comparaison exhaustive

@@ -50,6 +50,30 @@ containers = ["property_platform.modules.evidence"]
 layers = ["rebuild", "projects", "maps", "sources", "history"]
 
 [[tool.importlinter.contracts]]
+name = "Evidence base modules never import its sub-packages"
+type = "forbidden"
+source_modules = [
+    "property_platform.modules.evidence.models",
+    "property_platform.modules.evidence.accessibility_models",
+    "property_platform.modules.evidence.activity_models",
+    "property_platform.modules.evidence.basemap_models",
+    "property_platform.modules.evidence.history_models",
+    "property_platform.modules.evidence.project_models",
+    "property_platform.modules.evidence.apps",
+    "property_platform.modules.evidence.checks",
+    "property_platform.modules.evidence.runs",
+    "property_platform.modules.evidence.collection_profiles",
+    "property_platform.modules.evidence.media_storage",
+]
+forbidden_modules = [
+    "property_platform.modules.evidence.history",
+    "property_platform.modules.evidence.sources",
+    "property_platform.modules.evidence.maps",
+    "property_platform.modules.evidence.projects",
+    "property_platform.modules.evidence.rebuild",
+]
+
+[[tool.importlinter.contracts]]
 name = "Domain modules never import delivery or configuration"
 type = "forbidden"
 source_modules = ["property_platform.modules"]
