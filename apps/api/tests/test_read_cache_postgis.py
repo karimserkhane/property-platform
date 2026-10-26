@@ -199,3 +199,187 @@ def test_an_exclusion_invalidates_the_reads_it_applies_to(client, project_input)
     assert after.status_code == 200
     assert after.json()["total"] == 0
     assert after["ETag"] != first["ETag"]
+
+
+PARCELS_PATH = f"{PARCELS}?bbox={BBOX['bbox'].replace(',', '%2C')}"
+
+
+def collect_other_source():
+    """A scheduled collection of a source the parcel list never cites."""
+    from django.utils import timezone
+
+    from property_platform.modules.evidence.models import Capture, IngestionRun, Source
+
+    source, _ = Source.objects.get_or_create(
+        key="walk-zones", defaults={"name": "Walk zones", "url": "https://example.com"}
+    )
+    run = IngestionRun.objects.create(source=source, actor="scheduler", connector_version="test")
+    Capture.objects.create(
+        run=run,
+        url="https://example.com/zones",
+        payload=b"{}",
+        byte_length=2,
+        content_sha256="0" * 64,
+        http_status=200,
+        fetched_at=timezone.now(),
+    )
+    run.status, run.finished_at = "succeeded", timezone.now()
+    run.save(update_fields=["status", "finished_at"])
+
+
+def test_a_collection_of_another_source_keeps_bodies_citing_captures(client):
+    run([feature(1, "RT1_C1")])
+    collect_other_source()  # The other source exists before the first read.
+    with (
+        override_settings(**PREVIEW),
+        patch.object(preview, "features", wraps=preview.features) as computed,
+    ):
+        first = client.get(PARCELS, BBOX)
+        family = read_cache.store.get(PARCELS_PATH).family
+        assert read_cache.PROVENANCE_TABLES <= set(family.tables)
+        assert family.replays
+        collect_other_source()
+        again = client.get(PARCELS, BBOX, HTTP_IF_NONE_MATCH=first["ETag"])
+        refreshed = read_cache.store.get(PARCELS_PATH).family
+        body = client.get(PARCELS, BBOX)
+    assert computed.call_count == 1
+    assert again.status_code == 304
+    assert again["ETag"] == first["ETag"]
+    assert body.content == first.content
+    assert refreshed.revisions != family.revisions  # The next check needs no replay.
+
+
+def test_a_run_of_the_read_source_invalidates_the_body(client):
+    from property_platform.modules.evidence.models import IngestionRun
+
+    run([feature(1, "RT1_C1")])
+    collect_other_source()  # The other source exists before the first read.
+    with override_settings(**PREVIEW):
+        first = client.get(PARCELS, BBOX)
+        assert first.json()["features"][0]["properties"]["source_name"]
+        collect_other_source()
+        IngestionRun.objects.exclude(source__key="walk-zones").update(status="failed")
+        after = client.get(PARCELS, BBOX, HTTP_IF_NONE_MATCH=first["ETag"])
+    assert after.status_code == 200
+    assert after["ETag"] != first["ETag"]
+    assert after.json()["features"][0]["properties"]["source_name"] is None
+
+
+def test_a_provenance_writer_in_progress_invalidates_once_committed(client):
+    """Committed after a newer collection of another source, with an older revision id."""
+    import threading
+
+    from django.db import connection, transaction
+
+    from property_platform.modules.evidence.models import IngestionRun
+
+    run([feature(1, "RT1_C1")])
+    collect_other_source()  # The other source exists before the first read.
+    written, release = threading.Event(), threading.Event()
+
+    def slow_writer():
+        try:
+            with transaction.atomic():
+                IngestionRun.objects.update(status="failed")
+                written.set()
+                release.wait(10)
+        finally:
+            connection.close()
+
+    writer = threading.Thread(target=slow_writer)
+    writer.start()
+    try:
+        assert written.wait(10)
+        with override_settings(**PREVIEW):
+            first = client.get(PARCELS, BBOX)
+            collect_other_source()  # Newer revision ids; replayed, still the same rows.
+            assert client.get(PARCELS, BBOX)["ETag"] == first["ETag"]
+            release.set()
+            writer.join(10)
+            after = client.get(PARCELS, BBOX, HTTP_IF_NONE_MATCH=first["ETag"])
+    finally:
+        release.set()
+        writer.join(10)
+    assert after.status_code == 200
+    assert after["ETag"] != first["ETag"]
+    assert after.json()["features"][0]["properties"]["source_name"] is None
+
+
+def test_an_exclusion_invalidates_even_with_provenance_changes(client, project_input):  # noqa: F811
+    from test_projects_postgis import ingest
+
+    from property_platform.modules.evidence.models import HistoryExclusion, ProjectSnapshot
+
+    _, rows, _ = project_input
+    ingest(rows)
+    path = "/api/v1/preview/projects"
+    with override_settings(**PREVIEW):
+        first = client.get(path)
+        snapshot = ProjectSnapshot.objects.get()
+        collect_other_source()
+        HistoryExclusion.objects.create(
+            dataset="project:park-view",
+            record_key=snapshot.capture.url,
+            capture=snapshot.capture,
+            actor="reviewer",
+            reason="Source identity was incorrect",
+        )
+        after = client.get(path, HTTP_IF_NONE_MATCH=first["ETag"])
+    assert after.status_code == 200
+    assert after.json()["total"] == 0
+
+
+def test_a_writer_above_the_snapshot_horizon_invalidates_once_committed(client):
+    """Neither listed by the snapshot nor newer than the latest visible revision id."""
+    import threading
+
+    from django.db import connection, transaction
+
+    from property_platform.modules.evidence.models import Source
+
+    run([feature(1, "RT1_C1"), feature(2, "RT1_C2")])
+    first_id, second_id = Parcel.objects.order_by("pk").values_list("pk", flat=True)
+    steps = {name: threading.Event() for name in ("older", "hidden", "go", "release")}
+
+    def older():  # Starts first, writes the parcel family last, finishes first.
+        try:
+            with transaction.atomic():
+                Source.objects.update(name="Older writer")
+                steps["older"].set()
+                steps["go"].wait(10)
+                Parcel.objects.filter(pk=second_id).update(land_use="Retail")
+        finally:
+            connection.close()
+
+    def hidden():
+        try:
+            with transaction.atomic():
+                Parcel.objects.filter(pk=first_id).update(land_use="School")
+                steps["hidden"].set()
+                steps["release"].wait(10)
+        finally:
+            connection.close()
+
+    threads = [threading.Thread(target=older), threading.Thread(target=hidden)]
+    threads[0].start()
+    try:
+        assert steps["older"].wait(10)
+        threads[1].start()
+        assert steps["hidden"].wait(10)
+        steps["go"].set()
+        threads[0].join(10)
+        with override_settings(**PREVIEW):
+            first = client.get(TILE)
+            assert read_cache.store.get(TILE).family is not None
+            assert client.get(TILE, HTTP_IF_NONE_MATCH=first["ETag"]).status_code == 304
+            steps["release"].set()
+            threads[1].join(10)
+            after = client.get(TILE, HTTP_IF_NONE_MATCH=first["ETag"])
+    finally:
+        steps["go"].set()
+        steps["release"].set()
+        for thread in threads:
+            if thread.is_alive() or thread.ident:
+                thread.join(10)
+    assert after.status_code == 200
+    assert after["ETag"] != first["ETag"]
