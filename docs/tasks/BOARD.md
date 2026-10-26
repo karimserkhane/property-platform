@@ -15,7 +15,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A07](A07.md) | A | Bâtiments et contexte en tuiles vectorielles | 2 | A06 | non | done | claude |
 | [A08](A08.md) | A | Version de cache par famille de tables | 3 | — | non | done | claude |
 | [A09](A09.md) | A | Découpage interne du module evidence | 3 | — | non | done | claude |
-| [A10](A10.md) | A | Contenus bruts des captures vers le stockage objet | 3 | A03 | non | in-progress | claude |
+| [A10](A10.md) | A | Contenus bruts des captures vers le stockage objet | 3 | A03 | non | done | claude |
 | [A11](A11.md) | A | Rejeu des anciens protocoles géographiques | 1 | A04 | non | done | claude |
 | [A12](A12.md) | A | État publié reconstruit et historique des interprétations | 1 | A04 | non (décidée le 24/10) | done | claude-interactive |
 | [A13](A13.md) | A | Parcours navigateur en CI | 2 | A05 | non (décidée le 25/10 : option 1) | done | claude |
