@@ -14,6 +14,7 @@ import { ProjectDocuments } from "./documents";
 import dossier from "./dossier.module.css";
 import { Proof, ProofGroup, SourceLink } from "./evidence";
 import { MediaCard } from "./media-card";
+import { PaymentScheduleSimulator } from "./payment-schedule-simulator";
 import {
   formatHandover,
   formatProjectDate,
@@ -26,7 +27,8 @@ import {
 } from "./presentation";
 import styles from "./project.module.css";
 import { ProjectComponents, ProjectParent } from "./relations";
-import type { RetentionLabels } from "./retention";
+import { formatPercent, type RetentionLabels } from "./retention";
+import { declaredReadings, type ScheduleLabels } from "./schedule-form";
 import type { ProjectDetail, ProjectLabels } from "./types";
 import type { VerificationLabels } from "./verification";
 import { ProjectVerificationSection } from "./verification-sheet";
@@ -48,6 +50,7 @@ export function ProjectDetailView({
   verificationLabels,
   activityLabels,
   deliveryLabels,
+  scheduleLabels,
   neighbourhood,
 }: {
   project: ProjectDetail;
@@ -57,6 +60,7 @@ export function ProjectDetailView({
   verificationLabels: VerificationLabels;
   activityLabels: ActivityLabels;
   deliveryLabels: DeliveryLabels;
+  scheduleLabels: ScheduleLabels;
   neighbourhood?: ReactNode;
 }) {
   const territory = navigation.territories.find(
@@ -80,6 +84,7 @@ export function ProjectDetailView({
       ? labels.registeredHomes
       : labels.plannedHomes;
   const { documents, visuals } = projectMedia(project);
+  const readings = declaredReadings(project.verification);
   const quality = projectPositionQuality(project.map_locations);
   const typologies = groupProjectTypologies(project.typologies);
   const homeTypes = typologies.map((item) => item.property_type);
@@ -432,6 +437,32 @@ export function ProjectDetailView({
                 locale={locale}
               />
             )}
+            <PaymentScheduleSimulator
+              readings={readings.map(({ inspectedOn, percent }) => ({
+                inspectedOn,
+                percent,
+              }))}
+              citations={
+                <ul>
+                  {readings.map((reading) => (
+                    <li key={`${reading.inspectedOn}|${reading.percent}`}>
+                      <strong>{formatPercent(reading.percent, locale)}</strong>{" "}
+                      · {scheduleLabels.inspectedOn}{" "}
+                      <time dateTime={reading.inspectedOn}>
+                        {date(reading.inspectedOn)}
+                      </time>
+                      <Proof
+                        source={reading.source}
+                        labels={labels}
+                        locale={locale}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              }
+              labels={scheduleLabels}
+              locale={locale}
+            />
             {website && (
               <a
                 className={styles.textAction}
