@@ -1,7 +1,7 @@
 """Local research projection, deliberately distinct from an approved public dossier."""
 
 from property_platform.modules.catalog.queries import parcel_features, parcel_identity
-from property_platform.modules.evidence.catalogue_history import recover_display
+from property_platform.modules.evidence.history.catalogue_history import recover_display
 from property_platform.modules.evidence.queries import (
     parcel_attributes,
     parcel_provenance,

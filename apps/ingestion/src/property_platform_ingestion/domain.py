@@ -116,7 +116,7 @@ def execute(request):
                     territory=None if request["scope"] == "all" else request["scope"],
                 )
         if request.get("operation") == "data_history":
-            from property_platform.modules.evidence.pipeline_inventory import check_history
+            from property_platform.modules.evidence.history.pipeline_inventory import check_history
 
             if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
                 raise ValueError("History inventory requires a Prefect run and operator")

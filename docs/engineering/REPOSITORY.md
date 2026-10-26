@@ -1,5 +1,20 @@
 # Structure et règles de dépendance
 
+**Sous-paquets d'evidence — A09, 26 octobre 2026 (en cours).** `evidence` reste une
+seule application Django (même `app_label`, mêmes migrations) mais se range en
+sous-paquets, du plus haut au plus bas : `rebuild` (reconstruction et rejeu, peut tout
+lire), `projects` (fiches, rapprochements et lectures de projets), `maps` (couches
+cartographiques, identités géographiques, contexte), `sources` (collecteurs et imports
+de sources hors carte), puis `history` (journaux de lignes, exclusions réversibles,
+reprises de champs, couverture des tables : `history/journals.py`,
+`catalogue_history.py`, `pipeline_inventory.py`). Les modules à la racine
+(`models.py` et `*_models.py`, `runs.py`, `collection_profiles.py`, `media_storage.py`)
+forment le socle commun. Le contrat Import Linter « Evidence sub-packages follow their
+dependency direction » interdit qu'un sous-paquet importe un sous-paquet plus haut ; les
+couches pas encore créées y sont facultatives. Un ancien chemin déplacé reste un alias
+temporaire (`sys.modules`) du nouveau module, pour les branches ouvertes ; il sera
+supprimé à la fin d'A09.
+
 **Contrôle de reconstruction — A04.** `evidence/rebuild_archive.py` possède le paquet
 privé de captures, le rejeu par les importateurs typés et la comparaison exhaustive
 des tables. `ingestion/rebuilds.py` possède la création/suppression d'une base jetable ;
@@ -91,7 +106,7 @@ d'entrée HTTP ni changement de contrat. Voir [REBUILD.md](REBUILD.md#état-publ
 
 **Bâtiments 3D — 20 octobre 2026.** `atlas/building-3d.ts` possède la projection des hauteurs, les expressions et la caméra ; `building-popup.ts` présente les volumes mondiaux sans créer d’identité catalogue. `map-view-control.tsx` compose perspective, source de bâtiments et fond existant pour Explore et la carte projet. Les couches lisent le catalogue ou les tuiles OpenFreeMap déjà archivées par Prefect, avec une seule source 3D visible. Direction : présentation → contrats/tuiles archivées ; aucune nouvelle dépendance, table ou collecte parallèle. Voir [BUILDINGS_3D.md](BUILDINGS_3D.md).
 
-**Historique uniforme — 20 octobre 2026.** `evidence/history_models.py`, `history.py`, `catalogue_history.py` et `pipeline_inventory.py` possèdent le journal technique PostgreSQL, les exclusions réversibles, les reprises de champs et la couverture des tables. `evidence/basemap_models.py`/`basemap_archive.py` possèdent la file et les versions typées des tuiles ; `ingestion/collectors/basemaps.py` possède leur transport borné. `api/basemaps.py` lit l’archive et enregistre une demande sans acquisition réseau ; `web/atlas/archived-tiles.ts` attend son traitement Prefect. La direction reste `publication/API → evidence → catalog`, `ingestion → evidence`. Aucun traitement raster/OCR dans le runtime web/API. Le JSON du journal est technique et ne remplace pas les modèles métier. Voir [DATA_HISTORY.md](DATA_HISTORY.md).
+**Historique uniforme — 20 octobre 2026.** `evidence/history_models.py`, `history/journals.py`, `history/catalogue_history.py` et `history/pipeline_inventory.py` possèdent le journal technique PostgreSQL, les exclusions réversibles, les reprises de champs et la couverture des tables. `evidence/basemap_models.py`/`basemap_archive.py` possèdent la file et les versions typées des tuiles ; `ingestion/collectors/basemaps.py` possède leur transport borné. `api/basemaps.py` lit l’archive et enregistre une demande sans acquisition réseau ; `web/atlas/archived-tiles.ts` attend son traitement Prefect. La direction reste `publication/API → evidence → catalog`, `ingestion → evidence`. Aucun traitement raster/OCR dans le runtime web/API. Le JSON du journal est technique et ne remplace pas les modèles métier. Voir [DATA_HISTORY.md](DATA_HISTORY.md).
 
 Le dépôt conserve les choix de la revue V2 et du contre-audit. Un monorepo contient plusieurs applications, sans en faire des microservices. Les études sont dans `docs/product`, les décisions actuelles dans `docs/architecture` et les propositions remplacées dans `docs/archive`. Seuls README et AGENTS restent des documents Markdown de racine.
 

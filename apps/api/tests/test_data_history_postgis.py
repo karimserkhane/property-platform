@@ -19,6 +19,7 @@ from property_platform.modules.evidence.basemap_archive import (  # noqa: E402
     archive_pending,
     archived_tile,
 )
+from property_platform.modules.evidence.history.pipeline_inventory import inventory  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     BasemapRequest,
     Capture,
@@ -26,7 +27,6 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     RowRevision,
     Source,
 )
-from property_platform.modules.evidence.pipeline_inventory import inventory  # noqa: E402
 from property_platform.modules.publication.context_preview import public_context  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]

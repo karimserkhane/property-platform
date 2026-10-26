@@ -1,7 +1,7 @@
 """Bounded reads of complete public snapshots, never an HTTP-time collection."""
 
 from ..evidence.abu_dhabi import FEEDS
-from ..evidence.history import context_rows, observation_history
+from ..evidence.history.journals import context_rows, observation_history
 from ..evidence.models import (
     BusRouteObservation,
     CensusMeasureObservation,

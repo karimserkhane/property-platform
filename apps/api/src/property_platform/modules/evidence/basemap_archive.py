@@ -11,7 +11,7 @@ from django.db.models import Q, Sum
 from django.utils import timezone
 
 from .basemap_models import PROVIDERS
-from .history import audit_context
+from .history.journals import audit_context
 from .media_storage import read_capture
 from .models import BasemapRequest, BasemapTile, Capture, IngestionRun, Source
 

@@ -29,10 +29,10 @@ from . import (
 )
 from . import rebuild_published as published_level
 from .collection_profiles import COLLECTIONS
-from .history import audit_context
+from .history.journals import audit_context
+from .history.pipeline_inventory import inventory
 from .media_storage import read_capture
 from .models import BasemapTile, Capture, ImageryScene, IngestionRun, PropertyPresentation
-from .pipeline_inventory import inventory
 
 logger = logging.getLogger(__name__)
 VERSION = 1

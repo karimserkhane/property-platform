@@ -44,6 +44,12 @@ type = "layers"
 layers = ["property_platform.modules.publication", "property_platform.modules.evidence", "property_platform.modules.catalog"]
 
 [[tool.importlinter.contracts]]
+name = "Evidence sub-packages follow their dependency direction"
+type = "layers"
+containers = ["property_platform.modules.evidence"]
+layers = ["(rebuild)", "(projects)", "(maps)", "(sources)", "history"]
+
+[[tool.importlinter.contracts]]
 name = "Domain modules never import delivery or configuration"
 type = "forbidden"
 source_modules = ["property_platform.modules"]

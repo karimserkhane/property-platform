@@ -50,7 +50,7 @@ Arguments pytest : `... run --rm --no-deps checks-api bash scripts/checks/api.sh
 Toute donnée métier doit pouvoir être reconstruite par les migrations et les pipelines Prefect :
 
 - Une donnée entre par un collecteur ou une commande documentée qui crée sa capture, son exécution et son audit. Pas de SQL manuel dans la base partagée, pas de valeur saisie sans source.
-- Une nouvelle table est rattachée à ses flows dans `evidence/pipeline_inventory.py` et appelle `evidence.install_row_journals(false)` dans sa migration ([DATA_HISTORY.md](DATA_HISTORY.md)).
+- Une nouvelle table est rattachée à ses flows dans `evidence/history/pipeline_inventory.py` et appelle `evidence.install_row_journals(false)` dans sa migration ([DATA_HISTORY.md](DATA_HISTORY.md)).
 - Une décision humaine (exclusion, rapprochement) passe par une commande auditée et réversible, sauvegardée (tâche A03).
 - Les migrations sont additives ; ne jamais renuméroter une migration d'une autre branche sans le dire dans la PR.
 

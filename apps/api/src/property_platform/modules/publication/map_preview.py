@@ -1,7 +1,7 @@
 from django.db import connection, transaction
 
 from property_platform.modules.catalog.map_queries import map_rows
-from property_platform.modules.evidence.catalogue_history import recover_display
+from property_platform.modules.evidence.history.catalogue_history import recover_display
 from property_platform.modules.evidence.queries import (
     map_provenances,
     map_usage_tags,

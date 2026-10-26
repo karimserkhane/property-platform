@@ -27,7 +27,7 @@ from .activity_models import (
     DERIVING_METHODS,
     ConstructionActivityMeasurement,
 )
-from .history import audit_context
+from .history.journals import audit_context
 from .models import Capture, IngestionRun, ProjectIdentityLink, Source
 from .project_queries import location_method
 from .queries import map_provenances

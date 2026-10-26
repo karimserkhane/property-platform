@@ -2,6 +2,8 @@
 
 Possède sources, acquisitions, assertions et décisions de rapprochement. Peut utiliser les interfaces du catalogue ; ne dépend pas de publication.
 
+Le module se range en sous-paquets (`history`, puis `sources`, `maps`, `projects`, `rebuild`) dont la direction est vérifiée par Import Linter ; voir [REPOSITORY.md](../../../../../../docs/engineering/REPOSITORY.md). `history/` possède les journaux de lignes, les exclusions réversibles, les reprises de champs et la couverture des tables par les pipelines.
+
 Les corrections sont tracées et les rapprochements réversibles. Ce module conserve les propositions ; il ne publie pas directement les données du catalogue.
 
 Le schéma SQL `evidence` contient `source`, `ingestion_run`, `capture`, `parcel_observation`, `audit_event`, `quarantined_observation`, `map_observation`, `research_reference` `imagery_scene`, `property_presentation` et `property_media`. Les services et commandes utilisent les modèles Django configurés pour ces noms.

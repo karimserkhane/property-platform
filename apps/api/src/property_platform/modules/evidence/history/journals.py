@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from django.db import connection
 from django.db.models import CharField, OuterRef, Subquery, TextField
 
-from .models import HistoryExclusion
+from ..models import HistoryExclusion
 
 
 @contextmanager

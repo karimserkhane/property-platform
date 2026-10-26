@@ -11,7 +11,7 @@ from django.db import connection, transaction
 from django.db.models import Q
 from django.utils import timezone
 
-from .history import audit_context
+from .history.journals import audit_context
 from .media_storage import read_capture
 from .models import (
     Capture,
