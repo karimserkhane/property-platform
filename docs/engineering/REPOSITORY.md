@@ -63,6 +63,10 @@ de l'index pour publier. Direction : ingestion (flow `property-platform-evidence
 evidence/search → evidence/projects → catalog. `api/evidence_search.py` expose la recherche
 (`GET /preview/evidence-search`, opération `previewEvidenceSearch`, lecture mise en cache) ;
 direction : API → evidence/search. Voir [EVIDENCE_SEARCH.md](EVIDENCE_SEARCH.md).
+`evidence/search/embeddings.py` est le seul client du service facultatif `embeddings`
+(modèle local figé, profil Compose `embeddings`) ; `evidence_search_embedding` (migration 0039)
+garde les vecteurs dérivés de l'index, supprimés avec leur affirmation. Sans le service, la
+recherche plein texte reste complète. Le modèle n'entre jamais dans les runtimes web/API.
 
 **Fiche « Vérification » — B05, 25 octobre 2026.** `evidence/projects/verification_sheet.py`
 possède l'assemblage en lecture de la fiche : dernière lecture du registre, liens officiels

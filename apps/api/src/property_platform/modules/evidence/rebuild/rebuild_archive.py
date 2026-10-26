@@ -59,6 +59,9 @@ BACKUP_ONLY = {
 # Derived from the published dossiers, which are compared on their own; reported only.
 DERIVED = {
     "evidence_search_entry": "Search index of the published dossiers (E01), rebuilt last",
+    "evidence_search_embedding": (
+        "Vectors of the search index (E01); only with the optional embeddings service"
+    ),
 }
 # A historically unavailable reference is reproduced as unavailable, not as a new failure.
 REPLAYED_STATUS = {"failed": "replayed_unavailable"}

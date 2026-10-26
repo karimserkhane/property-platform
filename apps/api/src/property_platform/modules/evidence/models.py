@@ -7,7 +7,7 @@ from .accessibility_models import RoutingGraph, RoutingGraphPart, WalkingArea, W
 from .activity_models import ConstructionActivityMeasurement  # noqa: F401
 from .basemap_models import BasemapRequest, BasemapTile  # noqa: F401
 from .history_models import HistoryExclusion, RowRevision  # noqa: F401
-from .search_models import EvidenceSearchEntry  # noqa: F401
+from .search_models import EvidenceSearchEmbedding, EvidenceSearchEntry  # noqa: F401
 
 
 class Source(models.Model):

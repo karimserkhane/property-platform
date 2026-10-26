@@ -55,3 +55,30 @@ class EvidenceSearchEntry(models.Model):
                 name="evidence_search_entry_valid",
             ),
         ]
+
+
+class EvidenceSearchEmbedding(models.Model):
+    """Vector of one indexed statement, computed by the pinned local model.
+
+    Derived like its entry and removed with it. Stored as float32 bytes rather than a
+    pgvector column: the shared PostGIS image has no pgvector, and the published index
+    is small enough to rank in memory. See docs/engineering/EVIDENCE_SEARCH.md.
+    """
+
+    entry = models.OneToOneField(
+        EvidenceSearchEntry, on_delete=models.CASCADE, related_name="embedding"
+    )
+    # `<model>@<revision>`: a vector from another model is recomputed, never compared.
+    model = models.CharField(max_length=200)
+    vector = models.BinaryField()
+    run = models.ForeignKey("evidence.IngestionRun", on_delete=models.PROTECT)
+    ingested_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "evidence_search_embedding"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(model__regex=r"^[^@\s]+@[a-f0-9]{40}$"),
+                name="evidence_search_embedding_valid",
+            ),
+        ]
