@@ -305,6 +305,63 @@ class ProjectConstructionActivityResponse(Schema):
     parcels: list[ActivityParcelResponse]
 
 
+class ObservedSalesLabelResponse(Schema):
+    """Reviewed ADREC sales label that selects the project's recorded sales."""
+
+    district: str
+    label: str
+    evidence: Literal["register_name", "project_name"]
+    registration_number: str | None
+    reviewed_on: date
+
+
+class ObservedSalesCaptureResponse(Schema):
+    url: str
+    content_sha256: str
+
+
+class ObservedSalesWindowResponse(Schema):
+    """Newest ADREC sales window of the territory; windows overlap and are never added."""
+
+    territory: str
+    period_start: date
+    period_end: date
+    collected_at: datetime
+    captures: list[ObservedSalesCaptureResponse]
+
+
+class ObservedRangeResponse(Schema):
+    """Smallest and largest recorded value, as decimal text."""
+
+    min: str
+    max: str
+
+
+class ObservedSalesGroupResponse(Schema):
+    """Recorded sales of one type; ranges cover the full-share sales only."""
+
+    property_type: str
+    property_layout: str
+    sale_application_type: str
+    sale_sequence: str
+    sales_count: int
+    full_share_count: int
+    price_aed: ObservedRangeResponse | None
+    rate_aed_per_sqm: ObservedRangeResponse | None
+    sold_area_sqm: ObservedRangeResponse | None
+    first_registration_date: date
+    last_registration_date: date
+
+
+class ProjectObservedSalesResponse(Schema):
+    """Recorded ADREC sales of the project's reviewed labels, by type, with ranges."""
+
+    source: ActivitySourceResponse
+    labels: list[ObservedSalesLabelResponse]
+    window: ObservedSalesWindowResponse | None
+    groups: list[ObservedSalesGroupResponse]
+
+
 class ProjectDetailResponse(Schema):
     id: UUID
     slug: str
@@ -329,6 +386,7 @@ class ProjectDetailResponse(Schema):
     cancellation_retention: CancellationRetentionResponse | None = None
     verification: ProjectVerificationResponse | None = None
     construction_activity: ProjectConstructionActivityResponse | None = None
+    observed_sales: ProjectObservedSalesResponse | None = None
 
 
 class ProjectSummaryResponse(Schema):

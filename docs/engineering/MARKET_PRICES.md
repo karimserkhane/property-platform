@@ -1,6 +1,6 @@
 # Prix observés et prix demandés (C01)
 
-Tâche [C01](../tasks/C01.md), plan : [prix observés contre prix demandés](../product/PLAN_CONCURRENTIEL_20261023.md). Ce guide décrit d'abord le rapprochement entre les fiches projet et les ventes ADREC ; la projection des fourchettes et le prix demandé viendront dans la même tâche.
+Tâche [C01](../tasks/C01.md), plan : [prix observés contre prix demandés](../product/PLAN_CONCURRENTIEL_20261023.md). Ce guide décrit le rapprochement entre les fiches projet et les ventes ADREC, puis la lecture des fourchettes par type ; l'affichage et le prix demandé viendront dans la même tâche.
 
 ## 1. Le problème
 
@@ -29,7 +29,19 @@ Premier registre (26 octobre 2026) : **53 libellés** des trois îles, dont 16 p
 2. Ajouter la ligne dans `project_market_labels.json` avec la preuve applicable ; si aucune ne s'applique, ne pas lier : enregistrer d'abord le nom au registre des projets (source ADREC citée), puis lier par `register_name`.
 3. `pytest apps/api/tests/test_project_market_labels.py` valide le registre ; le prochain passage du pipeline des fiches (ou la commande) crée le lien. Retirer une ligne révoque le lien.
 
-## 5. Reste à faire dans C01
+## 5. Ventes observées par projet et type
 
-- Projection par projet et type (fourchette, effectif, période de la fenêtre, primaire/secondaire), jamais une valeur unique sans intervalle.
+Lecture seule par `evidence.market_sheet.project_market`, champ `observed_sales` de `GET /api/v1/preview/projects/{slug}` (absent, `null`, tant que la fiche n'a aucun libellé actif).
+
+- **Une seule fenêtre.** Les snapshots ADREC sont des fenêtres de 90 jours qui se recouvrent : la lecture prend le dernier snapshot de ventes **réussi** du territoire de la fiche (fin de période, puis date de collecte), jamais une somme de fenêtres ; le snapshot de l'émirat, qui recouvre ceux des îles, n'est pas lu ici. Fenêtre, date de collecte et captures (URL, empreinte) des lignes retenues sont rendues.
+- **Sélection.** Ventes dont `(district, project_name)` est égal à un libellé actif de la fiche ; un libellé révoqué retire immédiatement ses ventes.
+- **Groupes** : type de bien, typologie (`property_layout`), off-plan/prêt (`sale_application_type`), primaire/secondaire (`sale_sequence`), textes ADREC d'origine. Pour chacun : effectif, effectif des ventes de part entière, fourchettes min–max du prix (AED), du prix au m² et de la surface vendue, première et dernière date d'enregistrement.
+- **Parts partielles** (`sold_share` < 1) : comptées dans l'effectif, exclues des fourchettes, dont le prix ne décrit pas un bien entier.
+- Aucune médiane, moyenne ni estimation : une fourchette et son effectif. Un groupe d'une vente montre une fourchette réduite à cette vente, avec son effectif 1.
+
+Tests : `test_market_sheet_postgis.py` (fenêtre la plus récente seule, parts partielles, libellé révoqué, fiche sans libellé).
+
+## 6. Reste à faire dans C01
+
+- Affichage de la section sur la fiche projet (16 langues), avec nature « observé », fenêtre et source.
 - Prix demandé : aucun n'est collecté aujourd'hui (les extracteurs de fiches projet l'excluent volontairement, par exemple `project_propertyfinder.py` et `project_psi.py`). Le plan n'autorise à citer un prix demandé que lié à une annonce porteuse d'un permis Madhmoun vérifié ; la source de ces annonces reste à qualifier.

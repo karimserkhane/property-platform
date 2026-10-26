@@ -70,8 +70,11 @@ supprimés ; la page n'est jamais lue. Voir [la vérification des projets](PROJE
 `project_name` des ventes ADREC d'un district : égalité normalisée avec le nom de la
 fiche ou d'un de ses enregistrements ADREC, jamais une ressemblance. Table journalisée
 `evidence.project_market_label` (migration additive `0036`), liens révoqués et jamais
-supprimés ; les ventes ne sont pas recopiées. Direction : import evidence → catalog,
-sans point d'entrée HTTP ni changement de contrat. Voir [les prix observés](MARKET_PRICES.md).
+supprimés ; les ventes ne sont pas recopiées. Direction : import evidence → catalog.
+Lecture : `evidence/market_sheet.py` regroupe par type les ventes des libellés actifs dans la
+dernière fenêtre réussie du territoire (fourchettes et effectifs, jamais une valeur seule) ;
+`project_queries.project_detail` l'appelle (champ `observed_sales`, contrat régénéré).
+Voir [les prix observés](MARKET_PRICES.md).
 
 **État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild_published.py`
 possède la forme canonique de l'état publié (fiches projet, liens d'identité actifs),
