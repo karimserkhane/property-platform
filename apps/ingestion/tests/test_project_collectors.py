@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_protocol import (
     MAX_CAPTURE_BYTES,
     extract_project_source,
     project_registry,

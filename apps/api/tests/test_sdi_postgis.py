@@ -10,14 +10,14 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 from test_onwani_postgis import feature, run  # noqa: E402
 
 from property_platform.modules.catalog.models import Parcel  # noqa: E402
-from property_platform.modules.evidence import sdi_protocol as protocol  # noqa: E402
+from property_platform.modules.evidence.maps import sdi_protocol as protocol  # noqa: E402
+from property_platform.modules.evidence.maps.sdi_import import import_parcels  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     IngestionRun,
     ParcelObservation,
     QuarantinedObservation,
 )
-from property_platform.modules.evidence.sdi_import import import_parcels  # noqa: E402
 from property_platform.modules.publication.land_use import category  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]

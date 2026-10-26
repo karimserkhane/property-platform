@@ -16,7 +16,7 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 from test_adrec_postgis import execute, sales_acquisition  # noqa: E402
 from test_adrec_protocol import sale  # noqa: E402
 
-from property_platform.modules.evidence.accessibility import (  # noqa: E402
+from property_platform.modules.evidence.maps.accessibility import (  # noqa: E402
     StoredGraphReceipt,
     archive_graph,
     archive_walking,

@@ -364,7 +364,7 @@ def projects(
     offset: int = Query(0, ge=0, le=50000),
     limit: int = Query(200, ge=1, le=200),
 ):
-    from property_platform.modules.evidence.project_queries import project_directory
+    from property_platform.modules.evidence.projects.project_queries import project_directory
 
     return project_directory(territory, query=q, offset=offset, limit=limit)
 
@@ -378,7 +378,9 @@ def projects(
 def project_detail(request, slug: str):
     if len(slug) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
         return Status(404, {"code": "not_found"})
-    from property_platform.modules.evidence.project_queries import project_detail as read_project
+    from property_platform.modules.evidence.projects.project_queries import (
+        project_detail as read_project,
+    )
     from property_platform.modules.publication.cancellation_retention import project_retention
 
     result = read_project(slug)
@@ -420,7 +422,7 @@ class DeveloperDeliveryHistoryResponse(Schema):
 def developer_delivery_history(request, key: str):
     if len(key) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", key):
         return Status(404, {"code": "not_found"})
-    from property_platform.modules.evidence.delivery_history import (
+    from property_platform.modules.evidence.projects.delivery_history import (
         developer_delivery_history as read_history,
     )
 

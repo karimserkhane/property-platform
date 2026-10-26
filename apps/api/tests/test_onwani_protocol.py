@@ -6,7 +6,7 @@ from urllib.error import HTTPError
 
 import pytest
 
-from property_platform.modules.evidence import onwani
+from property_platform.modules.evidence.maps import onwani
 
 
 def feature():
@@ -77,7 +77,7 @@ def test_rejects_changed_metadata():
 def test_http_error_response_is_returned_for_capture_not_discarded():
     payload = b'{"error":{"code":429}}'
     error = HTTPError(onwani.BASE_URL, 429, "rate limited", {}, BytesIO(payload))
-    with patch("property_platform.modules.evidence.onwani.urlopen", side_effect=error):
+    with patch("property_platform.modules.evidence.maps.onwani.urlopen", side_effect=error):
         raw, receipt = onwani.fetch()
     assert raw == payload
     assert receipt["http_status"] == 429

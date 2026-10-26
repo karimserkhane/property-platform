@@ -6,7 +6,10 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection
 
 from property_platform.modules.evidence.collection_profiles import COLLECTIONS
-from property_platform.modules.evidence.property_import import import_presentations, registry
+from property_platform.modules.evidence.projects.property_import import (
+    import_presentations,
+    registry,
+)
 
 
 class Command(BaseCommand):

@@ -34,8 +34,8 @@ Ajouter le préfixe `C:\Users\Karim\Repositories\property-platform\` aux chemins
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\registry.py` | Déploiements, paramètres et calendrier |
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\flows.py` | Flows Prefect et identité durable de l’exécution |
 | `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\collectors\adrec.py` | Acquisition HTTPS bornée, avant transaction SQL |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\adrec.py` | Schéma source, filtres autorisés, pagination et nettoyage typé |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\adrec_import.py` | Conservation des captures puis écriture des observations avec Django |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\adrec.py` | Schéma source, filtres autorisés, pagination et nettoyage typé |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\adrec_import.py` | Conservation des captures puis écriture des observations avec Django |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\models.py` | Modèles SQL des snapshots, ventes et indices |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\migrations\0014_adrec_market_snapshots.py` | Création des nouvelles tables dans le schéma `evidence` |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\publication\adrec_preview.py` | Lecture du dernier snapshot complet pour l’interface |

@@ -2,8 +2,8 @@
 
 from test_delivery_history import BROKER, DEVELOPER, announcement, register
 
-from property_platform.modules.evidence.delivery_history import project_history
-from property_platform.modules.evidence.verification_sheet import contradictions
+from property_platform.modules.evidence.projects.delivery_history import project_history
+from property_platform.modules.evidence.projects.verification_sheet import contradictions
 
 Q1_2026 = ("quarter", 2026, 1, None, None)
 Q4_2027 = ("quarter", 2027, 4, None, None)

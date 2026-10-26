@@ -2,7 +2,7 @@
 
 import httpx
 import pytest
-from property_platform.modules.evidence import sdi_protocol as protocol
+from property_platform.modules.evidence.maps import sdi_protocol as protocol
 from test_collectors import client
 
 from property_platform_ingestion.collectors.sdi import precollect_sdi

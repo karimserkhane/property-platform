@@ -9,8 +9,8 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 from test_projects_postgis import project_input  # noqa: E402,F401,F811
 
 from property_platform.modules.evidence.models import Capture, ProjectMedia  # noqa: E402
-from property_platform.modules.evidence.project_import import import_project_details  # noqa: E402
-from property_platform.modules.evidence.project_media_storage import (  # noqa: E402
+from property_platform.modules.evidence.projects.project_import import import_project_details  # noqa: E402
+from property_platform.modules.evidence.projects.project_media_storage import (  # noqa: E402
     approve_project_media,
     attach_project_media_file,
 )

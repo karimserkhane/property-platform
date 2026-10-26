@@ -81,7 +81,7 @@ def test_source_history_never_accepts_a_different_project_or_changed_raw_bytes(t
 
 
 def test_catalogue_history_rebuilds_original_discovery_even_when_publisher_is_gone(tmp_path):
-    from property_platform.modules.evidence.project_discovery import catalogue_for
+    from property_platform.modules.evidence.projects.project_discovery import catalogue_for
     from test_project_discovery import aldar_catalogue
 
     scope = "saadiyat-island:aldar-saadiyat"

@@ -16,13 +16,13 @@ from test_onwani_postgis import feature, run  # noqa: E402
 
 from property_platform.modules.catalog.models import AdministrativeArea, Parcel  # noqa: E402
 from property_platform.modules.catalog.services import supersede_parcel  # noqa: E402
-from property_platform.modules.evidence import map_sources as map_protocol  # noqa: E402
-from property_platform.modules.evidence.identity_repair import (  # noqa: E402
+from property_platform.modules.evidence.maps import map_sources as map_protocol  # noqa: E402
+from property_platform.modules.evidence.maps.identity_repair import (  # noqa: E402
     repair_source_identities,
     reverse_identity_decision,
 )
-from property_platform.modules.evidence.identity_resolution import IdentityConflict  # noqa: E402
-from property_platform.modules.evidence.map_import import import_map_layer  # noqa: E402
+from property_platform.modules.evidence.maps.identity_resolution import IdentityConflict  # noqa: E402
+from property_platform.modules.evidence.maps.map_import import import_map_layer  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     AdministrativeAreaSourceAlias,
     AuditEvent,
@@ -32,7 +32,7 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ParcelObservation,
     ParcelSourceAlias,
 )
-from property_platform.modules.evidence.queries import (  # noqa: E402
+from property_platform.modules.evidence.projects.queries import (  # noqa: E402
     map_provenances,
     parcel_attributes,
     parcel_provenance,
@@ -71,7 +71,9 @@ def legacy_duplicate():
     newer = plot(101)
     newer["attributes"]["Permit_LastType"] = "Fresh permit source observation"
     # Reproduce the historic importer behaviour, without weakening the current guard.
-    with patch("property_platform.modules.evidence.services.resolve_parcel", return_value=None):
+    with patch(
+        "property_platform.modules.evidence.maps.services.resolve_parcel", return_value=None
+    ):
         acquisition = run([newer])
     duplicate = Parcel.objects.exclude(pk=canonical.pk).get()
     return canonical, duplicate, acquisition
@@ -104,7 +106,7 @@ def area_run(oid=1, *, name="RT1", district="57", changed_geometry=False):
         "last_modified_raw": "",
     }
     with patch(
-        "property_platform.modules.evidence.map_sources.fetch_url",
+        "property_platform.modules.evidence.maps.map_sources.fetch_url",
         side_effect=[
             (json.dumps(value).encode(), receipt) for value in (meta, listing, batch, listing)
         ],
@@ -318,7 +320,7 @@ def test_administrative_repair_and_reversal_keep_source_observations():
     area_run()
     canonical = AdministrativeArea.objects.get()
     with patch(
-        "property_platform.modules.evidence.map_import.resolve_administrative_area",
+        "property_platform.modules.evidence.maps.map_import.resolve_administrative_area",
         return_value=None,
     ):
         acquisition = area_run(101)

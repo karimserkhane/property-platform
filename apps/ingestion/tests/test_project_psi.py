@@ -4,13 +4,16 @@ import hashlib
 import json
 
 import pytest
-from property_platform.modules.evidence.project_discovery import candidates_for, catalogue_registry
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_discovery import (
+    candidates_for,
+    catalogue_registry,
+)
+from property_platform.modules.evidence.projects.project_protocol import (
     extract_project_source,
     project_registry,
     project_urls,
 )
-from property_platform.modules.evidence.project_psi import psi_position, psi_record
+from property_platform.modules.evidence.projects.project_psi import psi_position, psi_record
 
 
 def fixture():

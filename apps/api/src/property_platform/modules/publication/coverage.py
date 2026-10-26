@@ -8,8 +8,8 @@ from property_platform.modules.catalog.territories import (
     TERRITORY_BY_ID,
 )
 from property_platform.modules.evidence.collection_profiles import collection_for
-from property_platform.modules.evidence.onwani import SOURCE_KEY
-from property_platform.modules.evidence.sdi_protocol import namespace as sdi_namespace
+from property_platform.modules.evidence.maps.onwani import SOURCE_KEY
+from property_platform.modules.evidence.maps.sdi_protocol import namespace as sdi_namespace
 
 
 @dataclass(frozen=True)
@@ -151,7 +151,7 @@ def reference_source_keys(profile):
 
 
 def map_source_namespaces(territory_id):
-    from property_platform.modules.evidence.project_protocol import project_registry
+    from property_platform.modules.evidence.projects.project_protocol import project_registry
 
     members = member_territories(territory_id)
     return (

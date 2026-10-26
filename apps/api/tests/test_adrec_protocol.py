@@ -4,7 +4,7 @@ from decimal import Decimal
 
 import pytest
 
-from property_platform.modules.evidence import adrec
+from property_platform.modules.evidence.sources import adrec
 
 SCOPE = adrec.sales_scope("al-reem-island", as_of=date(2026, 10, 13))
 

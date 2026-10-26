@@ -2,7 +2,7 @@
 
 from urllib.parse import urlencode
 
-from property_platform.modules.evidence import sdi_protocol as protocol
+from property_platform.modules.evidence.maps import sdi_protocol as protocol
 
 from .map import _arcgis_parameters
 from .snapshots import ReplayFetcher, _batch_ids, _params

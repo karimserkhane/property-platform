@@ -14,7 +14,7 @@ from test_delivery_history_postgis import announce, read_register, sensi  # noqa
 
 from property_platform.modules.catalog.models import Project  # noqa: E402
 from property_platform.modules.evidence.models import ProjectVerificationLink  # noqa: E402
-from property_platform.modules.evidence.project_queries import project_detail  # noqa: E402
+from property_platform.modules.evidence.projects.project_queries import project_detail  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

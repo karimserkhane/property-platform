@@ -11,7 +11,6 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Project relations require real PostGIS", allow_module_level=True)
 
 from property_platform.modules.catalog.models import Developer, Project  # noqa: E402
-from property_platform.modules.evidence import project_relations as sync  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     HistoryExclusion,
@@ -20,7 +19,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ProjectSnapshot,
     Source,
 )
-from property_platform.modules.evidence.project_queries import (  # noqa: E402
+from property_platform.modules.evidence.projects import project_relations as sync  # noqa: E402
+from property_platform.modules.evidence.projects.project_queries import (  # noqa: E402
     project_detail,
     project_directory,
 )

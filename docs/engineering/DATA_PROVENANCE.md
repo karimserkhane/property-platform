@@ -4,9 +4,9 @@ Décision du 10 octobre 2026 : la carte pilote couvre Al Reem Island. Les donné
 
 ## Import manuel implémenté
 
-Le connecteur `apps/api/src/property_platform/modules/evidence/onwani.py` interroge la source officielle à chaque exécution, filtre `AL REEM ISLAND` **et** `ADM`, vérifie son schéma et collecte les identifiants puis les géométries par lots. Une seconde liste d'identifiants contrôle la couverture en fin de collecte ; elle ne garantit pas que tous les attributs sont restés figés pendant l'acquisition.
+Le connecteur `apps/api/src/property_platform/modules/evidence/maps/onwani.py` interroge la source officielle à chaque exécution, filtre `AL REEM ISLAND` **et** `ADM`, vérifie son schéma et collecte les identifiants puis les géométries par lots. Une seconde liste d'identifiants contrôle la couverture en fin de collecte ; elle ne garantit pas que tous les attributs sont restés figés pendant l'acquisition.
 
-`apps/api/src/property_platform/modules/evidence/services.py` conserve les réponses exactes et leur empreinte, puis applique un lot complet dans une transaction qui conserve aussi observations et audit. Un verrou PostgreSQL de session empêche deux instances de ce connecteur de modifier le catalogue simultanément. Connexion directe requise ; ne pas utiliser de pooler de transaction pour cette commande.
+`apps/api/src/property_platform/modules/evidence/maps/services.py` conserve les réponses exactes et leur empreinte, puis applique un lot complet dans une transaction qui conserve aussi observations et audit. Un verrou PostgreSQL de session empêche deux instances de ce connecteur de modifier le catalogue simultanément. Connexion directe requise ; ne pas utiliser de pooler de transaction pour cette commande.
 
 Une répétition crée une nouvelle acquisition et de nouvelles observations, mais pas de nouvelles parcelles pour les mêmes identifiants de source. Les changements typés ou géométriques augmentent la révision et produisent un audit. Les dates externes restent dans leurs champs bruts ; aucune date de publication n'est inventée. Les captures référencent exactement le champ `features[n]`, qui permet de retrouver chaque attribut et la géométrie d'origine.
 

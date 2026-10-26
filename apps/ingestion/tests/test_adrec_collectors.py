@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
-from property_platform.modules.evidence import adrec
+from property_platform.modules.evidence.sources import adrec
 
 from property_platform_ingestion import flows
 from property_platform_ingestion.collectors.adrec import precollect_adrec

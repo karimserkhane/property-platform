@@ -19,8 +19,8 @@ from property_platform.modules.evidence.models import (
     PropertyMedia,
     PropertyPresentation,
 )  # noqa: E402
-from property_platform.modules.evidence.property_import import import_presentations  # noqa: E402
-from property_platform.modules.evidence.queries import property_presentations  # noqa: E402
+from property_platform.modules.evidence.projects.property_import import import_presentations  # noqa: E402
+from property_platform.modules.evidence.projects.queries import property_presentations  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

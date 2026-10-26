@@ -46,7 +46,9 @@ def manifest_files(root, name):
 
 
 def ingest_files(root, name, *, actor):
-    from property_platform.modules.evidence.project_media_storage import attach_project_media_file
+    from property_platform.modules.evidence.projects.project_media_storage import (
+        attach_project_media_file,
+    )
 
     entries = manifest_files(root, name)  # Validate the entire manifest before mutating data.
     captures = [

@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from property_platform.modules.evidence.project_queries import project_location_gaps
+from property_platform.modules.evidence.projects.project_queries import project_location_gaps
 
 
 class Command(BaseCommand):
