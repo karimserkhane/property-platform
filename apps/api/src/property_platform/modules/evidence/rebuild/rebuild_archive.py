@@ -56,6 +56,10 @@ BACKUP_ONLY = {
     "walking_area": "Derived walking calculations require the routing worker",
     "basemap_request": "Demand queue includes requests without any acquired capture",
 }
+# Derived from the published dossiers, which are compared on their own; reported only.
+DERIVED = {
+    "evidence_search_entry": "Search index of the published dossiers (E01), rebuilt last",
+}
 # A historically unavailable reference is reproduced as unavailable, not as a new failure.
 REPLAYED_STATUS = {"failed": "replayed_unavailable"}
 # Catalogue identities whose duplicates, created before import-time resolution existed,
@@ -920,11 +924,15 @@ def compare_tables(
         name = table.split(".")[1]
         evidence_table = table.startswith("evidence.")
         reason = BACKUP_ONLY.get(name) if evidence_table else None
+        derived = DERIVED.get(name) if evidence_table else None
         policy = (
             "backup"
             if reason
+            else "derived"
+            if derived
             else ("new_audit" if evidence_table and name in TECHNICAL else "exact")
         )
+        reason = reason or derived
         row = {
             "table": table,
             "expected": expected.get(table),

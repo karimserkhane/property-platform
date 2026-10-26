@@ -70,6 +70,7 @@ Les horaires ci-dessous sont **préparés mais désactivés au premier enregistr
 | `property-presentations` | Six présentations examinées et médias dont les droits sont déclarés | Tous les jours 02:00 |
 | `sentinel-previews` | Reçu existant de deux scènes historiques Sentinel | Manuel uniquement |
 | `construction-activity` | Changement au sol Sentinel-2 des parcelles de projets relues ([méthode](CONSTRUCTION_ACTIVITY.md)) | Le 5 de chaque mois à 04:00, horaire inactif |
+| `evidence-search` | Index de recherche des affirmations publiées et de leurs preuves, sans collecte ([règles](EVIDENCE_SEARCH.md)) | Tous les jours à 02:30, horaire inactif |
 | `ingestion-readiness` | Vérification des registres et de la migration d'orchestration ; aucune collecte ni écriture métier | Manuel uniquement |
 
 Le registre de recherche contient actuellement **113 URL** ; cela ne signifie pas que 113 fournisseurs acceptent la collecte ou que 113 projets sont identifiés. Le flow de références traite chaque URL séparément et signale un lot incomplet si certaines échouent. Une page de recherche reste une référence, pas une preuve automatiquement acceptée d'un prix ou d'une disponibilité.

@@ -11,17 +11,6 @@ import json
 import re
 import unicodedata
 
-KINDS = (
-    "summary",
-    "handover",
-    "programme_total",
-    "typologies",
-    "amenity",
-    "declared_progress",
-    "registration",
-    "component_of",
-    "has_component",
-)
 # Arabic letters folded to their usual spelling variants; tatweel is decoration only.
 _ARABIC_FOLDS = str.maketrans({"ة": "ه", "ى": "ي", "ـ": None})
 # Han and kana are written without spaces: each character is its own search term.

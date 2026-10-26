@@ -7,7 +7,17 @@ those no longer published. See docs/engineering/EVIDENCE_SEARCH.md.
 
 from django.db import models
 
-from .search.claims import KINDS
+KINDS = (
+    "summary",
+    "handover",
+    "programme_total",
+    "typologies",
+    "amenity",
+    "declared_progress",
+    "registration",
+    "component_of",
+    "has_component",
+)
 
 
 class EvidenceSearchEntry(models.Model):

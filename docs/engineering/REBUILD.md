@@ -112,6 +112,7 @@ automatique.
 | `backup` | État non rétabli par le rejeu des captures : conserver/restaurer A03 ou relancer son pipeline dédié selon le tableau suivant. |
 | `identity` | Parcelles et zones administratives : les identités **actives** doivent être identiques (nombre et empreinte des couples espace de noms/identifiant source). Les lignes remplacées absentes du rejeu doivent correspondre exactement aux réparations revues de doublons (alias A03 avec `superseded_*`) ; l'importateur actuel résout ces enregistrements à l'import et ne recrée pas le doublon. Un manifeste plus ancien, sans ces statistiques, garde la comparaison `exact`. |
 | `history` | Historique des lectures de fiches et de catalogues (`project_snapshot`, `project_typology`, `project_amenity`, `project_media`, `project_source_candidate`, liens révoqués de `project_identity_link`) : compte affiché et expliqué (`history_differences`, `interpretations`), **non bloquant**, parce que l'[état publié](#état-publié-a12) est comparé à sa place. Sans état publié dans le manifeste, ces tables restent `exact`. |
+| `derived` | Index dérivé de l'état publié (`evidence_search_entry`, [E01](EVIDENCE_SEARCH.md)) : reconstruit en dernière étape, compte affiché, **non bloquant** ; les fiches publiées dont il dérive sont comparées elles-mêmes. |
 
 Chaque étape rejouée porte aussi, quand ils diffèrent de l'exécution d'origine, les
 comptes d'observations écrites par cette étape (`rows.expected` / `rows.actual`) :
@@ -219,6 +220,13 @@ code d'ingestion actuel et compare les valeurs enregistrées. Une mesure différ
 une parcelle qui n'est plus une cible fait échouer l'étape (`measurements` dans le
 rapport) ; la table `construction_activity_measurement` reste comparée exactement.
 Détail : [CONSTRUCTION_ACTIVITY.md](CONSTRUCTION_ACTIVITY.md#rejeu-dans-le-contrôle-de-reconstruction).
+
+## Index de recherche des preuves (E01)
+
+L'index `evidence_search_entry` est reconstruit en dernière étape de finition, après les
+relations et les liens de vérification, depuis les fiches publiées du rejeu. Il ne contient
+aucune donnée de source propre : la table suit la politique `derived`, rapportée sans bloquer (les fiches publiées
+sont comparées). Détail : [EVIDENCE_SEARCH.md](EVIDENCE_SEARCH.md#3-reconstruction).
 
 ## État publié (A12)
 

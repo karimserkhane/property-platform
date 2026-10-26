@@ -5,6 +5,8 @@ seule application Django (même `app_label`, mêmes migrations) mais se range en
 sous-paquets, du plus haut au plus bas : `rebuild` (reconstruction, rejeu et passerelle
 d'import, peut tout lire : `rebuild/rebuild_archive.py`, `rebuild_published.py`,
 `replay_protocols.py`, `demo_package.py`, `orchestration.py`, `failed_acquisitions.py`),
+`search` (index de recherche des affirmations publiées, E01 : `search/claims.py`,
+`search/index.py` ; lit `projects`),
 `projects` (fiches, rapprochements et lectures de projets :
 `projects/project_*.py` hors modèles, `property_protocol.py`, `property_import.py`,
 `queries.py`, `verification_sheet.py`, `delivery_history.py`, `activity_import.py`,
@@ -51,6 +53,14 @@ Affichage (B07) : `evidence/projects/activity_sheet.py` lit les mesures pour la 
 requête, jamais la part changée) ; `project_queries.project_detail` l'appelle. Côté web,
 `features/projects/activity.ts` possède les règles pures (niveaux et bases connus) et
 `construction-activity.tsx` le rendu de la section.
+
+**Recherche dans les preuves — E01, 27 octobre 2026.** `evidence/search/claims.py` possède
+l'extraction pure des affirmations d'une fiche publiée et la normalisation multilingue ;
+`evidence/search/index.py` la reconstruction (`rebuild_search_index`) et la recherche
+(`search_claims`) ; `evidence/search_models.py` la table journalisée `evidence_search_entry`
+(migration 0038, index GIN sur expression). Lecture seule de `project_queries` ; rien ne dépend
+de l'index pour publier. Direction : ingestion (flow `property-platform-evidence-search`) →
+evidence/search → evidence/projects → catalog. Voir [EVIDENCE_SEARCH.md](EVIDENCE_SEARCH.md).
 
 **Fiche « Vérification » — B05, 25 octobre 2026.** `evidence/projects/verification_sheet.py`
 possède l'assemblage en lecture de la fiche : dernière lecture du registre, liens officiels
