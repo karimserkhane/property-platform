@@ -2178,6 +2178,20 @@
               "type": "integer"
             },
             "required": false
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "default": "text",
+              "enum": [
+                "text",
+                "hybrid"
+              ],
+              "title": "Mode",
+              "type": "string"
+            },
+            "required": false
           }
         ],
         "responses": {
@@ -2212,7 +2226,7 @@
             }
           }
         },
-        "description": "Published statements matching every word of `q`, each with its evidence (E01).",
+        "description": "Published statements matching `q`, each with its evidence (E01).\n\n`text` requires every word; `hybrid` fuses it with the optional semantic ranking and\nanswers with the full text alone without the embeddings service.",
         "tags": [
           "local-preview"
         ]
@@ -7827,10 +7841,24 @@
             },
             "title": "Items",
             "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "text",
+              "hybrid"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "semantic": {
+            "title": "Semantic",
+            "type": "boolean"
           }
         },
         "required": [
-          "items"
+          "items",
+          "mode",
+          "semantic"
         ],
         "title": "EvidenceSearchResponse",
         "type": "object"

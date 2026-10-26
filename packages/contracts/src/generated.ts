@@ -450,7 +450,10 @@ export interface paths {
         };
         /**
          * Evidence Search
-         * @description Published statements matching every word of `q`, each with its evidence (E01).
+         * @description Published statements matching `q`, each with its evidence (E01).
+         *
+         *     `text` requires every word; `hybrid` fuses it with the optional semantic ranking and
+         *     answers with the full text alone without the embeddings service.
          */
         get: operations["previewEvidenceSearch"];
         put?: never;
@@ -2493,6 +2496,13 @@ export interface components {
         EvidenceSearchResponse: {
             /** Items */
             items: components["schemas"]["EvidenceSearchClaimResponse"][];
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "text" | "hybrid";
+            /** Semantic */
+            semantic: boolean;
         };
         /** EvidenceSearchSourceResponse */
         EvidenceSearchSourceResponse: {
@@ -3889,6 +3899,7 @@ export interface operations {
                 q: string;
                 territory?: ("al-reem-island" | "saadiyat-island" | "al-maryah-island") | null;
                 limit?: number;
+                mode?: "text" | "hybrid";
             };
             header?: never;
             path?: never;

@@ -95,11 +95,18 @@ def test_the_preview_route_answers_with_each_statement_and_its_evidence(client):
         other = client.get(
             "/api/v1/preview/evidence-search", {"q": "penthouse", "territory": "al-reem-island"}
         )
-        assert other.json() == {"items": []}
+        assert other.json() == {"items": [], "mode": "text", "semantic": False}
         first = client.get("/api/v1/preview/evidence-search", {"q": "penthouse", "limit": 1})
         assert first.json()["items"] == items[:1]
         assert client.get("/api/v1/preview/evidence-search").status_code == 422
         assert client.get("/api/v1/preview/evidence-search", {"q": "x" * 121}).status_code == 422
+        unknown = client.get("/api/v1/preview/evidence-search", {"q": "penthouse", "mode": "x"})
+        assert unknown.status_code == 422
+        # Without the optional service, the hybrid mode answers with the full text.
+        fallback = client.get(
+            "/api/v1/preview/evidence-search", {"q": "penthouse", "mode": "hybrid"}
+        ).json()
+        assert fallback == {"items": items, "mode": "hybrid", "semantic": False}
     with override_settings(DEBUG=False, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         assert client.get("/api/v1/preview/evidence-search", {"q": "penthouse"}).status_code == 403
 
@@ -171,3 +178,22 @@ def test_semantic_and_hybrid_answers_cite_the_same_evidence(monkeypatch):
 
     monkeypatch.setattr(embeddings, "_call", unavailable)
     assert hybrid_claims("penthouse") == (lexical, False)
+
+
+def test_the_preview_route_fuses_the_semantic_ranking_on_request(client, monkeypatch):
+    ingest_baccarat()
+    monkeypatch.setattr(embeddings, "_call", FakeService())
+    with override_settings(EVIDENCE_EMBEDDINGS_URL="http://embeddings:80"):
+        rebuild_search_index(actor="search-test", run_key="vectors")
+        with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+            text = client.get("/api/v1/preview/evidence-search", {"q": "penthouse"}).json()
+            fused = client.get(
+                "/api/v1/preview/evidence-search", {"q": "penthouse", "mode": "hybrid", "limit": 5}
+            ).json()
+        expected, _ = hybrid_claims("penthouse", limit=5)
+    assert text["mode"] == "text" and text["semantic"] is False
+    assert fused["mode"] == "hybrid" and fused["semantic"] is True
+    assert [item["claim_key"] for item in fused["items"]] == [
+        item["claim_key"] for item in expected
+    ]
+    assert all("score" not in item for item in fused["items"])

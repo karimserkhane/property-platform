@@ -42,7 +42,7 @@ Dans le contrôle de reconstruction ([REBUILD.md](REBUILD.md)), l'index est reco
 
 ## 4. Route HTTP
 
-`GET /api/v1/preview/evidence-search?q=…&territory=…&limit=…` (opération `previewEvidenceSearch`, `api/evidence_search.py`) renvoie `{"items": [...]}`, chaque élément tel que `search_claims` le produit : clé de citation, projet, genre, chemin, texte, langue, preuve (URL, nom, genre, SHA-256, pointeur, date de collecte) et date d'indexation. `q` est obligatoire (1 à 120 caractères), `territory` prend les mêmes valeurs que l'annuaire des projets, `limit` va de 1 à 50 (20 par défaut). Comme toute route `/preview`, elle répond `403 preview_disabled` hors prévisualisation locale et passe par le cache de lecture (`cached_read`) : l'ETag change dès qu'une reconstruction écrit dans la table journalisée. Le contrat est dans `packages/contracts` (`openapi.json`, `src/generated.ts`).
+`GET /api/v1/preview/evidence-search?q=…&territory=…&limit=…&mode=…` (opération `previewEvidenceSearch`, `api/evidence_search.py`) renvoie `{"items": [...], "mode": …, "semantic": …}`. `mode=text` (défaut) répond par `search_claims` ; `mode=hybrid` par `hybrid_claims` (§5), et `semantic` vaut `true` seulement si le classement sémantique a été fusionné : sans le service, la réponse hybride est exactement la réponse plein texte avec `semantic: false`. Le score sémantique n'est jamais renvoyé. Chaque élément est tel que `search_claims` le produit : clé de citation, projet, genre, chemin, texte, langue, preuve (URL, nom, genre, SHA-256, pointeur, date de collecte) et date d'indexation. `q` est obligatoire (1 à 120 caractères), `territory` prend les mêmes valeurs que l'annuaire des projets, `limit` va de 1 à 50 (20 par défaut). Comme toute route `/preview`, elle répond `403 preview_disabled` hors prévisualisation locale. Les réponses `text` passent par le cache de lecture (`cached_read`) : l'ETag change dès qu'une reconstruction écrit dans la table journalisée. Les réponses `hybrid` ne sont jamais mises en cache : elles dépendent aussi de la disponibilité du service facultatif, que le cache ne suit pas (un repli enregistré pendant une panne lui survivrait). Le contrat est dans `packages/contracts` (`openapi.json`, `src/generated.ts`).
 
 ## 5. Recherche sémantique (vecteurs)
 
@@ -59,5 +59,4 @@ Facultative : elle n'existe que si le service `embeddings` tourne et si `EVIDENC
 ## 6. Reste à faire (E01)
 
 - Évaluation sur les affirmations publiées réelles (requêtes multilingues et réponses attendues relues, sans données inventées) et choix de la forme exposée.
-- Paramètre de mode (`text`, `hybrid`) sur la route `/preview/evidence-search` et contrat régénéré.
 - Cas d'usage web (relais `app/api/…` et affichage), si la tâche le garde plutôt que de le laisser à E02.
