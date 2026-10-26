@@ -27,12 +27,13 @@ PREVIEW_PATHS = [
     "public-context?dataset=health",
     "accessibility?longitude=54.4&latitude=24.5",
     "market-map",
+    "evidence-search?q=penthouse",
 ]
 
 
 def test_every_preview_router_is_guarded():
     preview_routers = [router for prefix, router in api._routers if prefix.strip("/") == "preview"]
-    assert len(preview_routers) == 6
+    assert len(preview_routers) == 7
     for router in preview_routers:
         assert (preview_only, "operation") in router._decorators
 

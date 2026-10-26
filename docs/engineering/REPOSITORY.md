@@ -60,7 +60,9 @@ l'extraction pure des affirmations d'une fiche publiée et la normalisation mult
 (`search_claims`) ; `evidence/search_models.py` la table journalisée `evidence_search_entry`
 (migration 0038, index GIN sur expression). Lecture seule de `project_queries` ; rien ne dépend
 de l'index pour publier. Direction : ingestion (flow `property-platform-evidence-search`) →
-evidence/search → evidence/projects → catalog. Voir [EVIDENCE_SEARCH.md](EVIDENCE_SEARCH.md).
+evidence/search → evidence/projects → catalog. `api/evidence_search.py` expose la recherche
+(`GET /preview/evidence-search`, opération `previewEvidenceSearch`, lecture mise en cache) ;
+direction : API → evidence/search. Voir [EVIDENCE_SEARCH.md](EVIDENCE_SEARCH.md).
 
 **Fiche « Vérification » — B05, 25 octobre 2026.** `evidence/projects/verification_sheet.py`
 possède l'assemblage en lecture de la fiche : dernière lecture du registre, liens officiels

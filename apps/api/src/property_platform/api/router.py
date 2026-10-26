@@ -7,6 +7,7 @@ from ninja import NinjaAPI, Schema, Status
 
 from .accessibility import router as accessibility_router
 from .basemaps import router as basemaps_router
+from .evidence_search import router as evidence_search_router
 from .parcels import router as parcels_router
 from .preview import TerritoryNotConfigured, preview_only
 from .project_media import router as project_media_router
@@ -28,6 +29,7 @@ for preview_router in (
     project_media_router,
     basemaps_router,
     accessibility_router,
+    evidence_search_router,
 ):
     preview_router.add_decorator(preview_only)
     api.add_router("/preview", preview_router)

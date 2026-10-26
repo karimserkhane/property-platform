@@ -40,7 +40,11 @@ Le flow `property-platform-evidence-search` (déploiement `evidence-search`, tou
 
 Dans le contrôle de reconstruction ([REBUILD.md](REBUILD.md)), l'index est reconstruit en dernière étape de finition, après les relations et les liens de vérification ; la table suit la politique `derived` : son effectif est rapporté sans bloquer, car les fiches publiées dont elle dérive sont comparées elles-mêmes. `pipeline_inventory.py` la rattache au flow `property-platform-evidence-search`.
 
-## 4. Reste à faire (E01)
+## 4. Route HTTP
+
+`GET /api/v1/preview/evidence-search?q=…&territory=…&limit=…` (opération `previewEvidenceSearch`, `api/evidence_search.py`) renvoie `{"items": [...]}`, chaque élément tel que `search_claims` le produit : clé de citation, projet, genre, chemin, texte, langue, preuve (URL, nom, genre, SHA-256, pointeur, date de collecte) et date d'indexation. `q` est obligatoire (1 à 120 caractères), `territory` prend les mêmes valeurs que l'annuaire des projets, `limit` va de 1 à 50 (20 par défaut). Comme toute route `/preview`, elle répond `403 preview_disabled` hors prévisualisation locale et passe par le cache de lecture (`cached_read`) : l'ETag change dès qu'une reconstruction écrit dans la table journalisée. Le contrat est dans `packages/contracts` (`openapi.json`, `src/generated.ts`).
+
+## 5. Reste à faire (E01)
 
 - Recherche vectorielle (sémantique et interlangue) : extension pgvector et modèle d'embeddings local, service Docker optionnel et figé, sans service payant.
-- Exposition HTTP de la recherche (route `/preview`, contrat OpenAPI) et cas d'usage web.
+- Cas d'usage web (relais `app/api/…` et affichage), si la tâche le garde plutôt que de le laisser à E02.

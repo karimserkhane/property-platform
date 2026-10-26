@@ -3,6 +3,7 @@
 import os
 
 import pytest
+from django.test import override_settings
 
 if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Evidence search requires PostGIS", allow_module_level=True)
@@ -73,3 +74,26 @@ def test_a_withdrawn_project_leaves_the_index_and_its_answers():
     assert result["summary"]["statements"] == 0
     assert result["summary"]["removed"] > 0
     assert not EvidenceSearchEntry.objects.exists()
+
+
+def test_the_preview_route_answers_with_each_statement_and_its_evidence(client):
+    ingest_baccarat()
+    rebuild_search_index(actor="search-test", run_key="first")
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+        response = client.get("/api/v1/preview/evidence-search", {"q": "penthouse"})
+        assert response.status_code == 200
+        items = response.json()["items"]
+        assert items and items[0]["kind"] == "typologies"
+        assert items[0]["project"]["slug"] == "baccarat-residences-saadiyat"
+        assert items[0]["source"]["url"].startswith("https://")
+        assert items[0]["claim_key"] == search_claims("penthouse")[0]["claim_key"]
+        other = client.get(
+            "/api/v1/preview/evidence-search", {"q": "penthouse", "territory": "al-reem-island"}
+        )
+        assert other.json() == {"items": []}
+        first = client.get("/api/v1/preview/evidence-search", {"q": "penthouse", "limit": 1})
+        assert first.json()["items"] == items[:1]
+        assert client.get("/api/v1/preview/evidence-search").status_code == 422
+        assert client.get("/api/v1/preview/evidence-search", {"q": "x" * 121}).status_code == 422
+    with override_settings(DEBUG=False, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+        assert client.get("/api/v1/preview/evidence-search", {"q": "penthouse"}).status_code == 403
