@@ -26,6 +26,12 @@ services:
 
   # Migrations, then the demonstration replay (refused unless the database is empty),
   # then the API. Ready only once the replay has succeeded.
+  # The API runs under the image's own server (its CMD, plus request durations in the
+  # access log), not runserver: runserver runs every request at once, each with its own
+  # database session, so the burst of a first map load competed for the runner's CPUs
+  # inside PostgreSQL and the largest parcel-index read exceeded its 2 s statement budget
+  # (A17). Four threads bound the reads in progress, as in service; other requests wait
+  # outside PostgreSQL, before their statement budget starts.
   api:
     build:
       context: ../..
@@ -48,7 +54,9 @@ services:
       - >-
         python manage.py migrate --noinput
         && python manage.py load_demo_package --package /demo-replay --actor e2e-demo
-        && exec python manage.py runserver 0.0.0.0:8000 --noreload
+        && exec gunicorn property_platform.config.wsgi:application --bind 0.0.0.0:8000
+        --workers 1 --threads 4 --access-logfile -
+        --access-logformat '%(h)s "%(r)s" %(s)s %(b)s %(M)sms'
     depends_on:
       db:
         condition: service_healthy

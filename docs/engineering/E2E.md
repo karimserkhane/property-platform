@@ -59,6 +59,21 @@ l'API sont affichés et `.cache/e2e/` (traces, captures, rapport HTML) est publi
 artefact `e2e-traces` (14 jours). Durée mesurée en local : environ 1 min 30 de rejeu et
 1 min 30 de parcours, hors construction des images.
 
+L'API de cette pile tourne sous **gunicorn**, le serveur de l'image (`CMD` du
+`Dockerfile` : un processus, quatre threads), avec la durée de chaque requête dans le
+journal d'accès, et non sous `runserver`, qui exécute toutes les requêtes à la fois,
+chacune avec sa session PostgreSQL. Au premier affichage de la carte, le navigateur
+envoie d'un coup tuiles de parcelles et de contexte, index de contexte et quatre quarts
+de `parcel-index` ; sous `runserver`, ces lectures se disputaient dans PostgreSQL les
+processeurs du runner, déjà pris par le rendu WebGL logiciel, et la plus lourde (les
+2 060 parcelles du quart sud-est de Reem, environ 120 ms sur une machine au repos)
+dépassait parfois son `statement_timeout` de 2 s (A17). Avec quatre threads, comme en
+service, les autres requêtes attendent hors de PostgreSQL, avant que leur budget ne
+commence ; ce budget n'a pas changé. Mesure (rafale du run CI en échec rejouée 25 fois
+sur deux processeurs, dont 10 fois saturés par une charge égale à celle du navigateur) :
+43 lectures annulées et `parcel_features` jusqu'à 1,98 s sous `runserver`, aucune
+annulation et 0,87 s au plus sous gunicorn ([A17](../tasks/A17.md)).
+
 Le paquet se régénère depuis la base locale de référence avec `export_demo_package`
 (lecture seule) ; la sélection, les raisons et les licences sont dans
 `fixtures/demo-replay/selection.json`.
