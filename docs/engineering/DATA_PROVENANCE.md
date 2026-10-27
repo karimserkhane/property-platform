@@ -53,11 +53,15 @@ Chaque donnée garde ses droits. Mettre `enforced` à `true` arrête d'un coup l
 | `publication` | `open` (redistribution permise, avec `attribution`), `facts` (faits datés, courte citation d'origine et lien), `link` (simple lien) ou `none` |
 | `basis` | Ce qui justifie la décision, en une phrase |
 
-État au 27 octobre 2026, sur 83 hôtes :
+État au 28 octobre 2026, sur 83 hôtes :
 - **Données ouvertes** (`open`) : OpenStreetMap (et Overpass, Geofabrik, OpenFreeMap), Overture, Copernicus Sentinel-2, ESA WorldCover, Wikimedia Commons.
 - **Collecte interdite par leurs conditions** (`forbidden`, collectés tant que la collecte n'est pas appliquée) : Property Finder, PSI, Bayut, LinkedIn et Reddit (`none`), Aldar (`link` : les liens vers ses pages officielles restent, par décision de Karim).
 - **Relues sans interdiction** : Reportage et Bloom (médias non republiables, faits et liens) ; ADREC (aucune licence ni interdiction publiée, abonnement API officiel possible).
-- **Non qualifiées** (`unknown`, `facts`) : les autres promoteurs, la presse, les forums, Onwani, AD-SDI et les autres services publics ; à qualifier en [A21](../tasks/A21.md).
+- **Relues le 28 octobre 2026** ([A21](../tasks/A21.md), première passe) :
+  - SCAD : données ouvertes (`open`) selon sa politique DSMN-POL-08 et la licence fédérale de données ouvertes, citation du SCAD et partage à l'identique des données dérivées ;
+  - Onwani (DMT) : aucune licence ni interdiction publiée ; ADEK (écoles à charte) et ITC (Abu Dhabi Mobility) : contenus protégés, aucune clause sur l'accès automatisé, faits datés et liens ;
+  - soumis à Karim, collecte inchangée en attendant : Square Yards et Housebook (accès automatisé interdit), Gravity (copie et téléchargement réservés à l'usage privé), AD-SDI (métadonnées « réservé aux entités publiques d'Abu Dhabi » contre licence ouverte des mêmes jeux sur [data.abudhabi](https://data.abudhabi/opendata/geospatialdata)).
+- **Non qualifiées** (`unknown`, `facts`) : les autres promoteurs, la presse, les forums, DoH (site injoignable le 28 octobre) et les autres hôtes ; à qualifier en [A21](../tasks/A21.md).
 
 **Ce que le code en fait.** `evidence/source_rights.py`, sans réseau ni Django, est lu partout :
 - **Collecte**, quand elle est appliquée : les flows de fiches, catalogues, références et présentations sautent les sources `forbidden`. `SourceHTTP.fetch` les refuse aussi pour tout connecteur, même lancé à la main. Les pipelines et les registres restent en place : une autorisation écrite se traduit par une ligne modifiée.

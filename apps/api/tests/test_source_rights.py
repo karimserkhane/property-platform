@@ -178,10 +178,10 @@ def test_open_data_keep_their_licence_and_attribution():
     assert public_rights(onwani.BASE_URL) == {
         "licence": "unknown",
         "licence_url": None,
-        "terms_url": None,
+        "terms_url": "https://www.dmt.gov.ae/en/terms-and-conditions",
         "publication": "facts",
         "attribution": None,
-        "reviewed_on": None,
+        "reviewed_on": "2026-10-28",
         "shown_beyond_terms": False,
     }
 

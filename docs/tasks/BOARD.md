@@ -26,7 +26,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A18](A18.md) | A | Captures sous licence non qualifiée dans le dépôt public | 1 | A13 | non (décidée le 27/10 : retrait d'Aldar) | done | claude |
 | [A19](A19.md) | A | Droits et licences de chaque source | 1 | A18 | non (décidée le 27/10) | done | claude |
 | [A20](A20.md) | A | Licences et attributions affichées sur le site | 2 | A19 | non | done | claude |
-| [A21](A21.md) | A | Qualifier les conditions des sources non relues | 2 | A19 | si une source interdit la collecte | in-progress | claude |
+| [A21](A21.md) | A | Qualifier les conditions des sources non relues | 2 | A19 | oui (28/10 : quatre sources) | in-progress | claude |
 | [A22](A22.md) | A | Tout collecter et afficher, droits enregistrés et appliqués par interrupteur | 1 | A19 | non (décidée le 27/10) | done | claude |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
