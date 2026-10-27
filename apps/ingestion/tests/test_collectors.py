@@ -334,6 +334,19 @@ def test_property_receipts_match_existing_protocol_hash_bytes_and_times():
     assert validate_receipts(rows, {URL})[URL]["payload"] == b"project source bytes"
 
 
+def test_property_collection_reaches_every_profile_when_collection_is_not_enforced(
+    enforce_collection,
+):
+    enforce_collection(False)
+    forbidden = "https://www.aldar.com/en/news-and-media/example"
+    profiles = [
+        {"source_url": URL, "photo_key": None},
+        {"source_url": forbidden, "photo_key": None},
+    ]
+    assert property_urls(profiles, {}) == (URL, forbidden)
+
+
+@pytest.mark.usefixtures("collection_enforced")
 def test_property_collection_skips_profiles_whose_terms_forbid_it_and_their_photos():
     forbidden = "https://www.aldar.com/en/news-and-media/example"
     photos = {

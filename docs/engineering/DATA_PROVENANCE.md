@@ -37,6 +37,12 @@ Une page consultable n'établit pas à elle seule un droit de redistribution, un
 
 Toutes les données et tous les pipelines sont conservés ; chaque source porte ses droits. Les droits appartiennent à l'éditeur d'un site (ou à l'un de ses hôtes), pas à chaque ligne : une capture, une observation ou un fait hérite des droits de l'hôte de l'URL d'où il a été lu. Une revue modifiée s'applique donc d'un coup aux données passées et futures, sans réécrire de ligne.
 
+**Application des droits (A22).** Les droits sont toujours enregistrés, en base comme dans l'API. Les appliquer est une décision distincte du propriétaire : un interrupteur par droit dans `evidence/source_rights_enforcement.json`, avec `enforced`, la date, l'auteur et le motif. Décision de Karim au 27 octobre 2026, aucun des deux droits n'est appliqué :
+- **collecte** : tous les pipelines collectent, y compris les sites `forbidden` ;
+- **publication** : l'aperçu privé montre toutes les données collectées, y compris celles des sources `link` ou `none`.
+
+Chaque donnée garde ses droits. Mettre `enforced` à `true` arrête d'un coup les collectes ou masque ce que les conditions ne permettent pas (voir « Ce que le code en fait »), sans toucher aux données. Le remettre à `false` les rétablit.
+
 **Registre revu** : `evidence/source_rights.json`, une entrée par hôte (sous-domaines compris). Il couvre toutes les sources des registres et tous les connecteurs ; un test refuse une source sans entrée et une entrée qui ne sert plus.
 
 | Champ | Contenu |
@@ -49,19 +55,27 @@ Toutes les données et tous les pipelines sont conservés ; chaque source porte 
 
 État au 27 octobre 2026, sur 83 hôtes :
 - **Données ouvertes** (`open`) : OpenStreetMap (et Overpass, Geofabrik, OpenFreeMap), Overture, Copernicus Sentinel-2, ESA WorldCover, Wikimedia Commons.
-- **Collecte interdite** : Property Finder, PSI, Bayut, LinkedIn et Reddit (`none`), Aldar (`link` : les liens vers ses pages officielles restent, par décision de Karim).
+- **Collecte interdite par leurs conditions** (`forbidden`, collectés tant que la collecte n'est pas appliquée) : Property Finder, PSI, Bayut, LinkedIn et Reddit (`none`), Aldar (`link` : les liens vers ses pages officielles restent, par décision de Karim).
 - **Relues sans interdiction** : Reportage et Bloom (médias non republiables, faits et liens) ; ADREC (aucune licence ni interdiction publiée, abonnement API officiel possible).
 - **Non qualifiées** (`unknown`, `facts`) : les autres promoteurs, la presse, les forums, Onwani, AD-SDI et les autres services publics ; à qualifier en [A21](../tasks/A21.md).
 
 **Ce que le code en fait.** `evidence/source_rights.py`, sans réseau ni Django, est lu partout :
-- **Collecte** : les flows de fiches, catalogues, références et présentations sautent les sources `forbidden`, et `SourceHTTP.fetch` les refuse pour tout connecteur, même lancé à la main. Les pipelines et les registres restent en place : une autorisation écrite se traduit par une ligne modifiée.
-- **Publication** : rien de ce que porte une capture d'une source `link` ou `none` n'est publié (faits, typologies, médias, positions et repères de carte, liens de hiérarchie, présentations, références, signal satellite). Une fiche sans autre source n'est plus publiée. Le lien « site du projet » ne pointe vers une telle source que si elle est `link`.
+- **Collecte**, quand elle est appliquée : les flows de fiches, catalogues, références et présentations sautent les sources `forbidden`. `SourceHTTP.fetch` les refuse aussi pour tout connecteur, même lancé à la main. Les pipelines et les registres restent en place : une autorisation écrite se traduit par une ligne modifiée.
+- **Publication**, quand elle est appliquée : rien de ce que porte une capture d'une source `link` ou `none` n'est publié :
+  - faits, typologies et médias ;
+  - positions et repères de carte ;
+  - liens de hiérarchie, présentations et références ;
+  - signal satellite.
+
+  Une fiche sans autre source n'est plus publiée. Le lien « site du projet » ne pointe vers une telle source que si elle est `link`. Non appliquée, chaque lecture retrouve son comportement d'avant A19.
 - **API** : chaque source d'une fiche porte `rights` (licence, conditions, niveau de publication, attribution, date de revue). Le site les affiche sous chaque citation ([A20](../tasks/A20.md)). `GET /api/v1/preview/source-rights` publie le registre (sans auteur ni motif de revue) pour la page `/[locale]/sources` « Sources et licences », liée depuis la liste des sources de chaque fiche.
 - **Histoire** : les captures privées restent conservées et un rejeu les relit à l'identique ; une présentation dont la collecte est interdite et sans reçu est sautée.
 
 **En base.** La table `evidence.source_rights` (migration `0038`, journalisée) reflète le registre : une ligne active par hôte. Une revue modifiée ou retirée révoque la ligne en vigueur (`revoked_at`, `revoked_by`, motif) sans l'effacer, ce qui date chaque décision. Elle se joint aux captures par l'hôte de leur URL. Synchronisation idempotente : déploiement Prefect `source-rights` (chaque jour à 00:45, sans contacter de source), commande `python manage.py apply_source_rights --actor <nom>`, et étape finale de `rebuild-check` (politique `registry`, non bloquante). Après un déploiement qui modifie le registre, lancer la commande ou le déploiement.
 
 **Modifier un droit.** Une ligne du registre, relue avec ses conditions citées, dans une PR ; puis la synchronisation ci-dessus.
+
+**Activer ou couper l'application d'un droit.** Changer `enforced` dans `source_rights_enforcement.json`, avec la date, l'auteur et le motif, dans une PR. Ensuite, redéployer l'API pour la publication et l'ingestion pour la collecte. Le cache des lectures se vide au redémarrage de l'API.
 
 ### Première collecte directe de parcelles
 

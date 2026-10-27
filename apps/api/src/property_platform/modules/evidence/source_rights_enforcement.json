@@ -1,0 +1,14 @@
+{
+  "collection": {
+    "enforced": false,
+    "decided_on": "2026-10-27",
+    "decided_by": "Karim",
+    "basis": "Every pipeline collects again, including sites whose terms forbid automated access; their rights stay recorded, so turning this on stops those collectors at once (A22)."
+  },
+  "publication": {
+    "enforced": false,
+    "decided_on": "2026-10-27",
+    "decided_by": "Karim",
+    "basis": "The private preview shows every collected source; each one keeps its reviewed rights and licence, so turning this on hides at once what the terms do not allow (A22)."
+  }
+}

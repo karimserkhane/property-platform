@@ -13,8 +13,11 @@ needed here, so ingestion and the API share this module.
   (dated facts with a short original quote and a link to the page), `link` (a plain
   link only) or `none`.
 
-A forbidden or withheld site keeps its private receipts, which replay exactly; the
-read models apply the publication level to them as to new data.
+Whether each right is applied is a separate owner decision (A22), one switch per
+right in `source_rights_enforcement.json`: rights stay recorded and reported either
+way, and switching one on applies it to every source at once. A forbidden or
+withheld site keeps its private receipts, which replay exactly; when publication is
+enforced, the read models apply its level to them as to new data.
 """
 
 import json
@@ -25,6 +28,8 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 REGISTRY = Path(__file__).parent / "source_rights.json"
+ENFORCEMENT = Path(__file__).parent / "source_rights_enforcement.json"
+RIGHTS = ("collection", "publication")
 COLLECTION = ("allowed", "forbidden")
 PUBLICATION = ("open", "facts", "link", "none")
 FACTS = frozenset({"open", "facts"})
@@ -44,6 +49,7 @@ _FIELDS = {
     "attribution",
     "basis",
 }
+_DECISION = {"enforced", "decided_on", "decided_by", "basis"}
 # A host nobody reviewed keeps the private-preview treatment, marked as unqualified.
 DEFAULT = {
     "host": None,
@@ -105,10 +111,39 @@ def validate_source_rights(rows):
     return rows
 
 
+def validate_enforcement(decisions):
+    if not isinstance(decisions, dict) or set(decisions) != set(RIGHTS):
+        raise ValueError("Enforcement decides collection and publication")
+    for decision in decisions.values():
+        if not isinstance(decision, dict) or set(decision) != _DECISION:
+            raise ValueError("Unexpected enforcement decision")
+        if not isinstance(decision["enforced"], bool):
+            raise ValueError("A right is enforced or not")
+        if not isinstance(decision["decided_on"], str):
+            raise ValueError("An enforcement decision is dated")
+        date.fromisoformat(decision["decided_on"])
+        for key, limit in (("decided_by", 80), ("basis", 500)):
+            if not isinstance(decision[key], str) or not decision[key].strip():
+                raise ValueError("An enforcement decision names who made it and why")
+            if len(decision[key]) > limit:
+                raise ValueError("Enforcement decision too long")
+    return decisions
+
+
 @cache
 def source_rights():
     """The reviewed rights, validated once per process."""
     return tuple(validate_source_rights(json.loads(REGISTRY.read_text("utf-8"))))
+
+
+@cache
+def enforcement():
+    """The owner's decision for each right, validated once per process."""
+    return validate_enforcement(json.loads(ENFORCEMENT.read_text("utf-8")))
+
+
+def enforced(right):
+    return enforcement()[right]["enforced"]
 
 
 def rights_for(url):
@@ -124,17 +159,17 @@ def rights_for(url):
 
 
 def collection_allowed(url):
-    return rights_for(url)["collection"] == "allowed"
+    return not enforced("collection") or rights_for(url)["collection"] == "allowed"
 
 
 def facts_allowed(url):
     """Facts read from this page may be shown, with their source."""
-    return rights_for(url)["publication"] in FACTS
+    return not enforced("publication") or rights_for(url)["publication"] in FACTS
 
 
 def link_allowed(url):
     """A plain link to this page may be shown."""
-    return rights_for(url)["publication"] != "none"
+    return not enforced("publication") or rights_for(url)["publication"] != "none"
 
 
 def public_rights(url):
@@ -156,6 +191,8 @@ def withheld_capture_pattern():
     Capture URLs are explicit HTTPS URLs without credentials (`checked_url`), so the
     authority is a host with an optional :443 port.
     """
+    if not enforced("publication"):
+        return None
     hosts = "|".join(
         re.escape(row["host"]) for row in source_rights() if row["publication"] not in FACTS
     )
