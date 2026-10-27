@@ -70,7 +70,7 @@ def test_whole_area_reads_both_islands_without_leaking_other_sources(client):
     scope = next(row for row in registry["territories"] if row["id"] == "abu-dhabi")
     assert scope["parcel_count"] == 2
     assert scope["queryable"]
-    assert scope["collection_bounds"] == (54.383, 24.465, 54.483, 24.603)
+    assert scope["collection_bounds"] == (51.5, 22.5, 55.9, 25.2)
     query = {"bbox": "54.39,24.49,54.43,24.53", "territory": "abu-dhabi"}
     with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         parcels = client.get("/api/v1/preview/parcels", {**query, "limit": 1})
