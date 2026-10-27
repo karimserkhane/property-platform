@@ -146,8 +146,12 @@ def _embed(run):
 
 
 def _passage(entry):
+    return passage_text(entry.project.name, entry.text)
+
+
+def passage_text(project_name, text):
     # The project name places a statement such as a handover date under its project.
-    return f"{entry.project.name}: {entry.text}"
+    return f"{project_name}: {text}"
 
 
 def _published(rows, territory):
@@ -215,12 +219,12 @@ def hybrid_claims(query, *, territory=None, limit=20):
         semantic = semantic_claims(query, territory=territory, limit=MAX_RESULTS)
     except embeddings.EmbeddingsUnavailable:
         return lexical[: _limit(limit)], False
-    scores, items = {}, {}
-    for ranking in (lexical, semantic):
-        for rank, item in enumerate(ranking, start=1):
-            key = item["claim_key"]
-            scores[key] = scores.get(key, 0.0) + 1.0 / (FUSION_K + rank)
-            items.setdefault(key, {k: v for k, v in item.items() if k != "score"})
+    scores = fusion_scores(
+        [item["claim_key"] for item in lexical], [item["claim_key"] for item in semantic]
+    )
+    items = {}
+    for item in (*lexical, *semantic):
+        items.setdefault(item["claim_key"], {k: v for k, v in item.items() if k != "score"})
     ordered = sorted(
         items.values(),
         key=lambda item: (
@@ -232,6 +236,15 @@ def hybrid_claims(query, *, territory=None, limit=20):
         ),
     )
     return ordered[: _limit(limit)], True
+
+
+def fusion_scores(*rankings):
+    """Reciprocal rank fusion of rankings of claim keys, best first in each."""
+    scores = {}
+    for ranking in rankings:
+        for rank, key in enumerate(ranking, start=1):
+            scores[key] = scores.get(key, 0.0) + 1.0 / (FUSION_K + rank)
+    return scores
 
 
 def _order(row):

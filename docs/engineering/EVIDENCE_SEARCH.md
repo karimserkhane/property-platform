@@ -56,7 +56,32 @@ Facultative : elle n'existe que si le service `embeddings` tourne et si `EVIDENC
 
 **Mesure réelle du 27 octobre** (service local, modèle figé, quatre affirmations types) : la requête arabe « شقق بثلاث غرف » trouve les typologies (0,882 contre 0,807 au suivant) et la question chinoise sur l'achèvement trouve le statut « Completed » du registre ; en revanche, des requêtes françaises courtes (« piscine », « date de livraison ») placent d'abord l'affirmation du registre au format `champ: valeur`, de peu (0,838 contre 0,837 pour la piscine). Les écarts de score d'e5-small sont faibles et ces textes structurés attirent les requêtes courtes : la recherche sémantique seule n'est pas assez fiable pour être affichée telle quelle ; la fusion hybride, qui garde en tête ce que le plein texte trouve, est la forme à exposer.
 
-## 6. Reste à faire (E01)
+## 6. Évaluation sur les affirmations publiées
 
-- Évaluation sur les affirmations publiées réelles (requêtes multilingues et réponses attendues relues, sans données inventées) et choix de la forme exposée.
+`python manage.py evaluate_evidence_search [--mode text|semantic|hybrid] [--k 10]` (`search/evaluation.py`) mesure la recherche sur ce que le site publie au moment du lancement, **en lecture seule** : les affirmations sont tirées de `published_claims()` en mémoire, le plein texte applique l'expression de l'index (`VECTOR_SQL`) à des tableaux littéraux et les vecteurs sont calculés à la volée ; ni les tables de l'index ni aucune écriture ne sont nécessaires (on peut la lancer avec `PGOPTIONS="-c default_transaction_read_only=on"`). Chaque cas associe une requête à une règle de pertinence sur les champs structurés (genre, chemin, fragment du texte original), jamais à des réponses écrites à la main. Pour chaque cas et chaque mode : nombre d'affirmations pertinentes, nombre de réponses, pertinentes parmi les `k` premières, rang de la première pertinente. Les classements sont ceux de `search_claims` et `hybrid_claims` (même ordre, même fusion, test PostGIS).
+
+**Mesure du 27 octobre, plein texte** (873 affirmations de 183 projets, toutes en anglais ; base partagée en lecture seule) :
+
+| Requête | Langue | Pertinentes | Réponses | Pertinentes parmi les 10 premières | Première pertinente |
+| --- | --- | --- | --- | --- | --- |
+| swimming pool | en | 102 | 105 | 10 | 1 |
+| gym | en | 23 | 25 | 10 | 1 |
+| penthouse | en | 43 | 44 | 10 | 1 |
+| studio | en | 39 | 44 | 9 | 1 |
+| villa | en | 66 | 74 | 9 | 2 |
+| completed | en | 6 | 12 | 5 | 1 |
+| under construction | en | 26 | 52 | 5 | 1 |
+| registration number | en | 32 | 32 | 10 | 1 |
+| number of units | en | 62 | 5 | 4 | 1 |
+| tower 2 | en | 2 | 55 | 2 | 3 |
+| handover date | en | 89 | 0 | 0 | — |
+| piscine, salle de sport, appartements de trois chambres, date de livraison, numéro d'enregistrement, nombre de logements | fr | — | 0 | 0 | — |
+| مسبح, شقق بثلاث غرف | ar | — | 0 | 0 | — |
+| 游泳池, 项目是否已经完工 | zh | — | 0 | 0 | — |
+
+Lecture : le plein texte est précis pour le vocabulaire anglais des sources (équipements, typologies, statut, enregistrement). Il ne trouve rien dans une autre langue, car les textes originaux publiés sont tous en anglais et ne sont jamais traduits, ni quand le texte est une valeur nue (une date de remise des clés `2028-05-01` ne contient pas le mot « handover »). La recherche dans les 16 langues du site passe donc par le classement sémantique (§5), qui n'a été mesuré que sur quatre affirmations : sa mesure sur les 873 affirmations réelles demande de placer les poids du modèle figé (environ 470 Mo, Hugging Face, licence MIT) dans le cache monté du service local, ce que ce lot n'a pas fait sans l'accord du propriétaire.
+
+## 7. Reste à faire (E01)
+
+- Mesure `semantic` et `hybrid` sur les affirmations réelles avec le service local (décision du propriétaire : téléchargement des poids du modèle), puis choix du mode par défaut de la route.
 - Cas d'usage web (relais `app/api/…` et affichage), si la tâche le garde plutôt que de le laisser à E02.

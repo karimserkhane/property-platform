@@ -19,6 +19,7 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     RowRevision,
 )
 from property_platform.modules.evidence.search import embeddings  # noqa: E402
+from property_platform.modules.evidence.search.evaluation import CASES, evaluate  # noqa: E402
 from property_platform.modules.evidence.search.index import (  # noqa: E402
     hybrid_claims,
     rebuild_search_index,
@@ -197,3 +198,30 @@ def test_the_preview_route_fuses_the_semantic_ranking_on_request(client, monkeyp
         item["claim_key"] for item in expected
     ]
     assert all("score" not in item for item in fused["items"])
+
+
+def test_the_evaluation_ranks_like_the_index_without_reading_or_writing_it(monkeypatch):
+    ingest_baccarat()
+    monkeypatch.setattr(embeddings, "_call", FakeService())
+    with override_settings(EVIDENCE_EMBEDDINGS_URL="http://embeddings:80"):
+        result = evaluate(k=5)
+        assert EvidenceSearchEntry.objects.count() == 0
+        rebuild_search_index(actor="search-test", run_key="vectors")
+        fused, _ = hybrid_claims("penthouse", limit=50)
+    lexical = search_claims("penthouse", limit=50)
+    assert result["semantic"] is True
+    assert result["statements"] == EvidenceSearchEntry.objects.count()
+    rows = {(row["query"], row["mode"]): row for row in result["cases"]}
+    assert len(rows) == len(CASES) * 3
+    text, hybrid = rows["penthouse", "text"], rows["penthouse", "hybrid"]
+    assert text["answered"] == len(lexical) and text["first_relevant_rank"] == 1
+    assert hybrid["answered"] == len(fused)
+    assert text["relevant"] == hybrid["relevant"] > 0
+    assert 0 < text["relevant_in_top_5"] <= 5
+    # A query in another language finds nothing in English texts without vectors.
+    assert rows["piscine", "text"]["answered"] == 0
+
+    with override_settings(EVIDENCE_EMBEDDINGS_URL=""):
+        plain = evaluate(modes=("text", "hybrid"))
+    assert plain["semantic"] is False
+    assert {row["mode"] for row in plain["cases"]} == {"text"}
