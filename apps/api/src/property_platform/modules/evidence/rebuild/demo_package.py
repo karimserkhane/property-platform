@@ -1,9 +1,10 @@
 """Versioned demonstration package for browser journeys in CI (A13), never a dump.
 
-Owner decision of 25 October 2026: real captures, limited to the journeys, are kept
-in the private repository with provenance, licence and capture date per file. The
-package is an A04 replay manifest restricted to reviewed acquisitions; the current
-typed importers rebuild its rows in an empty, disposable database only.
+Owner decisions of 25 and 27 October 2026 (A13, A18): real captures, limited to the
+journeys, are kept in the public repository with provenance, licence and capture date
+per file; developer and listing pages are excluded. The package is an A04 replay
+manifest restricted to reviewed acquisitions; the current typed importers rebuild its
+rows in an empty, disposable database only.
 """
 
 import hashlib
