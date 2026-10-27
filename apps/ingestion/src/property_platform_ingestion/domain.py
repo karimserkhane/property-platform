@@ -310,7 +310,7 @@ def execute(request):
             from .collectors.sdi import precollect_sdi
 
             with SourceHTTP([URL, URL + "/query"]) as transport:
-                replay = precollect_sdi(transport, territory)
+                replay = precollect_sdi(transport, request["scope"])
             acquisition = replay.map
         elif operation == "onwani":
             with SourceHTTP(OnwaniCollector.allowed_urls()) as transport:

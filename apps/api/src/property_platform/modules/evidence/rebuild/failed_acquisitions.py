@@ -110,7 +110,10 @@ def _request_shape(url, operation, scope):
     if operation in {"adrec_sales", "adrec_indices"}:
         adrec.validate_request(operation, scope, base, params)
         return
-    profile = collection_for(scope.split(":", 1)[0])
+    if operation == "sdi_parcels":
+        expected, where, fields = sdi_protocol.URL, sdi_protocol.where(scope), sdi_protocol.FIELDS
+    else:
+        profile = collection_for(scope.split(":", 1)[0])
     if operation == "osm_bootstrap":
         if base != osm_bootstrap.URL or params not in osm_bootstrap.boxes(scope):
             raise ValueError("Unregistered OSM bootstrap window")
@@ -123,9 +126,7 @@ def _request_shape(url, operation, scope):
         return
     if operation == "onwani":
         expected, where, fields = onwani.BASE_URL, profile.parcel_where, onwani.FIELDS
-    elif operation == "sdi_parcels":
-        expected, where, fields = sdi_protocol.URL, sdi_protocol.where(scope), sdi_protocol.FIELDS
-    else:
+    elif operation != "sdi_parcels":
         expected, where, _, fields = profile.map_layers()[scope.rsplit(":", 1)[1]]
     if base == expected and params == {"f": "pjson"}:
         return

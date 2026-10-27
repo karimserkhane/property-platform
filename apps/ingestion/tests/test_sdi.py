@@ -68,3 +68,34 @@ def test_sdi_refuses_changing_incomplete_or_reclassified_snapshots(options, mess
     with client([protocol.URL, protocol.URL + "/query"], handler) as http:
         with pytest.raises(protocol.SourceError, match=message):
             precollect_sdi(http, "al-maryah-island")
+
+
+def test_district_scope_requests_only_its_reviewed_clause():
+    calls, handler = handler_for()
+    with client([protocol.URL, protocol.URL + "/query"], handler) as http:
+        precollect_sdi(http, "aam:al-bateen")
+    assert calls[1]["where"] == "MUNICIPALITYENG='AAM' AND DISTRICTENG='AL BATEEN'"
+    assert calls[2]["where"] == calls[1]["where"]
+
+
+def test_district_flow_runs_each_scope_and_reports_every_failure(monkeypatch):
+    from property_platform_ingestion import flows
+    from property_platform_ingestion.runtime import IngestionFailure
+
+    seen = []
+
+    def ingest(operation, scope, actor):
+        seen.append((operation, scope, actor))
+        if scope == "wrm:mzeerah":
+            raise IngestionFailure({"status": "failed", "error": "SourceError"})
+        return {"status": "succeeded"}
+
+    monkeypatch.setattr(flows, "ingest_source", ingest)
+    run = flows.sdi_district_parcels.fn
+    with pytest.raises(IngestionFailure) as failure:
+        run("WRM", ["wrm:mzeerah", "wrm:al-sila", "wrm:mzeerah"], "test")
+    assert failure.value.result["failed_scopes"] == ["wrm:mzeerah"]
+    assert seen == [("sdi_parcels", s, "test") for s in ("wrm:mzeerah", "wrm:al-sila")]
+    with pytest.raises(ValueError, match="reviewed AD-SDI scopes"):
+        run("WRM", ["adm:khalifa-city"], "test")
+    assert run("AAM", ["aam:al-bateen"], "test") == {"aam:al-bateen": {"status": "succeeded"}}

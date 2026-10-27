@@ -1,5 +1,7 @@
 # Collecte et orchestration avec Prefect
 
+**Parcelles AD-SDI de l'émirat — 27 octobre 2026 (F01).** Le registre atteint **63 déploiements** avec trois imports manuels `adm-`, `aam-` et `wrm-parcels-adsdi-districts` (flow `property-platform-sdi-district-parcels`). Chaque district est une exécution auditée distincte, de périmètre `<municipalité>:<district>` (par exemple `aam:al-bateen`), avec ses captures, sa quarantaine et sa source `ad-sdi:generic-search:plots:<périmètre>`. Les 213 districts viennent du registre revu `evidence/maps/sdi_districts.json` (statistiques AD-SDI du 27/10 : 98 ADM, 69 AAM, 46 WRM, environ 410 000 parcelles) ; aucun nom de district n'est accepté hors de ce registre. Les trois îles gardent leur périmètre et leur clause d'origine, pour que les captures archivées se rejouent à l'identique. Le paramètre `districts` limite l'import à une liste ; un échec n'interrompt pas les autres districts et le flow échoue en les nommant. Aucun horaire : une municipalité entière représente plusieurs heures d'acquisition.
+
 **Complément AD-SDI — 22 octobre 2026.** Le registre atteint **56 déploiements**
 avec trois imports manuels `*-parcels-adsdi`. Le flow distinct compare les lots aux
 parcelles Onwani et conserve les conflits, captures et audit ; il ne remplace pas
