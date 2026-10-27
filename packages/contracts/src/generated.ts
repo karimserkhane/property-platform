@@ -2253,6 +2253,11 @@ export interface components {
             attribution?: string | null;
             /** Reviewed On */
             reviewed_on?: string | null;
+            /**
+             * Shown Beyond Terms
+             * @default false
+             */
+            shown_beyond_terms: boolean;
         };
         /**
          * VerificationContradictionResponse

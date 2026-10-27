@@ -432,6 +432,8 @@
     "rightsReserved": "发布方保留所有权利",
     "rightsPerItem": "每个文件各自的许可",
     "rightsTerms": "来源条款",
+    "rightsBeyondLink": "尽管来源条款仅允许提供链接，仍予显示。",
+    "rightsBeyondNone": "尽管来源条款不允许重复使用，仍予显示。",
     "sourcesAndLicences": "来源与许可"
   },
   "Delivery": {

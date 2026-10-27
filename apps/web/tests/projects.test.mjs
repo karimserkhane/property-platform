@@ -507,6 +507,7 @@ test("a citation names the reviewed licence, its terms and attribution, or says 
     licenceUrl: null,
     termsUrl: null,
     attribution: null,
+    beyondTermsKey: null,
   });
   assert.deepEqual(
     sourceRightsNotice({
@@ -523,8 +524,21 @@ test("a citation names the reviewed licence, its terms and attribution, or says 
       licenceUrl: "https://opendatacommons.org/licenses/odbl/1-0/",
       termsUrl: null,
       attribution: "© OpenStreetMap contributors",
+      beyondTermsKey: null,
     },
   );
+  for (const [publication, key] of [
+    ["link", "rightsBeyondLink"],
+    ["none", "rightsBeyondNone"],
+  ]) {
+    const rights = { licence: "proprietary", publication };
+    assert.equal(sourceRightsNotice(rights).beyondTermsKey, null);
+    assert.equal(
+      sourceRightsNotice({ ...rights, shown_beyond_terms: true })
+        .beyondTermsKey,
+      key,
+    );
+  }
   for (const [licence, key] of [
     ["proprietary", "rightsReserved"],
     ["per-item", "rightsPerItem"],

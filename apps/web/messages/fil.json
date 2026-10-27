@@ -432,6 +432,8 @@
     "rightsReserved": "nakalaan ang karapatan sa publisher",
     "rightsPerItem": "sariling lisensya ng bawat file",
     "rightsTerms": "Mga tuntunin ng source",
+    "rightsBeyondLink": "Ipinapakita kahit link lang ang pinapayagan ng mga tuntunin ng source.",
+    "rightsBeyondNone": "Ipinapakita kahit hindi pinapayagan ng mga tuntunin ng source ang muling paggamit.",
     "sourcesAndLicences": "Mga pinagmulan at lisensya"
   },
   "Delivery": {

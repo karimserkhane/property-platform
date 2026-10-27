@@ -173,7 +173,11 @@ def link_allowed(url):
 
 
 def public_rights(url):
-    """What a reader is told about the rights of a source page."""
+    """What a reader is told about the rights of a source page.
+
+    `shown_beyond_terms` flags data shown only because publication is not enforced
+    (A22): its site's terms allow a plain link (`link`) or nothing (`none`).
+    """
     row = rights_for(url)
     return {
         "licence": row["licence"],
@@ -182,6 +186,7 @@ def public_rights(url):
         "publication": row["publication"],
         "attribution": row["attribution"] or None,
         "reviewed_on": row["reviewed_on"],
+        "shown_beyond_terms": not enforced("publication") and row["publication"] not in FACTS,
     }
 
 

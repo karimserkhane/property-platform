@@ -7050,6 +7050,11 @@
               }
             ],
             "title": "Reviewed On"
+          },
+          "shown_beyond_terms": {
+            "default": false,
+            "title": "Shown Beyond Terms",
+            "type": "boolean"
           }
         },
         "required": [

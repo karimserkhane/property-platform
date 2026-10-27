@@ -432,6 +432,8 @@
     "rightsReserved": "rights reserved by the publisher",
     "rightsPerItem": "licence of each file",
     "rightsTerms": "Source terms",
+    "rightsBeyondLink": "Shown although the source’s terms allow only a link.",
+    "rightsBeyondNone": "Shown although the source’s terms do not allow reuse.",
     "sourcesAndLicences": "Sources and licences"
   },
   "Delivery": {

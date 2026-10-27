@@ -432,6 +432,8 @@
     "rightsReserved": "الحقوق محفوظة للناشر",
     "rightsPerItem": "ترخيص خاص بكل ملف",
     "rightsTerms": "شروط المصدر",
+    "rightsBeyondLink": "معروض رغم أن شروط المصدر لا تسمح إلا بوضع رابط.",
+    "rightsBeyondNone": "معروض رغم أن شروط المصدر لا تسمح بإعادة الاستخدام.",
     "sourcesAndLicences": "المصادر والتراخيص"
   },
   "Delivery": {

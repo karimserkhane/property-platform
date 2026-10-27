@@ -432,6 +432,8 @@
     "rightsReserved": "droits réservés à l'éditeur",
     "rightsPerItem": "licence propre à chaque fichier",
     "rightsTerms": "Conditions de la source",
+    "rightsBeyondLink": "Affiché alors que les conditions de la source ne permettent qu’un lien.",
+    "rightsBeyondNone": "Affiché alors que les conditions de la source n’en permettent pas la reprise.",
     "sourcesAndLicences": "Sources et licences"
   },
   "Delivery": {

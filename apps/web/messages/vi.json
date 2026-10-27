@@ -432,6 +432,8 @@
     "rightsReserved": "nhà xuất bản giữ bản quyền",
     "rightsPerItem": "giấy phép riêng của từng tệp",
     "rightsTerms": "Điều khoản của nguồn",
+    "rightsBeyondLink": "Được hiển thị dù điều khoản của nguồn chỉ cho phép đặt liên kết.",
+    "rightsBeyondNone": "Được hiển thị dù điều khoản của nguồn không cho phép tái sử dụng.",
     "sourcesAndLicences": "Nguồn và giấy phép"
   },
   "Delivery": {

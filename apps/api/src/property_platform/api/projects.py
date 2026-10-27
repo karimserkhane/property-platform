@@ -21,6 +21,7 @@ class SourceRightsResponse(Schema):
     publication: Literal["open", "facts", "link", "none"]
     attribution: str | None = None
     reviewed_on: date | None = None
+    shown_beyond_terms: bool = False
 
 
 class ProjectSourceResponse(Schema):

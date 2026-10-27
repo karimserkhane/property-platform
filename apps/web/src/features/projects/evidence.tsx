@@ -97,31 +97,38 @@ export function SourceRights({
     <bdi dir="ltr">{notice.licence}</bdi>
   );
   return (
-    <p className={dossier.evidenceDate} data-project-evidence-rights>
-      {labels.rightsLicence}{" "}
-      {notice.licenceUrl ? (
-        <a href={notice.licenceUrl} target="_blank" rel="noopener noreferrer">
-          {licence}
-        </a>
-      ) : (
-        licence
-      )}
-      {notice.attribution && (
-        <>
-          {" "}
-          · <bdi>{notice.attribution}</bdi>
-        </>
-      )}
-      {notice.termsUrl && (
-        <>
-          {" "}
-          ·{" "}
-          <a href={notice.termsUrl} target="_blank" rel="noopener noreferrer">
-            {labels.rightsTerms} <span aria-hidden="true">↗</span>
+    <>
+      <p className={dossier.evidenceDate} data-project-evidence-rights>
+        {labels.rightsLicence}{" "}
+        {notice.licenceUrl ? (
+          <a href={notice.licenceUrl} target="_blank" rel="noopener noreferrer">
+            {licence}
           </a>
-        </>
+        ) : (
+          licence
+        )}
+        {notice.attribution && (
+          <>
+            {" "}
+            · <bdi>{notice.attribution}</bdi>
+          </>
+        )}
+        {notice.termsUrl && (
+          <>
+            {" "}
+            ·{" "}
+            <a href={notice.termsUrl} target="_blank" rel="noopener noreferrer">
+              {labels.rightsTerms} <span aria-hidden="true">↗</span>
+            </a>
+          </>
+        )}
+      </p>
+      {notice.beyondTermsKey && (
+        <p className={dossier.evidenceDate} data-project-evidence-beyond-terms>
+          {labels[notice.beyondTermsKey]}
+        </p>
       )}
-    </p>
+    </>
   );
 }
 
