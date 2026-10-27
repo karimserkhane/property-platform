@@ -1,6 +1,7 @@
 import { brand } from "@property-platform/branding";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { getTranslations } from "next-intl/server";
 import type { SourcesLabels } from "@/features/sources/data";
 import { readSourceSites } from "@/features/sources/server";
@@ -23,6 +24,9 @@ export async function generateMetadata({
 export default async function SourcesPage({ params }: SourcesPageProps) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  // The registry is read per request: prerendered at build time, without the API,
+  // the page would keep its unavailable state.
+  await connection();
   const project = await getTranslations({ locale, namespace: "Project" });
   const t = await getTranslations({ locale, namespace: "Sources" });
   const result = await readSourceSites();
