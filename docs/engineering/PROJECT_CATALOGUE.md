@@ -1,5 +1,9 @@
 # Catalogue Reem et Saadiyat — 21 octobre 2026
 
+## Retrait du 27 octobre 2026 (A19)
+
+Property Finder, PSI et Aldar ne sont plus collectés ni publiés : leurs conditions interdisent la collecte automatique ou la réutilisation de leur contenu ([règle et mécanisme](DATA_PROVENANCE.md#sites-retirés-a19)). Sur les 183 fiches du registre, **88 n'ont aucune autre source** : 75 à Reem, surtout des tours connues seulement par PSI, et 13 à Saadiyat. Elles ne sont plus publiées. Il en reste 95, appuyées par l'ADREC ou par d'autres promoteurs. Leur position déclarée par PSI disparaît aussi de la carte. Les comptes ci-dessous décrivent le catalogue avant ce retrait ; registres, captures et snapshots sont conservés.
+
 ## Couverture et attribution
 
 Le registre actuel contient **174 fiches nommées** : **117 Reem, 57 Saadiyat**, avec 58 identités de promoteurs, contre 57 fiches au départ. Les ajouts comprennent des programmes, résidences, tours et phases explicitement nommées ; ce total n'est ni un nombre de programmes maîtres indépendants ni une garantie d'exhaustivité. Les captures privées des différentes vagues restent distinctes.

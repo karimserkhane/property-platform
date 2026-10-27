@@ -33,6 +33,15 @@ Deux acquisitions réelles successives ont ensuite été exécutées dans une au
 
 Une page consultable n'établit pas à elle seule un droit de redistribution, une API utilisable ou une couverture complète. Distinguer lecture publique, collecte, conservation et publication des textes/médias. Un accès bloqué est enregistré comme tel ; aucune couverture « de tous les sites et commentaires » n'est promise. Les données identifiant des personnes ne sont pas collectées par défaut.
 
+### Sites retirés (A19)
+
+Objectif du propriétaire : des données ouvertes, ou des liens vers les sources. Un site dont les conditions interdisent la collecte automatique ou la réutilisation de son contenu est inscrit dans `evidence/source_withdrawals.json` : hôte (sous-domaines compris), décision, date, motif et `links` (un simple lien vers ses pages reste-t-il permis ?). Le 27 octobre 2026, Karim a retiré Property Finder, PSI, Aldar, LinkedIn et Reddit ; seuls les liens vers les pages officielles d'Aldar restent permis ([A19](../tasks/A19.md)).
+
+- **Collecte.** Les flows de fiches, catalogues, références et présentations sautent ces sites. `SourceHTTP.fetch` les refuse aussi, pour tout connecteur et toute exécution manuelle.
+- **Publication.** Rien de ce que porte une capture d'un site retiré n'est publié : faits, typologies, médias, positions et repères de carte, liens de hiérarchie, présentations, références, signal satellite. Une fiche sans autre source n'est plus publiée. Le lien « site du projet » ne pointe vers un site retiré que si sa décision le permet ; sinon il prend la page d'un promoteur publiée ou le site du promoteur.
+- **Histoire.** Les registres gardent leurs entrées et les captures privées restent conservées. Un rejeu ou `rebuild-check` les relit donc à l'identique, et la publication y applique le même filtre. Retirer une ligne du fichier rétablit la collecte et la publication, sans réécrire de données.
+- **Ajouter un retrait.** Une ligne dans le fichier, relue avec ses conditions citées ; `test_source_withdrawals.py` vérifie que chaque retrait couvre au moins une adresse des registres.
+
 ### Première collecte directe de parcelles
 
 - Couche : `MyLand/SMARTHUB/MapServer/0`, nom `PLOT`, géométrie polygonale, WGS84/EPSG:4326.
