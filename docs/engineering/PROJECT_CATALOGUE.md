@@ -2,7 +2,15 @@
 
 ## Droits des sources, 27 octobre 2026 (A19)
 
-Chaque source a désormais ses droits ([registre et règles](DATA_PROVENANCE.md#droits-de-chaque-source-a19)). Property Finder, PSI, Bayut et Aldar ne sont plus collectés : leurs conditions l'interdisent. Seules les pages officielles d'Aldar restent liées, sans aucun fait repris. Sur les 183 fiches du registre, **90 n'ont aucune autre source publiable** : 77 à Reem, surtout des tours connues seulement par PSI, et 13 à Saadiyat. Elles ne sont plus publiées. Il en reste 93, appuyées par l'ADREC ou par d'autres promoteurs, et les positions déclarées par PSI quittent la carte. Registres, pipelines, captures et snapshots sont conservés : une autorisation écrite d'un de ces sites les ramènerait. Les comptes ci-dessous décrivent le catalogue avant ce changement.
+Chaque source a désormais ses droits ([registre et règles](DATA_PROVENANCE.md#droits-de-chaque-source-a19)). Les conditions de Property Finder, PSI, Bayut et Aldar interdisent la collecte automatique et la réutilisation de leur contenu.
+
+Par décision de Karim ([A22](../tasks/A22.md)), ces sites restent collectés et affichés dans l'aperçu privé, chaque donnée avec ses droits. Appliquer la collecte les arrêterait d'un coup. Si l'application de la publication est activée, l'effet mesuré le 27 octobre est le suivant :
+- **90 des 183 fiches n'ont aucune autre source publiable** et ne sont plus publiées : 77 à Reem, surtout des tours connues seulement par PSI, et 13 à Saadiyat ;
+- il en reste 93, appuyées par l'ADREC ou par d'autres promoteurs ;
+- les positions déclarées par PSI quittent la carte ;
+- seules les pages officielles d'Aldar restent liées, sans aucun fait repris.
+
+Registres, pipelines, captures et snapshots sont conservés dans tous les cas.
 
 ## Couverture et attribution
 
