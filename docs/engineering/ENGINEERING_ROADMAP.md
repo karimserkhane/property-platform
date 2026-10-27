@@ -93,6 +93,25 @@ Le gain est modeste sur la seule zone collectée aujourd'hui (0,1° × 0,14°) :
 
 Mesures (base locale, lecture seule) : Al Reem 0,04 × 0,03° — `map-context` 1 488 Kio brut / 197 Kio gzip, `context-index` 1 286 / 150 Kio, 16 tuiles z15 = 78 Kio ; Saadiyat 0,06 × 0,04° — 1 734 / 210 Kio contre 1 456 / 153 Kio, 35 tuiles z15 = 94 Kio. La géométrie ne pèse qu’environ 15 % du brut : l’essentiel vient des métadonnées `source` répétées par élément (210 Kio pour les rues et 277 Kio pour les lieux à Al Reem). Publier chaque provenance une fois par réponse est la prochaine piste, à proposer comme tâche séparée. Le gain principal est le rendu : MapLibre ne découpe plus les emprises GeoJSON dans le navigateur et les tuiles se chargent par zone.
 
+**Premier import de l’émirat : WRM — 27 octobre 2026 (tâche F03).** Le déploiement manuel `wrm-parcels-adsdi-districts` (flow run `reliable-hippo`) a importé les 46 districts d’Al Dhafra en 17 minutes : **40 752 parcelles observées**, exactement l’effectif du registre revu, dont 40 750 créées et **2 en quarantaine** (géométrie AD-SDI invalide, PLOTID 347654 à Eastern Mahadir et 358310 à Ghayathi) ; aucun district en échec.
+
+Mesures (API locale, lecture seule ; temps du premier appel, médiane de cinq appels répétés servis par le cache de lecture ; tailles non compressées, la compression se fait au relais du site) :
+
+| Lecture | Avant | Après |
+| --- | --- | --- |
+| Parcelles courantes en base | 8 379 | 49 129 |
+| `real_estate.parcel` / `evidence.parcel_observation` | 8 Mo / 28 Mo | 30 Mo / 49 Mo |
+| Base entière | 873 Mo | 1 090 Mo (+217 Mo, surtout captures et journaux de lignes) |
+| Tuile z8 couvrant Al Reem et l’est d’Al Dhafra, sans territoire | 13 Ko, 0,14 s | 91 Ko, 0,28 s ; 0,04 s répétée |
+| Tuile z10 de Madinat Zayed, sans territoire | vide (204) | 161 Ko, 0,19 s ; 0,03 s répétée |
+| Tuile z12 / z14 de Madinat Zayed | vide | 104 Ko / 2 Ko, 0,1 s |
+| Tuiles d’Al Reem z10 à z16, territoire `abu-dhabi` | 2 à 347 Ko, 0,1 à 0,2 s | identiques (±4 octets), 0,1 à 0,2 s |
+| Index, cellule de 0,05° à Madinat Zayed, sans territoire | 0 ligne | 893 lignes, 574 Ko, 0,04 s |
+| Index, vue maximale de 0,2° à Madinat Zayed | 0 ligne | 3 000 lignes (page pleine), 1,9 Mo, 0,07 s |
+| Index, cellule de 0,05° à Al Reem | 2 779 lignes, 1,8 Mo, 0,05 à 0,13 s | identique |
+
+Lecture : à 49 000 parcelles, tuiles et index par zone restent sous 0,3 s au premier appel, et le coût d’une zone ne dépend que de ce qu’elle contient ; les îles ne ralentissent pas. Une ligne d’index pèse environ 640 octets non compressés et une parcelle environ 5 Ko en base, captures comprises : l’émirat entier (environ 410 000 parcelles) représenterait de l’ordre de 2 Go. **Limite** : le territoire `abu-dhabi` de l’explorateur réunit seulement les trois îles revues (`publication/coverage.py`) ; les parcelles WRM ne sont lisibles qu’en lecture sans territoire et n’apparaissent pas encore sur la carte. Leur affichage, puis les imports ADM et AAM et la mesure à l’échelle de l’émirat, forment [F04](../tasks/F04.md).
+
 ## Cache des lectures et requêtes conditionnelles — 23 octobre 2026
 
 `api/read_cache.py` met en cache les lectures `/preview` sans effet de bord (parcelles, index, tuiles, contexte, quartiers, marché, projets, références, imagerie) et répond aux requêtes conditionnelles.
