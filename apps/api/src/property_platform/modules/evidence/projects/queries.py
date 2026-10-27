@@ -6,6 +6,8 @@ from urllib.parse import urlparse
 from django.db.models import Exists, F, OuterRef, Prefetch, Q
 from django.db.models.functions import Coalesce, Substr
 
+from property_platform.modules.catalog.models import Parcel
+
 from ..models import (
     AdministrativeAreaSourceAlias,
     ImageryScene,
@@ -57,8 +59,13 @@ def _parcel_observations(parcel_ids):
         source_namespace=OuterRef("parcel__source_namespace"),
         source_record_id=OuterRef("source_record_id"),
     )
+    # Both branches below observe one of `parcel_ids` or a parcel they replaced. Saying
+    # so on the observation column keeps the read indexed: without it the alternative
+    # scanned every observation of the emirate (0.5 s for 3 000 parcels at 228 000).
+    observed = Parcel.objects.filter(Q(id__in=parcel_ids) | Q(superseded_by_id__in=parcel_ids))
     return (
         ParcelObservation.objects.filter(
+            parcel_id__in=observed.values("id"),
             capture__run__source__key=F("parcel__source_namespace"),
             capture__run__status__in=["succeeded", "quarantined"],
         )

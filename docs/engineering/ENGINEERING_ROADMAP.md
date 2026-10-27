@@ -110,7 +110,27 @@ Mesures (API locale, lecture seule ; temps du premier appel, médiane de cinq ap
 | Index, vue maximale de 0,2° à Madinat Zayed | 0 ligne | 3 000 lignes (page pleine), 1,9 Mo, 0,07 s |
 | Index, cellule de 0,05° à Al Reem | 2 779 lignes, 1,8 Mo, 0,05 à 0,13 s | identique |
 
-Lecture : à 49 000 parcelles, tuiles et index par zone restent sous 0,3 s au premier appel, et le coût d’une zone ne dépend que de ce qu’elle contient ; les îles ne ralentissent pas. Une ligne d’index pèse environ 640 octets non compressés et une parcelle environ 5 Ko en base, captures comprises : l’émirat entier (environ 410 000 parcelles) représenterait de l’ordre de 2 Go. **Limite** : le territoire `abu-dhabi` de l’explorateur réunit seulement les trois îles revues (`publication/coverage.py`) ; les parcelles WRM ne sont lisibles qu’en lecture sans territoire et n’apparaissent pas encore sur la carte. Leur affichage, puis les imports ADM et AAM et la mesure à l’échelle de l’émirat, forment [F04](../tasks/F04.md).
+Lecture : à 49 000 parcelles, tuiles et index par zone restent sous 0,3 s au premier appel, et le coût d’une zone ne dépend que de ce qu’elle contient ; les îles ne ralentissent pas. Une ligne d’index pèse environ 640 octets non compressés et une parcelle environ 5 Ko en base, captures comprises : l’émirat entier (environ 410 000 parcelles) représenterait de l’ordre de 2 Go. **Limite levée par F04** : le territoire `abu-dhabi` de l’explorateur réunissait seulement les trois îles revues ; depuis F04 (`publication/coverage.py`, `emirate_profile`), il lit les parcelles importées de tous les districts du registre. Leur affichage, puis les imports ADM et AAM et la mesure à l’échelle de l’émirat, forment [F04](../tasks/F04.md).
+**Import ADM — 27 octobre 2026 (tâche F04).** Le déploiement manuel `adm-parcels-adsdi-districts` (flow run `refined-piculet`, 2 h 05) a parcouru les 98 districts d’Abu Dhabi : 97 importés, **176 536 parcelles créées**, 184 573 observations. Les trois îles revues ont été relues sous leur espace de noms d’origine, sans doublon : Al Maryah 73 inchangées ; Al Reem 2 499 inchangées, 2 416 concordantes, 5 conflits de géométrie et 2 identifiants différents pour une forme quasi identique, en quarantaine ; Saadiyat 5 279 inchangées, 4 987 concordantes, 10 conflits de géométrie, 165 identifiants différents pour une forme quasi identique, 1 géométrie invalide et 1 recouvrement multiple, en quarantaine. Ailleurs, 2 géométries invalides (Al Muntazah, Khalifa Industrial). **Madinat Al Riyad a échoué** (`SourceError` dès la liste) : ses 35 077 parcelles dépassaient le plafond de 20 000 identifiants hérité d’Onwani. AD-SDI a désormais son propre plafond (50 000, testé contre le plus grand district du registre) ; le district sera importé par le même déploiement après fusion.
+
+Mesures (code de la branche F04 sur la base partagée, en lecture seule ; premier appel, puis médiane de cinq appels servis par le cache ; tailles non compressées) :
+
+| Lecture | F03 (49 129 parcelles) | Après ADM (225 665 courantes) |
+| --- | --- | --- |
+| `real_estate.parcel` / `evidence.parcel_observation` | 30 Mo / 49 Mo | 133 Mo / 146 Mo |
+| Base entière | 1 090 Mo | 2 069 Mo |
+| Tuile z8 de la ville d’Abu Dhabi | 91 Ko, 0,28 s | 243 Kio, 0,6 à 1,8 s ; 0,003 s répétée |
+| Tuile z10 de Khalifa City / d’Al Zahiyah | — | 1 505 / 441 Kio, 0,5 / 0,2 s |
+| Tuiles z12 et z14 en ville | — | 90 à 720 Kio, 0,03 à 0,13 s |
+| Tuiles d’Al Reem et de Madinat Zayed, territoire `abu-dhabi` | 0,1 à 0,2 s | 0,02 à 0,12 s |
+| Index, cellule de 0,05° en ville (Al Zahiyah, Khalifa City, Musaffah, Al Reem) | Al Reem : 2 779 lignes, 0,05 à 0,13 s | 3 000 lignes (page pleine), 1,8 Mio, 1,0 à 1,4 s |
+| Recherche de parcelle dans le territoire | — | 0,13 à 0,20 s (0,75 à 0,98 s avant correctif) |
+
+Constats :
+
+- **Provenance indexée.** Chaque lecture de provenance des parcelles parcourait toute la table des observations (alternative « remplacement accepté » de `evidence/projects/queries.py`) : 0,53 s pour une cellule de 3 000 parcelles, puis autant pour la relecture de contrôle du cache. Restreindre les observations aux parcelles demandées et à celles qu’elles remplacent, ce que les deux branches impliquent déjà, utilise les index : 0,10 s ; la recherche passe sous 0,2 s. Le reste du coût d’une page pleine vient de la sérialisation de 3 000 lignes et de la relecture de contrôle ; il dépend de la page, plus de la taille de l’émirat.
+- **Index sur `code`** : non ajouté, la recherche reste sous 0,2 s.
+- **Explorateur.** En ville, une cellule de 0,05° dépasse la page de 3 000 lignes, et la vue initiale du territoire, bornée désormais par l’émirat, couvre 18 à 28 cellules selon l’écran (contre 12 bornée aux îles) pour un budget de 16 : la liste demandait alors de zoomer, les tuiles restant dessinées et cliquables. Depuis le 27 octobre, jusqu’à quatre fois le budget (64 cellules), l’explorateur lit les 16 cellules les plus proches du centre de la vue et affiche l’avis de données partielles (`parcel-viewport.ts`) ; au-delà, rien n’est lu. Le budget de l’API et la taille des cellules ne changent pas : une cellule pleine en ville reste tronquée à 3 000 lignes avec le même avis.
 
 ## Cache des lectures et requêtes conditionnelles — 23 octobre 2026
 
