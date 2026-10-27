@@ -1,4 +1,4 @@
-"""Withheld sites stay in history but never reach a published read (A19)."""
+"""Every source stays in history with its rights; enforcing them hides withheld sites (A19, A22)."""
 
 import hashlib
 import itertools
@@ -154,6 +154,27 @@ def catalogue():
     return building
 
 
+def test_unenforced_publication_shows_every_source_with_its_rights(catalogue, enforce_rights):
+    enforce_rights(collection=True, publication=False)
+    assert published_slugs() == ["gate", "renad-tower", "sky-tower"]
+    renad = project_detail("renad-tower")
+    assert renad["handover"]["year"] == 2027
+    assert len(renad["map_locations"]) == 1
+    assert renad["parent"]["slug"] == "gate"
+    # An agency page is still never shown as the project's site.
+    assert renad["website_url"] == DEVELOPER_PAGE
+    # The shown PSI facts carry the rights its terms give, ready to be enforced.
+    rights = {source["url"]: source["rights"] for source in renad["sources"]}
+    assert rights[PSI_PAGE]["publication"] == "none"
+    assert rights[PSI_PAGE]["licence"] == "proprietary"
+    assert rights[PSI_PAGE]["terms_url"] == "https://psinv.net/en/terms"
+    assert property_presentations("place", [catalogue.id])[str(catalogue.id)]["website_url"] == (
+        ALDAR_PAGE
+    )
+    assert [row["url"] for row in research_references()] == [REDDIT_PAGE]
+
+
+@pytest.mark.usefixtures("enforced_rights")
 def test_withheld_sites_leave_no_fact_pin_link_or_project_behind(catalogue):
     assert published_slugs() == ["gate", "renad-tower"]
     renad = project_detail("renad-tower")
@@ -175,6 +196,7 @@ def test_withheld_sites_leave_no_fact_pin_link_or_project_behind(catalogue):
     assert research_references() == []
 
 
+@pytest.mark.usefixtures("enforced_rights")
 def test_revising_a_review_restores_every_read_without_rewriting_history(catalogue, monkeypatch):
     rows = ProjectSnapshot.objects.count()
     monkeypatch.setattr(source_rights, "source_rights", lambda: ())
@@ -190,6 +212,7 @@ def test_revising_a_review_restores_every_read_without_rewriting_history(catalog
     assert ProjectSnapshot.objects.count() == rows
 
 
+@pytest.mark.usefixtures("enforced_rights")
 def test_presentations_replay_forbidden_receipts_and_skip_them_once_collection_stops():
     from test_property_presentations_postgis import sample
 
@@ -206,6 +229,7 @@ def test_presentations_replay_forbidden_receipts_and_skip_them_once_collection_s
     assert property_presentations("building", [building.id]) == {}
 
 
+@pytest.mark.usefixtures("enforced_rights")
 def test_plain_links_to_a_withheld_site_follow_its_review(catalogue):
     gate = project_detail("gate")
     Project.objects.filter(slug="gate").update(website_url=ALDAR_PAGE)

@@ -1,0 +1,14 @@
+{
+  "collection": {
+    "enforced": true,
+    "decided_on": "2026-10-27",
+    "decided_by": "Karim",
+    "basis": "Collectors skip sites whose terms forbid automated access (A19); their pipelines, registries and receipts are kept."
+  },
+  "publication": {
+    "enforced": false,
+    "decided_on": "2026-10-27",
+    "decided_by": "Karim",
+    "basis": "The private preview shows every collected source; each one keeps its reviewed rights and licence, so turning this on hides at once what the terms do not allow (A22)."
+  }
+}

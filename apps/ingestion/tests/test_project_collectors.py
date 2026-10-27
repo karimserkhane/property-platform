@@ -368,6 +368,7 @@ def test_collector_fetches_each_registered_html_once_and_never_fetches_linked_me
     assert len(validate_project_receipts(receipts, rows)) == len(project_urls(rows))
 
 
+@pytest.mark.usefixtures("collection_enforced")
 def test_a_site_whose_terms_forbid_collection_is_refused_before_any_request():
     rows = [
         row
@@ -504,6 +505,7 @@ def test_one_failed_project_does_not_prevent_other_project_imports(monkeypatch):
     }
 
 
+@pytest.mark.usefixtures("collection_enforced")
 def test_discovery_and_reference_flows_never_schedule_forbidden_sites(monkeypatch):
     import logging
 
