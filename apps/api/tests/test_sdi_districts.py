@@ -1,8 +1,12 @@
 """Reviewed AD-SDI district scopes: no free SQL, islands keep their archived identity."""
 
+import json
+from importlib.resources import files
+
 import pytest
 
 from property_platform.modules.evidence.collection_profiles import COLLECTIONS
+from property_platform.modules.evidence.maps import onwani
 from property_platform.modules.evidence.maps import sdi_protocol as protocol
 from property_platform.modules.evidence.rebuild.failed_acquisitions import source_definition
 
@@ -34,3 +38,16 @@ def test_unregistered_scopes_are_refused(scope):
         protocol.where(scope)
     with pytest.raises(ValueError):
         protocol.scopes_in("DXB")
+
+
+def test_district_listing_bound_covers_every_reviewed_district():
+    raw = json.loads(
+        files(protocol.__package__).joinpath("sdi_districts.json").read_text(encoding="utf-8")
+    )
+    largest = max(row["plots_at_review"] for row in raw["districts"])
+    assert onwani.MAX_RECORDS < largest <= protocol.MAX_RECORDS
+    assert protocol.object_ids({"objectIds": list(range(largest, 0, -1))})[0] == 1
+    with pytest.raises(protocol.SourceError, match="unexpectedly large"):
+        protocol.object_ids({"objectIds": list(range(1, protocol.MAX_RECORDS + 2))})
+    with pytest.raises(onwani.SourceError, match="unexpectedly large"):
+        onwani.object_ids({"objectIds": list(range(1, largest + 1))})

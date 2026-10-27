@@ -64,9 +64,9 @@ def decode(payload):
     return data
 
 
-def object_ids(data):
+def object_ids(data, max_records=MAX_RECORDS):
     ids = data.get("objectIds")
-    if not isinstance(ids, list) or not ids or len(ids) > MAX_RECORDS:
+    if not isinstance(ids, list) or not ids or len(ids) > max_records:
         raise SourceError("Empty or unexpectedly large territory")
     if any(type(value) is not int or value <= 0 for value in ids) or len(set(ids)) != len(ids):
         raise SourceError("Invalid or duplicate source identities")

@@ -7,7 +7,8 @@ from functools import cache
 from importlib.resources import files
 
 from ..collection_profiles import COLLECTIONS, collection_for
-from .onwani import SourceError, decode, object_ids  # noqa: F401
+from . import onwani
+from .onwani import SourceError, decode  # noqa: F401
 
 URL = "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/Pub/Generic_Search_WM/MapServer/10"
 VERSION = "adsdi-plots-v1"
@@ -16,6 +17,9 @@ FIELDS = (
     "PRIMARYUSEENG,PRIMARYUSEARA,SOURCEOFORIGIN"
 )
 MAX_BYTES = 8 * 1024 * 1024
+# A district, not an island: Madinat Al Riyad listed 35 077 plots on 27/10/2026, above
+# the Onwani island bound. The bound still refuses a listing no reviewed district needs.
+MAX_RECORDS = 50000
 MUNICIPALITIES = ("ADM", "AAM", "WRM")
 _SCOPE = re.compile(r"(adm|aam|wrm):[a-z0-9]+(?:-[a-z0-9]+)*")
 _DISTRICT = re.compile(r"[A-Z0-9'`][A-Z0-9 '`-]{0,79}")
@@ -69,6 +73,10 @@ def where(scope):
     municipality, district = scope_for(scope)
     quoted = district.replace("'", "''")
     return f"MUNICIPALITYENG='{municipality}' AND DISTRICTENG='{quoted}'"
+
+
+def object_ids(data):
+    return onwani.object_ids(data, MAX_RECORDS)
 
 
 def metadata(data):
