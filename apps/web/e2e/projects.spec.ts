@@ -65,7 +65,11 @@ test("a reviewed component links to its programme and back", async ({
     const withParent = cards.filter({ hasText: /Part of ·/ });
     if (await withParent.count()) child = withParent.first();
   }
-  skipWithoutData(!child, "The local data has no reviewed project hierarchy");
+  skipWithoutData(
+    !child,
+    "The local data has no reviewed project hierarchy",
+    "every reviewed relation cites a developer or listing page, which the public demonstration package does not hold (A18)",
+  );
   if (!child) return;
   const childName = (await child.locator("h2").innerText()).trim();
   await child.click();

@@ -50,11 +50,18 @@ docker compose -f infra/local/compose.e2e-demo.yaml down
 ```
 
 Au démarrage, l'API applique les migrations puis `load_demo_package` rejoue
-`fixtures/demo-replay/` avec les importateurs actuels (aucun dump : 9 acquisitions
-revues, parcelles, rues et bâtiments de Reem, trois projets dont une hiérarchie relue,
-une lecture du registre ADREC) ; elle n'est prête qu'après un rejeu sans étape échouée
-ni divergente (environ 1 min 30). `E2E_REQUIRE_DATA=1` transforme tout parcours
-« ignoré faute de données » en **échec**. En CI, si un parcours échoue, les journaux de
+`fixtures/demo-replay/` avec les importateurs actuels (aucun dump : 6 acquisitions
+revues, parcelles, rues et bâtiments de Reem, un projet lu au registre ADREC) ; elle
+n'est prête qu'après un rejeu sans étape échouée ni divergente (environ 1 min 30).
+`E2E_REQUIRE_DATA=1` transforme tout parcours « ignoré faute de données » en **échec**,
+sauf ceux dont le paquet ne peut pas contenir les données : leur raison est donnée
+dans le parcours et le rapport les compte comme ignorés, jamais comme réussis.
+
+Le dépôt est public : le paquet ne contient **aucune page de promoteur ni d'annonce**
+(décision du 27/10, [A18](../tasks/A18.md)). Les pages d'Aldar qu'il contenait ont été
+retirées. Or toutes les relations de projet relues citent une telle page : le parcours
+« composant → programme parent » ne tourne donc que contre la base locale, et il est
+ignoré en CI avec sa raison. En CI, si un parcours échoue, les journaux de
 l'API sont affichés et `.cache/e2e/` (traces, captures, rapport HTML) est publié comme
 artefact `e2e-traces` (14 jours). Durée mesurée en local : environ 1 min 30 de rejeu et
 1 min 30 de parcours, hors construction des images.
@@ -76,7 +83,8 @@ annulation et 0,87 s au plus sous gunicorn ([A17](../tasks/A17.md)).
 
 Le paquet se régénère depuis la base locale de référence avec `export_demo_package`
 (lecture seule) ; la sélection, les raisons et les licences sont dans
-`fixtures/demo-replay/selection.json`.
+`fixtures/demo-replay/selection.json`. Une source n'y entre que si sa copie peut
+rester dans un dépôt public.
 
 ## Parcours
 
@@ -90,8 +98,8 @@ Le paquet se régénère depuis la base locale de référence avec `export_demo_
 
 Les parcours découvrent leurs données (premier projet de l'annuaire, première carte
 portant un parent) au lieu de figer des noms. Si les données locales ne contiennent
-aucune hiérarchie relue, le parcours correspondant est **marqué ignoré avec sa raison**
-(échec en CI, voir plus haut), jamais compté comme réussi. Le clic sur la carte sonde une grille autour du centre :
+aucune hiérarchie relue, le parcours correspondant est **marqué ignoré avec sa raison**,
+jamais compté comme réussi ; c'est toujours le cas en CI (voir plus haut). Le clic sur la carte sonde une grille autour du centre :
 l'eau et les routes ne sont pas des parcelles, mais une parcelle doit être trouvée.
 
 ## Limites

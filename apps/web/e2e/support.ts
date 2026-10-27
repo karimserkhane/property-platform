@@ -5,13 +5,18 @@ export const projectCards = (page: Page, locale = "en") =>
   page.locator(`a[href^="/${locale}/projects/"]`);
 
 // Locally a journey without its data is skipped with the reason. Against the
-// demonstration package (E2E_REQUIRE_DATA=1, CI) missing data fails instead.
-export function skipWithoutData(missing: boolean, reason: string) {
-  if (process.env.E2E_REQUIRE_DATA === "1") {
+// demonstration package (E2E_REQUIRE_DATA=1, CI) missing data fails instead, unless
+// the package cannot hold that data: `notInPackage` says why, and the skip shows it.
+export function skipWithoutData(
+  missing: boolean,
+  reason: string,
+  notInPackage?: string,
+) {
+  if (process.env.E2E_REQUIRE_DATA === "1" && !notInPackage) {
     expect(missing, reason).toBe(false);
     return;
   }
-  test.skip(missing, reason);
+  test.skip(missing, notInPackage ? `${reason}: ${notInPackage}` : reason);
 }
 
 export async function expectNoHorizontalScroll(page: Page) {
