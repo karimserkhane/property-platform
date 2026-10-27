@@ -199,11 +199,14 @@ def nearby_place_rows(target, identity, *, namespaces=None, parcel_namespaces=No
 PROJECT_MARKER_RADIUS_M = 50
 
 
-def project_markers_near_parcels(parcel_ids, radius_m=PROJECT_MARKER_RADIUS_M):
+def project_markers_near_parcels(
+    parcel_ids, radius_m=PROJECT_MARKER_RADIUS_M, excluded_namespaces=()
+):
     """Active project marker points within `radius_m` of each parcel boundary (0 inside).
 
     Clients keep their own naming and ambiguity rules; this only replaces the boundary
-    distance they used to compute from the full parcel geometry.
+    distance they used to compute from the full parcel geometry. Markers of
+    `excluded_namespaces` (sources the publication layer withholds) are left out.
     """
     if not parcel_ids:
         return {}
@@ -218,6 +221,7 @@ def project_markers_near_parcels(parcel_ids, radius_m=PROJECT_MARKER_RADIUS_M):
         JOIN {places} AS place
           ON place.active
          AND place.kind LIKE %s
+         AND place.source_namespace <> ALL(%s::text[])
          AND place.geometry && ST_Expand(parcel.geometry, %s)
          AND ST_DWithin(parcel.geometry::geography, place.geometry::geography, %s)
         WHERE parcel.id = ANY(%s::uuid[])
@@ -227,7 +231,16 @@ def project_markers_near_parcels(parcel_ids, radius_m=PROJECT_MARKER_RADIUS_M):
     with transaction.atomic():
         with connection.cursor() as cursor:
             cursor.execute("SET LOCAL statement_timeout='3000ms'")
-            cursor.execute(sql, [r"%\_project\_marker", margin, radius_m, list(parcel_ids)])
+            cursor.execute(
+                sql,
+                [
+                    r"%\_project\_marker",
+                    list(excluded_namespaces),
+                    margin,
+                    radius_m,
+                    list(parcel_ids),
+                ],
+            )
             for parcel_id, place_id, distance in cursor.fetchall():
                 nearby.setdefault(parcel_id, []).append(
                     {"place_id": place_id, "distance_m": round(distance, 2)}

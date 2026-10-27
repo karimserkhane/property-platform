@@ -334,6 +334,32 @@ def test_property_receipts_match_existing_protocol_hash_bytes_and_times():
     assert validate_receipts(rows, {URL})[URL]["payload"] == b"project source bytes"
 
 
+def test_property_collection_skips_profiles_of_withdrawn_sites_and_their_photos():
+    withdrawn = "https://www.aldar.com/en/news-and-media/example"
+    photos = {
+        "example": {
+            "source_url": "https://commons.wikimedia.org/wiki/File:Example.jpg",
+            "image_url": "https://upload.wikimedia.org/example.jpg",
+        }
+    }
+    profiles = [
+        {"source_url": URL, "photo_key": None},
+        {"source_url": withdrawn, "photo_key": "example"},
+    ]
+    assert property_urls(profiles, photos) == (URL,)
+    calls = []
+
+    def handler(request):
+        calls.append(str(request.url))
+        return httpx.Response(200, content=b"project source bytes")
+
+    with client([URL, withdrawn], handler) as http:
+        rows = collect_property_receipts(http, profiles, photos)
+        with pytest.raises(AcquisitionError, match="withdrawn"):
+            http.fetch(withdrawn, max_bytes=100)
+    assert calls == [URL] and [row["url"] for row in rows] == [URL]
+
+
 def test_property_collection_fails_whole_batch_when_one_source_fails():
     other = "https://publisher.example/projects/two"
     profiles = [{"source_url": url, "photo_key": None} for url in (URL, other)]

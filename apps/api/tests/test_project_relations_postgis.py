@@ -25,7 +25,13 @@ from property_platform.modules.evidence.projects.project_queries import (  # noq
     project_directory,
 )
 
-pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
+# Agency, Aldar and relation fixtures use sites withdrawn in A19; their replay mechanics
+# remain tested here, what publication hides is in test_source_withdrawals_postgis.py.
+pytestmark = [
+    pytest.mark.postgis,
+    pytest.mark.django_db(transaction=True),
+    pytest.mark.usefixtures("without_withdrawals"),
+]
 
 GATE_ARC = "https://www.aldar.com/properties/en/uae/reem-island/gate-arc"
 GATE = "https://www.aldar.com/properties/en/uae/reem-island/gate"

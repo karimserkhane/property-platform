@@ -10,6 +10,10 @@ from property_platform.modules.catalog.territories import (
 from property_platform.modules.evidence.collection_profiles import collection_for
 from property_platform.modules.evidence.maps.onwani import SOURCE_KEY
 from property_platform.modules.evidence.maps.sdi_protocol import namespace as sdi_namespace
+from property_platform.modules.evidence.source_withdrawals import is_withdrawn
+
+# Agency pins keep a namespace of their own, per publisher (`project_locations.py`).
+BROKER_PARSERS = {"psi_project_v1": "psi", "propertyfinder_project_v1": "propertyfinder"}
 
 
 @dataclass(frozen=True)
@@ -127,7 +131,8 @@ def navigation_registry():
     }
 
 
-def reference_source_keys(profile):
+def reference_source_keys(profile, *, withdrawn=False):
+    """Namespaces of reviewed references, or of those whose site is withdrawn (A19)."""
     import hashlib
     import json
     from pathlib import Path
@@ -137,7 +142,7 @@ def reference_source_keys(profile):
             dict.fromkeys(
                 key
                 for member in profile.member_territory_ids
-                for key in reference_source_keys(PROFILES[member])
+                for key in reference_source_keys(PROFILES[member], withdrawn=withdrawn)
             )
         )
     if not profile.reference_registry:
@@ -147,6 +152,7 @@ def reference_source_keys(profile):
     return tuple(
         "research:" + hashlib.sha256(row["url"].encode()).hexdigest()[:40]
         for row in json.loads(registry.read_text(encoding="utf-8"))
+        if is_withdrawn(row["url"]) == withdrawn
     )
 
 
@@ -169,18 +175,39 @@ def map_source_namespaces(territory_id):
             if project["territory_id"] in members
             for namespace in (
                 f"project:{project['slug']}",
+                *_broker_namespaces(project, withdrawn=False),
+            )
+        )
+    )
+
+
+def _broker_namespaces(project, *, withdrawn):
+    return tuple(
+        dict.fromkeys(
+            f"project:{project['slug']}:broker:{BROKER_PARSERS[source['parser']]}"
+            for source in project["sources"]
+            if source["parser"] in BROKER_PARSERS and is_withdrawn(source["url"]) == withdrawn
+        )
+    )
+
+
+def withdrawn_place_namespaces():
+    """Map identities declared only by withdrawn sites: agency pins and references (A19)."""
+    from property_platform.modules.evidence.projects.project_protocol import project_registry
+
+    return tuple(
+        dict.fromkeys(
+            (
                 *(
-                    (f"project:{project['slug']}:broker:psi",)
-                    if any(source["parser"] == "psi_project_v1" for source in project["sources"])
-                    else ()
+                    namespace
+                    for project in project_registry()
+                    for namespace in _broker_namespaces(project, withdrawn=True)
                 ),
                 *(
-                    (f"project:{project['slug']}:broker:propertyfinder",)
-                    if any(
-                        source["parser"] == "propertyfinder_project_v1"
-                        for source in project["sources"]
-                    )
-                    else ()
+                    key
+                    for profile in PROFILES.values()
+                    if not profile.member_territory_ids
+                    for key in reference_source_keys(profile, withdrawn=True)
                 ),
             )
         )

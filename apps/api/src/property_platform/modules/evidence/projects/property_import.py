@@ -13,6 +13,7 @@ from property_platform.modules.catalog.models import Building, Place
 
 from ..collection_profiles import DEFAULT_TERRITORY, collection_for
 from ..models import Capture, IngestionRun, PropertyMedia, PropertyPresentation, Source
+from ..source_withdrawals import is_withdrawn
 from .property_protocol import safe_url, validate_photo, validate_receipts
 
 ROOT = Path(__file__).parent.parent
@@ -33,6 +34,14 @@ def import_presentations(receipt_rows, *, actor, profiles=None, photos=None):
         raise ValueError("Valid actor required")
     if profiles is None or photos is None:
         profiles, photos = registry()
+    # A withdrawn site's profile replays from batches that hold it; new collections no
+    # longer contain it, nor its photograph (A19).
+    present = {row.get("url") for row in receipt_rows if isinstance(row, dict)}
+    profiles = [
+        row
+        for row in profiles
+        if row["source_url"] in present or not is_withdrawn(row["source_url"])
+    ]
     allowed = {row["source_url"] for row in profiles}
     for row in profiles:
         if row.get("photo_key"):

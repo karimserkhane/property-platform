@@ -30,6 +30,18 @@ from ..models import (
     ProjectSnapshot,
     ProjectTypology,
 )
+from ..source_withdrawals import capture_url_pattern, link_allowed
+
+
+def _withdrawn(field):
+    """Rows whose capture comes from a withdrawn site (A19); matches nothing otherwise."""
+    pattern = capture_url_pattern()
+    return Q(**{f"{field}__iregex": pattern}) if pattern else Q(pk__in=[])
+
+
+def _link(*urls):
+    """The first URL a plain link may point to; a withdrawn site keeps links by decision."""
+    return next((url for url in urls if url and link_allowed(url)), "")
 
 
 def _accepted_snapshots():
@@ -49,8 +61,10 @@ def _accepted_snapshots():
         capture__run__status="succeeded",
         ingested_at__gt=OuterRef("ingested_at"),
     )
-    return ProjectSnapshot.objects.filter(capture__run__status="succeeded").filter(
-        ~Exists(excluded), ~Exists(reread)
+    return (
+        ProjectSnapshot.objects.filter(capture__run__status="succeeded")
+        .exclude(_withdrawn("capture__url"))
+        .filter(~Exists(excluded), ~Exists(reread))
     )
 
 
@@ -67,6 +81,7 @@ def _relations(project_ids):
     accepted = _accepted_snapshots()
     rows = (
         ProjectRelation.objects.filter(active=True)
+        .exclude(_withdrawn("capture__url"))
         .filter(Q(child_id__in=project_ids) | Q(parent_id__in=project_ids))
         .filter(
             Exists(accepted.filter(project_id=OuterRef("child_id"))),
@@ -121,11 +136,13 @@ def _visible_links():
         record_key=OuterRef("capture__url"),
         active=True,
     )
-    return ProjectIdentityLink.objects.filter(
-        valid, active=True, capture__run__status="succeeded"
-    ).filter(
-        ~Exists(excluded),
-        Exists(_accepted_snapshots().filter(project_id=OuterRef("project_id"))),
+    return (
+        ProjectIdentityLink.objects.filter(valid, active=True, capture__run__status="succeeded")
+        .exclude(_withdrawn("capture__url"))
+        .filter(
+            ~Exists(excluded),
+            Exists(_accepted_snapshots().filter(project_id=OuterRef("project_id"))),
+        )
     )
 
 
@@ -160,9 +177,9 @@ def project_directory(territory=None, *, query="", offset=0, limit=200):
                     "id": row.developer.id,
                     "key": row.developer.key,
                     "name": row.developer.name,
-                    "website_url": row.developer.website_url,
+                    "website_url": _link(row.developer.website_url),
                 },
-                "website_url": row.website_url,
+                "website_url": _link(row.website_url, row.developer.website_url),
                 "updated_at": row.checked_at,
                 "has_map_identity": row.mapped,
                 "parent": _relation(parents[row.id], parents[row.id].parent)
@@ -224,7 +241,8 @@ def _proof_sources(snapshots):
 
 
 def _project_website(project, snapshots):
-    if urlsplit(project.website_url).hostname in {"psinv.net", "adrec.gov.ae"}:
+    linked = link_allowed(project.website_url)
+    if not linked or urlsplit(project.website_url).hostname in {"psinv.net", "adrec.gov.ae"}:
         for snapshot in snapshots:
             if (
                 snapshot.source_kind in {"developer", "publisher"}
@@ -232,7 +250,7 @@ def _project_website(project, snapshots):
                 and "/api/" not in urlsplit(snapshot.capture.url).path
             ):
                 return snapshot.capture.url
-    return project.website_url
+    return project.website_url if linked else _link(project.developer.website_url)
 
 
 def project_detail(slug):
@@ -376,7 +394,7 @@ def project_detail(slug):
         if not allowed(snapshot, "media"):
             continue
         for asset in snapshot.media.all():
-            if asset.source_url in seen:
+            if asset.source_url in seen or not link_allowed(asset.source_url):
                 continue
             seen.add(asset.source_url)
             url = None
@@ -416,7 +434,7 @@ def project_detail(slug):
             "id": project.developer.id,
             "key": project.developer.key,
             "name": project.developer.name,
-            "website_url": project.developer.website_url,
+            "website_url": _link(project.developer.website_url),
         },
         "summary": summary.summary if summary else "",
         "summary_source": _source(summary) if summary else None,
@@ -603,7 +621,9 @@ def project_location_gaps(territory=None):
                 )
             ),
             related=Exists(
-                ProjectRelation.objects.filter(active=True).filter(
+                ProjectRelation.objects.filter(active=True)
+                .exclude(_withdrawn("capture__url"))
+                .filter(
                     Q(child_id=OuterRef("pk"), parent__projectidentitylink__in=_visible_links())
                     | Q(parent_id=OuterRef("pk"), child__projectidentitylink__in=_visible_links())
                 )

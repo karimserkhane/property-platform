@@ -22,7 +22,13 @@ from property_platform.modules.evidence.models import (
 from property_platform.modules.evidence.projects.property_import import import_presentations  # noqa: E402
 from property_platform.modules.evidence.projects.queries import property_presentations  # noqa: E402
 
-pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
+# Agency, Aldar and relation fixtures use sites withdrawn in A19; their replay mechanics
+# remain tested here, what publication hides is in test_source_withdrawals_postgis.py.
+pytestmark = [
+    pytest.mark.postgis,
+    pytest.mark.django_db(transaction=True),
+    pytest.mark.usefixtures("without_withdrawals"),
+]
 
 
 def sample():

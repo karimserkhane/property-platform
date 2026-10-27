@@ -8,6 +8,7 @@ from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
 from prefect.runtime import flow_run
 from property_platform.modules.evidence.projects.project_protocol import project_registry
+from property_platform.modules.evidence.source_withdrawals import is_withdrawn
 
 from .project_archive import (
     catalogue_batches,
@@ -59,7 +60,7 @@ def rebuild_projects(
         raise ValueError("Unknown catalogue rebuild mode")
     prepare_catalogue(actor)
     indexed = index_project_archive()
-    successes, failures, geography = [], [], []
+    successes, failures, geography, withdrawn = [], [], [], []
     if include_geography:
         for area in (territory,) if territory else TERRITORIES:
             for label, collect in (
@@ -98,6 +99,9 @@ def rebuild_projects(
                             "project_details", scope, actor, archive_key=key
                         )
                     successes.append({"scope": scope, "versions": len(versions), "mode": "archive"})
+                elif is_withdrawn(source["url"]):
+                    # Its preserved history replays above; it is never collected again (A19).
+                    withdrawn.append(scope)
                 elif mode == "archive":
                     failures.append(scope)
                 else:
@@ -119,6 +123,8 @@ def rebuild_projects(
                             "project_discovery", scope, actor, archive_key=key
                         )
                         catalogue_versions += 1
+                elif is_withdrawn(definition["url"]):
+                    withdrawn.append(scope)
                 elif mode == "archive":
                     failures.append(scope)
                 else:
@@ -132,6 +138,7 @@ def rebuild_projects(
         "catalogue_versions": catalogue_versions,
         "geography_layers": geography,
         "missing_or_failed": failures,
+        "withdrawn_without_archive": withdrawn,
         "archive_index": indexed,
     }
     get_run_logger().info("Catalogue rebuild: %s", summary)
