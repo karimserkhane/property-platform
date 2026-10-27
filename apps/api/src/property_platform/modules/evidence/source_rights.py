@@ -173,7 +173,11 @@ def link_allowed(url):
 
 
 def public_rights(url):
-    """What a reader is told about the rights of a source page."""
+    """What a reader is told about the rights of a source page.
+
+    `shown_beyond_terms` flags data shown only because publication is not enforced
+    (A22): its site's terms allow a plain link (`link`) or nothing (`none`).
+    """
     row = rights_for(url)
     return {
         "licence": row["licence"],
@@ -182,6 +186,7 @@ def public_rights(url):
         "publication": row["publication"],
         "attribution": row["attribution"] or None,
         "reviewed_on": row["reviewed_on"],
+        "shown_beyond_terms": not enforced("publication") and row["publication"] not in FACTS,
     }
 
 
@@ -197,3 +202,36 @@ def withheld_capture_pattern():
         re.escape(row["host"]) for row in source_rights() if row["publication"] not in FACTS
     )
     return rf"^https://([^/?#:]+\.)?({hosts})(:443)?([/?#]|$)" if hosts else None
+
+
+# Base-map layers drawn by the web, each credited from the reviewed site it comes from.
+MAP_LAYERS = {
+    "openfreemap": "openfreemap.org",
+    "openstreetmap": "openstreetmap.org",
+    "esa-worldcover": "terrascope.be",
+    "copernicus-sentinel": "sentinel-cogs.s3.us-west-2.amazonaws.com",
+    "overture": "overturemaps.org",
+}
+
+
+def map_credits(layers=None):
+    """The attribution of each map layer, from the registry (A20).
+
+    The web map footers read this export instead of their own texts; a layer must come
+    from a reviewed, openly licensed site with its attribution.
+    """
+    rows = {row["host"]: row for row in source_rights()}
+    credits = {}
+    for key, host in (MAP_LAYERS if layers is None else layers).items():
+        row = rows.get(host)
+        if row is None or row["publication"] != "open":
+            raise ValueError(f"Map layer {key} needs an openly published, reviewed host")
+        credits[key] = {
+            "host": host,
+            "publisher": row["publisher"],
+            "licence": row["licence"],
+            "licence_url": row["licence_url"] or None,
+            "terms_url": row["terms_url"] or None,
+            "attribution": row["attribution"],
+        }
+    return credits

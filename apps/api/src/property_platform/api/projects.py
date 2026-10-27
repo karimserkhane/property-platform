@@ -21,6 +21,7 @@ class SourceRightsResponse(Schema):
     publication: Literal["open", "facts", "link", "none"]
     attribution: str | None = None
     reviewed_on: date | None = None
+    shown_beyond_terms: bool = False
 
 
 class ProjectSourceResponse(Schema):
@@ -126,6 +127,7 @@ class ProjectRelationResponse(Schema):
     basis: str
     source_url: str
     retrieved_at: datetime
+    rights: SourceRightsResponse | None = None
 
 
 class ProjectDeclaredProgressResponse(Schema):
@@ -150,6 +152,7 @@ class RetentionReferenceResponse(Schema):
     url: str
     consulted_on: date
     covers: str
+    rights: SourceRightsResponse | None = None
 
 
 class RetentionSourceResponse(Schema):
@@ -246,6 +249,7 @@ class VerificationLinkResponse(Schema):
     registration_number: str
     url: str
     reviewed_on: date
+    rights: SourceRightsResponse | None = None
 
 
 class VerificationContradictionResponse(Schema):
@@ -308,6 +312,7 @@ class ActivityParcelResponse(Schema):
 class ActivitySourceResponse(Schema):
     name: str
     url: str
+    rights: SourceRightsResponse | None = None
 
 
 class ProjectConstructionActivityResponse(Schema):

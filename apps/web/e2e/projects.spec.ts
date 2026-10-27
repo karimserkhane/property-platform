@@ -44,6 +44,10 @@ test("a project page shows its facts with sources and links back", async ({
   if (await evidence.count()) {
     await evidence.locator("summary").click();
     await expect(evidence).toHaveAttribute("open", "");
+    // Every citation states the reviewed licence of its source, or that it is unreviewed.
+    await expect(
+      evidence.locator("[data-project-evidence-rights]").first(),
+    ).toContainText("Licence");
   }
   await page
     .getByRole("navigation", { name: "Project navigation" })
@@ -84,6 +88,37 @@ test("a reviewed component links to its programme and back", async ({
   ).toBeVisible();
   const components = page.getByRole("region", { name: "Buildings & phases" });
   await expect(components.getByRole("link", { name: childName })).toBeVisible();
+  // The reviewed page behind each relation states its source's licence.
+  await expect(
+    components.locator("[data-project-evidence-rights]").first(),
+  ).toContainText("Licence");
+});
+
+test("data shown beyond its source's terms says so", async ({ page }) => {
+  // Publication is not enforced (A22): a page citing a link-only or no-reuse source flags it.
+  let flagged = null;
+  for (let offset = 0; offset < 192 && !flagged; offset += 48) {
+    await page.goto(`/en/projects?offset=${offset}`);
+    const cards = projectCards(page);
+    const count = await cards.count();
+    if (!count) break;
+    for (let index = 0; index < Math.min(count, 6) && !flagged; index += 1) {
+      await page.goto(`/en/projects?offset=${offset}`);
+      await projectCards(page).nth(index).click();
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      const line = page.locator("[data-project-evidence-beyond-terms]").first();
+      if (await line.count()) flagged = line;
+    }
+  }
+  skipWithoutData(
+    !flagged,
+    "The local data cites no source limited to a link or to nothing",
+    "such sources are developer and listing pages, which the public demonstration package does not hold (A18)",
+  );
+  if (!flagged) return;
+  await expect(flagged).toHaveText(
+    /^Shown although the source’s terms (allow only a link|do not allow reuse)\.$/,
+  );
 });
 
 test("a project links to its developer's delivery history with cited points", async ({
@@ -184,6 +219,26 @@ test("the satellite signal states its method and limits, also right to left", as
     page.getByRole("region", {
       name: "التغير على الأرض كما يُرى من القمر الصناعي",
     }),
+  ).toBeVisible();
+  await expectNoHorizontalScroll(page);
+});
+
+test("sources and licences list every reviewed site, also right to left", async ({
+  page,
+}) => {
+  // The registry ships with the API, so this page needs no collected data.
+  await page.goto("/en/sources");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Sources and licences" }),
+  ).toBeVisible();
+  const sites = page.locator("[data-source-site]");
+  await expect(sites.first()).toBeVisible();
+  await expect(sites.first().locator("[data-source-licence]")).not.toBeEmpty();
+  await expectNoHorizontalScroll(page);
+  await page.goto("/ar/sources");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "المصادر والتراخيص" }),
   ).toBeVisible();
   await expectNoHorizontalScroll(page);
 });

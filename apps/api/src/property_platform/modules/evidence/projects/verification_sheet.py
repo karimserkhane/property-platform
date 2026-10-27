@@ -6,6 +6,7 @@ picks which source is right.
 """
 
 from ..models import ProjectVerificationLink
+from ..source_rights import public_rights
 from .delivery_history import _day, delivery_readings, project_history
 from .project_queries import _source
 
@@ -115,6 +116,7 @@ def project_verification_sheet(project, accepted):
                 "registration_number": link.registration_number,
                 "url": link.url,
                 "reviewed_on": link.reviewed_on,
+                "rights": public_rights(link.url),
             }
             for link in links
         ],

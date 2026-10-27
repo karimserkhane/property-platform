@@ -20,6 +20,7 @@ from property_platform.modules.evidence.source_rights import (
     enforcement,
     facts_allowed,
     link_allowed,
+    map_credits,
     public_rights,
     rights_for,
     source_rights,
@@ -134,7 +135,13 @@ def test_unenforced_publication_shows_withheld_sites_and_still_reports_their_rig
     assert withheld_capture_pattern() is None
     assert public_rights(url)["publication"] == "none"
     assert public_rights(url)["terms_url"] == "https://psinv.net/en/terms"
+    assert public_rights(url)["shown_beyond_terms"]
+    assert not public_rights("https://api.openstreetmap.org/")["shown_beyond_terms"]
     assert not collection_allowed(url)
+
+
+def test_enforced_publication_never_flags_data_beyond_terms(enforced_rights):
+    assert not public_rights("https://psinv.net/en/projects/abu-dhabi/x-1")["shown_beyond_terms"]
 
 
 def test_unenforced_collection_reaches_every_site(enforce_rights):
@@ -175,6 +182,7 @@ def test_open_data_keep_their_licence_and_attribution():
         "publication": "facts",
         "attribution": None,
         "reviewed_on": None,
+        "shown_beyond_terms": False,
     }
 
 
@@ -265,3 +273,25 @@ def test_an_unreviewed_host_keeps_the_unqualified_preview_treatment(monkeypatch)
     assert rights_for("https://psinv.net/en/projects/x") is DEFAULT
     assert collection_allowed("https://psinv.net/en/projects/x")
     assert public_rights("https://psinv.net/")["licence"] == "unknown"
+
+
+def test_map_credits_come_from_openly_published_reviewed_hosts():
+    credits = map_credits()
+    assert set(credits) == {
+        "openfreemap",
+        "openstreetmap",
+        "esa-worldcover",
+        "copernicus-sentinel",
+        "overture",
+    }
+    rows = {row["host"]: row for row in source_rights()}
+    for credit in credits.values():
+        row = rows[credit["host"]]
+        assert row["publication"] == "open"
+        assert credit["attribution"] == row["attribution"]
+        assert credit["licence"] == row["licence"]
+    assert credits["openstreetmap"]["terms_url"] == "https://www.openstreetmap.org/copyright"
+    with pytest.raises(ValueError, match="openly published"):
+        map_credits({"aldar": "aldar.com"})
+    with pytest.raises(ValueError, match="openly published"):
+        map_credits({"unknown": "example.org"})

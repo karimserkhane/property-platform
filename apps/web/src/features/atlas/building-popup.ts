@@ -4,6 +4,7 @@ import {
   type MapGeoJSONFeature,
   Popup,
 } from "maplibre-gl";
+import { mapCreditText, mapCreditUrl } from "./map-credits";
 import type { MapLabels } from "./types";
 
 // A context tile is not a catalogue identity or a proven project association.
@@ -22,10 +23,10 @@ export function showWorldBuilding(
   const metres = Number(feature.properties.render_height);
   height.textContent = `${labels.heightIndicative} : ${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(metres)} m`;
   const source = document.createElement("a");
-  source.href = "https://www.openstreetmap.org/copyright";
+  source.href = mapCreditUrl("openstreetmap") ?? "";
   source.target = "_blank";
   source.rel = "noopener noreferrer";
-  source.textContent = "© OpenStreetMap · OpenFreeMap ↗";
+  source.textContent = `${mapCreditText("openfreemap")} ↗`;
   root.append(title, height, source);
   const popup = new Popup({
     maxWidth: "250px",

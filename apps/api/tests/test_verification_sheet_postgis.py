@@ -90,3 +90,4 @@ def test_project_detail_carries_register_facts_links_and_contradictions(sensi, c
         assert body["latest_reading"]["register_status"] == "Completed"
         assert body["contradictions"][0]["code"] == "announced_after_completion"
         assert body["official_links"][0]["reviewed_on"] == now.date().isoformat()
+        assert body["official_links"][0]["rights"]["licence"]

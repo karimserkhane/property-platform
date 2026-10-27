@@ -12,7 +12,7 @@ import {
 } from "./delivery";
 import { ProjectDocuments } from "./documents";
 import dossier from "./dossier.module.css";
-import { Proof, ProofGroup, SourceLink } from "./evidence";
+import { Proof, ProofGroup, SourceLink, SourceRights } from "./evidence";
 import { MediaCard } from "./media-card";
 import {
   formatHandover,
@@ -278,6 +278,7 @@ export function ProjectDetailView({
               activity={project.construction_activity}
               locale={locale}
               labels={activityLabels}
+              projectLabels={labels}
             />
           )}
           <ProjectComponents
@@ -451,6 +452,9 @@ export function ProjectDetailView({
             {labels.sources} <span aria-hidden="true">+</span>
           </summary>
           <p className={styles.muted}>{labels.sourceNote}</p>
+          <p>
+            <Link href="/sources">{labels.sourcesAndLicences}</Link>
+          </p>
           {project.sources.map((source) => (
             <article
               className={styles.source}
@@ -472,6 +476,7 @@ export function ProjectDetailView({
                   </>
                 )}
               </p>
+              <SourceRights source={source} labels={labels} />
             </article>
           ))}
         </details>

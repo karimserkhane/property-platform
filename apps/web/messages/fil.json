@@ -426,7 +426,15 @@
     "positionPublisher": "Tinatayang lokasyon: punto mula sa mapa ng developer o publisher, hindi pa beripikado.",
     "positionBroker": "Tinatayang lokasyon: puntong inilathala ng isang ahensya, hindi pa beripikado.",
     "positionDeclared": "Tinatayang lokasyon: puntong idineklara ng isang source, hindi pa beripikado.",
-    "deliveryHistory": "Kasaysayan ng turnover ng developer"
+    "deliveryHistory": "Kasaysayan ng turnover ng developer",
+    "rightsLicence": "Lisensya",
+    "rightsUnreviewed": "hindi pa nasusuri ang mga tuntunin",
+    "rightsReserved": "nakalaan ang karapatan sa publisher",
+    "rightsPerItem": "sariling lisensya ng bawat file",
+    "rightsTerms": "Mga tuntunin ng source",
+    "rightsBeyondLink": "Ipinapakita kahit link lang ang pinapayagan ng mga tuntunin ng source.",
+    "rightsBeyondNone": "Ipinapakita kahit hindi pinapayagan ng mga tuntunin ng source ang muling paggamit.",
+    "sourcesAndLicences": "Mga pinagmulan at lisensya"
   },
   "Delivery": {
     "title": "Kasaysayan ng turnover",
@@ -463,6 +471,23 @@
     "completionObserved": "Unang pagbasa na nagsasabing tapos na:",
     "notCompletedUntil": "Huling naunang pagbasa na hindi pa tapos:",
     "withoutObservations": "Mga proyektong walang may-petsang obserbasyon"
+  },
+  "Sources": {
+    "title": "Mga pinagmulan at lisensya",
+    "intro": "Lisensya, mga tuntunin at pinapayagang muling paggamit ng bawat site na pinagmulan, mula sa nasuring rehistro. Kailangan pang suriin ang mga tuntunin ng site na hindi pa nasusuri.",
+    "reviewedCount": "{reviewed} sa {total} site ang nasuri",
+    "licence": "Lisensya",
+    "publication": "Pinapayagang muling paggamit",
+    "collection": "Awtomatikong pagkolekta",
+    "collectionAllowed": "pinapayagan",
+    "collectionForbidden": "ipinagbabawal ng mga tuntunin nito",
+    "reviewed": "Nasuri noong",
+    "notReviewed": "hindi pa nasusuri",
+    "attribution": "Atribusyon:",
+    "publicationOpen": "bukas na lisensya, may atribusyon",
+    "publicationFacts": "mga petsadong datos, maikling sipi at link",
+    "publicationLink": "link lamang",
+    "publicationNone": "walang paglalathala"
   },
   "Retention": {
     "title": "Halagang maaaring ibawas kapag kinansela ang pagbili",

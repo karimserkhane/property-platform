@@ -426,7 +426,15 @@
     "positionPublisher": "Position approximative : point issu de la carte du promoteur ou de l’éditeur, non vérifié.",
     "positionBroker": "Position approximative : point publié par une agence, non vérifié.",
     "positionDeclared": "Position approximative : point déclaré par une source, non vérifié.",
-    "deliveryHistory": "Historique de livraison du promoteur"
+    "deliveryHistory": "Historique de livraison du promoteur",
+    "rightsLicence": "Licence",
+    "rightsUnreviewed": "conditions non relues",
+    "rightsReserved": "droits réservés à l'éditeur",
+    "rightsPerItem": "licence propre à chaque fichier",
+    "rightsTerms": "Conditions de la source",
+    "rightsBeyondLink": "Affiché alors que les conditions de la source ne permettent qu’un lien.",
+    "rightsBeyondNone": "Affiché alors que les conditions de la source n’en permettent pas la reprise.",
+    "sourcesAndLicences": "Sources et licences"
   },
   "Delivery": {
     "title": "Historique de livraison",
@@ -463,6 +471,23 @@
     "completionObserved": "Première lecture indiquant l'achèvement :",
     "notCompletedUntil": "Dernière lecture antérieure sans achèvement :",
     "withoutObservations": "Projets sans observation datée"
+  },
+  "Sources": {
+    "title": "Sources et licences",
+    "intro": "Licence, conditions et réutilisation permise de chaque site source, d’après le registre relu. Les conditions d’un site non relu restent à qualifier.",
+    "reviewedCount": "{reviewed} sites relus sur {total}",
+    "licence": "Licence",
+    "publication": "Réutilisation permise",
+    "collection": "Collecte automatisée",
+    "collectionAllowed": "permise",
+    "collectionForbidden": "interdite par ses conditions",
+    "reviewed": "Relu le",
+    "notReviewed": "pas encore relu",
+    "attribution": "Attribution :",
+    "publicationOpen": "licence ouverte, avec attribution",
+    "publicationFacts": "faits datés, courte citation et lien",
+    "publicationLink": "lien seul",
+    "publicationNone": "aucune publication"
   },
   "Retention": {
     "title": "Retenue en cas d'annulation",

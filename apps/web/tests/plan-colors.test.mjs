@@ -3,11 +3,6 @@ import { realpathSync } from "node:fs";
 import { createRequire, registerHooks } from "node:module";
 import test from "node:test";
 import {
-  HYDROGRAPHY_LAYERS,
-  HYDROGRAPHY_SOURCE,
-  PLAN_COLORS,
-} from "../src/features/atlas/hydrography.ts";
-import {
   COLORS,
   parcelFillColor,
   parcelFillOpacity,
@@ -26,6 +21,9 @@ const resolution = registerHooks({
     );
   },
 });
+const { HYDROGRAPHY_LAYERS, HYDROGRAPHY_SOURCE, PLAN_COLORS } = await import(
+  "../src/features/atlas/hydrography.ts"
+);
 const { mapLayers } = await import("../src/features/atlas/map-style.ts");
 const { updateProjectClusters } = await import(
   "../src/features/atlas/project-clusters.ts"

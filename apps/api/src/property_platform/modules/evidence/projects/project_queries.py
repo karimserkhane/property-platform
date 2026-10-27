@@ -107,6 +107,7 @@ def _relation(row, project):
         "basis": row.basis,
         "source_url": row.capture.url,
         "retrieved_at": row.capture.fetched_at,
+        "rights": public_rights(row.capture.url),
     }
 
 

@@ -18,6 +18,7 @@ import {
   PLAN_COLORS,
 } from "./hydrography";
 import { BASEMAP_IMAGERY, imageryVisibility } from "./imagery-sources";
+import { escapeHtml, mapCreditHtml, mapCreditText } from "./map-credits";
 import { mapPlaceFilter, registerMapMarkers } from "./map-markers";
 import { mapControlLabels, mapLayers, mapName } from "./map-style";
 import {
@@ -216,9 +217,9 @@ export default function ParcelMap({
         ),
       ].map((name) =>
         name.startsWith("OpenStreetMap")
-          ? "© OpenStreetMap contributors · ODbL"
+          ? mapCreditText("openstreetmap")
           : name.startsWith("Overture Maps")
-            ? "Overture Maps · upstream contributors · CDLA / Apache / CC0"
+            ? mapCreditText("overture")
             : name,
       ),
     [data, context],
@@ -609,19 +610,11 @@ export default function ParcelMap({
           ),
         ),
       ].map((credit) =>
-        credit === "© OpenStreetMap contributors · ODbL"
-          ? '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a>'
-          : credit.replace(
-              /[&<>"']/g,
-              (character) =>
-                ({
-                  "&": "&amp;",
-                  "<": "&lt;",
-                  ">": "&gt;",
-                  '"': "&quot;",
-                  "'": "&#39;",
-                })[character] ?? character,
-            ),
+        credit === mapCreditText("openstreetmap")
+          ? mapCreditHtml("openstreetmap")
+          : credit === mapCreditText("overture")
+            ? mapCreditHtml("overture")
+            : escapeHtml(credit),
       ),
     });
     instance.addControl(control);

@@ -167,6 +167,7 @@ def test_directory_and_dossier_show_parent_and_components_with_evidence(gate, cl
     detail = project_detail("gate")
     assert detail["parent"]["component"] == "The Gate Towers"
     assert detail["parent"]["source_url"] == GATE_ARC
+    assert detail["parent"]["rights"]["licence"]
     assert [row["slug"] for row in detail["components"]] == ["the-gate-tower-1"]
     with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         response = client.get("/api/v1/preview/projects/gate-arc")
