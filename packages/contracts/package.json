@@ -7,7 +7,8 @@
     ".": {
       "types": "./src/generated.ts"
     },
-    "./territories": "./territories.json"
+    "./territories": "./territories.json",
+    "./map-credits": "./map-credits.json"
   },
   "scripts": {
     "generate": "openapi-typescript openapi.json -o src/generated.ts",

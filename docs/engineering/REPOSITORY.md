@@ -301,6 +301,7 @@ property-platform/                   Racine du monorepo : code, outils et docume
 │   │   ├── tsconfig.json             Réglages de vérification des types
 │   │   ├── openapi.json              Description exportée de l'API Django
 │   │   ├── territories.json          Navigation nationale générée depuis le backend
+│   │   ├── map-credits.json          Crédits des fonds de carte, générés depuis le registre des droits
 │   │   └── src/                     Types utilisables par le site et le futur mobile
 │   │       └── generated.ts          Types TypeScript générés depuis OpenAPI
 │   └── branding/                     Configuration publique de marque, partagée par les clients

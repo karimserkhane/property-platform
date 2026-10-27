@@ -19,6 +19,7 @@ import styles from "./explorer.module.css";
 import { imagerySelection } from "./imagery-sources";
 import { Inspector } from "./inspector";
 import { boundsGeometry, frameGeometry } from "./map-analysis";
+import { mapCreditText, mapCreditUrl } from "./map-credits";
 import { MapLegend } from "./map-legend";
 import { MapViewControl } from "./map-view-control";
 import { AtlasPagination } from "./pagination";
@@ -671,11 +672,11 @@ export function Explorer({
                 {" "}
                 ·{" "}
                 <a
-                  href="https://www.openstreetmap.org/copyright"
+                  href={mapCreditUrl("openstreetmap") ?? undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  © OpenStreetMap contributors · ODbL
+                  {mapCreditText("openstreetmap")}
                 </a>
               </>
             )}

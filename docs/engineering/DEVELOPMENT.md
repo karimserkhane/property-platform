@@ -1231,7 +1231,7 @@ pnpm.cmd contracts:check
 git diff -- packages/contracts
 ```
 
-Revoir puis enregistrer **OpenAPI, les types TypeScript et `packages/contracts/territories.json` ensemble**. L'export Python produit aussi ce snapshot de navigation publique à côté du fichier OpenAPI ; ses nombres de parcelles restent calculés par l'API. Ne modifier aucun de ces fichiers générés à la main. Le web connaît ces contrats, pas les tables Django. La CI vérifie les deux exports backend.
+Revoir puis enregistrer **OpenAPI, les types TypeScript, `packages/contracts/territories.json` et `packages/contracts/map-credits.json` ensemble**. L'export Python produit aussi ce snapshot de navigation publique à côté du fichier OpenAPI ; ses nombres de parcelles restent calculés par l'API. `map-credits.json` donne l'attribution, la licence et les conditions de chaque fond de carte depuis le registre des droits des sources (`source_rights.MAP_LAYERS`). Ne modifier aucun de ces fichiers générés à la main. Le web connaît ces contrats, pas les tables Django. La CI vérifie ces exports backend.
 
 <a id="depannage"></a>
 

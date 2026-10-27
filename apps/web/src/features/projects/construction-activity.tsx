@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { mapCreditText, mapCreditUrl } from "../atlas/map-credits";
 import {
   type ActivityLabels,
   type ActivityParcel,
@@ -178,7 +179,17 @@ export function ProjectActivitySection({
             <bdi lang="en">{activity.source.name}</bdi>
           )}
         </p>
-        <p>{labels.attribution}</p>
+        <p>
+          {/* The reader's language; the registry keeps the original credit and its terms. */}
+          <a
+            href={mapCreditUrl("copernicus-sentinel") ?? undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={mapCreditText("copernicus-sentinel")}
+          >
+            {labels.attribution}
+          </a>
+        </p>
       </details>
     </section>
   );

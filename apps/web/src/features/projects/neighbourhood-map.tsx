@@ -40,6 +40,7 @@ import {
 import { showWorldBuilding } from "../atlas/building-popup";
 import { BASEMAP_IMAGERY, imageryVisibility } from "../atlas/imagery-sources";
 import { mapToolActive } from "../atlas/map-analysis";
+import { mapCreditHtml } from "../atlas/map-credits";
 import { MapViewControl } from "../atlas/map-view-control";
 import { MapWorkbench } from "../atlas/map-workbench";
 import {
@@ -264,9 +265,9 @@ export default function NeighbourhoodMap({
               data: collection as unknown as FeatureCollection,
               attribution:
                 key === "building"
-                  ? '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors · ODbL</a> · DMT / Onwani'
+                  ? `${mapCreditHtml("openstreetmap")} · DMT / Onwani`
                   : key === "place"
-                    ? '<a href="https://docs.overturemaps.org/attribution/">Overture Maps · upstream contributors</a>'
+                    ? mapCreditHtml("overture")
                     : undefined,
             });
           registerMapMarkers(map);

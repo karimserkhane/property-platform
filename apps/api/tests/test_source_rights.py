@@ -20,6 +20,7 @@ from property_platform.modules.evidence.source_rights import (
     enforcement,
     facts_allowed,
     link_allowed,
+    map_credits,
     public_rights,
     rights_for,
     source_rights,
@@ -272,3 +273,25 @@ def test_an_unreviewed_host_keeps_the_unqualified_preview_treatment(monkeypatch)
     assert rights_for("https://psinv.net/en/projects/x") is DEFAULT
     assert collection_allowed("https://psinv.net/en/projects/x")
     assert public_rights("https://psinv.net/")["licence"] == "unknown"
+
+
+def test_map_credits_come_from_openly_published_reviewed_hosts():
+    credits = map_credits()
+    assert set(credits) == {
+        "openfreemap",
+        "openstreetmap",
+        "esa-worldcover",
+        "copernicus-sentinel",
+        "overture",
+    }
+    rows = {row["host"]: row for row in source_rights()}
+    for credit in credits.values():
+        row = rows[credit["host"]]
+        assert row["publication"] == "open"
+        assert credit["attribution"] == row["attribution"]
+        assert credit["licence"] == row["licence"]
+    assert credits["openstreetmap"]["terms_url"] == "https://www.openstreetmap.org/copyright"
+    with pytest.raises(ValueError, match="openly published"):
+        map_credits({"aldar": "aldar.com"})
+    with pytest.raises(ValueError, match="openly published"):
+        map_credits({"unknown": "example.org"})
