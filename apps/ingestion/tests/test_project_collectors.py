@@ -15,17 +15,17 @@ from property_platform.modules.evidence.projects.project_protocol import (
     project_urls,
     validate_project_receipts,
 )
-from property_platform.modules.evidence.source_withdrawals import is_withdrawn
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 from property_platform_ingestion.collectors.http import AcquisitionError, SourceHTTP
 from property_platform_ingestion.collectors.projects import collect_project_receipts
 
 
 def collectable(rows):
-    """Registry rows without the sources of withdrawn sites, which are never fetched (A19)."""
+    """Registry rows without the sources whose terms forbid collection (A19)."""
     result = []
     for row in rows:
-        sources = [source for source in row["sources"] if not is_withdrawn(source["url"])]
+        sources = [source for source in row["sources"] if collection_allowed(source["url"])]
         if any(source["role"] != "terms" for source in sources):
             result.append({**row, "sources": sources})
     return result
@@ -368,12 +368,14 @@ def test_collector_fetches_each_registered_html_once_and_never_fetches_linked_me
     assert len(validate_project_receipts(receipts, rows)) == len(project_urls(rows))
 
 
-def test_a_withdrawn_site_is_refused_before_any_request():
+def test_a_site_whose_terms_forbid_collection_is_refused_before_any_request():
     rows = [
-        row for row in project_registry() if all(is_withdrawn(s["url"]) for s in row["sources"])
+        row
+        for row in project_registry()
+        if not any(collection_allowed(s["url"]) for s in row["sources"])
     ]
     with client(project_urls(rows[:1]), lambda request: pytest.fail("No request")) as http:
-        with pytest.raises(AcquisitionError, match="withdrawn"):
+        with pytest.raises(AcquisitionError, match="forbid"):
             collect_project_receipts(http, rows[:1])
 
 
@@ -427,7 +429,7 @@ def test_project_flow_uses_scoped_durable_gateway_without_archiving_restricted_m
         )
         for row in project_registry("saadiyat-island")
         for source in row["sources"]
-        if source["role"] != "terms" and not is_withdrawn(source["url"])
+        if source["role"] != "terms" and collection_allowed(source["url"])
     ]
     assert len(result) == len(calls)
     assert all(item["summary"]["projects"] == 1 for item in result)
@@ -502,7 +504,7 @@ def test_one_failed_project_does_not_prevent_other_project_imports(monkeypatch):
     }
 
 
-def test_discovery_and_reference_flows_never_schedule_withdrawn_sites(monkeypatch):
+def test_discovery_and_reference_flows_never_schedule_forbidden_sites(monkeypatch):
     import logging
 
     from property_platform.modules.evidence.projects.project_discovery import catalogue_registry
@@ -524,7 +526,7 @@ def test_discovery_and_reference_flows_never_schedule_withdrawn_sites(monkeypatc
     expected = [
         ("project_discovery", f"al-reem-island:{row['key']}")
         for row in catalogues
-        if not is_withdrawn(row["url"])
+        if collection_allowed(row["url"])
     ]
     assert calls == expected and 0 < len(expected) < len(catalogues)
     calls.clear()
@@ -533,6 +535,6 @@ def test_discovery_and_reference_flows_never_schedule_withdrawn_sites(monkeypatc
     expected = [
         ("references", f"al-reem-island:{reference_identity(row['url'])}")
         for row in rows
-        if not is_withdrawn(row["url"])
+        if collection_allowed(row["url"])
     ]
     assert calls == expected and 0 < len(expected) < len(rows)

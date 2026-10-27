@@ -56,6 +56,9 @@ BACKUP_ONLY = {
     "walking_area": "Derived walking calculations require the routing worker",
     "basemap_request": "Demand queue includes requests without any acquired capture",
 }
+# Mirrors of reviewed repository registries, rebuilt from the current file: a difference
+# says the reference database has not applied the latest review yet, not that data is lost.
+REGISTRY_MIRRORS = {"source_rights": "Reviewed source rights, mirrored from source_rights.json"}
 # A historically unavailable reference is reproduced as unavailable, not as a new failure.
 REPLAYED_STATUS = {"failed": "replayed_unavailable"}
 # Catalogue identities whose duplicates, created before import-time resolution existed,
@@ -922,11 +925,15 @@ def compare_tables(
         name = table.split(".")[1]
         evidence_table = table.startswith("evidence.")
         reason = BACKUP_ONLY.get(name) if evidence_table else None
+        mirror = REGISTRY_MIRRORS.get(name) if evidence_table else None
         policy = (
             "backup"
             if reason
+            else "registry"
+            if mirror
             else ("new_audit" if evidence_table and name in TECHNICAL else "exact")
         )
+        reason = reason or mirror
         row = {
             "table": table,
             "expected": expected.get(table),
@@ -1063,6 +1070,7 @@ def replay_archive(
     from ..projects import property_import
     from ..projects.project_relations import apply_project_relations
     from ..projects.project_verification_links import apply_project_verification_links
+    from ..source_rights_import import apply_source_rights
 
     manifest = json.loads((root / "manifest.json").read_text("utf-8"))
     if manifest["version"] != VERSION:
@@ -1224,6 +1232,7 @@ def replay_archive(
         ("imagery", lambda: replay_scenes(root, manifest["scenes"], actor)),
         ("project_relations", lambda: apply_project_relations(actor=actor)),
         ("project_verification_links", lambda: apply_project_verification_links(actor=actor)),
+        ("source_rights", lambda: apply_source_rights(actor=actor)),
     ):
         try:
             with audit_context(actor=actor):

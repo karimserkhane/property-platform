@@ -30,17 +30,17 @@ from ..models import (
     ProjectSnapshot,
     ProjectTypology,
 )
-from ..source_withdrawals import capture_url_pattern, link_allowed
+from ..source_rights import link_allowed, public_rights, withheld_capture_pattern
 
 
-def _withdrawn(field):
-    """Rows whose capture comes from a withdrawn site (A19); matches nothing otherwise."""
-    pattern = capture_url_pattern()
+def _withheld(field):
+    """Rows whose capture comes from a site whose facts are withheld (A19), else none."""
+    pattern = withheld_capture_pattern()
     return Q(**{f"{field}__iregex": pattern}) if pattern else Q(pk__in=[])
 
 
 def _link(*urls):
-    """The first URL a plain link may point to; a withdrawn site keeps links by decision."""
+    """The first URL a plain link may point to, as the source rights allow (A19)."""
     return next((url for url in urls if url and link_allowed(url)), "")
 
 
@@ -63,7 +63,7 @@ def _accepted_snapshots():
     )
     return (
         ProjectSnapshot.objects.filter(capture__run__status="succeeded")
-        .exclude(_withdrawn("capture__url"))
+        .exclude(_withheld("capture__url"))
         .filter(~Exists(excluded), ~Exists(reread))
     )
 
@@ -81,7 +81,7 @@ def _relations(project_ids):
     accepted = _accepted_snapshots()
     rows = (
         ProjectRelation.objects.filter(active=True)
-        .exclude(_withdrawn("capture__url"))
+        .exclude(_withheld("capture__url"))
         .filter(Q(child_id__in=project_ids) | Q(parent_id__in=project_ids))
         .filter(
             Exists(accepted.filter(project_id=OuterRef("child_id"))),
@@ -138,7 +138,7 @@ def _visible_links():
     )
     return (
         ProjectIdentityLink.objects.filter(valid, active=True, capture__run__status="succeeded")
-        .exclude(_withdrawn("capture__url"))
+        .exclude(_withheld("capture__url"))
         .filter(
             ~Exists(excluded),
             Exists(_accepted_snapshots().filter(project_id=OuterRef("project_id"))),
@@ -208,6 +208,7 @@ def _source(snapshot, pointer=""):
         "language": snapshot.language,
         "evidence_pointer": pointer,
         "rights_status": snapshot.source_rights_status,
+        "rights": public_rights(snapshot.capture.url),
         "ingested_at": snapshot.ingested_at,
         "historical": snapshot.capture.fetched_at
         < getattr(snapshot, "latest_source_at", snapshot.capture.fetched_at),
@@ -594,6 +595,7 @@ def project_locations(project, *, language="en"):
                     "language": language,
                     "evidence_pointer": "active_project_identity_link",
                     "rights_status": "restricted",
+                    "rights": public_rights(point_source.get("url", link.capture.url)),
                 },
             }
         )
@@ -622,7 +624,7 @@ def project_location_gaps(territory=None):
             ),
             related=Exists(
                 ProjectRelation.objects.filter(active=True)
-                .exclude(_withdrawn("capture__url"))
+                .exclude(_withheld("capture__url"))
                 .filter(
                     Q(child_id=OuterRef("pk"), parent__projectidentitylink__in=_visible_links())
                     | Q(parent_id=OuterRef("pk"), child__projectidentitylink__in=_visible_links())

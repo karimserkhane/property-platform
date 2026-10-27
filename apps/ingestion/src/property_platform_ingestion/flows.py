@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
 from prefect.runtime import flow_run
-from property_platform.modules.evidence.source_withdrawals import is_withdrawn
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 from .registry import (
     TERRITORY,
@@ -122,8 +122,8 @@ def references(
     if type(limit) is not int or not 1 <= limit <= 200:
         raise ValueError("Reference limit must be 1â€“200")
     rows, _, _ = source_registries(territory)
-    # Withdrawn sites stay registered for replays but are never contacted again (A19).
-    rows = [row for row in rows if not is_withdrawn(row["url"])]
+    # A site whose terms forbid collection stays registered for replays only (A19).
+    rows = [row for row in rows if collection_allowed(row["url"])]
     if reference_key is not None:
         rows = [row for row in rows if reference_identity(row["url"]) == reference_key]
         if len(rows) != 1:
@@ -184,7 +184,7 @@ def project_details(
         for project in project_registry(scope)
         for source in project["sources"]
         if source["role"] != "terms"
-        and not is_withdrawn(source["url"])
+        and collection_allowed(source["url"])
         and (source_kind == "all" or source.get("source_kind", "developer") == source_kind)
     ]
     for project, source in sources:
@@ -232,7 +232,7 @@ def project_discovery(territory: Territory = TERRITORY, actor: str = "manual"):
 
     results, failures = [], []
     for catalogue in catalogue_registry(territory):
-        if is_withdrawn(catalogue["url"]):
+        if not collection_allowed(catalogue["url"]):
             continue
         scope = f"{territory}:{catalogue['key']}"
         try:
@@ -357,6 +357,24 @@ def project_media_files(receipt_name: str = "project-media.json", actor: str = "
             "prefect_flow_run_id": run_id,
         }
     )
+
+
+@flow(name="property-platform-source-rights", retries=0)
+def source_rights(actor: str = "scheduled"):
+    """Mirror the reviewed source rights into the database; no source is contacted."""
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    result = invoke_domain(
+        {
+            "operation": "source_rights",
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        }
+    )
+    if result["status"] == "failed":
+        raise IngestionFailure(result)
+    return result
 
 
 @flow(name="property-platform-data-history", retries=0)
@@ -511,6 +529,7 @@ FLOWS = {
         media_storage,
         project_media_files,
         basemap_archive,
+        source_rights,
         data_history,
         routing_graph,
         walking_areas,

@@ -1,4 +1,4 @@
-"""Withdrawn sites stay in history but never reach a published read (A19)."""
+"""Withheld sites stay in history but never reach a published read (A19)."""
 
 import hashlib
 import itertools
@@ -10,10 +10,10 @@ from django.contrib.gis.geos import Point
 from django.utils import timezone
 
 if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
-    pytest.skip("Withdrawal filters require real PostGIS", allow_module_level=True)
+    pytest.skip("Source rights require real PostGIS", allow_module_level=True)
 
 from property_platform.modules.catalog.models import Developer, Place, Project  # noqa: E402
-from property_platform.modules.evidence import source_withdrawals  # noqa: E402
+from property_platform.modules.evidence import source_rights  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     IngestionRun,
@@ -36,7 +36,7 @@ from property_platform.modules.evidence.projects.queries import (  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
-ACTOR = "withdrawal-test"
+ACTOR = "source-rights-test"
 DEVELOPER = "https://tigerproperties.ae/"
 DEVELOPER_PAGE = "https://tigerproperties.ae/renad-tower/"
 PSI_PAGE = "https://psinv.net/en/projects/abu-dhabi/abu-dhabi-district/al-reem-island/renad-tower-1"
@@ -154,15 +154,18 @@ def catalogue():
     return building
 
 
-def test_withdrawn_sites_leave_no_fact_pin_link_or_project_behind(catalogue):
+def test_withheld_sites_leave_no_fact_pin_link_or_project_behind(catalogue):
     assert published_slugs() == ["gate", "renad-tower"]
     renad = project_detail("renad-tower")
     assert renad["handover"] is None
     assert [source["url"] for source in renad["sources"]] == [DEVELOPER_PAGE]
     assert renad["map_locations"] == []
     assert renad["parent"] is None
-    # An agency page is never shown as the project's site, withdrawn or not.
+    # An agency page is never shown as the project's site, whatever its rights.
     assert renad["website_url"] == DEVELOPER_PAGE
+    # Each published source states its reviewed rights (unknown: not qualified yet).
+    assert renad["sources"][0]["rights"]["licence"] == "unknown"
+    assert renad["sources"][0]["rights"]["publication"] == "facts"
     assert project_detail("sky-tower") is None
     items = {row["slug"]: row for row in project_directory()["items"]}
     assert not items["renad-tower"]["has_map_identity"]
@@ -172,9 +175,9 @@ def test_withdrawn_sites_leave_no_fact_pin_link_or_project_behind(catalogue):
     assert research_references() == []
 
 
-def test_removing_a_decision_restores_every_read_without_rewriting_history(catalogue, monkeypatch):
+def test_revising_a_review_restores_every_read_without_rewriting_history(catalogue, monkeypatch):
     rows = ProjectSnapshot.objects.count()
-    monkeypatch.setattr(source_withdrawals, "withdrawals", lambda: ())
+    monkeypatch.setattr(source_rights, "source_rights", lambda: ())
     assert published_slugs() == ["gate", "renad-tower", "sky-tower"]
     renad = project_detail("renad-tower")
     assert renad["handover"]["year"] == 2027
@@ -187,14 +190,14 @@ def test_removing_a_decision_restores_every_read_without_rewriting_history(catal
     assert ProjectSnapshot.objects.count() == rows
 
 
-def test_presentations_replay_withdrawn_receipts_and_skip_them_once_collection_stops():
+def test_presentations_replay_forbidden_receipts_and_skip_them_once_collection_stops():
     from test_property_presentations_postgis import sample
 
     from property_platform.modules.evidence.projects.property_import import import_presentations
 
     building, row, photo, receipts = sample()
-    assert source_withdrawals.is_withdrawn(row["source_url"])
-    # An archived batch still holding the withdrawn page replays exactly as recorded.
+    assert not source_rights.collection_allowed(row["source_url"])
+    # An archived batch still holding the forbidden page replays exactly as recorded.
     import_presentations(receipts, actor=ACTOR, profiles=[row], photos={"example": photo})
     assert PropertyPresentation.objects.count() == 1
     # A new batch no longer contains it; the profile is skipped instead of failing.
@@ -203,10 +206,39 @@ def test_presentations_replay_withdrawn_receipts_and_skip_them_once_collection_s
     assert property_presentations("building", [building.id]) == {}
 
 
-def test_plain_links_to_a_withdrawn_site_follow_its_decision(catalogue):
+def test_plain_links_to_a_withheld_site_follow_its_review(catalogue):
     gate = project_detail("gate")
     Project.objects.filter(slug="gate").update(website_url=ALDAR_PAGE)
     assert project_detail("gate")["website_url"] == ALDAR_PAGE  # links remain allowed
     Project.objects.filter(slug="gate").update(website_url=PSI_PAGE)
     assert project_detail("gate")["website_url"] == f"{DEVELOPER}gate/"
     assert gate["developer"]["website_url"] == DEVELOPER
+
+
+def test_the_database_mirrors_each_review_with_its_history(monkeypatch):
+    from property_platform.modules.evidence.models import SourceRights
+    from property_platform.modules.evidence.source_rights_import import apply_source_rights
+
+    reviews = source_rights.source_rights()
+    first = apply_source_rights(actor=ACTOR)
+    assert first == {"created": len(reviews), "kept": 0, "revoked": 0}
+    assert apply_source_rights(actor=ACTOR) == {"created": 0, "kept": len(reviews), "revoked": 0}
+    psi = SourceRights.objects.get(host="psinv.net", active=True)
+    assert (psi.collection, psi.publication, psi.licence) == ("forbidden", "none", "proprietary")
+    # A revised review revokes the row in force; a removed one is revoked, never deleted.
+    revised = [
+        {**row, "publication": "link"} if row["host"] == "psinv.net" else row
+        for row in reviews
+        if row["host"] != "reddit.com"
+    ]
+    monkeypatch.setattr(source_rights, "source_rights", lambda: tuple(revised))
+    assert apply_source_rights(actor="reviewer") == {
+        "created": 1,
+        "kept": len(reviews) - 2,
+        "revoked": 2,
+    }
+    history = list(SourceRights.objects.filter(host="psinv.net").order_by("id"))
+    assert [(row.publication, row.active) for row in history] == [("none", False), ("link", True)]
+    assert history[0].revoked_by == "reviewer"
+    assert not SourceRights.objects.filter(host="reddit.com", active=True).exists()
+    assert SourceRights.objects.filter(host="reddit.com").count() == 1

@@ -2151,6 +2151,7 @@ export interface components {
             evidence_pointer: string;
             /** Rights Status */
             rights_status: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
             /** Ingested At */
             ingested_at?: string | null;
             /**
@@ -2214,6 +2215,27 @@ export interface components {
             official_text_obtained: boolean;
             /** References */
             references: components["schemas"]["RetentionReferenceResponse"][];
+        };
+        /**
+         * SourceRightsResponse
+         * @description Reviewed rights of the source site (A19); `unknown` means not qualified yet.
+         */
+        SourceRightsResponse: {
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
         };
         /**
          * VerificationContradictionResponse

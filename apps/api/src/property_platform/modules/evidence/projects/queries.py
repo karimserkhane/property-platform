@@ -295,9 +295,9 @@ def map_provenances(target, ids, *, include_capture_id=False, include_method=Fal
 
 
 def research_references(source_keys=None):
-    from .project_queries import _withdrawn
+    from .project_queries import _withheld
 
-    records = ResearchReference.objects.exclude(_withdrawn("capture__url"))
+    records = ResearchReference.objects.exclude(_withheld("capture__url"))
     if source_keys is not None:
         records = records.filter(capture__run__source__key__in=source_keys)
     rows = (
@@ -345,7 +345,7 @@ def parcel_sources(parcel_ids):
 def property_presentations(target, ids):
     """Bounded typed presentation; raw captures and reviewer identities remain private."""
     from ..media_storage import delivery_url, eligible_media
-    from .project_queries import _link, _withdrawn, project_references
+    from .project_queries import _link, _withheld, project_references
 
     if target not in ("building", "place"):
         return {}
@@ -353,7 +353,7 @@ def property_presentations(target, ids):
         PropertyPresentation.objects.filter(
             **{f"{target}_id__in": ids}, capture__run__status="succeeded"
         )
-        .exclude(_withdrawn("capture__url"))
+        .exclude(_withheld("capture__url"))
         .select_related("capture")
         .defer("capture__payload")
         .prefetch_related(
@@ -407,7 +407,7 @@ def property_presentations(target, ids):
             ProjectIdentityLink.objects.filter(
                 active=True, capture__run__status="succeeded", **{f"{target}_id__in": missing}
             )
-            .exclude(_withdrawn("capture__url"))
+            .exclude(_withheld("capture__url"))
             .select_related("project__developer", "capture")
             .defer("capture__payload")
         )

@@ -1,13 +1,13 @@
 import pytest
 
-from property_platform.modules.evidence import source_withdrawals
+from property_platform.modules.evidence import source_rights
 
 
 @pytest.fixture
-def without_withdrawals(monkeypatch):
-    """Tests of import and read mechanics whose fixtures use a withdrawn site (A19).
+def unrestricted_sources(monkeypatch):
+    """Tests of import and read mechanics whose fixtures use a restricted site (A19).
 
-    Archived receipts of a withdrawn site still replay exactly; what the publication
-    then hides is covered by `test_source_withdrawals*.py`.
+    Every host then keeps the unreviewed default. Archived receipts of a restricted
+    site still replay exactly; what its rights hide is in `test_source_rights*.py`.
     """
-    monkeypatch.setattr(source_withdrawals, "withdrawals", lambda: ())
+    monkeypatch.setattr(source_rights, "source_rights", lambda: ())

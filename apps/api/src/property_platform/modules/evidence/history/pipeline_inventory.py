@@ -41,6 +41,7 @@ GROUPS = {
         "ProjectMediaPublication",
     },
     "property-platform-references": {"ResearchReference"},
+    "property-platform-source-rights": {"SourceRights"},
     "property-platform-imagery": {"ImageryScene"},
     "property-platform-construction-activity": {"ConstructionActivityMeasurement"},
     "property-platform-adrec-sales": {"AdrecMarketSnapshot", "AdrecSaleObservation"},

@@ -9,7 +9,7 @@ from property_platform.modules.evidence.projects.property_protocol import (
     validate_photo,
     validate_receipts,
 )
-from property_platform.modules.evidence.source_withdrawals import is_withdrawn
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 from .http import AcquisitionError, SourceHTTP, checked_url
 
@@ -35,8 +35,8 @@ def property_urls(profiles: Sequence[dict], photos: dict) -> tuple[str, ...]:
 
 
 def collectable(profiles: Sequence[dict]) -> list[dict]:
-    """Profiles whose source page may still be fetched; withdrawn sites are skipped (A19)."""
-    return [profile for profile in profiles if not is_withdrawn(profile["source_url"])]
+    """Profiles whose source page may be fetched under its source rights (A19)."""
+    return [profile for profile in profiles if collection_allowed(profile["source_url"])]
 
 
 def collect_property_receipts(
