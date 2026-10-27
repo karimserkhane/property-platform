@@ -426,7 +426,12 @@
     "positionPublisher": "Position approximative : point issu de la carte du promoteur ou de l’éditeur, non vérifié.",
     "positionBroker": "Position approximative : point publié par une agence, non vérifié.",
     "positionDeclared": "Position approximative : point déclaré par une source, non vérifié.",
-    "deliveryHistory": "Historique de livraison du promoteur"
+    "deliveryHistory": "Historique de livraison du promoteur",
+    "rightsLicence": "Licence",
+    "rightsUnreviewed": "conditions non relues",
+    "rightsReserved": "droits réservés à l'éditeur",
+    "rightsPerItem": "licence propre à chaque fichier",
+    "rightsTerms": "Conditions de la source"
   },
   "Delivery": {
     "title": "Historique de livraison",

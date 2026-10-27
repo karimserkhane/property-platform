@@ -426,7 +426,12 @@
     "positionPublisher": "Localização aproximada: ponto do mapa do promotor ou editor, não verificado.",
     "positionBroker": "Localização aproximada: ponto publicado por uma agência, não verificado.",
     "positionDeclared": "Localização aproximada: ponto declarado por uma fonte, não verificado.",
-    "deliveryHistory": "Histórico de entregas do incorporador"
+    "deliveryHistory": "Histórico de entregas do incorporador",
+    "rightsLicence": "Licença",
+    "rightsUnreviewed": "condições ainda não revistas",
+    "rightsReserved": "direitos reservados ao editor",
+    "rightsPerItem": "licença própria de cada ficheiro",
+    "rightsTerms": "Condições da fonte"
   },
   "Delivery": {
     "title": "Histórico de entregas",

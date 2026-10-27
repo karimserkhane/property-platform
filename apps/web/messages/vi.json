@@ -426,7 +426,12 @@
     "positionPublisher": "Vị trí gần đúng: điểm từ bản đồ của chủ đầu tư hoặc nhà xuất bản, chưa xác minh.",
     "positionBroker": "Vị trí gần đúng: điểm do một công ty môi giới công bố, chưa xác minh.",
     "positionDeclared": "Vị trí gần đúng: điểm do một nguồn khai báo, chưa xác minh.",
-    "deliveryHistory": "Lịch sử bàn giao của chủ đầu tư"
+    "deliveryHistory": "Lịch sử bàn giao của chủ đầu tư",
+    "rightsLicence": "Giấy phép",
+    "rightsUnreviewed": "điều khoản chưa được xem xét",
+    "rightsReserved": "nhà xuất bản giữ bản quyền",
+    "rightsPerItem": "giấy phép riêng của từng tệp",
+    "rightsTerms": "Điều khoản của nguồn"
   },
   "Delivery": {
     "title": "Lịch sử bàn giao",

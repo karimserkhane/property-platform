@@ -426,7 +426,12 @@
     "positionPublisher": "Ungefähre Lage: Punkt aus der Karte des Bauträgers oder Herausgebers, nicht geprüft.",
     "positionBroker": "Ungefähre Lage: von einer Agentur veröffentlichter Punkt, nicht geprüft.",
     "positionDeclared": "Ungefähre Lage: von einer Quelle angegebener Punkt, nicht geprüft.",
-    "deliveryHistory": "Übergabehistorie des Entwicklers"
+    "deliveryHistory": "Übergabehistorie des Entwicklers",
+    "rightsLicence": "Lizenz",
+    "rightsUnreviewed": "Bedingungen noch nicht geprüft",
+    "rightsReserved": "Rechte beim Herausgeber vorbehalten",
+    "rightsPerItem": "Lizenz je Datei",
+    "rightsTerms": "Bedingungen der Quelle"
   },
   "Delivery": {
     "title": "Übergabehistorie",

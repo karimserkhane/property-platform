@@ -426,7 +426,12 @@
     "positionPublisher": "موقع تقريبي: نقطة من خريطة المطوّر أو الناشر، غير مُتحقَّق منها.",
     "positionBroker": "موقع تقريبي: نقطة نشرتها وكالة عقارية، غير مُتحقَّق منها.",
     "positionDeclared": "موقع تقريبي: نقطة صرّح بها مصدر، غير مُتحقَّق منها.",
-    "deliveryHistory": "سجل تسليم المطوّر"
+    "deliveryHistory": "سجل تسليم المطوّر",
+    "rightsLicence": "الترخيص",
+    "rightsUnreviewed": "لم تُراجَع الشروط بعد",
+    "rightsReserved": "الحقوق محفوظة للناشر",
+    "rightsPerItem": "ترخيص خاص بكل ملف",
+    "rightsTerms": "شروط المصدر"
   },
   "Delivery": {
     "title": "سجل التسليم",

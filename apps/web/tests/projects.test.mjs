@@ -15,6 +15,7 @@ import {
   projectRelations,
   projectWebsite,
   safeSourceUrl,
+  sourceRightsNotice,
 } from "../src/features/projects/presentation.ts";
 
 test("field-specific notes share one capture citation while separate versions retain their provenance", () => {
@@ -497,4 +498,41 @@ test("the most precise documented position decides the notice and points stay ap
   );
   assert.equal(at("declared_point").approximate, true);
   assert.equal(at("invented_method"), null);
+});
+
+test("a citation names the reviewed licence, its terms and attribution, or says they are not reviewed", () => {
+  assert.deepEqual(sourceRightsNotice(undefined), {
+    labelKey: "rightsUnreviewed",
+    licence: null,
+    licenceUrl: null,
+    termsUrl: null,
+    attribution: null,
+  });
+  assert.deepEqual(
+    sourceRightsNotice({
+      licence: "ODbL-1.0",
+      licence_url: "https://opendatacommons.org/licenses/odbl/1-0/",
+      terms_url: "javascript:alert(1)",
+      publication: "open",
+      attribution: " © OpenStreetMap contributors ",
+      reviewed_on: "2026-10-27",
+    }),
+    {
+      labelKey: null,
+      licence: "ODbL-1.0",
+      licenceUrl: "https://opendatacommons.org/licenses/odbl/1-0/",
+      termsUrl: null,
+      attribution: "© OpenStreetMap contributors",
+    },
+  );
+  for (const [licence, key] of [
+    ["proprietary", "rightsReserved"],
+    ["per-item", "rightsPerItem"],
+    ["unknown", "rightsUnreviewed"],
+  ]) {
+    assert.equal(
+      sourceRightsNotice({ licence, publication: "facts" }).labelKey,
+      key,
+    );
+  }
 });

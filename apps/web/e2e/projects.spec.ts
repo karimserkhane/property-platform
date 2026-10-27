@@ -44,6 +44,10 @@ test("a project page shows its facts with sources and links back", async ({
   if (await evidence.count()) {
     await evidence.locator("summary").click();
     await expect(evidence).toHaveAttribute("open", "");
+    // Every citation states the reviewed licence of its source, or that it is unreviewed.
+    await expect(
+      evidence.locator("[data-project-evidence-rights]").first(),
+    ).toContainText("Licence");
   }
   await page
     .getByRole("navigation", { name: "Project navigation" })

@@ -426,7 +426,12 @@
     "positionPublisher": "Tinatayang lokasyon: punto mula sa mapa ng developer o publisher, hindi pa beripikado.",
     "positionBroker": "Tinatayang lokasyon: puntong inilathala ng isang ahensya, hindi pa beripikado.",
     "positionDeclared": "Tinatayang lokasyon: puntong idineklara ng isang source, hindi pa beripikado.",
-    "deliveryHistory": "Kasaysayan ng turnover ng developer"
+    "deliveryHistory": "Kasaysayan ng turnover ng developer",
+    "rightsLicence": "Lisensya",
+    "rightsUnreviewed": "hindi pa nasusuri ang mga tuntunin",
+    "rightsReserved": "nakalaan ang karapatan sa publisher",
+    "rightsPerItem": "sariling lisensya ng bawat file",
+    "rightsTerms": "Mga tuntunin ng source"
   },
   "Delivery": {
     "title": "Kasaysayan ng turnover",

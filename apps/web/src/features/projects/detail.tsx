@@ -12,7 +12,7 @@ import {
 } from "./delivery";
 import { ProjectDocuments } from "./documents";
 import dossier from "./dossier.module.css";
-import { Proof, ProofGroup, SourceLink } from "./evidence";
+import { Proof, ProofGroup, SourceLink, SourceRights } from "./evidence";
 import { MediaCard } from "./media-card";
 import {
   formatHandover,
@@ -472,6 +472,7 @@ export function ProjectDetailView({
                   </>
                 )}
               </p>
+              <SourceRights source={source} labels={labels} />
             </article>
           ))}
         </details>

@@ -299,3 +299,24 @@ export function projectPositionQuality(
       }
     : null;
 }
+
+const reservedLicences = {
+  unknown: "rightsUnreviewed",
+  proprietary: "rightsReserved",
+  "per-item": "rightsPerItem",
+} as const;
+
+/** The reviewed rights (A19) a citation tells a reader, with safe links only. */
+export function sourceRightsNotice(rights: ProjectSource["rights"]) {
+  const licence = rights?.licence ?? "unknown";
+  const key = Object.hasOwn(reservedLicences, licence)
+    ? reservedLicences[licence as keyof typeof reservedLicences]
+    : null;
+  return {
+    labelKey: key,
+    licence: key ? null : licence,
+    licenceUrl: safeSourceUrl(rights?.licence_url),
+    termsUrl: safeSourceUrl(rights?.terms_url),
+    attribution: rights?.attribution?.trim() || null,
+  };
+}

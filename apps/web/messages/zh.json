@@ -426,7 +426,12 @@
     "positionPublisher": "大致位置：来自开发商或发布方地图的点位，未经核实。",
     "positionBroker": "大致位置：由中介机构发布的点位，未经核实。",
     "positionDeclared": "大致位置：由来源声明的点位，未经核实。",
-    "deliveryHistory": "开发商交付记录"
+    "deliveryHistory": "开发商交付记录",
+    "rightsLicence": "许可",
+    "rightsUnreviewed": "条款尚未审阅",
+    "rightsReserved": "发布方保留所有权利",
+    "rightsPerItem": "每个文件各自的许可",
+    "rightsTerms": "来源条款"
   },
   "Delivery": {
     "title": "交付记录",

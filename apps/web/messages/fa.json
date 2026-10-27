@@ -426,7 +426,12 @@
     "positionPublisher": "موقعیت تقریبی: نقطه‌ای از نقشه سازنده یا ناشر، تأییدنشده.",
     "positionBroker": "موقعیت تقریبی: نقطه منتشرشده توسط یک آژانس، تأییدنشده.",
     "positionDeclared": "موقعیت تقریبی: نقطه اعلام‌شده توسط یک منبع، تأییدنشده.",
-    "deliveryHistory": "سابقهٔ تحویل سازنده"
+    "deliveryHistory": "سابقهٔ تحویل سازنده",
+    "rightsLicence": "مجوز",
+    "rightsUnreviewed": "شرایط هنوز بررسی نشده است",
+    "rightsReserved": "حقوق برای ناشر محفوظ است",
+    "rightsPerItem": "مجوز جداگانهٔ هر فایل",
+    "rightsTerms": "شرایط منبع"
   },
   "Delivery": {
     "title": "سابقهٔ تحویل",

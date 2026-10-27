@@ -426,7 +426,12 @@
     "positionPublisher": "Approximate position: point from the developer’s or publisher’s map, not verified.",
     "positionBroker": "Approximate position: point published by an agency, not verified.",
     "positionDeclared": "Approximate position: point declared by a source, not verified.",
-    "deliveryHistory": "Developer delivery history"
+    "deliveryHistory": "Developer delivery history",
+    "rightsLicence": "Licence",
+    "rightsUnreviewed": "terms not reviewed yet",
+    "rightsReserved": "rights reserved by the publisher",
+    "rightsPerItem": "licence of each file",
+    "rightsTerms": "Source terms"
   },
   "Delivery": {
     "title": "Delivery history",

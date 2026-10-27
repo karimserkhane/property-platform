@@ -3,6 +3,7 @@ import {
   formatProjectDate,
   projectEvidenceSources,
   safeSourceUrl,
+  sourceRightsNotice,
 } from "./presentation";
 import styles from "./project.module.css";
 import type { ProjectLabels, ProjectSource } from "./types";
@@ -76,7 +77,51 @@ function SourceCitation({
           <time dateTime={source.retrieved_at}>{retrieved}</time>
         </p>
       )}
+      <SourceRights source={source} labels={labels} />
     </div>
+  );
+}
+
+/** Licence, terms and attribution of the source site, from the reviewed registry. */
+export function SourceRights({
+  source,
+  labels,
+}: {
+  source: ProjectSource;
+  labels: ProjectLabels;
+}) {
+  const notice = sourceRightsNotice(source.rights);
+  const licence = notice.labelKey ? (
+    labels[notice.labelKey]
+  ) : (
+    <bdi dir="ltr">{notice.licence}</bdi>
+  );
+  return (
+    <p className={dossier.evidenceDate} data-project-evidence-rights>
+      {labels.rightsLicence}{" "}
+      {notice.licenceUrl ? (
+        <a href={notice.licenceUrl} target="_blank" rel="noopener noreferrer">
+          {licence}
+        </a>
+      ) : (
+        licence
+      )}
+      {notice.attribution && (
+        <>
+          {" "}
+          · <bdi>{notice.attribution}</bdi>
+        </>
+      )}
+      {notice.termsUrl && (
+        <>
+          {" "}
+          ·{" "}
+          <a href={notice.termsUrl} target="_blank" rel="noopener noreferrer">
+            {labels.rightsTerms} <span aria-hidden="true">↗</span>
+          </a>
+        </>
+      )}
+    </p>
   );
 }
 
