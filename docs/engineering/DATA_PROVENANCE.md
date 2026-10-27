@@ -37,11 +37,11 @@ Une page consultable n'établit pas à elle seule un droit de redistribution, un
 
 Toutes les données et tous les pipelines sont conservés ; chaque source porte ses droits. Les droits appartiennent à l'éditeur d'un site (ou à l'un de ses hôtes), pas à chaque ligne : une capture, une observation ou un fait hérite des droits de l'hôte de l'URL d'où il a été lu. Une revue modifiée s'applique donc d'un coup aux données passées et futures, sans réécrire de ligne.
 
-**Application des droits (A22).** Les droits sont toujours enregistrés, en base comme dans l'API. Les appliquer est une décision distincte du propriétaire : un interrupteur par droit dans `evidence/source_rights_enforcement.json`, avec `enforced`, la date, l'auteur et le motif. Décision de Karim au 27 octobre 2026 :
-- **collecte appliquée** : les sites dont les conditions interdisent l'accès automatisé ne sont pas contactés ;
-- **publication non appliquée** : l'aperçu privé montre toutes les données collectées, y compris celles des sources `link` ou `none`, chacune avec ses droits.
+**Application des droits (A22).** Les droits sont toujours enregistrés, en base comme dans l'API. Les appliquer est une décision distincte du propriétaire : un interrupteur par droit dans `evidence/source_rights_enforcement.json`, avec `enforced`, la date, l'auteur et le motif. Décision de Karim au 27 octobre 2026, aucun des deux droits n'est appliqué :
+- **collecte** : tous les pipelines collectent, y compris les sites `forbidden` ;
+- **publication** : l'aperçu privé montre toutes les données collectées, y compris celles des sources `link` ou `none`.
 
-Mettre `enforced` à `true` pour la publication masque d'un coup ce que les conditions ne permettent pas (voir « Ce que le code en fait »), sans toucher aux données. Le remettre à `false` rétablit l'affichage.
+Chaque donnée garde ses droits. Mettre `enforced` à `true` arrête d'un coup les collectes ou masque ce que les conditions ne permettent pas (voir « Ce que le code en fait »), sans toucher aux données. Le remettre à `false` les rétablit.
 
 **Registre revu** : `evidence/source_rights.json`, une entrée par hôte (sous-domaines compris). Il couvre toutes les sources des registres et tous les connecteurs ; un test refuse une source sans entrée et une entrée qui ne sert plus.
 
@@ -55,7 +55,7 @@ Mettre `enforced` à `true` pour la publication masque d'un coup ce que les cond
 
 État au 27 octobre 2026, sur 83 hôtes :
 - **Données ouvertes** (`open`) : OpenStreetMap (et Overpass, Geofabrik, OpenFreeMap), Overture, Copernicus Sentinel-2, ESA WorldCover, Wikimedia Commons.
-- **Collecte interdite** : Property Finder, PSI, Bayut, LinkedIn et Reddit (`none`), Aldar (`link` : les liens vers ses pages officielles restent, par décision de Karim).
+- **Collecte interdite par leurs conditions** (`forbidden`, collectés tant que la collecte n'est pas appliquée) : Property Finder, PSI, Bayut, LinkedIn et Reddit (`none`), Aldar (`link` : les liens vers ses pages officielles restent, par décision de Karim).
 - **Relues sans interdiction** : Reportage et Bloom (médias non republiables, faits et liens) ; ADREC (aucune licence ni interdiction publiée, abonnement API officiel possible).
 - **Non qualifiées** (`unknown`, `facts`) : les autres promoteurs, la presse, les forums, Onwani, AD-SDI et les autres services publics ; à qualifier en [A21](../tasks/A21.md).
 

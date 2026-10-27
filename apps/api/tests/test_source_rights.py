@@ -115,11 +115,14 @@ def test_the_owner_decisions_of_27_october_are_recorded():
     }
 
 
-def test_the_owner_shows_every_source_and_keeps_collection_within_the_terms():
+def test_the_owner_collects_and_shows_every_source_with_its_rights_recorded():
     decisions = enforcement()
     assert decisions["publication"]["enforced"] is False
-    assert decisions["collection"]["enforced"] is True
+    assert decisions["collection"]["enforced"] is False
     assert {decision["decided_by"] for decision in decisions.values()} == {"Karim"}
+    url = "https://psinv.net/en/projects/abu-dhabi/x-1"
+    assert collection_allowed(url) and facts_allowed(url)
+    assert rights_for(url)["collection"] == "forbidden"
 
 
 def test_unenforced_publication_shows_withheld_sites_and_still_reports_their_rights(
