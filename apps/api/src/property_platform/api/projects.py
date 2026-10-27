@@ -12,6 +12,17 @@ from .read_cache import cached_read
 router = Router(tags=["local-preview"])
 
 
+class SourceRightsResponse(Schema):
+    """Reviewed rights of the source site (A19); `unknown` means not qualified yet."""
+
+    licence: str
+    licence_url: str | None = None
+    terms_url: str | None = None
+    publication: Literal["open", "facts", "link", "none"]
+    attribution: str | None = None
+    reviewed_on: date | None = None
+
+
 class ProjectSourceResponse(Schema):
     url: str
     name: str
@@ -26,6 +37,7 @@ class ProjectSourceResponse(Schema):
     language: str
     evidence_pointer: str = ""
     rights_status: str
+    rights: SourceRightsResponse | None = None
     ingested_at: datetime | None = None
     historical: bool = False
 

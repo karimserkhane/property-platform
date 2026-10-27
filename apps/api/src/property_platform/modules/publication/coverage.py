@@ -11,6 +11,10 @@ from property_platform.modules.evidence.collection_profiles import collection_fo
 from property_platform.modules.evidence.maps.onwani import SOURCE_KEY
 from property_platform.modules.evidence.maps.sdi_protocol import district_scopes
 from property_platform.modules.evidence.maps.sdi_protocol import namespace as sdi_namespace
+from property_platform.modules.evidence.source_rights import facts_allowed
+
+# Agency pins keep a namespace of their own, per publisher (`project_locations.py`).
+BROKER_PARSERS = {"psi_project_v1": "psi", "propertyfinder_project_v1": "propertyfinder"}
 
 
 @dataclass(frozen=True)
@@ -153,7 +157,8 @@ def navigation_registry():
     }
 
 
-def reference_source_keys(profile):
+def reference_source_keys(profile, *, withheld=False):
+    """Namespaces of reviewed references, or of those whose facts are withheld (A19)."""
     import hashlib
     import json
     from pathlib import Path
@@ -163,7 +168,7 @@ def reference_source_keys(profile):
             dict.fromkeys(
                 key
                 for member in profile.member_territory_ids
-                for key in reference_source_keys(PROFILES[member])
+                for key in reference_source_keys(PROFILES[member], withheld=withheld)
             )
         )
     if not profile.reference_registry:
@@ -173,6 +178,7 @@ def reference_source_keys(profile):
     return tuple(
         "research:" + hashlib.sha256(row["url"].encode()).hexdigest()[:40]
         for row in json.loads(registry.read_text(encoding="utf-8"))
+        if facts_allowed(row["url"]) != withheld
     )
 
 
@@ -195,18 +201,39 @@ def map_source_namespaces(territory_id):
             if project["territory_id"] in members
             for namespace in (
                 f"project:{project['slug']}",
+                *_broker_namespaces(project, withheld=False),
+            )
+        )
+    )
+
+
+def _broker_namespaces(project, *, withheld):
+    return tuple(
+        dict.fromkeys(
+            f"project:{project['slug']}:broker:{BROKER_PARSERS[source['parser']]}"
+            for source in project["sources"]
+            if source["parser"] in BROKER_PARSERS and facts_allowed(source["url"]) != withheld
+        )
+    )
+
+
+def withheld_place_namespaces():
+    """Map identities declared only by sites whose facts are withheld (A19)."""
+    from property_platform.modules.evidence.projects.project_protocol import project_registry
+
+    return tuple(
+        dict.fromkeys(
+            (
                 *(
-                    (f"project:{project['slug']}:broker:psi",)
-                    if any(source["parser"] == "psi_project_v1" for source in project["sources"])
-                    else ()
+                    namespace
+                    for project in project_registry()
+                    for namespace in _broker_namespaces(project, withheld=True)
                 ),
                 *(
-                    (f"project:{project['slug']}:broker:propertyfinder",)
-                    if any(
-                        source["parser"] == "propertyfinder_project_v1"
-                        for source in project["sources"]
-                    )
-                    else ()
+                    key
+                    for profile in PROFILES.values()
+                    if not profile.member_territory_ids
+                    for key in reference_source_keys(profile, withheld=True)
                 ),
             )
         )

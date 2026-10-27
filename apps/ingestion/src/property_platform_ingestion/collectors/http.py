@@ -11,6 +11,7 @@ from datetime import UTC, datetime
 from urllib.parse import urlsplit
 
 import httpx
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 MAX_SESSION_BYTES = 64 * 1024 * 1024
 MAX_SESSION_RESPONSES = 600
@@ -167,6 +168,9 @@ class SourceHTTP:
     ) -> Acquisition:
         """Allow query parameters only when a connector verified a registered base."""
         checked_url(url)
+        # Last guard for every connector, including manual runs of a skipped source.
+        if not collection_allowed(url):
+            raise AcquisitionError("Source terms forbid automated collection")
         if allowed_base is None:
             approved = url in self._allowed_urls
         else:

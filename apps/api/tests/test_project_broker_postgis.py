@@ -19,7 +19,13 @@ from property_platform.modules.evidence.projects.project_import import import_pr
 from property_platform.modules.evidence.projects.project_protocol import project_registry  # noqa: E402
 from property_platform.modules.evidence.projects.project_queries import project_detail  # noqa: E402
 
-pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
+# Agency, Aldar and relation fixtures use sites whose rights withhold them (A19); their
+# replay mechanics remain tested here, what rights hide is in test_source_rights_postgis.py.
+pytestmark = [
+    pytest.mark.postgis,
+    pytest.mark.django_db(transaction=True),
+    pytest.mark.usefixtures("unrestricted_sources"),
+]
 
 
 def test_a_long_project_and_source_identity_is_audited_without_truncation():

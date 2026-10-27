@@ -334,6 +334,32 @@ def test_property_receipts_match_existing_protocol_hash_bytes_and_times():
     assert validate_receipts(rows, {URL})[URL]["payload"] == b"project source bytes"
 
 
+def test_property_collection_skips_profiles_whose_terms_forbid_it_and_their_photos():
+    forbidden = "https://www.aldar.com/en/news-and-media/example"
+    photos = {
+        "example": {
+            "source_url": "https://commons.wikimedia.org/wiki/File:Example.jpg",
+            "image_url": "https://upload.wikimedia.org/example.jpg",
+        }
+    }
+    profiles = [
+        {"source_url": URL, "photo_key": None},
+        {"source_url": forbidden, "photo_key": "example"},
+    ]
+    assert property_urls(profiles, photos) == (URL,)
+    calls = []
+
+    def handler(request):
+        calls.append(str(request.url))
+        return httpx.Response(200, content=b"project source bytes")
+
+    with client([URL, forbidden], handler) as http:
+        rows = collect_property_receipts(http, profiles, photos)
+        with pytest.raises(AcquisitionError, match="forbid"):
+            http.fetch(forbidden, max_bytes=100)
+    assert calls == [URL] and [row["url"] for row in rows] == [URL]
+
+
 def test_property_collection_fails_whole_batch_when_one_source_fails():
     other = "https://publisher.example/projects/two"
     profiles = [{"source_url": url, "photo_key": None} for url in (URL, other)]

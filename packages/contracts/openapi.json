@@ -6751,6 +6751,16 @@
             "title": "Rights Status",
             "type": "string"
           },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "ingested_at": {
             "anyOf": [
               {
@@ -6945,6 +6955,76 @@
           "references"
         ],
         "title": "RetentionSourceResponse",
+        "type": "object"
+      },
+      "SourceRightsResponse": {
+        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
+        "properties": {
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          },
+          "licence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licence Url"
+          },
+          "terms_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terms Url"
+          },
+          "publication": {
+            "enum": [
+              "open",
+              "facts",
+              "link",
+              "none"
+            ],
+            "title": "Publication",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribution"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed On"
+          }
+        },
+        "required": [
+          "licence",
+          "publication"
+        ],
+        "title": "SourceRightsResponse",
         "type": "object"
       },
       "VerificationContradictionResponse": {

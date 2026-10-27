@@ -105,6 +105,13 @@ DATASETS += (
         None,
     ),
     Dataset(
+        "source-rights",
+        "property-platform-source-rights",
+        "Mirror the reviewed source rights (licence, collection, publication) into the database.",
+        {},
+        "45 0 * * *",
+    ),
+    Dataset(
         "data-history",
         "property-platform-data-history",
         "Verify every owned table has a pipeline owner and database audit; retain the report.",

@@ -124,6 +124,17 @@ def execute(request):
             return check_history(
                 actor=request["actor"], run_key=f"history:{request['prefect_flow_run_id']}"
             )
+        if request.get("operation") == "source_rights":
+            from property_platform.modules.evidence.history.journals import audit_context
+            from property_platform.modules.evidence.source_rights_import import (
+                apply_source_rights,
+            )
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Source rights require a Prefect run and operator")
+            with audit_context(actor=request["actor"]):
+                summary = apply_source_rights(actor=request["actor"])
+            return {"status": "succeeded", "summary": summary}
         if request.get("operation") == "basemap":
             from datetime import timedelta
 
