@@ -431,7 +431,8 @@
     "rightsUnreviewed": "Bedingungen noch nicht geprüft",
     "rightsReserved": "Rechte beim Herausgeber vorbehalten",
     "rightsPerItem": "Lizenz je Datei",
-    "rightsTerms": "Bedingungen der Quelle"
+    "rightsTerms": "Bedingungen der Quelle",
+    "sourcesAndLicences": "Quellen und Lizenzen"
   },
   "Delivery": {
     "title": "Übergabehistorie",
@@ -468,6 +469,23 @@
     "completionObserved": "Erste Abfrage mit Fertigstellung:",
     "notCompletedUntil": "Letzte frühere Abfrage ohne Fertigstellung:",
     "withoutObservations": "Projekte ohne datierte Beobachtungen"
+  },
+  "Sources": {
+    "title": "Quellen und Lizenzen",
+    "intro": "Lizenz, Bedingungen und erlaubte Weiterverwendung jeder Quellseite, laut geprüftem Verzeichnis. Die Bedingungen einer noch nicht geprüften Seite sind noch einzuordnen.",
+    "reviewedCount": "{reviewed} von {total} Seiten geprüft",
+    "licence": "Lizenz",
+    "publication": "Erlaubte Weiterverwendung",
+    "collection": "Automatisierte Erfassung",
+    "collectionAllowed": "erlaubt",
+    "collectionForbidden": "durch ihre Bedingungen verboten",
+    "reviewed": "Geprüft am",
+    "notReviewed": "noch nicht geprüft",
+    "attribution": "Namensnennung:",
+    "publicationOpen": "offene Lizenz, mit Namensnennung",
+    "publicationFacts": "datierte Fakten, kurzes Zitat und Link",
+    "publicationLink": "nur Link",
+    "publicationNone": "keine Veröffentlichung"
   },
   "Retention": {
     "title": "Einbehalt bei Stornierung des Kaufs",

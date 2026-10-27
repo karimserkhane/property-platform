@@ -431,7 +431,8 @@
     "rightsUnreviewed": "শর্তাবলি এখনও পর্যালোচিত হয়নি",
     "rightsReserved": "প্রকাশকের সর্বস্বত্ব সংরক্ষিত",
     "rightsPerItem": "প্রতিটি ফাইলের নিজস্ব লাইসেন্স",
-    "rightsTerms": "উৎসের শর্তাবলি"
+    "rightsTerms": "উৎসের শর্তাবলি",
+    "sourcesAndLicences": "উৎস ও লাইসেন্স"
   },
   "Delivery": {
     "title": "হস্তান্তর ইতিহাস",
@@ -468,6 +469,23 @@
     "completionObserved": "সমাপ্তি জানানো প্রথম রিডিং:",
     "notCompletedUntil": "সমাপ্তি ছাড়া শেষ পূর্ববর্তী রিডিং:",
     "withoutObservations": "তারিখযুক্ত পর্যবেক্ষণ ছাড়া প্রকল্প"
+  },
+  "Sources": {
+    "title": "উৎস ও লাইসেন্স",
+    "intro": "পর্যালোচিত রেজিস্ট্রি অনুযায়ী প্রতিটি উৎস সাইটের লাইসেন্স, শর্তাবলি ও অনুমোদিত পুনর্ব্যবহার। যে সাইট এখনও পর্যালোচনা হয়নি, তার শর্তাবলি এখনও যাচাই করতে হবে।",
+    "reviewedCount": "{total}টির মধ্যে {reviewed}টি সাইট পর্যালোচিত",
+    "licence": "লাইসেন্স",
+    "publication": "অনুমোদিত পুনর্ব্যবহার",
+    "collection": "স্বয়ংক্রিয় সংগ্রহ",
+    "collectionAllowed": "অনুমোদিত",
+    "collectionForbidden": "শর্তাবলিতে নিষিদ্ধ",
+    "reviewed": "পর্যালোচনার তারিখ",
+    "notReviewed": "এখনও পর্যালোচনা হয়নি",
+    "attribution": "স্বীকৃতি:",
+    "publicationOpen": "উন্মুক্ত লাইসেন্স, স্বীকৃতিসহ",
+    "publicationFacts": "তারিখযুক্ত তথ্য, ছোট উদ্ধৃতি ও লিংক",
+    "publicationLink": "শুধু লিংক",
+    "publicationNone": "প্রকাশ নয়"
   },
   "Retention": {
     "title": "ক্রয় বাতিল হলে কর্তন",

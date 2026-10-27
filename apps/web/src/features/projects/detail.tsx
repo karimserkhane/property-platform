@@ -451,6 +451,9 @@ export function ProjectDetailView({
             {labels.sources} <span aria-hidden="true">+</span>
           </summary>
           <p className={styles.muted}>{labels.sourceNote}</p>
+          <p>
+            <Link href="/sources">{labels.sourcesAndLicences}</Link>
+          </p>
           {project.sources.map((source) => (
             <article
               className={styles.source}

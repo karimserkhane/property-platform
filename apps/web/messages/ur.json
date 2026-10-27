@@ -431,7 +431,8 @@
     "rightsUnreviewed": "شرائط کا ابھی جائزہ نہیں لیا گیا",
     "rightsReserved": "جملہ حقوق ناشر کے پاس محفوظ ہیں",
     "rightsPerItem": "ہر فائل کا اپنا لائسنس",
-    "rightsTerms": "ماخذ کی شرائط"
+    "rightsTerms": "ماخذ کی شرائط",
+    "sourcesAndLicences": "ماخذ اور لائسنس"
   },
   "Delivery": {
     "title": "حوالگی کی تاریخ",
@@ -468,6 +469,23 @@
     "completionObserved": "تکمیل بتانے والا پہلا اندراج:",
     "notCompletedUntil": "تکمیل کے بغیر آخری سابقہ اندراج:",
     "withoutObservations": "تاریخ وار مشاہدات کے بغیر پراجیکٹس"
+  },
+  "Sources": {
+    "title": "ماخذ اور لائسنس",
+    "intro": "جائزہ شدہ رجسٹر کے مطابق ہر ماخذ سائٹ کا لائسنس، شرائط اور اجازت یافتہ دوبارہ استعمال۔ جس سائٹ کا ابھی جائزہ نہیں ہوا، اس کی شرائط کا تعین ابھی باقی ہے۔",
+    "reviewedCount": "{total} میں سے {reviewed} سائٹس کا جائزہ لیا گیا",
+    "licence": "لائسنس",
+    "publication": "اجازت یافتہ دوبارہ استعمال",
+    "collection": "خودکار جمع آوری",
+    "collectionAllowed": "اجازت ہے",
+    "collectionForbidden": "اس کی شرائط کے تحت ممنوع",
+    "reviewed": "جائزے کی تاریخ",
+    "notReviewed": "ابھی جائزہ نہیں ہوا",
+    "attribution": "انتساب:",
+    "publicationOpen": "کھلا لائسنس، انتساب کے ساتھ",
+    "publicationFacts": "تاریخ وار حقائق، مختصر اقتباس اور لنک",
+    "publicationLink": "صرف لنک",
+    "publicationNone": "کوئی اشاعت نہیں"
   },
   "Retention": {
     "title": "خریداری منسوخ ہونے پر کٹوتی",

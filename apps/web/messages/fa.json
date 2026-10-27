@@ -431,7 +431,8 @@
     "rightsUnreviewed": "شرایط هنوز بررسی نشده است",
     "rightsReserved": "حقوق برای ناشر محفوظ است",
     "rightsPerItem": "مجوز جداگانهٔ هر فایل",
-    "rightsTerms": "شرایط منبع"
+    "rightsTerms": "شرایط منبع",
+    "sourcesAndLicences": "منابع و مجوزها"
   },
   "Delivery": {
     "title": "سابقهٔ تحویل",
@@ -468,6 +469,23 @@
     "completionObserved": "نخستین خوانشی که تکمیل را اعلام می‌کند:",
     "notCompletedUntil": "آخرین خوانش پیشین بدون تکمیل:",
     "withoutObservations": "پروژه‌های بدون مشاهدهٔ تاریخ‌دار"
+  },
+  "Sources": {
+    "title": "منابع و مجوزها",
+    "intro": "مجوز، شرایط و استفادهٔ مجاز از هر سایت منبع، بر اساس فهرست بازبینی‌شده. شرایط سایتی که هنوز بازبینی نشده باید ارزیابی شود.",
+    "reviewedCount": "{reviewed} از {total} سایت بازبینی شده",
+    "licence": "مجوز",
+    "publication": "استفادهٔ مجاز",
+    "collection": "گردآوری خودکار",
+    "collectionAllowed": "مجاز",
+    "collectionForbidden": "طبق شرایطش ممنوع",
+    "reviewed": "بازبینی در",
+    "notReviewed": "هنوز بازبینی نشده",
+    "attribution": "انتساب:",
+    "publicationOpen": "مجوز باز، با انتساب",
+    "publicationFacts": "واقعیت‌های تاریخ‌دار، نقل‌قول کوتاه و پیوند",
+    "publicationLink": "فقط پیوند",
+    "publicationNone": "بدون انتشار"
   },
   "Retention": {
     "title": "کسر مبلغ در صورت لغو خرید",

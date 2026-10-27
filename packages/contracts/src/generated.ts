@@ -441,6 +441,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/source-rights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Source Rights */
+        get: operations["previewSourceRights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2461,6 +2478,41 @@ export interface components {
             /** Historical */
             historical: boolean;
         };
+        /** SourceRightsRegistryResponse */
+        SourceRightsRegistryResponse: {
+            /** Items */
+            items: components["schemas"]["SourceSiteRightsResponse"][];
+        };
+        /**
+         * SourceSiteRightsResponse
+         * @description One reviewed site of the source rights registry (A19); `unknown` means not qualified.
+         */
+        SourceSiteRightsResponse: {
+            /** Host */
+            host: string;
+            /** Publisher */
+            publisher: string;
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Collection
+             * @enum {string}
+             */
+            collection: "allowed" | "forbidden";
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -3826,6 +3878,35 @@ export interface operations {
             };
             /** @description Service Unavailable */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewSourceRights: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceRightsRegistryResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

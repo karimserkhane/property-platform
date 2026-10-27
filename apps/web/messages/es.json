@@ -431,7 +431,8 @@
     "rightsUnreviewed": "condiciones aún no revisadas",
     "rightsReserved": "derechos reservados por el editor",
     "rightsPerItem": "licencia propia de cada archivo",
-    "rightsTerms": "Condiciones de la fuente"
+    "rightsTerms": "Condiciones de la fuente",
+    "sourcesAndLicences": "Fuentes y licencias"
   },
   "Delivery": {
     "title": "Historial de entregas",
@@ -468,6 +469,23 @@
     "completionObserved": "Primera lectura que indica finalización:",
     "notCompletedUntil": "Última lectura anterior sin finalización:",
     "withoutObservations": "Proyectos sin observaciones fechadas"
+  },
+  "Sources": {
+    "title": "Fuentes y licencias",
+    "intro": "Licencia, condiciones y reutilización permitida de cada sitio de origen, según el registro revisado. Las condiciones de un sitio aún no revisado quedan por calificar.",
+    "reviewedCount": "{reviewed} de {total} sitios revisados",
+    "licence": "Licencia",
+    "publication": "Reutilización permitida",
+    "collection": "Recopilación automatizada",
+    "collectionAllowed": "permitida",
+    "collectionForbidden": "prohibida por sus condiciones",
+    "reviewed": "Revisado el",
+    "notReviewed": "aún no revisado",
+    "attribution": "Atribución:",
+    "publicationOpen": "licencia abierta, con atribución",
+    "publicationFacts": "hechos fechados, cita breve y enlace",
+    "publicationLink": "solo enlace",
+    "publicationNone": "sin publicación"
   },
   "Retention": {
     "title": "Retención en caso de cancelación",

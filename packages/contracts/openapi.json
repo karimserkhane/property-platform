@@ -2129,6 +2129,38 @@
           "map-analysis-preview"
         ]
       }
+    },
+    "/api/v1/preview/source-rights": {
+      "get": {
+        "operationId": "previewSourceRights",
+        "summary": "Source Rights",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceRightsRegistryResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
     }
   },
   "components": {
@@ -7733,6 +7765,111 @@
           "historical"
         ],
         "title": "DistrictMarketResponse",
+        "type": "object"
+      },
+      "SourceRightsRegistryResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SourceSiteRightsResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "SourceRightsRegistryResponse",
+        "type": "object"
+      },
+      "SourceSiteRightsResponse": {
+        "description": "One reviewed site of the source rights registry (A19); `unknown` means not qualified.",
+        "properties": {
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          },
+          "licence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licence Url"
+          },
+          "terms_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terms Url"
+          },
+          "collection": {
+            "enum": [
+              "allowed",
+              "forbidden"
+            ],
+            "title": "Collection",
+            "type": "string"
+          },
+          "publication": {
+            "enum": [
+              "open",
+              "facts",
+              "link",
+              "none"
+            ],
+            "title": "Publication",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribution"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed On"
+          }
+        },
+        "required": [
+          "host",
+          "publisher",
+          "licence",
+          "collection",
+          "publication"
+        ],
+        "title": "SourceSiteRightsResponse",
         "type": "object"
       }
     }

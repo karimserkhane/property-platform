@@ -191,3 +191,23 @@ test("the satellite signal states its method and limits, also right to left", as
   ).toBeVisible();
   await expectNoHorizontalScroll(page);
 });
+
+test("sources and licences list every reviewed site, also right to left", async ({
+  page,
+}) => {
+  // The registry ships with the API, so this page needs no collected data.
+  await page.goto("/en/sources");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Sources and licences" }),
+  ).toBeVisible();
+  const sites = page.locator("[data-source-site]");
+  await expect(sites.first()).toBeVisible();
+  await expect(sites.first().locator("[data-source-licence]")).not.toBeEmpty();
+  await expectNoHorizontalScroll(page);
+  await page.goto("/ar/sources");
+  await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "المصادر والتراخيص" }),
+  ).toBeVisible();
+  await expectNoHorizontalScroll(page);
+});

@@ -431,7 +431,8 @@
     "rightsUnreviewed": "शर्तों की अभी समीक्षा नहीं हुई",
     "rightsReserved": "प्रकाशक के सर्वाधिकार सुरक्षित",
     "rightsPerItem": "हर फ़ाइल का अपना लाइसेंस",
-    "rightsTerms": "स्रोत की शर्तें"
+    "rightsTerms": "स्रोत की शर्तें",
+    "sourcesAndLicences": "स्रोत और लाइसेंस"
   },
   "Delivery": {
     "title": "हस्तांतरण इतिहास",
@@ -468,6 +469,23 @@
     "completionObserved": "पूर्णता बताने वाली पहली प्रविष्टि:",
     "notCompletedUntil": "पूर्णता के बिना अंतिम पिछली प्रविष्टि:",
     "withoutObservations": "दिनांकित अवलोकन के बिना परियोजनाएँ"
+  },
+  "Sources": {
+    "title": "स्रोत और लाइसेंस",
+    "intro": "समीक्षित रजिस्टर के अनुसार हर स्रोत साइट का लाइसेंस, शर्तें और अनुमत पुन: उपयोग। जिस साइट की समीक्षा अभी नहीं हुई, उसकी शर्तें अभी आंकी जानी हैं।",
+    "reviewedCount": "{total} में से {reviewed} साइटों की समीक्षा हुई",
+    "licence": "लाइसेंस",
+    "publication": "अनुमत पुन: उपयोग",
+    "collection": "स्वचालित संग्रह",
+    "collectionAllowed": "अनुमत",
+    "collectionForbidden": "इसकी शर्तों द्वारा निषिद्ध",
+    "reviewed": "समीक्षा की तारीख",
+    "notReviewed": "अभी समीक्षा नहीं हुई",
+    "attribution": "श्रेय:",
+    "publicationOpen": "खुला लाइसेंस, श्रेय सहित",
+    "publicationFacts": "दिनांकित तथ्य, छोटा उद्धरण और लिंक",
+    "publicationLink": "केवल लिंक",
+    "publicationNone": "कोई प्रकाशन नहीं"
   },
   "Retention": {
     "title": "ख़रीद रद्द होने पर कटौती",

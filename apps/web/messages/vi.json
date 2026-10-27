@@ -431,7 +431,8 @@
     "rightsUnreviewed": "điều khoản chưa được xem xét",
     "rightsReserved": "nhà xuất bản giữ bản quyền",
     "rightsPerItem": "giấy phép riêng của từng tệp",
-    "rightsTerms": "Điều khoản của nguồn"
+    "rightsTerms": "Điều khoản của nguồn",
+    "sourcesAndLicences": "Nguồn và giấy phép"
   },
   "Delivery": {
     "title": "Lịch sử bàn giao",
@@ -468,6 +469,23 @@
     "completionObserved": "Lần đọc đầu tiên ghi hoàn thành:",
     "notCompletedUntil": "Lần đọc trước gần nhất chưa hoàn thành:",
     "withoutObservations": "Dự án không có quan sát có ngày"
+  },
+  "Sources": {
+    "title": "Nguồn và giấy phép",
+    "intro": "Giấy phép, điều khoản và mức tái sử dụng được phép của từng trang nguồn, theo sổ đăng ký đã rà soát. Điều khoản của trang chưa được rà soát vẫn cần đánh giá.",
+    "reviewedCount": "Đã rà soát {reviewed}/{total} trang",
+    "licence": "Giấy phép",
+    "publication": "Tái sử dụng được phép",
+    "collection": "Thu thập tự động",
+    "collectionAllowed": "được phép",
+    "collectionForbidden": "bị điều khoản của trang cấm",
+    "reviewed": "Rà soát ngày",
+    "notReviewed": "chưa được rà soát",
+    "attribution": "Ghi nguồn:",
+    "publicationOpen": "giấy phép mở, có ghi nguồn",
+    "publicationFacts": "dữ kiện có ngày, trích dẫn ngắn và liên kết",
+    "publicationLink": "chỉ liên kết",
+    "publicationNone": "không công bố"
   },
   "Retention": {
     "title": "Khoản khấu trừ khi hủy giao dịch mua",

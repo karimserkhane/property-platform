@@ -431,7 +431,8 @@
     "rightsUnreviewed": "hindi pa nasusuri ang mga tuntunin",
     "rightsReserved": "nakalaan ang karapatan sa publisher",
     "rightsPerItem": "sariling lisensya ng bawat file",
-    "rightsTerms": "Mga tuntunin ng source"
+    "rightsTerms": "Mga tuntunin ng source",
+    "sourcesAndLicences": "Mga pinagmulan at lisensya"
   },
   "Delivery": {
     "title": "Kasaysayan ng turnover",
@@ -468,6 +469,23 @@
     "completionObserved": "Unang pagbasa na nagsasabing tapos na:",
     "notCompletedUntil": "Huling naunang pagbasa na hindi pa tapos:",
     "withoutObservations": "Mga proyektong walang may-petsang obserbasyon"
+  },
+  "Sources": {
+    "title": "Mga pinagmulan at lisensya",
+    "intro": "Lisensya, mga tuntunin at pinapayagang muling paggamit ng bawat site na pinagmulan, mula sa nasuring rehistro. Kailangan pang suriin ang mga tuntunin ng site na hindi pa nasusuri.",
+    "reviewedCount": "{reviewed} sa {total} site ang nasuri",
+    "licence": "Lisensya",
+    "publication": "Pinapayagang muling paggamit",
+    "collection": "Awtomatikong pagkolekta",
+    "collectionAllowed": "pinapayagan",
+    "collectionForbidden": "ipinagbabawal ng mga tuntunin nito",
+    "reviewed": "Nasuri noong",
+    "notReviewed": "hindi pa nasusuri",
+    "attribution": "Atribusyon:",
+    "publicationOpen": "bukas na lisensya, may atribusyon",
+    "publicationFacts": "mga petsadong datos, maikling sipi at link",
+    "publicationLink": "link lamang",
+    "publicationNone": "walang paglalathala"
   },
   "Retention": {
     "title": "Halagang maaaring ibawas kapag kinansela ang pagbili",

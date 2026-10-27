@@ -12,6 +12,7 @@ from .preview import TerritoryNotConfigured, preview_only
 from .project_media import router as project_media_router
 from .projects import router as projects_router
 from .public_context import router as context_router
+from .sources import router as sources_router
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ for preview_router in (
     project_media_router,
     basemaps_router,
     accessibility_router,
+    sources_router,
 ):
     preview_router.add_decorator(preview_only)
     api.add_router("/preview", preview_router)
