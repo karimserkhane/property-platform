@@ -1,8 +1,8 @@
 # Catalogue Reem et Saadiyat — 21 octobre 2026
 
-## Retrait du 27 octobre 2026 (A19)
+## Droits des sources, 27 octobre 2026 (A19)
 
-Property Finder, PSI et Aldar ne sont plus collectés ni publiés : leurs conditions interdisent la collecte automatique ou la réutilisation de leur contenu ([règle et mécanisme](DATA_PROVENANCE.md#sites-retirés-a19)). Sur les 183 fiches du registre, **88 n'ont aucune autre source** : 75 à Reem, surtout des tours connues seulement par PSI, et 13 à Saadiyat. Elles ne sont plus publiées. Il en reste 95, appuyées par l'ADREC ou par d'autres promoteurs. Leur position déclarée par PSI disparaît aussi de la carte. Les comptes ci-dessous décrivent le catalogue avant ce retrait ; registres, captures et snapshots sont conservés.
+Chaque source a désormais ses droits ([registre et règles](DATA_PROVENANCE.md#droits-de-chaque-source-a19)). Property Finder, PSI, Bayut et Aldar ne sont plus collectés : leurs conditions l'interdisent. Seules les pages officielles d'Aldar restent liées, sans aucun fait repris. Sur les 183 fiches du registre, **90 n'ont aucune autre source publiable** : 77 à Reem, surtout des tours connues seulement par PSI, et 13 à Saadiyat. Elles ne sont plus publiées. Il en reste 93, appuyées par l'ADREC ou par d'autres promoteurs, et les positions déclarées par PSI quittent la carte. Registres, pipelines, captures et snapshots sont conservés : une autorisation écrite d'un de ces sites les ramènerait. Les comptes ci-dessous décrivent le catalogue avant ce changement.
 
 ## Couverture et attribution
 
