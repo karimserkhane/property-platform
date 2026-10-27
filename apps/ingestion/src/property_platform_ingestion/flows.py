@@ -73,6 +73,33 @@ def sdi_parcels(territory: Territory = TERRITORY, actor: str = "scheduled"):
     return ingest_source("sdi_parcels", territory, actor)
 
 
+@flow(name="property-platform-sdi-district-parcels", retries=0)
+def sdi_district_parcels(
+    municipality: Literal["ADM", "AAM", "WRM"] = "ADM",
+    districts: list[str] | None = None,
+    actor: str = "manual",
+):
+    """Import reviewed AD-SDI districts one audited run each; a failure never hides others."""
+    from property_platform.modules.evidence.maps import sdi_protocol
+
+    registered = sdi_protocol.scopes_in(municipality)
+    scopes = registered if districts is None else list(dict.fromkeys(districts))
+    if not scopes or any(scope not in registered for scope in scopes):
+        raise ValueError("Districts must be reviewed AD-SDI scopes of this municipality")
+    results, failed = {}, []
+    for scope in scopes:
+        try:
+            results[scope] = ingest_source("sdi_parcels", scope, actor)
+        except IngestionFailure as exc:
+            results[scope] = exc.result
+            failed.append(scope)
+    if failed:
+        raise IngestionFailure(
+            {"status": "failed", "error": "DistrictImportFailed", "failed_scopes": failed}
+        )
+    return results
+
+
 @flow(name="property-platform-map", retries=0)
 def map_layer(
     layer: Literal["district", "community", "street", "osm", "overture"] = "osm",
@@ -462,6 +489,7 @@ FLOWS = {
     for f in (
         parcels,
         sdi_parcels,
+        sdi_district_parcels,
         map_layer,
         references,
         presentations,

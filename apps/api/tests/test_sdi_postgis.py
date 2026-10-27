@@ -150,3 +150,21 @@ def test_incomplete_snapshot_never_materializes_partial_parcels():
         )
     assert not Parcel.objects.exists()
     assert IngestionRun.objects.get().status == "failed" and Capture.objects.count() == 3
+
+
+def test_emirate_district_scope_keeps_its_own_municipality_and_source():
+    row = sdi_feature()
+    row["attributes"].update(DISTRICTENG="AL BATEEN", MUNICIPALITYENG="AAM", COMMUNITYENG="")
+    run = import_parcels(territory="aam:al-bateen", actor="test", acquisition=acquire_for(row))
+    assert run.summary["created"] == 1
+    parcel = Parcel.objects.get()
+    assert (parcel.municipality, parcel.district) == ("AAM", "AL BATEEN")
+    assert parcel.source_namespace == "ad-sdi:generic-search:plots:aam:al-bateen"
+
+
+def test_same_district_name_in_another_municipality_never_enters_the_scope():
+    row = sdi_feature()
+    row["attributes"].update(DISTRICTENG="AL BATEEN", MUNICIPALITYENG="ADM")
+    with pytest.raises(protocol.SourceError, match="outside requested municipality"):
+        import_parcels(territory="aam:al-bateen", actor="test", acquisition=acquire_for(row))
+    assert not Parcel.objects.exists()

@@ -203,10 +203,12 @@ def _capture(root, capture):
 def _source_scopes():
     from ..maps import sdi_protocol
 
-    result = {}
+    result = {
+        sdi_protocol.namespace(scope): ("sdi_parcels", scope)
+        for scope in (*COLLECTIONS, *sdi_protocol.district_scopes())
+    }
     for area, profile in COLLECTIONS.items():
         result[profile.parcel_namespace] = ("onwani", area)
-        result[sdi_protocol.namespace(area)] = ("sdi_parcels", area)
         for layer in ("district", "community", "street", "osm", "overture"):
             result[profile.map_namespace(layer)] = ("map", f"{area}:{layer}")
         for row in orchestration.reference_registry(area):

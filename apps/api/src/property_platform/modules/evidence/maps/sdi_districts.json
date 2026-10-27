@@ -1,0 +1,1286 @@
+{
+  "reviewed_on": "2026-10-27",
+  "source_url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/Pub/Generic_Search_WM/MapServer/10/query",
+  "review_query": "where=1=1&groupByFieldsForStatistics=MUNICIPALITYENG,DISTRICTENG&outStatistics=count(OBJECTID)",
+  "note": "Acquisition scopes only. plots_at_review is the source count on the review date, never imported data; each import captures its own listing.",
+  "districts": [
+    {
+      "scope": "aam:asharij",
+      "municipality": "AAM",
+      "district": "'ASHARIJ",
+      "plots_at_review": 890
+    },
+    {
+      "scope": "aam:abu-hiraybah",
+      "municipality": "AAM",
+      "district": "ABU HIRAYBAH",
+      "plots_at_review": 20
+    },
+    {
+      "scope": "aam:abu-samrah",
+      "municipality": "AAM",
+      "district": "ABU SAMRAH",
+      "plots_at_review": 382
+    },
+    {
+      "scope": "aam:ain-al-faydah",
+      "municipality": "AAM",
+      "district": "AIN AL FAYDAH",
+      "plots_at_review": 6686
+    },
+    {
+      "scope": "aam:al-ajban",
+      "municipality": "AAM",
+      "district": "AL 'AJBAN",
+      "plots_at_review": 1505
+    },
+    {
+      "scope": "aam:al-arad",
+      "municipality": "AAM",
+      "district": "AL 'ARAD",
+      "plots_at_review": 1567
+    },
+    {
+      "scope": "aam:al-iqabiyyah",
+      "municipality": "AAM",
+      "district": "AL 'IQABIYYAH",
+      "plots_at_review": 805
+    },
+    {
+      "scope": "aam:al-aamerah",
+      "municipality": "AAM",
+      "district": "AL AAMERAH",
+      "plots_at_review": 10991
+    },
+    {
+      "scope": "aam:al-aflaj",
+      "municipality": "AAM",
+      "district": "AL AFLAJ",
+      "plots_at_review": 9
+    },
+    {
+      "scope": "aam:al-ain-international-airport",
+      "municipality": "AAM",
+      "district": "AL AIN INTERNATIONAL AIRPORT",
+      "plots_at_review": 48
+    },
+    {
+      "scope": "aam:al-bateen",
+      "municipality": "AAM",
+      "district": "AL BATEEN",
+      "plots_at_review": 918
+    },
+    {
+      "scope": "aam:al-dahma",
+      "municipality": "AAM",
+      "district": "AL DAHMA",
+      "plots_at_review": 8
+    },
+    {
+      "scope": "aam:al-dhahir",
+      "municipality": "AAM",
+      "district": "AL DHAHIR",
+      "plots_at_review": 4149
+    },
+    {
+      "scope": "aam:al-dhahrah",
+      "municipality": "AAM",
+      "district": "AL DHAHRAH",
+      "plots_at_review": 2643
+    },
+    {
+      "scope": "aam:al-faqa",
+      "municipality": "AAM",
+      "district": "AL FAQA'",
+      "plots_at_review": 7307
+    },
+    {
+      "scope": "aam:al-fouah",
+      "municipality": "AAM",
+      "district": "AL FOU'AH",
+      "plots_at_review": 3030
+    },
+    {
+      "scope": "aam:al-hiyar",
+      "municipality": "AAM",
+      "district": "AL HIYAR",
+      "plots_at_review": 4811
+    },
+    {
+      "scope": "aam:al-jahili",
+      "municipality": "AAM",
+      "district": "AL JAHILI",
+      "plots_at_review": 428
+    },
+    {
+      "scope": "aam:al-jimi",
+      "municipality": "AAM",
+      "district": "AL JIMI",
+      "plots_at_review": 2668
+    },
+    {
+      "scope": "aam:al-khaznah",
+      "municipality": "AAM",
+      "district": "AL KHAZNAH",
+      "plots_at_review": 1540
+    },
+    {
+      "scope": "aam:al-khibeesi",
+      "municipality": "AAM",
+      "district": "AL KHIBEESI",
+      "plots_at_review": 2610
+    },
+    {
+      "scope": "aam:al-maqam",
+      "municipality": "AAM",
+      "district": "AL MAQAM",
+      "plots_at_review": 1438
+    },
+    {
+      "scope": "aam:al-markhaniyyah",
+      "municipality": "AAM",
+      "district": "AL MARKHANIYYAH",
+      "plots_at_review": 1279
+    },
+    {
+      "scope": "aam:al-masoudi",
+      "municipality": "AAM",
+      "district": "AL MAS'OUDI",
+      "plots_at_review": 759
+    },
+    {
+      "scope": "aam:al-mutarid",
+      "municipality": "AAM",
+      "district": "AL MU'TARID",
+      "plots_at_review": 1199
+    },
+    {
+      "scope": "aam:al-mutawah",
+      "municipality": "AAM",
+      "district": "AL MUTAW'AH",
+      "plots_at_review": 203
+    },
+    {
+      "scope": "aam:al-muwaiji",
+      "municipality": "AAM",
+      "district": "AL MUWAIJ'I",
+      "plots_at_review": 1736
+    },
+    {
+      "scope": "aam:al-nabbagh",
+      "municipality": "AAM",
+      "district": "AL NABBAGH",
+      "plots_at_review": 4009
+    },
+    {
+      "scope": "aam:al-noud",
+      "municipality": "AAM",
+      "district": "AL NOUD",
+      "plots_at_review": 6486
+    },
+    {
+      "scope": "aam:al-qattarah",
+      "municipality": "AAM",
+      "district": "AL QATTARAH",
+      "plots_at_review": 909
+    },
+    {
+      "scope": "aam:al-qisees",
+      "municipality": "AAM",
+      "district": "AL QISEES",
+      "plots_at_review": 4
+    },
+    {
+      "scope": "aam:al-qou",
+      "municipality": "AAM",
+      "district": "AL QOU'",
+      "plots_at_review": 5196
+    },
+    {
+      "scope": "aam:al-rawdah",
+      "municipality": "AAM",
+      "district": "AL RAWDAH",
+      "plots_at_review": 2450
+    },
+    {
+      "scope": "aam:al-rawdah-al-sharqiyah",
+      "municipality": "AAM",
+      "district": "AL RAWDAH AL SHARQIYAH",
+      "plots_at_review": 1373
+    },
+    {
+      "scope": "aam:al-ruwaydat",
+      "municipality": "AAM",
+      "district": "AL RUWAYDAT",
+      "plots_at_review": 19
+    },
+    {
+      "scope": "aam:al-sad",
+      "municipality": "AAM",
+      "district": "AL SAD",
+      "plots_at_review": 3885
+    },
+    {
+      "scope": "aam:al-salamat",
+      "municipality": "AAM",
+      "district": "AL SALAMAT",
+      "plots_at_review": 2291
+    },
+    {
+      "scope": "aam:al-sarouj",
+      "municipality": "AAM",
+      "district": "AL SAROUJ",
+      "plots_at_review": 1913
+    },
+    {
+      "scope": "aam:al-shiwayb",
+      "municipality": "AAM",
+      "district": "AL SHIWAYB",
+      "plots_at_review": 1108
+    },
+    {
+      "scope": "aam:al-shuwaymah",
+      "municipality": "AAM",
+      "district": "AL SHUWAYMAH",
+      "plots_at_review": 39
+    },
+    {
+      "scope": "aam:al-tiwayya",
+      "municipality": "AAM",
+      "district": "AL TIWAYYA",
+      "plots_at_review": 1798
+    },
+    {
+      "scope": "aam:al-wiqan",
+      "municipality": "AAM",
+      "district": "AL WIQAN",
+      "plots_at_review": 4495
+    },
+    {
+      "scope": "aam:bad-bint-saoud",
+      "municipality": "AAM",
+      "district": "BAD' BINT SA'OUD",
+      "plots_at_review": 1782
+    },
+    {
+      "scope": "aam:bu-kirayyah",
+      "municipality": "AAM",
+      "district": "BU KIRAYYAH",
+      "plots_at_review": 1535
+    },
+    {
+      "scope": "aam:central-district",
+      "municipality": "AAM",
+      "district": "CENTRAL DISTRICT",
+      "plots_at_review": 2716
+    },
+    {
+      "scope": "aam:falaj-hazza",
+      "municipality": "AAM",
+      "district": "FALAJ HAZZA'",
+      "plots_at_review": 1307
+    },
+    {
+      "scope": "aam:ghireebah",
+      "municipality": "AAM",
+      "district": "GHIREEBAH",
+      "plots_at_review": 13
+    },
+    {
+      "scope": "aam:ghnaymah",
+      "municipality": "AAM",
+      "district": "GHNAYMAH",
+      "plots_at_review": 1262
+    },
+    {
+      "scope": "aam:hili",
+      "municipality": "AAM",
+      "district": "HILI",
+      "plots_at_review": 3038
+    },
+    {
+      "scope": "aam:industrial-area",
+      "municipality": "AAM",
+      "district": "INDUSTRIAL AREA",
+      "plots_at_review": 1233
+    },
+    {
+      "scope": "aam:industrial-city",
+      "municipality": "AAM",
+      "district": "INDUSTRIAL CITY",
+      "plots_at_review": 1762
+    },
+    {
+      "scope": "aam:jabal-hafeet",
+      "municipality": "AAM",
+      "district": "JABAL HAFEET",
+      "plots_at_review": 56
+    },
+    {
+      "scope": "aam:khatm-al-shiklah",
+      "municipality": "AAM",
+      "district": "KHATM AL SHIKLAH",
+      "plots_at_review": 33
+    },
+    {
+      "scope": "aam:malaqit",
+      "municipality": "AAM",
+      "district": "MALAQIT",
+      "plots_at_review": 461
+    },
+    {
+      "scope": "aam:masakin",
+      "municipality": "AAM",
+      "district": "MASAKIN",
+      "plots_at_review": 1912
+    },
+    {
+      "scope": "aam:mazyad",
+      "municipality": "AAM",
+      "district": "MAZYAD",
+      "plots_at_review": 3540
+    },
+    {
+      "scope": "aam:mbazzarah-al-khadra",
+      "municipality": "AAM",
+      "district": "MBAZZARAH AL KHADRA",
+      "plots_at_review": 3160
+    },
+    {
+      "scope": "aam:nahil",
+      "municipality": "AAM",
+      "district": "NAHIL",
+      "plots_at_review": 1442
+    },
+    {
+      "scope": "aam:nimah",
+      "municipality": "AAM",
+      "district": "NI'MAH",
+      "plots_at_review": 1462
+    },
+    {
+      "scope": "aam:niqa-al-dheeb",
+      "municipality": "AAM",
+      "district": "NIQA AL DHEEB",
+      "plots_at_review": 853
+    },
+    {
+      "scope": "aam:ramlat-sweihan",
+      "municipality": "AAM",
+      "district": "RAMLAT SWEIHAN",
+      "plots_at_review": 1820
+    },
+    {
+      "scope": "aam:rimah",
+      "municipality": "AAM",
+      "district": "RIMAH",
+      "plots_at_review": 4827
+    },
+    {
+      "scope": "aam:sa",
+      "municipality": "AAM",
+      "district": "SA'",
+      "plots_at_review": 2895
+    },
+    {
+      "scope": "aam:shibat-al-wutah",
+      "municipality": "AAM",
+      "district": "SHI'BAT AL WUTAH",
+      "plots_at_review": 1761
+    },
+    {
+      "scope": "aam:shiab-al-ashkhar",
+      "municipality": "AAM",
+      "district": "SHIAB AL ASHKHAR",
+      "plots_at_review": 1011
+    },
+    {
+      "scope": "aam:sweihan",
+      "municipality": "AAM",
+      "district": "SWEIHAN",
+      "plots_at_review": 5637
+    },
+    {
+      "scope": "aam:um-al-zumoul",
+      "municipality": "AAM",
+      "district": "UM AL ZUMOUL",
+      "plots_at_review": 114
+    },
+    {
+      "scope": "aam:um-ghafah",
+      "municipality": "AAM",
+      "district": "UM GHAFAH",
+      "plots_at_review": 3330
+    },
+    {
+      "scope": "aam:zakhir",
+      "municipality": "AAM",
+      "district": "ZAKHIR",
+      "plots_at_review": 4616
+    },
+    {
+      "scope": "adm:abu-al-abyad-island",
+      "municipality": "ADM",
+      "district": "ABU AL ABYAD ISLAND",
+      "plots_at_review": 10
+    },
+    {
+      "scope": "adm:abu-al-habl-island",
+      "municipality": "ADM",
+      "district": "ABU AL HABL ISLAND",
+      "plots_at_review": 3
+    },
+    {
+      "scope": "adm:abu-dhabi-industrial-city",
+      "municipality": "ADM",
+      "district": "ABU DHABI INDUSTRIAL CITY",
+      "plots_at_review": 2297
+    },
+    {
+      "scope": "adm:abu-dhabi-islands",
+      "municipality": "ADM",
+      "district": "ABU DHABI ISLANDS",
+      "plots_at_review": 19
+    },
+    {
+      "scope": "adm:abu-mreikhah",
+      "municipality": "ADM",
+      "district": "ABU MREIKHAH",
+      "plots_at_review": 47
+    },
+    {
+      "scope": "adm:al-adlah",
+      "municipality": "ADM",
+      "district": "AL `ADLAH",
+      "plots_at_review": 1332
+    },
+    {
+      "scope": "adm:al-asheesh",
+      "municipality": "ADM",
+      "district": "AL `ASHEESH",
+      "plots_at_review": 1169
+    },
+    {
+      "scope": "adm:al-aliah-island",
+      "municipality": "ADM",
+      "district": "AL ALIAH ISLAND",
+      "plots_at_review": 520
+    },
+    {
+      "scope": "adm:al-bahyah",
+      "municipality": "ADM",
+      "district": "AL BAHYAH",
+      "plots_at_review": 7171
+    },
+    {
+      "scope": "adm:al-bateen",
+      "municipality": "ADM",
+      "district": "AL BATEEN",
+      "plots_at_review": 1835
+    },
+    {
+      "scope": "adm:al-bihouth",
+      "municipality": "ADM",
+      "district": "AL BIHOUTH",
+      "plots_at_review": 150
+    },
+    {
+      "scope": "adm:al-danah",
+      "municipality": "ADM",
+      "district": "AL DANAH",
+      "plots_at_review": 2361
+    },
+    {
+      "scope": "adm:al-falah",
+      "municipality": "ADM",
+      "district": "AL FALAH",
+      "plots_at_review": 7373
+    },
+    {
+      "scope": "adm:al-fayah",
+      "municipality": "ADM",
+      "district": "AL FAYAH",
+      "plots_at_review": 228
+    },
+    {
+      "scope": "adm:al-fteysi-island",
+      "municipality": "ADM",
+      "district": "AL FTEYSI ISLAND",
+      "plots_at_review": 7
+    },
+    {
+      "scope": "adm:al-haffar",
+      "municipality": "ADM",
+      "district": "AL HAFFAR",
+      "plots_at_review": 5154
+    },
+    {
+      "scope": "adm:al-halah-island",
+      "municipality": "ADM",
+      "district": "AL HALAH ISLAND",
+      "plots_at_review": 8
+    },
+    {
+      "scope": "adm:al-hanyourah",
+      "municipality": "ADM",
+      "district": "AL HANYOURAH",
+      "plots_at_review": 19
+    },
+    {
+      "scope": "adm:al-heel-island",
+      "municipality": "ADM",
+      "district": "AL HEEL ISLAND",
+      "plots_at_review": 1
+    },
+    {
+      "scope": "adm:al-hidayriyyat",
+      "municipality": "ADM",
+      "district": "AL HIDAYRIYYAT",
+      "plots_at_review": 6159
+    },
+    {
+      "scope": "adm:al-hisn",
+      "municipality": "ADM",
+      "district": "AL HISN",
+      "plots_at_review": 646
+    },
+    {
+      "scope": "adm:al-jubail-island",
+      "municipality": "ADM",
+      "district": "AL JUBAIL ISLAND",
+      "plots_at_review": 1782
+    },
+    {
+      "scope": "adm:al-kasir",
+      "municipality": "ADM",
+      "district": "AL KASIR",
+      "plots_at_review": 239
+    },
+    {
+      "scope": "adm:al-khalidiyah",
+      "municipality": "ADM",
+      "district": "AL KHALIDIYAH",
+      "plots_at_review": 660
+    },
+    {
+      "scope": "adm:al-khatm",
+      "municipality": "ADM",
+      "district": "AL KHATM",
+      "plots_at_review": 684
+    },
+    {
+      "scope": "adm:al-kheeran",
+      "municipality": "ADM",
+      "district": "AL KHEERAN",
+      "plots_at_review": 50
+    },
+    {
+      "scope": "adm:al-khidayrah",
+      "municipality": "ADM",
+      "district": "AL KHIDAYRAH",
+      "plots_at_review": 40
+    },
+    {
+      "scope": "adm:al-layyan",
+      "municipality": "ADM",
+      "district": "AL LAYYAN",
+      "plots_at_review": 1904
+    },
+    {
+      "scope": "adm:al-lulu-island",
+      "municipality": "ADM",
+      "district": "AL LULU ISLAND",
+      "plots_at_review": 8
+    },
+    {
+      "scope": "adm:al-mamourah",
+      "municipality": "ADM",
+      "district": "AL MA`MOURAH",
+      "plots_at_review": 558
+    },
+    {
+      "scope": "adm:al-manhal",
+      "municipality": "ADM",
+      "district": "AL MANHAL",
+      "plots_at_review": 1639
+    },
+    {
+      "scope": "al-maryah-island",
+      "municipality": "ADM",
+      "district": "AL MARYAH ISLAND",
+      "plots_at_review": 73
+    },
+    {
+      "scope": "adm:al-matar",
+      "municipality": "ADM",
+      "district": "AL MATAR",
+      "plots_at_review": 87
+    },
+    {
+      "scope": "adm:al-mirad",
+      "municipality": "ADM",
+      "district": "AL MI`RAD",
+      "plots_at_review": 19
+    },
+    {
+      "scope": "adm:al-mizn",
+      "municipality": "ADM",
+      "district": "AL MIZN",
+      "plots_at_review": 4764
+    },
+    {
+      "scope": "adm:al-muntazah",
+      "municipality": "ADM",
+      "district": "AL MUNTAZAH",
+      "plots_at_review": 1440
+    },
+    {
+      "scope": "adm:al-mushrif",
+      "municipality": "ADM",
+      "district": "AL MUSHRIF",
+      "plots_at_review": 1600
+    },
+    {
+      "scope": "adm:al-muzoun",
+      "municipality": "ADM",
+      "district": "AL MUZOUN",
+      "plots_at_review": 280
+    },
+    {
+      "scope": "adm:al-nahdah",
+      "municipality": "ADM",
+      "district": "AL NAHDAH",
+      "plots_at_review": 7145
+    },
+    {
+      "scope": "adm:al-nahyan",
+      "municipality": "ADM",
+      "district": "AL NAHYAN",
+      "plots_at_review": 1504
+    },
+    {
+      "scope": "adm:al-nouf",
+      "municipality": "ADM",
+      "district": "AL NOUF",
+      "plots_at_review": 447
+    },
+    {
+      "scope": "adm:al-qurm",
+      "municipality": "ADM",
+      "district": "AL QURM",
+      "plots_at_review": 277
+    },
+    {
+      "scope": "adm:al-rahah",
+      "municipality": "ADM",
+      "district": "AL RAHAH",
+      "plots_at_review": 2681
+    },
+    {
+      "scope": "adm:al-rahbah",
+      "municipality": "ADM",
+      "district": "AL RAHBAH",
+      "plots_at_review": 1772
+    },
+    {
+      "scope": "adm:al-ras-al-akhdar",
+      "municipality": "ADM",
+      "district": "AL RAS AL AKHDAR",
+      "plots_at_review": 67
+    },
+    {
+      "scope": "adm:al-rawdah",
+      "municipality": "ADM",
+      "district": "AL RAWDAH",
+      "plots_at_review": 722
+    },
+    {
+      "scope": "adm:al-reef",
+      "municipality": "ADM",
+      "district": "AL REEF",
+      "plots_at_review": 2764
+    },
+    {
+      "scope": "adm:al-reem-east-island",
+      "municipality": "ADM",
+      "district": "AL REEM EAST ISLAND",
+      "plots_at_review": 1
+    },
+    {
+      "scope": "al-reem-island",
+      "municipality": "ADM",
+      "district": "AL REEM ISLAND",
+      "plots_at_review": 2506
+    },
+    {
+      "scope": "adm:al-saadah",
+      "municipality": "ADM",
+      "district": "AL SA`ADAH",
+      "plots_at_review": 1220
+    },
+    {
+      "scope": "saadiyat-island",
+      "municipality": "ADM",
+      "district": "AL SAADIYAT ISLAND",
+      "plots_at_review": 5456
+    },
+    {
+      "scope": "adm:al-sader",
+      "municipality": "ADM",
+      "district": "AL SADER",
+      "plots_at_review": 4837
+    },
+    {
+      "scope": "adm:al-samhah",
+      "municipality": "ADM",
+      "district": "AL SAMHAH",
+      "plots_at_review": 4802
+    },
+    {
+      "scope": "adm:al-sammaliyyah-island",
+      "municipality": "ADM",
+      "district": "AL SAMMALIYYAH ISLAND",
+      "plots_at_review": 6
+    },
+    {
+      "scope": "adm:al-selmiyyah",
+      "municipality": "ADM",
+      "district": "AL SELMIYYAH",
+      "plots_at_review": 18
+    },
+    {
+      "scope": "adm:al-shahamah",
+      "municipality": "ADM",
+      "district": "AL SHAHAMAH",
+      "plots_at_review": 1017
+    },
+    {
+      "scope": "adm:al-shamkhah",
+      "municipality": "ADM",
+      "district": "AL SHAMKHAH",
+      "plots_at_review": 9292
+    },
+    {
+      "scope": "adm:al-shawamekh",
+      "municipality": "ADM",
+      "district": "AL SHAWAMEKH",
+      "plots_at_review": 2413
+    },
+    {
+      "scope": "adm:al-shelaylah-island",
+      "municipality": "ADM",
+      "district": "AL SHELAYLAH ISLAND",
+      "plots_at_review": 24
+    },
+    {
+      "scope": "adm:al-shinayin",
+      "municipality": "ADM",
+      "district": "AL SHINAYIN",
+      "plots_at_review": 108
+    },
+    {
+      "scope": "adm:al-smeeh",
+      "municipality": "ADM",
+      "district": "AL SMEEH",
+      "plots_at_review": 17
+    },
+    {
+      "scope": "adm:al-sout",
+      "municipality": "ADM",
+      "district": "AL SOUT",
+      "plots_at_review": 91
+    },
+    {
+      "scope": "adm:al-taweelah",
+      "municipality": "ADM",
+      "district": "AL TAWEELAH",
+      "plots_at_review": 52
+    },
+    {
+      "scope": "adm:al-wathbah",
+      "municipality": "ADM",
+      "district": "AL WATHBAH",
+      "plots_at_review": 2992
+    },
+    {
+      "scope": "adm:al-zahiyah",
+      "municipality": "ADM",
+      "district": "AL ZAHIYAH",
+      "plots_at_review": 871
+    },
+    {
+      "scope": "adm:al-zubarah",
+      "municipality": "ADM",
+      "district": "AL ZUBARAH",
+      "plots_at_review": 9
+    },
+    {
+      "scope": "adm:bani-yas",
+      "municipality": "ADM",
+      "district": "BANI YAS",
+      "plots_at_review": 8430
+    },
+    {
+      "scope": "adm:bilghaylam-island",
+      "municipality": "ADM",
+      "district": "BILGHAYLAM ISLAND",
+      "plots_at_review": 5
+    },
+    {
+      "scope": "adm:bu-niyaydah",
+      "municipality": "ADM",
+      "district": "BU NIYAYDAH",
+      "plots_at_review": 1
+    },
+    {
+      "scope": "adm:dhaharat-al-teeb",
+      "municipality": "ADM",
+      "district": "DHAHARAT AL TEEB",
+      "plots_at_review": 1165
+    },
+    {
+      "scope": "adm:dihan",
+      "municipality": "ADM",
+      "district": "DIHAN",
+      "plots_at_review": 1986
+    },
+    {
+      "scope": "adm:fahid-island",
+      "municipality": "ADM",
+      "district": "FAHID ISLAND",
+      "plots_at_review": 46
+    },
+    {
+      "scope": "adm:ghadeer-al-tayr",
+      "municipality": "ADM",
+      "district": "GHADEER AL TAYR",
+      "plots_at_review": 1316
+    },
+    {
+      "scope": "adm:ghanadhah",
+      "municipality": "ADM",
+      "district": "GHANADHAH",
+      "plots_at_review": 5
+    },
+    {
+      "scope": "adm:ghantout",
+      "municipality": "ADM",
+      "district": "GHANTOUT",
+      "plots_at_review": 2024
+    },
+    {
+      "scope": "adm:hadbat-al-zafaranah",
+      "municipality": "ADM",
+      "district": "HADBAT AL ZA`FARANAH",
+      "plots_at_review": 1286
+    },
+    {
+      "scope": "adm:jarn-yafour",
+      "municipality": "ADM",
+      "district": "JARN YAFOUR",
+      "plots_at_review": 589
+    },
+    {
+      "scope": "adm:khalifa-city",
+      "municipality": "ADM",
+      "district": "KHALIFA CITY",
+      "plots_at_review": 9542
+    },
+    {
+      "scope": "adm:khalifa-industrial",
+      "municipality": "ADM",
+      "district": "KHALIFA INDUSTRIAL",
+      "plots_at_review": 964
+    },
+    {
+      "scope": "adm:madinat-al-riyad",
+      "municipality": "ADM",
+      "district": "MADINAT AL RIYAD",
+      "plots_at_review": 35077
+    },
+    {
+      "scope": "adm:mohamed-bin-zayed-city",
+      "municipality": "ADM",
+      "district": "MOHAMED BIN ZAYED CITY",
+      "plots_at_review": 10204
+    },
+    {
+      "scope": "adm:mshayrif",
+      "municipality": "ADM",
+      "district": "MSHAYRIF",
+      "plots_at_review": 7874
+    },
+    {
+      "scope": "adm:musaffah",
+      "municipality": "ADM",
+      "district": "MUSAFFAH",
+      "plots_at_review": 3906
+    },
+    {
+      "scope": "adm:muwaylih",
+      "municipality": "ADM",
+      "district": "MUWAYLIH",
+      "plots_at_review": 995
+    },
+    {
+      "scope": "adm:nourai-island",
+      "municipality": "ADM",
+      "district": "NOURAI ISLAND",
+      "plots_at_review": 58
+    },
+    {
+      "scope": "adm:qasr-al-bahr",
+      "municipality": "ADM",
+      "district": "QASR AL BAHR",
+      "plots_at_review": 17
+    },
+    {
+      "scope": "adm:qirqishan",
+      "municipality": "ADM",
+      "district": "QIRQISHAN",
+      "plots_at_review": 8
+    },
+    {
+      "scope": "adm:rabdan",
+      "municipality": "ADM",
+      "district": "RABDAN",
+      "plots_at_review": 2199
+    },
+    {
+      "scope": "adm:ramhan-island",
+      "municipality": "ADM",
+      "district": "RAMHAN ISLAND",
+      "plots_at_review": 1357
+    },
+    {
+      "scope": "adm:rawdat-al-reef",
+      "municipality": "ADM",
+      "district": "RAWDAT AL REEF",
+      "plots_at_review": 3132
+    },
+    {
+      "scope": "adm:sas-al-nakhl",
+      "municipality": "ADM",
+      "district": "SAS AL NAKHL",
+      "plots_at_review": 94
+    },
+    {
+      "scope": "adm:shakhbout-city",
+      "municipality": "ADM",
+      "district": "SHAKHBOUT CITY",
+      "plots_at_review": 4452
+    },
+    {
+      "scope": "adm:ujaij",
+      "municipality": "ADM",
+      "district": "UJAIJ",
+      "plots_at_review": 14
+    },
+    {
+      "scope": "adm:um-yifeenah-island",
+      "municipality": "ADM",
+      "district": "UM YIFEENAH ISLAND",
+      "plots_at_review": 19
+    },
+    {
+      "scope": "adm:yas-island",
+      "municipality": "ADM",
+      "district": "YAS ISLAND",
+      "plots_at_review": 7195
+    },
+    {
+      "scope": "adm:zayed-city",
+      "municipality": "ADM",
+      "district": "ZAYED CITY",
+      "plots_at_review": 8944
+    },
+    {
+      "scope": "adm:zayed-military-city",
+      "municipality": "ADM",
+      "district": "ZAYED MILITARY CITY",
+      "plots_at_review": 739
+    },
+    {
+      "scope": "adm:zayed-port",
+      "municipality": "ADM",
+      "district": "ZAYED PORT",
+      "plots_at_review": 560
+    },
+    {
+      "scope": "wrm:abu-qrayn",
+      "municipality": "WRM",
+      "district": "ABU QRAYN",
+      "plots_at_review": 278
+    },
+    {
+      "scope": "wrm:al-ayif",
+      "municipality": "WRM",
+      "district": "AL 'AYIF",
+      "plots_at_review": 8
+    },
+    {
+      "scope": "wrm:al-azeezah",
+      "municipality": "WRM",
+      "district": "AL 'AZEEZAH",
+      "plots_at_review": 863
+    },
+    {
+      "scope": "wrm:al-bdayah",
+      "municipality": "WRM",
+      "district": "AL BDAY'AH",
+      "plots_at_review": 21
+    },
+    {
+      "scope": "wrm:al-dhafra-islands",
+      "municipality": "WRM",
+      "district": "AL DHAFRA ISLANDS",
+      "plots_at_review": 175
+    },
+    {
+      "scope": "wrm:al-dhannah-city",
+      "municipality": "WRM",
+      "district": "AL DHANNAH CITY",
+      "plots_at_review": 202
+    },
+    {
+      "scope": "wrm:al-ghuwaifat",
+      "municipality": "WRM",
+      "district": "AL GHUWAIFAT",
+      "plots_at_review": 123
+    },
+    {
+      "scope": "wrm:al-hamra",
+      "municipality": "WRM",
+      "district": "AL HAMRA",
+      "plots_at_review": 19
+    },
+    {
+      "scope": "wrm:al-harmiyyah",
+      "municipality": "WRM",
+      "district": "AL HARMIYYAH",
+      "plots_at_review": 1170
+    },
+    {
+      "scope": "wrm:al-jazeerah",
+      "municipality": "WRM",
+      "district": "AL JAZEERAH",
+      "plots_at_review": 32
+    },
+    {
+      "scope": "wrm:al-marfa",
+      "municipality": "WRM",
+      "district": "AL MARFA",
+      "plots_at_review": 2295
+    },
+    {
+      "scope": "wrm:al-mirayr",
+      "municipality": "WRM",
+      "district": "AL MIRAYR",
+      "plots_at_review": 30
+    },
+    {
+      "scope": "wrm:al-rideem",
+      "municipality": "WRM",
+      "district": "AL RIDEEM",
+      "plots_at_review": 764
+    },
+    {
+      "scope": "wrm:al-ruwais-industrial-city",
+      "municipality": "WRM",
+      "district": "AL RUWAIS INDUSTRIAL CITY",
+      "plots_at_review": 155
+    },
+    {
+      "scope": "wrm:al-shuwaihat",
+      "municipality": "WRM",
+      "district": "AL SHUWAIHAT",
+      "plots_at_review": 267
+    },
+    {
+      "scope": "wrm:al-sila",
+      "municipality": "WRM",
+      "district": "AL SILA'",
+      "plots_at_review": 2348
+    },
+    {
+      "scope": "wrm:al-taf-al-gharbi",
+      "municipality": "WRM",
+      "district": "AL TAF AL GHARBI",
+      "plots_at_review": 182
+    },
+    {
+      "scope": "wrm:al-wuhaydah",
+      "municipality": "WRM",
+      "district": "AL WUHAYDAH",
+      "plots_at_review": 431
+    },
+    {
+      "scope": "wrm:al-zarraf",
+      "municipality": "WRM",
+      "district": "AL ZARRAF",
+      "plots_at_review": 23
+    },
+    {
+      "scope": "wrm:bad-al-mutawah",
+      "municipality": "WRM",
+      "district": "BAD' AL MUTAW'AH",
+      "plots_at_review": 300
+    },
+    {
+      "scope": "wrm:barakah",
+      "municipality": "WRM",
+      "district": "BARAKAH",
+      "plots_at_review": 384
+    },
+    {
+      "scope": "wrm:bateen-liwa",
+      "municipality": "WRM",
+      "district": "BATEEN LIWA",
+      "plots_at_review": 68
+    },
+    {
+      "scope": "wrm:baynounah",
+      "municipality": "WRM",
+      "district": "BAYNOUNAH",
+      "plots_at_review": 286
+    },
+    {
+      "scope": "wrm:biljian",
+      "municipality": "WRM",
+      "district": "BILJI'AN",
+      "plots_at_review": 36
+    },
+    {
+      "scope": "wrm:bu-al-dhiyab",
+      "municipality": "WRM",
+      "district": "BU AL DHIYAB",
+      "plots_at_review": 155
+    },
+    {
+      "scope": "wrm:bu-hasa",
+      "municipality": "WRM",
+      "district": "BU HASA",
+      "plots_at_review": 75
+    },
+    {
+      "scope": "wrm:delma",
+      "municipality": "WRM",
+      "district": "DELMA",
+      "plots_at_review": 1157
+    },
+    {
+      "scope": "wrm:eastern-mahadir",
+      "municipality": "WRM",
+      "district": "EASTERN MAHADIR",
+      "plots_at_review": 3859
+    },
+    {
+      "scope": "wrm:ghayathi",
+      "municipality": "WRM",
+      "district": "GHAYATHI",
+      "plots_at_review": 3782
+    },
+    {
+      "scope": "wrm:habshan",
+      "municipality": "WRM",
+      "district": "HABSHAN",
+      "plots_at_review": 331
+    },
+    {
+      "scope": "wrm:hameem",
+      "municipality": "WRM",
+      "district": "HAMEEM",
+      "plots_at_review": 1038
+    },
+    {
+      "scope": "wrm:khasbat-al-reem",
+      "municipality": "WRM",
+      "district": "KHASBAT AL REEM",
+      "plots_at_review": 1
+    },
+    {
+      "scope": "wrm:madinat-zayed",
+      "municipality": "WRM",
+      "district": "MADINAT ZAYED",
+      "plots_at_review": 7632
+    },
+    {
+      "scope": "wrm:mahmiyyat-al-suqour",
+      "municipality": "WRM",
+      "district": "MAHMIYYAT AL SUQOUR",
+      "plots_at_review": 338
+    },
+    {
+      "scope": "wrm:mkhayriz",
+      "municipality": "WRM",
+      "district": "MKHAYRIZ",
+      "plots_at_review": 30
+    },
+    {
+      "scope": "wrm:mzeerah",
+      "municipality": "WRM",
+      "district": "MZEER'AH",
+      "plots_at_review": 4423
+    },
+    {
+      "scope": "wrm:qarn-al-yah",
+      "municipality": "WRM",
+      "district": "QARN AL YAH",
+      "plots_at_review": 46
+    },
+    {
+      "scope": "wrm:ras-ghumeis",
+      "municipality": "WRM",
+      "district": "RAS GHUMEIS",
+      "plots_at_review": 228
+    },
+    {
+      "scope": "wrm:ras-mshayrib",
+      "municipality": "WRM",
+      "district": "RAS MSHAYRIB",
+      "plots_at_review": 164
+    },
+    {
+      "scope": "wrm:sabkhat-matti",
+      "municipality": "WRM",
+      "district": "SABKHAT MATTI",
+      "plots_at_review": 1080
+    },
+    {
+      "scope": "wrm:tarif",
+      "municipality": "WRM",
+      "district": "TARIF",
+      "plots_at_review": 183
+    },
+    {
+      "scope": "wrm:um-al-ashtan",
+      "municipality": "WRM",
+      "district": "UM AL ASHTAN",
+      "plots_at_review": 21
+    },
+    {
+      "scope": "wrm:um-laylah",
+      "municipality": "WRM",
+      "district": "UM LAYLAH",
+      "plots_at_review": 61
+    },
+    {
+      "scope": "wrm:western-mahadir",
+      "municipality": "WRM",
+      "district": "WESTERN MAHADIR",
+      "plots_at_review": 3498
+    },
+    {
+      "scope": "wrm:yaw-al-ghadar",
+      "municipality": "WRM",
+      "district": "YAW AL GHADAR",
+      "plots_at_review": 36
+    },
+    {
+      "scope": "wrm:yaw-al-nadhrah",
+      "municipality": "WRM",
+      "district": "YAW AL NADHRAH",
+      "plots_at_review": 2154
+    }
+  ]
+}

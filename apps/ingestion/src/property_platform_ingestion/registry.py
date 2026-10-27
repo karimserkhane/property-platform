@@ -326,6 +326,20 @@ DATASETS += tuple(
 )
 
 
+# Emirate-wide AD-SDI plots, district by district. Manual: a full municipality is a
+# multi-hour acquisition that an operator starts deliberately (F01).
+DATASETS += tuple(
+    Dataset(
+        f"{municipality.lower()}-parcels-adsdi-districts",
+        "property-platform-sdi-district-parcels",
+        f"AD-SDI plots of {municipality}, district by district; identity checks and quarantine.",
+        {"municipality": municipality},
+        None,
+    )
+    for municipality in ("ADM", "AAM", "WRM")
+)
+
+
 def source_registries(territory=DEFAULT_TERRITORY):
     profile = collection_for(territory)
     root = files("property_platform.modules.evidence")
