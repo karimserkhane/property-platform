@@ -221,7 +221,10 @@ export function Explorer({
   useEffect(() => {
     if (!viewport) return;
     const cells = viewportCells(viewport, collectionBounds);
-    setZoomedOut(cells.kind === "too-large");
+    // A partial read lists the cells nearest the centre; the notice says so.
+    setZoomedOut(
+      cells.kind === "too-large" || (cells.kind === "cells" && cells.partial),
+    );
     if (cells.kind === "too-large") {
       // Keep the rows already drawn; a wider read would exceed the API budget.
       setState((current) => (current === "loading" ? "ready" : current));
