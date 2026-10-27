@@ -38,4 +38,5 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | oui | todo | unassigned |
 | [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | done | claude |
 | [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | done | claude |
-| [F03](F03.md) | F | Charge des parcelles de l'émirat sur les tuiles et l'index par zone | 3 | F01 | non | in-progress | claude |
+| [F03](F03.md) | F | Charge des parcelles de l'émirat sur les tuiles et l'index par zone | 3 | F01 | non | done | claude |
+| [F04](F04.md) | F | Parcelles de l'émirat sur la carte et imports ADM et AAM | 3 | F03 | non | todo | unassigned |
