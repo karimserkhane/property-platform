@@ -36,5 +36,5 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [D02](D02.md) | D | Liste de suivi et alertes explicables | 2 | D01 | non | todo | unassigned |
 | [E01](E01.md) | E | Index de recherche des preuves | 3 | A01 | non | todo | unassigned |
 | [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | oui | todo | unassigned |
-| [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | todo | unassigned |
+| [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | in-progress | claude |
 | [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | todo | unassigned |
