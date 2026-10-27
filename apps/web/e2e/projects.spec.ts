@@ -88,6 +88,37 @@ test("a reviewed component links to its programme and back", async ({
   ).toBeVisible();
   const components = page.getByRole("region", { name: "Buildings & phases" });
   await expect(components.getByRole("link", { name: childName })).toBeVisible();
+  // The reviewed page behind each relation states its source's licence.
+  await expect(
+    components.locator("[data-project-evidence-rights]").first(),
+  ).toContainText("Licence");
+});
+
+test("data shown beyond its source's terms says so", async ({ page }) => {
+  // Publication is not enforced (A22): a page citing a link-only or no-reuse source flags it.
+  let flagged = null;
+  for (let offset = 0; offset < 192 && !flagged; offset += 48) {
+    await page.goto(`/en/projects?offset=${offset}`);
+    const cards = projectCards(page);
+    const count = await cards.count();
+    if (!count) break;
+    for (let index = 0; index < Math.min(count, 6) && !flagged; index += 1) {
+      await page.goto(`/en/projects?offset=${offset}`);
+      await projectCards(page).nth(index).click();
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      const line = page.locator("[data-project-evidence-beyond-terms]").first();
+      if (await line.count()) flagged = line;
+    }
+  }
+  skipWithoutData(
+    !flagged,
+    "The local data cites no source limited to a link or to nothing",
+    "such sources are developer and listing pages, which the public demonstration package does not hold (A18)",
+  );
+  if (!flagged) return;
+  await expect(flagged).toHaveText(
+    /^Shown although the source’s terms (allow only a link|do not allow reuse)\.$/,
+  );
 });
 
 test("a project links to its developer's delivery history with cited points", async ({

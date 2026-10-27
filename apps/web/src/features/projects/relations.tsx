@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import dossier from "./dossier.module.css";
+import { SourceRights } from "./evidence";
 import { formatProjectDate, projectRelations } from "./presentation";
 import styles from "./project.module.css";
 import type { ProjectLabels } from "./types";
@@ -31,6 +32,7 @@ function RelationProof({
           {labels.source} <span aria-hidden="true">↗</span>
         </a>
       )}
+      <SourceRights source={relation} labels={labels} />
       {retrieved && (
         <p className={dossier.evidenceDate}>
           {labels.retrieved}{" "}

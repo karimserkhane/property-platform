@@ -1705,6 +1705,7 @@ export interface components {
              * Format: date-time
              */
             retrieved_at: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** ProjectSummaryResponse */
         ProjectSummaryResponse: {
@@ -1735,6 +1736,32 @@ export interface components {
              * @default 0
              */
             component_count: number;
+        };
+        /**
+         * SourceRightsResponse
+         * @description Reviewed rights of the source site (A19); `unknown` means not qualified yet.
+         */
+        SourceRightsResponse: {
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
+            /**
+             * Shown Beyond Terms
+             * @default false
+             */
+            shown_beyond_terms: boolean;
         };
         /**
          * ActivityMeasurementResponse
@@ -1806,6 +1833,7 @@ export interface components {
             name: string;
             /** Url */
             url: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /**
          * ActivityWindowResponse
@@ -2223,6 +2251,7 @@ export interface components {
             consulted_on: string;
             /** Covers */
             covers: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** RetentionSourceResponse */
         RetentionSourceResponse: {
@@ -2232,32 +2261,6 @@ export interface components {
             official_text_obtained: boolean;
             /** References */
             references: components["schemas"]["RetentionReferenceResponse"][];
-        };
-        /**
-         * SourceRightsResponse
-         * @description Reviewed rights of the source site (A19); `unknown` means not qualified yet.
-         */
-        SourceRightsResponse: {
-            /** Licence */
-            licence: string;
-            /** Licence Url */
-            licence_url?: string | null;
-            /** Terms Url */
-            terms_url?: string | null;
-            /**
-             * Publication
-             * @enum {string}
-             */
-            publication: "open" | "facts" | "link" | "none";
-            /** Attribution */
-            attribution?: string | null;
-            /** Reviewed On */
-            reviewed_on?: string | null;
-            /**
-             * Shown Beyond Terms
-             * @default false
-             */
-            shown_beyond_terms: boolean;
         };
         /**
          * VerificationContradictionResponse
@@ -2295,6 +2298,7 @@ export interface components {
              * Format: date
              */
             reviewed_on: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /**
          * VerificationRegisterResponse

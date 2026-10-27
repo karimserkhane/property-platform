@@ -83,11 +83,12 @@ function SourceCitation({
 }
 
 /** Licence, terms and attribution of the source site, from the reviewed registry. */
+/** Licence, attribution and terms of a cited page; any API item carrying `rights`. */
 export function SourceRights({
   source,
   labels,
 }: {
-  source: ProjectSource;
+  source: Pick<ProjectSource, "rights">;
   labels: ProjectLabels;
 }) {
   const notice = sourceRightsNotice(source.rights);

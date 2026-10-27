@@ -98,6 +98,10 @@ def test_project_retention_cites_the_declared_reading_of_an_off_plan_project():
     assert result["rates"] == [10]
     assert result["progress_inspected_on"] == "2026-06-29"
     assert result["progress_source"] is source
+    # Each commentary cites its site's reviewed rights; the shared schedule is untouched.
+    for reference in result["source"]["references"]:
+        assert reference["rights"]["licence"]
+    assert all("rights" not in reference for reference in SOURCE["references"])
 
 
 @pytest.mark.parametrize("off_plan", [False, None])

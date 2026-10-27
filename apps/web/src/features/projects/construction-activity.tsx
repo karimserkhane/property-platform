@@ -10,8 +10,10 @@ import {
   type ProjectActivity,
 } from "./activity";
 import dossier from "./dossier.module.css";
+import { SourceRights } from "./evidence";
 import { formatProjectDate, safeSourceUrl } from "./presentation";
 import styles from "./project.module.css";
+import type { ProjectLabels } from "./types";
 
 type Shared = { locale: string; labels: ActivityLabels };
 
@@ -131,8 +133,9 @@ function Parcel({
 /** Dated ground change seen on the project's parcels; a signal, never progress. */
 export function ProjectActivitySection({
   activity,
+  projectLabels,
   ...shared
-}: Shared & { activity: ProjectActivity }) {
+}: Shared & { activity: ProjectActivity; projectLabels: ProjectLabels }) {
   const { labels } = shared;
   const parcels = describedParcels(activity);
   const source = safeSourceUrl(activity.source.url);
@@ -179,6 +182,7 @@ export function ProjectActivitySection({
             <bdi lang="en">{activity.source.name}</bdi>
           )}
         </p>
+        <SourceRights source={activity.source} labels={projectLabels} />
         <p>
           {/* The reader's language; the registry keeps the original credit and its terms. */}
           <a

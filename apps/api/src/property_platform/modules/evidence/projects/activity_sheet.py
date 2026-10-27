@@ -7,6 +7,7 @@ share is not exposed.
 """
 
 from ..activity_models import ConstructionActivityMeasurement
+from ..source_rights import public_rights
 from .activity_import import SOURCE_URL
 from .project_queries import _withheld
 
@@ -57,7 +58,7 @@ def project_activity(project):
     for row in rows:
         latest.setdefault(row.parcel_id, row)
     return {
-        "source": {"name": SOURCE_NAME, "url": SOURCE_URL},
+        "source": {"name": SOURCE_NAME, "url": SOURCE_URL, "rights": public_rights(SOURCE_URL)},
         "parcels": sorted(
             (_parcel(row) for row in latest.values()),
             key=lambda item: (item["source_namespace"], item["source_record_id"]),

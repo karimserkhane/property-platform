@@ -1,5 +1,5 @@
 import dossier from "./dossier.module.css";
-import { Proof } from "./evidence";
+import { Proof, SourceRights } from "./evidence";
 import { formatProjectDate, safeSourceUrl } from "./presentation";
 import styles from "./project.module.css";
 import {
@@ -105,6 +105,7 @@ export function CancellationRetentionCard({
                 {formatProjectDate(reference.published_on, locale) ??
                   reference.published_on}
               </time>
+              <SourceRights source={reference} labels={projectLabels} />
             </li>
           ))}
         </ul>

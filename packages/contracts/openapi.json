@@ -5487,6 +5487,16 @@
             "format": "date-time",
             "title": "Retrieved At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5562,6 +5572,81 @@
           "has_map_identity"
         ],
         "title": "ProjectSummaryResponse",
+        "type": "object"
+      },
+      "SourceRightsResponse": {
+        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
+        "properties": {
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          },
+          "licence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licence Url"
+          },
+          "terms_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terms Url"
+          },
+          "publication": {
+            "enum": [
+              "open",
+              "facts",
+              "link",
+              "none"
+            ],
+            "title": "Publication",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribution"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed On"
+          },
+          "shown_beyond_terms": {
+            "default": false,
+            "title": "Shown Beyond Terms",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "licence",
+          "publication"
+        ],
+        "title": "SourceRightsResponse",
         "type": "object"
       },
       "ActivityMeasurementResponse": {
@@ -5722,6 +5807,16 @@
           "url": {
             "title": "Url",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6951,6 +7046,16 @@
           "covers": {
             "title": "Covers",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6987,81 +7092,6 @@
           "references"
         ],
         "title": "RetentionSourceResponse",
-        "type": "object"
-      },
-      "SourceRightsResponse": {
-        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
-        "properties": {
-          "licence": {
-            "title": "Licence",
-            "type": "string"
-          },
-          "licence_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Licence Url"
-          },
-          "terms_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Terms Url"
-          },
-          "publication": {
-            "enum": [
-              "open",
-              "facts",
-              "link",
-              "none"
-            ],
-            "title": "Publication",
-            "type": "string"
-          },
-          "attribution": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Attribution"
-          },
-          "reviewed_on": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reviewed On"
-          },
-          "shown_beyond_terms": {
-            "default": false,
-            "title": "Shown Beyond Terms",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "licence",
-          "publication"
-        ],
-        "title": "SourceRightsResponse",
         "type": "object"
       },
       "VerificationContradictionResponse": {
@@ -7132,6 +7162,16 @@
             "format": "date",
             "title": "Reviewed On",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [

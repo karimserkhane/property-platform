@@ -278,6 +278,7 @@ export function ProjectDetailView({
               activity={project.construction_activity}
               locale={locale}
               labels={activityLabels}
+              projectLabels={labels}
             />
           )}
           <ProjectComponents

@@ -5,7 +5,7 @@ import { developerHistoryHref, isDeveloperKey } from "./delivery";
 import delivery from "./delivery.module.css";
 import { Announcement, RegisterReadings } from "./delivery-history";
 import dossier from "./dossier.module.css";
-import { Proof } from "./evidence";
+import { Proof, SourceRights } from "./evidence";
 import { formatProjectDate, safeSourceUrl } from "./presentation";
 import styles from "./project.module.css";
 import { formatPercent } from "./retention";
@@ -283,6 +283,7 @@ export function ProjectVerificationSection({
                 {labels.reviewedOn}{" "}
                 <Day value={link.reviewed_on} locale={locale} />
               </p>
+              <SourceRights source={link} labels={projectLabels} />
             </li>
           ))}
         </ul>
