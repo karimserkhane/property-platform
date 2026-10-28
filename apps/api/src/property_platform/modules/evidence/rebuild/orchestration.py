@@ -83,6 +83,11 @@ def _validate_identity(operation, scope, execution_key, actor, reference_key=Non
         if reference_key is not None:
             raise ValueError("ADREC does not accept reference identities")
         return None
+    if operation == "sdi_parcels":
+        sdi_protocol.scope_for(scope)
+        if reference_key is not None:
+            raise ValueError("AD-SDI does not accept reference identities")
+        return None
     territory = scope.split(":", 1)[0]
     collection_for(territory)
     if territory != DEFAULT_TERRITORY and operation == "imagery":

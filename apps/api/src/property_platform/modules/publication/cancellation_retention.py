@@ -11,6 +11,8 @@ reading aid that points to its sources, not legal advice.
 
 from decimal import Decimal
 
+from property_platform.modules.evidence.source_rights import public_rights
+
 VERSION = "adrec-decision-165-2025-v1"
 
 SOURCE = {
@@ -85,7 +87,14 @@ def project_retention(declared_progress):
     """
     if declared_progress is None or declared_progress["off_plan"] is not True:
         return None
+    source = SOURCE | {
+        "references": [
+            reference | {"rights": public_rights(reference["url"])}
+            for reference in SOURCE["references"]
+        ]
+    }
     return retention(declared_progress["progress_percent"]) | {
+        "source": source,
         "progress_inspected_on": declared_progress["progress_inspected_on"],
         "progress_source": declared_progress["source"],
     }

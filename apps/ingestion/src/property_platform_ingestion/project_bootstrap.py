@@ -8,6 +8,7 @@ from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
 from prefect.runtime import flow_run
 from property_platform.modules.evidence.projects.project_protocol import project_registry
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 from .project_archive import (
     catalogue_batches,
@@ -59,7 +60,7 @@ def rebuild_projects(
         raise ValueError("Unknown catalogue rebuild mode")
     prepare_catalogue(actor)
     indexed = index_project_archive()
-    successes, failures, geography = [], [], []
+    successes, failures, geography, forbidden = [], [], [], []
     if include_geography:
         for area in (territory,) if territory else TERRITORIES:
             for label, collect in (
@@ -98,6 +99,9 @@ def rebuild_projects(
                             "project_details", scope, actor, archive_key=key
                         )
                     successes.append({"scope": scope, "versions": len(versions), "mode": "archive"})
+                elif not collection_allowed(source["url"]):
+                    # Its preserved history replays above; its terms forbid collection (A19).
+                    forbidden.append(scope)
                 elif mode == "archive":
                     failures.append(scope)
                 else:
@@ -119,6 +123,8 @@ def rebuild_projects(
                             "project_discovery", scope, actor, archive_key=key
                         )
                         catalogue_versions += 1
+                elif not collection_allowed(definition["url"]):
+                    forbidden.append(scope)
                 elif mode == "archive":
                     failures.append(scope)
                 else:
@@ -132,6 +138,7 @@ def rebuild_projects(
         "catalogue_versions": catalogue_versions,
         "geography_layers": geography,
         "missing_or_failed": failures,
+        "forbidden_without_archive": forbidden,
         "archive_index": indexed,
     }
     get_run_logger().info("Catalogue rebuild: %s", summary)

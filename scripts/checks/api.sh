@@ -15,7 +15,7 @@ python apps/api/manage.py makemigrations --check --dry-run
 echo "== generated contracts"
 contracts=$(mktemp -d)
 python -m property_platform.export_openapi --output "$contracts/openapi.json"
-for name in openapi.json territories.json; do
+for name in openapi.json territories.json map-credits.json; do
   if ! cmp -s "$contracts/$name" "packages/contracts/$name"; then
     echo "packages/contracts/$name is stale: regenerate it (see DEVELOPMENT.md)" >&2
     exit 1

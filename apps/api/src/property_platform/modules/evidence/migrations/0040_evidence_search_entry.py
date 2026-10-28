@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     dependencies = [
         ("catalog", "0006_developer_project"),
-        ("evidence", "0037_stored_object_raw_capture"),
+        ("evidence", "0039_project_market_label"),
     ]
 
     operations = [

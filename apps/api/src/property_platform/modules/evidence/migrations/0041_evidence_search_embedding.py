@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("evidence", "0038_evidence_search_entry"),
+        ("evidence", "0040_evidence_search_entry"),
     ]
 
     operations = [

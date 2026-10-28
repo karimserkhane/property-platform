@@ -7,7 +7,9 @@ share is not exposed.
 """
 
 from ..activity_models import ConstructionActivityMeasurement
+from ..source_rights import public_rights
 from .activity_import import SOURCE_URL
+from .project_queries import _withheld
 
 SOURCE_NAME = "Copernicus Sentinel-2 L2A"
 
@@ -48,6 +50,7 @@ def project_activity(project):
     latest = {}
     rows = (
         ConstructionActivityMeasurement.objects.filter(project=project, identity_link__active=True)
+        .exclude(_withheld("identity_link__capture__url"))
         .select_related("parcel", "before_capture", "after_capture")
         .defer("parcel__geometry", "before_capture__payload", "after_capture__payload")
         .order_by("-after_acquired_at", "-before_acquired_at", "-created_at", "-id")
@@ -55,7 +58,7 @@ def project_activity(project):
     for row in rows:
         latest.setdefault(row.parcel_id, row)
     return {
-        "source": {"name": SOURCE_NAME, "url": SOURCE_URL},
+        "source": {"name": SOURCE_NAME, "url": SOURCE_URL, "rights": public_rights(SOURCE_URL)},
         "parcels": sorted(
             (_parcel(row) for row in latest.values()),
             key=lambda item: (item["source_namespace"], item["source_record_id"]),

@@ -35,7 +35,7 @@ class EvidenceSearchEntry(models.Model):
     content_sha256 = models.CharField(max_length=64, blank=True)
     evidence_pointer = models.CharField(max_length=500, blank=True)
     retrieved_at = models.DateTimeField(null=True)
-    # Normalized words, read by the full-text index of migration 0038.
+    # Normalized words, read by the full-text index of migration 0040.
     project_terms = models.TextField()
     search_text = models.TextField()
     run = models.ForeignKey("evidence.IngestionRun", on_delete=models.PROTECT)

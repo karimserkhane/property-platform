@@ -25,8 +25,10 @@ from property_platform_ingestion.collectors import (
     precollect_onwani,
     precollect_reference,
 )
+from property_platform_ingestion.collectors.http import MAX_SESSION_BYTES
 from property_platform_ingestion.collectors.properties import property_urls
 from property_platform_ingestion.collectors.references import selected_references
+from property_platform_ingestion.collectors.snapshots import MAX_SNAPSHOT_BYTES
 
 URL = "https://publisher.example/projects/one"
 ROW = {"url": URL, "label": "Publisher — One", "kind": "developer"}
@@ -199,10 +201,17 @@ def test_session_byte_budget_prevents_append_of_an_oversize_complete_capture(ann
     assert sum(len(item.payload) for item in http.acquisitions) == 4
 
 
-@pytest.mark.parametrize("limit", [0, 64 * 1024 * 1024 + 1, True, "64"])
+@pytest.mark.parametrize("limit", [0, 256 * 1024 * 1024 + 1, True, "64"])
 def test_session_byte_budget_cannot_exceed_the_global_limit(limit):
     with pytest.raises(AcquisitionError, match="session byte budget"):
         SourceHTTP([URL], max_session_bytes=limit)
+
+
+def test_default_session_byte_budget_stays_64_mib():
+    assert MAX_SESSION_BYTES == 64 * 1024 * 1024
+    assert MAX_SNAPSHOT_BYTES == MAX_SESSION_BYTES
+    with SourceHTTP([URL]) as http:
+        assert http._max_session_bytes == MAX_SESSION_BYTES
 
 
 def test_journal_is_bounded_even_for_empty_actual_responses():
@@ -332,6 +341,45 @@ def test_property_receipts_match_existing_protocol_hash_bytes_and_times():
     assert rows[0]["sha256"] == hashlib.sha256(b"project source bytes").hexdigest()
     assert base64.b64decode(rows[0]["payload"]) == b"project source bytes"
     assert validate_receipts(rows, {URL})[URL]["payload"] == b"project source bytes"
+
+
+def test_property_collection_reaches_every_profile_when_collection_is_not_enforced(
+    enforce_collection,
+):
+    enforce_collection(False)
+    forbidden = "https://www.aldar.com/en/news-and-media/example"
+    profiles = [
+        {"source_url": URL, "photo_key": None},
+        {"source_url": forbidden, "photo_key": None},
+    ]
+    assert property_urls(profiles, {}) == (URL, forbidden)
+
+
+@pytest.mark.usefixtures("collection_enforced")
+def test_property_collection_skips_profiles_whose_terms_forbid_it_and_their_photos():
+    forbidden = "https://www.aldar.com/en/news-and-media/example"
+    photos = {
+        "example": {
+            "source_url": "https://commons.wikimedia.org/wiki/File:Example.jpg",
+            "image_url": "https://upload.wikimedia.org/example.jpg",
+        }
+    }
+    profiles = [
+        {"source_url": URL, "photo_key": None},
+        {"source_url": forbidden, "photo_key": "example"},
+    ]
+    assert property_urls(profiles, photos) == (URL,)
+    calls = []
+
+    def handler(request):
+        calls.append(str(request.url))
+        return httpx.Response(200, content=b"project source bytes")
+
+    with client([URL, forbidden], handler) as http:
+        rows = collect_property_receipts(http, profiles, photos)
+        with pytest.raises(AcquisitionError, match="forbid"):
+            http.fetch(forbidden, max_bytes=100)
+    assert calls == [URL] and [row["url"] for row in rows] == [URL]
 
 
 def test_property_collection_fails_whole_batch_when_one_source_fails():

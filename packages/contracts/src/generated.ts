@@ -464,6 +464,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/source-rights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Source Rights */
+        get: operations["previewSourceRights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1711,6 +1728,7 @@ export interface components {
              * Format: date-time
              */
             retrieved_at: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** ProjectSummaryResponse */
         ProjectSummaryResponse: {
@@ -1741,6 +1759,32 @@ export interface components {
              * @default 0
              */
             component_count: number;
+        };
+        /**
+         * SourceRightsResponse
+         * @description Reviewed rights of the source site (A19); `unknown` means not qualified yet.
+         */
+        SourceRightsResponse: {
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
+            /**
+             * Shown Beyond Terms
+             * @default false
+             */
+            shown_beyond_terms: boolean;
         };
         /**
          * ActivityMeasurementResponse
@@ -1812,6 +1856,7 @@ export interface components {
             name: string;
             /** Url */
             url: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /**
          * ActivityWindowResponse
@@ -1946,6 +1991,101 @@ export interface components {
             readings: number;
             source: components["schemas"]["ProjectSourceResponse"];
         };
+        /**
+         * ObservedRangeResponse
+         * @description Smallest and largest recorded value, as decimal text.
+         */
+        ObservedRangeResponse: {
+            /** Min */
+            min: string;
+            /** Max */
+            max: string;
+        };
+        /** ObservedSalesCaptureResponse */
+        ObservedSalesCaptureResponse: {
+            /** Url */
+            url: string;
+            /** Content Sha256 */
+            content_sha256: string;
+        };
+        /**
+         * ObservedSalesGroupResponse
+         * @description Recorded sales of one type; ranges cover the full-share sales only.
+         */
+        ObservedSalesGroupResponse: {
+            /** Property Type */
+            property_type: string;
+            /** Property Layout */
+            property_layout: string;
+            /** Sale Application Type */
+            sale_application_type: string;
+            /** Sale Sequence */
+            sale_sequence: string;
+            /** Sales Count */
+            sales_count: number;
+            /** Full Share Count */
+            full_share_count: number;
+            price_aed: components["schemas"]["ObservedRangeResponse"] | null;
+            rate_aed_per_sqm: components["schemas"]["ObservedRangeResponse"] | null;
+            sold_area_sqm: components["schemas"]["ObservedRangeResponse"] | null;
+            /**
+             * First Registration Date
+             * Format: date
+             */
+            first_registration_date: string;
+            /**
+             * Last Registration Date
+             * Format: date
+             */
+            last_registration_date: string;
+        };
+        /**
+         * ObservedSalesLabelResponse
+         * @description Reviewed ADREC sales label that selects the project's recorded sales.
+         */
+        ObservedSalesLabelResponse: {
+            /** District */
+            district: string;
+            /** Label */
+            label: string;
+            /**
+             * Evidence
+             * @enum {string}
+             */
+            evidence: "register_name" | "project_name";
+            /** Registration Number */
+            registration_number: string | null;
+            /**
+             * Reviewed On
+             * Format: date
+             */
+            reviewed_on: string;
+        };
+        /**
+         * ObservedSalesWindowResponse
+         * @description Newest ADREC sales window of the territory; windows overlap and are never added.
+         */
+        ObservedSalesWindowResponse: {
+            /** Territory */
+            territory: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
+            /** Captures */
+            captures: components["schemas"]["ObservedSalesCaptureResponse"][];
+        };
         /** ProjectAmenityResponse */
         ProjectAmenityResponse: {
             /** Code */
@@ -2033,6 +2173,7 @@ export interface components {
             cancellation_retention?: components["schemas"]["CancellationRetentionResponse"] | null;
             verification?: components["schemas"]["ProjectVerificationResponse"] | null;
             construction_activity?: components["schemas"]["ProjectConstructionActivityResponse"] | null;
+            observed_sales?: components["schemas"]["ProjectObservedSalesResponse"] | null;
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {
@@ -2126,6 +2267,18 @@ export interface components {
             height?: number | null;
             source: components["schemas"]["ProjectSourceResponse"];
         };
+        /**
+         * ProjectObservedSalesResponse
+         * @description Recorded ADREC sales of the project's reviewed labels, by type, with ranges.
+         */
+        ProjectObservedSalesResponse: {
+            source: components["schemas"]["ActivitySourceResponse"];
+            /** Labels */
+            labels: components["schemas"]["ObservedSalesLabelResponse"][];
+            window: components["schemas"]["ObservedSalesWindowResponse"] | null;
+            /** Groups */
+            groups: components["schemas"]["ObservedSalesGroupResponse"][];
+        };
         /** ProjectProgrammeResponse */
         ProjectProgrammeResponse: {
             /** Value */
@@ -2174,6 +2327,7 @@ export interface components {
             evidence_pointer: string;
             /** Rights Status */
             rights_status: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
             /** Ingested At */
             ingested_at?: string | null;
             /**
@@ -2228,6 +2382,7 @@ export interface components {
             consulted_on: string;
             /** Covers */
             covers: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** RetentionSourceResponse */
         RetentionSourceResponse: {
@@ -2274,6 +2429,7 @@ export interface components {
              * Format: date
              */
             reviewed_on: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /**
          * VerificationRegisterResponse
@@ -2518,6 +2674,41 @@ export interface components {
             evidence_pointer: string;
             /** Retrieved At */
             retrieved_at: string | null;
+        };
+        /** SourceRightsRegistryResponse */
+        SourceRightsRegistryResponse: {
+            /** Items */
+            items: components["schemas"]["SourceSiteRightsResponse"][];
+        };
+        /**
+         * SourceSiteRightsResponse
+         * @description One reviewed site of the source rights registry (A19); `unknown` means not qualified.
+         */
+        SourceSiteRightsResponse: {
+            /** Host */
+            host: string;
+            /** Publisher */
+            publisher: string;
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Collection
+             * @enum {string}
+             */
+            collection: "allowed" | "forbidden";
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
         };
     };
     responses: never;
@@ -3927,6 +4118,35 @@ export interface operations {
             };
             /** @description Service Unavailable */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewSourceRights: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceRightsRegistryResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

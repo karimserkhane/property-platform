@@ -6,6 +6,8 @@ from urllib.parse import urlparse
 from django.db.models import Exists, F, OuterRef, Prefetch, Q
 from django.db.models.functions import Coalesce, Substr
 
+from property_platform.modules.catalog.models import Parcel
+
 from ..models import (
     AdministrativeAreaSourceAlias,
     ImageryScene,
@@ -57,8 +59,13 @@ def _parcel_observations(parcel_ids):
         source_namespace=OuterRef("parcel__source_namespace"),
         source_record_id=OuterRef("source_record_id"),
     )
+    # Both branches below observe one of `parcel_ids` or a parcel they replaced. Saying
+    # so on the observation column keeps the read indexed: without it the alternative
+    # scanned every observation of the emirate (0.5 s for 3 000 parcels at 228 000).
+    observed = Parcel.objects.filter(Q(id__in=parcel_ids) | Q(superseded_by_id__in=parcel_ids))
     return (
         ParcelObservation.objects.filter(
+            parcel_id__in=observed.values("id"),
             capture__run__source__key=F("parcel__source_namespace"),
             capture__run__status__in=["succeeded", "quarantined"],
         )
@@ -295,7 +302,9 @@ def map_provenances(target, ids, *, include_capture_id=False, include_method=Fal
 
 
 def research_references(source_keys=None):
-    records = ResearchReference.objects.all()
+    from .project_queries import _withheld
+
+    records = ResearchReference.objects.exclude(_withheld("capture__url"))
     if source_keys is not None:
         records = records.filter(capture__run__source__key__in=source_keys)
     rows = (
@@ -343,7 +352,7 @@ def parcel_sources(parcel_ids):
 def property_presentations(target, ids):
     """Bounded typed presentation; raw captures and reviewer identities remain private."""
     from ..media_storage import delivery_url, eligible_media
-    from .project_queries import project_references
+    from .project_queries import _link, _withheld, project_references
 
     if target not in ("building", "place"):
         return {}
@@ -351,6 +360,7 @@ def property_presentations(target, ids):
         PropertyPresentation.objects.filter(
             **{f"{target}_id__in": ids}, capture__run__status="succeeded"
         )
+        .exclude(_withheld("capture__url"))
         .select_related("capture")
         .defer("capture__payload")
         .prefetch_related(
@@ -372,7 +382,7 @@ def property_presentations(target, ids):
             "name": row.display_name,
             "publisher": row.publisher_name,
             "developer": row.developer_name,
-            "website_url": row.website_url,
+            "website_url": _link(row.website_url),
             "summary": row.summary,
             "language": row.language,
             "source_url": row.capture.url,
@@ -404,6 +414,7 @@ def property_presentations(target, ids):
             ProjectIdentityLink.objects.filter(
                 active=True, capture__run__status="succeeded", **{f"{target}_id__in": missing}
             )
+            .exclude(_withheld("capture__url"))
             .select_related("project__developer", "capture")
             .defer("capture__payload")
         )
@@ -413,7 +424,7 @@ def property_presentations(target, ids):
                 "name": link.project.name,
                 "publisher": link.project.developer.name,
                 "developer": link.project.developer.name,
-                "website_url": link.project.website_url,
+                "website_url": _link(link.project.website_url, link.project.developer.website_url),
                 "summary": "",
                 "language": "und",
                 "source_url": link.capture.url,

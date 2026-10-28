@@ -23,8 +23,10 @@ from .onwani import SourceError
 
 
 def import_parcels(*, territory, actor, acquisition):
+    """`territory` is an island profile or a reviewed emirate district scope (`adm:<slug>`)."""
     if connection.vendor != "postgresql":
         raise ValueError("AD-SDI requires real PostGIS")
+    municipality, _ = protocol.scope_for(territory)
     source, _ = Source.objects.get_or_create(
         key=protocol.namespace(territory),
         defaults={"name": f"AD-SDI / Plots — {territory}", "url": protocol.URL},
@@ -111,7 +113,7 @@ def import_parcels(*, territory, actor, acquisition):
                     Parcel.objects.select_for_update().filter(
                         superseded_by__isnull=True,
                         official_plot_id=record["record_id"],
-                        municipality="ADM",
+                        municipality=municipality,
                         district=record["values"]["district"],
                     )[:2]
                 )
@@ -137,7 +139,7 @@ def import_parcels(*, territory, actor, acquisition):
                     nearby = list(
                         Parcel.objects.filter(
                             superseded_by__isnull=True,
-                            municipality="ADM",
+                            municipality=municipality,
                             district=record["values"]["district"],
                             geometry__intersects=geometry,
                         ).exclude(source_namespace=source.key)[:65]

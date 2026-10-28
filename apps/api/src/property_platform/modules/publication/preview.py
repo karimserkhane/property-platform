@@ -13,6 +13,8 @@ def parcel_index(*, bbox, limit, query, namespaces=None, after=None):
     """`features` without footprints, for maps drawing them from parcel tiles."""
     from property_platform.modules.catalog.map_queries import project_markers_near_parcels
 
+    from .coverage import withheld_place_namespaces
+
     collection = features(
         bbox=bbox, limit=limit, query=query, namespaces=namespaces, after=after, geometry=False
     )
@@ -22,7 +24,9 @@ def parcel_index(*, bbox, limit, query, namespaces=None, after=None):
         for feature in collection["features"]
         if feature["properties"]["category"] in {"mixed", "residential"}
     ]
-    nearby = project_markers_near_parcels(candidates)
+    nearby = project_markers_near_parcels(
+        candidates, excluded_namespaces=withheld_place_namespaces()
+    )
     for feature in collection["features"]:
         feature["properties"]["nearby_projects"] = nearby.get(feature["id"], [])
     return collection

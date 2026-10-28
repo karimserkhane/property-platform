@@ -110,7 +110,10 @@ def _request_shape(url, operation, scope):
     if operation in {"adrec_sales", "adrec_indices"}:
         adrec.validate_request(operation, scope, base, params)
         return
-    profile = collection_for(scope.split(":", 1)[0])
+    if operation == "sdi_parcels":
+        expected, where, fields = sdi_protocol.URL, sdi_protocol.where(scope), sdi_protocol.FIELDS
+    else:
+        profile = collection_for(scope.split(":", 1)[0])
     if operation == "osm_bootstrap":
         if base != osm_bootstrap.URL or params not in osm_bootstrap.boxes(scope):
             raise ValueError("Unregistered OSM bootstrap window")
@@ -123,9 +126,7 @@ def _request_shape(url, operation, scope):
         return
     if operation == "onwani":
         expected, where, fields = onwani.BASE_URL, profile.parcel_where, onwani.FIELDS
-    elif operation == "sdi_parcels":
-        expected, where, fields = sdi_protocol.URL, sdi_protocol.where(scope), sdi_protocol.FIELDS
-    else:
+    elif operation != "sdi_parcels":
         expected, where, _, fields = profile.map_layers()[scope.rsplit(":", 1)[1]]
     if base == expected and params == {"f": "pjson"}:
         return
@@ -161,7 +162,8 @@ def _request_shape(url, operation, scope):
 def validate_received_acquisitions(operation, scope, rows):
     if rows is None:
         return []
-    if not isinstance(rows, (list, tuple)) or len(rows) > 205:
+    count = sdi_protocol.MAX_RESPONSES if operation == "sdi_parcels" else 205
+    if not isinstance(rows, (list, tuple)) or len(rows) > count:
         raise ValueError("Failed acquisition journal exceeds its budget")
     if rows and operation not in {
         "sdi_parcels",
@@ -176,6 +178,7 @@ def validate_received_acquisitions(operation, scope, rows):
     }:
         raise ValueError("Only completed reviewed source responses can be retained here")
     output, transferred = [], 0
+    budget = sdi_protocol.MAX_SESSION_BYTES if operation == "sdi_parcels" else 64 * 1024 * 1024
     maximum = onwani.MAX_BYTES if operation == "onwani" else map_sources.MAX_BYTES
     if operation in {"adrec_sales", "adrec_indices"}:
         maximum = adrec.MAX_BYTES
@@ -210,7 +213,7 @@ def validate_received_acquisitions(operation, scope, rows):
         ):
             raise ValueError("Unexpected failed source payload or receipt size")
         transferred += len(payload)
-        if transferred > 64 * 1024 * 1024:
+        if transferred > budget:
             raise ValueError("Failed source journal exceeds its total byte budget")
         _request_shape(receipt["url"], operation, scope)
         started, fetched = receipt["fetched_started_at"], receipt["fetched_at"]

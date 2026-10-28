@@ -133,6 +133,17 @@ def execute(request):
                 actor=request["actor"],
                 run_key=f"evidence_search:{request['prefect_flow_run_id']}",
             )
+        if request.get("operation") == "source_rights":
+            from property_platform.modules.evidence.history.journals import audit_context
+            from property_platform.modules.evidence.source_rights_import import (
+                apply_source_rights,
+            )
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Source rights require a Prefect run and operator")
+            with audit_context(actor=request["actor"]):
+                summary = apply_source_rights(actor=request["actor"])
+            return {"status": "succeeded", "summary": summary}
         if request.get("operation") == "basemap":
             from datetime import timedelta
 
@@ -314,12 +325,17 @@ def execute(request):
                     replay._acquire(("map", osm_bootstrap.URL, _params(params)), collect)
             acquisition = replay.map
         elif operation == "sdi_parcels":
-            from property_platform.modules.evidence.maps.sdi_protocol import URL
+            from property_platform.modules.evidence.maps import sdi_protocol
 
             from .collectors.sdi import precollect_sdi
 
-            with SourceHTTP([URL, URL + "/query"]) as transport:
-                replay = precollect_sdi(transport, territory)
+            URL = sdi_protocol.URL
+            with SourceHTTP(
+                [URL, URL + "/query"],
+                max_session_bytes=sdi_protocol.MAX_SESSION_BYTES,
+                max_session_responses=sdi_protocol.MAX_RESPONSES,
+            ) as transport:
+                replay = precollect_sdi(transport, request["scope"])
             acquisition = replay.map
         elif operation == "onwani":
             with SourceHTTP(OnwaniCollector.allowed_urls()) as transport:

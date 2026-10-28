@@ -12,8 +12,10 @@ import {
 } from "./delivery";
 import { ProjectDocuments } from "./documents";
 import dossier from "./dossier.module.css";
-import { Proof, ProofGroup, SourceLink } from "./evidence";
+import { Proof, ProofGroup, SourceLink, SourceRights } from "./evidence";
 import { MediaCard } from "./media-card";
+import { type ObservedSalesLabels, observedSalesCount } from "./observed-sales";
+import { ProjectObservedSalesSection } from "./observed-sales-section";
 import {
   formatHandover,
   formatProjectDate,
@@ -47,6 +49,7 @@ export function ProjectDetailView({
   retentionLabels,
   verificationLabels,
   activityLabels,
+  observedSalesLabels,
   deliveryLabels,
   neighbourhood,
 }: {
@@ -56,6 +59,7 @@ export function ProjectDetailView({
   retentionLabels: RetentionLabels;
   verificationLabels: VerificationLabels;
   activityLabels: ActivityLabels;
+  observedSalesLabels: ObservedSalesLabels;
   deliveryLabels: DeliveryLabels;
   neighbourhood?: ReactNode;
 }) {
@@ -103,6 +107,9 @@ export function ProjectDetailView({
       ? [["project-components", labels.components]]
       : []),
     ...(project.typologies.length ? [["project-homes", labels.homes]] : []),
+    ...(project.observed_sales && observedSalesCount(project.observed_sales)
+      ? [["project-sales", observedSalesLabels.short]]
+      : []),
     ["project-documents", labels.documents],
     ...(project.amenities.length
       ? [["project-amenities", labels.amenities]]
@@ -278,6 +285,7 @@ export function ProjectDetailView({
               activity={project.construction_activity}
               locale={locale}
               labels={activityLabels}
+              projectLabels={labels}
             />
           )}
           <ProjectComponents
@@ -330,6 +338,14 @@ export function ProjectDetailView({
                 ))}
               </div>
             </section>
+          )}
+          {project.observed_sales && (
+            <ProjectObservedSalesSection
+              sales={project.observed_sales}
+              locale={locale}
+              labels={observedSalesLabels}
+              projectLabels={labels}
+            />
           )}
           <ProjectDocuments
             documents={documents}
@@ -451,6 +467,9 @@ export function ProjectDetailView({
             {labels.sources} <span aria-hidden="true">+</span>
           </summary>
           <p className={styles.muted}>{labels.sourceNote}</p>
+          <p>
+            <Link href="/sources">{labels.sourcesAndLicences}</Link>
+          </p>
           {project.sources.map((source) => (
             <article
               className={styles.source}
@@ -472,6 +491,7 @@ export function ProjectDetailView({
                   </>
                 )}
               </p>
+              <SourceRights source={source} labels={labels} />
             </article>
           ))}
         </details>

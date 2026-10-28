@@ -1,6 +1,6 @@
 """Explicit collection profiles: listing a territory does not activate its sources."""
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 
 from property_platform.modules.catalog.territories import (
     DEFAULT_TERRITORY_ID,
@@ -9,7 +9,12 @@ from property_platform.modules.catalog.territories import (
 )
 from property_platform.modules.evidence.collection_profiles import collection_for
 from property_platform.modules.evidence.maps.onwani import SOURCE_KEY
+from property_platform.modules.evidence.maps.sdi_protocol import district_scopes
 from property_platform.modules.evidence.maps.sdi_protocol import namespace as sdi_namespace
+from property_platform.modules.evidence.source_rights import facts_allowed
+
+# Agency pins keep a namespace of their own, per publisher (`project_locations.py`).
+BROKER_PARSERS = {"psi_project_v1": "psi", "propertyfinder_project_v1": "propertyfinder"}
 
 
 @dataclass(frozen=True)
@@ -21,6 +26,8 @@ class CoverageProfile:
     reference_registry: str | None = None
     imagery_ids: tuple[str, ...] = ()
     member_territory_ids: tuple[str, ...] = ()
+    # Wider than the members only where reviewed parcel scopes reach beyond them.
+    collection_bounds: tuple[float, float, float, float] | None = None
 
 
 # Provider identities are retained; replacing them would create duplicate catalogue objects.
@@ -73,8 +80,26 @@ def union_bounds(bounds):
     )
 
 
-# Whole area means the explicitly mapped islands, not every official district.
-PROFILES["abu-dhabi"] = combined_profile(tuple(PROFILES))
+def emirate_parcel_namespaces():
+    """Reviewed AD-SDI district scopes; island scopes resolve to their existing namespaces."""
+    return tuple(dict.fromkeys(sdi_namespace(scope) for scope in district_scopes()))
+
+
+def emirate_profile(member_ids):
+    """Island context plus the reviewed emirate parcels. Reading imported parcels never
+    starts their manual district deployments, and island identities stay unchanged."""
+    islands = combined_profile(member_ids)
+    return replace(
+        islands,
+        parcel_namespaces=tuple(
+            dict.fromkeys(islands.parcel_namespaces + emirate_parcel_namespaces())
+        ),
+        collection_bounds=TERRITORY_BY_ID["abu-dhabi"].bounds,
+    )
+
+
+# Context (streets, places, projects) stays on the mapped islands; parcels cover the emirate.
+PROFILES["abu-dhabi"] = emirate_profile(tuple(PROFILES))
 
 
 def profile_for(territory_id):
@@ -103,17 +128,22 @@ def coverage_registry():
                 "queryable": profile is not None,
                 "parcel_count": count,
                 "member_territory_ids": member_territories(territory.id),
-                "collection_bounds": union_bounds(
-                    TERRITORY_BY_ID[key].bounds for key in member_territories(territory.id)
-                )
-                if profile
-                else None,
+                "collection_bounds": collection_bounds(territory.id),
                 "camera_bounds": profile.camera_bounds if profile else territory.bounds,
                 "focus_bounds": profile.focus_bounds if profile else None,
                 "neighbourhood_bounds": profile.neighbourhood_bounds if profile else None,
             }
         )
     return {"default_territory_id": DEFAULT_TERRITORY_ID, "territories": entries}
+
+
+def collection_bounds(territory_id):
+    profile = profile_for(territory_id)
+    if profile is None:
+        return None
+    return profile.collection_bounds or union_bounds(
+        TERRITORY_BY_ID[key].bounds for key in member_territories(territory_id)
+    )
 
 
 def navigation_registry():
@@ -127,7 +157,8 @@ def navigation_registry():
     }
 
 
-def reference_source_keys(profile):
+def reference_source_keys(profile, *, withheld=False):
+    """Namespaces of reviewed references, or of those whose facts are withheld (A19)."""
     import hashlib
     import json
     from pathlib import Path
@@ -137,7 +168,7 @@ def reference_source_keys(profile):
             dict.fromkeys(
                 key
                 for member in profile.member_territory_ids
-                for key in reference_source_keys(PROFILES[member])
+                for key in reference_source_keys(PROFILES[member], withheld=withheld)
             )
         )
     if not profile.reference_registry:
@@ -147,6 +178,7 @@ def reference_source_keys(profile):
     return tuple(
         "research:" + hashlib.sha256(row["url"].encode()).hexdigest()[:40]
         for row in json.loads(registry.read_text(encoding="utf-8"))
+        if facts_allowed(row["url"]) != withheld
     )
 
 
@@ -169,18 +201,39 @@ def map_source_namespaces(territory_id):
             if project["territory_id"] in members
             for namespace in (
                 f"project:{project['slug']}",
+                *_broker_namespaces(project, withheld=False),
+            )
+        )
+    )
+
+
+def _broker_namespaces(project, *, withheld):
+    return tuple(
+        dict.fromkeys(
+            f"project:{project['slug']}:broker:{BROKER_PARSERS[source['parser']]}"
+            for source in project["sources"]
+            if source["parser"] in BROKER_PARSERS and facts_allowed(source["url"]) != withheld
+        )
+    )
+
+
+def withheld_place_namespaces():
+    """Map identities declared only by sites whose facts are withheld (A19)."""
+    from property_platform.modules.evidence.projects.project_protocol import project_registry
+
+    return tuple(
+        dict.fromkeys(
+            (
                 *(
-                    (f"project:{project['slug']}:broker:psi",)
-                    if any(source["parser"] == "psi_project_v1" for source in project["sources"])
-                    else ()
+                    namespace
+                    for project in project_registry()
+                    for namespace in _broker_namespaces(project, withheld=True)
                 ),
                 *(
-                    (f"project:{project['slug']}:broker:propertyfinder",)
-                    if any(
-                        source["parser"] == "propertyfinder_project_v1"
-                        for source in project["sources"]
-                    )
-                    else ()
+                    key
+                    for profile in PROFILES.values()
+                    if not profile.member_territory_ids
+                    for key in reference_source_keys(profile, withheld=True)
                 ),
             )
         )

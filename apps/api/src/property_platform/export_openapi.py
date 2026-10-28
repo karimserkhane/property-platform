@@ -30,3 +30,10 @@ if __name__ == "__main__":
         encoding="utf-8",
         newline="\n",
     )
+    from property_platform.modules.evidence.source_rights import map_credits
+
+    destination.with_name("map-credits.json").write_text(
+        json.dumps(map_credits(), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )

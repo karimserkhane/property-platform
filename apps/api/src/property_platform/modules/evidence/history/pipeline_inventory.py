@@ -30,6 +30,7 @@ GROUPS = {
         "ProjectMedia",
         "ProjectIdentityLink",
         "ProjectRelation",
+        "ProjectMarketLabel",
         "ProjectVerification",
         "ProjectVerificationLink",
     },
@@ -41,6 +42,7 @@ GROUPS = {
         "ProjectMediaPublication",
     },
     "property-platform-references": {"ResearchReference"},
+    "property-platform-source-rights": {"SourceRights"},
     "property-platform-imagery": {"ImageryScene"},
     "property-platform-construction-activity": {"ConstructionActivityMeasurement"},
     # Derived from the published dossiers only (E01).

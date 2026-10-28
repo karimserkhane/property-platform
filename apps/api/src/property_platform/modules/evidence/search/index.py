@@ -31,7 +31,7 @@ LOCK = 4_101_001
 MAX_RESULTS = 50
 # Reciprocal rank fusion constant: a rank in either list counts, neither list dominates.
 FUSION_K = 60
-# Same expression as the GIN index of migration 0038, so PostgreSQL can use it.
+# Same expression as the GIN index of migration 0040, so PostgreSQL can use it.
 VECTOR_SQL = (
     "(setweight(to_tsvector('simple'::regconfig, search_text), 'A') || "
     "setweight(to_tsvector('simple'::regconfig, project_terms), 'B'))"

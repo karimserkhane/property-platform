@@ -25,7 +25,13 @@ from property_platform.modules.evidence.projects.project_queries import (  # noq
     project_directory,
 )
 
-pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
+# Agency, Aldar and relation fixtures use sites whose rights withhold them (A19); their
+# replay mechanics remain tested here, what rights hide is in test_source_rights_postgis.py.
+pytestmark = [
+    pytest.mark.postgis,
+    pytest.mark.django_db(transaction=True),
+    pytest.mark.usefixtures("unrestricted_sources"),
+]
 
 GATE_ARC = "https://www.aldar.com/properties/en/uae/reem-island/gate-arc"
 GATE = "https://www.aldar.com/properties/en/uae/reem-island/gate"
@@ -161,6 +167,7 @@ def test_directory_and_dossier_show_parent_and_components_with_evidence(gate, cl
     detail = project_detail("gate")
     assert detail["parent"]["component"] == "The Gate Towers"
     assert detail["parent"]["source_url"] == GATE_ARC
+    assert detail["parent"]["rights"]["licence"]
     assert [row["slug"] for row in detail["components"]] == ["the-gate-tower-1"]
     with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
         response = client.get("/api/v1/preview/projects/gate-arc")

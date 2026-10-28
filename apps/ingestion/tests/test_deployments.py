@@ -156,3 +156,14 @@ def test_async_registration_awaits_the_factory_before_starting_runner(monkeypatc
     assert received[0].name == "parcels-onwani"
     assert received[0].schedules[0].active is False
     assert received[-1] == "started"
+
+
+def test_emirate_district_imports_are_manual_per_municipality():
+    from property_platform_ingestion.flows import FLOWS
+
+    rows = [r for r in DATASETS if r.flow_name == "property-platform-sdi-district-parcels"]
+    assert {r.parameters["municipality"] for r in rows} == {"ADM", "AAM", "WRM"}
+    assert all(r.cron is None and schedules_for(r, None) == [] for r in rows)
+    flow = FLOWS["property-platform-sdi-district-parcels"]
+    parameter = flow.parameters.model_dump()["properties"]["municipality"]
+    assert set(parameter["enum"]) == {"ADM", "AAM", "WRM"}

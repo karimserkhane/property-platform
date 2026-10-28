@@ -30,6 +30,18 @@ from ..models import (
     ProjectSnapshot,
     ProjectTypology,
 )
+from ..source_rights import link_allowed, public_rights, withheld_capture_pattern
+
+
+def _withheld(field):
+    """Rows whose capture comes from a site whose facts are withheld (A19), else none."""
+    pattern = withheld_capture_pattern()
+    return Q(**{f"{field}__iregex": pattern}) if pattern else Q(pk__in=[])
+
+
+def _link(*urls):
+    """The first URL a plain link may point to, as the source rights allow (A19)."""
+    return next((url for url in urls if url and link_allowed(url)), "")
 
 
 def _accepted_snapshots():
@@ -49,8 +61,10 @@ def _accepted_snapshots():
         capture__run__status="succeeded",
         ingested_at__gt=OuterRef("ingested_at"),
     )
-    return ProjectSnapshot.objects.filter(capture__run__status="succeeded").filter(
-        ~Exists(excluded), ~Exists(reread)
+    return (
+        ProjectSnapshot.objects.filter(capture__run__status="succeeded")
+        .exclude(_withheld("capture__url"))
+        .filter(~Exists(excluded), ~Exists(reread))
     )
 
 
@@ -67,6 +81,7 @@ def _relations(project_ids):
     accepted = _accepted_snapshots()
     rows = (
         ProjectRelation.objects.filter(active=True)
+        .exclude(_withheld("capture__url"))
         .filter(Q(child_id__in=project_ids) | Q(parent_id__in=project_ids))
         .filter(
             Exists(accepted.filter(project_id=OuterRef("child_id"))),
@@ -92,6 +107,7 @@ def _relation(row, project):
         "basis": row.basis,
         "source_url": row.capture.url,
         "retrieved_at": row.capture.fetched_at,
+        "rights": public_rights(row.capture.url),
     }
 
 
@@ -121,11 +137,13 @@ def _visible_links():
         record_key=OuterRef("capture__url"),
         active=True,
     )
-    return ProjectIdentityLink.objects.filter(
-        valid, active=True, capture__run__status="succeeded"
-    ).filter(
-        ~Exists(excluded),
-        Exists(_accepted_snapshots().filter(project_id=OuterRef("project_id"))),
+    return (
+        ProjectIdentityLink.objects.filter(valid, active=True, capture__run__status="succeeded")
+        .exclude(_withheld("capture__url"))
+        .filter(
+            ~Exists(excluded),
+            Exists(_accepted_snapshots().filter(project_id=OuterRef("project_id"))),
+        )
     )
 
 
@@ -160,9 +178,9 @@ def project_directory(territory=None, *, query="", offset=0, limit=200):
                     "id": row.developer.id,
                     "key": row.developer.key,
                     "name": row.developer.name,
-                    "website_url": row.developer.website_url,
+                    "website_url": _link(row.developer.website_url),
                 },
-                "website_url": row.website_url,
+                "website_url": _link(row.website_url, row.developer.website_url),
                 "updated_at": row.checked_at,
                 "has_map_identity": row.mapped,
                 "parent": _relation(parents[row.id], parents[row.id].parent)
@@ -191,6 +209,7 @@ def _source(snapshot, pointer=""):
         "language": snapshot.language,
         "evidence_pointer": pointer,
         "rights_status": snapshot.source_rights_status,
+        "rights": public_rights(snapshot.capture.url),
         "ingested_at": snapshot.ingested_at,
         "historical": snapshot.capture.fetched_at
         < getattr(snapshot, "latest_source_at", snapshot.capture.fetched_at),
@@ -224,7 +243,8 @@ def _proof_sources(snapshots):
 
 
 def _project_website(project, snapshots):
-    if urlsplit(project.website_url).hostname in {"psinv.net", "adrec.gov.ae"}:
+    linked = link_allowed(project.website_url)
+    if not linked or urlsplit(project.website_url).hostname in {"psinv.net", "adrec.gov.ae"}:
         for snapshot in snapshots:
             if (
                 snapshot.source_kind in {"developer", "publisher"}
@@ -232,12 +252,13 @@ def _project_website(project, snapshots):
                 and "/api/" not in urlsplit(snapshot.capture.url).path
             ):
                 return snapshot.capture.url
-    return project.website_url
+    return project.website_url if linked else _link(project.developer.website_url)
 
 
 def project_detail(slug):
-    # The sheets read delivery history and activity, which build on this module.
+    # The sheets read delivery history, activity and sales, which build on this module.
     from .activity_sheet import project_activity
+    from .market_sheet import project_market
     from .verification_sheet import project_verification_sheet
 
     project = Project.objects.select_related("developer").filter(slug=slug).first()
@@ -376,7 +397,7 @@ def project_detail(slug):
         if not allowed(snapshot, "media"):
             continue
         for asset in snapshot.media.all():
-            if asset.source_url in seen:
+            if asset.source_url in seen or not link_allowed(asset.source_url):
                 continue
             seen.add(asset.source_url)
             url = None
@@ -416,7 +437,7 @@ def project_detail(slug):
             "id": project.developer.id,
             "key": project.developer.key,
             "name": project.developer.name,
-            "website_url": project.developer.website_url,
+            "website_url": _link(project.developer.website_url),
         },
         "summary": summary.summary if summary else "",
         "summary_source": _source(summary) if summary else None,
@@ -469,6 +490,7 @@ def project_detail(slug):
         "declared_progress": _declared_progress(accepted),
         "verification": project_verification_sheet(project, accepted),
         "construction_activity": project_activity(project),
+        "observed_sales": project_market(project),
     }
 
 
@@ -576,6 +598,7 @@ def project_locations(project, *, language="en"):
                     "language": language,
                     "evidence_pointer": "active_project_identity_link",
                     "rights_status": "restricted",
+                    "rights": public_rights(point_source.get("url", link.capture.url)),
                 },
             }
         )
@@ -603,7 +626,9 @@ def project_location_gaps(territory=None):
                 )
             ),
             related=Exists(
-                ProjectRelation.objects.filter(active=True).filter(
+                ProjectRelation.objects.filter(active=True)
+                .exclude(_withheld("capture__url"))
+                .filter(
                     Q(child_id=OuterRef("pk"), parent__projectidentitylink__in=_visible_links())
                     | Q(parent_id=OuterRef("pk"), child__projectidentitylink__in=_visible_links())
                 )
