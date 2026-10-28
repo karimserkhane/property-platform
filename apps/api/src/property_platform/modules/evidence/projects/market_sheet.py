@@ -4,7 +4,9 @@ Read-only. Sales are selected by the project's active reviewed labels, inside th
 succeeded sales snapshot of the project's own territory: snapshots are overlapping 90-day
 windows of the same register, so two of them are never added. Each group gives a range
 and its count, never a single value; a sale of a partial share keeps its count but stays
-out of the price ranges.
+out of the price ranges. As in the other sections, the source carries its reviewed rights
+(A19) and, when publication is enforced (A22), sales read from a withheld capture are
+left out.
 """
 
 from decimal import Decimal
@@ -13,7 +15,9 @@ from django.db.models import Count, Max, Min, Q
 
 from ..models import AdrecMarketSnapshot, AdrecSaleObservation
 from ..project_models import ProjectMarketLabel
+from ..source_rights import public_rights
 from ..sources import adrec
+from .project_queries import _withheld
 
 SOURCE_NAME = "Abu Dhabi Real Estate Centre (ADREC)"
 GROUP = ("property_type", "property_layout", "sale_application_type", "sale_sequence")
@@ -52,7 +56,9 @@ def project_market(project):
         selected = Q()
         for label in labels:
             selected |= Q(district=label.district, project_name=label.label)
-        sales = AdrecSaleObservation.objects.filter(selected, snapshot=snapshot)
+        sales = AdrecSaleObservation.objects.filter(selected, snapshot=snapshot).exclude(
+            _withheld("capture__url")
+        )
         priced = FULL_SHARE & Q(price_aed__isnull=False)
         rows = (
             sales.values(*GROUP)
@@ -90,7 +96,11 @@ def project_market(project):
             .order_by("capture__url", "capture__content_sha256")
         ]
     return {
-        "source": {"name": SOURCE_NAME, "url": adrec.PAGE_URL},
+        "source": {
+            "name": SOURCE_NAME,
+            "url": adrec.PAGE_URL,
+            "rights": public_rights(adrec.PAGE_URL),
+        },
         "labels": [
             {
                 "district": label.district,

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import dossier from "./dossier.module.css";
+import { SourceRights } from "./evidence";
 import {
   formatObservedRange,
   type ObservedSales,
@@ -11,6 +12,7 @@ import {
 } from "./observed-sales";
 import { formatProjectDate, safeSourceUrl } from "./presentation";
 import styles from "./project.module.css";
+import type { ProjectLabels } from "./types";
 
 type Shared = { locale: string; labels: ObservedSalesLabels };
 
@@ -107,8 +109,9 @@ function Group({
 /** Recorded ADREC sales of the project, by type: ranges and counts, never a price. */
 export function ProjectObservedSalesSection({
   sales,
+  projectLabels,
   ...shared
-}: Shared & { sales: ObservedSales }) {
+}: Shared & { sales: ObservedSales; projectLabels: ProjectLabels }) {
   const { labels, locale } = shared;
   const source = safeSourceUrl(sales.source.url);
   const window = sales.window;
@@ -220,6 +223,7 @@ export function ProjectObservedSalesSection({
             <bdi lang="en">{sales.source.name}</bdi>
           )}
         </p>
+        <SourceRights source={sales.source} labels={projectLabels} />
       </details>
     </section>
   );
