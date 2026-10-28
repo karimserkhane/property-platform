@@ -67,7 +67,9 @@ JOURNALED_SQL = (
 MAX_HORIZON_SPAN = 100_000
 # Latest revision per table, transactions in progress and the horizon above them, and
 # whether a transaction pending since the entry (listed, or from its horizon to the
-# current one) committed a revision of these tables, all from one snapshot.
+# current one) committed a revision of these tables, all from one snapshot. The two
+# probes stay separate index lookups: joined by OR, they scanned the whole journal and
+# compared each revision with every pending id (minutes once it held a million rows).
 FAMILY_SQL = """
 WITH now AS (SELECT pg_snapshot_xmax(pg_current_snapshot())::text::bigint AS xmax)
 SELECT
@@ -78,14 +80,21 @@ SELECT
           ORDER BY f.position),
     array(SELECT x::text FROM pg_snapshot_xip(pg_current_snapshot()) AS x),
     (SELECT xmax FROM now),
-    (SELECT xmax FROM now) - %(horizon)s > %(span)s
-    OR EXISTS(SELECT 1 FROM evidence.row_revision r
-              JOIN unnest(%(schemas)s::text[], %(tables)s::text[]) AS f(schema_name, table_name)
-                ON r.schema_name = f.schema_name AND r.table_name = f.table_name
-              WHERE r.id > %(after)s
-                 OR r.transaction_id = ANY(%(pending)s::text[] || array(
-                      SELECT x::text FROM now, generate_series(
-                          %(horizon)s, least(now.xmax, %(horizon)s + %(span)s) - 1) AS x)))
+    CASE WHEN (SELECT xmax FROM now) - %(horizon)s > %(span)s THEN true ELSE
+        EXISTS(SELECT 1 FROM unnest(%(schemas)s::text[], %(tables)s::text[])
+                   AS f(schema_name, table_name)
+               JOIN evidence.row_revision r
+                 ON r.schema_name = f.schema_name AND r.table_name = f.table_name
+                AND r.id > %(after)s)
+        OR EXISTS(SELECT 1 FROM unnest(%(schemas)s::text[], %(tables)s::text[])
+                      AS f(schema_name, table_name)
+                  JOIN evidence.row_revision r
+                    ON r.schema_name = f.schema_name AND r.table_name = f.table_name
+                  JOIN unnest(%(pending)s::text[] || array(
+                         SELECT x::text FROM now, generate_series(
+                             %(horizon)s, least(now.xmax, %(horizon)s + %(span)s) - 1) AS x))
+                    AS p(transaction_id) ON r.transaction_id = p.transaction_id)
+    END
 """
 # Read by PostGIS for projections; changed only by the extension itself.
 STATIC_TABLES = frozenset({("public", "spatial_ref_sys")})

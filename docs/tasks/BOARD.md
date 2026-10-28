@@ -47,3 +47,4 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [F04](F04.md) | F | Parcelles de l'émirat sur la carte et imports ADM et AAM | 3 | F03 | non | done | claude |
 | [F05](F05.md) | F | Fin des imports de l'émirat : Madinat Al Riyad et AAM | 3 | F04 | non | done | claude |
 | [F06](F06.md) | F | Réimports des derniers districts de l'émirat et mesures | 3 | F05 | non | in-progress | claude |
+| [F07](F07.md) | F | Index des identifiants officiels de parcelles pour les imports de district | 3 | F05 | non | done | claude |
