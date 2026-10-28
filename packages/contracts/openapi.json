@@ -2129,6 +2129,38 @@
           "map-analysis-preview"
         ]
       }
+    },
+    "/api/v1/preview/source-rights": {
+      "get": {
+        "operationId": "previewSourceRights",
+        "summary": "Source Rights",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceRightsRegistryResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
     }
   },
   "components": {
@@ -5455,6 +5487,16 @@
             "format": "date-time",
             "title": "Retrieved At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5530,6 +5572,81 @@
           "has_map_identity"
         ],
         "title": "ProjectSummaryResponse",
+        "type": "object"
+      },
+      "SourceRightsResponse": {
+        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
+        "properties": {
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          },
+          "licence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licence Url"
+          },
+          "terms_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terms Url"
+          },
+          "publication": {
+            "enum": [
+              "open",
+              "facts",
+              "link",
+              "none"
+            ],
+            "title": "Publication",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribution"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed On"
+          },
+          "shown_beyond_terms": {
+            "default": false,
+            "title": "Shown Beyond Terms",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "licence",
+          "publication"
+        ],
+        "title": "SourceRightsResponse",
         "type": "object"
       },
       "ActivityMeasurementResponse": {
@@ -5690,6 +5807,16 @@
           "url": {
             "title": "Url",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6052,6 +6179,213 @@
         "title": "DeliveryRegisterResponse",
         "type": "object"
       },
+      "ObservedRangeResponse": {
+        "description": "Smallest and largest recorded value, as decimal text.",
+        "properties": {
+          "min": {
+            "title": "Min",
+            "type": "string"
+          },
+          "max": {
+            "title": "Max",
+            "type": "string"
+          }
+        },
+        "required": [
+          "min",
+          "max"
+        ],
+        "title": "ObservedRangeResponse",
+        "type": "object"
+      },
+      "ObservedSalesCaptureResponse": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "content_sha256": {
+            "title": "Content Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "content_sha256"
+        ],
+        "title": "ObservedSalesCaptureResponse",
+        "type": "object"
+      },
+      "ObservedSalesGroupResponse": {
+        "description": "Recorded sales of one type; ranges cover the full-share sales only.",
+        "properties": {
+          "property_type": {
+            "title": "Property Type",
+            "type": "string"
+          },
+          "property_layout": {
+            "title": "Property Layout",
+            "type": "string"
+          },
+          "sale_application_type": {
+            "title": "Sale Application Type",
+            "type": "string"
+          },
+          "sale_sequence": {
+            "title": "Sale Sequence",
+            "type": "string"
+          },
+          "sales_count": {
+            "title": "Sales Count",
+            "type": "integer"
+          },
+          "full_share_count": {
+            "title": "Full Share Count",
+            "type": "integer"
+          },
+          "price_aed": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ObservedRangeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rate_aed_per_sqm": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ObservedRangeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sold_area_sqm": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ObservedRangeResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "first_registration_date": {
+            "format": "date",
+            "title": "First Registration Date",
+            "type": "string"
+          },
+          "last_registration_date": {
+            "format": "date",
+            "title": "Last Registration Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "property_type",
+          "property_layout",
+          "sale_application_type",
+          "sale_sequence",
+          "sales_count",
+          "full_share_count",
+          "price_aed",
+          "rate_aed_per_sqm",
+          "sold_area_sqm",
+          "first_registration_date",
+          "last_registration_date"
+        ],
+        "title": "ObservedSalesGroupResponse",
+        "type": "object"
+      },
+      "ObservedSalesLabelResponse": {
+        "description": "Reviewed ADREC sales label that selects the project's recorded sales.",
+        "properties": {
+          "district": {
+            "title": "District",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "evidence": {
+            "enum": [
+              "register_name",
+              "project_name"
+            ],
+            "title": "Evidence",
+            "type": "string"
+          },
+          "registration_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Number"
+          },
+          "reviewed_on": {
+            "format": "date",
+            "title": "Reviewed On",
+            "type": "string"
+          }
+        },
+        "required": [
+          "district",
+          "label",
+          "evidence",
+          "registration_number",
+          "reviewed_on"
+        ],
+        "title": "ObservedSalesLabelResponse",
+        "type": "object"
+      },
+      "ObservedSalesWindowResponse": {
+        "description": "Newest ADREC sales window of the territory; windows overlap and are never added.",
+        "properties": {
+          "territory": {
+            "title": "Territory",
+            "type": "string"
+          },
+          "period_start": {
+            "format": "date",
+            "title": "Period Start",
+            "type": "string"
+          },
+          "period_end": {
+            "format": "date",
+            "title": "Period End",
+            "type": "string"
+          },
+          "collected_at": {
+            "format": "date-time",
+            "title": "Collected At",
+            "type": "string"
+          },
+          "captures": {
+            "items": {
+              "$ref": "#/components/schemas/ObservedSalesCaptureResponse"
+            },
+            "title": "Captures",
+            "type": "array"
+          }
+        },
+        "required": [
+          "territory",
+          "period_start",
+          "period_end",
+          "collected_at",
+          "captures"
+        ],
+        "title": "ObservedSalesWindowResponse",
+        "type": "object"
+      },
       "ProjectAmenityResponse": {
         "properties": {
           "code": {
@@ -6310,6 +6644,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ProjectConstructionActivityResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_sales": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProjectObservedSalesResponse"
               },
               {
                 "type": "null"
@@ -6629,6 +6973,46 @@
         "title": "ProjectMediaResponse",
         "type": "object"
       },
+      "ProjectObservedSalesResponse": {
+        "description": "Recorded ADREC sales of the project's reviewed labels, by type, with ranges.",
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/ActivitySourceResponse"
+          },
+          "labels": {
+            "items": {
+              "$ref": "#/components/schemas/ObservedSalesLabelResponse"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "window": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ObservedSalesWindowResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/ObservedSalesGroupResponse"
+            },
+            "title": "Groups",
+            "type": "array"
+          }
+        },
+        "required": [
+          "source",
+          "labels",
+          "window",
+          "groups"
+        ],
+        "title": "ProjectObservedSalesResponse",
+        "type": "object"
+      },
       "ProjectProgrammeResponse": {
         "properties": {
           "value": {
@@ -6750,6 +7134,16 @@
           "rights_status": {
             "title": "Rights Status",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "ingested_at": {
             "anyOf": [
@@ -6909,6 +7303,16 @@
           "covers": {
             "title": "Covers",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -7015,6 +7419,16 @@
             "format": "date",
             "title": "Reviewed On",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -7653,6 +8067,111 @@
           "historical"
         ],
         "title": "DistrictMarketResponse",
+        "type": "object"
+      },
+      "SourceRightsRegistryResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SourceSiteRightsResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "SourceRightsRegistryResponse",
+        "type": "object"
+      },
+      "SourceSiteRightsResponse": {
+        "description": "One reviewed site of the source rights registry (A19); `unknown` means not qualified.",
+        "properties": {
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "publisher": {
+            "title": "Publisher",
+            "type": "string"
+          },
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          },
+          "licence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licence Url"
+          },
+          "terms_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terms Url"
+          },
+          "collection": {
+            "enum": [
+              "allowed",
+              "forbidden"
+            ],
+            "title": "Collection",
+            "type": "string"
+          },
+          "publication": {
+            "enum": [
+              "open",
+              "facts",
+              "link",
+              "none"
+            ],
+            "title": "Publication",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribution"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed On"
+          }
+        },
+        "required": [
+          "host",
+          "publisher",
+          "licence",
+          "collection",
+          "publication"
+        ],
+        "title": "SourceSiteRightsResponse",
         "type": "object"
       }
     }

@@ -239,6 +239,25 @@ Les flux d’entrée sont bornés à **128 Mio par fichier** et utilisent un fic
 
 Les téléchargements et écritures ne s’exécutent pas dans une longue transaction SQL. Une copie archivée manquante ou corrompue produit une indisponibilité explicite ; l’API ne cache pas ce problème en revenant silencieusement au payload SQL. La lecture SQL reste compatible pour les captures qui n’ont pas encore été archivées.
 
+## 7 bis. Contenus bruts des captures hors de PostgreSQL (tâche A10)
+
+Les réponses brutes des sources (JSON, HTML, protobuf, tuiles) occupaient environ 1 Go dans `evidence.capture.payload` (mesure du 26 octobre 2026 : 3 341 captures, 987 Mo, dont 1 986 corps d'au moins 64 Kio pour 965 Mo). `capture_storage.py` les déplace vers le stockage privé configuré :
+
+1. le corps SQL est relu et comparé au SHA-256 et à la taille de la capture ;
+2. il est écrit sous `objects/sha256/ab/<sha256>.bin` (type `application/octet-stream`, jamais servi ni publié) puis relu et vérifié par l'adaptateur ; un corps identique déjà archivé est réutilisé ;
+3. dans une transaction courte, la capture reçoit son lien `CaptureObject` et `primary_object`, puis `payload` passe à NULL. Le déclencheur `protect_capture_bytes` refuse ce retrait sans copie vérifiée de même empreinte et de même taille.
+
+Aucune écriture de fichier n'a lieu dans une transaction SQL. Un échec avant la dernière étape laisse le corps SQL intact ; relancer reprend sans doublon. Les dates de récupération et d'ingestion, l'URL, le statut HTTP et l'empreinte de la capture ne changent pas ; le journal de lignes enregistre la mise à jour avec l'empreinte du corps, pas ses octets.
+
+Les corps de moins de 64 Kio restent en SQL (environ 22 Mo) : un fichier par petite réponse ne rapporterait rien. Les lecteurs passent tous par `read_capture`, qui préfère la copie archivée et refuse une copie manquante ou corrompue au lieu de revenir au SQL ; une capture dérivée (retraitement, revue de position) partage l'objet de sa capture parente par `inherited_body`.
+
+```bash
+docker compose -f infra/local/compose.yaml exec api python manage.py capture_storage report
+docker compose -f infra/local/compose.yaml exec api python manage.py capture_storage relocate --actor "<nom>" --limit 200
+```
+
+`report` ne lit aucun corps. `relocate` traite un lot borné (1 à 1 000, des plus anciennes aux plus récentes) et affiche ce qui reste ; `--min-bytes` change le seuil. Les objets sont dans le volume `media-data`, copié par la [sauvegarde nocturne](BACKUPS.md) après le dump : un dump et le miroir de la même nuit restent cohérents.
+
 ## 8. Sauvegarder et vérifier
 
 Sauvegarder **PostgreSQL et les objets** : un dump SQL seul ne contient pas le nouveau volume. Prévoir un inventaire des clés et SHA-256, une copie indépendante du stockage, une politique de rétention et un essai de restauration. R2 est un stockage principal ; ce n’est pas à lui seul une sauvegarde indépendante. Conserver le namespace et le mapping bucket/domaine avec la procédure de restauration, sans y écrire les secrets.

@@ -6,22 +6,28 @@ import type { ParcelIndex } from "./types";
 export const CELL_DEGREES = 0.05;
 // 16 cells cover 0.2° × 0.2°, the API's largest accepted bbox.
 export const MAX_VIEW_CELLS = 16;
+// Up to this many cells under the view, the cells nearest its centre are read
+// within the budget and the list is partial; a wider view reads nothing.
+export const MAX_PARTIAL_VIEW_CELLS = 4 * MAX_VIEW_CELLS;
 const MAX_CACHED_CELLS = 48;
 
 export type Bounds = readonly [number, number, number, number];
 
 export type ViewportCells =
-  | { kind: "cells"; cells: string[] }
+  | { kind: "cells"; cells: string[]; partial: boolean }
   | { kind: "outside" }
   | { kind: "too-large" };
 
 const edge = (index: number) => Number((index * CELL_DEGREES).toFixed(6));
 
 // Grid cells under `view`, clipped to the collected area, as `bbox` strings.
+// A view slightly wider than the budget keeps the `maxCells` cells nearest its
+// centre, so an emirate-wide collection still lists the framed area.
 export function viewportCells(
   view: Bounds,
   collection: Bounds,
   maxCells = MAX_VIEW_CELLS,
+  maxPartialCells = MAX_PARTIAL_VIEW_CELLS,
 ): ViewportCells {
   const west = Math.max(view[0], collection[0]);
   const south = Math.max(view[1], collection[1]);
@@ -32,8 +38,10 @@ export function viewportCells(
   const x1 = Math.ceil(east / CELL_DEGREES);
   const y0 = Math.floor(south / CELL_DEGREES);
   const y1 = Math.ceil(north / CELL_DEGREES);
-  if ((x1 - x0) * (y1 - y0) > maxCells) return { kind: "too-large" };
-  const cells: string[] = [];
+  if ((x1 - x0) * (y1 - y0) > maxPartialCells) return { kind: "too-large" };
+  const centreX = (west + east) / 2;
+  const centreY = (south + north) / 2;
+  const cells: { bbox: string; distance: number; order: number }[] = [];
   for (let x = x0; x < x1; x++)
     for (let y = y0; y < y1; y++) {
       const cell = [
@@ -42,9 +50,23 @@ export function viewportCells(
         Math.min(edge(x + 1), collection[2]),
         Math.min(edge(y + 1), collection[3]),
       ];
-      if (cell[0] < cell[2] && cell[1] < cell[3]) cells.push(cell.join(","));
+      if (cell[0] < cell[2] && cell[1] < cell[3])
+        cells.push({
+          bbox: cell.join(","),
+          distance:
+            ((cell[0] + cell[2]) / 2 - centreX) ** 2 +
+            ((cell[1] + cell[3]) / 2 - centreY) ** 2,
+          order: cells.length,
+        });
     }
-  return { kind: "cells", cells };
+  const partial = cells.length > maxCells;
+  const kept = partial
+    ? [...cells]
+        .sort((a, b) => a.distance - b.distance || a.order - b.order)
+        .slice(0, maxCells)
+        .sort((a, b) => a.order - b.order)
+    : cells;
+  return { kind: "cells", cells: kept.map((c) => c.bbox), partial };
 }
 
 type ReadCell = (bbox: string, signal: AbortSignal) => Promise<ParcelIndex>;

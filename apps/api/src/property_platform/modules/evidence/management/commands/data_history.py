@@ -4,9 +4,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from property_platform.modules.evidence.history import audit_context
+from property_platform.modules.evidence.history.journals import audit_context
+from property_platform.modules.evidence.history.pipeline_inventory import inventory
 from property_platform.modules.evidence.models import Capture, HistoryExclusion
-from property_platform.modules.evidence.pipeline_inventory import inventory
 
 
 class Command(BaseCommand):

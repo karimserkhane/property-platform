@@ -4,12 +4,15 @@ import copy
 import json
 
 import pytest
-from property_platform.modules.evidence.project_discovery import candidates_for, catalogue_for
-from property_platform.modules.evidence.project_propertyfinder import (
+from property_platform.modules.evidence.projects.project_discovery import (
+    candidates_for,
+    catalogue_for,
+)
+from property_platform.modules.evidence.projects.project_propertyfinder import (
     propertyfinder_position,
     propertyfinder_project,
 )
-from property_platform.modules.evidence.project_protocol import _base
+from property_platform.modules.evidence.projects.project_protocol import _base
 
 
 def fixture():

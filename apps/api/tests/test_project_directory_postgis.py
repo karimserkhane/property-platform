@@ -13,16 +13,19 @@ from django.utils import timezone
 if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Project directory requires PostGIS", allow_module_level=True)
 
-from property_platform.modules.evidence import (  # noqa: E402
-    orchestration,
-    project_discovery,
-    project_protocol,
-)
 from property_platform.modules.evidence.models import ProjectSourceCandidate  # noqa: E402
-from property_platform.modules.evidence.project_import import import_project_details  # noqa: E402
-from property_platform.modules.evidence.project_queries import project_directory  # noqa: E402
+from property_platform.modules.evidence.projects import project_discovery, project_protocol
+from property_platform.modules.evidence.projects.project_import import import_project_details  # noqa: E402
+from property_platform.modules.evidence.projects.project_queries import project_directory  # noqa: E402
+from property_platform.modules.evidence.rebuild import orchestration
 
-pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
+# Agency, Aldar and relation fixtures use sites whose rights withhold them (A19); their
+# replay mechanics remain tested here, what rights hide is in test_source_rights_postgis.py.
+pytestmark = [
+    pytest.mark.postgis,
+    pytest.mark.django_db(transaction=True),
+    pytest.mark.usefixtures("unrestricted_sources"),
+]
 
 
 def receipt(url, payload):

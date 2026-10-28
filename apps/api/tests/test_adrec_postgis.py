@@ -13,16 +13,16 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 
 from test_adrec_protocol import SCOPE, index, page, sale  # noqa: E402
 
-from property_platform.modules.evidence import adrec  # noqa: E402
 from property_platform.modules.evidence.models import (
     AdrecMarketSnapshot,
     AdrecSaleObservation,
     Capture,
 )  # noqa: E402
-from property_platform.modules.evidence.orchestration import (
+from property_platform.modules.evidence.rebuild.orchestration import (
     execute_import,
     record_acquisition_failure,
 )  # noqa: E402
+from property_platform.modules.evidence.sources import adrec  # noqa: E402
 from property_platform.modules.publication.adrec_preview import market  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]

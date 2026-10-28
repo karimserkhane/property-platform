@@ -12,8 +12,8 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
 from django.contrib.gis.geos import LineString, MultiLineString, MultiPolygon, Polygon  # noqa: E402
 
 from property_platform.modules.catalog.models import AdministrativeArea, Building, Place, Street  # noqa: E402
-from property_platform.modules.evidence import map_sources as protocol  # noqa: E402
-from property_platform.modules.evidence.map_import import import_map_layer  # noqa: E402
+from property_platform.modules.evidence.maps import map_sources as protocol  # noqa: E402
+from property_platform.modules.evidence.maps.map_import import import_map_layer  # noqa: E402
 from property_platform.modules.evidence.models import Capture, IngestionRun, MapObservation  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
@@ -117,7 +117,7 @@ def test_osm_centroid_repeat_reconciliation_and_geometry_audit(client):
 def test_truncated_replay_never_falls_back_or_replaces_existing():
     district()
     collect(osm())
-    with patch("property_platform.modules.evidence.map_sources.fetch_url") as fetch:
+    with patch("property_platform.modules.evidence.maps.map_sources.fetch_url") as fetch:
         with pytest.raises(ValueError):
             collect({**osm(), "remark": "timeout"})
         fetch.assert_not_called()
@@ -129,7 +129,7 @@ def test_truncated_replay_never_falls_back_or_replaces_existing():
 def test_audit_failure_rolls_back_geometry_but_keeps_capture():
     district()
     with patch(
-        "property_platform.modules.evidence.map_import.MapObservation.objects.create",
+        "property_platform.modules.evidence.maps.map_import.MapObservation.objects.create",
         side_effect=RuntimeError,
     ):
         with pytest.raises(RuntimeError):
@@ -172,7 +172,7 @@ def test_building_usage_comes_from_preserved_amenity_tags_not_its_generic_kind(c
     assert feature["properties"]["use_classification_version"] == "source-use-v2"
     assert "tags" not in feature["properties"]
     assert "_capture_id" not in feature["properties"]["source"]
-    from property_platform.modules.evidence.queries import map_provenances, map_usage_tags
+    from property_platform.modules.evidence.projects.queries import map_provenances, map_usage_tags
 
     identity = feature["id"]
     metadata = map_provenances("building", [identity], include_capture_id=True)

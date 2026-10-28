@@ -41,7 +41,8 @@ d'affichage `land-use-v3` reconnaît les familles générales sans inventer un �
 précis. Aucun propriétaire, occupant ou contact personnel n'est collecté.
 
 Chaque snapshot vérifie deux listes d'OBJECTID identiques et des lots complets de
-100 objets. Les plafonds sont 8 Mio par réponse et 64 Mio par acquisition. Les
+100 objets. Les plafonds sont 8 Mio par réponse et 64 Mio par acquisition (256 Mio et
+503 réponses pour un district de l'émirat, F05). Les
 réponses et leurs empreintes sont conservées avec leurs horloges d'acquisition et
 d'ingestion. `PLOTID` est l'identité source durable, distincte de l'OBJECTID technique.
 
@@ -55,8 +56,8 @@ snapshot n'effacent aucune parcelle historique.
 
 ## Propriétaires et exécution
 
-`evidence/sdi_protocol.py` possède le protocole pur et les sous-types ;
-`evidence/sdi_import.py` possède les captures, observations, quarantaines et mutations
+`evidence/maps/sdi_protocol.py` possède le protocole pur et les sous-types ;
+`evidence/maps/sdi_import.py` possède les captures, observations, quarantaines et mutations
 via les services du catalogue. `ingestion/collectors/sdi.py` acquiert hors transaction
 puis rejoue les mêmes réponses dans la passerelle durable. Direction : ingestion →
 evidence → catalog ; publication lit les deux namespaces. Aucun nouveau schéma ou

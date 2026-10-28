@@ -16,8 +16,9 @@ from test_construction_activity_postgis import (  # noqa: E402
     windows,
 )
 
-from property_platform.modules.evidence import activity_import  # noqa: E402
-from property_platform.modules.evidence.activity_sheet import project_activity  # noqa: E402
+from property_platform.modules.evidence.projects import activity_import  # noqa: E402
+from property_platform.modules.evidence.projects.activity_sheet import project_activity  # noqa: E402
+from property_platform.modules.evidence.source_rights import public_rights  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -33,7 +34,11 @@ def measure(link, result=MEASURED):
 def test_a_project_without_measurement_lists_no_parcel(linked):  # noqa: F811
     sheet = project_activity(linked.project)
     assert sheet == {
-        "source": {"name": "Copernicus Sentinel-2 L2A", "url": activity_import.SOURCE_URL},
+        "source": {
+            "name": "Copernicus Sentinel-2 L2A",
+            "url": activity_import.SOURCE_URL,
+            "rights": public_rights(activity_import.SOURCE_URL),
+        },
         "parcels": [],
     }
 

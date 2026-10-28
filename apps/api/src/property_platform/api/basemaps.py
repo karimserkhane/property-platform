@@ -23,7 +23,7 @@ router = Router(tags=["local-preview"])
     },
 )
 def tile(request, provider: str, z: int, x: int, y: int):
-    from property_platform.modules.evidence.basemap_archive import archived_tile
+    from property_platform.modules.evidence.maps.basemap_archive import archived_tile
 
     try:
         result = archived_tile(provider, z, x, y)

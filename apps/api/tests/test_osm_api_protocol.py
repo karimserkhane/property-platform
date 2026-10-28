@@ -1,7 +1,7 @@
 import pytest
 
-from property_platform.modules.evidence.onwani import SourceError
-from property_platform.modules.evidence.osm_api_protocol import boxes, decode
+from property_platform.modules.evidence.maps.onwani import SourceError
+from property_platform.modules.evidence.maps.osm_api_protocol import boxes, decode
 
 XML = b"""<osm version="0.6">
 <node id="1" lat="24.54" lon="54.41" version="1" timestamp="2026-01-01T00:00:00Z" />

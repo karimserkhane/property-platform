@@ -17,12 +17,12 @@ from django.db import connection  # noqa: E402
 from test_project_verification_postgis import adrec_receipt  # noqa: E402
 from test_property_protocol import receipt  # noqa: E402
 
-from property_platform.modules.evidence import project_protocol  # noqa: E402
-from property_platform.modules.evidence.delivery_history import (  # noqa: E402
+from property_platform.modules.evidence.models import Capture, HistoryExclusion  # noqa: E402
+from property_platform.modules.evidence.projects import project_protocol  # noqa: E402
+from property_platform.modules.evidence.projects.delivery_history import (  # noqa: E402
     developer_delivery_history,
 )
-from property_platform.modules.evidence.models import Capture, HistoryExclusion  # noqa: E402
-from property_platform.modules.evidence.project_import import import_project_details  # noqa: E402
+from property_platform.modules.evidence.projects.project_import import import_project_details  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

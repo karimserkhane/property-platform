@@ -1,29 +1,29 @@
 {
-  "decision": "Owner decision of 2026-10-25 (A13, option 1): real captures limited to the browser journeys, versioned in the private repository for disposable CI databases only. Not a licence to republish.",
+  "decision": "Owner decisions of 2026-10-25 (A13, option 1) and 2026-10-27 (A18): real captures limited to the browser journeys, for disposable CI databases only, in the public repository; developer and listing pages are excluded. These copies grant no licence to reuse.",
   "runs": [
     {
       "run": "c10a2e70-918a-4175-ae4c-a6dff2d18d0d",
       "source": "dmt:onwani:smarthub:plot:adm:reem",
       "why": "Reem parcels for the explorer, parcel selection and mobile map journeys (onwani-reem-v3, all 28 captures of the acquisition).",
-      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified (docs/product/STRATEGIE_PRODUIT_PROPERTY_PLATFORM.md). Internal test copy, private repository, owner decision 2026-10-25."
+      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified (docs/product/STRATEGIE_PRODUIT_PROPERTY_PLATFORM.md). Copy for disposable CI databases, kept in the public repository by owner decision of 2026-10-27 (A18)."
     },
     {
       "run": "b63eb454-5d0a-44f4-82ee-506ef3219477",
       "source": "dmt:onwani:reem:district",
       "why": "Reem district boundary that frames the explorer; acquired before the OSM run, whose import clips to it.",
-      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified. Internal test copy, private repository, owner decision 2026-10-25."
+      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified. Copy for disposable CI databases, kept in the public repository by owner decision of 2026-10-27 (A18)."
     },
     {
       "run": "304556b4-e79a-47bc-ba10-61ebae45d3f9",
       "source": "dmt:onwani:reem:community",
       "why": "Reem communities for the explorer context.",
-      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified. Internal test copy, private repository, owner decision 2026-10-25."
+      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified. Copy for disposable CI databases, kept in the public repository by owner decision of 2026-10-27 (A18)."
     },
     {
       "run": "b5234a36-e5e4-4ca5-8c40-d88c28550ecc",
       "source": "dmt:onwani:reem:street",
       "why": "Reem official streets for the explorer context.",
-      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified. Internal test copy, private repository, owner decision 2026-10-25."
+      "licence": "Abu Dhabi DMT Onwani public ArcGIS REST service; licence not qualified. Copy for disposable CI databases, kept in the public repository by owner decision of 2026-10-27 (A18)."
     },
     {
       "run": "ece1a59f-9938-4bf2-8c72-d73b53851162",
@@ -32,28 +32,10 @@
       "licence": "OpenStreetMap contributors, Open Database License 1.0 (https://www.openstreetmap.org/copyright)."
     },
     {
-      "run": "2dbcea46-fa31-4811-a22c-6d1c44ef0306",
-      "source": "project:gate",
-      "why": "Gate project page: directory search, project page with sources, component of Gate & Arc.",
-      "licence": "Aldar Properties website page; terms not qualified. Internal test copy, private repository, owner decision 2026-10-25."
-    },
-    {
-      "run": "ed1b140a-03f1-41a7-8a45-05c457a77998",
-      "source": "project:gate",
-      "why": "Gate community record of the Aldar search service, second registered source of the project.",
-      "licence": "Aldar Properties search service response; terms not qualified. Internal test copy, private repository, owner decision 2026-10-25."
-    },
-    {
-      "run": "b48fb5d9-26d0-4fc3-add2-60cc78a42ea4",
-      "source": "project:gate-arc",
-      "why": "Gate & Arc programme page, the capture the reviewed relation of 2026-10-23 cites (latest HTTP 200 before the end of the review day).",
-      "licence": "Aldar Properties website page; terms not qualified. Internal test copy, private repository, owner decision 2026-10-25."
-    },
-    {
       "run": "0f1ecb5c-2b66-4c7a-b49a-fe6cf243de21",
       "source": "project:faya-al-saadiyat",
-      "why": "ADREC register reading for the verification sheet journey; same developer as Gate for the delivery history journey.",
-      "licence": "ADREC public project register (adrec.gov.ae); terms not qualified. Internal test copy, private repository, owner decision 2026-10-25."
+      "why": "ADREC register reading for the verification sheet journey, and the project of the directory, project page and developer delivery history journeys.",
+      "licence": "ADREC public project register (adrec.gov.ae); terms not qualified. Copy for disposable CI databases, kept in the public repository by owner decision of 2026-10-27 (A18)."
     }
   ]
 }

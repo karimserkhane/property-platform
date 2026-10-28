@@ -2,7 +2,7 @@
 
 import json
 
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_protocol import (
     MAX_CAPTURE_BYTES,
     MAX_PROJECT_RECEIPT_BYTES,
     extract_project_source,

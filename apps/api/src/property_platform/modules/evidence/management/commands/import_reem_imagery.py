@@ -4,7 +4,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from property_platform.modules.evidence.imagery_import import (
+from property_platform.modules.evidence.sources.imagery_import import (
     BASE,
     BBOX,
     SCENES,

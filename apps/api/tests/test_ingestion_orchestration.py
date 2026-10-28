@@ -5,6 +5,7 @@ import hashlib
 import os
 from datetime import timedelta
 from unittest.mock import Mock, patch
+from urllib.parse import urlencode
 from uuid import uuid4
 
 import psycopg
@@ -22,7 +23,7 @@ from test_reem_map_postgis import district, osm  # noqa: E402
 from test_reem_map_postgis import receipt as map_receipt
 
 from property_platform.modules.catalog.models import Parcel  # noqa: E402
-from property_platform.modules.evidence import onwani, services  # noqa: E402
+from property_platform.modules.evidence.maps import onwani, sdi_protocol, services  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     ImageryScene,
@@ -34,7 +35,10 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     PropertyPresentation,
     Source,
 )
-from property_platform.modules.evidence.orchestration import (  # noqa: E402
+from property_platform.modules.evidence.rebuild.failed_acquisitions import (  # noqa: E402
+    validate_received_acquisitions,
+)
+from property_platform.modules.evidence.rebuild.orchestration import (  # noqa: E402
     ImportBusy,
     execute_import,
     execution_result,
@@ -168,6 +172,53 @@ def test_precollection_rejection_preserves_complete_real_response_without_catalo
     assert not Parcel.objects.exists() and not ParcelObservation.objects.exists()
 
 
+def test_district_failed_journal_keeps_every_reviewed_ad_sdi_response():
+    now = timezone.now()
+
+    def rows(url, count, payload=b"{}"):
+        receipt = {
+            "url": url,
+            "http_status": 200,
+            "fetched_started_at": now,
+            "fetched_at": now,
+            "etag": "",
+            "last_modified_raw": "",
+            "acquisition_method": "scheduled_https_collect",
+            "timestamp_basis": "collector_clock",
+        }
+        return [{"payload": payload, "receipt": receipt}] * count
+
+    scope = "adm:madinat-al-riyad"
+    params = {
+        "f": "json",
+        "where": sdi_protocol.where(scope),
+        "objectIds": "1",
+        "outFields": sdi_protocol.FIELDS,
+        "outSR": "4326",
+        "returnGeometry": "true",
+    }
+    batch = sdi_protocol.URL + "/query?" + urlencode(params)
+    # Madinat Al Riyad: 355 responses; Al Faqa': more than 64 MiB.
+    assert len(validate_received_acquisitions("sdi_parcels", scope, rows(batch, 355))) == 355
+    large = rows(batch, 14, b"x" * (5 * 1024 * 1024))
+    assert len(validate_received_acquisitions("sdi_parcels", scope, large)) == 14
+    with pytest.raises(ValueError, match="exceeds its budget"):
+        validate_received_acquisitions(
+            "sdi_parcels", scope, rows(batch, sdi_protocol.MAX_RESPONSES + 1)
+        )
+    with pytest.raises(ValueError, match="total byte budget"):
+        validate_received_acquisitions(
+            "sdi_parcels", scope, rows(batch, 52, b"x" * (5 * 1024 * 1024))
+        )
+    metadata = onwani.BASE_URL + "?f=pjson"
+    with pytest.raises(ValueError, match="exceeds its budget"):
+        validate_received_acquisitions("onwani", "al-reem-island", rows(metadata, 206))
+    with pytest.raises(ValueError, match="total byte budget"):
+        validate_received_acquisitions(
+            "onwani", "al-reem-island", rows(metadata, 14, b"x" * (5 * 1024 * 1024))
+        )
+
+
 @pytest.mark.parametrize("invalid", ["url", "chronology", "payload"])
 def test_unqualified_failed_journal_is_rejected_before_operational_or_source_writes(invalid):
     now = timezone.now()
@@ -210,7 +261,7 @@ def test_property_retry_can_bind_first_receipt_after_transport_failure():
         error="TimeoutError",
     )
     with patch(
-        "property_platform.modules.evidence.property_import.registry",
+        "property_platform.modules.evidence.projects.property_import.registry",
         return_value=([profile], {"example": photo}),
     ):
         result = execute("property_presentations", receipt=receipts)
@@ -308,7 +359,7 @@ def test_map_injected_acquisition_retains_source_owned_identity():
 def test_exact_property_receipt_replay_reuses_history_but_fresh_check_does_not():
     _, profile, photo, receipts = sample()
     with patch(
-        "property_platform.modules.evidence.property_import.registry",
+        "property_platform.modules.evidence.projects.property_import.registry",
         return_value=([profile], {"example": photo}),
     ):
         first = execute("property_presentations", receipt=receipts)

@@ -12,7 +12,7 @@ Les octets ne sont pas dupliqués dans le JSON du journal : les originaux resten
 
 Le journal refuse UPDATE/DELETE. Les opérations administrateur telles que TRUNCATE, restauration ou désactivation des triggers demandent une procédure de maintenance et une sauvegarde externe de PostgreSQL et du stockage privé. Les credentials/sessions Django et la base interne distincte de Prefect sont hors du journal immobilier.
 
-Les colonnes binaires apparaissent dans le journal sous forme de SHA-256 calculé par PostgreSQL. Les captures originales refusent la suppression et le remplacement de leurs octets/empreintes ; déplacer des octets SQL vers le stockage privé exige une copie vérifiée de même empreinte et même taille.
+Les colonnes binaires apparaissent dans le journal sous forme de SHA-256 calculé par PostgreSQL. Les captures originales refusent la suppression et le remplacement de leurs octets/empreintes ; déplacer des octets SQL vers le stockage privé exige une copie vérifiée de même empreinte et même taille. La commande `capture_storage relocate` applique cette règle ([MEDIA_STORAGE.md](MEDIA_STORAGE.md#7-bis-contenus-bruts-des-captures-hors-de-postgresql-tâche-a10)).
 
 ## Reprise dans les lectures
 
@@ -41,7 +41,7 @@ Les composites ESA WorldCover 2020/2021 sont gratuits sous CC BY 4.0 ([licence](
 
 ## Pipelines et installation
 
-`evidence/pipeline_inventory.py` rattache chaque table à ses flows producteurs. Les tables partagées/jonctions appartiennent aux flows qui les alimentent ; les décisions humaines ont une vérification, sans décision de revue fabriquée par une collecte.
+`evidence/history/pipeline_inventory.py` rattache chaque table à ses flows producteurs. Les tables partagées/jonctions appartiennent aux flows qui les alimentent ; les décisions humaines ont une vérification, sans décision de revue fabriquée par une collecte.
 
 Le déploiement **data-history** contrôle tables, triggers actifs et couverture des pipelines, puis capture son rapport. Une table inconnue/non auditée fait échouer le contrôle. Les trois déploiements **basemap-openfreemap**, **basemap-sentinel-worldcover-2020**, **basemap-sentinel-worldcover-2021** traitent la file chaque minute. Les nouveaux calendriers démarrent désactivés ; ceux déjà configurés sont conservés au redémarrage.
 

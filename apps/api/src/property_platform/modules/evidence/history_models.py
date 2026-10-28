@@ -25,6 +25,12 @@ class RowRevision(models.Model):
             ),
             models.Index(fields=["recorded_at"], name="row_revision_time_idx"),
             models.Index(fields=["execution_key"], name="row_revision_execution_idx"),
+            # Read-cache versions: latest revision per table, writes of pending transactions.
+            models.Index(fields=["schema_name", "table_name", "id"], name="row_revision_table_idx"),
+            models.Index(
+                fields=["transaction_id", "schema_name", "table_name"],
+                name="row_revision_transaction_idx",
+            ),
         ]
 
 

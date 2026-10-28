@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand, CommandError
 
-from property_platform.modules.evidence.project_locations import withdraw_camera_positions
+from property_platform.modules.evidence.projects.project_locations import withdraw_camera_positions
 
 
 class Command(BaseCommand):

@@ -3,12 +3,13 @@
 import json
 from collections.abc import Sequence
 
-from property_platform.modules.evidence.property_protocol import (
+from property_platform.modules.evidence.projects.property_protocol import (
     MAX_CAPTURE_BYTES,
     MAX_IMAGE_BYTES,
     validate_photo,
     validate_receipts,
 )
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 from .http import AcquisitionError, SourceHTTP, checked_url
 
@@ -23,7 +24,7 @@ def property_urls(profiles: Sequence[dict], photos: dict) -> tuple[str, ...]:
         raise AcquisitionError("Unexpected photograph registry")
     urls = []
     try:
-        for profile in profiles:
+        for profile in collectable(profiles):
             urls.append(checked_url(profile["source_url"]))
             if key := profile.get("photo_key"):
                 photo = photos[key]
@@ -31,6 +32,11 @@ def property_urls(profiles: Sequence[dict], photos: dict) -> tuple[str, ...]:
     except (KeyError, TypeError) as exc:
         raise AcquisitionError("Incomplete property acquisition registry") from exc
     return tuple(dict.fromkeys(urls))
+
+
+def collectable(profiles: Sequence[dict]) -> list[dict]:
+    """Profiles whose source page may be fetched under its source rights (A19)."""
+    return [profile for profile in profiles if collection_allowed(profile["source_url"])]
 
 
 def collect_property_receipts(
@@ -42,6 +48,7 @@ def collect_property_receipts(
 ) -> list[dict]:
     """Return a complete fresh batch or fail, never import a partial/stale receipt file."""
     urls = property_urls(profiles, photos)
+    profiles = collectable(profiles)
     if (
         type(max_receipt_bytes) is not int
         or not 1 <= max_receipt_bytes <= MAX_PROPERTY_RECEIPT_BYTES

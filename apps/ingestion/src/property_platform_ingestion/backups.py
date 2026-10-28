@@ -27,6 +27,8 @@ SCHEMAS = ("real_estate", "evidence")
 # Mounted private trees mirrored next to the dumps (see compose.ingestion.yaml).
 MIRRORED = {"media": Path("/media"), "receipts": Path("/data")}
 DUMP_TIMEOUT = 3600
+# Mismatch lines kept per check; the totals always count every object.
+MISMATCH_LINES = 50
 
 
 def backup_root() -> Path:
@@ -203,8 +205,49 @@ def compare_counts(expected: dict[str, int], restored: dict[str, int]) -> list[s
     ] + [f"{table}: not in the backup manifest" for table in sorted(set(restored) - set(expected))]
 
 
+def object_mismatches(cursor, mirror: Path) -> tuple[dict, list[str]]:
+    """Every local object the dump references must be mirrored with its size and SHA-256.
+
+    Raw capture bodies and private media leave SQL only after a verified copy exists, so a
+    dump is restorable only together with these files. S3 objects are counted, not read:
+    their provider keeps them.
+    """
+    cursor.execute(
+        "SELECT backend, object_key, byte_length, content_sha256 "
+        "FROM evidence.stored_object ORDER BY object_key"
+    )
+    summary = {"local": 0, "local_bytes": 0, "remote": 0}
+    mismatches = []
+    root = mirror.resolve()
+    for backend, key, size, sha256 in cursor.fetchall():
+        if backend != "local":
+            summary["remote"] += 1
+            continue
+        summary["local"] += 1
+        summary["local_bytes"] += size
+        path = mirror.joinpath(*key.split("/"))
+        if not path.resolve().is_relative_to(root):
+            problem = "escapes the mirror"
+        elif not path.is_file():
+            problem = "missing from the mirror"
+        elif path.stat().st_size != size:
+            problem = f"mirrored with {path.stat().st_size} bytes, expected {size}"
+        elif _sha256(path) != sha256:
+            problem = "mirrored copy differs from its SHA-256"
+        else:
+            continue
+        mismatches.append(f"object {key}: {problem}")
+    if len(mismatches) > MISMATCH_LINES:
+        hidden = len(mismatches) - MISMATCH_LINES
+        mismatches = mismatches[:MISMATCH_LINES] + [f"{hidden} more object mismatches"]
+    return summary, mismatches
+
+
 def restore_check(url: str | None = None, name: str | None = None) -> dict:
-    """Restore the newest (or named) dump into a throwaway database and compare counts."""
+    """Restore the newest (or named) dump into a throwaway database and compare counts.
+
+    Objects referenced by the restored database are checked against the file mirror.
+    """
     url = url or database_url()
     root = backup_root()
     found = backups(root)
@@ -236,16 +279,22 @@ def restore_check(url: str | None = None, name: str | None = None) -> dict:
         with psycopg.connect(parts._replace(path=f"/{scratch}").geturl()) as restored:
             with restored.cursor() as cursor:
                 counts = table_counts(cursor)
+                objects, object_problems = (
+                    object_mismatches(cursor, root / "files" / "media")
+                    if "evidence.stored_object" in counts
+                    else ({}, [])
+                )
     finally:
         with psycopg.connect(url, autocommit=True) as admin:
             admin.execute(
                 sql.SQL("DROP DATABASE IF EXISTS {} WITH (FORCE)").format(sql.Identifier(scratch))
             )
-    mismatches = compare_counts(manifest["tables"], counts)
+    mismatches = compare_counts(manifest["tables"], counts) + object_problems
     return {
         "name": name,
         "ok": not mismatches,
         "tables": len(counts),
         "rows": sum(counts.values()),
+        "objects": objects,
         "mismatches": mismatches,
     }

@@ -12,6 +12,18 @@ from .read_cache import cached_read
 router = Router(tags=["local-preview"])
 
 
+class SourceRightsResponse(Schema):
+    """Reviewed rights of the source site (A19); `unknown` means not qualified yet."""
+
+    licence: str
+    licence_url: str | None = None
+    terms_url: str | None = None
+    publication: Literal["open", "facts", "link", "none"]
+    attribution: str | None = None
+    reviewed_on: date | None = None
+    shown_beyond_terms: bool = False
+
+
 class ProjectSourceResponse(Schema):
     url: str
     name: str
@@ -26,6 +38,7 @@ class ProjectSourceResponse(Schema):
     language: str
     evidence_pointer: str = ""
     rights_status: str
+    rights: SourceRightsResponse | None = None
     ingested_at: datetime | None = None
     historical: bool = False
 
@@ -114,6 +127,7 @@ class ProjectRelationResponse(Schema):
     basis: str
     source_url: str
     retrieved_at: datetime
+    rights: SourceRightsResponse | None = None
 
 
 class ProjectDeclaredProgressResponse(Schema):
@@ -138,6 +152,7 @@ class RetentionReferenceResponse(Schema):
     url: str
     consulted_on: date
     covers: str
+    rights: SourceRightsResponse | None = None
 
 
 class RetentionSourceResponse(Schema):
@@ -234,6 +249,7 @@ class VerificationLinkResponse(Schema):
     registration_number: str
     url: str
     reviewed_on: date
+    rights: SourceRightsResponse | None = None
 
 
 class VerificationContradictionResponse(Schema):
@@ -296,6 +312,7 @@ class ActivityParcelResponse(Schema):
 class ActivitySourceResponse(Schema):
     name: str
     url: str
+    rights: SourceRightsResponse | None = None
 
 
 class ProjectConstructionActivityResponse(Schema):
@@ -303,6 +320,63 @@ class ProjectConstructionActivityResponse(Schema):
 
     source: ActivitySourceResponse
     parcels: list[ActivityParcelResponse]
+
+
+class ObservedSalesLabelResponse(Schema):
+    """Reviewed ADREC sales label that selects the project's recorded sales."""
+
+    district: str
+    label: str
+    evidence: Literal["register_name", "project_name"]
+    registration_number: str | None
+    reviewed_on: date
+
+
+class ObservedSalesCaptureResponse(Schema):
+    url: str
+    content_sha256: str
+
+
+class ObservedSalesWindowResponse(Schema):
+    """Newest ADREC sales window of the territory; windows overlap and are never added."""
+
+    territory: str
+    period_start: date
+    period_end: date
+    collected_at: datetime
+    captures: list[ObservedSalesCaptureResponse]
+
+
+class ObservedRangeResponse(Schema):
+    """Smallest and largest recorded value, as decimal text."""
+
+    min: str
+    max: str
+
+
+class ObservedSalesGroupResponse(Schema):
+    """Recorded sales of one type; ranges cover the full-share sales only."""
+
+    property_type: str
+    property_layout: str
+    sale_application_type: str
+    sale_sequence: str
+    sales_count: int
+    full_share_count: int
+    price_aed: ObservedRangeResponse | None
+    rate_aed_per_sqm: ObservedRangeResponse | None
+    sold_area_sqm: ObservedRangeResponse | None
+    first_registration_date: date
+    last_registration_date: date
+
+
+class ProjectObservedSalesResponse(Schema):
+    """Recorded ADREC sales of the project's reviewed labels, by type, with ranges."""
+
+    source: ActivitySourceResponse
+    labels: list[ObservedSalesLabelResponse]
+    window: ObservedSalesWindowResponse | None
+    groups: list[ObservedSalesGroupResponse]
 
 
 class ProjectDetailResponse(Schema):
@@ -329,6 +403,7 @@ class ProjectDetailResponse(Schema):
     cancellation_retention: CancellationRetentionResponse | None = None
     verification: ProjectVerificationResponse | None = None
     construction_activity: ProjectConstructionActivityResponse | None = None
+    observed_sales: ProjectObservedSalesResponse | None = None
 
 
 class ProjectSummaryResponse(Schema):
@@ -364,7 +439,7 @@ def projects(
     offset: int = Query(0, ge=0, le=50000),
     limit: int = Query(200, ge=1, le=200),
 ):
-    from property_platform.modules.evidence.project_queries import project_directory
+    from property_platform.modules.evidence.projects.project_queries import project_directory
 
     return project_directory(territory, query=q, offset=offset, limit=limit)
 
@@ -378,7 +453,9 @@ def projects(
 def project_detail(request, slug: str):
     if len(slug) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
         return Status(404, {"code": "not_found"})
-    from property_platform.modules.evidence.project_queries import project_detail as read_project
+    from property_platform.modules.evidence.projects.project_queries import (
+        project_detail as read_project,
+    )
     from property_platform.modules.publication.cancellation_retention import project_retention
 
     result = read_project(slug)
@@ -420,7 +497,7 @@ class DeveloperDeliveryHistoryResponse(Schema):
 def developer_delivery_history(request, key: str):
     if len(key) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", key):
         return Status(404, {"code": "not_found"})
-    from property_platform.modules.evidence.delivery_history import (
+    from property_platform.modules.evidence.projects.delivery_history import (
         developer_delivery_history as read_history,
     )
 

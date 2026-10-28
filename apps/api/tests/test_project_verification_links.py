@@ -4,7 +4,7 @@ import copy
 
 import pytest
 
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_protocol import (
     project_verification_links,
     validate_project_verification_links,
 )

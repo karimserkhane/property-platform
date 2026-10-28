@@ -1,10 +1,27 @@
 import assert from "node:assert/strict";
+import { registerHooks } from "node:module";
 import test from "node:test";
-import {
-  BASEMAP_IMAGERY,
-  imagerySelection,
-  imageryVisibility,
-} from "../src/features/atlas/imagery-sources.ts";
+
+// Production uses bundler resolution for extensionless TypeScript imports.
+// Limit Node's equivalent resolution to the atlas module being tested here.
+const atlasUrl = new URL("../src/features/atlas/", import.meta.url).href;
+const resolution = registerHooks({
+  resolve(specifier, context, nextResolve) {
+    return nextResolve(
+      context.parentURL?.startsWith(atlasUrl) && specifier.startsWith("./")
+        ? `${specifier}.ts`
+        : specifier,
+      context,
+    );
+  },
+});
+const { BASEMAP_IMAGERY, imagerySelection, imageryVisibility } = await import(
+  "../src/features/atlas/imagery-sources.ts"
+);
+const { mapCreditHtml, mapCreditText, mapCreditUrl } = await import(
+  "../src/features/atlas/map-credits.ts"
+);
+resolution.deregister();
 
 test("imagery revisions have distinct HTTPS sources and do not replace the default provider", () => {
   assert.equal(BASEMAP_IMAGERY[0].id, "esri");
@@ -82,4 +99,28 @@ test("close-up Esri views reuse the available Reem parent tile instead of grey h
   );
   assert.ok(closeUp.z > esri.maxzoom);
   assert.equal(imagerySelection("esri").scene, "esri");
+});
+
+test("map credits come from the reviewed registry, linked to the site's terms", () => {
+  assert.equal(
+    mapCreditText("openstreetmap"),
+    "© OpenStreetMap contributors · ODbL 1.0",
+  );
+  assert.equal(
+    mapCreditUrl("openstreetmap"),
+    "https://www.openstreetmap.org/copyright",
+  );
+  assert.equal(
+    mapCreditHtml("overture"),
+    '<a href="https://docs.overturemaps.org/attribution/" target="_blank" rel="noopener noreferrer">© Overture Maps Foundation · CDLA Permissive 2.0</a>',
+  );
+  const worldcover = BASEMAP_IMAGERY.find(
+    (provider) => provider.id === "sentinel-worldcover-2021",
+  );
+  assert.equal(worldcover.attribution, mapCreditText("esa-worldcover", "2021"));
+  assert.match(
+    worldcover.attribution,
+    /ESA WorldCover project.*2021.*CC BY 4\.0$/,
+  );
+  assert.equal(worldcover.sourceUrl, mapCreditUrl("esa-worldcover"));
 });

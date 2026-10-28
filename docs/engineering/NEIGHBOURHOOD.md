@@ -60,8 +60,8 @@ Préfixe Windows : `C:\Users\Karim\Repositories\property-platform\`.
 | Chemin depuis ce préfixe | Responsabilité |
 |---|---|
 | `apps/api/src/property_platform/modules/evidence/collection_profiles.py` | Périmètres et requêtes de collecte OSM |
-| `apps/api/src/property_platform/modules/evidence/map_sources.py` | Protocole et choix typé des lieux OSM |
-| `apps/api/src/property_platform/modules/evidence/map_import.py` | Réconciliation et observations auditées |
+| `apps/api/src/property_platform/modules/evidence/maps/map_sources.py` | Protocole et choix typé des lieux OSM |
+| `apps/api/src/property_platform/modules/evidence/maps/map_import.py` | Réconciliation et observations auditées |
 | `apps/api/src/property_platform/modules/catalog/map_queries.py` | Géométries, distances et superpositions bornées |
 | `apps/api/src/property_platform/modules/publication/surroundings.py` | Catégories et provenances des environs |
 | `apps/api/src/property_platform/modules/publication/preview.py` | Fiche de parcelle et alternatives superposées |

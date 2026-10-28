@@ -1,3 +1,6 @@
+import { mapCreditText, mapCreditUrl } from "./map-credits";
+
+// Esri World Imagery is not a reviewed source site yet; its credit stays here.
 export const IMAGERY_ATTRIBUTION =
   "Esri, Maxar, Earthstar Geographics and the GIS User Community";
 
@@ -38,8 +41,8 @@ export const BASEMAP_IMAGERY: readonly ImageryProvider[] = [
     tiles: `archive://sentinel-worldcover-${year}/{z}/{x}/{y}`,
     minzoom: 8,
     maxzoom: 14,
-    attribution: `© ESA WorldCover project ${year} / Contains modified Copernicus Sentinel data (${year}) processed by ESA WorldCover consortium · Terrascope · CC BY 4.0`,
-    sourceUrl: "https://esa-worldcover.org/en/data-access",
+    attribution: mapCreditText("esa-worldcover", String(year)),
+    sourceUrl: mapCreditUrl("esa-worldcover") ?? "",
     year,
   })),
 ];

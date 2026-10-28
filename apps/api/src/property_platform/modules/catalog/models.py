@@ -72,6 +72,14 @@ class Parcel(models.Model):
     class Meta:
         # Resolved in real_estate by the fixed PostgreSQL search_path.
         db_table = "parcel"
+        # Identity checks of every imported plot look up its official ID in its district;
+        # without this, each lookup scans the whole emirate.
+        indexes = [
+            models.Index(
+                fields=["official_plot_id", "municipality", "district"],
+                name="parcel_official_plot",
+            ),
+        ]
         constraints = [
             models.UniqueConstraint(
                 fields=["source_namespace", "source_record_id"], name="parcel_source_identity"

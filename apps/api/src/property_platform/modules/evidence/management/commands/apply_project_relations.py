@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from property_platform.modules.evidence.project_relations import apply_project_relations
+from property_platform.modules.evidence.projects.project_relations import apply_project_relations
 
 
 class Command(BaseCommand):

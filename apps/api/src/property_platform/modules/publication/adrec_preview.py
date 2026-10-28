@@ -2,8 +2,8 @@
 
 from django.db.models import Max, OuterRef, Subquery
 
-from property_platform.modules.evidence import adrec
 from property_platform.modules.evidence.models import AdrecIndexObservation, AdrecMarketSnapshot
+from property_platform.modules.evidence.sources import adrec
 
 
 def market(territory, *, query="", offset=0, limit=40, snapshot_id=None):
