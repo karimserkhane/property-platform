@@ -7,7 +7,7 @@ d'import, peut tout lire : `rebuild/rebuild_archive.py`, `rebuild_published.py`,
 `replay_protocols.py`, `demo_package.py`, `orchestration.py`, `failed_acquisitions.py`),
 `projects` (fiches, rapprochements et lectures de projets :
 `projects/project_*.py` hors modèles, `property_protocol.py`, `property_import.py`,
-`queries.py`, `verification_sheet.py`, `delivery_history.py`, `activity_import.py`,
+`queries.py`, `verification_sheet.py`, `market_sheet.py`, `delivery_history.py`, `activity_import.py`,
 `activity_sheet.py` ; les registres JSON restent à la racine), `maps` (couches
 cartographiques, parcelles, fonds archivés, accessibilité et identités géographiques :
 `maps/onwani.py`, `services.py`, `map_sources.py`, `map_import.py`, `osm_api_protocol.py`,
@@ -91,6 +91,19 @@ contrat ; l'affichage relève de B05. `project_verification_links.json` et
 (table journalisée `evidence.project_verification_link`, migration additive `0034`),
 rattachés à un numéro porté par une source ADREC enregistrée, révoqués et jamais
 supprimés ; la page n'est jamais lue. Voir [la vérification des projets](PROJECT_VERIFICATION.md).
+
+**Libellés de ventes ADREC — C01, 26 octobre 2026.** `evidence/project_market_labels.json`
+(registre relu, à la racine comme les autres registres),
+`projects/project_protocol.validate_project_market_labels` (règles pures) et
+`projects/project_market_labels.py` possèdent le rapprochement entre une fiche et le texte
+`project_name` des ventes ADREC d'un district : égalité normalisée avec le nom de la
+fiche ou d'un de ses enregistrements ADREC, jamais une ressemblance. Table journalisée
+`evidence.project_market_label` (migration additive `0039`), liens révoqués et jamais
+supprimés ; les ventes ne sont pas recopiées. Direction : import evidence → catalog.
+Lecture : `evidence/projects/market_sheet.py` regroupe par type les ventes des libellés
+actifs dans la dernière fenêtre réussie du territoire (fourchettes et effectifs, jamais une
+valeur seule) ; `project_queries.project_detail` l'appelle (champ `observed_sales`, contrat
+régénéré). Voir [les prix observés](MARKET_PRICES.md).
 
 **État publié reconstruit — A12, 24 octobre 2026.** `evidence/rebuild/rebuild_published.py`
 possède la forme canonique de l'état publié (fiches projet, liens d'identité actifs),
