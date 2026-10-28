@@ -136,7 +136,7 @@ Constats :
 
 - **Al Faqa’** (`jolly-lyrebird`, 32 min) : **7 307 parcelles créées**, aucune quarantaine, sous le budget de district de F05.
 - **SA’** (troisième essai identique) : la liste reçoit encore la page « Request Rejected » du pare-feu d’AD-SDI pour la clause `DISTRICTENG='SA'''` ; le district est noté **indisponible chez la source** ([INGESTION.md](INGESTION.md)), sans reformuler la requête.
-- **Madinat Al Riyad** (`exceptional-slug`) : collecte complète en 3 min (354 réponses), puis `DomainTimeout` après 3 600 s. Les 57 minutes restantes venaient de la base : la recherche des candidats d’une parcelle par `official_plot_id`, municipalité et district parcourait toute `real_estate.parcel` (367 074 lignes, environ 100 ms par parcelle). Index `parcel_official_plot` (migration additive `catalog/0007`) livré par [F07](../tasks/F07.md) ; le réimport, qui exige cette migration sur la base partagée, reste à faire dans F06.
+- **Madinat Al Riyad** (`exceptional-slug`) : collecte complète en 3 min (354 réponses), puis `DomainTimeout` après 3 600 s. Les 57 minutes restantes venaient de la base : la recherche des candidats d’une parcelle par `official_plot_id`, municipalité et district parcourait toute `real_estate.parcel` (367 074 lignes, environ 100 ms par parcelle). Index `parcel_official_plot` (migration additive `catalog/0007`) livré par F07 (PR #50) ; le réimport, qui exige cette migration sur la base partagée, reste à faire dans F06.
 
 Mesures après Al Faqa’ (base partagée, API en place ; premier appel, puis médiane de cinq ; tailles non compressées) :
 
