@@ -100,7 +100,7 @@ def test_every_source_and_connector_has_an_explicit_review_entry():
     assert {row["host"] for row in source_rights()} == used
 
 
-def test_the_owner_decisions_of_27_october_are_recorded():
+def test_the_owner_decisions_of_27_and_28_october_are_recorded():
     decided = {
         row["host"]: (row["collection"], row["publication"])
         for row in source_rights()
@@ -109,10 +109,13 @@ def test_the_owner_decisions_of_27_october_are_recorded():
     assert decided == {
         "aldar.com": ("forbidden", "link"),
         "bayut.com": ("forbidden", "none"),
+        "gravity-re.com": ("forbidden", "link"),
+        "housebook.deals": ("forbidden", "none"),
         "linkedin.com": ("forbidden", "none"),
         "propertyfinder.ae": ("forbidden", "none"),
         "psinv.net": ("forbidden", "none"),
         "reddit.com": ("forbidden", "none"),
+        "squareyards.ae": ("forbidden", "none"),
     }
 
 

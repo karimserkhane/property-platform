@@ -88,7 +88,7 @@
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "The ADSDI_OpenData layer metadata say 'For use by Abu Dhabi government entities only', while the same layers are public on data.abudhabi under the Abu Dhabi Government Open Data License. Contradiction submitted to the owner (A21)."
+    "basis": "The ADSDI_OpenData layer metadata say 'For use by Abu Dhabi government entities only', while the same layers are public on data.abudhabi under the Abu Dhabi Government Open Data License. The owner kept it as facts until the layers are collected from the open platform (F08)."
   },
   {
     "host": "arup.com",
@@ -344,11 +344,11 @@
     "licence_url": "",
     "terms_url": "https://gravity-re.com/terms",
     "reviewed_on": "2026-10-28",
-    "reviewed_by": "claude",
-    "collection": "allowed",
-    "publication": "facts",
+    "reviewed_by": "Karim",
+    "collection": "forbidden",
+    "publication": "link",
     "attribution": "",
-    "basis": "Terms limit the site to private, non-commercial use and forbid copying or downloading its material without written consent; no clause on automated access. Submitted to the owner, as Aldar was (A21)."
+    "basis": "Terms limit the site to private, non-commercial use and forbid copying or downloading its material without written consent; collection forbidden and links kept, as for Aldar, by owner decision (A21)."
   },
   {
     "host": "gulfnews.com",
@@ -370,11 +370,11 @@
     "licence_url": "",
     "terms_url": "https://ae.housebook.deals/en/rules",
     "reviewed_on": "2026-10-28",
-    "reviewed_by": "claude",
-    "collection": "allowed",
-    "publication": "facts",
+    "reviewed_by": "Karim",
+    "collection": "forbidden",
+    "publication": "none",
     "attribution": "",
-    "basis": "Terms forbid automated programs that scan, copy or index the service and extracting its database, for personal, non-commercial use only. Submitted to the owner before marking collection forbidden (A21)."
+    "basis": "Terms forbid automated programs that scan, copy or index the service and extracting its database, for personal, non-commercial use only; collection forbidden and nothing shown, by owner decision (A21)."
   },
   {
     "host": "imkan.ae",
@@ -929,11 +929,11 @@
     "licence_url": "",
     "terms_url": "https://www.squareyards.ae/terms",
     "reviewed_on": "2026-10-28",
-    "reviewed_by": "claude",
-    "collection": "allowed",
-    "publication": "facts",
+    "reviewed_by": "Karim",
+    "collection": "forbidden",
+    "publication": "none",
     "attribution": "",
-    "basis": "Terms (section 10) forbid any robot, spider or automatic device to access, acquire or copy the site, and wholesale reproduction of its content. Submitted to the owner before marking collection forbidden (A21)."
+    "basis": "Terms (section 10) forbid any robot, spider or automatic device to access, acquire or copy the site, and wholesale reproduction of its content; collection forbidden and nothing shown, by owner decision (A21)."
   },
   {
     "host": "sralmaryahisland.com",
