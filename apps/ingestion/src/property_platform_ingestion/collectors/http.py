@@ -14,6 +14,8 @@ import httpx
 from property_platform.modules.evidence.source_rights import collection_allowed
 
 MAX_SESSION_BYTES = 64 * 1024 * 1024
+# A connector may declare a larger measured budget (AD-SDI districts), never above this.
+MAX_DECLARED_SESSION_BYTES = 256 * 1024 * 1024
 MAX_SESSION_RESPONSES = 600
 
 
@@ -112,7 +114,10 @@ class SourceHTTP:
             raise AcquisitionError("At least one reviewed source URL is required")
         if not 0 <= min_interval_seconds <= 60 or not 1 <= total_timeout_seconds <= 300:
             raise AcquisitionError("Invalid acquisition pacing or timeout")
-        if type(max_session_bytes) is not int or not 1 <= max_session_bytes <= MAX_SESSION_BYTES:
+        if (
+            type(max_session_bytes) is not int
+            or not 1 <= max_session_bytes <= MAX_DECLARED_SESSION_BYTES
+        ):
             raise AcquisitionError("Invalid acquisition session byte budget")
         if (
             type(max_session_responses) is not int

@@ -9,6 +9,8 @@ from pathlib import Path
 MAX_REQUEST = 8192
 MAX_RESULT = 64 * 1024
 TIMEOUT = 900
+# A full AD-SDI district: Madinat Al Riyad needs 355 requests at about 5 s each (28/10/2026).
+SDI_TIMEOUT = 3600
 
 
 class IngestionFailure(RuntimeError):

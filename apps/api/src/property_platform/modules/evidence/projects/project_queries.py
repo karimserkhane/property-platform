@@ -256,8 +256,9 @@ def _project_website(project, snapshots):
 
 
 def project_detail(slug):
-    # The sheets read delivery history and activity, which build on this module.
+    # The sheets read delivery history, activity and sales, which build on this module.
     from .activity_sheet import project_activity
+    from .market_sheet import project_market
     from .verification_sheet import project_verification_sheet
 
     project = Project.objects.select_related("developer").filter(slug=slug).first()
@@ -489,6 +490,7 @@ def project_detail(slug):
         "declared_progress": _declared_progress(accepted),
         "verification": project_verification_sheet(project, accepted),
         "construction_activity": project_activity(project),
+        "observed_sales": project_market(project),
     }
 
 

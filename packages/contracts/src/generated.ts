@@ -1968,6 +1968,101 @@ export interface components {
             readings: number;
             source: components["schemas"]["ProjectSourceResponse"];
         };
+        /**
+         * ObservedRangeResponse
+         * @description Smallest and largest recorded value, as decimal text.
+         */
+        ObservedRangeResponse: {
+            /** Min */
+            min: string;
+            /** Max */
+            max: string;
+        };
+        /** ObservedSalesCaptureResponse */
+        ObservedSalesCaptureResponse: {
+            /** Url */
+            url: string;
+            /** Content Sha256 */
+            content_sha256: string;
+        };
+        /**
+         * ObservedSalesGroupResponse
+         * @description Recorded sales of one type; ranges cover the full-share sales only.
+         */
+        ObservedSalesGroupResponse: {
+            /** Property Type */
+            property_type: string;
+            /** Property Layout */
+            property_layout: string;
+            /** Sale Application Type */
+            sale_application_type: string;
+            /** Sale Sequence */
+            sale_sequence: string;
+            /** Sales Count */
+            sales_count: number;
+            /** Full Share Count */
+            full_share_count: number;
+            price_aed: components["schemas"]["ObservedRangeResponse"] | null;
+            rate_aed_per_sqm: components["schemas"]["ObservedRangeResponse"] | null;
+            sold_area_sqm: components["schemas"]["ObservedRangeResponse"] | null;
+            /**
+             * First Registration Date
+             * Format: date
+             */
+            first_registration_date: string;
+            /**
+             * Last Registration Date
+             * Format: date
+             */
+            last_registration_date: string;
+        };
+        /**
+         * ObservedSalesLabelResponse
+         * @description Reviewed ADREC sales label that selects the project's recorded sales.
+         */
+        ObservedSalesLabelResponse: {
+            /** District */
+            district: string;
+            /** Label */
+            label: string;
+            /**
+             * Evidence
+             * @enum {string}
+             */
+            evidence: "register_name" | "project_name";
+            /** Registration Number */
+            registration_number: string | null;
+            /**
+             * Reviewed On
+             * Format: date
+             */
+            reviewed_on: string;
+        };
+        /**
+         * ObservedSalesWindowResponse
+         * @description Newest ADREC sales window of the territory; windows overlap and are never added.
+         */
+        ObservedSalesWindowResponse: {
+            /** Territory */
+            territory: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
+            /** Captures */
+            captures: components["schemas"]["ObservedSalesCaptureResponse"][];
+        };
         /** ProjectAmenityResponse */
         ProjectAmenityResponse: {
             /** Code */
@@ -2055,6 +2150,7 @@ export interface components {
             cancellation_retention?: components["schemas"]["CancellationRetentionResponse"] | null;
             verification?: components["schemas"]["ProjectVerificationResponse"] | null;
             construction_activity?: components["schemas"]["ProjectConstructionActivityResponse"] | null;
+            observed_sales?: components["schemas"]["ProjectObservedSalesResponse"] | null;
         };
         /** ProjectHandoverResponse */
         ProjectHandoverResponse: {
@@ -2147,6 +2243,18 @@ export interface components {
             /** Height */
             height?: number | null;
             source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * ProjectObservedSalesResponse
+         * @description Recorded ADREC sales of the project's reviewed labels, by type, with ranges.
+         */
+        ProjectObservedSalesResponse: {
+            source: components["schemas"]["ActivitySourceResponse"];
+            /** Labels */
+            labels: components["schemas"]["ObservedSalesLabelResponse"][];
+            window: components["schemas"]["ObservedSalesWindowResponse"] | null;
+            /** Groups */
+            groups: components["schemas"]["ObservedSalesGroupResponse"][];
         };
         /** ProjectProgrammeResponse */
         ProjectProgrammeResponse: {

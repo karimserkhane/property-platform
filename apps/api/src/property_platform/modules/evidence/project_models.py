@@ -538,6 +538,70 @@ class ProjectVerification(models.Model):
         ]
 
 
+class ProjectMarketLabel(models.Model):
+    """Reviewed ADREC sales label of a project (C01): which recorded sales it designates.
+
+    ADREC names a sale's project by free text within a district. Active rows follow
+    `project_market_labels.json`; removed or revised entries are revoked, never deleted,
+    so a published sales figure can be traced to the links that selected its rows.
+    """
+
+    project = models.ForeignKey(
+        "catalog.Project", on_delete=models.PROTECT, related_name="market_labels"
+    )
+    district = models.CharField(max_length=255)
+    label = models.CharField(max_length=255)
+    evidence = models.CharField(max_length=20)
+    registration_number = models.CharField(max_length=40, blank=True)
+    basis = models.CharField(max_length=500)
+    reviewed_on = models.DateField()
+    actor = models.CharField(max_length=160)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True)
+    revoked_by = models.CharField(max_length=160, blank=True)
+    revocation_reason = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        db_table = "project_market_label"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    district__regex=r"\S",
+                    label__regex=r"\S",
+                    basis__regex=r"\S",
+                    actor__regex=r"\S",
+                )
+                & (
+                    models.Q(evidence="project_name", registration_number="")
+                    | models.Q(
+                        evidence="register_name", registration_number__regex=r"^[0-9][0-9/]{5,39}$"
+                    )
+                ),
+                name="project_market_label_review_present",
+            ),
+            # A label designates one project at a time; a revoked link stays as history.
+            models.UniqueConstraint(
+                fields=["district", "label"],
+                condition=models.Q(active=True),
+                name="project_market_label_one_active",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    active=True, revoked_at__isnull=True, revoked_by="", revocation_reason=""
+                )
+                | models.Q(
+                    active=False,
+                    revoked_at__isnull=False,
+                    revoked_at__gte=models.F("created_at"),
+                    revoked_by__regex=r"\S",
+                    revocation_reason__regex=r"\S",
+                ),
+                name="project_market_label_revocation_valid",
+            ),
+        ]
+
+
 class ProjectVerificationLink(models.Model):
     """Reviewed link from a project registration to its official verification page (B02).
 

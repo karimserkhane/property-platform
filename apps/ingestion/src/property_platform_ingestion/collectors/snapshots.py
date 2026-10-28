@@ -8,7 +8,7 @@ from collections import defaultdict, deque
 
 from property_platform.modules.evidence.maps import map_sources, onwani
 
-from .http import AcquisitionError
+from .http import MAX_DECLARED_SESSION_BYTES, AcquisitionError
 from .map import MapCollector, OnwaniCollector
 from .references import ReferenceCollector
 
@@ -23,7 +23,10 @@ class ReplayFetcher:
     """One-use in-memory receipts; missing, exhausted or unexpected calls fail closed."""
 
     def __init__(self, *, max_total_bytes: int = MAX_SNAPSHOT_BYTES):
-        if type(max_total_bytes) is not int or not 1 <= max_total_bytes <= MAX_SNAPSHOT_BYTES:
+        if (
+            type(max_total_bytes) is not int
+            or not 1 <= max_total_bytes <= MAX_DECLARED_SESSION_BYTES
+        ):
             raise AcquisitionError("Invalid total snapshot byte budget")
         self._budget = max_total_bytes
         self._size = 0

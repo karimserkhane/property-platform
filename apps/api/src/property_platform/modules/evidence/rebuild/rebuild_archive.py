@@ -1068,6 +1068,7 @@ def replay_archive(
     captures (B06): the API runtime never reads rasters itself.
     """
     from ..projects import property_import
+    from ..projects.project_market_labels import apply_project_market_labels
     from ..projects.project_relations import apply_project_relations
     from ..projects.project_verification_links import apply_project_verification_links
     from ..source_rights_import import apply_source_rights
@@ -1232,6 +1233,7 @@ def replay_archive(
         ("imagery", lambda: replay_scenes(root, manifest["scenes"], actor)),
         ("project_relations", lambda: apply_project_relations(actor=actor)),
         ("project_verification_links", lambda: apply_project_verification_links(actor=actor)),
+        ("project_market_labels", lambda: apply_project_market_labels(actor=actor)),
         ("source_rights", lambda: apply_source_rights(actor=actor)),
     ):
         try:

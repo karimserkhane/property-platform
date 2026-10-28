@@ -1,6 +1,6 @@
 # Tableau des tâches
 
-Tâches issues du [plan concurrentiel](../product/PLAN_CONCURRENTIEL_20261023.md) et de la [feuille de route technique](../engineering/ENGINEERING_ROADMAP.md). Règles d'usage : [AGENT_WORKFLOW.md](../engineering/AGENT_WORKFLOW.md). Le fichier de chaque tâche fait foi ; ce tableau en est le résumé et se met à jour dans la même PR.
+Tâches issues du [plan concurrentiel](../product/PLAN_CONCURRENTIEL_20261023.md) et de la [feuille de route technique](../engineering/ENGINEERING_ROADMAP.md). Règles d'usage : [AGENT_WORKFLOW.md](../engineering/AGENT_WORKFLOW.md). Le fichier de chaque tâche fait foi ; ce tableau en est le résumé et se met à jour dans la même PR. Les branches partent de `main` et les PR la visent (branche de référence depuis le 28/10).
 
 Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si toutes ses dépendances sont `done` et si aucune décision du propriétaire n'est en attente.
 
@@ -35,8 +35,9 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [B05](B05.md) | B | Fiche « Vérification » d'un projet | 1 | B02, B03, B04 | non | done | claude |
 | [B06](B06.md) | B | Indice d'activité de chantier par satellite | 2 | A02 | non (décidée le 26/10 : option 3) | done | claude |
 | [B07](B07.md) | B | Signal d'activité satellite sur la fiche projet | 2 | B06 | non | done | claude |
-| [C01](C01.md) | C | Prix observés contre prix demandés | 2 | A01 | non | todo | unassigned |
+| [C01](C01.md) | C | Prix observés contre prix demandés | 2 | A01 | non (décidée le 28/10 : découpage vers C03) | done | claude |
 | [C02](C02.md) | C | Simulateur d'échéancier et coût total | 2 | B02 | non | todo | unassigned |
+| [C03](C03.md) | C | Prix demandés d'annonces à permis Madhmoun vérifié | 2 | C01, A19 | si aucune source autorisée | todo | unassigned |
 | [D01](D01.md) | D | Comptes utilisateurs | 2 | — | oui | todo | unassigned |
 | [D02](D02.md) | D | Liste de suivi et alertes explicables | 2 | D01 | non | todo | unassigned |
 | [E01](E01.md) | E | Index de recherche des preuves | 3 | A01 | non | todo | unassigned |
@@ -45,4 +46,6 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | done | claude |
 | [F03](F03.md) | F | Charge des parcelles de l'émirat sur les tuiles et l'index par zone | 3 | F01 | non | done | claude |
 | [F04](F04.md) | F | Parcelles de l'émirat sur la carte et imports ADM et AAM | 3 | F03 | non | done | claude |
-| [F05](F05.md) | F | Fin des imports de l'émirat : Madinat Al Riyad et AAM | 3 | F04 | non | todo | unassigned |
+| [F05](F05.md) | F | Fin des imports de l'émirat : Madinat Al Riyad et AAM | 3 | F04 | non | done | claude |
+| [F06](F06.md) | F | Réimports des derniers districts de l'émirat et mesures | 3 | F05 | non | done | claude |
+| [F07](F07.md) | F | Index des identifiants officiels de parcelles pour les imports de district | 3 | F05 | non | done | claude |

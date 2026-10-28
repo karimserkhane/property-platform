@@ -41,7 +41,8 @@ d'affichage `land-use-v3` reconnaît les familles générales sans inventer un �
 précis. Aucun propriétaire, occupant ou contact personnel n'est collecté.
 
 Chaque snapshot vérifie deux listes d'OBJECTID identiques et des lots complets de
-100 objets. Les plafonds sont 8 Mio par réponse et 64 Mio par acquisition. Les
+100 objets. Les plafonds sont 8 Mio par réponse et 64 Mio par acquisition (256 Mio et
+503 réponses pour un district de l'émirat, F05). Les
 réponses et leurs empreintes sont conservées avec leurs horloges d'acquisition et
 d'ingestion. `PLOTID` est l'identité source durable, distincte de l'OBJECTID technique.
 
