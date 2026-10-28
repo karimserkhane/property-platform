@@ -1,6 +1,6 @@
 # Prix observés et prix demandés (C01)
 
-Tâche [C01](../tasks/C01.md), plan : [prix observés contre prix demandés](../product/PLAN_CONCURRENTIEL_20261023.md). Ce guide décrit le rapprochement entre les fiches projet et les ventes ADREC, puis la lecture des fourchettes par type  et son affichage. Le prix demandé et l'écart relèvent de [C03](../tasks/C03.md) (découpage décidé le 28/10).
+Tâche [C01](../tasks/C01.md), plan : [prix observés contre prix demandés](../product/PLAN_CONCURRENTIEL_20261023.md). Ce guide décrit le rapprochement entre les fiches projet et les ventes ADREC, puis la lecture des fourchettes par type et son affichage. Le prix demandé et l'écart relèvent de [C03](../tasks/C03.md) (découpage décidé le 28/10).
 
 ## 1. Le problème
 
@@ -45,4 +45,4 @@ Affichage : section « Ventes enregistrées » de la fiche projet (`apps/web/src
 
 ## 6. Reste à faire dans C01
 
-- Prix demandé : aucun n'est collecté aujourd'hui (les extracteurs de fiches projet l'excluent volontairement, par exemple `project_propertyfinder.py` et `project_psi.py`). Le plan n'autorise à citer un prix demandé que lié à une annonce porteuse d'un permis Madhmoun vérifié  ; la qualification de la source, la collecte et l'écart relèvent de [C03](../tasks/C03.md).
+- Prix demandé : aucun n'est collecté aujourd'hui (les extracteurs de fiches projet l'excluent volontairement, par exemple `project_propertyfinder.py` et `project_psi.py`). Le plan n'autorise à citer un prix demandé que lié à une annonce porteuse d'un permis Madhmoun vérifié ; la qualification de la source, la collecte et l'écart relèvent de [C03](../tasks/C03.md).
