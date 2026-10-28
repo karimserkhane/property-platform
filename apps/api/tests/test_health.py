@@ -6,7 +6,9 @@ from django.db import OperationalError, connection
 
 
 def test_liveness_does_not_access_database(client):
-    with patch("liwa.api.router.connection.cursor", side_effect=AssertionError("DB accessed")):
+    with patch(
+        "property_platform.api.router.connection.cursor", side_effect=AssertionError("DB accessed")
+    ):
         response = client.get("/api/v1/health/live")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
@@ -14,7 +16,8 @@ def test_liveness_does_not_access_database(client):
 
 def test_readiness_returns_unavailable_without_leaking_database_errors(client):
     with patch(
-        "liwa.api.router.connection.cursor", side_effect=OperationalError("private details")
+        "property_platform.api.router.connection.cursor",
+        side_effect=OperationalError("private details"),
     ):
         response = client.get("/api/v1/health/ready")
     assert response.status_code == 503
@@ -29,7 +32,9 @@ def test_staff_admin_and_interactive_docs_are_not_exposed_in_non_debug_mode(clie
 
 @pytest.mark.postgis
 @pytest.mark.django_db
-@pytest.mark.skipif(os.environ.get("LIWA_TEST_POSTGIS") != "1", reason="PostGIS not enabled")
+@pytest.mark.skipif(
+    os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1", reason="PostGIS not enabled"
+)
 def test_readiness_uses_real_postgis(client):
     assert connection.vendor == "postgresql"
     with connection.cursor() as cursor:

@@ -1,0 +1,27 @@
+from django.core.management.base import BaseCommand, CommandError
+
+from property_platform.modules.evidence.collection_profiles import COLLECTIONS
+from property_platform.modules.evidence.maps.services import import_onwani
+
+
+class Command(BaseCommand):
+    help = "Acquire reviewed territory parcels directly from DMT/Onwani, with evidence and audit."
+
+    def add_arguments(self, parser):
+        parser.add_argument("--territory", choices=tuple(COLLECTIONS), default="al-reem-island")
+        parser.add_argument(
+            "--actor", required=True, help="Operator identifier for the audit trail"
+        )
+
+    def handle(self, *args, **options):
+        actor = options["actor"].strip()
+        if not actor or len(actor) > 160:
+            raise CommandError("Actor must contain 1–160 characters")
+        try:
+            run = import_onwani(actor=actor, territory=options["territory"])
+        except Exception as exc:
+            raise CommandError(
+                f"Import failed ({type(exc).__name__}); inspect evidence.ingestion_run. "
+                "No partial catalogue acquisition is applied."
+            ) from exc
+        self.stdout.write(self.style.SUCCESS(f"Run {run.id}: {run.summary}"))

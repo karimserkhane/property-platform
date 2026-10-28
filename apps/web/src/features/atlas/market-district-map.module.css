@@ -1,0 +1,50 @@
+.panel {
+  margin-block: 20px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.panel summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 650;
+}
+.panel label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-block: 12px;
+}
+.panel select {
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.canvas {
+  height: min(450px, 60dvh);
+  min-height: 270px;
+  border-radius: 12px;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  font-size: 0.75rem;
+  margin-block: 1rem;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.legend i {
+  display: inline-block;
+  inline-size: 0.8rem;
+  block-size: 0.8rem;
+  border-radius: 0.15rem;
+}

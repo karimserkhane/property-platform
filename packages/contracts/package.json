@@ -1,12 +1,14 @@
 {
-  "name": "@liwa/contracts",
+  "name": "@property-platform/contracts",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "exports": {
     ".": {
       "types": "./src/generated.ts"
-    }
+    },
+    "./territories": "./territories.json",
+    "./map-credits": "./map-credits.json"
   },
   "scripts": {
     "generate": "openapi-typescript openapi.json -o src/generated.ts",

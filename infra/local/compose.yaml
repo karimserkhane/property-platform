@@ -1,19 +1,19 @@
-name: liwa-local
+name: property-platform-local
 
 services:
   db:
     image: postgis/postgis:18-3.6
     environment:
-      POSTGRES_DB: liwa
-      POSTGRES_USER: liwa
-      POSTGRES_PASSWORD: liwa-local-only
+      POSTGRES_DB: property_platform
+      POSTGRES_USER: property_platform
+      POSTGRES_PASSWORD: property-platform-local-only
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       # PostgreSQL 18 uses a different data layout; preserve the old PG17 volume.
       - postgres18-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U liwa -d liwa"]
+      test: ["CMD-SHELL", "pg_isready -U property_platform -d property_platform"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -23,15 +23,47 @@ services:
       context: ../..
       dockerfile: apps/api/Dockerfile
     environment:
-      DJANGO_SETTINGS_MODULE: liwa.config.settings.local
+      DJANGO_SETTINGS_MODULE: property_platform.config.settings.local
       DJANGO_SECRET_KEY: local-development-key-never-use-in-production
-      DATABASE_URL: postgresql://liwa:liwa-local-only@db:5432/liwa
+      DATABASE_URL: postgresql://property_platform:property-platform-local-only@db:5432/property_platform
+      MEDIA_STORAGE_BACKEND: local
+      MEDIA_LOCAL_ROOT: /media
+      MEDIA_PUBLICATION_ENABLED: "0"
+    volumes:
+      - media-data:/media
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000", "--noreload"]
     depends_on:
       db:
         condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Optional compiled preview; the default workflow still uses pnpm on port 3000.
+  web:
+    profiles: [web-preview]
+    image: property-platform-web-preview
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+    env_file:
+      - path: ../../.env.preview-access.local
+        required: false
+    environment:
+      PROPERTY_PLATFORM_API_ORIGIN: http://api:8000
+      PROPERTY_PLATFORM_ENABLE_LOCAL_PREVIEW: "1"
+      PROJECT_NEIGHBOURHOOD_PROVIDER: ${PROJECT_NEIGHBOURHOOD_PROVIDER:-local}
+      GOOGLE_MAPS_EMBED_BROWSER_KEY: ${GOOGLE_MAPS_EMBED_BROWSER_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3102:3000"
 
 volumes:
   postgres18-data:
+  media-data:

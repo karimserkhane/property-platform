@@ -1,0 +1,41 @@
+[
+  {
+    "target": "building",
+    "namespace": "osm:saadiyat:osm",
+    "record_id": "way/729447143",
+    "display_name": "Park View",
+    "publisher_name": "Bloom Holding",
+    "developer_name": "Bloom Holding",
+    "website_url": "https://bloomholding.com/what-we-do/properties/park-view",
+    "source_url": "https://bloomholding.com/what-we-do/properties/park-view",
+    "required_terms": ["Park View", "Saadiyat", "Bloom"],
+    "summary": "Part of the Park View development on Saadiyat Island. The developer describes residential and hotel apartments; unit availability is not verified.",
+    "language": "en"
+  },
+  {
+    "target": "building",
+    "namespace": "osm:saadiyat:osm",
+    "record_id": "way/729447144",
+    "display_name": "Park View",
+    "publisher_name": "Bloom Holding",
+    "developer_name": "Bloom Holding",
+    "website_url": "https://bloomholding.com/what-we-do/properties/park-view",
+    "source_url": "https://bloomholding.com/what-we-do/properties/park-view",
+    "required_terms": ["Park View", "Saadiyat", "Bloom"],
+    "summary": "Part of the Park View development on Saadiyat Island. The developer describes residential and hotel apartments; unit availability is not verified.",
+    "language": "en"
+  },
+  {
+    "target": "building",
+    "namespace": "osm:saadiyat:osm",
+    "record_id": "way/729447145",
+    "display_name": "Park View",
+    "publisher_name": "Bloom Holding",
+    "developer_name": "Bloom Holding",
+    "website_url": "https://bloomholding.com/what-we-do/properties/park-view",
+    "source_url": "https://bloomholding.com/what-we-do/properties/park-view",
+    "required_terms": ["Park View", "Saadiyat", "Bloom"],
+    "summary": "Part of the Park View development on Saadiyat Island. The developer describes residential and hotel apartments; unit availability is not verified.",
+    "language": "en"
+  }
+]

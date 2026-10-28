@@ -4,8 +4,12 @@
 **/.venv
 .tools-env
 .cache
+.codex-remote-attachments
 .pnpm-store
 **/__pycache__
 **/.env
 **/.env.*
 !**/.env.example
+# Browser journeys are mounted by checks-e2e, never part of the web build.
+apps/web/e2e
+apps/web/playwright.config.ts

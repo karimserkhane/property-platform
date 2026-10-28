@@ -1,0 +1,88 @@
+# CI-equivalent checks in Docker, for people and AI agents (see docs/engineering/AGENT_WORKFLOW.md).
+# From the repository (or worktree) root, with the local database already running:
+#   docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks run --rm --no-deps checks-api
+#   ... run --rm --no-deps checks-ingestion
+#   ... run --rm --no-deps checks-web
+# `--no-deps` never starts, stops or recreates shared services. Extra pytest arguments:
+#   ... run --rm --no-deps checks-api bash scripts/checks/api.sh -k parcel_tiles
+# The API tests create and drop their own `test_property_platform` database.
+services:
+  checks-api:
+    profiles: [checks]
+    build:
+      context: ../..
+      dockerfile: infra/local/checks/Dockerfile
+      target: api
+    image: property-platform-checks-api
+    environment:
+      DJANGO_SETTINGS_MODULE: property_platform.config.settings.testing
+      DATABASE_URL: postgresql://property_platform:property-platform-local-only@db:5432/property_platform
+      PROPERTY_PLATFORM_TEST_POSTGIS: "1"
+      PYTHONPATH: /workspace/apps/api/src
+      MEDIA_LOCAL_ROOT: /tmp/media
+    volumes:
+      - ../..:/workspace:ro
+    command: ["bash", "scripts/checks/api.sh"]
+
+  checks-ingestion:
+    profiles: [checks]
+    build:
+      context: ../..
+      dockerfile: infra/local/checks/Dockerfile
+      target: ingestion
+    image: property-platform-checks-ingestion
+    environment:
+      PYTHONPATH: /workspace/apps/ingestion/src:/workspace/apps/api/src
+      PREFECT_HOME: /tmp/prefect
+      PREFECT_SERVER_ALLOW_EPHEMERAL_MODE: "false"
+    volumes:
+      - ../..:/workspace:ro
+    command: ["bash", "scripts/checks/ingestion.sh"]
+
+  checks-web:
+    profiles: [checks]
+    build:
+      context: ../..
+      dockerfile: infra/local/checks/Dockerfile
+      target: web
+    image: property-platform-checks-web
+    environment:
+      CHECK_BUILD: ${CHECK_BUILD:-0}
+    # Linux dependencies and Next.js output live in volumes, never in the host tree.
+    volumes:
+      - ../..:/workspace
+      - checks-node-modules:/workspace/node_modules
+      - checks-web-node-modules:/workspace/apps/web/node_modules
+      - checks-contracts-node-modules:/workspace/packages/contracts/node_modules
+      - checks-branding-node-modules:/workspace/packages/branding/node_modules
+      - checks-web-next:/workspace/apps/web/.next
+      - checks-pnpm-store:/pnpm-store
+    command: ["bash", "scripts/checks/web.sh"]
+
+  # Browser journeys against the running local API (read only), with a compiled web
+  # server started inside the container WITHOUT preview access control. Build first:
+  #   ... --profile checks build checks-e2e
+  #   ... --profile checks run --rm --no-deps checks-e2e
+  # Failure traces, screenshots and the HTML report are written to .cache/e2e/.
+  checks-e2e:
+    profiles: [checks]
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+      target: e2e
+    image: property-platform-checks-e2e
+    environment:
+      E2E_API_ORIGIN: http://api:8000
+    volumes:
+      - ../../apps/web/e2e:/repo/apps/web/e2e:ro
+      - ../../apps/web/playwright.config.ts:/repo/apps/web/playwright.config.ts:ro
+      - ../../.cache/e2e:/artifacts
+    ipc: host
+
+volumes:
+  checks-node-modules:
+  checks-web-node-modules:
+  checks-contracts-node-modules:
+  checks-branding-node-modules:
+  checks-web-next:
+  checks-pnpm-store:

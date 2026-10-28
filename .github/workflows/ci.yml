@@ -3,7 +3,7 @@ name: Foundation checks
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, "codex/**"]
 
 permissions:
   contents: read
@@ -29,10 +29,11 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:web
       - run: pnpm docs:check
+      - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.remote-preview.yaml --profile web-preview --profile remote-preview config --quiet
       - run: pnpm build
       - run: node scripts/prepare-web-runtime.mjs
       - run: pnpm smoke:web
-      - run: docker build -t liwa-web-ci -f apps/web/Dockerfile .
+      - run: docker build -t property-platform-web-ci -f apps/web/Dockerfile .
 
   api:
     runs-on: ubuntu-latest
@@ -41,17 +42,17 @@ jobs:
       postgres:
         image: postgis/postgis:18-3.6
         env:
-          POSTGRES_DB: liwa
-          POSTGRES_USER: liwa
+          POSTGRES_DB: property_platform
+          POSTGRES_USER: property_platform
           POSTGRES_PASSWORD: ci-only-password
         ports: ["5432:5432"]
         options: >-
-          --health-cmd "pg_isready -U liwa -d liwa"
+          --health-cmd "pg_isready -U property_platform -d property_platform"
           --health-interval 5s --health-timeout 3s --health-retries 20
     env:
-      DJANGO_SETTINGS_MODULE: liwa.config.settings.testing
-      DATABASE_URL: postgresql://liwa:ci-only-password@localhost:5432/liwa
-      LIWA_TEST_POSTGIS: "1"
+      DJANGO_SETTINGS_MODULE: property_platform.config.settings.testing
+      DATABASE_URL: postgresql://property_platform:ci-only-password@localhost:5432/property_platform
+      PROPERTY_PLATFORM_TEST_POSTGIS: "1"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: astral-sh/setup-uv@v10.3.0
@@ -67,8 +68,63 @@ jobs:
       - run: uv run --project apps/api python apps/api/manage.py makemigrations --check --dry-run
       - run: uv run --project apps/api python apps/api/manage.py migrate --noinput
       - run: uv run --project apps/api pytest apps/api/tests -c apps/api/pyproject.toml
-      - run: uv run --project apps/api python -m liwa.export_openapi --output packages/contracts/openapi.json
-      - run: git diff --exit-code -- packages/contracts/openapi.json
+      - run: uv run --project apps/api python -m property_platform.export_openapi --output packages/contracts/openapi.json
+      - run: git diff --exit-code -- packages/contracts/openapi.json packages/contracts/territories.json packages/contracts/map-credits.json
       - run: docker compose -f infra/local/compose.yaml config --quiet
-      - run: docker build -t liwa-api-ci -f apps/api/Dockerfile .
-      - run: docker run --rm -e DJANGO_SETTINGS_MODULE=liwa.config.settings.local liwa-api-ci python manage.py check
+      - run: docker build -t property-platform-api-ci -f apps/api/Dockerfile .
+      - run: docker run --rm -e DJANGO_SETTINGS_MODULE=property_platform.config.settings.local property-platform-api-ci python manage.py check
+
+  # Browser journeys against the versioned demonstration package (A13,
+  # docs/engineering/E2E.md): disposable PostGIS, migrations, replay, API, Playwright.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      E2E_COMPOSE: docker compose -f infra/local/compose.e2e-demo.yaml
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - run: $E2E_COMPOSE config --quiet
+      - run: $E2E_COMPOSE build
+      - name: Replay the demonstration package and start the API
+        run: $E2E_COMPOSE up -d --wait api
+      - run: $E2E_COMPOSE run --rm checks-e2e
+      - name: API and replay logs
+        if: failure()
+        run: $E2E_COMPOSE logs --no-color api
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: e2e-traces
+          path: .cache/e2e/
+          retention-days: 14
+      - if: always()
+        run: $E2E_COMPOSE down
+
+  ingestion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PREFECT_HOME: ${{ github.workspace }}/.cache/prefect
+      PREFECT_SERVER_ALLOW_EPHEMERAL_MODE: "false"
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.0
+        with:
+          version: "0.13.0"
+          python-version: "3.14.8"
+      - run: uv lock --project apps/ingestion --check
+      - run: uv sync --project apps/ingestion --frozen
+      - run: uv run --project apps/ingestion ruff check apps/ingestion
+      - run: uv run --project apps/ingestion ruff format --check apps/ingestion
+      - run: uv run --project apps/ingestion pytest apps/ingestion/tests -c apps/ingestion/pyproject.toml
+      - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion config --quiet
+      - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml -f infra/local/compose.map-analysis.yaml --profile ingestion --profile map-analysis config --quiet
+      - name: Validate optional R2 storage configuration without contacting the cloud
+        env:
+          MEDIA_S3_ENDPOINT_URL: https://ci-account.r2.cloudflarestorage.com
+          MEDIA_S3_BUCKET: ci-private-media
+          MEDIA_S3_ACCESS_KEY_ID: configuration-test-only
+          MEDIA_S3_SECRET_ACCESS_KEY: configuration-test-only
+        run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml -f infra/local/compose.storage.s3.yaml --profile ingestion config --quiet
+      - run: docker build -t property-platform-ingestion-ci -f apps/ingestion/Dockerfile .
+      - run: docker run --rm --network none property-platform-ingestion-ci python -m property_platform_ingestion datasets

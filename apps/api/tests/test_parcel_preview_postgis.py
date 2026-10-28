@@ -1,0 +1,68 @@
+import os
+from uuid import uuid4
+
+import pytest
+from django.test import override_settings
+
+if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
+    pytest.skip("Preview integration requires real PostGIS", allow_module_level=True)
+
+from test_onwani_postgis import feature, run  # noqa: E402
+
+pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
+
+
+def test_preview_geometry_filter_provenance_and_private_field_allowlist(client):
+    rows = [feature(1, "RT1_C1"), feature(2, "RT1_C2")]
+    rows[0]["attributes"]["ELMS_LANDUSENAME_E"] = "Mosque"
+    rows[1]["attributes"]["ELMS_LANDUSENAME_E"] = "School"
+    run(rows)
+    with override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True):
+        response = client.get(
+            "/api/v1/preview/parcels", {"bbox": "54.39,24.49,54.42,24.52", "limit": 1}
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["truncated"] is True
+        assert len(data["features"]) == 1
+        item = data["features"][0]
+        assert item["geometry"]["type"] == "MultiPolygon"
+        assert set(item["properties"]) == {
+            "id",
+            "code",
+            "community",
+            "land_use",
+            "construction_status",
+            "category",
+            "source_url",
+            "source_name",
+            "use_types",
+            "use_classification_version",
+            "field_history",
+        }
+        assert (
+            item["properties"]["use_types"]
+            == {
+                "Mosque": ["mosque"],
+                "School": ["school"],
+            }[item["properties"]["land_use"]]
+        )
+        assert item["properties"]["use_classification_version"] == "source-use-v2"
+        detail = client.get(f"/api/v1/preview/parcels/{item['id']}")
+        assert detail.status_code == 200
+        assert detail.json()["source"]["published_at"] is None
+        assert detail.json()["source"]["retrieved_at"]
+        assert item["properties"]["source_url"] == detail.json()["source"]["url"]
+        assert item["properties"]["source_name"] == detail.json()["source"]["name"]
+        assert detail.json()["use_types"] == item["properties"]["use_types"]
+        assert detail.json()["use_classification_version"] == "source-use-v2"
+        for private in ["raw_attributes", "actor", "payload", "record_sha256"]:
+            assert private not in detail.json()
+        assert client.get(f"/api/v1/preview/parcels/{uuid4()}").status_code == 404
+        outside = client.get("/api/v1/preview/parcels", {"bbox": "54.1,24.1,54.2,24.2"})
+        assert outside.json()["features"] == []
+        searched = client.get(
+            "/api/v1/preview/parcels", {"bbox": "54.39,24.49,54.42,24.52", "q": "rt1_c2"}
+        )
+        assert len(searched.json()["features"]) == 1
+        assert searched.json()["features"][0]["properties"]["code"] == "RT1_C2"

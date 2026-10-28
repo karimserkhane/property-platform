@@ -1,5 +1,5 @@
 {
-  "name": "liwa-atlas",
+  "name": "property-platform",
   "private": true,
   "packageManager": "pnpm@12.10.1",
   "engines": {
@@ -7,16 +7,16 @@
     "pnpm": ">=12.10.1 <13"
   },
   "scripts": {
-    "dev:web": "pnpm --filter @liwa/web dev",
-    "build": "pnpm --filter @liwa/web build",
+    "dev:web": "pnpm --filter @property-platform/web dev",
+    "build": "pnpm --filter @property-platform/web build",
     "typecheck": "pnpm -r typecheck",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "test:web": "pnpm --filter @liwa/web test",
+    "test:web": "pnpm --filter @property-platform/web test",
     "docs:check": "node scripts/check-doc-links.mjs",
     "smoke:web": "node scripts/smoke-web.mjs",
-    "contracts:generate": "pnpm --filter @liwa/contracts generate",
-    "contracts:check": "pnpm --filter @liwa/contracts check"
+    "contracts:generate": "pnpm --filter @property-platform/contracts generate",
+    "contracts:check": "pnpm --filter @property-platform/contracts check"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15"

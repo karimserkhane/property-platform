@@ -1,0 +1,103 @@
+# Optional overlay. Use with compose.yaml and --profile ingestion.
+# Local development only: credentials are samples, not production secrets.
+services:
+  prefect-db:
+    profiles: [ingestion]
+    image: postgres:18.6-trixie
+    environment:
+      POSTGRES_DB: prefect
+      POSTGRES_USER: prefect
+      POSTGRES_PASSWORD: prefect-local-only
+    volumes:
+      - prefect-postgres18-data:/var/lib/postgresql
+    networks: [prefect-private]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prefect -d prefect"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # The metadata database has no host port and never uses the business DB.
+
+  prefect:
+    profiles: [ingestion]
+    image: property-platform-ingestion
+    build:
+      context: ../..
+      dockerfile: apps/ingestion/Dockerfile
+    command: ["prefect", "server", "start", "--host", "0.0.0.0"]
+    environment:
+      PREFECT_SERVER_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect-local-only@prefect-db:5432/prefect
+      # Same-origin API works both on localhost and through private Tailscale Serve.
+      PREFECT_SERVER_UI_API_URL: /api
+      PREFECT_SERVER_ANALYTICS_ENABLED: "false"
+      PREFECT_SERVER_DATABASE_SQLALCHEMY_POOL_SIZE: "5"
+      PREFECT_SERVER_DATABASE_SQLALCHEMY_MAX_OVERFLOW: "5"
+    ports:
+      - "127.0.0.1:4200:4200"
+    # A bridge for the loopback UI port, plus the isolated metadata network.
+    networks: [prefect-ui, prefect-private]
+    depends_on:
+      prefect-db:
+        condition: service_healthy
+    init: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4200/api/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+      start_period: 30s
+
+  ingestion:
+    profiles: [ingestion]
+    image: property-platform-ingestion
+    build:
+      context: ../..
+      dockerfile: apps/ingestion/Dockerfile
+    environment:
+      DJANGO_SETTINGS_MODULE: property_platform.config.settings.local
+      DJANGO_SECRET_KEY: local-development-key-never-use-in-production
+      DATABASE_URL: postgresql://property_platform:property-platform-local-only@db:5432/property_platform
+      PREFECT_API_URL: http://prefect:4200/api
+      PREFECT_UI_URL: http://localhost:4200
+      PREFECT_SERVER_ALLOW_EPHEMERAL_MODE: "false"
+      PREFECT_RUNNER_PROCESS_LIMIT: "1"
+      PREFECT_RUNNER_SERVER_ENABLE: "true"
+      PREFECT_RUNNER_SERVER_HOST: "127.0.0.1"
+      PREFECT_RUNNER_SERVER_PORT: "8080"
+      INGESTION_STORAGE_DIR: /data
+      BACKUP_DIR: /backups
+      MEDIA_STORAGE_BACKEND: local
+      MEDIA_LOCAL_ROOT: /media
+      MEDIA_PUBLICATION_ENABLED: "0"
+    volumes:
+      - ingestion-data:/data
+      - media-data:/media
+      # Host folder (ignored by Git), so backups survive a Docker reset.
+      - ${PROPERTY_PLATFORM_BACKUP_DIR:-../../.cache/backups}:/backups
+    networks: [default, prefect-private]
+    depends_on:
+      db:
+        condition: service_healthy
+      prefect:
+        condition: service_healthy
+    init: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stop_grace_period: 60s
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2)"]
+      interval: 15s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  prefect-postgres18-data:
+  ingestion-data:
+
+networks:
+  prefect-private:
+    internal: true
+  prefect-ui:

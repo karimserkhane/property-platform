@@ -38,6 +38,426 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/surroundings/{target}/{identity}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Surroundings */
+        get: operations["previewSurroundings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/references": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** References */
+        get: operations["previewReferences"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/imagery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Imagery */
+        get: operations["previewImagery"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/property-media/{media_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Property Media */
+        get: operations["previewPropertyMedia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/map-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context */
+        get: operations["previewMapContext"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/context-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Context Index
+         * @description `map-context` rows; streets and buildings come with bounds instead of
+         *     geometry, for maps drawing them from `context-tiles`.
+         */
+        get: operations["previewContextIndex"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/context-tiles/{z}/{x}/{y}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context Tile */
+        get: operations["previewContextTile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/parcels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Parcels */
+        get: operations["previewParcels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/parcel-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Parcel Index
+         * @description Parcel rows without footprints; maps draw them from `parcel-tiles`.
+         */
+        get: operations["previewParcelIndex"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/parcel-search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Parcel Search
+         * @description Index rows whose code starts with `q` anywhere in the territory, so a map
+         *     reading only its visible cells can still find a parcel outside the view.
+         */
+        get: operations["previewParcelSearch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/parcel-tiles/{z}/{x}/{y}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Parcel Tile */
+        get: operations["previewParcelTile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/parcels/{parcel_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Parcel */
+        get: operations["previewParcel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/territories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Territories */
+        get: operations["previewTerritories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/adrec-market": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Adrec Market */
+        get: operations["previewAdrecMarket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/district-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Districts */
+        get: operations["previewDistrictMap"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/public-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Context */
+        get: operations["previewPublicContext"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Projects */
+        get: operations["previewProjectDirectory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/projects/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Project Detail */
+        get: operations["previewProjectDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/developers/{key}/delivery-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Developer Delivery History */
+        get: operations["previewDeveloperDeliveryHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/project-media/{media_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Project Media */
+        get: operations["previewProjectMedia"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        /** Project Media Head */
+        head: operations["previewProjectMediaHead"];
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/basemap/{provider}/{z}/{x}/{y}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tile */
+        get: operations["previewBasemapTile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/accessibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Accessibility */
+        get: operations["previewWalkingArea"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/market-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Market Map */
+        get: operations["previewDistrictMarket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/preview/source-rights": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Source Rights */
+        get: operations["previewSourceRights"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -49,6 +469,2166 @@ export interface components {
              * @enum {string}
              */
             status: "ok" | "ready" | "unavailable";
+        };
+        /** Amenity */
+        Amenity: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Use Types */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /** Distance M */
+            distance_m: number;
+            source: components["schemas"]["MapProvenance"];
+        };
+        /** AmenityGroup */
+        AmenityGroup: {
+            /**
+             * Key
+             * @enum {string}
+             */
+            key: "education" | "shopping" | "health" | "transport" | "leisure" | "dining" | "worship";
+            /** Items */
+            items: components["schemas"]["Amenity"][];
+        };
+        /** MapProvenance */
+        MapProvenance: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Reliability */
+            reliability: string;
+            /** Acquisition Method */
+            acquisition_method: string;
+            /** Timestamp Basis */
+            timestamp_basis: string;
+        };
+        /** Surroundings */
+        Surroundings: {
+            /** Radius M */
+            radius_m: number;
+            /**
+             * Distance Basis
+             * @enum {string}
+             */
+            distance_basis: "point" | "centroid";
+            /** Truncated */
+            truncated: boolean;
+            /** Groups */
+            groups: components["schemas"]["AmenityGroup"][];
+        };
+        /** Error */
+        Error: {
+            /** Code */
+            code: string;
+        };
+        /** ResearchReferenceResponse */
+        ResearchReferenceResponse: {
+            /** Label */
+            label: string;
+            /** Title */
+            title: string;
+            /** Source Kind */
+            source_kind: string;
+            /** Available */
+            available: boolean;
+            /** Place Id */
+            place_id: string | null;
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+        };
+        /** ImageryResponse */
+        ImageryResponse: {
+            /** Id */
+            id: string;
+            /**
+             * Acquired At
+             * Format: date-time
+             */
+            acquired_at: string;
+            /** Cloud Cover Tile */
+            cloud_cover_tile: number;
+            /** Resolution M */
+            resolution_m: number;
+            /** Coordinates */
+            coordinates: number[][];
+            /** Image Url */
+            image_url: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+        };
+        /** FieldHistory */
+        FieldHistory: {
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+        };
+        /** Geometry */
+        Geometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[][][][];
+        };
+        /** LineGeometry */
+        LineGeometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[][][];
+        };
+        /** MapCollection */
+        MapCollection: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["MapFeature"][];
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** MapContext */
+        MapContext: {
+            street: components["schemas"]["MapCollection"];
+            building: components["schemas"]["MapCollection"];
+            place: components["schemas"]["MapCollection"];
+            administrative_area: components["schemas"]["MapCollection"];
+        };
+        /** MapFeature */
+        MapFeature: {
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Geometry */
+            geometry: components["schemas"]["Geometry"] | components["schemas"]["LineGeometry"] | components["schemas"]["PointGeometry"];
+            properties: components["schemas"]["MapProperties"];
+        };
+        /** MapProperties */
+        MapProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v2
+             */
+            use_classification_version: string;
+            /** Height M */
+            height_m?: number | null;
+            /** Levels */
+            levels?: number | null;
+            /**
+             * Parcel Ids
+             * @default []
+             */
+            parcel_ids: string[];
+            source: components["schemas"]["MapProvenance"];
+            presentation?: components["schemas"]["PropertyPresentationResponse"] | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
+        };
+        /** PointGeometry */
+        PointGeometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[];
+        };
+        /** ProjectReferenceResponse */
+        ProjectReferenceResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+        };
+        /** PropertyPhoto */
+        PropertyPhoto: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Caption */
+            caption: string;
+            /** Language */
+            language: string;
+            /** Author */
+            author: string;
+            /** Licence Code */
+            licence_code: string;
+            /** Licence Url */
+            licence_url: string;
+            /** Source Url */
+            source_url: string;
+            /** Taken On */
+            taken_on: string | null;
+            /** Delivery Url */
+            delivery_url?: string | null;
+        };
+        /** PropertyPresentationResponse */
+        PropertyPresentationResponse: {
+            /** Name */
+            name: string;
+            /** Publisher */
+            publisher: string;
+            /** Developer */
+            developer: string;
+            /** Website Url */
+            website_url: string;
+            /** Summary */
+            summary: string;
+            /** Language */
+            language: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /** Media */
+            media: components["schemas"]["PropertyPhoto"][];
+            project?: components["schemas"]["ProjectReferenceResponse"] | null;
+        };
+        /** ContextIndex */
+        ContextIndex: {
+            street: components["schemas"]["ContextIndexCollection"];
+            building: components["schemas"]["ContextIndexCollection"];
+            place: components["schemas"]["MapCollection"];
+            administrative_area: components["schemas"]["MapCollection"];
+        };
+        /** ContextIndexCollection */
+        ContextIndexCollection: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["ContextIndexFeature"][];
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** ContextIndexFeature */
+        ContextIndexFeature: {
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            properties: components["schemas"]["ContextIndexProperties"];
+        };
+        /** ContextIndexProperties */
+        ContextIndexProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Kind */
+            kind: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v2
+             */
+            use_classification_version: string;
+            /** Height M */
+            height_m?: number | null;
+            /** Levels */
+            levels?: number | null;
+            /**
+             * Parcel Ids
+             * @default []
+             */
+            parcel_ids: string[];
+            source: components["schemas"]["MapProvenance"];
+            presentation?: components["schemas"]["PropertyPresentationResponse"] | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+        };
+        /** Collection */
+        Collection: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["Feature"][];
+            /** Truncated */
+            truncated: boolean;
+            /** Next Cursor */
+            next_cursor?: string | null;
+            /** Classification Version */
+            classification_version: string;
+        };
+        /** Feature */
+        Feature: {
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            geometry: components["schemas"]["Geometry"];
+            properties: components["schemas"]["Properties"];
+        };
+        /** Properties */
+        Properties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Community */
+            community: string;
+            /** Land Use */
+            land_use: string;
+            /** Construction Status */
+            construction_status: string;
+            /** Category */
+            category: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v2
+             */
+            use_classification_version: string;
+            /** Source Url */
+            source_url: string | null;
+            /** Source Name */
+            source_name: string | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
+        };
+        /** IndexFeature */
+        IndexFeature: {
+            /** Type */
+            type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            properties: components["schemas"]["IndexProperties"];
+        };
+        /** IndexProperties */
+        IndexProperties: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Community */
+            community: string;
+            /** Land Use */
+            land_use: string;
+            /** Construction Status */
+            construction_status: string;
+            /** Category */
+            category: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v2
+             */
+            use_classification_version: string;
+            /** Source Url */
+            source_url: string | null;
+            /** Source Name */
+            source_name: string | null;
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Label Point */
+            label_point: [
+                number,
+                number
+            ];
+            /** Area M2 */
+            area_m2: number;
+            /**
+             * Nearby Projects
+             * @default []
+             */
+            nearby_projects: components["schemas"]["NearbyProjectMarker"][];
+        };
+        /** NearbyProjectMarker */
+        NearbyProjectMarker: {
+            /**
+             * Place Id
+             * Format: uuid
+             */
+            place_id: string;
+            /** Distance M */
+            distance_m: number;
+        };
+        /** ParcelIndex */
+        ParcelIndex: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["IndexFeature"][];
+            /** Truncated */
+            truncated: boolean;
+            /** Next Cursor */
+            next_cursor?: string | null;
+            /** Classification Version */
+            classification_version: string;
+        };
+        /** Detail */
+        Detail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** District */
+            district: string;
+            /** Community */
+            community: string;
+            /** Revision */
+            revision: number;
+            source: components["schemas"]["Provenance"];
+            /** Publication Status */
+            publication_status: string;
+            /** Land Use */
+            land_use: string;
+            /** Construction Status */
+            construction_status: string;
+            /** Category */
+            category: string;
+            /**
+             * Use Types
+             * @default []
+             */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /**
+             * Use Classification Version
+             * @default source-use-v2
+             */
+            use_classification_version: string;
+            /** Area M2 */
+            area_m2: number;
+            attributes: components["schemas"]["ParcelAttributes"];
+            /** Places */
+            places: components["schemas"]["NearbyPlace"][];
+            /** Streets */
+            streets: components["schemas"]["NearbyStreet"][];
+            /** Overlapping Parcels */
+            overlapping_parcels: components["schemas"]["OverlappingParcel"][];
+            /**
+             * Field History
+             * @default {}
+             */
+            field_history: {
+                [key: string]: components["schemas"]["FieldHistory"];
+            };
+        };
+        /** NearbyPlace */
+        NearbyPlace: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Kind */
+            kind: string;
+        };
+        /** NearbyStreet */
+        NearbyStreet: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Distance M */
+            distance_m: number;
+        };
+        /** OverlappingParcel */
+        OverlappingParcel: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Code */
+            code: string;
+            /** Land Use */
+            land_use: string;
+            /** Use Types */
+            use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
+            /** Construction Status */
+            construction_status: string;
+            /** Ownership */
+            ownership: string;
+            source: components["schemas"]["Provenance"];
+        };
+        /** ParcelAttributes */
+        ParcelAttributes: {
+            /** Planning */
+            planning: string;
+            /** Ownership */
+            ownership: string;
+            /** Allocation */
+            allocation: string;
+            /** Approval Date */
+            approval_date: string | null;
+            /** Received Date */
+            received_date: string | null;
+            /** Permit Date */
+            permit_date: string | null;
+            /** Permit Type */
+            permit_type: string;
+            /** Meps */
+            meps: string;
+            /** Meps Updated */
+            meps_updated: string;
+            /** Dcr Url */
+            dcr_url: string;
+        };
+        /** Provenance */
+        Provenance: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+        };
+        /** TerritoryRegistry */
+        TerritoryRegistry: {
+            /** Default Territory Id */
+            default_territory_id: string;
+            /** Territories */
+            territories: components["schemas"]["TerritoryResponse"][];
+        };
+        /** TerritoryResponse */
+        TerritoryResponse: {
+            /** Id */
+            id: string;
+            /** Parent Id */
+            parent_id: string | null;
+            /** Level */
+            level: string;
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Queryable */
+            queryable: boolean;
+            /** Parcel Count */
+            parcel_count: number;
+            /** Member Territory Ids */
+            member_territory_ids: string[];
+            /** Collection Bounds */
+            collection_bounds: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
+            /** Camera Bounds */
+            camera_bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Focus Bounds */
+            focus_bounds: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
+            /** Neighbourhood Bounds */
+            neighbourhood_bounds: [
+                number,
+                number,
+                number,
+                number
+            ] | null;
+        };
+        /** AdrecIndexResponse */
+        AdrecIndexResponse: {
+            /** Kind */
+            kind: string;
+            /** Property Type */
+            property_type: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /** Municipality */
+            municipality: string;
+            /** Index Value */
+            index_value: string | null;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+        };
+        /** AdrecMarketResponse */
+        AdrecMarketResponse: {
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Period Start */
+            period_start: string | null;
+            /** Period End */
+            period_end: string | null;
+            /** Retrieved At */
+            retrieved_at: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Total */
+            total: number;
+            /** Offset */
+            offset: number;
+            /** Has More */
+            has_more: boolean;
+            /** Sales */
+            sales: components["schemas"]["AdrecSaleResponse"][];
+            /** Indices */
+            indices: components["schemas"]["AdrecIndexResponse"][];
+            /** Index Review Needed */
+            index_review_needed: boolean;
+            /** Historical */
+            historical: boolean;
+            /** Snapshots */
+            snapshots: components["schemas"]["AdrecSnapshotResponse"][];
+        };
+        /** AdrecSaleResponse */
+        AdrecSaleResponse: {
+            /** Position */
+            position: number;
+            /**
+             * Registration Date
+             * Format: date
+             */
+            registration_date: string;
+            /** Project Name */
+            project_name: string;
+            /** District */
+            district: string;
+            /** Community */
+            community: string;
+            /** Property Type */
+            property_type: string;
+            /** Property Layout */
+            property_layout: string;
+            /** Sale Application Type */
+            sale_application_type: string;
+            /** Sale Sequence */
+            sale_sequence: string;
+            /** Price Aed */
+            price_aed: string | null;
+            /** Sold Area Sqm */
+            sold_area_sqm: string | null;
+            /** Plot Area Sqm */
+            plot_area_sqm: string | null;
+            /** Rate Aed Per Sqm */
+            rate_aed_per_sqm: string | null;
+            /** Sold Share */
+            sold_share: string | null;
+        };
+        /** AdrecSnapshotResponse */
+        AdrecSnapshotResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Source Row Count */
+            source_row_count: number;
+        };
+        /** DistrictMapFeature */
+        DistrictMapFeature: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "Feature";
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["DistrictMapGeometry"];
+            properties: components["schemas"]["DistrictMapProperties"];
+        };
+        /** DistrictMapGeometry */
+        DistrictMapGeometry: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "MultiPolygon";
+            /** Coordinates */
+            coordinates: number[][][][];
+        };
+        /** DistrictMapProperties */
+        DistrictMapProperties: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
+            /** Name Ar */
+            name_ar: string;
+            /** Municipality */
+            municipality: string;
+            /** District Id */
+            district_id: number;
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+            /** Label Point */
+            label_point: [
+                number,
+                number
+            ];
+            /** Explore Territory Id */
+            explore_territory_id: string | null;
+        };
+        /** DistrictMapResponse */
+        DistrictMapResponse: {
+            /**
+             * Type
+             * @constant
+             */
+            type: "FeatureCollection";
+            /**
+             * Territory
+             * @constant
+             */
+            territory: "abu-dhabi";
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Retrieved At */
+            retrieved_at: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Display Geometry Version */
+            display_geometry_version: string;
+            /** Features */
+            features: components["schemas"]["DistrictMapFeature"][];
+        };
+        /** HistoricalField */
+        HistoricalField: {
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+        };
+        /** BusRouteResponse */
+        BusRouteResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
+            /** Number */
+            number: string;
+            /** Origin */
+            origin: string;
+            /** Destination */
+            destination: string;
+            /** Timetable Url */
+            timetable_url: string;
+        };
+        /** CensusResponse */
+        CensusResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
+            /** Reference Year */
+            reference_year: number;
+            /** Region */
+            region: string;
+            /** Category */
+            category: string;
+            /** Unit */
+            unit: string;
+            /** Value */
+            value: string;
+            /** Rounding Base */
+            rounding_base: number | null;
+        };
+        /** DistrictResponse */
+        DistrictResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
+            /** Name Ar */
+            name_ar: string;
+            /** Municipality */
+            municipality: string;
+            /** District Id */
+            district_id: number;
+            /** Bounds */
+            bounds: [
+                number,
+                number,
+                number,
+                number
+            ];
+        };
+        /** FacilityResponse */
+        FacilityResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
+            /** Facility Type */
+            facility_type: string;
+            /** Address */
+            address: string;
+            /** Planned */
+            planned: boolean;
+            /** Operator */
+            operator: string;
+            /** Licence Number */
+            licence_number: string;
+            /** Services Original */
+            services_original: string;
+            /** Longitude */
+            longitude: number;
+            /** Latitude */
+            latitude: number;
+        };
+        /** PublicContextResponse */
+        PublicContextResponse: {
+            /** Dataset */
+            dataset: string;
+            /** Territory */
+            territory: string;
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Retrieved At */
+            retrieved_at: string | null;
+            /** Acquisition Method */
+            acquisition_method: string | null;
+            /** Timestamp Basis */
+            timestamp_basis: string | null;
+            /** Source Modified Date */
+            source_modified_date: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Reuse Status */
+            reuse_status: string;
+            /** Total */
+            total: number;
+            /** Offset */
+            offset: number;
+            /** Has More */
+            has_more: boolean;
+            /** Health */
+            health: components["schemas"]["FacilityResponse"][];
+            /** Districts */
+            districts: components["schemas"]["DistrictResponse"][];
+            /** Schools */
+            schools: components["schemas"]["SchoolResponse"][];
+            /** Mobility */
+            mobility: components["schemas"]["BusRouteResponse"][];
+            /** Statistics */
+            statistics: components["schemas"]["CensusResponse"][];
+        };
+        /** SchoolResponse */
+        SchoolResponse: {
+            /** Source Record Id */
+            source_record_id: string;
+            /** Name */
+            name: string;
+            /**
+             * Snapshot Id
+             * Format: uuid
+             */
+            snapshot_id: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Historical */
+            historical: boolean;
+            /** Field History */
+            field_history: {
+                [key: string]: components["schemas"]["HistoricalField"];
+            };
+            /** Name Ar */
+            name_ar: string;
+            /** Municipality */
+            municipality: string;
+            /** District */
+            district: string;
+            /** District Ar */
+            district_ar: string;
+            /** Community */
+            community: string;
+            /** Grades Original */
+            grades_original: string;
+            /** Longitude */
+            longitude: number;
+            /** Latitude */
+            latitude: number;
+        };
+        /** ProjectDeveloperResponse */
+        ProjectDeveloperResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Name */
+            name: string;
+            /** Website Url */
+            website_url: string;
+        };
+        /** ProjectDirectoryResponse */
+        ProjectDirectoryResponse: {
+            /** Items */
+            items: components["schemas"]["ProjectSummaryResponse"][];
+            /** Has More */
+            has_more: boolean;
+            /** Total */
+            total: number;
+            /** Offset */
+            offset: number;
+        };
+        /**
+         * ProjectRelationResponse
+         * @description The other project of a reviewed component link, never a merged identity.
+         */
+        ProjectRelationResponse: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Component */
+            component: string;
+            /** Basis */
+            basis: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+        };
+        /** ProjectSummaryResponse */
+        ProjectSummaryResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Territory */
+            territory: string;
+            developer: components["schemas"]["ProjectDeveloperResponse"];
+            /** Website Url */
+            website_url: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Has Map Identity */
+            has_map_identity: boolean;
+            parent?: components["schemas"]["ProjectRelationResponse"] | null;
+            /**
+             * Component Count
+             * @default 0
+             */
+            component_count: number;
+        };
+        /**
+         * SourceRightsResponse
+         * @description Reviewed rights of the source site (A19); `unknown` means not qualified yet.
+         */
+        SourceRightsResponse: {
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
+            /**
+             * Shown Beyond Terms
+             * @default false
+             */
+            shown_beyond_terms: boolean;
+        };
+        /**
+         * ActivityMeasurementResponse
+         * @description Ground change between two scenes of a parcel; a signal, never a progress share.
+         */
+        ActivityMeasurementResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "measured" | "insufficient_clear_pixels";
+            /** Level */
+            level: ("low" | "moderate" | "high") | null;
+            /** Method Version */
+            method_version: string;
+            /** Tile */
+            tile: string;
+            /** Before Scene Id */
+            before_scene_id: string;
+            /** After Scene Id */
+            after_scene_id: string;
+            /**
+             * Before Acquired At
+             * Format: date-time
+             */
+            before_acquired_at: string;
+            /**
+             * After Acquired At
+             * Format: date-time
+             */
+            after_acquired_at: string;
+            /** Parcel Pixels */
+            parcel_pixels: number;
+            /** Clear Pixels */
+            clear_pixels: number;
+            /**
+             * Measured At
+             * Format: date-time
+             */
+            measured_at: string;
+            before_window: components["schemas"]["ActivityWindowResponse"];
+            after_window: components["schemas"]["ActivityWindowResponse"];
+        };
+        /** ActivityParcelResponse */
+        ActivityParcelResponse: {
+            /** Source Namespace */
+            source_namespace: string;
+            /** Source Record Id */
+            source_record_id: string;
+            /** Official Plot Id */
+            official_plot_id: string | null;
+            /** Area M2 */
+            area_m2: number;
+            /**
+             * Area Basis
+             * @enum {string}
+             */
+            area_basis: "reviewed_parcel" | "parcel_containing_position";
+            /**
+             * Position Method
+             * @enum {string}
+             */
+            position_method: "cadastral_parcel" | "authority_point" | "building_footprint";
+            latest: components["schemas"]["ActivityMeasurementResponse"];
+        };
+        /** ActivitySourceResponse */
+        ActivitySourceResponse: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+        };
+        /**
+         * ActivityWindowResponse
+         * @description Captured Sentinel-2 file window that one date of a measurement was computed from.
+         */
+        ActivityWindowResponse: {
+            /** Url */
+            url: string;
+            /** Content Sha256 */
+            content_sha256: string;
+        };
+        /**
+         * CancellationRetentionResponse
+         * @description Developer retention on cancellation at the declared stage; a reading aid, not advice.
+         */
+        CancellationRetentionResponse: {
+            /** Version */
+            version: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "rate" | "boundary" | "unknown" | "out_of_range";
+            /** Progress Percent */
+            progress_percent: number | null;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /** Rates */
+            rates: number[];
+            /** Bands */
+            bands: components["schemas"]["RetentionBandResponse"][];
+            /** Full Refund Possible */
+            full_refund_possible: boolean;
+            /** Paid Share Discretion Percent */
+            paid_share_discretion_percent: number;
+            source: components["schemas"]["RetentionSourceResponse"];
+            progress_source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** DeliveryAnnouncementResponse */
+        DeliveryAnnouncementResponse: {
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "year" | "quarter" | "month" | "day";
+            /** Year */
+            year: number;
+            /** Quarter */
+            quarter: number | null;
+            /** Month */
+            month: number | null;
+            /** Day */
+            day: number | null;
+            /** Original Text */
+            original_text: string;
+            /**
+             * Window Start
+             * Format: date
+             */
+            window_start: string;
+            /**
+             * Window End
+             * Format: date
+             */
+            window_end: string;
+            /**
+             * First Observed At
+             * Format: date-time
+             */
+            first_observed_at: string;
+            /**
+             * Last Observed At
+             * Format: date-time
+             */
+            last_observed_at: string;
+            /** Readings */
+            readings: number;
+            /**
+             * Change
+             * @enum {string}
+             */
+            change: "first" | "later" | "earlier" | "refined";
+            outcome: components["schemas"]["DeliveryOutcomeResponse"];
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** DeliveryCompletionResponse */
+        DeliveryCompletionResponse: {
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /** Not Completed Until */
+            not_completed_until: string | null;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * DeliveryOutcomeResponse
+         * @description Whether a register reading proves the announced period was met or missed.
+         */
+        DeliveryOutcomeResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "met" | "late" | "undetermined";
+            /** Late By At Least Days */
+            late_by_at_least_days: number | null;
+            source: components["schemas"]["ProjectSourceResponse"] | null;
+        };
+        /** DeliveryRegisterResponse */
+        DeliveryRegisterResponse: {
+            /** Status */
+            status: string;
+            /** Completed */
+            completed: boolean;
+            /** Progress Percent */
+            progress_percent: number | null;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /**
+             * First Observed At
+             * Format: date-time
+             */
+            first_observed_at: string;
+            /**
+             * Last Observed At
+             * Format: date-time
+             */
+            last_observed_at: string;
+            /** Readings */
+            readings: number;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * ObservedRangeResponse
+         * @description Smallest and largest recorded value, as decimal text.
+         */
+        ObservedRangeResponse: {
+            /** Min */
+            min: string;
+            /** Max */
+            max: string;
+        };
+        /** ObservedSalesCaptureResponse */
+        ObservedSalesCaptureResponse: {
+            /** Url */
+            url: string;
+            /** Content Sha256 */
+            content_sha256: string;
+        };
+        /**
+         * ObservedSalesGroupResponse
+         * @description Recorded sales of one type; ranges cover the full-share sales only.
+         */
+        ObservedSalesGroupResponse: {
+            /** Property Type */
+            property_type: string;
+            /** Property Layout */
+            property_layout: string;
+            /** Sale Application Type */
+            sale_application_type: string;
+            /** Sale Sequence */
+            sale_sequence: string;
+            /** Sales Count */
+            sales_count: number;
+            /** Full Share Count */
+            full_share_count: number;
+            price_aed: components["schemas"]["ObservedRangeResponse"] | null;
+            rate_aed_per_sqm: components["schemas"]["ObservedRangeResponse"] | null;
+            sold_area_sqm: components["schemas"]["ObservedRangeResponse"] | null;
+            /**
+             * First Registration Date
+             * Format: date
+             */
+            first_registration_date: string;
+            /**
+             * Last Registration Date
+             * Format: date
+             */
+            last_registration_date: string;
+        };
+        /**
+         * ObservedSalesLabelResponse
+         * @description Reviewed ADREC sales label that selects the project's recorded sales.
+         */
+        ObservedSalesLabelResponse: {
+            /** District */
+            district: string;
+            /** Label */
+            label: string;
+            /**
+             * Evidence
+             * @enum {string}
+             */
+            evidence: "register_name" | "project_name";
+            /** Registration Number */
+            registration_number: string | null;
+            /**
+             * Reviewed On
+             * Format: date
+             */
+            reviewed_on: string;
+        };
+        /**
+         * ObservedSalesWindowResponse
+         * @description Newest ADREC sales window of the territory; windows overlap and are never added.
+         */
+        ObservedSalesWindowResponse: {
+            /** Territory */
+            territory: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Collected At
+             * Format: date-time
+             */
+            collected_at: string;
+            /** Captures */
+            captures: components["schemas"]["ObservedSalesCaptureResponse"][];
+        };
+        /** ProjectAmenityResponse */
+        ProjectAmenityResponse: {
+            /** Code */
+            code: string;
+            /** Label */
+            label: string;
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * ProjectConstructionActivityResponse
+         * @description Latest satellite measurement of each measured parcel of the project.
+         */
+        ProjectConstructionActivityResponse: {
+            source: components["schemas"]["ActivitySourceResponse"];
+            /** Parcels */
+            parcels: components["schemas"]["ActivityParcelResponse"][];
+        };
+        /**
+         * ProjectDeclaredProgressResponse
+         * @description Latest completion the authority register declares, dated by its inspection.
+         */
+        ProjectDeclaredProgressResponse: {
+            /**
+             * Authority
+             * @constant
+             */
+            authority: "adrec";
+            /** Progress Percent */
+            progress_percent: number;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /** Register Status */
+            register_status: string;
+            /** Off Plan */
+            off_plan: boolean | null;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectDetailResponse */
+        ProjectDetailResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Territory */
+            territory: string;
+            developer: components["schemas"]["ProjectDeveloperResponse"];
+            /** Website Url */
+            website_url: string;
+            /** Summary */
+            summary: string;
+            summary_source?: components["schemas"]["ProjectSourceResponse"] | null;
+            /** Language */
+            language: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            handover: components["schemas"]["ProjectHandoverResponse"] | null;
+            programme_total: components["schemas"]["ProjectProgrammeResponse"] | null;
+            /** Typologies */
+            typologies: components["schemas"]["ProjectTypologyResponse"][];
+            /** Amenities */
+            amenities: components["schemas"]["ProjectAmenityResponse"][];
+            /** Media */
+            media: components["schemas"]["ProjectMediaResponse"][];
+            /** Sources */
+            sources: components["schemas"]["ProjectSourceResponse"][];
+            /** Map Locations */
+            map_locations: components["schemas"]["ProjectMapLocationResponse"][];
+            parent?: components["schemas"]["ProjectRelationResponse"] | null;
+            /**
+             * Components
+             * @default []
+             */
+            components: components["schemas"]["ProjectRelationResponse"][];
+            declared_progress?: components["schemas"]["ProjectDeclaredProgressResponse"] | null;
+            cancellation_retention?: components["schemas"]["CancellationRetentionResponse"] | null;
+            verification?: components["schemas"]["ProjectVerificationResponse"] | null;
+            construction_activity?: components["schemas"]["ProjectConstructionActivityResponse"] | null;
+            observed_sales?: components["schemas"]["ProjectObservedSalesResponse"] | null;
+        };
+        /** ProjectHandoverResponse */
+        ProjectHandoverResponse: {
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "year" | "quarter" | "month" | "day";
+            /** Year */
+            year: number;
+            /** Quarter */
+            quarter: number | null;
+            /** Month */
+            month: number | null;
+            /** Day */
+            day: number | null;
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectMapLocationResponse */
+        ProjectMapLocationResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "building" | "place" | "parcel";
+            /**
+             * Method
+             * @enum {string}
+             */
+            method: "cadastral_parcel" | "building_footprint" | "authority_point" | "broker_point" | "publisher_point" | "declared_point";
+            /**
+             * Precision
+             * @enum {string}
+             */
+            precision: "boundary" | "footprint" | "point";
+            /** Name */
+            name: string;
+            /** Geometry */
+            geometry: components["schemas"]["Geometry"] | components["schemas"]["PointGeometry"];
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectMediaResponse */
+        ProjectMediaResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "image" | "document" | "video" | "model";
+            /** Role */
+            role: string;
+            /** Title */
+            title: string;
+            /** Mime Type */
+            mime_type: string;
+            /** Source Url */
+            source_url: string;
+            /** Original Text */
+            original_text: string;
+            /**
+             * Rights Status
+             * @enum {string}
+             */
+            rights_status: "reference_only" | "approved" | "blocked";
+            /** Delivery Url */
+            delivery_url: string | null;
+            /** Author */
+            author?: string | null;
+            /** Licence Code */
+            licence_code?: string | null;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Taken On */
+            taken_on?: string | null;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
+            /** Width */
+            width?: number | null;
+            /** Height */
+            height?: number | null;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /**
+         * ProjectObservedSalesResponse
+         * @description Recorded ADREC sales of the project's reviewed labels, by type, with ranges.
+         */
+        ProjectObservedSalesResponse: {
+            source: components["schemas"]["ActivitySourceResponse"];
+            /** Labels */
+            labels: components["schemas"]["ObservedSalesLabelResponse"][];
+            window: components["schemas"]["ObservedSalesWindowResponse"] | null;
+            /** Groups */
+            groups: components["schemas"]["ObservedSalesGroupResponse"][];
+        };
+        /** ProjectProgrammeResponse */
+        ProjectProgrammeResponse: {
+            /** Value */
+            value: number;
+            /**
+             * Basis
+             * @default announced
+             * @enum {string}
+             */
+            basis: "announced" | "registered";
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectSourceResponse */
+        ProjectSourceResponse: {
+            /** Url */
+            url: string;
+            /** Name */
+            name: string;
+            /**
+             * Kind
+             * @default developer
+             * @enum {string}
+             */
+            kind: "developer" | "publisher" | "broker" | "authority" | "media" | "community" | "reference";
+            /** Content Sha256 */
+            content_sha256?: string | null;
+            /** Developer Name */
+            developer_name?: string | null;
+            /** Developer Role */
+            developer_role?: ("declared" | "registered") | null;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /** Language */
+            language: string;
+            /**
+             * Evidence Pointer
+             * @default
+             */
+            evidence_pointer: string;
+            /** Rights Status */
+            rights_status: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+            /** Ingested At */
+            ingested_at?: string | null;
+            /**
+             * Historical
+             * @default false
+             */
+            historical: boolean;
+        };
+        /** ProjectTypologyResponse */
+        ProjectTypologyResponse: {
+            /** Property Type */
+            property_type: string;
+            /** Bedrooms */
+            bedrooms: number | null;
+            /** Original Text */
+            original_text: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** ProjectVerificationResponse */
+        ProjectVerificationResponse: {
+            latest_reading: components["schemas"]["VerificationRegisterResponse"] | null;
+            /** Register Readings */
+            register_readings: components["schemas"]["DeliveryRegisterResponse"][];
+            completion: components["schemas"]["DeliveryCompletionResponse"] | null;
+            /** Official Links */
+            official_links: components["schemas"]["VerificationLinkResponse"][];
+            /** Contradictions */
+            contradictions: components["schemas"]["VerificationContradictionResponse"][];
+        };
+        /** RetentionBandResponse */
+        RetentionBandResponse: {
+            /** Lower Percent */
+            lower_percent: number;
+            /** Upper Percent */
+            upper_percent: number;
+        };
+        /** RetentionReferenceResponse */
+        RetentionReferenceResponse: {
+            /** Publisher */
+            publisher: string;
+            /**
+             * Published On
+             * Format: date
+             */
+            published_on: string;
+            /** Url */
+            url: string;
+            /**
+             * Consulted On
+             * Format: date
+             */
+            consulted_on: string;
+            /** Covers */
+            covers: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+        };
+        /** RetentionSourceResponse */
+        RetentionSourceResponse: {
+            /** Decision */
+            decision: string;
+            /** Official Text Obtained */
+            official_text_obtained: boolean;
+            /** References */
+            references: components["schemas"]["RetentionReferenceResponse"][];
+        };
+        /**
+         * VerificationContradictionResponse
+         * @description Two cited readings that disagree; no cause is inferred.
+         */
+        VerificationContradictionResponse: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "announced_after_completion" | "announced_period_passed" | "sources_disagree" | "progress_decreased";
+            /** Late By At Least Days */
+            late_by_at_least_days: number | null;
+            /** Announcements */
+            announcements: components["schemas"]["DeliveryAnnouncementResponse"][];
+            /** Register Readings */
+            register_readings: components["schemas"]["DeliveryRegisterResponse"][];
+        };
+        /**
+         * VerificationLinkResponse
+         * @description Official register page an operator matched to the project; never read by the platform.
+         */
+        VerificationLinkResponse: {
+            /**
+             * Authority
+             * @constant
+             */
+            authority: "adrec";
+            /** Registration Number */
+            registration_number: string;
+            /** Url */
+            url: string;
+            /**
+             * Reviewed On
+             * Format: date
+             */
+            reviewed_on: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+        };
+        /**
+         * VerificationRegisterResponse
+         * @description Latest project-scope register reading, values as published.
+         */
+        VerificationRegisterResponse: {
+            /**
+             * Authority
+             * @constant
+             */
+            authority: "adrec";
+            /** Registration Number */
+            registration_number: string;
+            /** Permit Number */
+            permit_number: string | null;
+            /** Register Status */
+            register_status: string | null;
+            /** Off Plan */
+            off_plan: boolean | null;
+            /** Registered On */
+            registered_on: string | null;
+            /** Progress Percent */
+            progress_percent: number | null;
+            /** Progress Inspected On */
+            progress_inspected_on: string | null;
+            /** Inspection Company */
+            inspection_company: string | null;
+            /** Progress Report Url */
+            progress_report_url: string | null;
+            /** Progress Report Valid Until */
+            progress_report_valid_until: string | null;
+            /** Progress Report Expired */
+            progress_report_expired: boolean | null;
+            /** Sold Percent */
+            sold_percent: number | null;
+            /** Sold Original */
+            sold_original: string | null;
+            /** Escrow Bank Name */
+            escrow_bank_name: string | null;
+            /** Escrow Account Number */
+            escrow_account_number: string | null;
+            /** Developer Licence */
+            developer_licence: string | null;
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            source: components["schemas"]["ProjectSourceResponse"];
+        };
+        /** DeliveryProjectResponse */
+        DeliveryProjectResponse: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Territory */
+            territory: string;
+            /** Announcements */
+            announcements: components["schemas"]["DeliveryAnnouncementResponse"][];
+            /** Register Readings */
+            register_readings: components["schemas"]["DeliveryRegisterResponse"][];
+            completion: components["schemas"]["DeliveryCompletionResponse"] | null;
+        };
+        /** DeliverySummaryResponse */
+        DeliverySummaryResponse: {
+            /** Projects */
+            projects: number;
+            /** With Announcements */
+            with_announcements: number;
+            /** With Register */
+            with_register: number;
+            /** Completed Observed */
+            completed_observed: number;
+            /** Late Observed */
+            late_observed: number;
+            /** Announcement Moved Later */
+            announcement_moved_later: number;
+        };
+        /** DeveloperDeliveryHistoryResponse */
+        DeveloperDeliveryHistoryResponse: {
+            developer: components["schemas"]["ProjectDeveloperResponse"];
+            summary: components["schemas"]["DeliverySummaryResponse"];
+            /** Projects */
+            projects: components["schemas"]["DeliveryProjectResponse"][];
+        };
+        /** WalkingCollection */
+        WalkingCollection: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["WalkingFeature"][];
+        };
+        /** WalkingFeature */
+        WalkingFeature: {
+            /** Type */
+            type: string;
+            geometry: components["schemas"]["WalkingGeometry"];
+            properties: components["schemas"]["WalkingProperties"];
+        };
+        /** WalkingGeometry */
+        WalkingGeometry: {
+            /** Type */
+            type: string;
+            /** Coordinates */
+            coordinates: number[][][][];
+        };
+        /** WalkingProperties */
+        WalkingProperties: {
+            /** Minutes */
+            minutes: number;
+            /** Mode */
+            mode: string;
+        };
+        /** WalkingResponse */
+        WalkingResponse: {
+            collection: components["schemas"]["WalkingCollection"];
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Graph Id */
+            graph_id: string;
+            /**
+             * Graph Fetched At
+             * Format: date-time
+             */
+            graph_fetched_at: string;
+            /** Source Url */
+            source_url: string;
+            /** Historical */
+            historical: boolean;
+        };
+        /** DistrictMarketFeature */
+        DistrictMarketFeature: {
+            /** Type */
+            type: string;
+            /** Id */
+            id: string;
+            geometry: components["schemas"]["WalkingGeometry"];
+            properties: components["schemas"]["DistrictMarketProperties"];
+        };
+        /** DistrictMarketProperties */
+        DistrictMarketProperties: {
+            /** Name */
+            name: string;
+            /** Name Ar */
+            name_ar: string;
+            /** Sales */
+            sales: number;
+            /** Rate Samples */
+            rate_samples: number;
+            /** Median Rate */
+            median_rate: string | null;
+            /** Volume Aed */
+            volume_aed: string;
+            /**
+             * Boundary Ingested At
+             * Format: date-time
+             */
+            boundary_ingested_at: string;
+        };
+        /** DistrictMarketResponse */
+        DistrictMarketResponse: {
+            /** Type */
+            type: string;
+            /** Features */
+            features: components["schemas"]["DistrictMarketFeature"][];
+            /** Snapshot Id */
+            snapshot_id: string | null;
+            /** Boundary Snapshot Id */
+            boundary_snapshot_id: string | null;
+            /** Period Start */
+            period_start: string | null;
+            /** Period End */
+            period_end: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Boundary Source Url */
+            boundary_source_url: string;
+            /** Unmatched Sales */
+            unmatched_sales: number;
+            /** Mapped Sales */
+            mapped_sales: number;
+            /** Historical */
+            historical: boolean;
+        };
+        /** SourceRightsRegistryResponse */
+        SourceRightsRegistryResponse: {
+            /** Items */
+            items: components["schemas"]["SourceSiteRightsResponse"][];
+        };
+        /**
+         * SourceSiteRightsResponse
+         * @description One reviewed site of the source rights registry (A19); `unknown` means not qualified.
+         */
+        SourceSiteRightsResponse: {
+            /** Host */
+            host: string;
+            /** Publisher */
+            publisher: string;
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Collection
+             * @enum {string}
+             */
+            collection: "allowed" | "forbidden";
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
         };
     };
     responses: never;
@@ -104,6 +2684,1351 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    previewSurroundings: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path: {
+                target: "parcel" | "building" | "place" | "street";
+                identity: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Surroundings"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewReferences: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResearchReferenceResponse"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewImagery: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageryResponse"][];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewPropertyMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reviewed licensed JPEG; local preview only */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewMapContext: {
+        parameters: {
+            query: {
+                bbox: string;
+                territory?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MapContext"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewContextIndex: {
+        parameters: {
+            query: {
+                bbox: string;
+                territory?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContextIndex"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewContextTile: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path: {
+                z: number;
+                x: number;
+                y: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Mapbox Vector Tile; layers `building` (`id`) and `street` (`id`, `name`, `name_ar`) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.mapbox-vector-tile": string;
+                };
+            };
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewParcels: {
+        parameters: {
+            query: {
+                bbox: string;
+                limit?: number;
+                q?: string;
+                territory?: string | null;
+                after?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Collection"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewParcelIndex: {
+        parameters: {
+            query: {
+                bbox: string;
+                limit?: number;
+                q?: string;
+                territory?: string | null;
+                after?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParcelIndex"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewParcelSearch: {
+        parameters: {
+            query: {
+                q: string;
+                territory: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParcelIndex"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewParcelTile: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path: {
+                z: number;
+                x: number;
+                y: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Mapbox Vector Tile; layer `parcels`, property `id` only */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.mapbox-vector-tile": string;
+                };
+            };
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewParcel: {
+        parameters: {
+            query?: {
+                territory?: string | null;
+            };
+            header?: never;
+            path: {
+                parcel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Detail"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewTerritories: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TerritoryRegistry"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewAdrecMarket: {
+        parameters: {
+            query: {
+                territory: string;
+                q?: string;
+                offset?: number;
+                limit?: number;
+                snapshot_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdrecMarketResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewDistrictMap: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistrictMapResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewPublicContext: {
+        parameters: {
+            query: {
+                dataset: "health" | "schools" | "mobility" | "statistics" | "districts";
+                territory?: string;
+                q?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicContextResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectDirectory: {
+        parameters: {
+            query?: {
+                territory?: ("al-reem-island" | "saadiyat-island" | "al-maryah-island") | null;
+                q?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectDirectoryResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectDetailResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewDeveloperDeliveryHistory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeveloperDeliveryHistoryResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Partial Content */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Range Not Satisfiable */
+            416: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewProjectMediaHead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                media_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Partial Content */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Range Not Satisfiable */
+            416: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewBasemapTile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+                z: number;
+                x: number;
+                y: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Archived, source-specific tile bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                    "application/x-protobuf": string;
+                };
+            };
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewWalkingArea: {
+        parameters: {
+            query: {
+                longitude: number;
+                latitude: number;
+                minutes?: number;
+                territory?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WalkingResponse"];
+                };
+            };
+            /** @description Accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewDistrictMarket: {
+        parameters: {
+            query?: {
+                territory?: string;
+                q?: string;
+                snapshot_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistrictMarketResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewSourceRights: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceRightsRegistryResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
                 };
             };
         };

@@ -1,0 +1,65 @@
+{
+  "purpose": "Editorial UAE atmosphere for homepage and project covers, not property evidence; project covers explicitly label illustrative photographs",
+  "location": "Dubai and Abu Dhabi, United Arab Emirates",
+  "license": "Unsplash License",
+  "license_url": "https://unsplash.com/license",
+  "license_checked_at": "2026-10-12",
+  "assets": [
+    {
+      "file": "dubai-night-1920.webp",
+      "location": "Dubai, United Arab Emirates",
+      "photographer": "Alla Rome",
+      "source_page": "https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8",
+      "download_url": "https://images.unsplash.com/photo-1671818786453-c54ff4786ab0?fm=webp&fit=max&w=1920&q=82",
+      "width": 1920,
+      "byte_length": 381392,
+      "sha256": "32fbb0cf08dc259f7dcbbf8247cbfe06a97d1564bea603cb463506ea710d7943"
+    },
+    {
+      "file": "dubai-night-768.webp",
+      "location": "Dubai, United Arab Emirates",
+      "photographer": "Alla Rome",
+      "source_page": "https://unsplash.com/photos/the-skyline-of-a-large-city-at-night-lODmPrkAxM8",
+      "download_url": "https://images.unsplash.com/photo-1671818786453-c54ff4786ab0?fm=webp&fit=max&w=768&q=82",
+      "width": 768,
+      "byte_length": 71904,
+      "sha256": "391b51ccb411b72dffe25660c4dfd4cc2bd6763a5c7e1fda1d765b11d1a8b748"
+    },
+    {
+      "file": "abu-dhabi-coast-768.webp",
+      "photographer": "Hanks K",
+      "source_page": "https://unsplash.com/photos/beach-palm-trees-and-resort-under-a-hazy-sky-_c08bbHy-xg",
+      "download_url": "https://images.unsplash.com/photo-1754497679408-a2b03095157e?fm=webp&fit=max&w=768&q=82",
+      "width": 768,
+      "byte_length": 70090,
+      "sha256": "28a3e018f4457bd1407555bb1c10e08edff92c4eca32e52ffe312b5f1474a93e"
+    },
+    {
+      "file": "abu-dhabi-coast-1920.webp",
+      "photographer": "Hanks K",
+      "source_page": "https://unsplash.com/photos/beach-palm-trees-and-resort-under-a-hazy-sky-_c08bbHy-xg",
+      "download_url": "https://images.unsplash.com/photo-1754497679408-a2b03095157e?fm=webp&fit=max&w=1920&q=82",
+      "width": 1920,
+      "byte_length": 391218,
+      "sha256": "915d2cd1fc1134d3816227b517b2becd5d4ce1e3c0a36a617bedbc46f3909c38"
+    },
+    {
+      "file": "abu-dhabi-sunset-768.webp",
+      "photographer": "Yulia Evtushenko",
+      "source_page": "https://unsplash.com/photos/a-couple-of-palm-trees-sitting-next-to-each-other-MhpX3VgaG4U",
+      "download_url": "https://images.unsplash.com/photo-1676648527602-2c9b942249e1?fm=webp&fit=max&w=768&q=82",
+      "width": 768,
+      "byte_length": 99604,
+      "sha256": "4ea65fd7676d7ba23844137354fd52c8926280cca6c52e942406b2e0f12a5842"
+    },
+    {
+      "file": "abu-dhabi-sunset-1920.webp",
+      "photographer": "Yulia Evtushenko",
+      "source_page": "https://unsplash.com/photos/a-couple-of-palm-trees-sitting-next-to-each-other-MhpX3VgaG4U",
+      "download_url": "https://images.unsplash.com/photo-1676648527602-2c9b942249e1?fm=webp&fit=max&w=1920&q=82",
+      "width": 1920,
+      "byte_length": 502654,
+      "sha256": "d1f961e46dbcf84570f845f8ee2d49538177496e7dd6c5824799fa6aca200de3"
+    }
+  ]
+}

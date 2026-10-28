@@ -1,0 +1,87 @@
+# Disposable stack for the browser journeys against the versioned demonstration
+# package (A13, docs/engineering/E2E.md). Its own Compose project: it never shares a
+# database, volume, network or port with the local stack, and nothing outlives `down`
+# (database and media live in tmpfs). Used by GitHub CI and runnable locally:
+#   docker compose -f infra/local/compose.e2e-demo.yaml build
+#   docker compose -f infra/local/compose.e2e-demo.yaml up -d --wait api
+#   docker compose -f infra/local/compose.e2e-demo.yaml run --rm checks-e2e
+#   docker compose -f infra/local/compose.e2e-demo.yaml down
+# Failure traces, screenshots and the HTML report are written to .cache/e2e/.
+name: property-platform-e2e-demo
+
+services:
+  db:
+    image: postgis/postgis:18-3.6
+    environment:
+      POSTGRES_DB: property_platform
+      POSTGRES_USER: property_platform
+      POSTGRES_PASSWORD: e2e-demo-only-password
+    tmpfs:
+      - /var/lib/postgresql:size=2g
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "property_platform", "-d", "property_platform"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Migrations, then the demonstration replay (refused unless the database is empty),
+  # then the API. Ready only once the replay has succeeded.
+  # The API runs under the image's own server (its CMD, plus request durations in the
+  # access log), not runserver: runserver runs every request at once, each with its own
+  # database session, so the burst of a first map load competed for the runner's CPUs
+  # inside PostgreSQL and the largest parcel-index read exceeded its 2 s statement budget
+  # (A17). Four threads bound the reads in progress, as in service; other requests wait
+  # outside PostgreSQL, before their statement budget starts.
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/api/Dockerfile
+    image: property-platform-e2e-demo-api
+    environment:
+      DJANGO_SETTINGS_MODULE: property_platform.config.settings.local
+      DJANGO_SECRET_KEY: e2e-demo-key-never-use-in-production
+      DATABASE_URL: postgresql://property_platform:e2e-demo-only-password@db:5432/property_platform
+      MEDIA_STORAGE_BACKEND: local
+      MEDIA_LOCAL_ROOT: /media
+      MEDIA_PUBLICATION_ENABLED: "0"
+    volumes:
+      - ../../fixtures/demo-replay:/demo-replay:ro
+    tmpfs:
+      - /media:size=512m,uid=1000,gid=1000
+    command:
+      - sh
+      - -c
+      - >-
+        python manage.py migrate --noinput
+        && python manage.py load_demo_package --package /demo-replay --actor e2e-demo
+        && exec gunicorn property_platform.config.wsgi:application --bind 0.0.0.0:8000
+        --workers 1 --threads 4 --access-logfile -
+        --access-logformat '%(h)s "%(r)s" %(s)s %(b)s %(M)sms'
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15m
+
+  checks-e2e:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+      target: e2e
+    image: property-platform-checks-e2e
+    environment:
+      E2E_API_ORIGIN: http://api:8000
+      # The package holds every journey's data: a journey without it fails, never skips.
+      E2E_REQUIRE_DATA: "1"
+    volumes:
+      - ../../apps/web/e2e:/repo/apps/web/e2e:ro
+      - ../../apps/web/playwright.config.ts:/repo/apps/web/playwright.config.ts:ro
+      - ../../.cache/e2e:/artifacts
+    ipc: host
+    depends_on:
+      api:
+        condition: service_healthy

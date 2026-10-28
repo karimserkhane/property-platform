@@ -1,0 +1,876 @@
+{
+  "purpose": "Research observations only. No pipeline deployment or database import. This is not a database dump or an executable ingestion manifest.",
+  "compiled_at_utc": "2026-10-22T03:13:53.537374+00:00",
+  "method": {
+    "tls_verified": true,
+    "authentication_used": false,
+    "max_concurrent_requests": 3,
+    "data_minimization": "No individual owners or contact details requested. No parcel geometry payloads republished in this file.",
+    "timestamp_basis": "Recorded probe timestamp; response completion time is not uniformly available. Request-start timestamps are explicitly used for failed requests."
+  },
+  "geometry_references": [
+    {
+      "id": "onwani-maryah-district-74",
+      "source_url": "https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/1/query?where=UPPER%28NAMEENGLISH%29+LIKE+%27%25MARY%25%27+OR+UPPER%28NAMEENGLISH%29+LIKE+%27%25SOW%25%27&outFields=OBJECTID%2CNAMEENGLISH%2CNAMEARABIC%2CDISTRICTID&returnGeometry=true&outSR=4326&f=json",
+      "select": {
+        "NAMEENGLISH": "AL MARYAH ISLAND",
+        "DISTRICTID": 74
+      },
+      "canonical_geometry_sha256": "1fdabb63865fde9a1e2befe9f068c0578f3e9085423a61e2d6fe2fb696926c27",
+      "canonical_encoding": "JSON compact separators, rings plus spatialReference wkid 4326. The original cached public district response was used; no geometry is embedded here. Re-fetching may yield a later revision."
+    }
+  ],
+  "limitations": [
+    "Counts are observations at their recorded timestamps, not guarantees of exhaustive or current cadastral registration.",
+    "Rights for Pub/Generic_Search_WM and TAMM/ALDAR_Properties not established by HTTP access.",
+    "Only Maryah parcel IDs and geometries were checked across all 73 returned rows. Reem and Saadiyat parcel totals are server counts.",
+    "Envelope windows overlap; use exact district attributes or official boundary geometry.",
+    "Long GET geometry queries returned non-JSON HTTP 200; successful POST observations are retained instead.",
+    "A Fountain attribute query with nonexistent date columns returned ArcGIS error 400; it is excluded from usable data observations. No new AI fountain identity was established.",
+    "Raw research responses are local ignored cache files, not a production archive."
+  ],
+  "observations": [
+    {
+      "id": "public-plots-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/Pub/Generic_Search_WM/MapServer/10/query",
+        "parameters": {
+          "f": "json",
+          "where": "UPPER(DISTRICTENG)='AL MARYAH ISLAND'",
+          "returnCountOnly": "true"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:40:26.729127+00:00",
+      "http_status": 200,
+      "response_sha256": "10bacd9d5c68b0b2ebe0340d6f463008c52e76d4c245131f58464a0ed80eaffc",
+      "count": 73
+    },
+    {
+      "id": "public-plots-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/Pub/Generic_Search_WM/MapServer/10/query",
+        "parameters": {
+          "f": "json",
+          "where": "UPPER(DISTRICTENG)='AL REEM ISLAND'",
+          "returnCountOnly": "true"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:40:26.782835+00:00",
+      "http_status": 200,
+      "response_sha256": "e3fa98dc15c2d449c82461e2fd59752250d43dc7bd170ab8783847c8ce8293fc",
+      "count": 2506
+    },
+    {
+      "id": "public-plots-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/Pub/Generic_Search_WM/MapServer/10/query",
+        "parameters": {
+          "f": "json",
+          "where": "UPPER(DISTRICTENG)='AL SAADIYAT ISLAND'",
+          "returnCountOnly": "true"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:40:26.481385+00:00",
+      "http_status": 200,
+      "response_sha256": "1fce17e6a6350374b05be4cc02e43b454024bd28fd1ccf660148ebe9276a0f0c",
+      "count": 5456
+    },
+    {
+      "id": "public-plots-maryah-names",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/Pub/Generic_Search_WM/MapServer/10/query",
+        "parameters": {
+          "f": "json",
+          "where": "UPPER(DISTRICTENG) LIKE '%MAR%' OR UPPER(DISTRICTENG) LIKE '%SOW%' OR UPPER(DISTRICTENG) LIKE '%SUW%'",
+          "outFields": "DISTRICTENG",
+          "returnDistinctValues": "true",
+          "returnGeometry": "false",
+          "resultRecordCount": "50"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:40:27.178381+00:00",
+      "http_status": 200,
+      "response_sha256": "d1df7558024c557df70a8ebf5ddbe66e8c4813c7112debd5af17fa7160e6307e",
+      "quality_observation": {
+        "rows": 50,
+        "distinct_district_names": 3,
+        "exceeded_transfer_limit": true,
+        "requested_distinct_not_achieved": true
+      }
+    },
+    {
+      "id": "opendata-207-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/207/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:27.826898+00:00",
+      "http_status": 200,
+      "response_sha256": "4c9caa2c9fbb5e5f0099ac08ff7a74fd9c6711d307d1e88705cb791b157d3404",
+      "count": 10,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-207-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/207/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:27.693579+00:00",
+      "http_status": 200,
+      "response_sha256": "99bdb4d58607c55e945abefcf209c438ac86954b026f8c933df7d412ac1ca91c",
+      "count": 17,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-207-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/207/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:27.869395+00:00",
+      "http_status": 200,
+      "response_sha256": "b35539ce83f07b2fe8fb4bdce27fb9666c2122af4ad9a5850a711d906fb58998",
+      "count": 42,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-828-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/828/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:28.404660+00:00",
+      "http_status": 200,
+      "response_sha256": "77225c1b889e1a23d33f5e7724a89deba869a0b481aff9fe90736b56532d0542",
+      "count": 9,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-828-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/828/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:28.404890+00:00",
+      "http_status": 200,
+      "response_sha256": "13862f084a72fbe80d353527118c5ce361f7edde5713476ca2e774a04952b03a",
+      "count": 16,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-828-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/828/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:28.404403+00:00",
+      "http_status": 200,
+      "response_sha256": "378b29d3b1366f06830e5d8508c4904df51d579982c733a79a98b2439063aa21",
+      "count": 39,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-353-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/353/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:28.991447+00:00",
+      "http_status": 200,
+      "response_sha256": "b97e2cd823aa371bf5aae1a2640f50501b81d863116d60d5ed799bb77c8ea575",
+      "count": 98,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-353-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/353/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:28.404776+00:00",
+      "http_status": null,
+      "response_sha256": null,
+      "failure": "TimeoutError: The read operation timed out",
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count.",
+      "timestamp_basis": "request_start; no response received"
+    },
+    {
+      "id": "opendata-353-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/353/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:29.055681+00:00",
+      "http_status": 200,
+      "response_sha256": "3dbc9cb2e2df912061c1d7f298d576190795a3864d9e0a9242ba72cc4c77847d",
+      "count": 1728,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-27-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/27/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:29.520256+00:00",
+      "http_status": 200,
+      "response_sha256": "a7b59f14220279bf034e35863bb5c8f0e489b130e214b6eead2d04fe26f2ea8b",
+      "count": 5,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-27-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/27/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:30.052163+00:00",
+      "http_status": 200,
+      "response_sha256": "a801e3865bd6b93fa0f4735ca65ca39157d0351f446ccecbb37ba7501a2e8faf",
+      "count": 13,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-27-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/27/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:30.090785+00:00",
+      "http_status": 200,
+      "response_sha256": "b1a32536efad4ddc3c91dae351ff80a48fdd5792ac2ecc832d06374bef27bb19",
+      "count": 107,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-817-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/817/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:30.541016+00:00",
+      "http_status": 200,
+      "response_sha256": "016beb09feb542c3cccbeadf397d388285dad5af1b599a72b26575ca3fb43ec9",
+      "count": 23,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-817-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/817/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:30.544465+00:00",
+      "http_status": 200,
+      "response_sha256": "40cea6f6ff4b8442f0264e9510a80b8257167c17bc22bc7dfce80a1e55d9172a",
+      "count": 154,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-817-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/817/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:31.034315+00:00",
+      "http_status": 200,
+      "response_sha256": "dbd046824ac239bc2fa79b152b1152a43bdfc4e110a96862cefe043d9f57270a",
+      "count": 128,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-21-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/21/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:31.215492+00:00",
+      "http_status": 200,
+      "response_sha256": "6ee8a36b3a4c997cf095a065def85314b843303c136e2a9b281fe6e130575905",
+      "count": 15,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-21-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/21/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:31.698310+00:00",
+      "http_status": 200,
+      "response_sha256": "d64031d385f466fa27ac912bb11c2f71c5aecbf3a86e3e24a96d870528901f2c",
+      "count": 38,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-21-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/21/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:31.876185+00:00",
+      "http_status": 200,
+      "response_sha256": "b97e2cd823aa371bf5aae1a2640f50501b81d863116d60d5ed799bb77c8ea575",
+      "count": 98,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-22-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/22/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:31.698464+00:00",
+      "http_status": null,
+      "response_sha256": null,
+      "failure": "URLError: <urlopen error [WinError 10060] Une tentative de connexion a échoué car le parti connecté n’a pas répondu convenablement au-delà d’une certaine durée ou une connexion établie a échoué car l’hôte de connexion n’a pas répondu>",
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count.",
+      "timestamp_basis": "request_start; no response received"
+    },
+    {
+      "id": "opendata-22-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/22/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:33.428502+00:00",
+      "http_status": 200,
+      "response_sha256": "378b29d3b1366f06830e5d8508c4904df51d579982c733a79a98b2439063aa21",
+      "count": 39,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-22-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/22/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:34.003825+00:00",
+      "http_status": 200,
+      "response_sha256": "99f0c7aa3b9e216ab5b68c1d8b83210510bb90cf3be76c9bf5c227418494ab1a",
+      "count": 91,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-207-window-maryah-sample",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/207/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "outFields": "OBJECTID,PROJECT_NAME,DEVELOPER_NAME,SHARINGSTATUS_DM",
+          "returnGeometry": "true",
+          "outSR": "4326",
+          "resultRecordCount": "1",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:34.486400+00:00",
+      "http_status": 200,
+      "response_sha256": "a54e44aad1070f9473a4286fdb92d6bcc6081311fd8cc9ab8583a63624b801b2",
+      "count": null,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-828-window-maryah-sample",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/828/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "outFields": "OBJECTID,PROJECTID,PROJECT_NAME,COMPANYNAME",
+          "returnGeometry": "true",
+          "outSR": "4326",
+          "resultRecordCount": "1",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:34.961756+00:00",
+      "http_status": 200,
+      "response_sha256": "7d07a51b452587beb4d3421977657175fa04dd5b3feaa17c510a7a2baa67fb96",
+      "count": null,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "opendata-353-window-maryah-sample",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/353/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "outFields": "OBJECTID,BUILDINGID,NAMEENGLISH,BUILDINGNUMBEROFFLOORS,PERMITID,CONSTRUCTIONSITEID,PHYSICALSTATUS,STARTDATE,COMPLETIONDATE,DISTRTICTNAMEENG",
+          "returnGeometry": "true",
+          "outSR": "4326",
+          "resultRecordCount": "1",
+          "geometry": "54.385,24.49,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:35:35.510896+00:00",
+      "http_status": 200,
+      "response_sha256": "98a2ec99d41508244dff6f57485c68d8230d057d0a5baf7cdab75cd86509a80c",
+      "count": null,
+      "geographic_scope": "Envelope intersection; overlaps adjacent districts. Not an island count."
+    },
+    {
+      "id": "maryah-plots-geometry",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/Pub/Generic_Search_WM/MapServer/10/query",
+        "parameters": {
+          "f": "json",
+          "where": "UPPER(DISTRICTENG)='AL MARYAH ISLAND'",
+          "outFields": "OBJECTID,PLOTID,PLOTNUMBER,DISTRICTENG,COMMUNITYENG,PRIMARYUSEENG,SOURCEOFORIGIN",
+          "returnGeometry": "true",
+          "outSR": "4326",
+          "resultRecordCount": "100",
+          "orderByFields": "OBJECTID ASC"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:48:44.769896+00:00",
+      "http_status": 200,
+      "response_sha256": "31154a0c8ad48ecc46fd5486b232344778625063a5aac35e10f42bf24136efb8",
+      "quality_observation": {
+        "rows": 73,
+        "transfer_limit": false,
+        "unique_plot_ids": 73,
+        "null_plot_ids": 0,
+        "polygon_rows": 73,
+        "extent": [
+          54.38579788729883, 24.49136356325534, 54.395414904879246,
+          24.51319014371328
+        ]
+      }
+    },
+    {
+      "id": "aldar-plots-metadata",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agshost/rest/services/TAMM/ALDAR_Properties/MapServer/4",
+        "parameters": {
+          "f": "json"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:48:44.772372+00:00",
+      "http_status": 200,
+      "response_sha256": "e9b504ee40030062e67f5b4800956e33d206e26762430e35ca248ca10b59b7cc",
+      "field_names": [
+        "OBJECTID",
+        "SHAPE",
+        "DESCRIPTION_EN",
+        "Area",
+        "Sector",
+        "Plot",
+        "SHAPE.STLength()",
+        "SHAPE.STArea()"
+      ]
+    },
+    {
+      "id": "aldar-window-maryah",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agshost/rest/services/TAMM/ALDAR_Properties/MapServer/4/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.385,24.490,54.398,24.515",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:48:45.758394+00:00",
+      "http_status": 200,
+      "response_sha256": "618de7d9f46f3f697d827a1b6d84974760d5deda62e4e592adaa3c646602a94c",
+      "count": 0
+    },
+    {
+      "id": "aldar-window-reem",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agshost/rest/services/TAMM/ALDAR_Properties/MapServer/4/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:48:45.789647+00:00",
+      "http_status": 200,
+      "response_sha256": "a7b59f14220279bf034e35863bb5c8f0e489b130e214b6eead2d04fe26f2ea8b",
+      "count": 5
+    },
+    {
+      "id": "aldar-window-saadiyat",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agshost/rest/services/TAMM/ALDAR_Properties/MapServer/4/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": "54.386,24.4886,54.4812,24.6019",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:48:46.051593+00:00",
+      "http_status": 200,
+      "response_sha256": "a7b59f14220279bf034e35863bb5c8f0e489b130e214b6eead2d04fe26f2ea8b",
+      "count": 5
+    },
+    {
+      "id": "second-207",
+      "request": {
+        "method": "POST",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/207/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": {
+            "reference": "onwani-maryah-district-74",
+            "encoding": "JSON polygon with spatialReference wkid 4326"
+          },
+          "geometryType": "esriGeometryPolygon",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:51:28.453849+00:00",
+      "http_status": 200,
+      "response_sha256": "57413ce83ee1d989e384dfd3a82c6e2d9052a23c4204706bd2d7df11aa4c2d7c",
+      "count": 2
+    },
+    {
+      "id": "second-353",
+      "request": {
+        "method": "POST",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/353/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": {
+            "reference": "onwani-maryah-district-74",
+            "encoding": "JSON polygon with spatialReference wkid 4326"
+          },
+          "geometryType": "esriGeometryPolygon",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:51:28.456311+00:00",
+      "http_status": 200,
+      "response_sha256": "84f3f23634eb171f98aad6eb14fca27f32071db5897dc68835388f9bf5230df7",
+      "count": 30
+    },
+    {
+      "id": "second-21",
+      "request": {
+        "method": "POST",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/21/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "returnCountOnly": "true",
+          "geometry": {
+            "reference": "onwani-maryah-district-74",
+            "encoding": "JSON polygon with spatialReference wkid 4326"
+          },
+          "geometryType": "esriGeometryPolygon",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:51:28.459438+00:00",
+      "http_status": 200,
+      "response_sha256": "0c07187ea6d064441225b3cba26a7b1e8bc702fcf332b457dae8e26892ba68a6",
+      "count": 3
+    },
+    {
+      "id": "second-building-district",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/353/query",
+        "parameters": {
+          "f": "json",
+          "where": "UPPER(DISTRTICTNAMEENG)='AL MARYAH ISLAND'",
+          "returnCountOnly": "true"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:51:29.219625+00:00",
+      "http_status": 200,
+      "response_sha256": "84f3f23634eb171f98aad6eb14fca27f32071db5897dc68835388f9bf5230df7",
+      "count": 30
+    },
+    {
+      "id": "second-aldar-geometry",
+      "request": {
+        "method": "GET",
+        "url": "https://arcgis.sdi.abudhabi.ae/agshost/rest/services/TAMM/ALDAR_Properties/MapServer/4/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "geometry": "54.3886,24.4707,54.4273,24.5177",
+          "geometryType": "esriGeometryEnvelope",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects",
+          "outFields": "OBJECTID,DESCRIPTION_EN,Area,Sector,Plot",
+          "returnGeometry": "true",
+          "outSR": "4326",
+          "resultRecordCount": 10
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:51:29.257114+00:00",
+      "http_status": 200,
+      "response_sha256": "3f60f216d49dcd492489bd51baaffd5be3ad96e9a2d4cd38cf8bd6283d0a70a1",
+      "count": null,
+      "quality_observation": {
+        "polygon_rows": 5,
+        "source_area_names": ["Al Reem Island"],
+        "scope": "Five features returned in the Reem window; not current sale availability."
+      }
+    },
+    {
+      "id": "maryah-exact-projects",
+      "request": {
+        "method": "POST",
+        "url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/207/query",
+        "parameters": {
+          "f": "json",
+          "where": "1=1",
+          "outFields": "OBJECTID,PROJECT_NAME,DEVELOPER_NAME,SHARINGSTATUS_DM,CH_FID",
+          "returnGeometry": "false",
+          "resultRecordCount": 10,
+          "geometry": {
+            "reference": "onwani-maryah-district-74",
+            "encoding": "JSON polygon with spatialReference wkid 4326"
+          },
+          "geometryType": "esriGeometryPolygon",
+          "inSR": "4326",
+          "spatialRel": "esriSpatialRelIntersects"
+        }
+      },
+      "observed_at_utc": "2026-10-22T02:56:19.849886+00:00",
+      "http_status": 200,
+      "response_sha256": "4495dc43865071012fd1d0b9e3761ded5274ff7bd73bf7c0cff2733e599ed7b2",
+      "quality_observation": {
+        "rows": 2,
+        "project_names": ["Al Maryah Island", "Al Maryah Phase 1 & 2"],
+        "sharing_status_values": ["Report"]
+      }
+    }
+  ]
+}

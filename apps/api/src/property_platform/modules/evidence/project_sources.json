@@ -1,0 +1,567 @@
+[
+  {
+    "url": "https://reportagegroup.com/projects/residential-apartments/the-district/",
+    "label": "Reportage — The District",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-bridges-tower/",
+    "label": "Radiant — Bridges Towers",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.modon.com/real-estate/muheira",
+    "label": "Modon — Muheira, nouvelle phase",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.modon.com/real-estate/tara-park",
+    "label": "Modon — Tara Park",
+    "kind": "developer"
+  },
+  {
+    "url": "https://tigerproperties.ae/renad-tower/",
+    "label": "Tiger — Renad Tower",
+    "kind": "developer"
+  },
+  {
+    "url": "https://rotanaresidences-alreem.rdhuae.com/",
+    "label": "Royal Development — Rotana Residences",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-garden-towers/",
+    "label": "Radiant — Garden Towers",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-atrium-towers/",
+    "label": "Radiant — Atrium Towers",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-waves-tower/",
+    "label": "Radiant — Waves Tower",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-terrace/",
+    "label": "Radiant — Terrace",
+    "kind": "developer"
+  },
+  {
+    "url": "https://mered.ae/projects/riviera",
+    "label": "MERED — Riviera Residences",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.deyaar.ae/en/media_center/deyaar-makes-abu-dhabi-debut-with-rivage-a-stunning-resort-style-waterfront-residence-on-al-reem-island/",
+    "label": "Deyaar — Rivage",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.modon.com/about-modon/media-centre/details/2025/12/12/modon-awards-aed-1-billion-main-construction-contract-for-maysan-project-on-reem-island",
+    "label": "Modon — Contrat Maysan / Mayar et Thoraya",
+    "kind": "developer"
+  },
+  {
+    "url": "https://saasproperties.com/en/properties/abu-dhabi/saas-heights/",
+    "label": "SAAS — Heights",
+    "kind": "developer"
+  },
+  {
+    "url": "https://saasproperties.com/en/properties/abu-dhabi/seamont-residences/",
+    "label": "SAAS / Royal Development — Seamont",
+    "kind": "developer"
+  },
+  {
+    "url": "https://saasproperties.com/en/properties/abu-dhabi/reem-eleven/",
+    "label": "SAAS — Reem Eleven",
+    "kind": "developer"
+  },
+  {
+    "url": "https://reportagegroup.com/projects/residential-apartments/marlin/",
+    "label": "Reportage — Marlin 1",
+    "kind": "developer"
+  },
+  {
+    "url": "https://reportagegroup.com/projects/residential-apartments/marlin-2/",
+    "label": "Reportage — Marlin 2",
+    "kind": "developer"
+  },
+  {
+    "url": "https://object-1.com/a1la-residence-launch/",
+    "label": "Object 1 — Lancement A1LA et portefeuille Al Reem",
+    "kind": "developer"
+  },
+  {
+    "url": "https://imkan.ae/projects/makers-district/sunstone",
+    "label": "IMKAN — Sunstone",
+    "kind": "developer"
+  },
+  {
+    "url": "https://imkan.ae/projects/makers-district/the-artery",
+    "label": "IMKAN — The Artery Residences",
+    "kind": "developer"
+  },
+  {
+    "url": "https://beta.oneuae.com/development-detail?title=JOUD+Residence",
+    "label": "ONE Development — JOUD One",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-marina-towers/",
+    "label": "Radiant — Marina Towers",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-elite-tower/",
+    "label": "Radiant — Elite Tower",
+    "kind": "developer"
+  },
+  {
+    "url": "https://reportagegroup.com/projects/residential-apartments/vista-3/",
+    "label": "Reportage — Vista 3",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radissonresidences-alreem.rdhuae.com/",
+    "label": "RDH — Radisson Residences",
+    "kind": "developer"
+  },
+  {
+    "url": "https://saasproperties.com/en/properties/abu-dhabi/reem-eight/",
+    "label": "SAAS — Reem Eight",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.ohana.ae/news/construction-on-elie-saab-waterfront-by-ohana/",
+    "label": "Ohana — Elie Saab Waterfront",
+    "kind": "developer"
+  },
+  {
+    "url": "https://gafproperty.com/properties/flow-25",
+    "label": "GAF — Flow 25",
+    "kind": "developer"
+  },
+  {
+    "url": "https://burtville.com/en/projects/bab-al-qasr-royal-residence-28/",
+    "label": "Burtville — Bab Al Qasr Royal Residence 28",
+    "kind": "developer"
+  },
+  {
+    "url": "https://by-mholding.com/index.php/projects/development/14/Canal-By-M",
+    "label": "By M / Gefinor — Canal by M",
+    "kind": "developer"
+  },
+  {
+    "url": "https://beta.oneuae.com/development-detail?title=One+Residence",
+    "label": "ONE Development — One Residence",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.modon.com/real-estate/reem-hills",
+    "label": "Modon — Reem Hills",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.tarafholding.com/en/project/w-residences",
+    "label": "Taraf — W Residences",
+    "kind": "developer"
+  },
+  {
+    "url": "https://reportagegroup.com/projects/residential-apartments/al-maryah-vista-2/",
+    "label": "Reportage — Al Maryah Vista 2",
+    "kind": "developer"
+  },
+  {
+    "url": "https://reportagegroup.com/districtoffer/",
+    "label": "Reportage — The District, offre actuelle",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.modon.com/real-estate/reem-island",
+    "label": "Modon - page d’ensemble Reem Island",
+    "kind": "developer"
+  },
+  {
+    "url": "https://radiantrealestate.ae/developments/radiant-square/",
+    "label": "Radiant - Square, projet existant",
+    "kind": "developer"
+  },
+  {
+    "url": "https://rightcapital.ae/",
+    "label": "Right Capital - projet phare",
+    "kind": "developer"
+  },
+  {
+    "url": "https://rdhuae.com/projects/radisson-residences/",
+    "label": "RDH - Radisson, fiche du promoteur",
+    "kind": "developer"
+  },
+  {
+    "url": "https://fosterdevelopers.com/portfolio/marafid/",
+    "label": "Foster Developers — Marafid",
+    "kind": "developer"
+  },
+  {
+    "url": "https://www.wam.ae/en/article/bhu27gm-high-speed-train-projected-contribute-aed145",
+    "label": "WAM — Annonce du train à grande vitesse",
+    "kind": "authority"
+  },
+  {
+    "url": "https://www.arup.com/projects/reem-downtown/",
+    "label": "Arup — Reem Downtown",
+    "kind": "media"
+  },
+  {
+    "url": "https://aiph.org/green-city-case-studies/abu-dhabi-uae-reem-downtown/",
+    "label": "AIPH — Étude Reem Downtown",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.crystal-projects.com/projects/construction-of-infra-works-rt4-",
+    "label": "Crystal — Travaux d'infrastructure RT4",
+    "kind": "media"
+  },
+  {
+    "url": "https://rimal.ae/our-projects/",
+    "label": "Rimal — références de chantier : RT4-P7 et Najmat RR5-C2",
+    "kind": "media"
+  },
+  {
+    "url": "https://map.radiantproperties.ae/viewer/index.php?code=69ca190b6be5d&m=0",
+    "label": "Radiant — Plan interactif officiel",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.rixosalreemresidences.com/",
+    "label": "Rixos Al Reem Residences — Site du projet",
+    "kind": "media"
+  },
+  {
+    "url": "https://gulfnews.com/gn-focus/company-news/east-west-breaks-ground-on-rixos-al-reem-residences-in-abu-dhabi-1.500673734",
+    "label": "East & West — Lancement des travaux Rixos",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.mubadala.com/en/news/mubadala-and-aldar-announce-expansion-of-abu-dhabis-financial-district-on-al-maryah-island",
+    "label": "Aldar et Mubadala — Extension du quartier financier Al Maryah",
+    "kind": "authority"
+  },
+  {
+    "url": "https://www.mubadala.com/en/news/taraf-signs-mou-with-mubadala-to-explore-major-mixed-use-waterfront-development-on-al-reem-island",
+    "label": "Mubadala et TARAF — Protocole d'accord Al Reem",
+    "kind": "authority"
+  },
+  {
+    "url": "https://www.reddit.com/r/AbuDhabi_Real_Estate/comments/1t69s5l/modon_future_plans_availability/",
+    "label": "Reddit — Modon future plans / availability",
+    "kind": "forum"
+  },
+  {
+    "url": "https://ae.linkedin.com/company/emirates-developments",
+    "label": "Emirates Developments — Annonce Waterfront by Missoni",
+    "kind": "media"
+  },
+  {
+    "url": "https://map.radiantproperties.ae/viewer/index.php?code=68ee138d96bef",
+    "label": "Radiant — Carte Atrium",
+    "kind": "media"
+  },
+  {
+    "url": "https://map.radiantproperties.ae/viewer/index.php?code=69eb59853c221",
+    "label": "Radiant — Carte Waves",
+    "kind": "media"
+  },
+  {
+    "url": "https://map.radiantproperties.ae/viewer/index.php?code=6a292541432b0",
+    "label": "Radiant — Carte Terrace",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.railjournal.com/passenger/high-speed/abu-dhabi-dubai-high-speed-construction-underway/",
+    "label": "International Railway Journal — Travaux Abu Dhabi–Dubai",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.tradingview.com/news/reuters.com,2026-09-21:newsml_Zaw3N5VRj:0-royal-development-holding-launches-phase-2-of-395mln-radisson-residences-on-al-reem-island/",
+    "label": "RDH — Nouvelle phase Radisson, communiqué repris",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.linkedin.com/pulse/inside-burtville-developments-12-abu-dhabi-projects-early-siddig-tnx7f",
+    "label": "Bab Al Qasr Beach Resort 77 — Piste de lancement",
+    "kind": "media"
+  },
+  {
+    "url": "https://vazeno.files.cmp.optimizely.com/download/assets/Aldar%2BProperties%2BResults%2BPresentation%2BFY-2025-VF.pdf/a5e53f6e2c3e11f181666ed115eea297",
+    "label": "Aldar — Résultats FY2025",
+    "kind": "media"
+  },
+  {
+    "url": "https://sralmaryahisland.com/",
+    "label": "SAAS — St. Regis The Residences Al Maryah",
+    "kind": "media"
+  },
+  {
+    "url": "https://ae.linkedin.com/company/saas-properties",
+    "label": "SAAS — Annonce publique Ritz-Carlton Residences",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.adgm.com/media/announcements/saas-unveils-new-landmark-project-the-ritz-carlton-residences-al-maryah-island-during-abu-dhabi-finance-week-2025",
+    "label": "SAAS — Annonce Ritz-Carlton hébergée par ADGM",
+    "kind": "media"
+  },
+  {
+    "url": "https://mediahub.jumeirah.com/emirates-developments-enters-agreement-with-jumeirah-to-develop-jumeirah-branded-residences-on-al-maryah-island-abu-dhabi/?filter=image-filter&lang=eng",
+    "label": "Jumeirah — Résidences Al Maryah",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.mubadala.com/en/news/mubadala-and-taraf-partner-with-kerzner-international-to-introduce-one-and-only-private-residences-on-al-maryah-island",
+    "label": "Mubadala / Taraf / Kerzner — One&Only",
+    "kind": "authority"
+  },
+  {
+    "url": "https://www.mubadala.com/en/news/mubadala-breaks-ground-on-landmark-ai-maryah-island-waterfront-transformation",
+    "label": "Mubadala — Al Maryah Waterfront",
+    "kind": "authority"
+  },
+  {
+    "url": "https://www.mediaoffice.abudhabi/en/crown-prince-news/khaled-bin-mohamed-bin-zayed-witnesses-launch-of-marsa-al-saadiyat-development-project-spanning-64m-sqm-with-investment-value-of-aed100bn/",
+    "label": "Abu Dhabi Media Office — Marsa Al Saadiyat",
+    "kind": "media"
+  },
+  {
+    "url": "https://world.modon.com/",
+    "label": "Modon World - carte et descriptifs publics",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.skyscrapercity.com/threads/project-reem-downtown.2380572/",
+    "label": "SkyscraperCity - Project Reem Downtown",
+    "kind": "forum"
+  },
+  {
+    "url": "https://www.propertyfinder.ae/en/new-projects/lp/abu-dhabi/al-reem-island",
+    "label": "Property Finder - projets Al Reem",
+    "kind": "media"
+  },
+  {
+    "url": "https://ae.linkedin.com/company/zsr-real-estate-abu-dhabi",
+    "label": "Bab Al Qasr 77 - commercialisation récente",
+    "kind": "media"
+  },
+  {
+    "url": "https://ae.housebook.deals/en/catalog/tara-park-06ace2",
+    "label": "Housebook — carte Tara Park",
+    "kind": "broker"
+  },
+  {
+    "url": "https://ae.housebook.deals/en/catalog/rixos-al-reem-residences-d9bd74",
+    "label": "Housebook — carte Rixos Al Reem Residences",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/rixos-al-reem-residences",
+    "label": "JRE — carte Rixos Al Reem Residences",
+    "kind": "broker"
+  },
+  {
+    "url": "https://ae.housebook.deals/en/catalog/muheira-by-modon-04c494",
+    "label": "Housebook — carte Muheira by Modon",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/saas-heights",
+    "label": "JRE — carte SAAS Heights",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/waterfront-by-missoni",
+    "label": "JRE — carte Waterfront by Missoni",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/a1la-residence",
+    "label": "JRE — carte A1LA Residence",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/seamont-autograph-collection-residences",
+    "label": "JRE — carte Seamont Autograph Collection Residences",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/reem-eleven",
+    "label": "JRE — carte Reem Eleven",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/rivage-at-reem-island",
+    "label": "Rendr — carte Rivage",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/bab-al-qasr-royal-residence-28",
+    "label": "Rendr — carte bab al qasr royal residence 28",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/canal-by-m",
+    "label": "Rendr — carte canal by m",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/elie-saab-waterfront",
+    "label": "Rendr — carte elie saab waterfront",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/flow-25",
+    "label": "Rendr — carte flow 25",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/radisson-residences-tower-1",
+    "label": "Rendr — carte radisson residences tower 1",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/radisson-residences-tower-2",
+    "label": "Rendr — carte radisson residences tower 2",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/reem-eleven",
+    "label": "Rendr — carte reem eleven",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/reportage-vista-3",
+    "label": "Rendr — carte reportage vista 3",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/riviera-residences",
+    "label": "Rendr — carte riviera residences",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/rotana-residences-north-tower",
+    "label": "Rendr — carte rotana residences north tower",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/rotana-residences-south-tower",
+    "label": "Rendr — carte rotana residences south tower",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/sunstone",
+    "label": "Rendr — carte sunstone",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/tara-park",
+    "label": "Rendr — carte tara park",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/tara-park-2",
+    "label": "Rendr — carte tara park 2",
+    "kind": "broker"
+  },
+  {
+    "url": "https://rendr.ae/projects/the-artery-residences",
+    "label": "Rendr — carte the artery residences",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/vista-3",
+    "label": "JRE — carte vista 3",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/radisson-residences",
+    "label": "JRE — carte radisson residences",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/flow-25",
+    "label": "JRE — carte flow 25",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/joud-residence",
+    "label": "JRE — carte joud residence",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/sunstone",
+    "label": "JRE — carte sunstone",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/the-artery-residences",
+    "label": "JRE — carte the artery residences",
+    "kind": "broker"
+  },
+  {
+    "url": "https://jre.ae/projects/elie-saab-waterfront",
+    "label": "JRE — carte elie saab waterfront",
+    "kind": "broker"
+  },
+  {
+    "url": "https://corporate.etihadrail.ae/en/newsroom/press/with-the-blessing-of-the-uae-president-khaled-bin-mohamed-bin-zayed-and-hamdan-bin-mohammed-bin-rashid-witness-announcement-of-high-speed-train-project-linking-abu-dhabi-and-dubai",
+    "label": "Etihad Rail — annonce de la grande vitesse",
+    "kind": "authority"
+  },
+  {
+    "url": "https://www.reddit.com/r/AbuDhabi_Real_Estate/comments/1sw5tn4/new_aiintegrated_tower_on_al_reem_island_joud/",
+    "label": "Reddit — JOUD et référence RR3-C4",
+    "kind": "forum"
+  },
+  {
+    "url": "https://www.reddit.com/r/AbuDhabi_Real_Estate/comments/1pjrxev/new_radisson_launch_in_reem_and_why_its_gonna_be/",
+    "label": "Reddit — reprise de tours Hydra par Radisson",
+    "kind": "forum"
+  },
+  {
+    "url": "https://www.reddit.com/r/AbuDhabi_Real_Estate/comments/1qjs43e/modon_whats_their_plan_for_2026/",
+    "label": "Reddit — futurs projets Modon et gare près de Reem Mall",
+    "kind": "forum"
+  },
+  {
+    "url": "https://www.c15-alreem.com/",
+    "label": "C15 — offre de développement RR2-C15",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.reddit.com/r/AbuDhabi_Real_Estate/comments/1qbrmgh/rotana_branded_residences_by_rdc_reem_island/",
+    "label": "Reddit — Rotana : hypothèse derrière Object 1",
+    "kind": "forum"
+  },
+  {
+    "url": "https://www.nrec.com.kw/news/supplementary-disclosure-carina-views-2026-09-16",
+    "label": "NREC — transaction Carina Views, 16 septembre 2026",
+    "kind": "media"
+  },
+  {
+    "url": "https://www.nrec.com.kw/news/disclosure-supplementary-disclosure-regarding-a-subsidiary-2026-09-23",
+    "label": "NREC — complément du 23 septembre 2026",
+    "kind": "media"
+  },
+  {
+    "url": "https://skyscraperpage.com/forum/showthread.php?page=96&t=145254",
+    "label": "SkyscraperPage — Reem Mall et Carina Views, archive 2011",
+    "kind": "forum"
+  },
+  {
+    "url": "https://skyscraperpage.com/forum/showthread.php?p=8813355",
+    "label": "SkyscraperPage — Tameer Towers, ancienne relance",
+    "kind": "forum"
+  }
+]

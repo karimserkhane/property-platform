@@ -1,0 +1,837 @@
+{
+ "currentVersion": 11.2,
+ "cimVersion": "3.2.0",
+ "id": 0,
+ "name": "PLOT",
+ "type": "Feature Layer",
+ "description": "",
+ "geometryType": "esriGeometryPolygon",
+ "sourceSpatialReference": {
+  "wkid": 4326,
+  "latestWkid": 4326,
+  "xyTolerance": 8.983152841195215E-9,
+  "zTolerance": 0.001,
+  "mTolerance": 0.001,
+  "falseX": -400,
+  "falseY": -400,
+  "xyUnits": 9.999999999999999E8,
+  "falseZ": 0,
+  "zUnits": 1,
+  "falseM": 0,
+  "mUnits": 1
+ },
+ "copyrightText": "",
+ "parentLayer": null,
+ "subLayers": [],
+ "minScale": 0,
+ "maxScale": 0,
+ "referenceScale": 0.0,
+ "drawingInfo": {
+  "renderer": {
+   "type": "simple",
+   "symbol": {
+    "type": "esriSFS",
+    "style": "esriSFSSolid",
+    "color": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "outline": {
+     "type": "esriSLS",
+     "style": "esriSLSSolid",
+     "color": [
+      225,
+      225,
+      225,
+      255
+     ],
+     "width": 0.4
+    }
+   }
+  },
+  "scaleSymbols": true,
+  "transparency": 0,
+  "labelingInfo": null
+ },
+ "defaultVisibility": false,
+ "extent": {
+  "xmin": 51.531850543000076,
+  "ymin": 22.63768666900006,
+  "xmax": 56.01675858900006,
+  "ymax": 25.409027884000068,
+  "spatialReference": {
+   "wkid": 4326,
+   "latestWkid": 4326,
+   "xyTolerance": 8.983152841195215E-9,
+   "zTolerance": 2,
+   "mTolerance": 0.001,
+   "falseX": -400,
+   "falseY": -400,
+   "xyUnits": 1.125899906842624E13,
+   "falseZ": 0,
+   "zUnits": 1,
+   "falseM": -100000,
+   "mUnits": 10000
+  }
+ },
+ "hasAttachments": false,
+ "htmlPopupType": "esriServerHTMLPopupTypeAsHTMLText",
+ "displayField": "APPROVEDBY",
+ "typeIdField": null,
+ "subtypeFieldName": null,
+ "subtypeField": null,
+ "defaultSubtypeCode": null,
+ "fields": [
+  {
+   "name": "OBJECTID",
+   "type": "esriFieldTypeOID",
+   "alias": "OBJECTID",
+   "domain": null
+  },
+  {
+   "name": "ELMS_LandUse_Const",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_LandUse_Const",
+   "length": 254,
+   "domain": null
+  },
+  {
+   "name": "ELMS_ParentLanduse_Const",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_ParentLanduse_Const",
+   "length": 254,
+   "domain": null
+  },
+  {
+   "name": "ELMS_AllocationStatus",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_AllocationStatus",
+   "length": 254,
+   "domain": null
+  },
+  {
+   "name": "Construction_Status",
+   "type": "esriFieldTypeString",
+   "alias": "Construction_Status",
+   "length": 254,
+   "domain": null
+  },
+  {
+   "name": "APPROVALDATE",
+   "type": "esriFieldTypeDate",
+   "alias": "APPROVALDATE",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "APPROVEDBY",
+   "type": "esriFieldTypeString",
+   "alias": "APPROVEDBY",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "BPSKEY",
+   "type": "esriFieldTypeString",
+   "alias": "BPSKEY",
+   "length": 25,
+   "domain": null
+  },
+  {
+   "name": "CALCULATEDAREA",
+   "type": "esriFieldTypeDouble",
+   "alias": "CALCULATEDAREA",
+   "domain": null
+  },
+  {
+   "name": "CANCELDATE",
+   "type": "esriFieldTypeDate",
+   "alias": "CANCELDATE",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "COMMUNITYARA",
+   "type": "esriFieldTypeString",
+   "alias": "COMMUNITYARA",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "COMMUNITYENG",
+   "type": "esriFieldTypeString",
+   "alias": "COMMUNITYENG",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "COMMUNITYID",
+   "type": "esriFieldTypeString",
+   "alias": "COMMUNITYID",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "CREATIONDATE",
+   "type": "esriFieldTypeDate",
+   "alias": "CREATIONDATE",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "DISTRICTARA",
+   "type": "esriFieldTypeString",
+   "alias": "DISTRICTARA",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "DISTRICTENG",
+   "type": "esriFieldTypeString",
+   "alias": "DISTRICTENG",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "DISTRICTID",
+   "type": "esriFieldTypeString",
+   "alias": "DISTRICTID",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "ELMSKEY",
+   "type": "esriFieldTypeString",
+   "alias": "ELMSKEY",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "ENGID",
+   "type": "esriFieldTypeString",
+   "alias": "ENGID",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "GISID",
+   "type": "esriFieldTypeString",
+   "alias": "GISID",
+   "length": 20,
+   "domain": null
+  },
+  {
+   "name": "INITIATEDBY",
+   "type": "esriFieldTypeString",
+   "alias": "INITIATEDBY",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "ISSUEDATE",
+   "type": "esriFieldTypeDate",
+   "alias": "ISSUEDATE",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "MODIFIEDDATE",
+   "type": "esriFieldTypeDate",
+   "alias": "MODIFIEDDATE",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "MUNICIPALITYARA",
+   "type": "esriFieldTypeString",
+   "alias": "MUNICIPALITYARA",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "MUNICIPALITYENG",
+   "type": "esriFieldTypeString",
+   "alias": "MUNICIPALITYENG",
+   "length": 5,
+   "domain": null
+  },
+  {
+   "name": "OWNERSHIPTYPE",
+   "type": "esriFieldTypeString",
+   "alias": "OWNERSHIPTYPE",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "PLANNEDAREA",
+   "type": "esriFieldTypeDouble",
+   "alias": "PLANNEDAREA",
+   "domain": null
+  },
+  {
+   "name": "PLANNEDAREAIMPERIAL",
+   "type": "esriFieldTypeDouble",
+   "alias": "PLANNEDAREAIMPERIAL",
+   "domain": null
+  },
+  {
+   "name": "PLANNEDAREAMETRIC",
+   "type": "esriFieldTypeDouble",
+   "alias": "PLANNEDAREAMETRIC",
+   "domain": null
+  },
+  {
+   "name": "PLANNINGSTATUS",
+   "type": "esriFieldTypeString",
+   "alias": "PLANNINGSTATUS",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "PLOTDIMENSION",
+   "type": "esriFieldTypeString",
+   "alias": "PLOTDIMENSION",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "PLOTID",
+   "type": "esriFieldTypeString",
+   "alias": "PLOTID",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "PLOTNUMBER",
+   "type": "esriFieldTypeString",
+   "alias": "PLOTNUMBER",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "PRIMARYUSEARA",
+   "type": "esriFieldTypeString",
+   "alias": "PRIMARYUSEARA",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "PRIMARYUSEENG",
+   "type": "esriFieldTypeInteger",
+   "alias": "PRIMARYUSEENG",
+   "domain": null
+  },
+  {
+   "name": "PROJECTID",
+   "type": "esriFieldTypeString",
+   "alias": "PROJECTID",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "REMARK",
+   "type": "esriFieldTypeString",
+   "alias": "REMARK",
+   "length": 500,
+   "domain": null
+  },
+  {
+   "name": "ROADID",
+   "type": "esriFieldTypeString",
+   "alias": "ROADID",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "SECTORTPSS",
+   "type": "esriFieldTypeString",
+   "alias": "SECTORTPSS",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "SECUSEARA",
+   "type": "esriFieldTypeString",
+   "alias": "SECUSEARA",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "SECUSEENG",
+   "type": "esriFieldTypeString",
+   "alias": "SECUSEENG",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "SOURCEOFORIGIN",
+   "type": "esriFieldTypeString",
+   "alias": "SOURCEOFORIGIN",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "PRIMARYUSEENGDESC",
+   "type": "esriFieldTypeString",
+   "alias": "PRIMARYUSEENGDESC",
+   "length": 254,
+   "domain": null
+  },
+  {
+   "name": "STATUS",
+   "type": "esriFieldTypeString",
+   "alias": "STATUS",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "UTILITYCLEARANCEDATE",
+   "type": "esriFieldTypeDate",
+   "alias": "UTILITYCLEARANCEDATE",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "ZONETPSS",
+   "type": "esriFieldTypeString",
+   "alias": "ZONETPSS",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "FLAT_ID",
+   "type": "esriFieldTypeString",
+   "alias": "FLAT_ID",
+   "length": 10,
+   "domain": null
+  },
+  {
+   "name": "SERVICESTATUS",
+   "type": "esriFieldTypeString",
+   "alias": "SERVICESTATUS",
+   "length": 32,
+   "domain": null
+  },
+  {
+   "name": "Longitude",
+   "type": "esriFieldTypeDouble",
+   "alias": "Longitude",
+   "domain": null
+  },
+  {
+   "name": "Latitude",
+   "type": "esriFieldTypeDouble",
+   "alias": "Latitude",
+   "domain": null
+  },
+  {
+   "name": "MunicipalityName",
+   "type": "esriFieldTypeString",
+   "alias": "MunicipalityName",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "SectorNumber_PlotID",
+   "type": "esriFieldTypeString",
+   "alias": "SectorNumber_PlotID",
+   "length": 100,
+   "domain": null
+  },
+  {
+   "name": "DataReceivedDate",
+   "type": "esriFieldTypeDate",
+   "alias": "DataReceivedDate",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "PLOTCALCULATEDAREA",
+   "type": "esriFieldTypeDouble",
+   "alias": "PLOTCALCULATEDAREA",
+   "domain": null
+  },
+  {
+   "name": "Permit_LastDate",
+   "type": "esriFieldTypeDate",
+   "alias": "Permit_LastDate",
+   "length": 8,
+   "domain": null
+  },
+  {
+   "name": "Permit_LastType",
+   "type": "esriFieldTypeString",
+   "alias": "Permit_LastType",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "ELMS_PARENTLANDUSE_E",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_PARENTLANDUSE_E",
+   "length": 500,
+   "domain": null
+  },
+  {
+   "name": "ELMS_PARENTLANDUSE_A",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_PARENTLANDUSE_A",
+   "length": 500,
+   "domain": null
+  },
+  {
+   "name": "ELMS_LANDUSENAME_E",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_LANDUSENAME_E",
+   "length": 500,
+   "domain": null
+  },
+  {
+   "name": "ELMS_LANDUSENAME_A",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_LANDUSENAME_A",
+   "length": 500,
+   "domain": null
+  },
+  {
+   "name": "DevCode_Category",
+   "type": "esriFieldTypeString",
+   "alias": "DevCode_Category",
+   "length": 100,
+   "domain": null
+  },
+  {
+   "name": "DevCode_Description",
+   "type": "esriFieldTypeString",
+   "alias": "DevCode_Description",
+   "length": 100,
+   "domain": null
+  },
+  {
+   "name": "DevCode",
+   "type": "esriFieldTypeString",
+   "alias": "DevCode",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "DevCode_FAR",
+   "type": "esriFieldTypeString",
+   "alias": "DevCode_FAR",
+   "length": 255,
+   "domain": null
+  },
+  {
+   "name": "DevCode_MaxGFA",
+   "type": "esriFieldTypeDouble",
+   "alias": "DevCode_MaxGFA",
+   "domain": null
+  },
+  {
+   "name": "OBJECTID_1",
+   "type": "esriFieldTypeInteger",
+   "alias": "OBJECTID_1",
+   "domain": null
+  },
+  {
+   "name": "MAXALLOWABLEHEIGHTS",
+   "type": "esriFieldTypeString",
+   "alias": "MAXALLOWABLEHEIGHTS",
+   "length": 5,
+   "domain": null
+  },
+  {
+   "name": "Investment_Name",
+   "type": "esriFieldTypeString",
+   "alias": "Investment_Name",
+   "length": 100,
+   "domain": null
+  },
+  {
+   "name": "ELMS_PLOTALLOCATION_ID",
+   "type": "esriFieldTypeInteger",
+   "alias": "ELMS_PLOTALLOCATION_ID",
+   "domain": null
+  },
+  {
+   "name": "ELMS_PLOTALLOCATION_NAME_A",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_PLOTALLOCATION_NAME_A",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "ELMS_PLOTALLOCATION_NAME_E",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_PLOTALLOCATION_NAME_E",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "ELMS_PLOTALLOCATION_CONST",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_PLOTALLOCATION_CONST",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "SHAPE",
+   "type": "esriFieldTypeGeometry",
+   "alias": "SHAPE",
+   "domain": null
+  },
+  {
+   "name": "DMT_DCR_URL",
+   "type": "esriFieldTypeString",
+   "alias": "DMT_DCR_URL",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "Old_DISTRICTENG",
+   "type": "esriFieldTypeString",
+   "alias": "Old_DISTRICTENG",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "Old_DISTRICTARA",
+   "type": "esriFieldTypeString",
+   "alias": "Old_DISTRICTARA",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "Old_DISTRICTID",
+   "type": "esriFieldTypeString",
+   "alias": "Old_DISTRICTID",
+   "length": 10,
+   "domain": null
+  },
+  {
+   "name": "Old_COMMUNITYENG",
+   "type": "esriFieldTypeString",
+   "alias": "Old_COMMUNITYENG",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "Old_COMMUNITYARA",
+   "type": "esriFieldTypeString",
+   "alias": "Old_COMMUNITYARA",
+   "length": 200,
+   "domain": null
+  },
+  {
+   "name": "Old_COMMUNITYID",
+   "type": "esriFieldTypeString",
+   "alias": "Old_COMMUNITYID",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "Old_ROADID",
+   "type": "esriFieldTypeString",
+   "alias": "Old_ROADID",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "Old_PLOTNUMBER",
+   "type": "esriFieldTypeString",
+   "alias": "Old_PLOTNUMBER",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "Old_FLAT_ID",
+   "type": "esriFieldTypeString",
+   "alias": "Old_FLAT_ID",
+   "length": 5,
+   "domain": null
+  },
+  {
+   "name": "Old_SectorNumber_PlotID",
+   "type": "esriFieldTypeString",
+   "alias": "Old_SectorNumber_PlotID",
+   "length": 100,
+   "domain": null
+  },
+  {
+   "name": "ELMS_PLOTID",
+   "type": "esriFieldTypeString",
+   "alias": "ELMS_PLOTID",
+   "length": 20,
+   "domain": null
+  },
+  {
+   "name": "MEPS_CONS_STATUS",
+   "type": "esriFieldTypeString",
+   "alias": "MEPS_CONS_STATU",
+   "length": 100,
+   "domain": null
+  },
+  {
+   "name": "MEPS_CONS_UPDATEON",
+   "type": "esriFieldTypeString",
+   "alias": "MEPS_CONS_UPDATEON",
+   "length": 50,
+   "domain": null
+  },
+  {
+   "name": "MEPS_ADDITIONAL_INFO",
+   "type": "esriFieldTypeString",
+   "alias": "MEPS_ADDITIONAL_INFO",
+   "length": 100,
+   "domain": null
+  },
+  {
+   "name": "SHAPE.STArea()",
+   "type": "esriFieldTypeDouble",
+   "alias": "SHAPE.STArea()",
+   "domain": null
+  },
+  {
+   "name": "SHAPE.STLength()",
+   "type": "esriFieldTypeDouble",
+   "alias": "SHAPE.STLength()",
+   "domain": null
+  },
+  {
+   "name": "Field",
+   "type": "esriFieldTypeInteger",
+   "alias": "Field",
+   "domain": null
+  }
+ ],
+ "geometryField": {
+  "name": "SHAPE",
+  "type": "esriFieldTypeGeometry",
+  "alias": "SHAPE"
+ },
+ "indexes": [
+  {
+   "name": "R29_pk",
+   "fields": "OBJECTID",
+   "isAscending": true,
+   "isUnique": true,
+   "description": ""
+  },
+  {
+   "name": "I29SectorNumber_",
+   "fields": "SectorNumber_PlotID",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I29GISID4",
+   "fields": "GISID,DISTRICTENG",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I29MUNICIPALITYE",
+   "fields": "MUNICIPALITYENG,ROADID,COMMUNITYENG,DISTRICTENG,PLOTNUMBER,FLAT_ID",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I29COMMUNITYENG2",
+   "fields": "COMMUNITYENG,MUNICIPALITYENG,ROADID,GISID,PLOTNUMBER,FLAT_ID",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "I29COMMUNITYID1",
+   "fields": "COMMUNITYID,DISTRICTID,MUNICIPALITYENG,PLOTNUMBER,ROADID,GISID",
+   "isAscending": true,
+   "isUnique": false,
+   "description": ""
+  },
+  {
+   "name": "S19_idx",
+   "fields": "SHAPE",
+   "isAscending": true,
+   "isUnique": true,
+   "description": ""
+  }
+ ],
+ "subtypes": [],
+ "relationships": [],
+ "canModifyLayer": true,
+ "canScaleSymbols": false,
+ "hasLabels": false,
+ "capabilities": "Query,Map,Data",
+ "maxRecordCount": 2000,
+ "supportsStatistics": true,
+ "supportsExceedsLimitStatistics": true,
+ "supportsAdvancedQueries": true,
+ "supportedQueryFormats": "JSON, geoJSON, PBF",
+ "isDataVersioned": false,
+ "ownershipBasedAccessControlForFeatures": {"allowOthersToQuery": true},
+ "useStandardizedQueries": true,
+ "supportedSpatialRelationships": [
+  "esriSpatialRelIntersects",
+  "esriSpatialRelContains",
+  "esriSpatialRelCrosses",
+  "esriSpatialRelEnvelopeIntersects",
+  "esriSpatialRelIndexIntersects",
+  "esriSpatialRelOverlaps",
+  "esriSpatialRelTouches",
+  "esriSpatialRelWithin",
+  "esriSpatialRelRelation"
+ ],
+ "advancedQueryCapabilities": {
+  "useStandardizedQueries": true,
+  "supportsStatistics": true,
+  "supportsPercentileStatistics": true,
+  "supportsHavingClause": true,
+  "supportsOrderBy": true,
+  "supportsDistinct": true,
+  "supportsCountDistinct": true,
+  "supportsAdvancedQueryRelated": true,
+  "supportsQueryRelatedPagination": true,
+  "supportsPagination": true,
+  "supportsLod": false,
+  "supportsQueryWithLodSR": false,
+  "supportsTrueCurve": true,
+  "supportsQueryWithDatumTransformation": true,
+  "supportsReturningQueryExtent": true,
+  "supportsQueryWithDistance": true,
+  "supportsSqlExpression": true,
+  "supportsTimeRelation": true,
+  "supportsSqlFormat": false,
+  "supportsQueryAnalytic": true,
+  "supportsCurrentUserQueries": true
+ },
+ "supportsDatumTransformation": true,
+ "advancedQueryAnalyticCapabilities": {
+  "supportsLinearRegression": true,
+  "supportsAsync": false,
+  "supportsPercentileAnalytic": true
+ },
+ "dateFieldsTimeReference": null,
+ "preferredTimeReference": null,
+ "datesInUnknownTimezone": false,
+ "hasGeometryProperties": true,
+ "geometryProperties": {
+  "shapeAreaFieldName": "SHAPE.STArea()",
+  "shapeLengthFieldName": "SHAPE.STLength()",
+  "units": "esriDecimalDegrees",
+  "mapUnits": {"uwkid": 9102}
+ },
+ "hasMetadata": true,
+ "isDataArchived": false,
+ "archivingInfo": {
+  "supportsQueryWithHistoricMoment": false,
+  "startArchivingMoment": -1
+ },
+ "supportsCoordinatesQuantization": true,
+ "supportsDynamicLegends": true
+}

@@ -1,0 +1,442 @@
+[
+  {
+    "project": "jumeirah-residences-al-maryah-island",
+    "district": "Al Maryah Island",
+    "label": "Jumeirah Residences Al Maryah Island",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "a1la-residence",
+    "district": "Al Reem Island",
+    "label": "A1LA Residence",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "amaya-towers",
+    "district": "Al Reem Island",
+    "label": "Amaya Towers",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "bab-al-qasr-royal-residence-28",
+    "district": "Al Reem Island",
+    "label": "Bab Al Qasr Royal Residence 28",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "beach-towers",
+    "district": "Al Reem Island",
+    "label": "Beach Towers",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "canal-residence",
+    "district": "Al Reem Island",
+    "label": "Canal Residence",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "elie-saab-waterfront",
+    "district": "Al Reem Island",
+    "label": "Elie Saab Waterfront",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "flow-25",
+    "district": "Al Reem Island",
+    "label": "Flow25",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "horizon-towers",
+    "district": "Al Reem Island",
+    "label": "Horizon Towers",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "julphar-residence",
+    "district": "Al Reem Island",
+    "label": "Julphar Residence",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "leaf-tower",
+    "district": "Al Reem Island",
+    "label": "Leaf Tower",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "mangrove-place",
+    "district": "Al Reem Island",
+    "label": "Mangrove Place",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "marlin-2",
+    "district": "Al Reem Island",
+    "label": "Marlin 2",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "oceanscape",
+    "district": "Al Reem Island",
+    "label": "Oceanscape",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "parkside-residence-b",
+    "district": "Al Reem Island",
+    "label": "Parkside Residence B",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "pixel",
+    "district": "Al Reem Island",
+    "label": "Pixel",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "radiant-elite-tower",
+    "district": "Al Reem Island",
+    "label": "Radiant Elite Tower",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "radiant-marina-towers",
+    "district": "Al Reem Island",
+    "label": "Radiant Marina Towers",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "radiant-square",
+    "district": "Al Reem Island",
+    "label": "Radiant Square",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "radiant-terrace",
+    "district": "Al Reem Island",
+    "label": "Radiant Terrace",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "radisson-residences-tower-2",
+    "district": "Al Reem Island",
+    "label": "Radisson Residences - Tower 2",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "reem-eight",
+    "district": "Al Reem Island",
+    "label": "Reem Eight",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "reem-eleven",
+    "district": "Al Reem Island",
+    "label": "Reem Eleven",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "reem-five",
+    "district": "Al Reem Island",
+    "label": "Reem Five",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "reem-hills-phase-2a",
+    "district": "Al Reem Island",
+    "label": "Reem Hills - Phase 2A",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "reem-nine",
+    "district": "Al Reem Island",
+    "label": "Reem Nine",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "reflection-tower-a",
+    "district": "Al Reem Island",
+    "label": "Reflection Tower A",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "renad-tower",
+    "district": "Al Reem Island",
+    "label": "Renad Tower",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "rivage",
+    "district": "Al Reem Island",
+    "label": "Rivage",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "riviera-residences",
+    "district": "Al Reem Island",
+    "label": "Riviera Residences",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "saas-heights",
+    "district": "Al Reem Island",
+    "label": "SAAS Heights",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "sunstone",
+    "district": "Al Reem Island",
+    "label": "Sunstone",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "the-wave",
+    "district": "Al Reem Island",
+    "label": "The Wave",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "thoraya",
+    "district": "Al Reem Island",
+    "label": "Thoraya",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "vista-3",
+    "district": "Al Reem Island",
+    "label": "Vista 3",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "ajwan-towers",
+    "district": "Al Saadiyat Island",
+    "label": "Ajwan Towers",
+    "evidence": "register_name",
+    "registration_number": "2023/302023",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 2023/302023 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "c3-garden",
+    "district": "Al Saadiyat Island",
+    "label": "C3 Garden",
+    "evidence": "register_name",
+    "registration_number": "2023/278930",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 2023/278930 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "henge-residences",
+    "district": "Al Saadiyat Island",
+    "label": "Henge Residences",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "jawaher-al-saadiyat",
+    "district": "Al Saadiyat Island",
+    "label": "Jawaher Al Saadiyat",
+    "evidence": "project_name",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the registered project name in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "mamsha-garden",
+    "district": "Al Saadiyat Island",
+    "label": "Mamsha Gardens A",
+    "evidence": "register_name",
+    "registration_number": "20240000361638",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20240000361638 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "mamsha-garden",
+    "district": "Al Saadiyat Island",
+    "label": "Mamsha Gardens B",
+    "evidence": "register_name",
+    "registration_number": "20240000361689",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20240000361689 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "mamsha-palm",
+    "district": "Al Saadiyat Island",
+    "label": "Mamsha Palm",
+    "evidence": "register_name",
+    "registration_number": "20240000322782",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20240000322782 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "manarat-living-2",
+    "district": "Al Saadiyat Island",
+    "label": "Manarat Living II",
+    "evidence": "register_name",
+    "registration_number": "20230000157087",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20230000157087 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "manarat-living-iii",
+    "district": "Al Saadiyat Island",
+    "label": "Manarat Living III",
+    "evidence": "register_name",
+    "registration_number": "20250000424792",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20250000424792 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "nouran-living",
+    "district": "Al Saadiyat Island",
+    "label": "Nouran Living",
+    "evidence": "register_name",
+    "registration_number": "20240000198137",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20240000198137 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "saadiyat-lagoons-al-sidr",
+    "district": "Al Saadiyat Island",
+    "label": "Saadiyat Lagoons - Phase 2 - Al Sidr",
+    "evidence": "register_name",
+    "registration_number": "2023/17878",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 2023/17878 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "saadiyat-lagoons-ethir",
+    "district": "Al Saadiyat Island",
+    "label": "Saadiyat Lagoons - Phase 2 - Ethir",
+    "evidence": "register_name",
+    "registration_number": "2023/19409",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 2023/19409 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "saadiyat-lagoons-wilds-phase-1",
+    "district": "Al Saadiyat Island",
+    "label": "Saadiyat Lagoons - Wilds - Phase 1",
+    "evidence": "register_name",
+    "registration_number": "2022/598291",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 2022/598291 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "saadiyat-lagoons-wilds-phase-2",
+    "district": "Al Saadiyat Island",
+    "label": "Saadiyat Lagoons - Wilds - Phase 2",
+    "evidence": "register_name",
+    "registration_number": "2022/643329",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 2022/643329 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "saadiyat-reserve-the-dunes",
+    "district": "Al Saadiyat Island",
+    "label": "Saadiyat Reserve - The Dunes",
+    "evidence": "register_name",
+    "registration_number": "2021/296874",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 2021/296874 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "solea",
+    "district": "Al Saadiyat Island",
+    "label": "Solea",
+    "evidence": "register_name",
+    "registration_number": "20250000429282",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20250000429282 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "mandarin-oriental-residences-saadiyat-cultural-district-abu-dhabi",
+    "district": "Al Saadiyat Island",
+    "label": "The Fountain View Residences",
+    "evidence": "register_name",
+    "registration_number": "20240000370263",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20240000370263 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  },
+  {
+    "project": "the-row-saadiyat",
+    "district": "Al Saadiyat Island",
+    "label": "The Row Saadiyat",
+    "evidence": "register_name",
+    "registration_number": "20250000646205",
+    "basis": "The ADREC sales label equals, ignoring case and punctuation, the name of ADREC registration 20250000646205 of this project in the same district.",
+    "reviewed_on": "2026-10-26"
+  }
+]

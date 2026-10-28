@@ -1,6 +1,24 @@
 # Données de Reem : collecte directe, provenance et audit
 
-Décision du 10 octobre 2026 : la carte pilote couvre Al Reem Island. Les données sont acquises directement auprès de leurs sources ; le HTML fourni sert de référence visuelle, pas de jeu de données à importer. Ce document précise le modèle cible avant création des modèles Django et migrations. Les tables décrites ci-dessous ne sont pas encore implémentées.
+Décision du 10 octobre 2026 : la carte pilote couvre Al Reem Island. Les données sont acquises directement auprès de leurs sources ; le HTML fourni sert de référence visuelle, pas de jeu de données à importer. Ce document décrit la cible et son premier sous-ensemble implémenté : parcelles, acquisitions Onwani, captures, observations et événements d'audit. Les décisions éditoriales, les autres collecteurs et la publication restent à développer.
+
+## Import manuel implémenté
+
+Le connecteur `apps/api/src/property_platform/modules/evidence/maps/onwani.py` interroge la source officielle à chaque exécution, filtre `AL REEM ISLAND` **et** `ADM`, vérifie son schéma et collecte les identifiants puis les géométries par lots. Une seconde liste d'identifiants contrôle la couverture en fin de collecte ; elle ne garantit pas que tous les attributs sont restés figés pendant l'acquisition.
+
+`apps/api/src/property_platform/modules/evidence/maps/services.py` conserve les réponses exactes et leur empreinte, puis applique un lot complet dans une transaction qui conserve aussi observations et audit. Un verrou PostgreSQL de session empêche deux instances de ce connecteur de modifier le catalogue simultanément. Connexion directe requise ; ne pas utiliser de pooler de transaction pour cette commande.
+
+Une répétition crée une nouvelle acquisition et de nouvelles observations, mais pas de nouvelles parcelles pour les mêmes identifiants de source. Les changements typés ou géométriques augmentent la révision et produisent un audit. Les dates externes restent dans leurs champs bruts ; aucune date de publication n'est inventée. Les captures référencent exactement le champ `features[n]`, qui permet de retrouver chaque attribut et la géométrie d'origine.
+
+Limites explicites de ce premier sous-ensemble : les réponses JSON bornées sont stockées dans PostgreSQL, sans stockage objet ni déduplication physique des captures ; aucun document/photo/vidéo n'est acquis. L'OBJECTID reste un identifiant d'observation rattaché à la source, pas une garantie d'identité cadastrale permanente : un changement d'identifiant nécessite une réconciliation ultérieure. Une géométrie topologiquement invalide est conservée dans `evidence.quarantined_observation`, sans réparation silencieuse ni remplacement d'une ancienne valeur valide ; les autres enregistrements complets sont appliqués et le statut du lot devient `quarantined`. Un mauvais territoire, un schéma inattendu ou un lot manquant font en revanche échouer toute l'acquisition. Aucune disparition n'efface une parcelle. Les erreurs réseau sont enregistrées sur l'acquisition, les réponses HTTP d'erreur bornées sont capturées. Il n'y a ni reprise à mi-lot, ni planification, ni publication automatique. Le journal n'est pas encore durci par des rôles SQL dédiés ; les opérations de cette commande restent transactionnelles et attribuées à son opérateur.
+
+Les captures exploratoires de la section suivante ne sont pas utilisées par cette commande. Voir [les commandes de développement](DEVELOPMENT.md#premier-import-manuel-des-parcelles-onwani).
+
+### Vérifications de ce premier import
+
+Les tests d'intégration ont été exécutés avec PostgreSQL 18.6/PostGIS 3.6 réel dans une base de test séparée : répétition sans doublon, changement de valeur avec historique, échec de collecte sans mutation du catalogue, rollback en cas d'échec d'audit, lot incomplet, trous et polygones disjoints, et quarantaine sans remplacement d'une valeur valide. Les tests de protocole vérifient aussi territoires, identifiants, coordonnées, schéma, troncature et conservation d'une réponse HTTP d'erreur.
+
+Deux acquisitions réelles successives ont ensuite été exécutées dans une autre base temporaire : première acquisition **2 432 observations, 2 431 créations et une quarantaine** ; seconde acquisition **0 création, 0 modification, 2 431 inchangées et une quarantaine**. La géométrie invalide observée correspond à l'OBJECTID `26032713`. Les 56 captures des deux acquisitions ont été conservées dans cette base pendant le test. La base temporaire a été supprimée après vérification ; la base locale de développement `property_platform` n'a pas été alimentée par ces tests. Ces effectifs décrivent les acquisitions testées, pas une constante à imposer aux futures collectes.
 
 ## 1. Sources et état de la recherche
 
@@ -14,6 +32,50 @@ Décision du 10 octobre 2026 : la carte pilote couvre Al Reem Island. Les donné
 | Forums, avis et réseaux sociaux | Témoignages et signaux de changement | Sources publiques à inventorier ; accès, couverture et droits de réutilisation à qualifier par plateforme |
 
 Une page consultable n'établit pas à elle seule un droit de redistribution, une API utilisable ou une couverture complète. Distinguer lecture publique, collecte, conservation et publication des textes/médias. Un accès bloqué est enregistré comme tel ; aucune couverture « de tous les sites et commentaires » n'est promise. Les données identifiant des personnes ne sont pas collectées par défaut.
+
+### Droits de chaque source (A19)
+
+Toutes les données et tous les pipelines sont conservés ; chaque source porte ses droits. Les droits appartiennent à l'éditeur d'un site (ou à l'un de ses hôtes), pas à chaque ligne : une capture, une observation ou un fait hérite des droits de l'hôte de l'URL d'où il a été lu. Une revue modifiée s'applique donc d'un coup aux données passées et futures, sans réécrire de ligne.
+
+**Application des droits (A22).** Les droits sont toujours enregistrés, en base comme dans l'API. Les appliquer est une décision distincte du propriétaire : un interrupteur par droit dans `evidence/source_rights_enforcement.json`, avec `enforced`, la date, l'auteur et le motif. Décision de Karim au 27 octobre 2026, aucun des deux droits n'est appliqué :
+- **collecte** : tous les pipelines collectent, y compris les sites `forbidden` ;
+- **publication** : l'aperçu privé montre toutes les données collectées, y compris celles des sources `link` ou `none`.
+
+Chaque donnée garde ses droits. Mettre `enforced` à `true` arrête d'un coup les collectes ou masque ce que les conditions ne permettent pas (voir « Ce que le code en fait »), sans toucher aux données. Le remettre à `false` les rétablit.
+
+**Registre revu** : `evidence/source_rights.json`, une entrée par hôte (sous-domaines compris). Il couvre toutes les sources des registres et tous les connecteurs ; un test refuse une source sans entrée et une entrée qui ne sert plus.
+
+| Champ | Contenu |
+| --- | --- |
+| `licence`, `licence_url` | Licence de réutilisation : `ODbL-1.0`, `CC-BY-4.0`, `CDLA-Permissive-2.0`, `Copernicus`, `per-item` (licence propre à chaque fichier), `proprietary`, ou `unknown` (conditions jamais relues) |
+| `terms_url`, `reviewed_on`, `reviewed_by` | Conditions lues, date et auteur de la revue (`Karim` pour une décision du propriétaire) |
+| `collection` | `allowed`, ou `forbidden` quand les conditions interdisent l'accès automatisé |
+| `publication` | `open` (redistribution permise, avec `attribution`), `facts` (faits datés, courte citation d'origine et lien), `link` (simple lien) ou `none` |
+| `basis` | Ce qui justifie la décision, en une phrase |
+
+État au 27 octobre 2026, sur 83 hôtes :
+- **Données ouvertes** (`open`) : OpenStreetMap (et Overpass, Geofabrik, OpenFreeMap), Overture, Copernicus Sentinel-2, ESA WorldCover, Wikimedia Commons.
+- **Collecte interdite par leurs conditions** (`forbidden`, collectés tant que la collecte n'est pas appliquée) : Property Finder, PSI, Bayut, LinkedIn et Reddit (`none`), Aldar (`link` : les liens vers ses pages officielles restent, par décision de Karim).
+- **Relues sans interdiction** : Reportage et Bloom (médias non republiables, faits et liens) ; ADREC (aucune licence ni interdiction publiée, abonnement API officiel possible).
+- **Non qualifiées** (`unknown`, `facts`) : les autres promoteurs, la presse, les forums, Onwani, AD-SDI et les autres services publics ; à qualifier en [A21](../tasks/A21.md).
+
+**Ce que le code en fait.** `evidence/source_rights.py`, sans réseau ni Django, est lu partout :
+- **Collecte**, quand elle est appliquée : les flows de fiches, catalogues, références et présentations sautent les sources `forbidden`. `SourceHTTP.fetch` les refuse aussi pour tout connecteur, même lancé à la main. Les pipelines et les registres restent en place : une autorisation écrite se traduit par une ligne modifiée.
+- **Publication**, quand elle est appliquée : rien de ce que porte une capture d'une source `link` ou `none` n'est publié :
+  - faits, typologies et médias ;
+  - positions et repères de carte ;
+  - liens de hiérarchie, présentations et références ;
+  - signal satellite.
+
+  Une fiche sans autre source n'est plus publiée. Le lien « site du projet » ne pointe vers une telle source que si elle est `link`. Non appliquée, chaque lecture retrouve son comportement d'avant A19.
+- **API** : chaque source d'une fiche porte `rights` (licence, conditions, niveau de publication, attribution, date de revue) et `shown_beyond_terms`, vrai quand la publication n'est pas appliquée et que les conditions ne permettent qu'un lien ou rien. Les pages citées hors des sources de la fiche le portent aussi : page relue d'une relation entre projets, lien officiel du registre, source Sentinel-2 de l'activité satellite, source ADREC des ventes enregistrées ([C01](../tasks/C01.md) ; ventes d'une capture retenue écartées quand la publication est appliquée) et commentaires juridiques de la retenue en cas d'annulation. Le site les affiche sous chaque citation, avec une ligne qui signale ces données ([A20](../tasks/A20.md)). `GET /api/v1/preview/source-rights` publie le registre (sans auteur ni motif de revue) pour la page `/[locale]/sources` « Sources et licences », liée depuis la liste des sources de chaque fiche. Les crédits des cartes (OpenFreeMap, OpenStreetMap, ESA WorldCover, Copernicus Sentinel, Overture) viennent du même registre, par l'export `packages/contracts/map-credits.json` (`source_rights.map_credits`), lié aux conditions de chaque site ; une couche ne peut venir que d'un site relu en publication `open`. Esri World Imagery n'est pas encore relu : son crédit reste dans `imagery-sources.ts`.
+- **Histoire** : les captures privées restent conservées et un rejeu les relit à l'identique ; une présentation dont la collecte est interdite et sans reçu est sautée.
+
+**En base.** La table `evidence.source_rights` (migration `0038`, journalisée) reflète le registre : une ligne active par hôte. Une revue modifiée ou retirée révoque la ligne en vigueur (`revoked_at`, `revoked_by`, motif) sans l'effacer, ce qui date chaque décision. Elle se joint aux captures par l'hôte de leur URL. Synchronisation idempotente : déploiement Prefect `source-rights` (chaque jour à 00:45, sans contacter de source), commande `python manage.py apply_source_rights --actor <nom>`, et étape finale de `rebuild-check` (politique `registry`, non bloquante). Après un déploiement qui modifie le registre, lancer la commande ou le déploiement.
+
+**Modifier un droit.** Une ligne du registre, relue avec ses conditions citées, dans une PR ; puis la synchronisation ci-dessus.
+
+**Activer ou couper l'application d'un droit.** Changer `enforced` dans `source_rights_enforcement.json`, avec la date, l'auteur et le motif, dans une PR. Ensuite, redéployer l'API pour la publication et l'ingestion pour la collecte. Le cache des lectures se vide au redémarrage de l'API.
 
 ### Première collecte directe de parcelles
 
@@ -37,9 +99,9 @@ Le modèle distingue : **source → acquisition → assertion → décision de v
 
 | Module cible | Objets et responsabilités |
 |---|---|
-| `apps/api/src/liwa/modules/evidence/` | Sources, acquisitions, versions de captures, assertions, preuves et décisions de rapprochement réversibles |
-| `apps/api/src/liwa/modules/catalog/` | Identifiants immobiliers internes stables, parcelles, bâtiments, logements et relations acceptées |
-| `apps/api/src/liwa/modules/publication/` | Décisions de validation/publication, version affichée et références vers les preuves utilisées |
+| `apps/api/src/property_platform/modules/evidence/` | Sources, acquisitions, versions de captures, assertions, preuves et décisions de rapprochement réversibles |
+| `apps/api/src/property_platform/modules/catalog/` | Identifiants immobiliers internes stables, parcelles, bâtiments, logements et relations acceptées |
+| `apps/api/src/property_platform/modules/publication/` | Décisions de validation/publication, version affichée et références vers les preuves utilisées |
 
 Les prix, avis et documents rejoindront leurs modules propriétaires lorsqu'ils seront introduits. Une référence de provenance doit viser un champ défini et sa version, ou un enregistrement typé identifié : pas une chaîne libre impossible à vérifier. Plusieurs preuves peuvent soutenir une valeur ; plusieurs valeurs contradictoires restent visibles dans les assertions sans écraser l'historique.
 
@@ -96,3 +158,5 @@ L'IA peut proposer une extraction ou une appréciation motivée. Conserver fourn
 Tests essentiels : répétition d'un import sans doublon métier, échec puis reprise d'un lot, rejet d'un mauvais territoire, détection d'une réponse tronquée, date sans heure/fuseau, changement de valeur sans perte de la preuve précédente, contradictions entre sources, rollback simultané de mutation et audit, édition concurrente et annulation d'un rapprochement erroné. Les géométries et contraintes spatiales sont validées avec PostgreSQL/PostGIS réel.
 
 Le prototype vise une couverture cartographique de Reem ; les informations disponibles varient selon les parcelles et sources. Il ne promet pas un dossier complet pour chaque bien ni une actualisation instantanée de tous les sites.
+
+La [revue de base de données](DATABASE_DESIGN.md) précise les noms de domaines retenus, les contraintes SQL d'intégrité, les limites du premier modèle d'identité et les validations restantes pour permissions, versions, sauvegardes et migration des schémas. Les contraintes d'intégrité ne protègent pas à elles seules les preuves contre une modification autorisée par les droits SQL.

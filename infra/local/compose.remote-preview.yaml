@@ -1,0 +1,29 @@
+# Optional private phone preview. No host installation, privileged mode or public Funnel.
+# Use with compose.yaml and both --profile web-preview --profile remote-preview.
+services:
+  remote-preview:
+    profiles: [remote-preview]
+    image: tailscale/tailscale:v1.104.1@sha256:87c55d6be56ad85b3d8bceca5f87f73de288c609131460dd1be1874c250cc41d
+    entrypoint: [tailscaled]
+    command:
+      - --tun=userspace-networking
+      - --state=/var/lib/tailscale/tailscaled.state
+      - --socket=/tmp/tailscaled.sock
+    # Serve proxies to 127.0.0.1:3000 in the web namespace. No published host port.
+    network_mode: service:web
+    depends_on:
+      web:
+        condition: service_started
+    volumes:
+      - remote-preview-state:/var/lib/tailscale
+    tmpfs:
+      - /tmp:mode=0700
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    restart: unless-stopped
+
+volumes:
+  # Contains private device identity. Never export to Git or share this volume.
+  remote-preview-state:

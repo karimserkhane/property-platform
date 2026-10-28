@@ -1,0 +1,54 @@
+.root {
+  display: grid;
+  gap: 0.85rem;
+}
+.root h2 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+.note {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+.cards {
+  display: grid;
+  gap: 0.75rem;
+}
+.cards article {
+  background: var(--surface, #fff);
+  border: 1px solid var(--line, #dedbd3);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 5px 18px #14383f08;
+}
+.cards h3 {
+  margin-block: 0.5rem;
+  font-size: 1rem;
+  font-family: var(--font-ui);
+  line-height: 1.45;
+}
+.cards p {
+  margin-block: 0.45rem;
+  font-size: 0.9rem;
+}
+.badge {
+  display: inline-block;
+  background: #e5f0ec;
+  color: #174c47;
+  padding: 0.25rem 0.5rem;
+  border-radius: 2rem;
+  font-size: 0.72rem;
+}
+.cards .value {
+  font-size: 2rem;
+  font-weight: 600;
+}
+.paging {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.paging button {
+  min-height: 2.5rem;
+}

@@ -6,6 +6,7 @@
       "**",
       "!**/generated.ts",
       "!**/openapi.json",
+      "!**/territories.json",
       "!**/pnpm-lock.yaml"
     ]
   },
