@@ -11,6 +11,7 @@ import { ProjectNeighbourhood } from "@/features/projects/neighbourhood";
 import { googleNeighbourhoodUrl } from "@/features/projects/neighbourhood-config";
 import type { ObservedSalesLabels } from "@/features/projects/observed-sales";
 import type { RetentionLabels } from "@/features/projects/retention";
+import type { ScheduleLabels } from "@/features/projects/schedule-form";
 import { readProject } from "@/features/projects/server";
 import type { ProjectLabels } from "@/features/projects/types";
 import type { VerificationLabels } from "@/features/projects/verification";
@@ -107,6 +108,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       deliveryText(key as keyof typeof english.Delivery),
     ]),
   ) as DeliveryLabels;
+  const scheduleText = await getTranslations({ locale, namespace: "Schedule" });
+  const scheduleLabels = Object.fromEntries(
+    Object.keys(english.Schedule).map((key) => [
+      key,
+      scheduleText(key as keyof typeof english.Schedule),
+    ]),
+  ) as ScheduleLabels;
   const useLabels = Object.fromEntries(
     Object.keys(english.Use).map((key) => [
       key,
@@ -129,6 +137,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       activityLabels={activityLabels}
       observedSalesLabels={observedSalesLabels}
       deliveryLabels={deliveryLabels}
+      scheduleLabels={scheduleLabels}
       neighbourhood={
         area ? (
           <ProjectNeighbourhood
