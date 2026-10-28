@@ -13,8 +13,10 @@ from test_adrec_postgis import execute, sales_acquisition  # noqa: E402
 from test_adrec_protocol import sale  # noqa: E402
 
 from property_platform.modules.catalog.models import Developer, Project  # noqa: E402
+from property_platform.modules.evidence import source_rights  # noqa: E402
 from property_platform.modules.evidence.models import ProjectMarketLabel  # noqa: E402
 from property_platform.modules.evidence.projects.market_sheet import project_market  # noqa: E402
+from property_platform.modules.evidence.source_rights import public_rights  # noqa: E402
 from property_platform.modules.evidence.sources import adrec  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
@@ -78,6 +80,32 @@ def test_only_the_newest_window_is_read_and_partial_shares_stay_out_of_ranges(la
     assert two_beds["rate_aed_per_sqm"]["min"] == "15000.00000000"
     assert (studios["sales_count"], studios["price_aed"]["min"]) == (1, "800000.00")
     assert two_beds["sale_sequence"] == "primary"
+
+
+def test_the_source_states_its_reviewed_rights(labelled):
+    execute(sales_acquisition([sale()]))
+    sheet = project_market(labelled.project)
+    assert sheet["source"]["rights"] == public_rights(adrec.PAGE_URL)
+    assert sheet["source"]["rights"]["publication"] == "facts"
+    assert sheet["source"]["rights"]["terms_url"] == "https://adrec.gov.ae/en/terms_and_conditions"
+
+
+def test_enforced_publication_leaves_out_sales_from_a_withheld_capture(
+    labelled, enforce_rights, monkeypatch
+):
+    execute(sales_acquisition([sale()]))
+    withheld = tuple(
+        {**row, "publication": "none"} if row["host"] == "adrec.gov.ae" else row
+        for row in source_rights.source_rights()
+    )
+    monkeypatch.setattr(source_rights, "source_rights", lambda: withheld)
+    enforce_rights(publication=False)
+    shown = project_market(labelled.project)
+    assert shown["groups"] and shown["source"]["rights"]["shown_beyond_terms"]
+    enforce_rights(publication=True)
+    sheet = project_market(labelled.project)
+    assert (sheet["groups"], sheet["window"]["captures"]) == ([], [])
+    assert not sheet["source"]["rights"]["shown_beyond_terms"]
 
 
 def test_a_revoked_label_hides_its_sales(labelled):

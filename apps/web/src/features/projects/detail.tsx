@@ -344,6 +344,7 @@ export function ProjectDetailView({
               sales={project.observed_sales}
               locale={locale}
               labels={observedSalesLabels}
+              projectLabels={labels}
             />
           )}
           <ProjectDocuments
