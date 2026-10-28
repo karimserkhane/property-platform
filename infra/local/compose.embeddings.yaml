@@ -1,0 +1,31 @@
+# Optional local embeddings model for the semantic evidence search (E01). No published
+# port, no paid service. The model and its revision are pinned in
+# apps/api/src/property_platform/modules/evidence/search/embeddings.py, which refuses a
+# service serving anything else. Weights are fetched once from Hugging Face into the volume.
+services:
+  embeddings:
+    profiles: [embeddings]
+    # text-embeddings-inference cpu-1.9.3
+    image: ghcr.io/huggingface/text-embeddings-inference@sha256:ad950d30878eceb72aaf32024d26fa2b1d04a75304fa0b4776b49aa1941fea07
+    command:
+      - --model-id=intfloat/multilingual-e5-small
+      - --revision=614241f622f53c4eeff9890bdc4f31cfecc418b3
+      - --port=80
+    environment:
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    volumes:
+      - embeddings-data:/data
+    init: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    mem_limit: 2g
+    cpus: 2
+  api:
+    environment:
+      EVIDENCE_EMBEDDINGS_URL: http://embeddings:80
+  ingestion:
+    environment:
+      EVIDENCE_EMBEDDINGS_URL: http://embeddings:80
+volumes:
+  embeddings-data:

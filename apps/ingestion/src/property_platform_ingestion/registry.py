@@ -165,6 +165,13 @@ DATASETS += (
         {"territory": "all"},
         "0 4 5 * *",
     ),
+    Dataset(
+        "evidence-search",
+        "property-platform-evidence-search",
+        "Index the statements of published project dossiers with their evidence; no collection.",
+        {},
+        "30 2 * * *",
+    ),
 )
 
 # Same reviewed connectors, distinct source identities and deployment scopes.

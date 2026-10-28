@@ -45,6 +45,8 @@ GROUPS = {
     "property-platform-source-rights": {"SourceRights"},
     "property-platform-imagery": {"ImageryScene"},
     "property-platform-construction-activity": {"ConstructionActivityMeasurement"},
+    # Derived from the published dossiers only (E01).
+    "property-platform-evidence-search": {"EvidenceSearchEntry", "EvidenceSearchEmbedding"},
     "property-platform-adrec-sales": {"AdrecMarketSnapshot", "AdrecSaleObservation"},
     "property-platform-adrec-indices": {"AdrecMarketSnapshot", "AdrecIndexObservation"},
     "property-platform-public-context": {

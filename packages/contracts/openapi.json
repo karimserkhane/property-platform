@@ -2130,6 +2130,108 @@
         ]
       }
     },
+    "/api/v1/preview/evidence-search": {
+      "get": {
+        "operationId": "previewEvidenceSearch",
+        "summary": "Evidence Search",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "maxLength": 120,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "al-reem-island",
+                    "saadiyat-island",
+                    "al-maryah-island"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "default": "text",
+              "enum": [
+                "text",
+                "hybrid"
+              ],
+              "title": "Mode",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvidenceSearchResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Published statements matching `q`, each with its evidence (E01).\n\n`text` requires every word; `hybrid` fuses it with the optional semantic ranking and\nanswers with the full text alone without the embeddings service.",
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
     "/api/v1/preview/source-rights": {
       "get": {
         "operationId": "previewSourceRights",
@@ -8067,6 +8169,165 @@
           "historical"
         ],
         "title": "DistrictMarketResponse",
+        "type": "object"
+      },
+      "EvidenceSearchClaimResponse": {
+        "properties": {
+          "claim_key": {
+            "title": "Claim Key",
+            "type": "string"
+          },
+          "project": {
+            "$ref": "#/components/schemas/EvidenceSearchProjectResponse"
+          },
+          "kind": {
+            "enum": [
+              "summary",
+              "handover",
+              "programme_total",
+              "typologies",
+              "amenity",
+              "declared_progress",
+              "registration",
+              "component_of",
+              "has_component"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EvidenceSearchSourceResponse"
+          },
+          "indexed_at": {
+            "format": "date-time",
+            "title": "Indexed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_key",
+          "project",
+          "kind",
+          "path",
+          "text",
+          "language",
+          "source",
+          "indexed_at"
+        ],
+        "title": "EvidenceSearchClaimResponse",
+        "type": "object"
+      },
+      "EvidenceSearchProjectResponse": {
+        "properties": {
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "EvidenceSearchProjectResponse",
+        "type": "object"
+      },
+      "EvidenceSearchResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceSearchClaimResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "text",
+              "hybrid"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "semantic": {
+            "title": "Semantic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "mode",
+          "semantic"
+        ],
+        "title": "EvidenceSearchResponse",
+        "type": "object"
+      },
+      "EvidenceSearchSourceResponse": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "content_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Sha256"
+          },
+          "evidence_pointer": {
+            "title": "Evidence Pointer",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          }
+        },
+        "required": [
+          "url",
+          "name",
+          "kind",
+          "content_sha256",
+          "evidence_pointer",
+          "retrieved_at"
+        ],
+        "title": "EvidenceSearchSourceResponse",
         "type": "object"
       },
       "SourceRightsRegistryResponse": {

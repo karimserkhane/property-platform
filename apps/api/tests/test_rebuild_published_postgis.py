@@ -186,3 +186,15 @@ def test_a_manifest_without_published_state_keeps_history_tables_exact(tmp_path)
     result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
     assert not result["ok"] and result["published_blocking"] is None
     assert result["mismatches"] == ["evidence.project_snapshot"]
+
+
+def test_the_search_index_is_rebuilt_last_and_never_blocks(tmp_path):
+    reading(tower(), version="v2", summary="Current reading", typologies=[("studio", 0)])
+    expected = archive.counts()
+    manifest(tmp_path, expected=expected, published=published.published_state())
+    result = archive.replay_archive(tmp_path, "integration-rebuild", str(uuid4()))
+    report = json.loads((tmp_path / "report.json").read_text())
+    table = next(r for r in report["tables"] if r["table"] == "evidence.evidence_search_entry")
+    assert table["policy"] == "derived" and table["actual"] > table["expected"] == 0
+    assert "evidence.evidence_search_entry" not in result["mismatches"]
+    assert not any(step["operation"] == "evidence_search" for step in report["steps"])

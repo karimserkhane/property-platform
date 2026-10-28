@@ -104,3 +104,6 @@ MEDIA_STORAGE = {
     "public_base_url": os.environ.get("MEDIA_PUBLIC_BASE_URL", ""),
     "publication_enabled": os.environ.get("MEDIA_PUBLICATION_ENABLED", "0") == "1",
 }
+
+# Optional local embeddings service (profile `embeddings`); empty turns semantic search off.
+EVIDENCE_EMBEDDINGS_URL = os.environ.get("EVIDENCE_EMBEDDINGS_URL", "")

@@ -441,6 +441,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/evidence-search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Evidence Search
+         * @description Published statements matching `q`, each with its evidence (E01).
+         *
+         *     `text` requires every word; `hybrid` fuses it with the optional semantic ranking and
+         *     answers with the full text alone without the embeddings service.
+         */
+        get: operations["previewEvidenceSearch"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/preview/source-rights": {
         parameters: {
             query?: never;
@@ -2595,6 +2618,63 @@ export interface components {
             /** Historical */
             historical: boolean;
         };
+        /** EvidenceSearchClaimResponse */
+        EvidenceSearchClaimResponse: {
+            /** Claim Key */
+            claim_key: string;
+            project: components["schemas"]["EvidenceSearchProjectResponse"];
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "summary" | "handover" | "programme_total" | "typologies" | "amenity" | "declared_progress" | "registration" | "component_of" | "has_component";
+            /** Path */
+            path: string;
+            /** Text */
+            text: string;
+            /** Language */
+            language: string;
+            source: components["schemas"]["EvidenceSearchSourceResponse"];
+            /**
+             * Indexed At
+             * Format: date-time
+             */
+            indexed_at: string;
+        };
+        /** EvidenceSearchProjectResponse */
+        EvidenceSearchProjectResponse: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+        };
+        /** EvidenceSearchResponse */
+        EvidenceSearchResponse: {
+            /** Items */
+            items: components["schemas"]["EvidenceSearchClaimResponse"][];
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "text" | "hybrid";
+            /** Semantic */
+            semantic: boolean;
+        };
+        /** EvidenceSearchSourceResponse */
+        EvidenceSearchSourceResponse: {
+            /** Url */
+            url: string;
+            /** Name */
+            name: string;
+            /** Kind */
+            kind: string;
+            /** Content Sha256 */
+            content_sha256: string | null;
+            /** Evidence Pointer */
+            evidence_pointer: string;
+            /** Retrieved At */
+            retrieved_at: string | null;
+        };
         /** SourceRightsRegistryResponse */
         SourceRightsRegistryResponse: {
             /** Items */
@@ -3986,6 +4066,49 @@ export interface operations {
             };
             /** @description Unprocessable Content */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewEvidenceSearch: {
+        parameters: {
+            query: {
+                q: string;
+                territory?: ("al-reem-island" | "saadiyat-island" | "al-maryah-island") | null;
+                limit?: number;
+                mode?: "text" | "hybrid";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvidenceSearchResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

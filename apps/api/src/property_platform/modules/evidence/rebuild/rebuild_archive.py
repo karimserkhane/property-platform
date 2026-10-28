@@ -56,6 +56,14 @@ BACKUP_ONLY = {
     "walking_area": "Derived walking calculations require the routing worker",
     "basemap_request": "Demand queue includes requests without any acquired capture",
 }
+# Derived from the published dossiers, which are compared on their own; reported only.
+DERIVED = {
+    "evidence_search_entry": "Search index of the published dossiers (E01), rebuilt last",
+    "evidence_search_embedding": (
+        "Vectors of the search index (E01); only with the optional embeddings service"
+    ),
+}
+
 # Mirrors of reviewed repository registries, rebuilt from the current file: a difference
 # says the reference database has not applied the latest review yet, not that data is lost.
 REGISTRY_MIRRORS = {"source_rights": "Reviewed source rights, mirrored from source_rights.json"}
@@ -925,15 +933,18 @@ def compare_tables(
         name = table.split(".")[1]
         evidence_table = table.startswith("evidence.")
         reason = BACKUP_ONLY.get(name) if evidence_table else None
+        derived = DERIVED.get(name) if evidence_table else None
         mirror = REGISTRY_MIRRORS.get(name) if evidence_table else None
         policy = (
             "backup"
             if reason
+            else "derived"
+            if derived
             else "registry"
             if mirror
             else ("new_audit" if evidence_table and name in TECHNICAL else "exact")
         )
-        reason = reason or mirror
+        reason = reason or derived or mirror
         row = {
             "table": table,
             "expected": expected.get(table),
@@ -1071,7 +1082,13 @@ def replay_archive(
     from ..projects.project_market_labels import apply_project_market_labels
     from ..projects.project_relations import apply_project_relations
     from ..projects.project_verification_links import apply_project_verification_links
+    from ..search.index import rebuild_search_index
     from ..source_rights_import import apply_source_rights
+
+    def index_search():
+        result = rebuild_search_index(actor=actor, run_key="rebuild")
+        if result["status"] != "succeeded":
+            raise RuntimeError(result.get("error") or "EvidenceSearchFailed")
 
     manifest = json.loads((root / "manifest.json").read_text("utf-8"))
     if manifest["version"] != VERSION:
@@ -1235,6 +1252,8 @@ def replay_archive(
         ("project_verification_links", lambda: apply_project_verification_links(actor=actor)),
         ("project_market_labels", lambda: apply_project_market_labels(actor=actor)),
         ("source_rights", lambda: apply_source_rights(actor=actor)),
+        # Last: the index reads the published dossiers the stages above produce (E01).
+        ("evidence_search", index_search),
     ):
         try:
             with audit_context(actor=actor):
