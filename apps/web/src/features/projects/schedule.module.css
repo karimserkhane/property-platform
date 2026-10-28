@@ -1,0 +1,165 @@
+.simulator {
+  margin-block: 20px;
+  padding: 22px;
+  border: 1px solid #ddd6c8;
+  border-radius: 14px;
+  background: #fffcf4d9;
+  overflow-wrap: anywhere;
+}
+.simulator h3 {
+  margin-block: 0 8px;
+}
+.simulator h4 {
+  margin-block: 18px 8px;
+  font-size: 14px;
+}
+.muted {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #6c7478;
+}
+.form {
+  display: grid;
+  gap: 14px;
+}
+.field {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  color: #6c7478;
+}
+.field input,
+.field select {
+  min-height: 44px;
+  padding-inline: 10px;
+  border: 1px solid #cfc7b8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1f2a2e;
+  font: inherit;
+  font-size: 15px;
+}
+.plan {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e4ddcf;
+  border-radius: 10px;
+  min-inline-size: 0;
+}
+.plan legend {
+  padding-inline: 4px;
+  font-weight: 600;
+}
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  align-items: end;
+  padding-block-end: 10px;
+  border-block-end: 1px dashed #e4ddcf;
+}
+.rowNumber {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-weight: 600;
+}
+.add,
+.remove {
+  min-height: 44px;
+  padding-inline: 14px;
+  border: 1px solid #cfc7b8;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  justify-self: start;
+}
+.check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+}
+.readings ul {
+  margin: 0;
+  padding-inline-start: 18px;
+}
+.result {
+  display: block;
+}
+.issues {
+  margin-block: 12px 0;
+  padding-inline-start: 18px;
+  color: #8a4b1f;
+}
+.timeline {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.timeline li {
+  padding: 12px;
+  border-inline-start: 3px solid #9d8055;
+  background: #ffffffb3;
+  border-radius: 6px;
+}
+.timeline p {
+  margin-block: 2px;
+}
+.when {
+  font-weight: 600;
+}
+.amount {
+  font-size: 18px;
+  font-weight: 600;
+}
+.bar {
+  position: relative;
+  display: flex;
+  block-size: 10px;
+  margin-block-start: 8px;
+  border-radius: 5px;
+  background: #ece6da;
+  overflow: visible;
+}
+.paid {
+  background: #3d6b5c;
+  border-start-start-radius: 5px;
+  border-end-start-radius: 5px;
+}
+.paidRange {
+  background: repeating-linear-gradient(
+    45deg,
+    #3d6b5c80 0 4px,
+    transparent 4px 8px
+  );
+}
+.progress {
+  position: absolute;
+  inset-block: -4px;
+  inline-size: 3px;
+  margin-inline-start: -1px;
+  background: #9d4f1f;
+}
+.totals {
+  display: grid;
+  gap: 10px;
+  margin-block: 16px 8px;
+}
+.totals dt {
+  font-size: 12px;
+  color: #6c7478;
+}
+.totals dd {
+  margin-inline: 0;
+}
+.totals .total {
+  font-size: 24px;
+  font-weight: 600;
+}
