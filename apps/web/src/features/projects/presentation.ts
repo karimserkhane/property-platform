@@ -299,3 +299,37 @@ export function projectPositionQuality(
       }
     : null;
 }
+
+const reservedLicences = {
+  unknown: "rightsUnreviewed",
+  proprietary: "rightsReserved",
+  "per-item": "rightsPerItem",
+} as const;
+
+type SourceRightsInput =
+  | (Omit<NonNullable<ProjectSource["rights"]>, "shown_beyond_terms"> & {
+      shown_beyond_terms?: boolean;
+    })
+  | null
+  | undefined;
+
+/** The reviewed rights (A19) a citation tells a reader, with safe links only. */
+export function sourceRightsNotice(rights: SourceRightsInput) {
+  const licence = rights?.licence ?? "unknown";
+  const key = Object.hasOwn(reservedLicences, licence)
+    ? reservedLicences[licence as keyof typeof reservedLicences]
+    : null;
+  return {
+    labelKey: key,
+    licence: key ? null : licence,
+    licenceUrl: safeSourceUrl(rights?.licence_url),
+    termsUrl: safeSourceUrl(rights?.terms_url),
+    attribution: rights?.attribution?.trim() || null,
+    // Data shown although publication is not enforced (A22) and the terms forbid it.
+    beyondTermsKey: rights?.shown_beyond_terms
+      ? rights.publication === "link"
+        ? ("rightsBeyondLink" as const)
+        : ("rightsBeyondNone" as const)
+      : null,
+  };
+}

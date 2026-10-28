@@ -105,6 +105,13 @@ DATASETS += (
         None,
     ),
     Dataset(
+        "source-rights",
+        "property-platform-source-rights",
+        "Mirror the reviewed source rights (licence, collection, publication) into the database.",
+        {},
+        "45 0 * * *",
+    ),
+    Dataset(
         "data-history",
         "property-platform-data-history",
         "Verify every owned table has a pipeline owner and database audit; retain the report.",
@@ -323,6 +330,20 @@ DATASETS += tuple(
         ("saadiyat", "saadiyat-island"),
         ("maryah", "al-maryah-island"),
     )
+)
+
+
+# Emirate-wide AD-SDI plots, district by district. Manual: a full municipality is a
+# multi-hour acquisition that an operator starts deliberately (F01).
+DATASETS += tuple(
+    Dataset(
+        f"{municipality.lower()}-parcels-adsdi-districts",
+        "property-platform-sdi-district-parcels",
+        f"AD-SDI plots of {municipality}, district by district; identity checks and quarantine.",
+        {"municipality": municipality},
+        None,
+    )
+    for municipality in ("ADM", "AAM", "WRM")
 )
 
 

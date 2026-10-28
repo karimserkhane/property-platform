@@ -18,7 +18,10 @@ from property_platform.modules.evidence.management.commands.import_reem_imagery 
     SCENES,
 )
 from property_platform.modules.evidence.models import ImageryScene, IngestionRun, ResearchReference  # noqa: E402
-from property_platform.modules.evidence.research_import import import_reference, page_metadata  # noqa: E402
+from property_platform.modules.evidence.sources.research_import import (  # noqa: E402
+    import_reference,
+    page_metadata,
+)
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -94,7 +97,8 @@ def test_source_title_is_plain_text_not_a_copied_assertion():
 
 def test_failed_source_remains_a_failed_run_without_invented_reference():
     with patch(
-        "property_platform.modules.evidence.research_import.urlopen", side_effect=TimeoutError
+        "property_platform.modules.evidence.sources.research_import.urlopen",
+        side_effect=TimeoutError,
     ):
         run = import_reference(
             {"url": "https://reportagegroup.com/example", "label": "Test", "kind": "developer"},
@@ -110,7 +114,7 @@ def test_reprocess_preserves_receipt_dates_and_retires_known_wrong_marker():
 
     from property_platform.modules.catalog.models import Place
     from property_platform.modules.evidence.models import Capture, MapObservation, Source
-    from property_platform.modules.evidence.research_import import reprocess_reference
+    from property_platform.modules.evidence.sources.research_import import reprocess_reference
 
     district()
     source = Source.objects.create(

@@ -4,6 +4,8 @@
 
 **Complément du 24 octobre 2026 :** la [qualification du registre des projets ADREC](QUALIFICATION_REGISTRE_ADREC_20261024.md) examine l'annuaire DARI (entrée 02) : consultable sans compte, mais collecte automatique et republication interdites par ses conditions. La plateforme n'en conserve que des liens de vérification.
 
+**Complément du 27 octobre 2026 :** la [qualification des sources de Dubai](QUALIFICATION_SOURCES_DUBAI_20261027.md) (entrées 06 à 16) constate que les fiches Dubai Pulse redirigent vers l'accueil de Data.Dubai, que les CSV du site DLD passent par un CAPTCHA sous des conditions d'usage personnel, et qu'aucun accès à la Building Intelligence Platform n'est publié. Aucune collecte Dubai n'est prête.
+
 Revue du **13 octobre 2026**. Cet inventaire contient **44 entrées de sources, jeux de données ou pistes institutionnelles**. Plusieurs entrées appartiennent à une même autorité ; ce n’est pas une liste de 44 fournisseurs indépendants. Il couvre les sept émirats, avec des niveaux d’accès très différents. Il documente la recherche ; il n’active pas de nouveaux imports.
 
 La valeur recherchée est une fiche immobilière documentée : projet, promoteur, statut, avancement daté, caractéristiques, ventes, loyers, charges et environnement. Une carte cadastrale apporte la localisation ; les autres sources apportent les informations nécessaires pour comprendre le bien.

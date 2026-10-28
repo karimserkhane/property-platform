@@ -1,7 +1,7 @@
 import pytest
 
-from property_platform.modules.evidence.map_sources import coordinates, decode
-from property_platform.modules.evidence.onwani import SourceError
+from property_platform.modules.evidence.maps.map_sources import coordinates, decode
+from property_platform.modules.evidence.maps.onwani import SourceError
 from property_platform.modules.publication.land_use import category
 
 

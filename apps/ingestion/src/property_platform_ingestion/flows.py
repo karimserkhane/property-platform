@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
 from prefect.runtime import flow_run
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 from .registry import (
     TERRITORY,
@@ -18,7 +19,7 @@ from .registry import (
     reference_identity,
     source_registries,
 )
-from .runtime import IngestionFailure, invoke_domain
+from .runtime import SDI_TIMEOUT, TIMEOUT, IngestionFailure, invoke_domain
 
 
 @task(name="Acquire and ingest source", retries=0, cache_policy=NO_CACHE)
@@ -42,7 +43,8 @@ def ingest_source(operation: str, scope: str, actor: str, **parameters) -> dict:
             "prefect_flow_run_id": run_id,
             "actor": f"Prefect/{run_id}/{actor.strip()}",
             **parameters,
-        }
+        },
+        timeout=SDI_TIMEOUT if operation == "sdi_parcels" else TIMEOUT,
     )
     logger = get_run_logger()
     logger.info(
@@ -73,6 +75,33 @@ def sdi_parcels(territory: Territory = TERRITORY, actor: str = "scheduled"):
     return ingest_source("sdi_parcels", territory, actor)
 
 
+@flow(name="property-platform-sdi-district-parcels", retries=0)
+def sdi_district_parcels(
+    municipality: Literal["ADM", "AAM", "WRM"] = "ADM",
+    districts: list[str] | None = None,
+    actor: str = "manual",
+):
+    """Import reviewed AD-SDI districts one audited run each; a failure never hides others."""
+    from property_platform.modules.evidence.maps import sdi_protocol
+
+    registered = sdi_protocol.scopes_in(municipality)
+    scopes = registered if districts is None else list(dict.fromkeys(districts))
+    if not scopes or any(scope not in registered for scope in scopes):
+        raise ValueError("Districts must be reviewed AD-SDI scopes of this municipality")
+    results, failed = {}, []
+    for scope in scopes:
+        try:
+            results[scope] = ingest_source("sdi_parcels", scope, actor)
+        except IngestionFailure as exc:
+            results[scope] = exc.result
+            failed.append(scope)
+    if failed:
+        raise IngestionFailure(
+            {"status": "failed", "error": "DistrictImportFailed", "failed_scopes": failed}
+        )
+    return results
+
+
 @flow(name="property-platform-map", retries=0)
 def map_layer(
     layer: Literal["district", "community", "street", "osm", "overture"] = "osm",
@@ -94,6 +123,8 @@ def references(
     if type(limit) is not int or not 1 <= limit <= 200:
         raise ValueError("Reference limit must be 1â€“200")
     rows, _, _ = source_registries(territory)
+    # A site whose terms forbid collection stays registered for replays only (A19).
+    rows = [row for row in rows if collection_allowed(row["url"])]
     if reference_key is not None:
         rows = [row for row in rows if reference_identity(row["url"]) == reference_key]
         if len(rows) != 1:
@@ -140,7 +171,7 @@ def project_details(
     acquisition_mode: Literal["live", "archive_latest", "archive_all"] = "live",
 ):
     """Reviewed factual project observations; promoter media remain external references."""
-    from property_platform.modules.evidence.project_protocol import project_registry
+    from property_platform.modules.evidence.projects.project_protocol import project_registry
 
     from .project_archive import project_batches
 
@@ -154,6 +185,7 @@ def project_details(
         for project in project_registry(scope)
         for source in project["sources"]
         if source["role"] != "terms"
+        and collection_allowed(source["url"])
         and (source_kind == "all" or source.get("source_kind", "developer") == source_kind)
     ]
     for project, source in sources:
@@ -197,10 +229,12 @@ def project_details(
 
 @flow(name="property-platform-project-discovery", retries=0)
 def project_discovery(territory: Territory = TERRITORY, actor: str = "manual"):
-    from property_platform.modules.evidence.project_discovery import catalogue_registry
+    from property_platform.modules.evidence.projects.project_discovery import catalogue_registry
 
     results, failures = [], []
     for catalogue in catalogue_registry(territory):
+        if not collection_allowed(catalogue["url"]):
+            continue
         scope = f"{territory}:{catalogue['key']}"
         try:
             results.append(
@@ -278,7 +312,7 @@ def adrec_sales(
     actor: str = "scheduled",
 ):
     """Snapshot 90 completed Dubai days. Scheduled run time fixes the retry scope."""
-    from property_platform.modules.evidence.adrec import sales_scope
+    from property_platform.modules.evidence.sources.adrec import sales_scope
 
     scheduled = flow_run.scheduled_start_time
     if isinstance(scheduled, str):
@@ -324,6 +358,24 @@ def project_media_files(receipt_name: str = "project-media.json", actor: str = "
             "prefect_flow_run_id": run_id,
         }
     )
+
+
+@flow(name="property-platform-source-rights", retries=0)
+def source_rights(actor: str = "scheduled"):
+    """Mirror the reviewed source rights into the database; no source is contacted."""
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    result = invoke_domain(
+        {
+            "operation": "source_rights",
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+        }
+    )
+    if result["status"] == "failed":
+        raise IngestionFailure(result)
+    return result
 
 
 @flow(name="property-platform-data-history", retries=0)
@@ -462,6 +514,7 @@ FLOWS = {
     for f in (
         parcels,
         sdi_parcels,
+        sdi_district_parcels,
         map_layer,
         references,
         presentations,
@@ -477,6 +530,7 @@ FLOWS = {
         media_storage,
         project_media_files,
         basemap_archive,
+        source_rights,
         data_history,
         routing_graph,
         walking_areas,

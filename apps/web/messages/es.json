@@ -426,7 +426,15 @@
     "positionPublisher": "Ubicación aproximada: punto del mapa del promotor o del editor, sin verificar.",
     "positionBroker": "Ubicación aproximada: punto publicado por una agencia, sin verificar.",
     "positionDeclared": "Ubicación aproximada: punto declarado por una fuente, sin verificar.",
-    "deliveryHistory": "Historial de entregas del promotor"
+    "deliveryHistory": "Historial de entregas del promotor",
+    "rightsLicence": "Licencia",
+    "rightsUnreviewed": "condiciones aún no revisadas",
+    "rightsReserved": "derechos reservados por el editor",
+    "rightsPerItem": "licencia propia de cada archivo",
+    "rightsTerms": "Condiciones de la fuente",
+    "rightsBeyondLink": "Se muestra aunque las condiciones de la fuente solo permiten un enlace.",
+    "rightsBeyondNone": "Se muestra aunque las condiciones de la fuente no permiten su reutilización.",
+    "sourcesAndLicences": "Fuentes y licencias"
   },
   "Delivery": {
     "title": "Historial de entregas",
@@ -463,6 +471,23 @@
     "completionObserved": "Primera lectura que indica finalización:",
     "notCompletedUntil": "Última lectura anterior sin finalización:",
     "withoutObservations": "Proyectos sin observaciones fechadas"
+  },
+  "Sources": {
+    "title": "Fuentes y licencias",
+    "intro": "Licencia, condiciones y reutilización permitida de cada sitio de origen, según el registro revisado. Las condiciones de un sitio aún no revisado quedan por calificar.",
+    "reviewedCount": "{reviewed} de {total} sitios revisados",
+    "licence": "Licencia",
+    "publication": "Reutilización permitida",
+    "collection": "Recopilación automatizada",
+    "collectionAllowed": "permitida",
+    "collectionForbidden": "prohibida por sus condiciones",
+    "reviewed": "Revisado el",
+    "notReviewed": "aún no revisado",
+    "attribution": "Atribución:",
+    "publicationOpen": "licencia abierta, con atribución",
+    "publicationFacts": "hechos fechados, cita breve y enlace",
+    "publicationLink": "solo enlace",
+    "publicationNone": "sin publicación"
   },
   "Retention": {
     "title": "Retención en caso de cancelación",

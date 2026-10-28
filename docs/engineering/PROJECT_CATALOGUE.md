@@ -1,5 +1,17 @@
 # Catalogue Reem et Saadiyat — 21 octobre 2026
 
+## Droits des sources, 27 octobre 2026 (A19)
+
+Chaque source a désormais ses droits ([registre et règles](DATA_PROVENANCE.md#droits-de-chaque-source-a19)). Les conditions de Property Finder, PSI, Bayut et Aldar interdisent la collecte automatique et la réutilisation de leur contenu.
+
+Par décision de Karim ([A22](../tasks/A22.md)), ces sites restent collectés et affichés dans l'aperçu privé, chaque donnée avec ses droits. Appliquer la collecte les arrêterait d'un coup. Si l'application de la publication est activée, l'effet mesuré le 27 octobre est le suivant :
+- **90 des 183 fiches n'ont aucune autre source publiable** et ne sont plus publiées : 77 à Reem, surtout des tours connues seulement par PSI, et 13 à Saadiyat ;
+- il en reste 93, appuyées par l'ADREC ou par d'autres promoteurs ;
+- les positions déclarées par PSI quittent la carte ;
+- seules les pages officielles d'Aldar restent liées, sans aucun fait repris.
+
+Registres, pipelines, captures et snapshots sont conservés dans tous les cas.
+
 ## Couverture et attribution
 
 Le registre actuel contient **174 fiches nommées** : **117 Reem, 57 Saadiyat**, avec 58 identités de promoteurs, contre 57 fiches au départ. Les ajouts comprennent des programmes, résidences, tours et phases explicitement nommées ; ce total n'est ni un nombre de programmes maîtres indépendants ni une garantie d'exhaustivité. Les captures privées des différentes vagues restent distinctes.

@@ -13,9 +13,9 @@ from test_adrec_postgis import execute, sales_acquisition  # noqa: E402
 from test_adrec_protocol import sale  # noqa: E402
 
 from property_platform.modules.catalog.models import Developer, Project  # noqa: E402
-from property_platform.modules.evidence import adrec  # noqa: E402
-from property_platform.modules.evidence.market_sheet import project_market  # noqa: E402
 from property_platform.modules.evidence.models import ProjectMarketLabel  # noqa: E402
+from property_platform.modules.evidence.projects.market_sheet import project_market  # noqa: E402
+from property_platform.modules.evidence.sources import adrec  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

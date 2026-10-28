@@ -878,15 +878,15 @@ Dans PyCharm, ouvrir les fichiers ci-dessous. Les libellés donnent le chemin co
 | Fichier | Fonction ou objet à regarder | Rôle |
 |---|---|---|
 | [apps/api/src/property_platform/modules/evidence/management/commands/import_onwani.py](../../apps/api/src/property_platform/modules/evidence/management/commands/import_onwani.py) | `Command.handle` | Reçoit `--actor`, déclenche l'import et affiche le bilan ou l'erreur |
-| [apps/api/src/property_platform/modules/evidence/services.py](../../apps/api/src/property_platform/modules/evidence/services.py) | `import_onwani` et sa fonction interne `acquire` | Organise le travail, conserve captures/observations et gère verrou, transaction, audit et quarantaine |
-| [apps/api/src/property_platform/modules/evidence/onwani.py](../../apps/api/src/property_platform/modules/evidence/onwani.py) | `fetch`, `decode`, `validate_metadata`, `object_ids`, `parse_feature` | Interroge l'API officielle, lit le JSON et contrôle les réponses/champs |
+| [apps/api/src/property_platform/modules/evidence/maps/services.py](../../apps/api/src/property_platform/modules/evidence/maps/services.py) | `import_onwani` et sa fonction interne `acquire` | Organise le travail, conserve captures/observations et gère verrou, transaction, audit et quarantaine |
+| [apps/api/src/property_platform/modules/evidence/maps/onwani.py](../../apps/api/src/property_platform/modules/evidence/maps/onwani.py) | `fetch`, `decode`, `validate_metadata`, `object_ids`, `parse_feature` | Interroge l'API officielle, lit le JSON et contrôle les réponses/champs |
 | [apps/api/src/property_platform/modules/catalog/services.py](../../apps/api/src/property_platform/modules/catalog/services.py) | `geometry_from_rings`, `reconcile_parcel` | Convertit et valide les géométries ; crée ou met à jour les parcelles |
 | [apps/api/src/property_platform/modules/catalog/models.py](../../apps/api/src/property_platform/modules/catalog/models.py) | `Parcel` | Définit les données typées du catalogue et sa contrainte d'identité de source |
 | [apps/api/src/property_platform/modules/evidence/models.py](../../apps/api/src/property_platform/modules/evidence/models.py) | `Source`, `IngestionRun`, `Capture`, `ParcelObservation`, `AuditEvent`, `QuarantinedObservation` | Définit les tables de provenance, historique et anomalies |
 | [apps/api/tests/test_onwani_protocol.py](../../apps/api/tests/test_onwani_protocol.py) | Tests sans réseau | Vérifie les réponses malformées, mauvais territoires, doublons, coordonnées et erreurs HTTP |
 | [apps/api/tests/test_onwani_postgis.py](../../apps/api/tests/test_onwani_postgis.py) | Tests avec PostGIS réel | Vérifie géométries, répétition, rollback, quarantaine et imports concurrents |
 
-**Ordre conseillé pour comprendre :** commencer par `apps/api/src/property_platform/modules/evidence/services.py`, puis ouvrir les fonctions qu'il appelle dans les deux fichiers de connecteur et de services catalogue. Les modèles expliquent ensuite les champs enregistrés. L'ORM Django traduit les opérations comme `objects.create()` en requêtes SQL vers PostgreSQL.
+**Ordre conseillé pour comprendre :** commencer par `apps/api/src/property_platform/modules/evidence/maps/services.py`, puis ouvrir les fonctions qu'il appelle dans les deux fichiers de connecteur et de services catalogue. Les modèles expliquent ensuite les champs enregistrés. L'ORM Django traduit les opérations comme `objects.create()` en requêtes SQL vers PostgreSQL.
 
 Pour la collecte orchestrée, ouvrir aussi `C:\Users\Karim\Repositories\property-platform\apps\ingestion\src\property_platform_ingestion\`. Ce dossier possède les collecteurs, les flows Prefect, les calendriers et le stockage des reçus. Les règles métier, modèles et transactions restent dans les modules Django ci-dessus ; [INGESTION.md](INGESTION.md) donne les fichiers à lire et leur ordre d'appel.
 
@@ -1002,8 +1002,8 @@ Ce retraitement ajoute son propre historique, conserve la date de collecte origi
 |---|---|
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_sources.py` | URL fixes, requêtes bornées, contrôle des réponses/coordonnées |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\map_import.py` | Préparation, filtrage de Reem, réconciliation et observations typées |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\research_sources.py` | Extraction inerte et contrôlée des titres et repères par fournisseur |
-| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\research_import.py` | Collecte/retraitement des pages et audit |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\research_sources.py` | Extraction inerte et contrôlée des titres et repères par fournisseur |
+| `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\sources\research_import.py` | Collecte/retraitement des pages et audit |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\evidence\project_sources.json` | Registre de liens publics à relire ; pas une liste de périmètres certifiés |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\catalog\models.py` | Modèles Parcel, Street, Building, Place, AdministrativeArea |
 | `C:\Users\Karim\Repositories\property-platform\apps\api\src\property_platform\modules\catalog\map_queries.py` | Lectures spatiales et distances/surfaces calculées dans PostGIS |
@@ -1231,7 +1231,7 @@ pnpm.cmd contracts:check
 git diff -- packages/contracts
 ```
 
-Revoir puis enregistrer **OpenAPI, les types TypeScript et `packages/contracts/territories.json` ensemble**. L'export Python produit aussi ce snapshot de navigation publique à côté du fichier OpenAPI ; ses nombres de parcelles restent calculés par l'API. Ne modifier aucun de ces fichiers générés à la main. Le web connaît ces contrats, pas les tables Django. La CI vérifie les deux exports backend.
+Revoir puis enregistrer **OpenAPI, les types TypeScript, `packages/contracts/territories.json` et `packages/contracts/map-credits.json` ensemble**. L'export Python produit aussi ce snapshot de navigation publique à côté du fichier OpenAPI ; ses nombres de parcelles restent calculés par l'API. `map-credits.json` donne l'attribution, la licence et les conditions de chaque fond de carte depuis le registre des droits des sources (`source_rights.MAP_LAYERS`). Ne modifier aucun de ces fichiers générés à la main. Le web connaît ces contrats, pas les tables Django. La CI vérifie ces exports backend.
 
 <a id="depannage"></a>
 

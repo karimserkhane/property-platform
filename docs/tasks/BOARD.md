@@ -13,14 +13,21 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A05](A05.md) | A | Tests de parcours navigateur (Playwright) | 1 | — | non | done | claude |
 | [A06](A06.md) | A | Index des parcelles par zone visible | 2 | — | non | done | claude |
 | [A07](A07.md) | A | Bâtiments et contexte en tuiles vectorielles | 2 | A06 | non | done | claude |
-| [A08](A08.md) | A | Version de cache par famille de tables | 3 | — | non | todo | unassigned |
-| [A09](A09.md) | A | Découpage interne du module evidence | 3 | — | non | todo | unassigned |
-| [A10](A10.md) | A | Contenus bruts des captures vers le stockage objet | 3 | A03 | non | todo | unassigned |
+| [A08](A08.md) | A | Version de cache par famille de tables | 3 | — | non | done | claude |
+| [A09](A09.md) | A | Découpage interne du module evidence | 3 | — | non | done | claude |
+| [A10](A10.md) | A | Contenus bruts des captures vers le stockage objet | 3 | A03 | non | done | claude |
 | [A11](A11.md) | A | Rejeu des anciens protocoles géographiques | 1 | A04 | non | done | claude |
 | [A12](A12.md) | A | État publié reconstruit et historique des interprétations | 1 | A04 | non (décidée le 24/10) | done | claude-interactive |
 | [A13](A13.md) | A | Parcours navigateur en CI | 2 | A05 | non (décidée le 25/10 : option 1) | done | claude |
 | [A14](A14.md) | A | Contrôle réel du rejeu géographique : identités et divergence revue | 1 | A11 | non | done | claude |
 | [A15](A15.md) | A | Écarts restants du rejeu géographique et anciennes identités OSM | 1 | A14 | non | done | claude |
+| [A16](A16.md) | A | Version de cache des tables de provenance par source | 3 | A08 | non | done | claude |
+| [A17](A17.md) | A | Délai dépassé de l'index des parcelles dans le job CI e2e | 1 | A13 | non | done | claude |
+| [A18](A18.md) | A | Captures sous licence non qualifiée dans le dépôt public | 1 | A13 | non (décidée le 27/10 : retrait d'Aldar) | done | claude |
+| [A19](A19.md) | A | Droits et licences de chaque source | 1 | A18 | non (décidée le 27/10) | done | claude |
+| [A20](A20.md) | A | Licences et attributions affichées sur le site | 2 | A19 | non | done | claude |
+| [A21](A21.md) | A | Qualifier les conditions des sources non relues | 2 | A19 | si une source interdit la collecte | todo | unassigned |
+| [A22](A22.md) | A | Tout collecter et afficher, droits enregistrés et appliqués par interrupteur | 1 | A19 | non (décidée le 27/10) | done | claude |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
@@ -34,5 +41,10 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [D02](D02.md) | D | Liste de suivi et alertes explicables | 2 | D01 | non | todo | unassigned |
 | [E01](E01.md) | E | Index de recherche des preuves | 3 | A01 | non | todo | unassigned |
 | [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | oui | todo | unassigned |
-| [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | todo | unassigned |
-| [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | todo | unassigned |
+| [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | done | claude |
+| [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | done | claude |
+| [F03](F03.md) | F | Charge des parcelles de l'émirat sur les tuiles et l'index par zone | 3 | F01 | non | done | claude |
+| [F04](F04.md) | F | Parcelles de l'émirat sur la carte et imports ADM et AAM | 3 | F03 | non | done | claude |
+| [F05](F05.md) | F | Fin des imports de l'émirat : Madinat Al Riyad et AAM | 3 | F04 | non | done | claude |
+| [F06](F06.md) | F | Réimports des derniers districts de l'émirat et mesures | 3 | F05 | non | done | claude |
+| [F07](F07.md) | F | Index des identifiants officiels de parcelles pour les imports de district | 3 | F05 | non | done | claude |

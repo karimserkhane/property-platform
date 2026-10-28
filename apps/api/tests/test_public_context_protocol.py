@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from property_platform.modules.evidence import abu_dhabi, adrec
+from property_platform.modules.evidence.sources import abu_dhabi, adrec
 
 
 def facility(identity=61, **changes):

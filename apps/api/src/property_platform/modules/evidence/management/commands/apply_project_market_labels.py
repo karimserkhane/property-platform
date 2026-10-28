@@ -2,7 +2,9 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from property_platform.modules.evidence.project_market_labels import apply_project_market_labels
+from property_platform.modules.evidence.projects.project_market_labels import (
+    apply_project_market_labels,
+)
 
 
 class Command(BaseCommand):

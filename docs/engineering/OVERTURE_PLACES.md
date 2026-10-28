@@ -13,8 +13,8 @@ Depuis `C:\Users\Karim\Repositories\property-platform` :
 | Chemin | Rôle |
 |---|---|
 | `apps/ingestion/src/property_platform_ingestion/collectors/overture.py` | Téléchargement de l’index STAC, sélection des fragments, lecture filtrée en flux |
-| `apps/api/src/property_platform/modules/evidence/overture_protocol.py` | Release, enveloppes, limites, validation et classification sans réseau ni ORM |
-| `apps/api/src/property_platform/modules/evidence/overture_places.py` | Captures, contrôle du contour officiel et stockage Django |
+| `apps/api/src/property_platform/modules/evidence/maps/overture_protocol.py` | Release, enveloppes, limites, validation et classification sans réseau ni ORM |
+| `apps/api/src/property_platform/modules/evidence/maps/overture_places.py` | Captures, contrôle du contour officiel et stockage Django |
 | `apps/api/src/property_platform/modules/publication/place_display.py` | Suppression conservatrice des répétitions à l’affichage |
 | `apps/web/src/features/atlas/imagery-sources.ts` | Registre des fournisseurs raster examinés |
 

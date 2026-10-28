@@ -2,7 +2,7 @@ import json
 
 from django.core.management.base import BaseCommand
 
-from property_platform.modules.evidence.project_verification_links import (
+from property_platform.modules.evidence.projects.project_verification_links import (
     apply_project_verification_links,
 )
 

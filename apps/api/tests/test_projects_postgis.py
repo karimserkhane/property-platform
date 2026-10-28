@@ -14,7 +14,6 @@ from django.db import IntegrityError, connection, transaction  # noqa: E402
 from test_property_protocol import receipt  # noqa: E402
 
 from property_platform.modules.catalog.models import Building, Developer, Project  # noqa: E402
-from property_platform.modules.evidence import project_protocol  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     IngestionRun,
@@ -22,13 +21,14 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ProjectMedia,
     ProjectSnapshot,
 )
-from property_platform.modules.evidence.project_import import (  # noqa: E402
+from property_platform.modules.evidence.projects import project_protocol  # noqa: E402
+from property_platform.modules.evidence.projects.project_import import (  # noqa: E402
     import_project_details,
     interpretation_sha256,
     registry_sha256,
     revoke_project_link,
 )
-from property_platform.modules.evidence.project_queries import (  # noqa: E402
+from property_platform.modules.evidence.projects.project_queries import (  # noqa: E402
     project_detail,
     project_directory,
     project_location_gaps,
@@ -280,7 +280,9 @@ def test_excluded_media_source_does_not_mask_accepted_reference(project_input, f
 
 def test_source_position_is_audited_idempotent_and_respects_revocation(project_input):
     from property_platform.modules.evidence.models import MapObservation
-    from property_platform.modules.evidence.project_locations import materialize_project_position
+    from property_platform.modules.evidence.projects.project_locations import (
+        materialize_project_position,
+    )
 
     _, rows, _ = project_input
     ingest(rows)
@@ -314,7 +316,7 @@ def test_changed_developer_identity_rolls_back_complete_batch(project_input):
 
 def test_camera_position_review_preserves_history_and_cannot_restore_rejected_pin(project_input):
     from property_platform.modules.evidence.models import MapObservation
-    from property_platform.modules.evidence.project_locations import (
+    from property_platform.modules.evidence.projects.project_locations import (
         materialize_project_position,
         withdraw_camera_positions,
     )

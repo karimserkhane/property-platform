@@ -12,7 +12,7 @@ from test_onwani_postgis import feature, run  # noqa: E402
 from property_platform.modules.catalog.map_queries import map_rows  # noqa: E402
 from property_platform.modules.catalog.models import AdministrativeArea, Parcel, Place  # noqa: E402
 from property_platform.modules.catalog.queries import parcel_counts, parcel_identity  # noqa: E402
-from property_platform.modules.evidence.onwani import SOURCE_KEY  # noqa: E402
+from property_platform.modules.evidence.maps.onwani import SOURCE_KEY  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

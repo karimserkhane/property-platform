@@ -46,7 +46,26 @@ test("a view outside the collection or too large reads nothing", () => {
     { kind: "too-large" },
   );
   // The whole current collection fits in the cell budget.
-  assert.equal(viewportCells(COLLECTION, COLLECTION).kind, "cells");
+  const whole = viewportCells(COLLECTION, COLLECTION);
+  assert.equal(whole.kind, "cells");
+  assert.equal(whole.partial, false);
+});
+
+test("a view slightly over the budget reads the cells nearest its centre", () => {
+  // 6 × 4 cells inside an emirate-wide collection, centred on 54.4, 24.5.
+  const result = viewportCells([54.25, 24.4, 54.55, 24.6], [52, 22, 56, 25], 4);
+  assert.equal(result.kind, "cells");
+  assert.equal(result.partial, true);
+  assert.deepEqual(result.cells, [
+    "54.35,24.45,54.4,24.5",
+    "54.35,24.5,54.4,24.55",
+    "54.4,24.45,54.45,24.5",
+    "54.4,24.5,54.45,24.55",
+  ]);
+  // Beyond four times the budget nothing is read.
+  assert.deepEqual(viewportCells([54, 24, 55, 25], [52, 22, 56, 25], 4, 16), {
+    kind: "too-large",
+  });
 });
 
 test("cells are read once, merged without border duplicates and evicted LRU", async () => {

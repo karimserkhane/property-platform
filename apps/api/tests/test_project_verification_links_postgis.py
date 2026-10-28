@@ -7,8 +7,8 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Project verification links require real PostGIS", allow_module_level=True)
 
 from property_platform.modules.catalog.models import Developer, Project  # noqa: E402
-from property_platform.modules.evidence import project_verification_links as sync  # noqa: E402
 from property_platform.modules.evidence.models import ProjectVerificationLink  # noqa: E402
+from property_platform.modules.evidence.projects import project_verification_links as sync  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

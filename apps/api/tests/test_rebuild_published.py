@@ -6,11 +6,14 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 
-from property_platform.modules.evidence.project_import import (
+from property_platform.modules.evidence.projects.project_import import (
     interpretation_sha256,
     registry_sha256,
 )
-from property_platform.modules.evidence.rebuild_published import canonical, compare_published
+from property_platform.modules.evidence.rebuild.rebuild_published import (
+    canonical,
+    compare_published,
+)
 
 SOURCE = {
     "url": "https://example.com/tower",

@@ -9,7 +9,7 @@ Les ventes ADREC (`evidence.adrec_sale_observation`, voir [ABU_DHABI.md](ABU_DHA
 ## 2. Registre relu des libellés
 
 - Fichier : `apps/api/src/property_platform/modules/evidence/project_market_labels.json`. Une ligne = `project` (slug), `district` (texte ADREC exact du district du projet), `label` (texte ADREC exact du projet), `evidence`, `registration_number` (pour `register_name`), `basis` (en anglais), `reviewed_on`.
-- Deux preuves seulement, vérifiées sans base par `project_protocol.validate_project_market_labels` :
+- Deux preuves seulement, vérifiées sans base par `projects/project_protocol.validate_project_market_labels` :
   - `register_name` : le libellé est égal, à la casse, aux espaces et à la ponctuation près, au nom d'un enregistrement ADREC (`adrec_project_v1`) que le registre des projets rattache déjà à la fiche, cité par son numéro ;
   - `project_name` : le libellé est égal, aux mêmes conditions, au nom enregistré de la fiche.
 - Le district doit être celui du territoire de la fiche (`adrec.DISTRICTS`) ; un libellé d'un district désigne au plus un projet.
@@ -19,7 +19,7 @@ Premier registre (26 octobre 2026) : **53 libellés** des trois îles, dont 16 p
 
 ## 3. Table et exécution
 
-- Table `evidence.project_market_label` (migration additive `0036`), journalisée, rattachée au pipeline des fiches projet dans `pipeline_inventory.py`. Contraintes : preuve connue, numéro présent si et seulement si `register_name`, un seul lien actif par `(district, label)`, révocation complète.
+- Table `evidence.project_market_label` (migration additive `0039`), journalisée, rattachée au pipeline des fiches projet dans `history/pipeline_inventory.py`. Contraintes : preuve connue, numéro présent si et seulement si `register_name`, un seul lien actif par `(district, label)`, révocation complète.
 - `apply_project_market_labels` s'exécute dans la transaction de `import_project_details`, à la fin du rejeu d'archives et via `python manage.py apply_project_market_labels --actor <nom> [--territory <id>]`. Idempotente : un lien modifié est révoqué puis recréé, un lien retiré est révoqué (`revoked_at`, `revoked_by`, motif), jamais supprimé ; un lien attend (`waiting`) tant que sa fiche n'existe pas.
 - Les ventes ne sont pas recopiées : elles sont sélectionnées à la lecture par `(district, project_name)` égal au lien actif. Un libellé peut donc précéder la première fenêtre ADREC qui le contient, et une fenêtre nouvelle s'y rattache sans réécriture.
 
@@ -31,7 +31,7 @@ Premier registre (26 octobre 2026) : **53 libellés** des trois îles, dont 16 p
 
 ## 5. Ventes observées par projet et type
 
-Lecture seule par `evidence.market_sheet.project_market`, champ `observed_sales` de `GET /api/v1/preview/projects/{slug}` (absent, `null`, tant que la fiche n'a aucun libellé actif).
+Lecture seule par `evidence.projects.market_sheet.project_market`, champ `observed_sales` de `GET /api/v1/preview/projects/{slug}` (absent, `null`, tant que la fiche n'a aucun libellé actif).
 
 - **Une seule fenêtre.** Les snapshots ADREC sont des fenêtres de 90 jours qui se recouvrent : la lecture prend le dernier snapshot de ventes **réussi** du territoire de la fiche (fin de période, puis date de collecte), jamais une somme de fenêtres ; le snapshot de l'émirat, qui recouvre ceux des îles, n'est pas lu ici. Fenêtre, date de collecte et captures (URL, empreinte) des lignes retenues sont rendues.
 - **Sélection.** Ventes dont `(district, project_name)` est égal à un libellé actif de la fiche ; un libellé révoqué retire immédiatement ses ventes.

@@ -426,7 +426,15 @@
     "positionPublisher": "大致位置：来自开发商或发布方地图的点位，未经核实。",
     "positionBroker": "大致位置：由中介机构发布的点位，未经核实。",
     "positionDeclared": "大致位置：由来源声明的点位，未经核实。",
-    "deliveryHistory": "开发商交付记录"
+    "deliveryHistory": "开发商交付记录",
+    "rightsLicence": "许可",
+    "rightsUnreviewed": "条款尚未审阅",
+    "rightsReserved": "发布方保留所有权利",
+    "rightsPerItem": "每个文件各自的许可",
+    "rightsTerms": "来源条款",
+    "rightsBeyondLink": "尽管来源条款仅允许提供链接，仍予显示。",
+    "rightsBeyondNone": "尽管来源条款不允许重复使用，仍予显示。",
+    "sourcesAndLicences": "来源与许可"
   },
   "Delivery": {
     "title": "交付记录",
@@ -463,6 +471,23 @@
     "completionObserved": "首次显示竣工的读取：",
     "notCompletedUntil": "此前最后一次未竣工的读取：",
     "withoutObservations": "没有带日期观察记录的项目"
+  },
+  "Sources": {
+    "title": "来源与许可",
+    "intro": "根据已审核的登记表，列出每个来源网站的许可、条款和允许的再利用方式。尚未审核的网站，其条款仍待确认。",
+    "reviewedCount": "已审核 {reviewed}/{total} 个网站",
+    "licence": "许可",
+    "publication": "允许的再利用",
+    "collection": "自动采集",
+    "collectionAllowed": "允许",
+    "collectionForbidden": "其条款禁止",
+    "reviewed": "审核日期",
+    "notReviewed": "尚未审核",
+    "attribution": "署名：",
+    "publicationOpen": "开放许可，需署名",
+    "publicationFacts": "带日期的事实、简短引文和链接",
+    "publicationLink": "仅链接",
+    "publicationNone": "不予发布"
   },
   "Retention": {
     "title": "取消购买时的扣留比例",

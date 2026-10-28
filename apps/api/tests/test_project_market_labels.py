@@ -4,7 +4,7 @@ import copy
 
 import pytest
 
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_protocol import (
     project_market_labels,
     validate_project_market_labels,
 )

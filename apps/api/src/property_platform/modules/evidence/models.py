@@ -7,6 +7,7 @@ from .accessibility_models import RoutingGraph, RoutingGraphPart, WalkingArea, W
 from .activity_models import ConstructionActivityMeasurement  # noqa: F401
 from .basemap_models import BasemapRequest, BasemapTile  # noqa: F401
 from .history_models import HistoryExclusion, RowRevision  # noqa: F401
+from .rights_models import SourceRights  # noqa: F401
 
 
 class Source(models.Model):
@@ -264,6 +265,7 @@ class StoredObject(models.Model):
                         "video/mp4",
                         "video/webm",
                         "model/gltf-binary",
+                        "application/octet-stream",
                     ],
                 ),
                 name="stored_object_metadata_valid",

@@ -4,7 +4,7 @@ from datetime import UTC, date, datetime
 
 import pytest
 
-from property_platform.modules.evidence.delivery_history import (
+from property_platform.modules.evidence.projects.delivery_history import (
     announced_window,
     project_history,
     summarise,

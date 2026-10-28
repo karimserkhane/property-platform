@@ -13,14 +13,14 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
     pytest.skip("Capture rebuild requires real PostGIS", allow_module_level=True)
 
 from property_platform.modules.catalog.models import Parcel  # noqa: E402
-from property_platform.modules.evidence import onwani  # noqa: E402
-from property_platform.modules.evidence import rebuild_archive as archive
+from property_platform.modules.evidence.maps import onwani  # noqa: E402
 from property_platform.modules.evidence.models import (  # noqa: E402
     Capture,
     IngestionRun,
     RowRevision,
     Source,
 )
+from property_platform.modules.evidence.rebuild import rebuild_archive as archive
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
@@ -264,7 +264,7 @@ def test_geography_precedes_presentations_and_projects_without_reordering_versio
 
 
 def test_a_shared_source_page_cannot_multiply_reviewed_presentation_targets(monkeypatch):
-    from property_platform.modules.evidence import property_import
+    from property_platform.modules.evidence.projects import property_import
 
     url = "https://example.com/towers"
     first = {"source_url": url, "target": "building", "namespace": "osm:reem:osm", "record_id": "1"}
@@ -309,7 +309,7 @@ def test_export_does_not_mutate_the_source_and_counts_the_capture_snapshot(tmp_p
 
 def test_historical_unavailable_reference_is_replayed_as_unavailable(tmp_path):
     from property_platform.modules.evidence.models import ResearchReference
-    from property_platform.modules.evidence.orchestration import (
+    from property_platform.modules.evidence.rebuild.orchestration import (
         reference_identity,
         reference_registry,
     )
@@ -642,7 +642,7 @@ def test_only_places_the_legacy_osm_mapping_excluded_are_counted_apart(
 
 
 def test_legacy_selection_rules_are_copied_from_their_commits():
-    from property_platform.modules.evidence import replay_protocols as legacy
+    from property_platform.modules.evidence.rebuild import replay_protocols as legacy
 
     named = legacy.legacy_selection("map", "al-reem-island:osm", "reem-map-v1")
     bootstrap = legacy.legacy_selection("osm_bootstrap", "saadiyat-island", "osm-api-bootstrap-v1")
@@ -673,8 +673,8 @@ def test_project_captures_outside_the_registry_are_reported_not_dropped(tmp_path
     from django.contrib.gis.geos import Point
 
     from property_platform.modules.catalog.models import Place
-    from property_platform.modules.evidence import project_protocol
     from property_platform.modules.evidence.models import MapObservation
+    from property_platform.modules.evidence.projects import project_protocol
 
     project = next(
         row

@@ -4,7 +4,7 @@ from copy import deepcopy
 
 import pytest
 
-from property_platform.modules.evidence.project_maryah import enrich_maryah
+from property_platform.modules.evidence.projects.project_maryah import enrich_maryah
 
 RITZ = (
     "ritz-carlton-residences-al-maryah-island",

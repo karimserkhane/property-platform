@@ -8,16 +8,27 @@ from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
-from property_platform.modules.evidence.project_protocol import (
+from property_platform.modules.evidence.projects.project_protocol import (
     MAX_CAPTURE_BYTES,
     extract_project_source,
     project_registry,
     project_urls,
     validate_project_receipts,
 )
+from property_platform.modules.evidence.source_rights import collection_allowed
 
 from property_platform_ingestion.collectors.http import AcquisitionError, SourceHTTP
 from property_platform_ingestion.collectors.projects import collect_project_receipts
+
+
+def collectable(rows):
+    """Registry rows without the sources whose terms forbid collection (A19)."""
+    result = []
+    for row in rows:
+        sources = [source for source in row["sources"] if collection_allowed(source["url"])]
+        if any(source["role"] != "terms" for source in sources):
+            result.append({**row, "sources": sources})
+    return result
 
 
 def project(slug):
@@ -339,7 +350,7 @@ def test_replay_checks_actual_bytes_hash_and_url_before_extraction():
 
 
 def test_collector_fetches_each_registered_html_once_and_never_fetches_linked_media():
-    rows = project_registry()
+    rows = collectable(project_registry())
     fixtures = {
         source["url"]: source_html(row, source) for row in rows for source in row["sources"]
     }
@@ -355,6 +366,18 @@ def test_collector_fetches_each_registered_html_once_and_never_fetches_linked_me
     assert len(receipts) == len(calls) == len(set(calls)) == len(project_urls(rows))
     assert all(url in project_urls(rows) for url in calls)
     assert len(validate_project_receipts(receipts, rows)) == len(project_urls(rows))
+
+
+@pytest.mark.usefixtures("collection_enforced")
+def test_a_site_whose_terms_forbid_collection_is_refused_before_any_request():
+    rows = [
+        row
+        for row in project_registry()
+        if not any(collection_allowed(s["url"]) for s in row["sources"])
+    ]
+    with client(project_urls(rows[:1]), lambda request: pytest.fail("No request")) as http:
+        with pytest.raises(AcquisitionError, match="forbid"):
+            collect_project_receipts(http, rows[:1])
 
 
 @pytest.mark.parametrize(
@@ -407,7 +430,7 @@ def test_project_flow_uses_scoped_durable_gateway_without_archiving_restricted_m
         )
         for row in project_registry("saadiyat-island")
         for source in row["sources"]
-        if source["role"] != "terms"
+        if source["role"] != "terms" and collection_allowed(source["url"])
     ]
     assert len(result) == len(calls)
     assert all(item["summary"]["projects"] == 1 for item in result)
@@ -427,11 +450,13 @@ def test_project_flow_can_refresh_one_registered_project_without_changing_defaul
     gateway.with_options = lambda **kwargs: gateway
     monkeypatch.setattr(flows, "ingest_source", gateway)
     flows.project_details.fn(territory="al-reem-island", actor="reviewer", project_slug="reem-nine")
-    assert len(calls) == 2
+    [row] = collectable(project_registry("al-reem-island:reem-nine"))
+    sources = [source for source in row["sources"] if source["role"] != "terms"]
+    assert len(calls) == len(sources) >= 1
     assert all(scope.startswith("al-reem-island:reem-nine:") for _, scope, _ in calls)
     with pytest.raises(ValueError, match="not registered"):
         flows.project_details.fn(territory="al-reem-island", project_slug="unknown-project")
-    assert len(calls) == 2
+    assert len(calls) == len(sources)
 
 
 def test_project_and_presentations_checkpoints_cannot_collide_for_one_prefect_run(tmp_path):
@@ -458,7 +483,7 @@ def test_project_and_presentations_checkpoints_cannot_collide_for_one_prefect_ru
 def test_one_failed_project_does_not_prevent_other_project_imports(monkeypatch):
     from property_platform_ingestion import flows
 
-    rows = project_registry("al-reem-island")
+    rows = collectable(project_registry("al-reem-island"))
     calls = []
 
     def gateway(operation, scope, actor):
@@ -478,3 +503,40 @@ def test_one_failed_project_does_not_prevent_other_project_imports(monkeypatch):
         "succeeded": count - 1,
         "failed": [rows[0]["slug"]],
     }
+
+
+@pytest.mark.usefixtures("collection_enforced")
+def test_discovery_and_reference_flows_never_schedule_forbidden_sites(monkeypatch):
+    import logging
+
+    from property_platform.modules.evidence.projects.project_discovery import catalogue_registry
+
+    from property_platform_ingestion import flows
+    from property_platform_ingestion.registry import reference_identity, source_registries
+
+    calls = []
+
+    def gateway(operation, scope, actor, **parameters):
+        calls.append((operation, scope))
+        return {"status": "succeeded"}
+
+    gateway.with_options = lambda **kwargs: gateway
+    monkeypatch.setattr(flows, "ingest_source", gateway)
+    monkeypatch.setattr(flows, "get_run_logger", lambda: logging.getLogger(__name__))
+    catalogues = catalogue_registry("al-reem-island")
+    flows.project_discovery.fn(territory="al-reem-island", actor="reviewer")
+    expected = [
+        ("project_discovery", f"al-reem-island:{row['key']}")
+        for row in catalogues
+        if collection_allowed(row["url"])
+    ]
+    assert calls == expected and 0 < len(expected) < len(catalogues)
+    calls.clear()
+    rows, _, _ = source_registries("al-reem-island")
+    flows.references.fn(territory="al-reem-island", actor="reviewer")
+    expected = [
+        ("references", f"al-reem-island:{reference_identity(row['url'])}")
+        for row in rows
+        if collection_allowed(row["url"])
+    ]
+    assert calls == expected and 0 < len(expected) < len(rows)

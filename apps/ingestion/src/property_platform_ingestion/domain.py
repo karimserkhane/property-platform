@@ -22,8 +22,9 @@ def execute(request):
 
     django.setup()
     from django.db import connections
-    from property_platform.modules.evidence import orchestration, property_import
     from property_platform.modules.evidence.models import IngestionExecution
+    from property_platform.modules.evidence.projects import property_import
+    from property_platform.modules.evidence.rebuild import orchestration
 
     from .collectors import (
         MapCollector,
@@ -75,7 +76,7 @@ def execute(request):
         }:
             raise ValueError("Only a reviewed project source can replay this archive")
         if request.get("operation") in {"routing_graph", "walking_areas"}:
-            from property_platform.modules.evidence.accessibility import (
+            from property_platform.modules.evidence.maps.accessibility import (
                 archive_graph,
                 archive_walking,
             )
@@ -100,7 +101,7 @@ def execute(request):
             return archive_walking(**values, compute=compute_walking)
         if request.get("operation") == "construction_activity":
             from property_platform.modules.catalog.territories import TERRITORY_BY_ID
-            from property_platform.modules.evidence.activity_import import measure_activity
+            from property_platform.modules.evidence.projects.activity_import import measure_activity
 
             from .collectors.sentinel_measure import ActivityCollector
 
@@ -116,20 +117,31 @@ def execute(request):
                     territory=None if request["scope"] == "all" else request["scope"],
                 )
         if request.get("operation") == "data_history":
-            from property_platform.modules.evidence.pipeline_inventory import check_history
+            from property_platform.modules.evidence.history.pipeline_inventory import check_history
 
             if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
                 raise ValueError("History inventory requires a Prefect run and operator")
             return check_history(
                 actor=request["actor"], run_key=f"history:{request['prefect_flow_run_id']}"
             )
+        if request.get("operation") == "source_rights":
+            from property_platform.modules.evidence.history.journals import audit_context
+            from property_platform.modules.evidence.source_rights_import import (
+                apply_source_rights,
+            )
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id"}:
+                raise ValueError("Source rights require a Prefect run and operator")
+            with audit_context(actor=request["actor"]):
+                summary = apply_source_rights(actor=request["actor"])
+            return {"status": "succeeded", "summary": summary}
         if request.get("operation") == "basemap":
             from datetime import timedelta
 
             from django.db.models import Q
             from django.utils import timezone
             from property_platform.modules.catalog.territories import TERRITORY_BY_ID
-            from property_platform.modules.evidence.basemap_archive import (
+            from property_platform.modules.evidence.maps.basemap_archive import (
                 archive_pending,
                 seed_area,
             )
@@ -205,8 +217,12 @@ def execute(request):
             if executor.migration_plan(executor.loader.graph.leaf_nodes()):
                 raise SchemaNotReady("Django migrations must be applied before ingestion")
             IngestionExecution.objects.exists()
-            from property_platform.modules.evidence.project_discovery import catalogue_registry
-            from property_platform.modules.evidence.project_protocol import project_registry
+            from property_platform.modules.evidence.projects.project_discovery import (
+                catalogue_registry,
+            )
+            from property_platform.modules.evidence.projects.project_protocol import (
+                project_registry,
+            )
 
             territories = {}
             for territory in TERRITORIES:
@@ -249,7 +265,7 @@ def execute(request):
         acquisition, receipt, replay = None, None, None
         acquiring = True
         if operation == "public_context":
-            from property_platform.modules.evidence import abu_dhabi
+            from property_platform.modules.evidence.sources import abu_dhabi
 
             from .collectors.context import precollect_context, replay_school_archive
 
@@ -267,7 +283,7 @@ def execute(request):
                     replay = precollect_context(transport, request["scope"])
             acquisition = replay.map
         elif operation in {"adrec_sales", "adrec_indices"}:
-            from property_platform.modules.evidence import adrec
+            from property_platform.modules.evidence.sources import adrec
 
             from .collectors.adrec import precollect_adrec
 
@@ -277,7 +293,7 @@ def execute(request):
         elif operation == "osm_bootstrap":
             from urllib.parse import urlencode
 
-            from property_platform.modules.evidence import osm_api_protocol as osm_bootstrap
+            from property_platform.modules.evidence.maps import osm_api_protocol as osm_bootstrap
 
             from .collectors.snapshots import ReplayFetcher, _params
 
@@ -300,12 +316,17 @@ def execute(request):
                     replay._acquire(("map", osm_bootstrap.URL, _params(params)), collect)
             acquisition = replay.map
         elif operation == "sdi_parcels":
-            from property_platform.modules.evidence.sdi_protocol import URL
+            from property_platform.modules.evidence.maps import sdi_protocol
 
             from .collectors.sdi import precollect_sdi
 
-            with SourceHTTP([URL, URL + "/query"]) as transport:
-                replay = precollect_sdi(transport, territory)
+            URL = sdi_protocol.URL
+            with SourceHTTP(
+                [URL, URL + "/query"],
+                max_session_bytes=sdi_protocol.MAX_SESSION_BYTES,
+                max_session_responses=sdi_protocol.MAX_RESPONSES,
+            ) as transport:
+                replay = precollect_sdi(transport, request["scope"])
             acquisition = replay.map
         elif operation == "onwani":
             with SourceHTTP(OnwaniCollector.allowed_urls()) as transport:
@@ -314,7 +335,7 @@ def execute(request):
         elif operation == "map":
             layer = request["scope"].split(":")[1]
             if layer == "overture":
-                from property_platform.modules.evidence.overture_places import URL
+                from property_platform.modules.evidence.maps.overture_places import URL
 
                 from .collectors.overture import acquire_places
                 from .collectors.snapshots import ReplayFetcher, _params
@@ -345,7 +366,7 @@ def execute(request):
                 collect,
             )
         elif operation == "project_discovery":
-            from property_platform.modules.evidence.project_discovery import (
+            from property_platform.modules.evidence.projects.project_discovery import (
                 candidates_for,
                 catalogue_byte_limit,
                 catalogue_for,
@@ -373,7 +394,7 @@ def execute(request):
                 )
                 archive_catalogue_batch(storage, request["scope"], receipt)
         elif operation == "project_details":
-            from property_platform.modules.evidence.project_protocol import (
+            from property_platform.modules.evidence.projects.project_protocol import (
                 project_registry,
                 project_urls,
             )

@@ -12,6 +12,18 @@ from .read_cache import cached_read
 router = Router(tags=["local-preview"])
 
 
+class SourceRightsResponse(Schema):
+    """Reviewed rights of the source site (A19); `unknown` means not qualified yet."""
+
+    licence: str
+    licence_url: str | None = None
+    terms_url: str | None = None
+    publication: Literal["open", "facts", "link", "none"]
+    attribution: str | None = None
+    reviewed_on: date | None = None
+    shown_beyond_terms: bool = False
+
+
 class ProjectSourceResponse(Schema):
     url: str
     name: str
@@ -26,6 +38,7 @@ class ProjectSourceResponse(Schema):
     language: str
     evidence_pointer: str = ""
     rights_status: str
+    rights: SourceRightsResponse | None = None
     ingested_at: datetime | None = None
     historical: bool = False
 
@@ -114,6 +127,7 @@ class ProjectRelationResponse(Schema):
     basis: str
     source_url: str
     retrieved_at: datetime
+    rights: SourceRightsResponse | None = None
 
 
 class ProjectDeclaredProgressResponse(Schema):
@@ -138,6 +152,7 @@ class RetentionReferenceResponse(Schema):
     url: str
     consulted_on: date
     covers: str
+    rights: SourceRightsResponse | None = None
 
 
 class RetentionSourceResponse(Schema):
@@ -234,6 +249,7 @@ class VerificationLinkResponse(Schema):
     registration_number: str
     url: str
     reviewed_on: date
+    rights: SourceRightsResponse | None = None
 
 
 class VerificationContradictionResponse(Schema):
@@ -296,6 +312,7 @@ class ActivityParcelResponse(Schema):
 class ActivitySourceResponse(Schema):
     name: str
     url: str
+    rights: SourceRightsResponse | None = None
 
 
 class ProjectConstructionActivityResponse(Schema):
@@ -422,7 +439,7 @@ def projects(
     offset: int = Query(0, ge=0, le=50000),
     limit: int = Query(200, ge=1, le=200),
 ):
-    from property_platform.modules.evidence.project_queries import project_directory
+    from property_platform.modules.evidence.projects.project_queries import project_directory
 
     return project_directory(territory, query=q, offset=offset, limit=limit)
 
@@ -436,7 +453,9 @@ def projects(
 def project_detail(request, slug: str):
     if len(slug) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
         return Status(404, {"code": "not_found"})
-    from property_platform.modules.evidence.project_queries import project_detail as read_project
+    from property_platform.modules.evidence.projects.project_queries import (
+        project_detail as read_project,
+    )
     from property_platform.modules.publication.cancellation_retention import project_retention
 
     result = read_project(slug)
@@ -478,7 +497,7 @@ class DeveloperDeliveryHistoryResponse(Schema):
 def developer_delivery_history(request, key: str):
     if len(key) > 100 or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", key):
         return Status(404, {"code": "not_found"})
-    from property_platform.modules.evidence.delivery_history import (
+    from property_platform.modules.evidence.projects.delivery_history import (
         developer_delivery_history as read_history,
     )
 

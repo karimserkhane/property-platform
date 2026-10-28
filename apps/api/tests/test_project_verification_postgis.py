@@ -17,8 +17,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     ProjectSnapshot,
     ProjectVerification,
 )
-from property_platform.modules.evidence.project_import import import_project_details  # noqa: E402
-from property_platform.modules.evidence.project_protocol import project_registry  # noqa: E402
+from property_platform.modules.evidence.projects.project_import import import_project_details  # noqa: E402
+from property_platform.modules.evidence.projects.project_protocol import project_registry  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 

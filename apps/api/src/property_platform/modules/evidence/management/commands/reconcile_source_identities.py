@@ -3,7 +3,7 @@ import json
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
-from property_platform.modules.evidence.identity_repair import (
+from property_platform.modules.evidence.maps.identity_repair import (
     repair_source_identities,
     reverse_identity_decision,
 )

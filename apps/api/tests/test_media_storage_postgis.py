@@ -24,8 +24,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     PropertyMedia,
     StoredObject,
 )
-from property_platform.modules.evidence.property_import import import_presentations  # noqa: E402
-from property_platform.modules.evidence.queries import property_media_asset  # noqa: E402
+from property_platform.modules.evidence.projects.property_import import import_presentations  # noqa: E402
+from property_platform.modules.evidence.projects.queries import property_media_asset  # noqa: E402
 from property_platform.object_storage.adapters import LocalStore  # noqa: E402
 from property_platform.object_storage.core import ObjectReceipt, StorageError  # noqa: E402
 
