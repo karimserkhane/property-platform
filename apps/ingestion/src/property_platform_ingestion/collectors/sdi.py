@@ -9,7 +9,7 @@ from .snapshots import ReplayFetcher, _batch_ids, _params
 
 
 def precollect_sdi(client, territory):
-    replay = ReplayFetcher()
+    replay = ReplayFetcher(max_total_bytes=protocol.MAX_SESSION_BYTES)
 
     def acquire(base, params):
         shape = _arcgis_parameters(params, where=protocol.where(territory), fields=protocol.FIELDS)
