@@ -19,7 +19,7 @@ from .registry import (
     reference_identity,
     source_registries,
 )
-from .runtime import IngestionFailure, invoke_domain
+from .runtime import SDI_TIMEOUT, TIMEOUT, IngestionFailure, invoke_domain
 
 
 @task(name="Acquire and ingest source", retries=0, cache_policy=NO_CACHE)
@@ -43,7 +43,8 @@ def ingest_source(operation: str, scope: str, actor: str, **parameters) -> dict:
             "prefect_flow_run_id": run_id,
             "actor": f"Prefect/{run_id}/{actor.strip()}",
             **parameters,
-        }
+        },
+        timeout=SDI_TIMEOUT if operation == "sdi_parcels" else TIMEOUT,
     )
     logger = get_run_logger()
     logger.info(

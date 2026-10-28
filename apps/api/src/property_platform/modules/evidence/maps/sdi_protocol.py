@@ -20,6 +20,11 @@ MAX_BYTES = 8 * 1024 * 1024
 # A district, not an island: Madinat Al Riyad listed 35 077 plots on 27/10/2026, above
 # the Onwani island bound. The bound still refuses a listing no reviewed district needs.
 MAX_RECORDS = 50000
+# One district acquisition: metadata, two listings and every batch of 100. Rural plots are
+# large: Al Faqa' sent 66.5 MB in 60 of its 74 batches on 27/10/2026, above the 64 MiB
+# session budget shared by other sources.
+MAX_RESPONSES = MAX_RECORDS // 100 + 3
+MAX_SESSION_BYTES = 256 * 1024 * 1024
 MUNICIPALITIES = ("ADM", "AAM", "WRM")
 _SCOPE = re.compile(r"(adm|aam|wrm):[a-z0-9]+(?:-[a-z0-9]+)*")
 _DISTRICT = re.compile(r"[A-Z0-9'`][A-Z0-9 '`-]{0,79}")

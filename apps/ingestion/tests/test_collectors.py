@@ -25,8 +25,10 @@ from property_platform_ingestion.collectors import (
     precollect_onwani,
     precollect_reference,
 )
+from property_platform_ingestion.collectors.http import MAX_SESSION_BYTES
 from property_platform_ingestion.collectors.properties import property_urls
 from property_platform_ingestion.collectors.references import selected_references
+from property_platform_ingestion.collectors.snapshots import MAX_SNAPSHOT_BYTES
 
 URL = "https://publisher.example/projects/one"
 ROW = {"url": URL, "label": "Publisher — One", "kind": "developer"}
@@ -199,10 +201,17 @@ def test_session_byte_budget_prevents_append_of_an_oversize_complete_capture(ann
     assert sum(len(item.payload) for item in http.acquisitions) == 4
 
 
-@pytest.mark.parametrize("limit", [0, 64 * 1024 * 1024 + 1, True, "64"])
+@pytest.mark.parametrize("limit", [0, 256 * 1024 * 1024 + 1, True, "64"])
 def test_session_byte_budget_cannot_exceed_the_global_limit(limit):
     with pytest.raises(AcquisitionError, match="session byte budget"):
         SourceHTTP([URL], max_session_bytes=limit)
+
+
+def test_default_session_byte_budget_stays_64_mib():
+    assert MAX_SESSION_BYTES == 64 * 1024 * 1024
+    assert MAX_SNAPSHOT_BYTES == MAX_SESSION_BYTES
+    with SourceHTTP([URL]) as http:
+        assert http._max_session_bytes == MAX_SESSION_BYTES
 
 
 def test_journal_is_bounded_even_for_empty_actual_responses():

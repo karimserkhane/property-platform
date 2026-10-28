@@ -316,11 +316,16 @@ def execute(request):
                     replay._acquire(("map", osm_bootstrap.URL, _params(params)), collect)
             acquisition = replay.map
         elif operation == "sdi_parcels":
-            from property_platform.modules.evidence.maps.sdi_protocol import URL
+            from property_platform.modules.evidence.maps import sdi_protocol
 
             from .collectors.sdi import precollect_sdi
 
-            with SourceHTTP([URL, URL + "/query"]) as transport:
+            URL = sdi_protocol.URL
+            with SourceHTTP(
+                [URL, URL + "/query"],
+                max_session_bytes=sdi_protocol.MAX_SESSION_BYTES,
+                max_session_responses=sdi_protocol.MAX_RESPONSES,
+            ) as transport:
                 replay = precollect_sdi(transport, request["scope"])
             acquisition = replay.map
         elif operation == "onwani":
