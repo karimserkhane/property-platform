@@ -132,6 +132,51 @@ Constats :
 - **Index sur `code`** : non ajouté, la recherche reste sous 0,2 s.
 - **Explorateur.** En ville, une cellule de 0,05° dépasse la page de 3 000 lignes, et la vue initiale du territoire, bornée désormais par l’émirat, couvre 18 à 28 cellules selon l’écran (contre 12 bornée aux îles) pour un budget de 16 : la liste demandait alors de zoomer, les tuiles restant dessinées et cliquables. Depuis le 27 octobre, jusqu’à quatre fois le budget (64 cellules), l’explorateur lit les 16 cellules les plus proches du centre de la vue et affiche l’avis de données partielles (`parcel-viewport.ts`) ; au-delà, rien n’est lu. Le budget de l’API et la taille des cellules ne changent pas : une cellule pleine en ville reste tronquée à 3 000 lignes avec le même avis.
 
+**Derniers districts de l’émirat — 28 octobre 2026 (tâche F06).** Lancés par le flow `property-platform-sdi-district-parcels` dans le conteneur d’ingestion (acteur `claude-f06`), le runner ayant 2 h 30 de retard sur les files minute des fonds de carte :
+
+- **Al Faqa’** (`jolly-lyrebird`, 32 min) : **7 307 parcelles créées**, aucune quarantaine, sous le budget de district de F05.
+- **SA’** (troisième essai identique) : la liste reçoit encore la page « Request Rejected » du pare-feu d’AD-SDI pour la clause `DISTRICTENG='SA'''` ; le district est noté **indisponible chez la source** ([INGESTION.md](INGESTION.md)), sans reformuler la requête.
+- **Madinat Al Riyad** (`exceptional-slug`) : collecte complète en 3 min (354 réponses), puis `DomainTimeout` après 3 600 s. Les 57 minutes restantes venaient de la base : la recherche des candidats d’une parcelle par `official_plot_id`, municipalité et district parcourait toute `real_estate.parcel` (367 074 lignes, environ 100 ms par parcelle). Index `parcel_official_plot` (migration additive `catalog/0007`) livré par F07 (PR #50).
+- **Madinat Al Riyad, réimport** (`pink-dachshund`, après la migration `catalog/0007` et le redéploiement de l’API) : **35 077 parcelles créées** sur 35 077 observées, aucune quarantaine ni conflit, en **8 min 12 s** au lieu de plus d’une heure. L’émirat compte 212 districts importés sur 213, SA’ restant indisponible chez la source.
+
+Mesures après Al Faqa’ (base partagée, API en place ; premier appel, puis médiane de cinq ; tailles non compressées) :
+
+| Lecture | Après ADM (F04) | Après Al Faqa’ (F06) |
+| --- | --- | --- |
+| Parcelles courantes | 225 665 | 371 950 |
+| `real_estate.parcel` / `evidence.parcel_observation` | 133 Mo / 146 Mo | 254 Mo / 237 Mo |
+| Base entière | 2 069 Mo | 3 246 Mo, dont 1 694 Mo de journal des lignes (`evidence.row_revision`, 1 254 980 lignes) |
+| Tuile z8 de la ville d’Abu Dhabi | 243 Kio, 0,6 à 1,8 s | **503** au premier appel (délai de 3 s dépassé), 0,09 s ensuite |
+| Tuile z10 de Khalifa City / d’Al Zahiyah | 1 505 / 441 Kio, 0,5 / 0,2 s | **503** au premier appel / 441 Kio, 0,9 s puis 0,08 s |
+| Tuile z10 d’Al Faqa’ | — | 196 Kio avant l’import, 334 Kio après ; 0,95 s puis 0,07 s |
+| Tuiles z12 et z14 en ville | 90 à 720 Kio, 0,03 à 0,13 s | 108 à 714 Kio, 0,4 à 0,9 s puis 0,07 à 0,11 s |
+| Index, cellule de 0,05° en ville | 1,8 Mio, 1,0 à 1,4 s | 1,8 à 1,9 Mio, 2,6 à 4,9 s pendant l’import ; **plusieurs minutes** après (ci-dessous) |
+
+Constats :
+
+- **Validation du cache.** La vérification de famille (`FAMILY_SQL`, `api/read_cache.py`) joignait par `OR` « révision postérieure à l’entrée » et « écrite par une transaction en attente » : PostgreSQL parcourait tout le journal des lignes en comparant chaque révision aux identifiants en attente (15 000 ici, jusqu’à 100 000). Une lecture d’index restait plus de 4 minutes sur cette requête. Deux sondes `EXISTS` distinctes utilisent les index `(schema_name, table_name, id)` et `transaction_id` : 1,4 ms mesurées sur le même journal. Le correctif, livré avec la PR de F07, sera mesuré sur l’API redéployée.
+- **Tuiles froides de faible zoom.** Les tuiles z8 et z10 les plus denses dépassent le délai de 3 s au premier appel : à reprendre dans F06 après le correctif du cache, qui pesait sur la même base pendant ces mesures.
+- **Recherche** : non mesurée, la lecture d’index qui fournit un code de parcelle à chercher n’a pas répondu ; à relever après le déploiement. Index sur `code` toujours non ajouté.
+
+Mesures après Madinat Al Riyad (28 octobre, 06 h UTC ; API redéployée avec le correctif du cache ; même protocole : premier appel, puis médiane de cinq ; index par zone et recherche dans le territoire `abu-dhabi`, tuiles sans territoire) :
+
+| Lecture | Après ADM (F04) | Après Al Faqa’ (F06) | Après Madinat Al Riyad (F06) |
+| --- | --- | --- | --- |
+| Parcelles courantes | 225 665 | 371 950 | **407 027** (409 458 lignes) |
+| `real_estate.parcel` / `evidence.parcel_observation` | 133 Mo / 146 Mo | 254 Mo / 237 Mo | 288 Mo / 255 Mo |
+| Base entière | 2 069 Mo | 3 246 Mo | 3 455 Mo, dont 1 826 Mo de journal des lignes (1 360 570 lignes) |
+| Tuile z8 de la ville d’Abu Dhabi | 243 Kio, 0,6 à 1,8 s | **503** au premier appel | 252 Kio, 1,56 s puis 0,03 s |
+| Tuile z10 de Khalifa City (couvre aussi Madinat Al Riyad) / d’Al Zahiyah | 1 505 / 441 Kio, 0,5 / 0,2 s | **503** / 441 Kio, 0,9 s | 1 623 / 441 Kio, 0,72 / 0,63 s puis 0,05 / 0,03 s |
+| Tuiles z12 de Khalifa City et z14 d’Al Zahiyah | 90 à 720 Kio, 0,03 à 0,13 s | 0,4 à 0,9 s | 900 / 108 Kio, 0,22 / 0,09 s puis 0,04 / 0,03 s |
+| Index, cellule de 0,05° (Al Zahiyah, Khalifa City) | 1,8 Mio, 1,0 à 1,4 s | plusieurs minutes | 1,9 Mio (3 000 lignes), 1,23 à 1,53 s puis 0,05 s |
+| Index, cellule de 0,05° de Madinat Al Riyad | — | — | 830 Kio, 0,65 s puis 0,04 s |
+| Recherche de parcelle (codes exacts, préfixes de communauté) | 0,13 à 0,20 s | non mesurée | 0,16 à 0,73 s puis 0,02 à 0,03 s |
+
+Constats :
+
+- **Cache.** Avec les sondes `EXISTS`, l’index par zone revient au niveau de F04 (1,2 à 1,5 s pour une page pleine) et plus aucune tuile froide ne dépasse le délai de 3 s : les `503` mesurés après Al Faqa’ venaient de la validation du cache qui chargeait la base, pas de la densité des tuiles.
+- **Index sur `code` : non ajouté.** La recherche filtre par `UPPER(code) LIKE 'préfixe%'` en parcours séquentiel parallèle de `real_estate.parcel` : 108 ms mesurées (`EXPLAIN ANALYZE`) sur les 0,4 à 0,7 s d’un premier appel. Un index n’en retirerait qu’un sixième ; le reste vient des lectures de provenance et de la validation du cache. Il sera reconsidéré si la table double (Dubai, F02) ou si la recherche dépasse 1 s.
+
 ## Cache des lectures et requêtes conditionnelles — 23 octobre 2026
 
 `api/read_cache.py` met en cache les lectures `/preview` sans effet de bord (parcelles, index, tuiles, contexte, quartiers, marché, projets, références, imagerie) et répond aux requêtes conditionnelles.
