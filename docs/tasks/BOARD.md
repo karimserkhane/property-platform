@@ -1,6 +1,6 @@
 # Tableau des tâches
 
-Tâches issues du [plan concurrentiel](../product/PLAN_CONCURRENTIEL_20261023.md) et de la [feuille de route technique](../engineering/ENGINEERING_ROADMAP.md). Règles d'usage : [AGENT_WORKFLOW.md](../engineering/AGENT_WORKFLOW.md). Le fichier de chaque tâche fait foi ; ce tableau en est le résumé et se met à jour dans la même PR.
+Tâches issues du [plan concurrentiel](../product/PLAN_CONCURRENTIEL_20261023.md) et de la [feuille de route technique](../engineering/ENGINEERING_ROADMAP.md). Règles d'usage : [AGENT_WORKFLOW.md](../engineering/AGENT_WORKFLOW.md). Le fichier de chaque tâche fait foi ; ce tableau en est le résumé et se met à jour dans la même PR. Les branches partent de `main` et les PR la visent (branche de référence depuis le 28/10).
 
 Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si toutes ses dépendances sont `done` et si aucune décision du propriétaire n'est en attente.
 

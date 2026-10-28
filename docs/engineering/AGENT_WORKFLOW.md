@@ -14,9 +14,9 @@ Une tâche est **prenable** si son statut est `todo`, si toutes ses dépendances
 
 Réserver avant de coder, pour que l'autre agent le voie sur GitHub :
 
-1. Branche `<agent>/<id>-<sujet>` depuis la branche de référence à jour (aujourd'hui `codex/abu-dhabi-context-ingestion`, puis `main` quand elle aura été fusionnée).
+1. Branche `<agent>/<id>-<sujet>` depuis la branche de référence à jour : `main`. Depuis le 28 octobre 2026 (PR #37), `main` contient tout `codex/abu-dhabi-context-ingestion`, qui n'est plus la référence et ne reçoit plus de PR.
 2. Dans le fichier de la tâche et dans `BOARD.md` : `status: in-progress`, `owner: <agent>`, `branch: <branche>`.
-3. Commit `Claim <id>: <titre>`, push, puis **PR en brouillon** vers la branche de référence ; noter son numéro dans `pr:`.
+3. Commit `Claim <id>: <titre>`, push, puis **PR en brouillon** vers `main` ; noter son numéro dans `pr:`.
 
 Une réservation sans commit depuis plus de 3 jours peut être reprise : l'indiquer dans le journal de la tâche et dans la PR.
 
@@ -64,7 +64,7 @@ Autorisé si elle sert une tâche et respecte la modularité :
 
 ## 7. Mettre à jour la prévisualisation de Karim
 
-Seulement après fusion (ou à la demande de Karim), depuis le dossier principal à jour :
+Seulement après fusion (ou à la demande de Karim), depuis le dossier principal, sur `main` à jour (`git pull --ff-only origin main`) :
 
 ```bash
 docker compose -f infra/local/compose.yaml -f infra/local/compose.remote-preview.yaml --profile web-preview --profile remote-preview build api web
