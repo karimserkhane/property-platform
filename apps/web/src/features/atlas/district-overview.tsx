@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { CitedRights } from "@/features/projects/cited-rights";
 import type { DistrictMapData, DistrictView } from "./district-map";
 import { normalized } from "./presentation";
 import type {
@@ -245,6 +246,7 @@ export function DistrictOverview({
             {data.retrieved_at &&
               ` · ${labels.retrieved}: ${new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Asia/Dubai" }).format(new Date(data.retrieved_at))}`}
           </p>
+          <CitedRights rights={data.rights} />
         </>
       )}
     </section>

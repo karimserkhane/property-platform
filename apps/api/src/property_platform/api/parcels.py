@@ -19,6 +19,59 @@ class Error(Schema):
     code: str
 
 
+class SourceRightsResponse(Schema):
+    """Reviewed rights of the source site (A19); `unknown` means not qualified yet."""
+
+    licence: str
+    licence_url: str | None = None
+    terms_url: str | None = None
+    publication: Literal["open", "facts", "link", "none"]
+    attribution: str | None = None
+    reviewed_on: date | None = None
+    shown_beyond_terms: bool = False
+
+
+def _value(row, field):
+    return row.get(field) if isinstance(row, dict) else getattr(row, field, None)
+
+
+def cited_rights(row, field):
+    """The rights of the page a response cites in `field`, for every cited source (A24)."""
+    from property_platform.modules.evidence.source_rights import public_rights
+
+    url = _value(row, field)
+    return public_rights(url) if url else None
+
+
+class CitedSourceResponse(Schema):
+    """One site cited by a list of map features, with its reviewed rights (A24)."""
+
+    url: str
+    name: str
+    rights: SourceRightsResponse
+
+
+def cited_sources(collection, source):
+    """Distinct sources of a feature list, so thousands of features need no rights each."""
+    from property_platform.modules.evidence.source_rights import public_rights
+
+    found = {}
+    for feature in _value(collection, "features") or ():
+        url, name = source(_value(feature, "properties") or {})
+        if url and url not in found:
+            found[url] = {"url": url, "name": name or "", "rights": public_rights(url)}
+    return list(found.values())
+
+
+def _parcel_source(properties):
+    return _value(properties, "source_url"), _value(properties, "source_name")
+
+
+def _map_source(properties):
+    source = _value(properties, "source") or {}
+    return _value(source, "url"), _value(source, "name")
+
+
 class Geometry(Schema):
     type: str
     coordinates: list[list[list[list[float]]]]
@@ -28,6 +81,11 @@ class FieldHistory(Schema):
     url: str
     retrieved_at: datetime
     ingested_at: datetime
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "url")
 
 
 class Properties(Schema):
@@ -57,6 +115,11 @@ class Collection(Schema):
     truncated: bool
     next_cursor: UUID | None = None
     classification_version: str
+    sources: list[CitedSourceResponse] = []
+
+    @staticmethod
+    def resolve_sources(obj):
+        return cited_sources(obj, _parcel_source)
 
 
 class NearbyProjectMarker(Schema):
@@ -83,6 +146,11 @@ class ParcelIndex(Schema):
     truncated: bool
     next_cursor: UUID | None = None
     classification_version: str
+    sources: list[CitedSourceResponse] = []
+
+    @staticmethod
+    def resolve_sources(obj):
+        return cited_sources(obj, _parcel_source)
 
 
 class Provenance(Schema):
@@ -91,6 +159,11 @@ class Provenance(Schema):
     retrieved_at: datetime
     published_at: datetime | None
     ingested_at: datetime
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "url")
 
 
 class ParcelAttributes(Schema):
@@ -151,10 +224,25 @@ class Detail(Schema):
     field_history: dict[str, FieldHistory] = {}
 
 
-class MapProvenance(Provenance):
+class MapProvenance(Schema):
+    """Provenance of one map feature; its rights are in the list's `sources` (A24)."""
+
+    name: str
+    url: str
+    retrieved_at: datetime
+    published_at: datetime | None
+    ingested_at: datetime
     reliability: str
     acquisition_method: str
     timestamp_basis: str
+
+
+class CitedMapProvenance(MapProvenance):
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "url")
 
 
 class Amenity(Schema):
@@ -163,7 +251,7 @@ class Amenity(Schema):
     name_ar: str
     use_types: list[UseType]
     distance_m: float
-    source: MapProvenance
+    source: CitedMapProvenance
 
 
 class AmenityGroup(Schema):
@@ -214,6 +302,11 @@ class ResearchReferenceResponse(Schema):
     url: str
     retrieved_at: datetime
     published_at: datetime | None
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "url")
 
 
 @router.get(
@@ -239,6 +332,11 @@ class ImageryResponse(Schema):
     image_url: str
     source_url: str
     retrieved_at: datetime
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
 
 
 @router.get(
@@ -278,6 +376,11 @@ class PropertyPresentationResponse(Schema):
     published_at: datetime | None
     media: list[PropertyPhoto]
     project: ProjectReferenceResponse | None = None
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
 
 
 class ProjectReferenceResponse(Schema):
@@ -356,6 +459,11 @@ class MapCollection(Schema):
     type: str
     features: list[MapFeature]
     truncated: bool
+    sources: list[CitedSourceResponse] = []
+
+    @staticmethod
+    def resolve_sources(obj):
+        return cited_sources(obj, _map_source)
 
 
 class MapContext(Schema):
@@ -379,6 +487,11 @@ class ContextIndexCollection(Schema):
     type: str
     features: list[ContextIndexFeature]
     truncated: bool
+    sources: list[CitedSourceResponse] = []
+
+    @staticmethod
+    def resolve_sources(obj):
+        return cited_sources(obj, _map_source)
 
 
 class ContextIndex(Schema):
@@ -709,6 +822,11 @@ class AdrecMarketResponse(Schema):
     index_review_needed: bool
     historical: bool
     snapshots: list[AdrecSnapshotResponse]
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
 
 
 @router.get(

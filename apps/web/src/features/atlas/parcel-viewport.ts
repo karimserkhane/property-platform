@@ -149,5 +149,13 @@ export function mergeCells(parts: ParcelIndex[]): ParcelIndex {
     features,
     truncated: parts.some((part) => part.truncated),
     classification_version: parts[0]?.classification_version ?? "",
+    // One entry per cited site across the merged cells (A24).
+    sources: [
+      ...new Map(
+        parts
+          .flatMap((part) => part.sources ?? [])
+          .map((source) => [source.url, source]),
+      ).values(),
+    ],
   };
 }

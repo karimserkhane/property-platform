@@ -6,7 +6,7 @@ from ninja.decorators import decorate_view
 
 from property_platform.modules.publication.coverage import profile_for
 
-from .parcels import Error
+from .parcels import Error, SourceRightsResponse, cited_rights
 from .read_cache import cached_read
 
 router = Router(tags=["map-analysis-preview"])
@@ -40,6 +40,11 @@ class WalkingResponse(Schema):
     graph_fetched_at: datetime
     source_url: str
     historical: bool
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
 
 
 @router.get(
@@ -90,6 +95,17 @@ class DistrictMarketResponse(Schema):
     unmatched_sales: int
     mapped_sales: int
     historical: bool
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
+
+    boundary_rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_boundary_rights(obj):
+        return cited_rights(obj, "boundary_source_url")
 
 
 @router.get(

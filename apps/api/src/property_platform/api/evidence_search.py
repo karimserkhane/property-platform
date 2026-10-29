@@ -5,7 +5,7 @@ from typing import Literal
 from ninja import Query, Router, Schema
 from ninja.decorators import decorate_view
 
-from .parcels import Error
+from .parcels import Error, SourceRightsResponse, cited_rights
 from .read_cache import cached_read
 
 
@@ -41,6 +41,11 @@ class EvidenceSearchSourceResponse(Schema):
     content_sha256: str | None
     evidence_pointer: str
     retrieved_at: datetime | None
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "url")
 
 
 class EvidenceSearchClaimResponse(Schema):

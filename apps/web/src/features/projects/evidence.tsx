@@ -6,7 +6,7 @@ import {
   sourceRightsNotice,
 } from "./presentation";
 import styles from "./project.module.css";
-import type { ProjectLabels, ProjectSource } from "./types";
+import type { ProjectLabels, ProjectSource, SourceRightsLabels } from "./types";
 
 export function SourceLink({
   source,
@@ -89,7 +89,7 @@ export function SourceRights({
   labels,
 }: {
   source: Pick<ProjectSource, "rights">;
-  labels: ProjectLabels;
+  labels: SourceRightsLabels;
 }) {
   const notice = sourceRightsNotice(source.rights);
   const licence = notice.labelKey ? (

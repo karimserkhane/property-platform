@@ -2342,7 +2342,7 @@
             "type": "number"
           },
           "source": {
-            "$ref": "#/components/schemas/MapProvenance"
+            "$ref": "#/components/schemas/CitedMapProvenance"
           }
         },
         "required": [
@@ -2386,7 +2386,7 @@
         "title": "AmenityGroup",
         "type": "object"
       },
-      "MapProvenance": {
+      "CitedMapProvenance": {
         "properties": {
           "name": {
             "title": "Name",
@@ -2429,6 +2429,16 @@
           "timestamp_basis": {
             "title": "Timestamp Basis",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2441,7 +2451,82 @@
           "acquisition_method",
           "timestamp_basis"
         ],
-        "title": "MapProvenance",
+        "title": "CitedMapProvenance",
+        "type": "object"
+      },
+      "SourceRightsResponse": {
+        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
+        "properties": {
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          },
+          "licence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licence Url"
+          },
+          "terms_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terms Url"
+          },
+          "publication": {
+            "enum": [
+              "open",
+              "facts",
+              "link",
+              "none"
+            ],
+            "title": "Publication",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribution"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed On"
+          },
+          "shown_beyond_terms": {
+            "default": false,
+            "title": "Shown Beyond Terms",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "licence",
+          "publication"
+        ],
+        "title": "SourceRightsResponse",
         "type": "object"
       },
       "Surroundings": {
@@ -2542,6 +2627,16 @@
               }
             ],
             "title": "Published At"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2598,6 +2693,16 @@
             "format": "date-time",
             "title": "Retrieved At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2611,6 +2716,29 @@
           "retrieved_at"
         ],
         "title": "ImageryResponse",
+        "type": "object"
+      },
+      "CitedSourceResponse": {
+        "description": "One site cited by a list of map features, with its reviewed rights (A24).",
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "rights": {
+            "$ref": "#/components/schemas/SourceRightsResponse"
+          }
+        },
+        "required": [
+          "url",
+          "name",
+          "rights"
+        ],
+        "title": "CitedSourceResponse",
         "type": "object"
       },
       "FieldHistory": {
@@ -2628,6 +2756,16 @@
             "format": "date-time",
             "title": "Ingested At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2711,6 +2849,14 @@
           "truncated": {
             "title": "Truncated",
             "type": "boolean"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -2908,6 +3054,65 @@
         "title": "MapProperties",
         "type": "object"
       },
+      "MapProvenance": {
+        "description": "Provenance of one map feature; its rights are in the list's `sources` (A24).",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "reliability": {
+            "title": "Reliability",
+            "type": "string"
+          },
+          "acquisition_method": {
+            "title": "Acquisition Method",
+            "type": "string"
+          },
+          "timestamp_basis": {
+            "title": "Timestamp Basis",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "retrieved_at",
+          "published_at",
+          "ingested_at",
+          "reliability",
+          "acquisition_method",
+          "timestamp_basis"
+        ],
+        "title": "MapProvenance",
+        "type": "object"
+      },
       "PointGeometry": {
         "properties": {
           "type": {
@@ -3084,6 +3289,16 @@
                 "type": "null"
               }
             ]
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -3141,6 +3356,14 @@
           "truncated": {
             "title": "Truncated",
             "type": "boolean"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -3352,6 +3575,14 @@
           "classification_version": {
             "title": "Classification Version",
             "type": "string"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -3741,6 +3972,14 @@
           "classification_version": {
             "title": "Classification Version",
             "type": "string"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -4138,6 +4377,16 @@
             "format": "date-time",
             "title": "Ingested At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -4513,6 +4762,16 @@
             },
             "title": "Snapshots",
             "type": "array"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -4904,6 +5163,16 @@
             },
             "title": "Features",
             "type": "array"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5389,6 +5658,16 @@
             },
             "title": "Statistics",
             "type": "array"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5674,81 +5953,6 @@
           "has_map_identity"
         ],
         "title": "ProjectSummaryResponse",
-        "type": "object"
-      },
-      "SourceRightsResponse": {
-        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
-        "properties": {
-          "licence": {
-            "title": "Licence",
-            "type": "string"
-          },
-          "licence_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Licence Url"
-          },
-          "terms_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Terms Url"
-          },
-          "publication": {
-            "enum": [
-              "open",
-              "facts",
-              "link",
-              "none"
-            ],
-            "title": "Publication",
-            "type": "string"
-          },
-          "attribution": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Attribution"
-          },
-          "reviewed_on": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reviewed On"
-          },
-          "shown_beyond_terms": {
-            "default": false,
-            "title": "Shown Beyond Terms",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "licence",
-          "publication"
-        ],
-        "title": "SourceRightsResponse",
         "type": "object"
       },
       "ActivityMeasurementResponse": {
@@ -7058,6 +7262,16 @@
           },
           "source": {
             "$ref": "#/components/schemas/ProjectSourceResponse"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -7233,10 +7447,6 @@
             "title": "Evidence Pointer",
             "type": "string"
           },
-          "rights_status": {
-            "title": "Rights Status",
-            "type": "string"
-          },
           "rights": {
             "anyOf": [
               {
@@ -7270,8 +7480,7 @@
           "name",
           "retrieved_at",
           "published_at",
-          "language",
-          "rights_status"
+          "language"
         ],
         "title": "ProjectSourceResponse",
         "type": "object"
@@ -7983,6 +8192,16 @@
           "historical": {
             "title": "Historical",
             "type": "boolean"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -8153,6 +8372,26 @@
           "historical": {
             "title": "Historical",
             "type": "boolean"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "boundary_rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -8317,6 +8556,16 @@
               }
             ],
             "title": "Retrieved At"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [

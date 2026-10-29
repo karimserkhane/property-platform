@@ -15,7 +15,6 @@ export function projectEvidenceSources(sources: ProjectSource[]) {
       source.published_at,
       source.ingested_at,
       source.historical,
-      source.rights_status,
       source.developer_name,
       source.developer_role,
     ]);

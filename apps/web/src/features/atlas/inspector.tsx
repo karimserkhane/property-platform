@@ -1,7 +1,10 @@
 import { useTranslations } from "next-intl";
+import { Fragment } from "react";
 import { MapLocateButton } from "@/components/map-locate-button";
+import { CitedRights } from "@/features/projects/cited-rights";
 import {
   featureShape,
+  listedRights,
   type ParcelProperty,
   preferredParcelProperty,
   propertyName,
@@ -60,6 +63,11 @@ export function Inspector({
         }).format(new Date(value))
       : labels.unknown;
   const source = feature?.properties.source ?? detail?.source;
+  const layers = Object.values(context ?? {});
+  // A map feature's rights come once per site with its list; a parcel's with its detail.
+  const sourceRights = feature
+    ? listedRights(feature.properties.source.url, layers)
+    : detail?.source.rights;
   const a = detail?.attributes;
   const candidates = detail ? [...(parcelProperties.get(detail.id) ?? [])] : [];
   for (const place of detail?.places ?? []) {
@@ -89,12 +97,15 @@ export function Inspector({
           {Object.entries(
             detail?.field_history ?? feature?.properties.field_history ?? {},
           ).map(([field, source]) => (
-            <p key={field}>
-              <bdi>{field}</bdi> · {date(source.retrieved_at)} ·{" "}
-              <a href={source.url} target="_blank" rel="noopener noreferrer">
-                {labels.source} ↗
-              </a>
-            </p>
+            <Fragment key={field}>
+              <p>
+                <bdi>{field}</bdi> · {date(source.retrieved_at)} ·{" "}
+                <a href={source.url} target="_blank" rel="noopener noreferrer">
+                  {labels.source} ↗
+                </a>
+              </p>
+              <CitedRights rights={source.rights} />
+            </Fragment>
           ))}
         </details>
       )}
@@ -166,6 +177,7 @@ export function Inspector({
                 >
                   {labels.source} ↗
                 </a>
+                <CitedRights rights={parcel.source.rights} />
               </div>
             ))}
           </details>
@@ -290,41 +302,50 @@ export function Inspector({
                   (f) => f.id === place.id,
                 );
                 return (
-                  <p key={place.id}>
-                    {original ? (
-                      <button
-                        type="button"
-                        className="candidate-button"
-                        onClick={() => choose(original)}
-                      >
+                  <Fragment key={place.id}>
+                    <p>
+                      {original ? (
+                        <button
+                          type="button"
+                          className="candidate-button"
+                          onClick={() => choose(original)}
+                        >
+                          <bdi>
+                            {(locale === "ar" && place.name_ar) ||
+                              place.name ||
+                              place.name_ar}
+                          </bdi>{" "}
+                          →
+                        </button>
+                      ) : (
                         <bdi>
                           {(locale === "ar" && place.name_ar) ||
                             place.name ||
                             place.name_ar}
-                        </bdi>{" "}
-                        →
-                      </button>
-                    ) : (
-                      <bdi>
-                        {(locale === "ar" && place.name_ar) ||
-                          place.name ||
-                          place.name_ar}
-                      </bdi>
-                    )}
+                        </bdi>
+                      )}
+                      {original && (
+                        <>
+                          {" "}
+                          ·{" "}
+                          <a
+                            href={original.properties.source.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {labels.source} ↗
+                          </a>
+                        </>
+                      )}
+                    </p>
                     {original && (
-                      <>
-                        {" "}
-                        ·{" "}
-                        <a
-                          href={original.properties.source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {labels.source} ↗
-                        </a>
-                      </>
+                      <CitedRights
+                        rights={listedRights(original.properties.source.url, [
+                          context?.place,
+                        ])}
+                      />
                     )}
-                  </p>
+                  </Fragment>
                 );
               })}
             </details>
@@ -389,6 +410,7 @@ export function Inspector({
           <p className="small-text">
             <bdi>{source.name}</bdi>
           </p>
+          <CitedRights rights={sourceRights} />
         </details>
       )}
     </>

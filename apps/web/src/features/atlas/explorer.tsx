@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
+  Fragment,
   type ReactNode,
   useCallback,
   useEffect,
@@ -11,6 +12,7 @@ import {
   useState,
 } from "react";
 import { UiIcon } from "@/components/ui-icon";
+import { CitedRights } from "@/features/projects/cited-rights";
 import { isProjectSlug } from "@/features/projects/data";
 import { ProjectMapSummary } from "@/features/projects/map-summary";
 import { buildingViewSelection } from "./building-3d";
@@ -29,6 +31,7 @@ import { type Bounds, ParcelCellCache, viewportCells } from "./parcel-viewport";
 import {
   csv,
   download,
+  listedRights,
   parcelPropertyIndex,
   propertyFeatures,
   sourceLabel,
@@ -56,6 +59,7 @@ const EMPTY_PARCELS: ParcelIndex = {
   features: [],
   truncated: false,
   classification_version: "",
+  sources: [],
 };
 
 export function Explorer({
@@ -862,23 +866,17 @@ export function Explorer({
                 {tab === "sources" ? (
                   <section className="atlas-source-list">
                     <p>{m.spatial}</p>
-                    {[
-                      ...new Set(
-                        (collection?.features ?? []).flatMap((item) =>
-                          item.properties.source_url
-                            ? [item.properties.source_url]
-                            : [],
-                        ),
-                      ),
-                    ].map((url) => (
-                      <a
-                        key={url}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {labels.source} · {m.parcels}
-                      </a>
+                    {(collection?.sources ?? []).map((source) => (
+                      <Fragment key={source.url}>
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {labels.source} · {m.parcels}
+                        </a>
+                        <CitedRights rights={source.rights} />
+                      </Fragment>
                     ))}
                     {[
                       ...new Map(
@@ -913,6 +911,12 @@ export function Explorer({
                             timeZone: "Asia/Dubai",
                           }).format(new Date(source.retrieved_at))}
                         </p>
+                        <CitedRights
+                          rights={listedRights(
+                            source.url,
+                            Object.values(context ?? {}),
+                          )}
+                        />
                       </article>
                     ))}
                   </section>

@@ -4,6 +4,7 @@ import type { components } from "@property-platform/contracts";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { CitedRights } from "@/features/projects/cited-rights";
 import styles from "./adrec-market.module.css";
 import type { MapLabels } from "./types";
 
@@ -253,6 +254,7 @@ export function AdrecMarket({
                 </>
               )}
             </p>
+            <CitedRights rights={data.rights} />
           </>
         )
       )}

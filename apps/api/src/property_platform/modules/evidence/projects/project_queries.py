@@ -208,7 +208,6 @@ def _source(snapshot, pointer=""):
         "published_at": snapshot.capture.source_published_at,
         "language": snapshot.language,
         "evidence_pointer": pointer,
-        "rights_status": snapshot.source_rights_status,
         "rights": public_rights(snapshot.capture.url),
         "ingested_at": snapshot.ingested_at,
         "historical": snapshot.capture.fetched_at
@@ -597,7 +596,6 @@ def project_locations(project, *, language="en"):
                     ),
                     "language": language,
                     "evidence_pointer": "active_project_identity_link",
-                    "rights_status": "restricted",
                     "rights": public_rights(point_source.get("url", link.capture.url)),
                 },
             }

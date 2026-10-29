@@ -18,10 +18,13 @@ export type IndexedFeature = ContextIndexFeature & {
   family: "building" | "street";
 };
 export type AtlasFeature = MapFeature | IndexedFeature;
+// One entry per site cited by a list, with its reviewed rights (A24).
+export type CitedSource = components["schemas"]["CitedSourceResponse"];
 type AtlasCollection = {
   type: string;
   features: AtlasFeature[];
   truncated: boolean;
+  sources: CitedSource[];
 };
 // Either `map-context` or the explorer's tagged `context-index`.
 export type AtlasContext = {

@@ -9,7 +9,7 @@ from ninja.decorators import decorate_view
 
 from property_platform.modules.publication.coverage import profile_for
 
-from .parcels import Error
+from .parcels import Error, SourceRightsResponse, cited_rights
 from .read_cache import cached_read
 
 router = Router(tags=["public-context-preview"])
@@ -93,6 +93,11 @@ class PublicContextResponse(Schema):
     schools: list[SchoolResponse]
     mobility: list[BusRouteResponse]
     statistics: list[CensusResponse]
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
 
 
 class DistrictMapProperties(DistrictResponse):
@@ -120,6 +125,11 @@ class DistrictMapResponse(Schema):
     source_url: str
     display_geometry_version: str
     features: list[DistrictMapFeature]
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
 
 
 @router.get(
