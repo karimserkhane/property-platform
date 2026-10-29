@@ -149,13 +149,15 @@ export function mergeCells(parts: ParcelIndex[]): ParcelIndex {
     features,
     truncated: parts.some((part) => part.truncated),
     classification_version: parts[0]?.classification_version ?? "",
-    // One entry per cited site across the merged cells (A24).
-    sources: [
-      ...new Map(
-        parts
-          .flatMap((part) => part.sources ?? [])
-          .map((source) => [source.url, source]),
-      ).values(),
-    ],
+    sources: mergedSources(parts),
   };
+}
+
+// One entry per cited site across the merged cells, the first one seen (A24).
+function mergedSources(parts: ParcelIndex[]) {
+  const sites = new Map<string, ParcelIndex["sources"][number]>();
+  for (const part of parts)
+    for (const source of part.sources ?? [])
+      if (!sites.has(source.host)) sites.set(source.host, source);
+  return [...sites.values()];
 }

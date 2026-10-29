@@ -643,8 +643,14 @@ export interface components {
         /**
          * CitedSourceResponse
          * @description One site cited by a list of map features, with its reviewed rights (A24).
+         *
+         *     `host` is the reviewed registry host covering the site (or the page's own host when
+         *     no review lists it); a feature's rights are those of the entry covering its URL.
+         *     `url` and `name` are the first page of that site the list cites.
          */
         CitedSourceResponse: {
+            /** Host */
+            host: string;
             /** Url */
             url: string;
             /** Name */

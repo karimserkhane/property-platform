@@ -127,18 +127,24 @@ test("merging keeps truncation from any cell", () => {
 
 test("merging lists each cited site once, with its rights", () => {
   const sdi = {
+    host: "sdi.example",
     url: "https://sdi.example/plots",
     name: "AD-SDI",
     rights: { licence: "unknown", publication: "facts" },
   };
   const osm = {
+    host: "osm.example",
     url: "https://osm.example/",
     name: "OSM",
     rights: { licence: "ODbL-1.0", publication: "open" },
   };
   const merged = mergeCells([
     { ...rows("1"), sources: [sdi] },
-    { ...rows("2"), sources: [sdi, osm] },
+    // Another page of the same site is the same entry.
+    {
+      ...rows("2"),
+      sources: [{ ...sdi, url: "https://sdi.example/other" }, osm],
+    },
     // A cell cached before A24 carries no sources.
     rows("3"),
   ]);

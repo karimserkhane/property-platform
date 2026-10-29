@@ -400,13 +400,36 @@ test("a map feature finds the rights of its site in its lists", () => {
     shown_beyond_terms: true,
   };
   const lists = [
-    { sources: [{ url: "https://osm.example/", name: "OSM", rights: osm }] },
+    {
+      sources: [
+        {
+          host: "openstreetmap.org",
+          url: "https://www.openstreetmap.org/way/1",
+          name: "OSM",
+          rights: osm,
+        },
+      ],
+    },
     null,
-    { sources: [{ url: "https://psi.example/", name: "PSI", rights: psi }] },
+    {
+      sources: [
+        {
+          host: "psinv.net",
+          url: "https://psinv.net/a",
+          name: "PSI",
+          rights: psi,
+        },
+      ],
+    },
   ];
-  assert.equal(listedRights("https://psi.example/", lists), psi);
-  assert.equal(listedRights("https://osm.example/", lists), osm);
-  // An uncited page or a missing URL states no rights rather than guessing.
+  // Every page of a site, subdomains included, shares the entry of that site.
+  assert.equal(listedRights("https://psinv.net/b", lists), psi);
+  assert.equal(
+    listedRights("https://www.openstreetmap.org/node/2", lists),
+    osm,
+  );
+  // Another site, a lookalike, or a missing URL states no rights rather than guessing.
   assert.equal(listedRights("https://other.example/", lists), null);
+  assert.equal(listedRights("https://notpsinv.net/", lists), null);
   assert.equal(listedRights(undefined, lists), null);
 });

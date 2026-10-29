@@ -867,7 +867,7 @@ export function Explorer({
                   <section className="atlas-source-list">
                     <p>{m.spatial}</p>
                     {(collection?.sources ?? []).map((source) => (
-                      <Fragment key={source.url}>
+                      <Fragment key={source.host}>
                         <a
                           href={source.url}
                           target="_blank"

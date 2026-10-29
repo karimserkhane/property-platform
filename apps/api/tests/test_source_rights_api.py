@@ -129,7 +129,9 @@ def test_map_lists_state_each_cited_site_once():
             "classification_version": "test",
         }
     )
-    assert [(source.url, source.name) for source in parcels.sources] == [(SDI, "AD-SDI")]
+    assert [(source.host, source.url, source.name) for source in parcels.sources] == [
+        ("arcgis.sdi.abudhabi.ae", SDI, "AD-SDI")
+    ]
     assert parcels.sources[0].rights.licence == "unknown"
     place = {
         "type": "Feature",
@@ -147,13 +149,25 @@ def test_map_lists_state_each_cited_site_once():
             ),
         },
     }
-    places = MapCollection.model_validate(
+    # Each OpenStreetMap object cites its own page; they all share one site entry.
+    objects = [
         {
-            "type": "FeatureCollection",
-            "features": [{**place, "id": place["properties"]["id"]}],
-            "truncated": False,
+            **place,
+            "id": f"00000000-0000-0000-0000-00000000001{n}",
+            "properties": {
+                **place["properties"],
+                "id": f"00000000-0000-0000-0000-00000000001{n}",
+                "source": {**place["properties"]["source"], "url": f"{OSM}way/{n}"},
+            },
         }
+        for n in (1, 2, 3)
+    ]
+    places = MapCollection.model_validate(
+        {"type": "FeatureCollection", "features": objects, "truncated": False}
     )
-    assert [source.rights.licence for source in places.sources] == ["ODbL-1.0"]
+    assert [(source.host, source.url) for source in places.sources] == [
+        ("openstreetmap.org", f"{OSM}way/1")
+    ]
+    assert places.sources[0].rights.licence == "ODbL-1.0"
     # Each feature keeps its provenance without repeating the rights.
     assert "rights" not in places.features[0].properties.source.model_dump()

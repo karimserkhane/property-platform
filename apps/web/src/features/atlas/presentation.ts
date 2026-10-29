@@ -485,10 +485,17 @@ export function listedRights(
   url: string | null | undefined,
   lists: readonly ({ sources: CitedSource[] } | null | undefined)[],
 ) {
-  if (!url) return null;
+  let host: string;
+  try {
+    host = new URL(url ?? "").hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+  // An entry's host is the reviewed site, which covers its subdomains.
   for (const list of lists)
     for (const source of list?.sources ?? [])
-      if (source.url === url) return source.rights;
+      if (host === source.host || host.endsWith(`.${source.host}`))
+        return source.rights;
   return null;
 }
 
