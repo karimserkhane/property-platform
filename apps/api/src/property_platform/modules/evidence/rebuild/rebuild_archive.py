@@ -66,7 +66,12 @@ DERIVED = {
 
 # Mirrors of reviewed repository registries, rebuilt from the current file: a difference
 # says the reference database has not applied the latest review yet, not that data is lost.
-REGISTRY_MIRRORS = {"source_rights": "Reviewed source rights, mirrored from source_rights.json"}
+REGISTRY_MIRRORS = {
+    "source_rights": "Reviewed source rights, mirrored from source_rights.json",
+    "source_rights_enforcement": (
+        "Owner's enforcement switches, mirrored from source_rights_enforcement.json"
+    ),
+}
 # A historically unavailable reference is reproduced as unavailable, not as a new failure.
 REPLAYED_STATUS = {"failed": "replayed_unavailable"}
 # Catalogue identities whose duplicates, created before import-time resolution existed,
