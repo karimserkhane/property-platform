@@ -1,3 +1,4 @@
+import { CitedRights } from "@/features/projects/cited-rights";
 import type { AtlasLabels, MapLabels, ResearchReference } from "./types";
 
 export function References({
@@ -47,6 +48,7 @@ export function References({
           <a href={item.url} target="_blank" rel="noopener noreferrer">
             {labels.source} ↗
           </a>
+          <CitedRights rights={item.rights} />
           <p>
             {labels.retrieved} ·{" "}
             {new Intl.DateTimeFormat(locale, {

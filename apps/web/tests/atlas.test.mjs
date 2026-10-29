@@ -5,6 +5,7 @@ import {
   districtBounds,
   geometryBounds,
   geometryClickArea,
+  listedRights,
   normalized,
   parcelMapLabels,
   parcelPropertyIndex,
@@ -389,4 +390,23 @@ test("clickable parcel name labels retain building, place and street priority", 
   const use = hit("parcel-use-names", "use");
   const street = hit("street-names", "street");
   assert.equal(selectMapHit([use, street]), street);
+});
+
+test("a map feature finds the rights of its site in its lists", () => {
+  const osm = { licence: "ODbL-1.0", publication: "open" };
+  const psi = {
+    licence: "proprietary",
+    publication: "none",
+    shown_beyond_terms: true,
+  };
+  const lists = [
+    { sources: [{ url: "https://osm.example/", name: "OSM", rights: osm }] },
+    null,
+    { sources: [{ url: "https://psi.example/", name: "PSI", rights: psi }] },
+  ];
+  assert.equal(listedRights("https://psi.example/", lists), psi);
+  assert.equal(listedRights("https://osm.example/", lists), osm);
+  // An uncited page or a missing URL states no rights rather than guessing.
+  assert.equal(listedRights("https://other.example/", lists), null);
+  assert.equal(listedRights(undefined, lists), null);
 });

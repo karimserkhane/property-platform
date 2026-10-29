@@ -11,6 +11,7 @@ import {
   setWorkerUrl,
 } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
+import { CitedRights } from "@/features/projects/cited-rights";
 import { registerArchivedTiles } from "./archived-tiles";
 import {
   HYDROGRAPHY_LAYERS,
@@ -285,6 +286,8 @@ export default function MarketDistrictMap({
                   DMT / Onwani
                 </a>
               </p>
+              <CitedRights rights={data.rights} />
+              <CitedRights rights={data.boundary_rights} />
             </>
           )}
         </>

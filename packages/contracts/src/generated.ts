@@ -508,7 +508,7 @@ export interface components {
             use_types: ("school" | "university" | "nursery" | "mosque" | "worship" | "hospital" | "healthcare" | "rail_station" | "bus_station" | "bus_stop" | "rail" | "restaurant" | "cafe" | "retail" | "office" | "commercial" | "mixed_use" | "villa" | "townhouse" | "housing" | "hotel" | "park" | "open_space" | "beach" | "sports" | "parking" | "infrastructure" | "project_perimeter")[];
             /** Distance M */
             distance_m: number;
-            source: components["schemas"]["MapProvenance"];
+            source: components["schemas"]["CitedMapProvenance"];
         };
         /** AmenityGroup */
         AmenityGroup: {
@@ -520,8 +520,8 @@ export interface components {
             /** Items */
             items: components["schemas"]["Amenity"][];
         };
-        /** MapProvenance */
-        MapProvenance: {
+        /** CitedMapProvenance */
+        CitedMapProvenance: {
             /** Name */
             name: string;
             /** Url */
@@ -544,6 +544,33 @@ export interface components {
             acquisition_method: string;
             /** Timestamp Basis */
             timestamp_basis: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+        };
+        /**
+         * SourceRightsResponse
+         * @description Reviewed rights of the source site (A19); `unknown` means not qualified yet.
+         */
+        SourceRightsResponse: {
+            /** Licence */
+            licence: string;
+            /** Licence Url */
+            licence_url?: string | null;
+            /** Terms Url */
+            terms_url?: string | null;
+            /**
+             * Publication
+             * @enum {string}
+             */
+            publication: "open" | "facts" | "link" | "none";
+            /** Attribution */
+            attribution?: string | null;
+            /** Reviewed On */
+            reviewed_on?: string | null;
+            /**
+             * Shown Beyond Terms
+             * @default false
+             */
+            shown_beyond_terms: boolean;
         };
         /** Surroundings */
         Surroundings: {
@@ -585,6 +612,7 @@ export interface components {
             retrieved_at: string;
             /** Published At */
             published_at: string | null;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** ImageryResponse */
         ImageryResponse: {
@@ -610,6 +638,18 @@ export interface components {
              * Format: date-time
              */
             retrieved_at: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+        };
+        /**
+         * CitedSourceResponse
+         * @description One site cited by a list of map features, with its reviewed rights (A24).
+         */
+        CitedSourceResponse: {
+            /** Url */
+            url: string;
+            /** Name */
+            name: string;
+            rights: components["schemas"]["SourceRightsResponse"];
         };
         /** FieldHistory */
         FieldHistory: {
@@ -625,6 +665,7 @@ export interface components {
              * Format: date-time
              */
             ingested_at: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** Geometry */
         Geometry: {
@@ -648,6 +689,11 @@ export interface components {
             features: components["schemas"]["MapFeature"][];
             /** Truncated */
             truncated: boolean;
+            /**
+             * Sources
+             * @default []
+             */
+            sources: components["schemas"]["CitedSourceResponse"][];
         };
         /** MapContext */
         MapContext: {
@@ -710,6 +756,34 @@ export interface components {
             field_history: {
                 [key: string]: components["schemas"]["FieldHistory"];
             };
+        };
+        /**
+         * MapProvenance
+         * @description Provenance of one map feature; its rights are in the list's `sources` (A24).
+         */
+        MapProvenance: {
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Retrieved At
+             * Format: date-time
+             */
+            retrieved_at: string;
+            /** Published At */
+            published_at: string | null;
+            /**
+             * Ingested At
+             * Format: date-time
+             */
+            ingested_at: string;
+            /** Reliability */
+            reliability: string;
+            /** Acquisition Method */
+            acquisition_method: string;
+            /** Timestamp Basis */
+            timestamp_basis: string;
         };
         /** PointGeometry */
         PointGeometry: {
@@ -780,6 +854,7 @@ export interface components {
             /** Media */
             media: components["schemas"]["PropertyPhoto"][];
             project?: components["schemas"]["ProjectReferenceResponse"] | null;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** ContextIndex */
         ContextIndex: {
@@ -796,6 +871,11 @@ export interface components {
             features: components["schemas"]["ContextIndexFeature"][];
             /** Truncated */
             truncated: boolean;
+            /**
+             * Sources
+             * @default []
+             */
+            sources: components["schemas"]["CitedSourceResponse"][];
         };
         /** ContextIndexFeature */
         ContextIndexFeature: {
@@ -869,6 +949,11 @@ export interface components {
             next_cursor?: string | null;
             /** Classification Version */
             classification_version: string;
+            /**
+             * Sources
+             * @default []
+             */
+            sources: components["schemas"]["CitedSourceResponse"][];
         };
         /** Feature */
         Feature: {
@@ -1012,6 +1097,11 @@ export interface components {
             next_cursor?: string | null;
             /** Classification Version */
             classification_version: string;
+            /**
+             * Sources
+             * @default []
+             */
+            sources: components["schemas"]["CitedSourceResponse"][];
         };
         /** Detail */
         Detail: {
@@ -1152,6 +1242,7 @@ export interface components {
              * Format: date-time
              */
             ingested_at: string;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** TerritoryRegistry */
         TerritoryRegistry: {
@@ -1275,6 +1366,7 @@ export interface components {
             historical: boolean;
             /** Snapshots */
             snapshots: components["schemas"]["AdrecSnapshotResponse"][];
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** AdrecSaleResponse */
         AdrecSaleResponse: {
@@ -1427,6 +1519,7 @@ export interface components {
             display_geometry_version: string;
             /** Features */
             features: components["schemas"]["DistrictMapFeature"][];
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** HistoricalField */
         HistoricalField: {
@@ -1638,6 +1731,7 @@ export interface components {
             mobility: components["schemas"]["BusRouteResponse"][];
             /** Statistics */
             statistics: components["schemas"]["CensusResponse"][];
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** SchoolResponse */
         SchoolResponse: {
@@ -1759,32 +1853,6 @@ export interface components {
              * @default 0
              */
             component_count: number;
-        };
-        /**
-         * SourceRightsResponse
-         * @description Reviewed rights of the source site (A19); `unknown` means not qualified yet.
-         */
-        SourceRightsResponse: {
-            /** Licence */
-            licence: string;
-            /** Licence Url */
-            licence_url?: string | null;
-            /** Terms Url */
-            terms_url?: string | null;
-            /**
-             * Publication
-             * @enum {string}
-             */
-            publication: "open" | "facts" | "link" | "none";
-            /** Attribution */
-            attribution?: string | null;
-            /** Reviewed On */
-            reviewed_on?: string | null;
-            /**
-             * Shown Beyond Terms
-             * @default false
-             */
-            shown_beyond_terms: boolean;
         };
         /**
          * ActivityMeasurementResponse
@@ -2266,6 +2334,7 @@ export interface components {
             /** Height */
             height?: number | null;
             source: components["schemas"]["ProjectSourceResponse"];
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /**
          * ProjectObservedSalesResponse
@@ -2325,8 +2394,6 @@ export interface components {
              * @default
              */
             evidence_pointer: string;
-            /** Rights Status */
-            rights_status: string;
             rights?: components["schemas"]["SourceRightsResponse"] | null;
             /** Ingested At */
             ingested_at?: string | null;
@@ -2563,6 +2630,7 @@ export interface components {
             source_url: string;
             /** Historical */
             historical: boolean;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** DistrictMarketFeature */
         DistrictMarketFeature: {
@@ -2617,6 +2685,8 @@ export interface components {
             mapped_sales: number;
             /** Historical */
             historical: boolean;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
+            boundary_rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** EvidenceSearchClaimResponse */
         EvidenceSearchClaimResponse: {
@@ -2674,6 +2744,7 @@ export interface components {
             evidence_pointer: string;
             /** Retrieved At */
             retrieved_at: string | null;
+            rights?: components["schemas"]["SourceRightsResponse"] | null;
         };
         /** SourceRightsRegistryResponse */
         SourceRightsRegistryResponse: {

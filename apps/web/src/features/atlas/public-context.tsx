@@ -3,6 +3,7 @@
 import type { components } from "@property-platform/contracts";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { CitedRights } from "@/features/projects/cited-rights";
 import styles from "./public-context.module.css";
 
 type Context = components["schemas"]["PublicContextResponse"];
@@ -285,6 +286,7 @@ export function PublicContext({ locale }: { locale: string }) {
               {data.acquisition_method === "manual_archive_import" && (
                 <p>{t("archiveNote")}</p>
               )}
+              <CitedRights rights={data.rights} />
             </footer>
           </>
         )

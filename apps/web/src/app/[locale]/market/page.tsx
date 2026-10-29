@@ -7,6 +7,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { AdrecMarket } from "@/features/atlas/adrec-market";
 import styles from "@/features/atlas/market-page.module.css";
 import type { MapLabels } from "@/features/atlas/types";
+import { pickRightsLabels } from "@/features/projects/cited-rights";
 import { isLocale } from "@/i18n/locales";
 import { Link } from "@/i18n/navigation";
 
@@ -71,7 +72,11 @@ export default async function MarketPage({ params, searchParams }: Props) {
       </nav>
       <NextIntlClientProvider
         locale={locale}
-        messages={{ Market: messages.Market }}
+        messages={{
+          Market: messages.Market,
+          // Only the rights texts each cited source needs (A24).
+          Project: pickRightsLabels(messages.Project),
+        }}
       >
         <AdrecMarket
           key={territory}
