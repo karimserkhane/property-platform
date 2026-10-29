@@ -1,6 +1,7 @@
 import math
 from datetime import date, datetime
 from typing import Literal
+from urllib.parse import urlsplit
 from uuid import UUID
 
 from ninja import Router, Schema, Status
@@ -44,22 +45,40 @@ def cited_rights(row, field):
 
 
 class CitedSourceResponse(Schema):
-    """One site cited by a list of map features, with its reviewed rights (A24)."""
+    """One site cited by a list of map features, with its reviewed rights (A24).
 
+    `host` is the reviewed registry host covering the site (or the page's own host when
+    no review lists it); a feature's rights are those of the entry covering its URL.
+    `url` and `name` are the first page of that site the list cites.
+    """
+
+    host: str
     url: str
     name: str
     rights: SourceRightsResponse
 
 
 def cited_sources(collection, source):
-    """Distinct sources of a feature list, so thousands of features need no rights each."""
-    from property_platform.modules.evidence.source_rights import public_rights
+    """One entry per site a feature list cites, so its thousands of features need no rights.
+
+    Map features cite one page each (an OpenStreetMap way, a register record), but
+    rights belong to the site: every page of a reviewed host shares its review.
+    """
+    from property_platform.modules.evidence.source_rights import public_rights, rights_for
 
     found = {}
     for feature in _value(collection, "features") or ():
         url, name = source(_value(feature, "properties") or {})
-        if url and url not in found:
-            found[url] = {"url": url, "name": name or "", "rights": public_rights(url)}
+        if not url:
+            continue
+        host = rights_for(url)["host"] or (urlsplit(url).hostname or "").lower()
+        if host and host not in found:
+            found[host] = {
+                "host": host,
+                "url": url,
+                "name": name or "",
+                "rights": public_rights(url),
+            }
     return list(found.values())
 
 
