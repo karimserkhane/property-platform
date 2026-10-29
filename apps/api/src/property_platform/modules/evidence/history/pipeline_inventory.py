@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 
 from django.apps import apps
 from django.db import connection
@@ -42,7 +43,7 @@ GROUPS = {
         "ProjectMediaPublication",
     },
     "property-platform-references": {"ResearchReference"},
-    "property-platform-source-rights": {"SourceRights"},
+    "property-platform-source-rights": {"SourceRights", "SourceRightsEnforcement"},
     "property-platform-imagery": {"ImageryScene"},
     "property-platform-construction-activity": {"ConstructionActivityMeasurement"},
     # Derived from the published dossiers only (E01).
@@ -67,6 +68,25 @@ GROUPS = {
         "AdministrativeAreaSourceAlias",
     },
 }
+# Tables whose rows are not data read from a source. Every other owned table is a
+# dataset of `evidence.data_rights`, which gives each row the rights of its site (A23).
+RIGHTS_EXEMPT = {
+    "evidence.audit_event": "Field journal of parcel observations",
+    "evidence.row_revision": "Row journal of every owned table",
+    "evidence.ingestion_run": "Collection run metadata",
+    "evidence.ingestion_execution": "Prefect execution metadata",
+    "evidence.ingestion_execution_run": "Prefect execution metadata",
+    "evidence.source": "Catalogue of collectors",
+    "evidence.capture_object": "Stored bytes of a capture, which has its own rights row",
+    "evidence.stored_object": "Stored bytes of captures and media",
+    "evidence.source_rights": "The reviewed rights themselves",
+    "evidence.source_rights_enforcement": "The owner's enforcement switches",
+    "evidence.basemap_request": "Demand queue without source content",
+    "evidence.walking_request": "Demand queue without source content",
+    "evidence.history_exclusion": "Operator decision",
+    "evidence.project_market_label": "Reviewed operator decision linking register labels",
+}
+_DATASET = re.compile(r"'((?:evidence|real_estate)\.[a-z_]+)'::text")
 SHARED = {
     "Source",
     "Capture",
@@ -88,6 +108,8 @@ def inventory():
             FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
             WHERE n.nspname IN ('real_estate','evidence') AND c.relkind='r' ORDER BY 1,2""")
         tables = cursor.fetchall()
+        cursor.execute("SELECT pg_get_viewdef(to_regclass('evidence.data_rights'))")
+        with_rights = set(_DATASET.findall(cursor.fetchone()[0] or ""))
     models = {
         model._meta.db_table: model.__name__
         for model in apps.get_models(include_auto_created=True)
@@ -101,6 +123,8 @@ def inventory():
             if model in SHARED
             else [flow for flow, members in GROUPS.items() if model in members]
         )
+        name = f"{schema}.{table}"
+        rights = "evidence.data_rights" if name in with_rights else RIGHTS_EXEMPT.get(name)
         rows.append(
             {
                 "schema": schema,
@@ -108,13 +132,15 @@ def inventory():
                 "model": model,
                 "audited": audited,
                 "flows": flows,
-                "covered": bool(flows) and audited,
+                "rights": rights,
+                "covered": bool(flows) and audited and rights is not None,
             }
         )
     return {
         "checked_at": timezone.now().isoformat(),
         "tables": rows,
         "uncovered": [f"{r['schema']}.{r['table']}" for r in rows if not r["covered"]],
+        "rights_uncovered": [f"{r['schema']}.{r['table']}" for r in rows if r["rights"] is None],
         "exceptions": [
             {
                 "provider": "esri",

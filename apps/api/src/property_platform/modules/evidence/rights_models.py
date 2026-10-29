@@ -1,8 +1,8 @@
-"""Reviewed source rights mirrored from `source_rights.json`, with their history (A19)."""
+"""Reviewed source rights and their enforcement, mirrored with their history (A19, A23)."""
 
 from django.db import models
 
-from .source_rights import COLLECTION, PUBLICATION
+from .source_rights import COLLECTION, PUBLICATION, RIGHTS
 
 
 class SourceRights(models.Model):
@@ -62,5 +62,57 @@ class SourceRights(models.Model):
                     revocation_reason__regex=r"\S",
                 ),
                 name="source_rights_revocation_valid",
+            ),
+        ]
+
+
+class SourceRightsEnforcement(models.Model):
+    """The owner's switch for each right (A22), mirrored with its history for SQL (A23).
+
+    `evidence.data_rights` reads the publication switch to flag rows shown beyond their
+    site's terms. The repository file stays the decision; a changed one is revoked here.
+    """
+
+    name = models.CharField(max_length=20)
+    enforced = models.BooleanField()
+    decided_on = models.DateField()
+    decided_by = models.CharField(max_length=80)
+    basis = models.CharField(max_length=500)
+    actor = models.CharField(max_length=160)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True)
+    revoked_by = models.CharField(max_length=160, blank=True)
+    revocation_reason = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        db_table = "source_rights_enforcement"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    name__in=RIGHTS,
+                    decided_by__regex=r"\S",
+                    basis__regex=r"\S",
+                    actor__regex=r"\S",
+                ),
+                name="source_rights_enforcement_decided",
+            ),
+            models.UniqueConstraint(
+                fields=["name"],
+                condition=models.Q(active=True),
+                name="source_rights_enforcement_one_active",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    active=True, revoked_at__isnull=True, revoked_by="", revocation_reason=""
+                )
+                | models.Q(
+                    active=False,
+                    revoked_at__isnull=False,
+                    revoked_at__gte=models.F("created_at"),
+                    revoked_by__regex=r"\S",
+                    revocation_reason__regex=r"\S",
+                ),
+                name="source_rights_enforcement_revocation_valid",
             ),
         ]
