@@ -21,6 +21,11 @@ class Dataset:
     description: str
     parameters: dict
     cron: str | None
+    # A queue drain: a later run does everything an earlier one would, so the runner keeps
+    # only the latest overdue run (`deployments.cancel_superseded_drains`).
+    drain: bool = False
+    # Earlier default cadences; an initial schedule still on one moves to `cron`.
+    retired_crons: tuple[str, ...] = ()
 
 
 DATASETS = (
@@ -92,7 +97,10 @@ DATASETS += tuple(
         "property-platform-basemap-archive",
         "Archive demanded/covered tiles with exact acquisition times; preserve every version.",
         {"provider": provider},
-        "* * * * *",
+        # The map waits up to three minutes for a first acquisition (DATA_HISTORY.md).
+        "*/2 * * * *",
+        drain=True,
+        retired_crons=("* * * * *",),
     )
     for provider in ("openfreemap", "sentinel-worldcover-2020", "sentinel-worldcover-2021")
 )
@@ -156,7 +164,10 @@ DATASETS += (
         "property-platform-walking-areas",
         "Compute and archive queued walking areas, with source graph and exact ingestion time.",
         {},
-        "* * * * *",
+        # Odd minutes, between the basemap passes on even ones.
+        "1-59/2 * * * *",
+        drain=True,
+        retired_crons=("* * * * *",),
     ),
     Dataset(
         "construction-activity",

@@ -94,7 +94,7 @@ def test_history_and_static_assets_are_not_recurring_jobs():
         assert job.cron is None
     assert not any("font" in dataset.name or "home" in dataset.name for dataset in DATASETS)
     assert next(d for d in DATASETS if d.name == "routing-osm-graph").cron == "0 3 1 * *"
-    assert next(d for d in DATASETS if d.name == "walking-areas").cron == "* * * * *"
+    assert next(d for d in DATASETS if d.name == "walking-areas").cron == "1-59/2 * * * *"
 
 
 def test_domain_result_preserves_quarantine_as_an_explicit_non_retry_outcome(monkeypatch):
