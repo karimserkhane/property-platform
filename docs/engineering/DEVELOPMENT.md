@@ -1029,6 +1029,13 @@ docker compose -f infra/local/compose.yaml exec api python manage.py import_reem
 
 L'environnement `.cache/imagery-tools` installe Rasterio et ses dépendances **uniquement pour ce traitement**. Le script `C:\Users\Karim\Repositories\property-platform\scripts\acquire_reem_imagery.py` lit les métadonnées STAC puis seulement les plages d'octets utiles des rasters, recadre Reem, reprojette pour la carte et produit un reçu borné. Cela peut prendre plusieurs minutes. Les certificats HTTPS restent vérifiés.
 
+Le script respecte l'interrupteur de collecte ([A27](../tasks/A27.md)) : l'item STAC, l'en-tête et chaque plage du raster, redirections comprises, s'ouvrent par `evidence/source_fetch.py`, comme les connecteurs manuels de l'API. Si la collecte est appliquée (`source_rights_enforcement.json`) et qu'Earth Search ou le stockage `sentinel-cogs` est revu comme interdit, il s'arrête avant toute requête vers ce site, sans reçu, sur `CollectionForbidden: Source terms forbid automated collection`. Ce module et `source_rights.py` n'importent que la bibliothèque standard, sans Django : le script les lit dans `apps/api/src`, qu'il ajoute lui-même à son chemin d'import, et le venv ci-dessus n'installe rien de plus. Le script est aussi copié dans l'image d'ingestion (`/workspace/scripts/acquire_reem_imagery.py`), qui contient Rasterio 1.5.2 et le paquet API installé : le même import y fonctionne. Pour le vérifier sans aucun accès réseau, `--help` charge Rasterio et le contrôle puis affiche l'aide :
+
+```powershell
+.\.cache\imagery-tools\Scripts\python.exe scripts/acquire_reem_imagery.py --help
+docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion exec ingestion python /workspace/scripts/acquire_reem_imagery.py --help
+```
+
 `compose cp` copie ce reçu local vers `/tmp/sentinel-reem.json` **dans le conteneur API**. La dernière commande vérifie identité, coordonnées, dates, empreinte et taille, puis stocke les deux aperçus et leurs preuves en base. Ces fichiers de travail ne vont pas dans Git. Une scène existante n'est pas remplacée silencieusement si son rendu change : la commande exige alors une revue.
 
 Enfin relancer le site avec `pnpm.cmd dev:web`, ou reconstruire le profil Docker de prévisualisation du début du guide. Ouvrir `/en/explore`, essayer RT4, une parcelle, les onglets rues/projets, la légende et les dates satellite. Les imports ne sont pas nécessaires pour simplement consulter les données déjà présentes.
