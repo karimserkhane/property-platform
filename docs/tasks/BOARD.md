@@ -32,6 +32,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A24](A24.md) | A | Droits de chaque source dans toute l'API et sur la carte | 1 | A22 | non (décidée le 29/10) | done | claude |
 | [A25](A25.md) | A | Interrupteur de collecte respecté par tous les collecteurs | 2 | A22 | non | done | claude |
 | [A26](A26.md) | A | Runner Prefect libéré des files minute et des exécutions orphelines | 1 | — | non | done | claude |
+| [A27](A27.md) | A | Interrupteur de collecte respecté par le script d'imagerie manuel | 2 | A25 | non | in-progress | claude |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
