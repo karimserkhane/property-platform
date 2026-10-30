@@ -31,7 +31,7 @@ La table `evidence.evidence_search_entry` (migration `0040`) garde `search_text`
 
 ## 3. Reconstruction
 
-Le flow `property-platform-evidence-search` (déploiement `evidence-search`, tous les jours à 02:30, **horaire inactif** jusqu'à décision) appelle l'opération de domaine `evidence_search`, qui exécute `rebuild_search_index` :
+Le flow `property-platform-evidence-search` (déploiement `evidence-search`, tous les jours à 02:30 heure de Dubaï ; horaire enregistré inactif, activé sur le Prefect partagé le 30 octobre 2026) appelle l'opération de domaine `evidence_search`, qui exécute `rebuild_search_index` :
 
 - verrou consultatif : une seule reconstruction à la fois ;
 - un run `IngestionRun` (source `evidence-search-index`) par exécution Prefect, idempotent par clé de run ;
@@ -46,7 +46,7 @@ Dans le contrôle de reconstruction ([REBUILD.md](REBUILD.md)), l'index est reco
 - **Contenu.** 873 affirmations ajoutées pour 177 projets publiés, version `evidence-search-v1`. Aucun vecteur : `embeddings` vaut `not_configured`, car le service facultatif ne tourne pas.
 - **Lancement.** Le flow a été appelé directement dans le conteneur d'ingestion, parce que le runner avait des heures de retard (corrigé par [A26](../tasks/A26.md)).
 - **Contrôle par la route.** Les requêtes « penthouse », « handover » et « Saadiyat Grove » trouvent leurs fiches, chaque résultat portant sa source et ses droits. « escrow » ne trouve rien.
-- **Horaire.** L'horaire quotidien `evidence-search` (02 h 30) reste inactif : sans lui, l'index ne suit pas les nouvelles publications.
+- **Horaire.** Karim a fait activer l'horaire quotidien `evidence-search` (`30 2 * * *`, Asia/Dubai) le 30 octobre 2026 : l'index suit désormais les nouvelles publications. Première course planifiée le 31 octobre à 02 h 30, heure de Dubaï (30 octobre, 22 h 30 UTC).
 
 ## 4. Route HTTP
 
