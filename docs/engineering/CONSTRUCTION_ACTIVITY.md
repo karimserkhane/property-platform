@@ -43,7 +43,7 @@ Ne sont jamais mesurés sans lien de parcelle relu : les points de courtier, d'�
 
 ## Exécution
 
-Flow Prefect `property-platform-construction-activity`, déploiement `construction-activity` (paramètre `territory` : `all` ou un territoire enregistré), horaire `0 4 5 * *` (Asia/Dubai) enregistré **inactif**. L'opération de domaine `construction_activity` ouvre un `ActivityCollector` (`collectors/sentinel_measure.py`) et appelle `activity_import.measure_activity` :
+Flow Prefect `property-platform-construction-activity`, déploiement `construction-activity` (paramètre `territory` : `all` ou un territoire enregistré), horaire `0 4 5 * *` (Asia/Dubai) enregistré inactif, activé sur le Prefect partagé le 30 octobre 2026. L'opération de domaine `construction_activity` ouvre un `ActivityCollector` (`collectors/sentinel_measure.py`) et appelle `activity_import.measure_activity` :
 
 1. Exécution `IngestionRun` sur la source `sentinel-2-l2a-earth-search`, sous le verrou consultatif `8473303` (une seule mesure à la fois).
 2. Une seule recherche sur l'emprise de toutes les parcelles retenues ; chaque page est une capture.
@@ -73,7 +73,7 @@ Chaque exécution mensuelle ajoute la paire la plus récente ; l'historique se c
 
 - **Traces.** 16 captures : 2 pages de recherche STAC et 14 fenêtres d'image. Le journal des lignes contient 7 révisions.
 - **Lancement.** Le flow a été appelé directement dans le conteneur d'ingestion, parce que le runner avait des heures de retard (corrigé par [A26](../tasks/A26.md)).
-- **Horaire.** L'horaire mensuel `construction-activity` (`0 4 5 * *`) reste inactif. La fiche annonce pourtant une comparaison chaque mois : tant que Karim ne l'active pas, de nouvelles paires ne sont mesurées qu'à la main.
+- **Horaire.** Karim a fait activer l'horaire mensuel `construction-activity` (`0 4 5 * *`, Asia/Dubai) le 30 octobre 2026 : la comparaison mensuelle annoncée sur la fiche est désormais planifiée. Première course le 5 novembre à 04 h 00, heure de Dubaï (00 h 00 UTC).
 
 ## Rejeu dans le contrôle de reconstruction
 
