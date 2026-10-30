@@ -65,6 +65,7 @@ source_modules = [
     "property_platform.modules.evidence.runs",
     "property_platform.modules.evidence.collection_profiles",
     "property_platform.modules.evidence.media_storage",
+    "property_platform.modules.evidence.source_fetch",
 ]
 forbidden_modules = [
     "property_platform.modules.evidence.history",

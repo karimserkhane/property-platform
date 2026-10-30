@@ -37,3 +37,17 @@ def enforce_rights(monkeypatch):
 def enforced_rights(enforce_rights):
     """Every right applied, as once the owner switches them on."""
     enforce_rights()
+
+
+@pytest.fixture
+def forbid_collection(monkeypatch):
+    """Review hosts as forbidding collection, whatever their terms say today (A25)."""
+
+    def forbid(*hosts):
+        rows = tuple(
+            {**row, "collection": "forbidden"} if row["host"] in hosts else row
+            for row in source_rights.source_rights()
+        )
+        monkeypatch.setattr(source_rights, "source_rights", lambda: rows)
+
+    return forbid

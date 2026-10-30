@@ -3,11 +3,11 @@
 import json
 import math
 from datetime import UTC, datetime
-from urllib.error import HTTPError
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 from ..collection_profiles import DEFAULT_TERRITORY, collection_for
+from ..source_fetch import open_source
 
 SOURCE_KEY = collection_for().parcel_namespace
 BASE_URL = "https://onwani.abudhabi.ae/arcgis/rest/services/MyLand/SMARTHUB/MapServer/0"
@@ -35,11 +35,7 @@ def fetch(params=None):
     request = Request(
         url, headers={"User-Agent": "PropertyPlatform/0.1 (manual source acquisition)"}
     )
-    try:
-        response = urlopen(request, timeout=30)
-    except HTTPError as exc:
-        response = exc
-    with response:
+    with open_source(request, timeout=30) as response:
         payload = response.read(MAX_BYTES + 1)
         receipt = {
             "url": url,

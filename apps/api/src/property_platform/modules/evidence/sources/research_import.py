@@ -2,9 +2,8 @@ import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from urllib.error import HTTPError
 from urllib.parse import urlparse
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 from django.contrib.gis.geos import Point
 from django.db import transaction
@@ -18,6 +17,7 @@ from ..collection_profiles import DEFAULT_TERRITORY, collection_for
 from ..media_storage import read_capture
 from ..models import Capture, IngestionRun, MapObservation, ResearchReference, Source
 from ..runs import mark_failed
+from ..source_fetch import open_source
 from .research_sources import page_metadata, project_marker
 
 VERSION = "district-references-v3"
@@ -158,17 +158,17 @@ def reprocess_reference(reference, *, actor, territory=DEFAULT_TERRITORY):
 
 
 def fetch_reference(url):
-    """Default bounded acquisition; workers may inject a separately managed transport."""
+    """Default bounded acquisition; workers may inject a separately managed transport.
+
+    Called directly or by `import_reference`, it checks the collection switch first,
+    whatever rows the reference flow already filtered (A25).
+    """
     started = datetime.now(UTC)
     request = Request(
         url,
         headers={"User-Agent": "PropertyPlatform/0.1 (manual public reference acquisition)"},
     )
-    try:
-        response = urlopen(request, timeout=18)
-    except HTTPError as exc:
-        response = exc
-    with response:
+    with open_source(request, timeout=18) as response:
         payload = response.read(MAX_BYTES + 1)
         if len(payload) > MAX_BYTES:
             raise ValueError("Reference exceeds capture budget")
