@@ -210,6 +210,24 @@ def test_range_session_requires_partial_responses_and_reviewed_hosts():
             read_window(record, parcel(8, 8, 20, 16), open_asset=session.open)
 
 
+@pytest.mark.parametrize("enforced", [False, True])
+def test_range_session_follows_the_collection_switch(
+    enforced, enforce_collection, forbid_collection
+):
+    enforce_collection(enforced)
+    forbid_collection("sentinel-cogs.s3.us-west-2.amazonaws.com")
+    record, files = scene("S2C_40RBN_20260901_0_L2A", VALUES, SCL)
+    log = []
+    with RangeSession(transport=ranges(files, log=log)) as session:
+        if enforced:
+            with pytest.raises(AcquisitionError, match="forbid"):
+                read_window(record, parcel(8, 8, 20, 16), open_asset=session.open)
+        else:
+            window = read_window(record, parcel(8, 8, 20, 16), open_asset=session.open)
+            assert (window["arrays"]["nir"] == 2500).all()
+    assert (log == []) is enforced
+
+
 END = datetime(2026, 10, 25, tzinfo=UTC)
 BBOX = (54.38, 24.47, 54.43, 24.52)
 

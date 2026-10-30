@@ -63,6 +63,29 @@ def test_no_arbitrary_redirect_or_oversized_source(tmp_path, monkeypatch):
     assert list((tmp_path / "sources").iterdir()) == []
 
 
+@pytest.mark.parametrize("enforced", [False, True])
+def test_extract_follows_the_collection_switch(
+    enforced, tmp_path, monkeypatch, enforce_collection, forbid_collection
+):
+    monkeypatch.setenv("ROUTING_STORAGE_DIR", str(tmp_path))
+    enforce_collection(enforced)
+    forbid_collection("geofabrik.de")
+    payload = b"header-OSMHeader" + b"pbf-fixture"
+    seen = []
+
+    def respond(request):
+        seen.append(request.method)
+        return httpx.Response(200, content=payload if request.method == "GET" else b"")
+
+    with client_for(respond):
+        if enforced:
+            with pytest.raises(AcquisitionError, match="forbid"):
+                routing.acquire_graph()
+        else:
+            assert routing.acquire_graph().byte_length == len(payload)
+    assert seen == ([] if enforced else ["HEAD", "GET"])
+
+
 def test_db_replay_is_streamed_hash_checked_and_needs_no_source_network(tmp_path, monkeypatch):
     monkeypatch.setenv("ROUTING_STORAGE_DIR", str(tmp_path))
     payload = b"archived-pbf"

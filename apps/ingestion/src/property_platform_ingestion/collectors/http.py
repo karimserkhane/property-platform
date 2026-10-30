@@ -50,6 +50,17 @@ def checked_url(url: str) -> str:
     raise AcquisitionError("Literal IP addresses are not accepted as sources")
 
 
+def collectable_url(url: str) -> str:
+    """Refuse, before any request, a site whose terms forbid collection once enforced.
+
+    Every transport to a source site calls this, `SourceHTTP` and the collectors that
+    keep their own budgets alike, so the switch of A22 stops them all at once (A25).
+    """
+    if not collection_allowed(url):
+        raise AcquisitionError("Source terms forbid automated collection")
+    return url
+
+
 @dataclass(frozen=True)
 class Acquisition:
     url: str
@@ -174,8 +185,7 @@ class SourceHTTP:
         """Allow query parameters only when a connector verified a registered base."""
         checked_url(url)
         # Last guard for every connector, including manual runs of a skipped source.
-        if not collection_allowed(url):
-            raise AcquisitionError("Source terms forbid automated collection")
+        collectable_url(url)
         if allowed_base is None:
             approved = url in self._allowed_urls
         else:

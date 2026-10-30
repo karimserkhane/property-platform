@@ -17,7 +17,7 @@ from urllib.parse import urlencode, urlsplit
 import httpx
 import numpy as np
 
-from .http import AcquisitionError, checked_url
+from .http import AcquisitionError, checked_url, collectable_url
 from .sentinel_activity import ASSET_HOST, BANDS, CLASSIFICATION, COLLECTION, reflectance
 
 SEARCH_URL = "https://earth-search.aws.element84.com/v1/search"
@@ -188,6 +188,7 @@ class RangeSession:
         return self._lengths[url]
 
     def _request(self, method, url, **headers):
+        collectable_url(url)
         try:
             response = self._client.request(method, url, headers=headers)
         except httpx.HTTPError as exc:
