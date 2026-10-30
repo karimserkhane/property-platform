@@ -55,6 +55,26 @@ Chaque exécution mensuelle ajoute la paire la plus récente ; l'historique se c
 
 **Constat du 25 octobre 2026 (base locale, lecture seule).** Aucun des 156 liens d'identité actifs ne vise une parcelle : 151 visent un lieu (point) et 5 un bâtiment. Le flow ne mesure donc encore rien. Le point relu d'un projet tombe dans exactement une parcelle courante pour 116 liens (108 projets) ; 23 points tombent dans plusieurs parcelles et 12 dans aucune ; parmi les 116, quatre parcelles font moins de 0,2 ha et plusieurs dépassent 14 ha (plans d'ensemble). Karim a choisi le 26 octobre la règle ci-dessus ([B06](../tasks/B06.md)) : elle retient aujourd'hui **7 projets sur 7 parcelles** (5 liens à un point du registre, 4 à une emprise de bâtiment, certains pour le même projet). Les 67 points de courtier qui tombent dans une seule parcelle de 0,2 à 10 ha restent exclus.
 
+**Première exécution réelle — 29 octobre 2026.**
+
+- **Exécution.** Exécution Prefect `beautiful-potoo`, acteur `claude`, source `sentinel-2-l2a-earth-search`, de 19 h 39 à 19 h 40 UTC, statut `succeeded`.
+- **Mesures.** 7 cibles et 7 mesures, sans échec, parcelle illisible ni report. Toutes viennent de la tuile MGRS-39RZH, avec la paire de scènes du 27/09 (`S2C_39RZH_20260927`) et du 17/10/2026 (`S2C_39RZH_20261017`). Tous les pixels de chaque parcelle sont clairs.
+- **Niveaux.**
+
+  | Projet | Territoire | Niveau | Base de la parcelle | Surface | Pixels clairs |
+  | --- | --- | --- | --- | --- | --- |
+  | Manarat Living | Saadiyat | changement modéré | point du registre | 4 892 m² | 52 / 52 |
+  | Ajwan Towers | Saadiyat | peu de changement | point du registre | 9 340 m² | 95 / 95 |
+  | Manarat Living 2 | Saadiyat | peu de changement | point du registre | 5 694 m² | 56 / 56 |
+  | Nouran Living | Saadiyat | peu de changement | point du registre | 10 532 m² | 107 / 107 |
+  | Park View | Saadiyat | peu de changement | emprise de bâtiment | 10 191 m² | 102 / 102 |
+  | Soho Square | Saadiyat | peu de changement | point du registre | 7 682 m² | 74 / 74 |
+  | Reem Nine | Reem | peu de changement | emprise de bâtiment | 4 167 m² | 45 / 45 |
+
+- **Traces.** 16 captures : 2 pages de recherche STAC et 14 fenêtres d'image. Le journal des lignes contient 7 révisions.
+- **Lancement.** Le flow a été appelé directement dans le conteneur d'ingestion, parce que le runner avait des heures de retard (corrigé par [A26](../tasks/A26.md)).
+- **Horaire.** L'horaire mensuel `construction-activity` (`0 4 5 * *`) reste inactif. La fiche annonce pourtant une comparaison chaque mois : tant que Karim ne l'active pas, de nouvelles paires ne sont mesurées qu'à la main.
+
 ## Rejeu dans le contrôle de reconstruction
 
 Le contrôle `rebuild-check` ([REBUILD.md](REBUILD.md#mesures-dactivité-de-chantier-b06)) refait chaque mesure sans réseau :
@@ -81,6 +101,12 @@ Section « Changement au sol vu par satellite » de la fiche projet, après la v
 - **Méthode et limites** (bloc dépliable) : comparaison pixel par pixel avec masque nuages et ombres, seuils non calibrés, les quatre limites ci-dessus, source Copernicus Sentinel-2 L2A (Earth Search) et attribution « Contient des données Copernicus Sentinel modifiées ». Messages `Activity` en 16 langues ; identifiants en `<bdi dir="ltr">` pour l'arabe, l'ourdou et le persan.
 
 Code web : `apps/web/src/features/projects/activity.ts` et `construction-activity.tsx`. Tests : `test_activity_sheet_postgis.py`, `tests/activity.test.mjs`, parcours `e2e/projects.spec.ts` (anglais et arabe).
+
+**Vu sur la base partagée — 29 octobre 2026.** La vérification a eu lieu sur une copie temporaire du site, avec la même image web, sur le port 3103, sans accès protégé. La copie a été supprimée ensuite.
+
+- **Manarat Living, en français.** La section affiche « changement modéré », les deux dates, 52 pixels clairs sur 52 et la parcelle déduite du point du registre. Elle montre aussi la méthode, les limites, la source et la licence Copernicus, sans aucun pourcentage.
+- **En arabe.** La page s'affiche de droite à gauche, et la section est traduite. Aucune erreur dans la console.
+- **The District, sans mesure.** La page affiche « aucune mesure », avec la règle de choix des parcelles.
 
 ## Découpage
 

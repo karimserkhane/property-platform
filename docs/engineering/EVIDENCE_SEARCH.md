@@ -40,6 +40,14 @@ Le flow `property-platform-evidence-search` (déploiement `evidence-search`, tou
 
 Dans le contrôle de reconstruction ([REBUILD.md](REBUILD.md)), l'index est reconstruit en dernière étape de finition, après les relations et les liens de vérification ; la table suit la politique `derived` : son effectif est rapporté sans bloquer, car les fiches publiées dont elle dérive sont comparées elles-mêmes. `pipeline_inventory.py` la rattache au flow `property-platform-evidence-search`.
 
+**Premier index de la base partagée — 29 octobre 2026.**
+
+- **Exécution.** Exécution Prefect `faithful-oyster`, acteur `claude`, run `evidence-search-index` de 19 h 38 à 19 h 39 UTC, statut `succeeded`.
+- **Contenu.** 873 affirmations ajoutées pour 177 projets publiés, version `evidence-search-v1`. Aucun vecteur : `embeddings` vaut `not_configured`, car le service facultatif ne tourne pas.
+- **Lancement.** Le flow a été appelé directement dans le conteneur d'ingestion, parce que le runner avait des heures de retard (corrigé par [A26](../tasks/A26.md)).
+- **Contrôle par la route.** Les requêtes « penthouse », « handover » et « Saadiyat Grove » trouvent leurs fiches, chaque résultat portant sa source et ses droits. « escrow » ne trouve rien.
+- **Horaire.** L'horaire quotidien `evidence-search` (02 h 30) reste inactif : sans lui, l'index ne suit pas les nouvelles publications.
+
 ## 4. Route HTTP
 
 `GET /api/v1/preview/evidence-search?q=…&territory=…&limit=…&mode=…` (opération `previewEvidenceSearch`, `api/evidence_search.py`) renvoie `{"items": [...], "mode": …, "semantic": …}`. `mode=text` (défaut) répond par `search_claims` ; `mode=hybrid` par `hybrid_claims` (§5), et `semantic` vaut `true` seulement si le classement sémantique a été fusionné : sans le service, la réponse hybride est exactement la réponse plein texte avec `semantic: false`. Le score sémantique n'est jamais renvoyé. Chaque élément est tel que `search_claims` le produit : clé de citation, projet, genre, chemin, texte, langue, preuve (URL, nom, genre, SHA-256, pointeur, date de collecte) et date d'indexation. `q` est obligatoire (1 à 120 caractères), `territory` prend les mêmes valeurs que l'annuaire des projets, `limit` va de 1 à 50 (20 par défaut). Comme toute route `/preview`, elle répond `403 preview_disabled` hors prévisualisation locale. Les réponses `text` passent par le cache de lecture (`cached_read`) : l'ETag change dès qu'une reconstruction écrit dans la table journalisée. Les réponses `hybrid` ne sont jamais mises en cache : elles dépendent aussi de la disponibilité du service facultatif, que le cache ne suit pas (un repli enregistré pendant une panne lui survivrait). Le contrat est dans `packages/contracts` (`openapi.json`, `src/generated.ts`).
