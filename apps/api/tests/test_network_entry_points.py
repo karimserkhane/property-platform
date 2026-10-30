@@ -37,10 +37,6 @@ ENTRY_POINTS = {
     (API + "search/embeddings.py", "_call"): "Private embeddings service (E01)",
     ("infra/local/routing/server.py", "launch"): "Valhalla on 127.0.0.1",
     ("infra/local/routing/server.py", "Handler.do_POST"): "Valhalla on 127.0.0.1",
-    # Manual Sentinel-2 script, run outside both runtimes; it does not read the switch.
-    ("scripts/acquire_reem_imagery.py", "RangeReader.__init__"): "Manual imagery script",
-    ("scripts/acquire_reem_imagery.py", "RangeReader.read"): "Manual imagery script",
-    ("scripts/acquire_reem_imagery.py", "main"): "Manual imagery script",
 }
 
 
