@@ -15,15 +15,15 @@
   {
     "host": "admobility.gov.ae",
     "publisher": "Abu Dhabi Mobility (ITC)",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://admobility.gov.ae/en/terms-and-conditions/",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms protect the site content and require ITC's consent to use it, with no clause on automated access. Dated facts with a link, no copy of its content; ITC bus stops are also on data.abudhabi."
   },
   {
     "host": "adrec.gov.ae",
@@ -82,13 +82,13 @@
     "publisher": "Abu Dhabi Spatial Data Infrastructure (AD-SDI)",
     "licence": "unknown",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://arcgis.sdi.abudhabi.ae/agspublish/rest/services/OpenData/ADSDI_OpenData/MapServer/207/metadata",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Public ArcGIS publication; republication licence not established. To qualify (A21)."
+    "basis": "The ADSDI_OpenData layer metadata say 'For use by Abu Dhabi government entities only', while the same layers are public on data.abudhabi under the Abu Dhabi Government Open Data License. The owner kept it as facts until the layers are collected from the open platform (F08)."
   },
   {
     "host": "arup.com",
@@ -184,15 +184,15 @@
   {
     "host": "charterschools.abudhabi",
     "publisher": "ADEK Charter Schools",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://charterschools.abudhabi/en/copyright",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "ADEK's copyright notice allows reproduction in original form only for personal, non-commercial or internal use; its terms forbid no automated access. Dated facts with a link, no copy of its material."
   },
   {
     "host": "crystal-projects.com",
@@ -231,7 +231,7 @@
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "The public facility map page publishes no terms; doh.gov.ae refused connections on 2026-10-28, so its site terms are still to be read (A21)."
   },
   {
     "host": "earth-search.aws.element84.com",
@@ -340,15 +340,15 @@
   {
     "host": "gravity-re.com",
     "publisher": "Gravity Real Estate",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
-    "collection": "allowed",
-    "publication": "facts",
+    "terms_url": "https://gravity-re.com/terms",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "Karim",
+    "collection": "forbidden",
+    "publication": "link",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms limit the site to private, non-commercial use and forbid copying or downloading its material without written consent; collection forbidden and links kept, as for Aldar, by owner decision (A21)."
   },
   {
     "host": "gulfnews.com",
@@ -366,15 +366,15 @@
   {
     "host": "housebook.deals",
     "publisher": "Housebook",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
-    "collection": "allowed",
-    "publication": "facts",
+    "terms_url": "https://ae.housebook.deals/en/rules",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "Karim",
+    "collection": "forbidden",
+    "publication": "none",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid automated programs that scan, copy or index the service and extracting its database, for personal, non-commercial use only; collection forbidden and nothing shown, by owner decision (A21)."
   },
   {
     "host": "imkan.ae",
@@ -563,13 +563,13 @@
     "publisher": "Department of Municipalities and Transport (Onwani)",
     "licence": "unknown",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.dmt.gov.ae/en/terms-and-conditions",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Public ArcGIS service; no published reuse licence found (A18). To qualify with DMT (A21)."
+    "basis": "The DMT terms page covers privacy only and the MyLand and addressing layers carry no use limitation: no reuse licence and no prohibition found."
   },
   {
     "host": "openfreemap.org",
@@ -873,15 +873,15 @@
   {
     "host": "scad.gov.ae",
     "publisher": "Statistics Centre Abu Dhabi (SCAD)",
-    "licence": "unknown",
-    "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "licence": "UAE Federal Open Data Licence",
+    "licence_url": "https://scad.gov.ae/documents/d/guest/scad-open-data-policy",
+    "terms_url": "https://www.scad.gov.ae/terms-of-use",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "claude",
     "collection": "allowed",
-    "publication": "facts",
-    "attribution": "",
-    "basis": "Not reviewed; SCAD publishes an open data policy to check for these tables (A21)."
+    "publication": "open",
+    "attribution": "Source: Statistics Centre - Abu Dhabi (SCAD)",
+    "basis": "SCAD's open data policy (DSMN-POL-08) allows free use and sharing under the UAE Federal Open Data Licence, citing SCAD with file name and date and keeping derived data open; its terms allow reproduction with acknowledgement."
   },
   {
     "host": "sentinel-cogs.s3.us-west-2.amazonaws.com",
@@ -925,15 +925,15 @@
   {
     "host": "squareyards.ae",
     "publisher": "Square Yards",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
-    "collection": "allowed",
-    "publication": "facts",
+    "terms_url": "https://www.squareyards.ae/terms",
+    "reviewed_on": "2026-10-28",
+    "reviewed_by": "Karim",
+    "collection": "forbidden",
+    "publication": "none",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms (section 10) forbid any robot, spider or automatic device to access, acquire or copy the site, and wholesale reproduction of its content; collection forbidden and nothing shown, by owner decision (A21)."
   },
   {
     "host": "sralmaryahisland.com",
