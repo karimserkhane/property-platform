@@ -1,6 +1,11 @@
 """Isolated acquisition worker; requires rasterio==1.5.2, never the API environment.
 
 Produces a bounded acquisition receipt for import_reem_imagery. No HTML data is used.
+Every request opens through `evidence/source_fetch.py`, which checks the collection
+switch (A22) on the request and each redirect, so the switch stops this script as it
+stops the collectors (A27). That module and `source_rights.py` import only the standard
+library: the isolated venv reads them from `apps/api/src`, the ingestion image from its
+installed API package.
 """
 
 import argparse
@@ -8,9 +13,10 @@ import base64
 import hashlib
 import io
 import json
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 import rasterio
 from rasterio.enums import Resampling
@@ -19,17 +25,28 @@ from rasterio.vrt import WarpedVRT
 from rasterio.warp import transform_bounds
 from rasterio.windows import from_bounds
 
+sys.path.append(str(Path(__file__).resolve().parents[1] / "apps" / "api" / "src"))
+from property_platform.modules.evidence.source_fetch import (  # noqa: E402
+    collectable_url,
+    open_source,
+)
+
 BBOX = [54.3887, 24.4708, 54.4271, 24.5175]
 SCENES = ["S2C_40RBN_20261004_0_L2A", "S2C_40RBN_20260629_0_L2A"]
 BASE = "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/"
 
 
 class RangeReader(io.RawIOBase):
-    """Verified HTTPS range transport using Python's trust store on Windows."""
+    """Verified HTTPS range transport using Python's trust store on Windows.
+
+    Each request goes through the collection switch before it leaves (A27).
+    """
 
     def __init__(self, url):
         self.url, self.position, self.transferred = url, 0, 0
-        with urlopen(Request(url, method="HEAD"), timeout=45) as r:
+        with open_source(Request(url, method="HEAD"), timeout=45) as r:
+            if r.status != 200:
+                raise ValueError(f"Raster answered HTTP {r.status}")
             self.length = int(r.headers["Content-Length"])
 
     def readable(self):
@@ -54,7 +71,7 @@ class RangeReader(io.RawIOBase):
         if size > 8 * 1024 * 1024 or self.transferred + size > 64 * 1024 * 1024:
             raise ValueError("Raster range budget exceeded")
         start = self.position
-        with urlopen(
+        with open_source(
             Request(self.url, headers={"Range": f"bytes={start}-{start + size - 1}"}),
             timeout=45,
         ) as r:
@@ -73,17 +90,19 @@ class RangeReader(io.RawIOBase):
         return len(value)
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     results = []
     for identity in SCENES:
         started = datetime.now(UTC).isoformat()
-        with urlopen(
+        with open_source(
             Request(BASE + identity, headers={"User-Agent": "PropertyPlatform/0.1"}),
             timeout=45,
         ) as r:
+            if r.status != 200:
+                raise ValueError(f"STAC item answered HTTP {r.status}")
             payload = r.read(1024 * 1024 + 1)
         if len(payload) > 1024 * 1024:
             raise ValueError("STAC capture too large")
@@ -91,6 +110,8 @@ def main():
         asset = item["assets"]["visual"]["href"]
         if not asset.startswith("https://sentinel-cogs.s3.us-west-2.amazonaws.com/"):
             raise ValueError("Unexpected raster host")
+        # Refused here with its reason: Rasterio would hide it behind "Opener is invalid".
+        collectable_url(asset)
 
         # Read COG byte ranges, not the entire satellite tile. Render outside the API.
         def opener(path, mode="rb", *, asset_url=asset):

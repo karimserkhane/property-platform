@@ -2,11 +2,13 @@
 
 The manual connectors `maps/map_sources.py`, `maps/onwani.py` and
 `sources/research_import.py` read reviewed public endpoints with the standard library,
-outside the ingestion `SourceHTTP`. They open every request here: the request and each
-redirect it follows are checked against `collection_allowed` before they leave, so the
-switch of A22 stops these paths as it stops the collectors. Replays of archived
-receipts never come here and stay exact. No Django is needed, so protocol tests stay
-portable.
+outside the ingestion `SourceHTTP`, and so does the Sentinel-2 script
+`scripts/acquire_reem_imagery.py` from its isolated Rasterio venv (A27). They open every
+request here: the request and each redirect it follows are checked against
+`collection_allowed` before they leave, so the switch of A22 stops these paths as it
+stops the collectors. Replays of archived receipts never come here and stay exact. No
+Django is needed, so protocol tests stay portable and the script imports this module
+without the API environment.
 """
 
 from urllib.error import HTTPError
