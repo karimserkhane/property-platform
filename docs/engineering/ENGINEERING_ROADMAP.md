@@ -38,16 +38,16 @@ Autres constats :
 | --- | --- | --- | --- |
 | 1 | Journaux et trace complète des échecs ; gardes communes des routes API | Diagnostic des imports ; moins de code recopié | Fusionné (PR #1) |
 | 2 | Compression brotli/gzip et relais partagé des lectures `/api/atlas/*` | 5 à 7 fois moins de données par affichage de carte | Fusionné (PR #2) |
-| 3 | Tuiles vectorielles PostGIS (`ST_AsMVT`) pour parcelles et bâtiments | Carte fluide à l'échelle des sept émirats ; fin de la limite de 12 000 parcelles | Parcelles de l'explorateur : PR #3 ; index par zone : A06 ; bâtiments et rues : A07 |
+| 3 | Tuiles vectorielles PostGIS (`ST_AsMVT`) pour parcelles et bâtiments | Carte fluide à l'échelle des sept émirats ; fin de la limite de 12 000 parcelles | Parcelles de l'explorateur : PR #3 ; index par zone : A06 ; bâtiments et rues : A07 ; contexte hors des îles, lieux et zones : [F10](../tasks/F10.md) |
 | 4 | Cache des lectures lourdes avec `ETag` lié à la version des données (`evidence.row_revision`) | `district-map`, `market-map`, `map-context` instantanés en lecture répétée | PR #4 (instantané PostgreSQL) ; version par famille de tables : A08 ; tables de provenance : A16 |
-| 5 | Simplification des contours en SQL et regroupement des requêtes de `map-context` | Temps serveur divisé avant même le cache | À faire |
-| 6 | Images satellite servies comme fichiers cachables au lieu de base64 dans le JSON | −850 Ko sur la vue imagerie | À faire |
-| 7 | Sauvegarde automatique PostgreSQL + stockage privé, avec test de restauration planifié | Reprise après perte de données | Fusionné (PR #8, tâche A03) ; sauvegarde quotidienne et test de restauration hebdomadaire actifs |
-| 8 | Tests de parcours navigateur (Playwright) : recherche, fiche, arabe RTL, mobile ; budgets de performance en CI | Régressions visibles avant fusion | À faire |
-| 9 | Contenus bruts des captures vers le stockage objet, adressés par SHA-256 | Base et sauvegardes beaucoup plus légères | À faire |
-| 10 | Découpage interne d'`evidence` (95 fichiers, 14 700 lignes) en sous-paquets : projets, cartes, sources, historique | Ajout de fonctionnalités sans module fourre-tout ; même application Django et mêmes migrations | À faire |
-| 11 | Composants carte : état regroupé en hooks/reducers (`explorer.tsx` 20 états, `map-workbench.tsx` 18) | Fonctionnalités carte plus simples à ajouter et à tester | À faire |
-| 12 | Chaîne d'approvisionnement : images et actions par digest, mises à jour automatisées, analyse de vulnérabilités | Builds reproductibles et sûrs | À faire |
+| 5 | Simplification des contours en SQL et regroupement des requêtes de `map-context` | Temps serveur divisé avant même le cache | À faire : [A34](../tasks/A34.md) |
+| 6 | Images satellite servies comme fichiers cachables au lieu de base64 dans le JSON | −850 Ko sur la vue imagerie | À faire : [A36](../tasks/A36.md) |
+| 7 | Sauvegarde automatique PostgreSQL + stockage privé, avec test de restauration planifié | Reprise après perte de données | Fusionné (PR #8, tâche A03) ; sauvegarde quotidienne et test de restauration hebdomadaire actifs ; copie hors de la machine : [A30](../tasks/A30.md) |
+| 8 | Tests de parcours navigateur (Playwright) : recherche, fiche, arabe RTL, mobile ; budgets de performance en CI | Régressions visibles avant fusion | Parcours : A05, en CI depuis A13 ; budgets de performance : [A33](../tasks/A33.md) |
+| 9 | Contenus bruts des captures vers le stockage objet, adressés par SHA-256 | Base et sauvegardes beaucoup plus légères | Code livré par A10 (PR #35) ; jamais exécuté sur la base partagée (1,84 Go encore en SQL le 31/10) : [A29](../tasks/A29.md) |
+| 10 | Découpage interne d'`evidence` (95 fichiers, 14 700 lignes) en sous-paquets : projets, cartes, sources, historique | Ajout de fonctionnalités sans module fourre-tout ; même application Django et mêmes migrations | Fusionné (PR #33, tâche A09) |
+| 11 | Composants carte : état regroupé en hooks/reducers (`explorer.tsx` 20 états, `map-workbench.tsx` 18) | Fonctionnalités carte plus simples à ajouter et à tester | À faire (23 et 20 états le 31/10) : [A37](../tasks/A37.md) |
+| 12 | Chaîne d'approvisionnement : images et actions par digest, mises à jour automatisées, analyse de vulnérabilités | Builds reproductibles et sûrs | À faire : [A38](../tasks/A38.md) |
 
 Ordre proposé : 3 et 4 d'abord (passage à l'échelle et temps de réponse), puis 7 et 8 (filets de sécurité), puis les chantiers de structure. Le chantier 4 doit traiter un cas limite : deux transactions concurrentes peuvent valider dans le désordre, donc une version fondée sur le seul maximum de `row_revision` doit être complétée (par exemple par l'horizon des transactions en cours) pour ne jamais servir une donnée exclue.
 

@@ -16,6 +16,7 @@ import { mapControlLabels, mapLayers, mapName } from "../atlas/map-style";
 import { readParcelPages } from "../atlas/parcel-pages";
 import {
   geometryClickArea,
+  listedRights,
   parcelFillOpacity,
   parcelMapLabels,
   parcelPropertyIndex,
@@ -24,10 +25,15 @@ import {
   selectMapHit,
 } from "../atlas/presentation";
 import type { MapContext, MapLabels, UseLabels } from "../atlas/types";
+import { SourceRights } from "./evidence";
 import { projectLocationBounds } from "./neighbourhood-focus";
 import { safeSourceUrl } from "./presentation";
 import styles from "./project.module.css";
-import type { ProjectMapLocation } from "./types";
+import type {
+  ProjectMapLocation,
+  SourceRightsLabels,
+  SourceRights as SourceRightsResponse,
+} from "./types";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Popup } from "maplibre-gl";
 import { registerArchivedTiles } from "../atlas/archived-tiles";
@@ -100,6 +106,7 @@ export default function NeighbourhoodMap({
   retryLabel,
   useLabels,
   truncatedLabel,
+  rightsLabels,
 }: {
   territory: string;
   bounds: number[];
@@ -112,6 +119,7 @@ export default function NeighbourhoodMap({
   retryLabel: string;
   useLabels: UseLabels;
   truncatedLabel: string;
+  rightsLabels: SourceRightsLabels;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
@@ -121,6 +129,7 @@ export default function NeighbourhoodMap({
     title: string;
     code?: string;
     url: string | null;
+    rights: SourceRightsResponse | null | undefined;
   } | null>(null);
   const [truncated, setTruncated] = useState(false);
   const instance = useRef<LibreMap | null>(null);
@@ -330,6 +339,7 @@ export default function NeighbourhoodMap({
               setSelection({
                 title: projectFeatures[0].properties.name,
                 url: null,
+                rights: null,
               });
               return;
             }
@@ -396,6 +406,7 @@ export default function NeighbourhoodMap({
                     : parcel.properties.land_use || mapLabels.parcelTitle,
                   code: parcel.properties.code,
                   url: safeSourceUrl(parcel.properties.source_url),
+                  rights: listedRights(parcel.properties.source_url, [parcels]),
                 });
             } else {
               const feature = [
@@ -415,6 +426,11 @@ export default function NeighbourhoodMap({
                           ? mapLabels.streets
                           : mapLabels.building),
                   url: safeSourceUrl(feature.properties.source.url),
+                  rights: listedRights(feature.properties.source.url, [
+                    data.building,
+                    data.place,
+                    data.street,
+                  ]),
                 });
             }
           });
@@ -565,6 +581,10 @@ export default function NeighbourhoodMap({
               url: item.feature
                 ? safeSourceUrl(item.feature.properties.source.url)
                 : null,
+              rights: listedRights(
+                item.feature?.properties.source.url,
+                Object.values(toolContext ?? {}),
+              ),
             });
           }}
           compact
@@ -626,6 +646,12 @@ export default function NeighbourhoodMap({
             <a href={selection.url} target="_blank" rel="noopener noreferrer">
               {mapLabels.reference} ↗
             </a>
+          )}
+          {selection.rights && (
+            <SourceRights
+              source={{ rights: selection.rights }}
+              labels={rightsLabels}
+            />
           )}
         </aside>
       )}

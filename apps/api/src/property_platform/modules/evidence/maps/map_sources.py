@@ -2,11 +2,11 @@
 
 import json
 from datetime import UTC, datetime
-from urllib.error import HTTPError
 from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib.request import Request
 
 from ..collection_profiles import collection_for
+from ..source_fetch import open_source
 from .onwani import SourceError
 
 VERSION = "district-map-v5"
@@ -38,11 +38,7 @@ def fetch_url(base, params):
     url = base + "?" + urlencode(params)
     started = datetime.now(UTC)
     request = Request(url, headers={"User-Agent": "PropertyPlatform/0.1 (manual map acquisition)"})
-    try:
-        response = urlopen(request, timeout=60)
-    except HTTPError as exc:
-        response = exc
-    with response:
+    with open_source(request, timeout=60) as response:
         payload = response.read(MAX_BYTES + 1)
         receipt = {
             "url": url,

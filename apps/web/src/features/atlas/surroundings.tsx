@@ -3,6 +3,7 @@
 import type { components } from "@property-platform/contracts";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { CitedRights } from "@/features/projects/cited-rights";
 import type { AtlasLabels, MapLabels } from "./types";
 
 type Data = components["schemas"]["Surroundings"];
@@ -129,6 +130,7 @@ export function Surroundings({
                           <span>
                             ≈ <bdi>{number.format(item.distance_m)}</bdi> m
                           </span>
+                          <CitedRights rights={item.source.rights} />
                         </li>
                       ))}
                     </ul>

@@ -97,7 +97,7 @@ def test_source_title_is_plain_text_not_a_copied_assertion():
 
 def test_failed_source_remains_a_failed_run_without_invented_reference():
     with patch(
-        "property_platform.modules.evidence.sources.research_import.urlopen",
+        "property_platform.modules.evidence.source_fetch.OPENER.open",
         side_effect=TimeoutError,
     ):
         run = import_reference(

@@ -47,7 +47,7 @@ layers = ["property_platform.modules.publication", "property_platform.modules.ev
 name = "Evidence sub-packages follow their dependency direction"
 type = "layers"
 containers = ["property_platform.modules.evidence"]
-layers = ["rebuild", "projects", "maps", "sources", "history"]
+layers = ["rebuild", "search", "projects", "maps", "sources", "history"]
 
 [[tool.importlinter.contracts]]
 name = "Evidence base modules never import its sub-packages"
@@ -59,11 +59,13 @@ source_modules = [
     "property_platform.modules.evidence.basemap_models",
     "property_platform.modules.evidence.history_models",
     "property_platform.modules.evidence.project_models",
+    "property_platform.modules.evidence.search_models",
     "property_platform.modules.evidence.apps",
     "property_platform.modules.evidence.checks",
     "property_platform.modules.evidence.runs",
     "property_platform.modules.evidence.collection_profiles",
     "property_platform.modules.evidence.media_storage",
+    "property_platform.modules.evidence.source_fetch",
 ]
 forbidden_modules = [
     "property_platform.modules.evidence.history",
@@ -71,6 +73,7 @@ forbidden_modules = [
     "property_platform.modules.evidence.maps",
     "property_platform.modules.evidence.projects",
     "property_platform.modules.evidence.rebuild",
+    "property_platform.modules.evidence.search",
 ]
 
 [[tool.importlinter.contracts]]

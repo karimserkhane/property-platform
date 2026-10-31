@@ -21,3 +21,153 @@ def test_source_rights_list_the_reviewed_registry(client):
         assert item["licence_url"] == (row["licence_url"] or None)
         assert item["terms_url"] == (row["terms_url"] or None)
         assert item["attribution"] == (row["attribution"] or None)
+
+
+STAMP = "2026-10-20T00:00:00Z"
+PSI = "https://psinv.net/en/projects/abu-dhabi/al-reem-island/renad-tower-1"
+OSM = "https://www.openstreetmap.org/"
+SDI = "https://arcgis.sdi.abudhabi.ae/agshost/rest/services/Hosted/Plots/FeatureServer/0"
+
+
+def _provenance(url, **extra):
+    return {
+        "name": "Source",
+        "url": url,
+        "retrieved_at": STAMP,
+        "published_at": None,
+        "ingested_at": STAMP,
+        **extra,
+    }
+
+
+def test_every_cited_source_states_the_rights_of_its_site(enforce_rights):
+    from property_platform.api.accessibility import WalkingResponse
+    from property_platform.api.evidence_search import EvidenceSearchSourceResponse
+    from property_platform.api.parcels import FieldHistory, Provenance, ResearchReferenceResponse
+    from property_platform.api.projects import ProjectSourceResponse
+
+    enforce_rights(collection=False, publication=False)
+    detail = Provenance.model_validate(_provenance(PSI))
+    assert (detail.rights.licence, detail.rights.publication) == ("proprietary", "none")
+    # Shown only because publication is not enforced (A22).
+    assert detail.rights.shown_beyond_terms
+    history = FieldHistory.model_validate({"url": OSM, "retrieved_at": STAMP, "ingested_at": STAMP})
+    assert history.rights.licence == "ODbL-1.0"
+    reference = ResearchReferenceResponse.model_validate(
+        {
+            "label": "Forum",
+            "title": "Thread",
+            "source_kind": "forum",
+            "available": True,
+            "place_id": None,
+            "url": "https://www.reddit.com/r/AbuDhabi/comments/x/",
+            "retrieved_at": STAMP,
+            "published_at": None,
+        }
+    )
+    assert reference.rights.publication == "none"
+    search = EvidenceSearchSourceResponse.model_validate(
+        {
+            "url": PSI,
+            "name": "PSI",
+            "kind": "broker",
+            "content_sha256": None,
+            "evidence_pointer": "",
+            "retrieved_at": None,
+        }
+    )
+    assert search.rights.licence == "proprietary"
+    walking = WalkingResponse.model_validate(
+        {
+            "collection": {"type": "FeatureCollection", "features": []},
+            "ingested_at": STAMP,
+            "graph_id": "1",
+            "graph_fetched_at": STAMP,
+            "source_url": "https://download.geofabrik.de/asia/gcc-states-261019.osm.pbf",
+            "historical": False,
+        }
+    )
+    assert walking.rights.licence == "ODbL-1.0"
+    # A project source keeps the rights its read computed, else gets them from its page.
+    source = ProjectSourceResponse.model_validate(
+        {"url": PSI, "name": "PSI", "retrieved_at": STAMP, "published_at": None, "language": "en"}
+    )
+    assert source.rights.publication == "none"
+
+
+def test_map_lists_state_each_cited_site_once():
+    from property_platform.api.parcels import Collection, MapCollection
+
+    parcel = {
+        "type": "Feature",
+        "geometry": {"type": "MultiPolygon", "coordinates": []},
+        "properties": {
+            "code": "C1",
+            "community": "Reem",
+            "land_use": "",
+            "construction_status": "",
+            "category": "",
+            "source_url": SDI,
+            "source_name": "AD-SDI",
+        },
+    }
+    parcels = Collection.model_validate(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    **parcel,
+                    "id": f"00000000-0000-0000-0000-00000000000{n}",
+                    "properties": {
+                        **parcel["properties"],
+                        "id": f"00000000-0000-0000-0000-00000000000{n}",
+                    },
+                }
+                for n in (1, 2, 3)
+            ],
+            "truncated": False,
+            "classification_version": "test",
+        }
+    )
+    assert [(source.host, source.url, source.name) for source in parcels.sources] == [
+        ("arcgis.sdi.abudhabi.ae", SDI, "AD-SDI")
+    ]
+    assert parcels.sources[0].rights.licence == "unknown"
+    place = {
+        "type": "Feature",
+        "geometry": {"type": "Point", "coordinates": [54.39, 24.5]},
+        "properties": {
+            "id": "00000000-0000-0000-0000-000000000009",
+            "name": "Park",
+            "name_ar": "",
+            "kind": "park",
+            "source": _provenance(
+                OSM,
+                reliability="community",
+                acquisition_method="live",
+                timestamp_basis="collector_clock",
+            ),
+        },
+    }
+    # Each OpenStreetMap object cites its own page; they all share one site entry.
+    objects = [
+        {
+            **place,
+            "id": f"00000000-0000-0000-0000-00000000001{n}",
+            "properties": {
+                **place["properties"],
+                "id": f"00000000-0000-0000-0000-00000000001{n}",
+                "source": {**place["properties"]["source"], "url": f"{OSM}way/{n}"},
+            },
+        }
+        for n in (1, 2, 3)
+    ]
+    places = MapCollection.model_validate(
+        {"type": "FeatureCollection", "features": objects, "truncated": False}
+    )
+    assert [(source.host, source.url) for source in places.sources] == [
+        ("openstreetmap.org", f"{OSM}way/1")
+    ]
+    assert places.sources[0].rights.licence == "ODbL-1.0"
+    # Each feature keeps its provenance without repeating the rights.
+    assert "rights" not in places.features[0].properties.source.model_dump()

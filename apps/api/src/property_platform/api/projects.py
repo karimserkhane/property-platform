@@ -6,22 +6,10 @@ from uuid import UUID
 from ninja import Query, Router, Schema, Status
 from ninja.decorators import decorate_view
 
-from .parcels import Error, Geometry, PointGeometry
+from .parcels import Error, Geometry, PointGeometry, SourceRightsResponse, cited_rights
 from .read_cache import cached_read
 
 router = Router(tags=["local-preview"])
-
-
-class SourceRightsResponse(Schema):
-    """Reviewed rights of the source site (A19); `unknown` means not qualified yet."""
-
-    licence: str
-    licence_url: str | None = None
-    terms_url: str | None = None
-    publication: Literal["open", "facts", "link", "none"]
-    attribution: str | None = None
-    reviewed_on: date | None = None
-    shown_beyond_terms: bool = False
 
 
 class ProjectSourceResponse(Schema):
@@ -37,10 +25,15 @@ class ProjectSourceResponse(Schema):
     published_at: datetime | None
     language: str
     evidence_pointer: str = ""
-    rights_status: str
     rights: SourceRightsResponse | None = None
     ingested_at: datetime | None = None
     historical: bool = False
+
+    @staticmethod
+    def resolve_rights(obj):
+        # Every cited project source states its rights, whichever read built it (A24).
+        rights = obj.get("rights") if isinstance(obj, dict) else getattr(obj, "rights", None)
+        return rights or cited_rights(obj, "url")
 
 
 class ProjectDeveloperResponse(Schema):
@@ -99,6 +92,12 @@ class ProjectMediaResponse(Schema):
     width: int | None = None
     height: int | None = None
     source: ProjectSourceResponse
+    # The page the file was found on; the file's own licence is `licence_code` (A24).
+    rights: SourceRightsResponse | None = None
+
+    @staticmethod
+    def resolve_rights(obj):
+        return cited_rights(obj, "source_url")
 
 
 class ProjectMapLocationResponse(Schema):

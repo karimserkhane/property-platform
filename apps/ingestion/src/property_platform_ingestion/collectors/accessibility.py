@@ -12,7 +12,7 @@ from pathlib import Path
 
 import httpx
 
-from .http import AcquisitionError
+from .http import AcquisitionError, collectable_url
 
 GRAPH_URL = "https://download.geofabrik.de/asia/gcc-states-latest.osm.pbf"
 MAX_GRAPH_BYTES = 320 * 1024 * 1024
@@ -48,6 +48,7 @@ class GraphReceipt:
 
 
 def acquire_graph():
+    collectable_url(GRAPH_URL)
     root = Path(os.environ.get("ROUTING_STORAGE_DIR", "/routing")) / "sources"
     root.mkdir(parents=True, exist_ok=True)
     started = datetime.now(UTC)
@@ -74,7 +75,7 @@ def acquire_graph():
                 raise AcquisitionError("Unregistered regional extract redirect")
         elif metadata.status_code != 200:
             raise AcquisitionError("Regional extract metadata unavailable")
-        with client.stream("GET", url) as response:
+        with client.stream("GET", collectable_url(url)) as response:
             if (
                 response.status_code != 200
                 or response.headers.get("Content-Encoding", "identity") != "identity"

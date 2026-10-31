@@ -2130,6 +2130,108 @@
         ]
       }
     },
+    "/api/v1/preview/evidence-search": {
+      "get": {
+        "operationId": "previewEvidenceSearch",
+        "summary": "Evidence Search",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "maxLength": 120,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            },
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "territory",
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "al-reem-island",
+                    "saadiyat-island",
+                    "al-maryah-island"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Territory"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            },
+            "required": false
+          },
+          {
+            "in": "query",
+            "name": "mode",
+            "schema": {
+              "default": "text",
+              "enum": [
+                "text",
+                "hybrid"
+              ],
+              "title": "Mode",
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvidenceSearchResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Published statements matching `q`, each with its evidence (E01).\n\n`text` requires every word; `hybrid` fuses it with the optional semantic ranking and\nanswers with the full text alone without the embeddings service.",
+        "tags": [
+          "local-preview"
+        ]
+      }
+    },
     "/api/v1/preview/source-rights": {
       "get": {
         "operationId": "previewSourceRights",
@@ -2240,7 +2342,7 @@
             "type": "number"
           },
           "source": {
-            "$ref": "#/components/schemas/MapProvenance"
+            "$ref": "#/components/schemas/CitedMapProvenance"
           }
         },
         "required": [
@@ -2284,7 +2386,7 @@
         "title": "AmenityGroup",
         "type": "object"
       },
-      "MapProvenance": {
+      "CitedMapProvenance": {
         "properties": {
           "name": {
             "title": "Name",
@@ -2327,6 +2429,16 @@
           "timestamp_basis": {
             "title": "Timestamp Basis",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2339,7 +2451,82 @@
           "acquisition_method",
           "timestamp_basis"
         ],
-        "title": "MapProvenance",
+        "title": "CitedMapProvenance",
+        "type": "object"
+      },
+      "SourceRightsResponse": {
+        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
+        "properties": {
+          "licence": {
+            "title": "Licence",
+            "type": "string"
+          },
+          "licence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Licence Url"
+          },
+          "terms_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terms Url"
+          },
+          "publication": {
+            "enum": [
+              "open",
+              "facts",
+              "link",
+              "none"
+            ],
+            "title": "Publication",
+            "type": "string"
+          },
+          "attribution": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attribution"
+          },
+          "reviewed_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed On"
+          },
+          "shown_beyond_terms": {
+            "default": false,
+            "title": "Shown Beyond Terms",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "licence",
+          "publication"
+        ],
+        "title": "SourceRightsResponse",
         "type": "object"
       },
       "Surroundings": {
@@ -2440,6 +2627,16 @@
               }
             ],
             "title": "Published At"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2496,6 +2693,16 @@
             "format": "date-time",
             "title": "Retrieved At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2509,6 +2716,34 @@
           "retrieved_at"
         ],
         "title": "ImageryResponse",
+        "type": "object"
+      },
+      "CitedSourceResponse": {
+        "description": "One site cited by a list of map features, with its reviewed rights (A24).\n\n`host` is the reviewed registry host covering the site (or the page's own host when\nno review lists it); a feature's rights are those of the entry covering its URL.\n`url` and `name` are the first page of that site the list cites.",
+        "properties": {
+          "host": {
+            "title": "Host",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "rights": {
+            "$ref": "#/components/schemas/SourceRightsResponse"
+          }
+        },
+        "required": [
+          "host",
+          "url",
+          "name",
+          "rights"
+        ],
+        "title": "CitedSourceResponse",
         "type": "object"
       },
       "FieldHistory": {
@@ -2526,6 +2761,16 @@
             "format": "date-time",
             "title": "Ingested At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2609,6 +2854,14 @@
           "truncated": {
             "title": "Truncated",
             "type": "boolean"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -2806,6 +3059,65 @@
         "title": "MapProperties",
         "type": "object"
       },
+      "MapProvenance": {
+        "description": "Provenance of one map feature; its rights are in the list's `sources` (A24).",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "ingested_at": {
+            "format": "date-time",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "reliability": {
+            "title": "Reliability",
+            "type": "string"
+          },
+          "acquisition_method": {
+            "title": "Acquisition Method",
+            "type": "string"
+          },
+          "timestamp_basis": {
+            "title": "Timestamp Basis",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "url",
+          "retrieved_at",
+          "published_at",
+          "ingested_at",
+          "reliability",
+          "acquisition_method",
+          "timestamp_basis"
+        ],
+        "title": "MapProvenance",
+        "type": "object"
+      },
       "PointGeometry": {
         "properties": {
           "type": {
@@ -2982,6 +3294,16 @@
                 "type": "null"
               }
             ]
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -3039,6 +3361,14 @@
           "truncated": {
             "title": "Truncated",
             "type": "boolean"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -3250,6 +3580,14 @@
           "classification_version": {
             "title": "Classification Version",
             "type": "string"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -3639,6 +3977,14 @@
           "classification_version": {
             "title": "Classification Version",
             "type": "string"
+          },
+          "sources": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/CitedSourceResponse"
+            },
+            "title": "Sources",
+            "type": "array"
           }
         },
         "required": [
@@ -4036,6 +4382,16 @@
             "format": "date-time",
             "title": "Ingested At",
             "type": "string"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -4411,6 +4767,16 @@
             },
             "title": "Snapshots",
             "type": "array"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -4802,6 +5168,16 @@
             },
             "title": "Features",
             "type": "array"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5287,6 +5663,16 @@
             },
             "title": "Statistics",
             "type": "array"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5572,81 +5958,6 @@
           "has_map_identity"
         ],
         "title": "ProjectSummaryResponse",
-        "type": "object"
-      },
-      "SourceRightsResponse": {
-        "description": "Reviewed rights of the source site (A19); `unknown` means not qualified yet.",
-        "properties": {
-          "licence": {
-            "title": "Licence",
-            "type": "string"
-          },
-          "licence_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Licence Url"
-          },
-          "terms_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Terms Url"
-          },
-          "publication": {
-            "enum": [
-              "open",
-              "facts",
-              "link",
-              "none"
-            ],
-            "title": "Publication",
-            "type": "string"
-          },
-          "attribution": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Attribution"
-          },
-          "reviewed_on": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reviewed On"
-          },
-          "shown_beyond_terms": {
-            "default": false,
-            "title": "Shown Beyond Terms",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "licence",
-          "publication"
-        ],
-        "title": "SourceRightsResponse",
         "type": "object"
       },
       "ActivityMeasurementResponse": {
@@ -6956,6 +7267,16 @@
           },
           "source": {
             "$ref": "#/components/schemas/ProjectSourceResponse"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -7131,10 +7452,6 @@
             "title": "Evidence Pointer",
             "type": "string"
           },
-          "rights_status": {
-            "title": "Rights Status",
-            "type": "string"
-          },
           "rights": {
             "anyOf": [
               {
@@ -7168,8 +7485,7 @@
           "name",
           "retrieved_at",
           "published_at",
-          "language",
-          "rights_status"
+          "language"
         ],
         "title": "ProjectSourceResponse",
         "type": "object"
@@ -7881,6 +8197,16 @@
           "historical": {
             "title": "Historical",
             "type": "boolean"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -8051,6 +8377,26 @@
           "historical": {
             "title": "Historical",
             "type": "boolean"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "boundary_rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -8067,6 +8413,175 @@
           "historical"
         ],
         "title": "DistrictMarketResponse",
+        "type": "object"
+      },
+      "EvidenceSearchClaimResponse": {
+        "properties": {
+          "claim_key": {
+            "title": "Claim Key",
+            "type": "string"
+          },
+          "project": {
+            "$ref": "#/components/schemas/EvidenceSearchProjectResponse"
+          },
+          "kind": {
+            "enum": [
+              "summary",
+              "handover",
+              "programme_total",
+              "typologies",
+              "amenity",
+              "declared_progress",
+              "registration",
+              "component_of",
+              "has_component"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EvidenceSearchSourceResponse"
+          },
+          "indexed_at": {
+            "format": "date-time",
+            "title": "Indexed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_key",
+          "project",
+          "kind",
+          "path",
+          "text",
+          "language",
+          "source",
+          "indexed_at"
+        ],
+        "title": "EvidenceSearchClaimResponse",
+        "type": "object"
+      },
+      "EvidenceSearchProjectResponse": {
+        "properties": {
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "EvidenceSearchProjectResponse",
+        "type": "object"
+      },
+      "EvidenceSearchResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceSearchClaimResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "text",
+              "hybrid"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "semantic": {
+            "title": "Semantic",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "items",
+          "mode",
+          "semantic"
+        ],
+        "title": "EvidenceSearchResponse",
+        "type": "object"
+      },
+      "EvidenceSearchSourceResponse": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "content_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Sha256"
+          },
+          "evidence_pointer": {
+            "title": "Evidence Pointer",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieved At"
+          },
+          "rights": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRightsResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "url",
+          "name",
+          "kind",
+          "content_sha256",
+          "evidence_pointer",
+          "retrieved_at"
+        ],
+        "title": "EvidenceSearchSourceResponse",
         "type": "object"
       },
       "SourceRightsRegistryResponse": {

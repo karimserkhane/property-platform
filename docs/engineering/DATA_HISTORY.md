@@ -43,7 +43,7 @@ Les composites ESA WorldCover 2020/2021 sont gratuits sous CC BY 4.0 ([licence](
 
 `evidence/history/pipeline_inventory.py` rattache chaque table à ses flows producteurs. Les tables partagées/jonctions appartiennent aux flows qui les alimentent ; les décisions humaines ont une vérification, sans décision de revue fabriquée par une collecte.
 
-Le déploiement **data-history** contrôle tables, triggers actifs et couverture des pipelines, puis capture son rapport. Une table inconnue/non auditée fait échouer le contrôle. Les trois déploiements **basemap-openfreemap**, **basemap-sentinel-worldcover-2020**, **basemap-sentinel-worldcover-2021** traitent la file chaque minute. Les nouveaux calendriers démarrent désactivés ; ceux déjà configurés sont conservés au redémarrage.
+Le déploiement **data-history** contrôle tables, triggers actifs et couverture des pipelines, puis capture son rapport. Une table inconnue/non auditée fait échouer le contrôle. Les trois déploiements **basemap-openfreemap**, **basemap-sentinel-worldcover-2020**, **basemap-sentinel-worldcover-2021** traitent la file toutes les deux minutes, aux minutes paires ; le runner ne garde que la dernière course en retard de chaque file ([INGESTION.md](INGESTION.md), [A26](../tasks/A26.md)). Les nouveaux calendriers démarrent désactivés ; ceux déjà configurés sont conservés au redémarrage.
 
 Une nouvelle table doit ajouter son rattachement et appeler `evidence.install_row_journals(false)` dans sa migration explicite. Aucun DDL de démarrage.
 

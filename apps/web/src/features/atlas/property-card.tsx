@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { MapLocateButton } from "@/components/map-locate-button";
+import { CitedRights } from "@/features/projects/cited-rights";
 import { ProjectMapSummary } from "@/features/projects/map-summary";
 import {
   featureShape,
@@ -233,15 +234,17 @@ export function PropertyCard({
       {links
         .filter((link) => link.url !== website)
         .map((link) => (
-          <a
-            className="property-reference"
-            href={link.url}
-            key={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <bdi>{link.label}</bdi> ↗
-          </a>
+          <Fragment key={link.url}>
+            <a
+              className="property-reference"
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <bdi>{link.label}</bdi> ↗
+            </a>
+            <CitedRights rights={link.rights} />
+          </Fragment>
         ))}
       {profile && (
         <details className="property-proof">
@@ -260,6 +263,7 @@ export function PropertyCard({
           >
             {m.reference} ↗
           </a>
+          <CitedRights rights={profile.rights} />
         </details>
       )}
     </div>

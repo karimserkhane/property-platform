@@ -245,8 +245,14 @@ def test_the_database_mirrors_each_review_with_its_history(monkeypatch):
 
     reviews = source_rights.source_rights()
     first = apply_source_rights(actor=ACTOR)
-    assert first == {"created": len(reviews), "kept": 0, "revoked": 0}
-    assert apply_source_rights(actor=ACTOR) == {"created": 0, "kept": len(reviews), "revoked": 0}
+    switches = {"created": 2, "kept": 0, "revoked": 0}
+    assert first == {"created": len(reviews), "kept": 0, "revoked": 0, "enforcement": switches}
+    assert apply_source_rights(actor=ACTOR) == {
+        "created": 0,
+        "kept": len(reviews),
+        "revoked": 0,
+        "enforcement": {"created": 0, "kept": 2, "revoked": 0},
+    }
     psi = SourceRights.objects.get(host="psinv.net", active=True)
     assert (psi.collection, psi.publication, psi.licence) == ("forbidden", "none", "proprietary")
     # A revised review revokes the row in force; a removed one is revoked, never deleted.
@@ -260,6 +266,7 @@ def test_the_database_mirrors_each_review_with_its_history(monkeypatch):
         "created": 1,
         "kept": len(reviews) - 2,
         "revoked": 2,
+        "enforcement": {"created": 0, "kept": 2, "revoked": 0},
     }
     history = list(SourceRights.objects.filter(host="psinv.net").order_by("id"))
     assert [(row.publication, row.active) for row in history] == [("none", False), ("link", True)]

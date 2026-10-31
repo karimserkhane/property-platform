@@ -2,6 +2,7 @@ import type { ExpressionSpecification } from "maplibre-gl";
 import type {
   AtlasContext,
   AtlasFeature,
+  CitedSource,
   MapFeature,
   MapLabels,
   ParcelCollection,
@@ -477,6 +478,25 @@ export function districtBounds(
       Math.max(...bounds.map((b) => b[1][1])),
     ],
   ];
+}
+
+/** The reviewed rights of a cited page, from the lists' one entry per site (A24). */
+export function listedRights(
+  url: string | null | undefined,
+  lists: readonly ({ sources: CitedSource[] } | null | undefined)[],
+) {
+  let host: string;
+  try {
+    host = new URL(url ?? "").hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+  // An entry's host is the reviewed site, which covers its subdomains.
+  for (const list of lists)
+    for (const source of list?.sources ?? [])
+      if (host === source.host || host.endsWith(`.${source.host}`))
+        return source.rights;
+  return null;
 }
 
 export function sourceLabel(reliability: string, labels: MapLabels) {

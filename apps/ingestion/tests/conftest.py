@@ -18,3 +18,17 @@ def enforce_collection(monkeypatch):
 def collection_enforced(enforce_collection):
     """Collectors follow each site's terms, as the refusal tests expect."""
     enforce_collection()
+
+
+@pytest.fixture
+def forbid_collection(monkeypatch):
+    """Review hosts as forbidding collection, whatever their terms say today (A25)."""
+
+    def forbid(*hosts):
+        rows = tuple(
+            {**row, "collection": "forbidden"} if row["host"] in hosts else row
+            for row in source_rights.source_rights()
+        )
+        monkeypatch.setattr(source_rights, "source_rights", lambda: rows)
+
+    return forbid

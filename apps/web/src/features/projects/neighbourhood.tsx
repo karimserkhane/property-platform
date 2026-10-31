@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { MapLabels, UseLabels } from "../atlas/types";
+import { pickRightsLabels } from "./cited-rights";
 import { projectPositionQuality } from "./presentation";
 import styles from "./project.module.css";
 import type { ProjectLabels, ProjectMapLocation } from "./types";
@@ -80,6 +81,7 @@ export function ProjectNeighbourhood({
             unavailable={labels.mapUnavailable}
             loadingLabel={labels.loading}
             retryLabel={labels.retry}
+            rightsLabels={pickRightsLabels(labels)}
           />
         )}
       </div>
