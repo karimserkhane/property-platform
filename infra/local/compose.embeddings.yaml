@@ -6,7 +6,7 @@ services:
   embeddings:
     profiles: [embeddings]
     # text-embeddings-inference cpu-1.9.3
-    image: ghcr.io/huggingface/text-embeddings-inference@sha256:ad950d30878eceb72aaf32024d26fa2b1d04a75304fa0b4776b49aa1941fea07
+    image: ghcr.io/huggingface/text-embeddings-inference@sha256:72b107107b96f7923b031470c57e6d36b44d815eafb6e9bca103b685378400cb
     command:
       - --model-id=intfloat/multilingual-e5-small
       - --revision=614241f622f53c4eeff9890bdc4f31cfecc418b3
