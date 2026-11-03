@@ -1,0 +1,104 @@
+# A38 (owner decision of 3 November 2026): Dependabot, weekly grouped pull requests to main.
+# A version is proposed only once it has been public for 7 days (cooldown), so a release
+# pulled back after a compromise or a regression rarely reaches a pull request. Nothing
+# merges without green CI; docs/engineering/TOOLCHAIN.md lists the compatibility pins kept
+# by the ignore rules below.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Dubai
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directories:
+      - /apps/api
+      - /apps/ingestion
+      - /apps/web
+      - /infra/local/checks
+      - /infra/local/routing
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Dubai
+    cooldown:
+      default-days: 7
+    groups:
+      base-images:
+        patterns: ["*"]
+    ignore:
+      # Django supports Python 3.14 at most (TOOLCHAIN.md).
+      - dependency-name: python
+        versions: [">=3.15"]
+      # The Playwright image follows @playwright/test by hand (E2E.md): same version on both.
+      - dependency-name: mcr.microsoft.com/playwright
+      # Pinned by digest without a tag; updated by hand with its graph rebuild (MAP_ANALYSIS.md).
+      - dependency-name: ghcr.io/valhalla/valhalla-scripted
+
+  - package-ecosystem: docker-compose
+    directory: /infra/local
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Dubai
+    cooldown:
+      default-days: 7
+    groups:
+      compose-images:
+        patterns: ["*"]
+    ignore:
+      # A PostgreSQL or PostGIS major upgrade needs a dump and restore of the shared volume.
+      - dependency-name: postgis/postgis
+        update-types: [version-update:semver-major]
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
+      # Pinned by digest without a tag; updated by hand with the frozen model (EVIDENCE_SEARCH.md).
+      - dependency-name: ghcr.io/huggingface/text-embeddings-inference
+
+  - package-ecosystem: uv
+    directories:
+      - /apps/api
+      - /apps/ingestion
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Dubai
+    cooldown:
+      default-days: 7
+    groups:
+      python-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Prefect 3.8 schedules break with SQLAlchemy 2.1 hybrids (TOOLCHAIN.md).
+      - dependency-name: sqlalchemy
+        versions: [">=2.1"]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Dubai
+    cooldown:
+      default-days: 7
+    groups:
+      javascript-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Compiler API compatibility packages consumed by Next.js and openapi-typescript.
+      - dependency-name: typescript
+      - dependency-name: "@typescript/typescript6"
+      # Must stay on the Playwright image version (E2E.md).
+      - dependency-name: "@playwright/test"
