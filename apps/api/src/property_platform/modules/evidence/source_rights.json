@@ -208,6 +208,19 @@
     "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
   },
   {
+    "host": "dari.ae",
+    "publisher": "Advanced Real Estate Services LLC (ADRES), operator of DARI",
+    "licence": "proprietary",
+    "licence_url": "",
+    "terms_url": "https://www.dari.ae/en/app/term-and-condition",
+    "reviewed_on": "2026-10-24",
+    "reviewed_by": "claude",
+    "collection": "forbidden",
+    "publication": "link",
+    "attribution": "",
+    "basis": "Terms forbid robots, scrapers and any automated access, copying or republication (B01). Directory pages are only linked so buyers can verify a registration; nothing is collected or shown from them."
+  },
+  {
     "host": "deyaar.ae",
     "publisher": "Deyaar",
     "licence": "unknown",
