@@ -68,6 +68,15 @@ services:
       PREFECT_RUNNER_SERVER_PORT: "8080"
       INGESTION_STORAGE_DIR: /data
       BACKUP_DIR: /backups
+      # A30: optional second copy of each backup; empty = none, "directory" or "s3".
+      BACKUP_COPY_TARGET: ${PROPERTY_PLATFORM_BACKUP_COPY_TARGET:-}
+      BACKUP_COPY_DIR: /backup-copy
+      BACKUP_COPY_S3_ENDPOINT_URL: ${BACKUP_COPY_S3_ENDPOINT_URL:-}
+      BACKUP_COPY_S3_REGION: ${BACKUP_COPY_S3_REGION:-}
+      BACKUP_COPY_S3_BUCKET: ${BACKUP_COPY_S3_BUCKET:-}
+      BACKUP_COPY_S3_PREFIX: ${BACKUP_COPY_S3_PREFIX:-}
+      BACKUP_COPY_S3_ACCESS_KEY_ID: ${BACKUP_COPY_S3_ACCESS_KEY_ID:-}
+      BACKUP_COPY_S3_SECRET_ACCESS_KEY: ${BACKUP_COPY_S3_SECRET_ACCESS_KEY:-}
       MEDIA_STORAGE_BACKEND: local
       MEDIA_LOCAL_ROOT: /media
       MEDIA_PUBLICATION_ENABLED: "0"
@@ -76,6 +85,8 @@ services:
       - media-data:/media
       # Host folder (ignored by Git), so backups survive a Docker reset.
       - ${PROPERTY_PLATFORM_BACKUP_DIR:-../../.cache/backups}:/backups
+      # A30: external disk, synced folder or network share for the copy (BACKUPS.md).
+      - ${PROPERTY_PLATFORM_BACKUP_COPY_DIR:-../../.cache/backup-copy}:/backup-copy
     networks: [default, prefect-private]
     depends_on:
       db:

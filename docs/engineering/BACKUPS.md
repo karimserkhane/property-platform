@@ -10,7 +10,7 @@ Mise en place le 23 octobre 2026 (tâche [A03](../tasks/A03.md)). Les données m
 | Manifeste | Nom, date, version du serveur, taille, SHA-256 du fichier, comptes par table, résumé des copies | `property_platform-<horodatage UTC>.json` |
 | Médias privés (`/media`) et reçus de collecte (`/data`) | Copie incrémentale : seuls les fichiers nouveaux ou modifiés sont recopiés ; rien n'est supprimé du miroir | `files/media/`, `files/receipts/` |
 
-Le dossier est `BACKUP_DIR` dans le conteneur d'ingestion, monté depuis `${PROPERTY_PLATFORM_BACKUP_DIR:-../../.cache/backups}` (relatif à `infra/local`), c'est-à-dire `.cache/backups` à la racine du dépôt par défaut : un dossier de l'hôte ignoré par Git, qui survit à une réinitialisation de Docker. Pour une copie hors de la machine, pointer `PROPERTY_PLATFORM_BACKUP_DIR` vers un disque externe ou un dossier synchronisé.
+Le dossier est `BACKUP_DIR` dans le conteneur d'ingestion, monté depuis `${PROPERTY_PLATFORM_BACKUP_DIR:-../../.cache/backups}` (relatif à `infra/local`), c'est-à-dire `.cache/backups` à la racine du dépôt par défaut : un dossier de l'hôte ignoré par Git, qui survit à une réinitialisation de Docker. Une seconde copie, ailleurs, se configure à part : voir [Copie vers une seconde destination](#copie-vers-une-seconde-destination-a30).
 
 Les identifiants de la base passent aux outils PostgreSQL par l'environnement (`PGPASSWORD`), jamais par la ligne de commande. Aucune sauvegarde n'entre dans Git ni dans une image.
 
@@ -28,6 +28,26 @@ Les identifiants de la base passent aux outils PostgreSQL par l'environnement (`
 **Contrôle de restauration** : vérifie le SHA-256 du fichier, restaure dans une base jetable `restore_check_<horodatage>` sur le même serveur, compare les comptes à ceux du manifeste, vérifie que chaque objet local de `evidence.stored_object` restauré (médias privés, corps bruts de captures déplacés par A10) existe dans le miroir `files/media` avec sa taille et son SHA-256 (les objets S3 sont seulement comptés), puis supprime toujours la base jetable. Un écart fait échouer le flow ; au plus 50 lignes d'écart sont listées, le reste est compté.
 
 Mesures du premier essai réel (23 octobre 2026) : sauvegarde de 468 Mo en 2 min 30 (49 tables, 196 521 lignes) et première copie de 1 208 reçus (682 Mo) ; restauration contrôlée en 1 min 40, sans écart.
+
+## Copie vers une seconde destination (A30)
+
+**Décision de Karim (3 novembre 2026)** : les sauvegardes restent en local pour le moment ; la copie doit pouvoir passer plus tard à une solution cloud sans réécriture. Le module `backup_copy.py` d'`apps/ingestion` copie chaque sauvegarde réussie vers la destination choisie par `PROPERTY_PLATFORM_BACKUP_COPY_TARGET` (fichier `infra/local/.env`, ignoré par Git) :
+
+| Valeur | Destination | État |
+| --- | --- | --- |
+| vide (défaut) | aucune copie | actif sur le poste de Karim |
+| `directory` | dossier de l'hôte `PROPERTY_PLATFORM_BACKUP_COPY_DIR`, monté sur `/backup-copy` : disque externe, dossier synchronisé, partage réseau | prêt, essayé le 3 novembre |
+| `s3` | compartiment privé compatible S3 (R2, B2, S3…), variables `BACKUP_COPY_S3_*` | prêt, testé sans réseau ; aucun fournisseur choisi, aucun compte ni coût sans accord de Karim |
+
+**Ce qui est copié et dans quel ordre.** Le miroir `files/` (médias privés, corps de captures déplacés par A10/A29, reçus), puis le dump, puis son manifeste : un manifeste présent dans la copie garantit que son dump et les fichiers qu'il référence y sont aussi. Chaque fichier est vérifié après écriture (taille et SHA-256 ; en S3, le fournisseur contrôle aussi la somme `ChecksumSHA256` envoyée et l'objet porte son SHA-256 en métadonnée). Un fichier déjà présent avec la même taille n'est pas recopié : les objets du miroir sont nommés par leur SHA-256 et les reçus ne sont jamais réécrits. La rotation de la copie est celle du dossier local (7 jours, 4 semaines) ; les fichiers du miroir n'y sont jamais supprimés.
+
+**Échec visible.** La copie s'exécute dans le flow `backup-database`, après la sauvegarde locale et sa rotation : si elle échoue (dossier non monté, disque plein, somme différente, identifiants absents), le run Prefect échoue, alors que la sauvegarde locale est déjà complète.
+
+**Restaurer depuis la copie.** Le flow `restore-check` accepte `source="copy"` (paramètre du run dans Prefect, l'horaire hebdomadaire garde `local`). Pour un dossier, la restauration lit directement la copie ; pour S3, le dump et le manifeste les plus récents sont téléchargés dans `BACKUP_DIR/.copy-restore` puis effacés, et chaque objet référencé est vérifié dans la copie par sa taille et son SHA-256, sans téléchargement.
+
+**Activer une copie vers un dossier.** Dans `infra/local/.env` : `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=directory` et `PROPERTY_PLATFORM_BACKUP_COPY_DIR=E:\property-platform-backups` (exemple pour un disque externe), puis recréer le seul conteneur d'ingestion avec `--env-file infra/local/.env`. Un dossier sur le même disque que Docker ne protège pas d'une panne ou d'une perte du PC : au 3 novembre, le poste n'a qu'un disque (C:, 47 Go libres), ce qui reste la limite de la décision « local ».
+
+**Passer au cloud plus tard.** Choisir le fournisseur et son budget (décision de Karim), créer un compartiment privé et une clé limitée à ce compartiment, remplir `BACKUP_COPY_S3_*` dans `.env`, puis `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=s3`. Avant d'y copier des preuves privées, décider aussi du chiffrement côté poste (non fait : le chiffrement au repos du fournisseur ne protège pas d'un accès au compte). Les objets de plus de 5 Gio demanderont un envoi en plusieurs parties, non écrit (dump actuel : environ 1 Go).
 
 ## Restaurer manuellement
 
