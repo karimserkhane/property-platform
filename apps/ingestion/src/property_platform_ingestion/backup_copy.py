@@ -39,10 +39,15 @@ class DirectoryTarget:
         return path
 
     def inventory(self, prefix: str) -> dict[str, int]:
-        """Keys that start with `prefix`, with their sizes; partial copies are not listed."""
-        base = self._path("/".join(prefix.split("/")[:-1]))
+        """Keys that start with `prefix`, with their sizes; partial copies are not listed.
+
+        A prefix without a folder lists the top level only (dumps and manifests), so checking
+        a dump does not walk the thousands of mirrored files.
+        """
+        folder = "/".join(prefix.split("/")[:-1])
+        base = self._path(folder)
         found = {}
-        for path in base.rglob("*") if base.is_dir() else ():
+        for path in (base.rglob("*") if folder else base.iterdir()) if base.is_dir() else ():
             key = path.relative_to(self.root).as_posix()
             if key.startswith(prefix) and path.is_file() and not path.name.endswith(".partial"):
                 found[key] = path.stat().st_size
