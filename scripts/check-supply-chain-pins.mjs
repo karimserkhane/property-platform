@@ -32,7 +32,9 @@ for (const file of files) {
     if (action) {
       const reference = action[1];
       if (!reference.startsWith("./") && !/@[0-9a-f]{40}$/.test(reference)) {
-        failures.push(`${where}: action ${reference} is not pinned by commit SHA`);
+        failures.push(
+          `${where}: action ${reference} is not pinned by commit SHA`,
+        );
       }
       return;
     }
@@ -41,7 +43,9 @@ for (const file of files) {
     const reference = from?.[1] ?? image?.[1];
     // Workflow expressions (the scan matrix) are checked through the values they expand to.
     if (!reference || reference.startsWith("${{")) return;
-    const local = (from && stages.has(reference)) || reference.startsWith("property-platform-");
+    const local =
+      (from && stages.has(reference)) ||
+      reference.startsWith("property-platform-");
     if (from?.[2]) stages.add(from[2]);
     // Earlier build stages and images built by this repository carry no registry digest.
     if (local) return;
@@ -52,7 +56,9 @@ for (const file of files) {
     }
     const seen = digestsByImage.get(name);
     if (seen && seen.digest !== digest) {
-      failures.push(`${where}: ${name} is pinned to ${digest}, but ${seen.where} uses ${seen.digest}`);
+      failures.push(
+        `${where}: ${name} is pinned to ${digest}, but ${seen.where} uses ${seen.digest}`,
+      );
     } else if (!seen) {
       digestsByImage.set(name, { digest, where });
     }
@@ -63,11 +69,15 @@ if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-console.log(`Checked supply-chain pins in ${files.length} files (${digestsByImage.size} images).`);
+console.log(
+  `Checked supply-chain pins in ${files.length} files (${digestsByImage.size} images).`,
+);
 
 // CI scans exactly the pinned images, so a Dependabot bump is scanned in its own pull request.
 if (process.argv.includes("--github-output")) {
-  const images = [...digestsByImage].map(([name, { digest }]) => `${name}@${digest}`).sort();
+  const images = [...digestsByImage]
+    .map(([name, { digest }]) => `${name}@${digest}`)
+    .sort();
   const targets = JSON.stringify(["lockfiles", ...images]);
   await appendFile(process.env.GITHUB_OUTPUT, `targets=${targets}\n`);
 }
