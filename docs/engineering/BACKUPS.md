@@ -47,6 +47,8 @@ Mesures du premier essai réel (23 octobre 2026) : sauvegarde de 468 Mo en 2 min
 
 **Activer une copie vers un dossier.** Dans `infra/local/.env` : `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=directory` et `PROPERTY_PLATFORM_BACKUP_COPY_DIR=E:\property-platform-backups` (exemple pour un disque externe), puis recréer le seul conteneur d'ingestion avec `--env-file infra/local/.env`. Un dossier sur le même disque que Docker ne protège pas d'une panne ou d'une perte du PC : au 3 novembre, le poste n'a qu'un disque (C:, 47 Go libres), ce qui reste la limite de la décision « local ».
 
+**Essai réel du 3 novembre 2026** (image de la branche, conteneur à part, sans toucher au runner) : copie de la sauvegarde `property_platform-20261103T160444Z` vers `.cache/backup-copy` en 14 min 09 (dump de 438 Mo et 6 153 fichiers du miroir, 2,94 Go) ; deuxième passage sans rien recopier ; `restore-check` depuis la copie vert en 6 min 51 (58 tables, 2 801 028 lignes, 2 985 objets vérifiés par taille et SHA-256). Le mode S3 est testé sans réseau (stub botocore), jamais contre un fournisseur réel.
+
 **Passer au cloud plus tard.** Choisir le fournisseur et son budget (décision de Karim), créer un compartiment privé et une clé limitée à ce compartiment, remplir `BACKUP_COPY_S3_*` dans `.env`, puis `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=s3`. Avant d'y copier des preuves privées, décider aussi du chiffrement côté poste (non fait : le chiffrement au repos du fournisseur ne protège pas d'un accès au compte). Les objets de plus de 5 Gio demanderont un envoi en plusieurs parties, non écrit (dump actuel : environ 1 Go).
 
 ## Restaurer manuellement
