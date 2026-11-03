@@ -53,9 +53,10 @@ Chaque donnée garde ses droits. Mettre `enforced` à `true` arrête d'un coup l
 | `publication` | `open` (redistribution permise, avec `attribution`), `facts` (faits datés, courte citation d'origine et lien), `link` (simple lien) ou `none` |
 | `basis` | Ce qui justifie la décision, en une phrase |
 
-État au 28 octobre 2026, sur 83 hôtes :
+État au 28 octobre 2026, sur 83 hôtes (84 depuis l'ajout de DARI le 3 novembre) :
 - **Données ouvertes** (`open`) : OpenStreetMap (et Overpass, Geofabrik, OpenFreeMap), Overture, Copernicus Sentinel-2, ESA WorldCover, Wikimedia Commons.
 - **Collecte interdite par leurs conditions** (`forbidden`, collectés tant que la collecte n'est pas appliquée) : Property Finder, PSI, Bayut, LinkedIn, Reddit, Square Yards et Housebook (`none`), Aldar et Gravity (`link` : les liens vers leurs pages restent), par décisions de Karim des 27 et 28 octobre.
+- **DARI** (`dari.ae`, ajouté le 3 novembre 2026 avec [B08](../tasks/B08.md)) : collecte `forbidden`, publication `link`, d'après la revue de ses conditions du 24 octobre ([B01](../tasks/B01.md)) ; seules les URL des fiches de l'annuaire sont gardées, relevées à la main, pour que l'acheteur vérifie lui-même.
 - **Relues sans interdiction** : Reportage et Bloom (médias non republiables, faits et liens) ; ADREC (aucune licence ni interdiction publiée, abonnement API officiel possible).
 - **Relues le 28 octobre 2026** ([A21](../tasks/A21.md), première passe) :
   - SCAD : données ouvertes (`open`) selon sa politique DSMN-POL-08 et la licence fédérale de données ouvertes, citation du SCAD et partage à l'identique des données dérivées ;

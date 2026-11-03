@@ -14,6 +14,9 @@ from test_delivery_history_postgis import announce, read_register, sensi  # noqa
 
 from property_platform.modules.catalog.models import Project  # noqa: E402
 from property_platform.modules.evidence.models import ProjectVerificationLink  # noqa: E402
+from property_platform.modules.evidence.projects.project_protocol import (  # noqa: E402
+    project_verification_links,
+)
 from property_platform.modules.evidence.projects.project_queries import project_detail  # noqa: E402
 
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
@@ -51,9 +54,18 @@ def test_project_detail_carries_register_facts_links_and_contradictions(sensi, c
     (contradiction,) = sheet["contradictions"]
     assert contradiction["code"] == "announced_after_completion"
     assert contradiction["announcements"][0]["source"]["url"] == official["url"]
-    assert sheet["official_links"] == []
+    # The import applies the reviewed registry (B08): Sensi's DARI page is already linked.
+    reviewed = [row["url"] for row in project_verification_links() if row["project"] == "sensi"]
+    assert [link["url"] for link in sheet["official_links"]] == reviewed
 
     project = Project.objects.get(slug="sensi")
+    # Revoke it so the fixture links below are the only ones the sheet can show.
+    ProjectVerificationLink.objects.filter(project=project, active=True).update(
+        active=False,
+        revoked_at=timezone.now(),
+        revoked_by="verification-test",
+        revocation_reason="Replaced by the test fixture",
+    )
     url = "https://www.dari.ae/en/app/directory/project/123"
     ProjectVerificationLink.objects.create(
         project=project,

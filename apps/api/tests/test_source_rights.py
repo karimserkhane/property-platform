@@ -109,6 +109,9 @@ def test_the_owner_decisions_of_27_and_28_october_are_recorded():
     assert decided == {
         "aldar.com": ("forbidden", "link"),
         "bayut.com": ("forbidden", "none"),
+        # Not an owner decision: the DARI terms forbid automated access (B01, 24/10); its
+        # directory pages are linked by hand (B08).
+        "dari.ae": ("forbidden", "link"),
         "gravity-re.com": ("forbidden", "link"),
         "housebook.deals": ("forbidden", "none"),
         "linkedin.com": ("forbidden", "none"),
