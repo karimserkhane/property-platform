@@ -9,11 +9,11 @@ dependencies = [
   "dj-database-url==3.1.2",
   "psycopg[binary]==3.3.6",
   "gunicorn==26.2.0",
-  "boto3==1.43.114",
+  "boto3==1.43.119",
 ]
 
 [dependency-groups]
-dev = ["pytest==9.1.1", "pytest-django==4.14.0", "ruff==0.17.0", "import-linter==2.15"]
+dev = ["pytest==9.1.1", "pytest-django==4.14.0", "ruff==0.17.3", "import-linter==2.15"]
 
 [build-system]
 requires = ["hatchling==1.32.4"]
