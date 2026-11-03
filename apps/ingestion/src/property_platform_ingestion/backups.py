@@ -162,13 +162,20 @@ def mirror_private_files(root: Path, sources: dict[str, Path] | None = None) -> 
     return summary
 
 
-def backups(root: Path | None = None) -> list[tuple[datetime, str]]:
+def parse_names(names) -> list[tuple[datetime, str]]:
+    """Backup names made by `create_backup`, with their moment; other names are ignored."""
     found = []
-    for manifest in (root or backup_root()).glob(f"{PREFIX}*.json"):
-        match = re.fullmatch(rf"{re.escape(PREFIX)}(\d{{8}}T\d{{6}}Z)", manifest.stem)
-        if match and (manifest.with_suffix(".dump")).exists():
-            found.append((datetime.strptime(match[1], STAMP).replace(tzinfo=UTC), manifest.stem))
-    return sorted(found, reverse=True)
+    for name in names:
+        match = re.fullmatch(rf"{re.escape(PREFIX)}(\d{{8}}T\d{{6}}Z)", name)
+        if match:
+            found.append((datetime.strptime(match[1], STAMP).replace(tzinfo=UTC), name))
+    return found
+
+
+def backups(root: Path | None = None) -> list[tuple[datetime, str]]:
+    manifests = (root or backup_root()).glob(f"{PREFIX}*.json")
+    names = [path.stem for path in manifests if path.with_suffix(".dump").exists()]
+    return sorted(parse_names(names), reverse=True)
 
 
 def retained(found: list[tuple[datetime, str]]) -> set[str]:
@@ -205,12 +212,13 @@ def compare_counts(expected: dict[str, int], restored: dict[str, int]) -> list[s
     ] + [f"{table}: not in the backup manifest" for table in sorted(set(restored) - set(expected))]
 
 
-def object_mismatches(cursor, mirror: Path) -> tuple[dict, list[str]]:
+def object_mismatches(cursor, mirror: Path, describe=None) -> tuple[dict, list[str]]:
     """Every local object the dump references must be mirrored with its size and SHA-256.
 
     Raw capture bodies and private media leave SQL only after a verified copy exists, so a
     dump is restorable only together with these files. S3 objects are counted, not read:
-    their provider keeps them.
+    their provider keeps them. `describe(key)` checks a remote backup copy instead of the
+    mirror folder: it returns the copied size and SHA-256, or None when the object is absent.
     """
     cursor.execute(
         "SELECT backend, object_key, byte_length, content_sha256 "
@@ -225,6 +233,18 @@ def object_mismatches(cursor, mirror: Path) -> tuple[dict, list[str]]:
             continue
         summary["local"] += 1
         summary["local_bytes"] += size
+        if describe is not None:
+            copied = describe(key)
+            if copied is None:
+                problem = "missing from the copy"
+            elif copied[0] != size:
+                problem = f"copied with {copied[0]} bytes, expected {size}"
+            elif copied[1] != sha256:
+                problem = "copy differs from its SHA-256"
+            else:
+                continue
+            mismatches.append(f"object {key}: {problem}")
+            continue
         path = mirror.joinpath(*key.split("/"))
         if not path.resolve().is_relative_to(root):
             problem = "escapes the mirror"
@@ -243,13 +263,19 @@ def object_mismatches(cursor, mirror: Path) -> tuple[dict, list[str]]:
     return summary, mismatches
 
 
-def restore_check(url: str | None = None, name: str | None = None) -> dict:
+def restore_check(
+    url: str | None = None,
+    name: str | None = None,
+    root: Path | None = None,
+    describe=None,
+) -> dict:
     """Restore the newest (or named) dump into a throwaway database and compare counts.
 
-    Objects referenced by the restored database are checked against the file mirror.
+    Objects referenced by the restored database are checked against the file mirror under
+    `root` (the backup folder by default, or a copied folder), or through `describe`.
     """
     url = url or database_url()
-    root = backup_root()
+    root = root or backup_root()
     found = backups(root)
     if not found:
         raise FileNotFoundError("No backup to check")
@@ -280,7 +306,7 @@ def restore_check(url: str | None = None, name: str | None = None) -> dict:
             with restored.cursor() as cursor:
                 counts = table_counts(cursor)
                 objects, object_problems = (
-                    object_mismatches(cursor, root / "files" / "media")
+                    object_mismatches(cursor, root / "files" / "media", describe)
                     if "evidence.stored_object" in counts
                     else ({}, [])
                 )

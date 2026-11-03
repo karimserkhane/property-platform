@@ -491,22 +491,33 @@ def walking_areas(actor: str = "scheduled"):
 
 @flow(name="property-platform-backup", retries=0)
 def backup(actor: str = "scheduled"):
-    """Dump the database from one snapshot, mirror private files, then apply retention."""
-    from . import backups
+    """Dump the database from one snapshot, mirror private files, then apply retention.
+
+    With BACKUP_COPY_TARGET set, the finished backup is then copied there (A30); a failed
+    copy fails the run, after the local backup is complete.
+    """
+    from . import backup_copy, backups
 
     result = backups.create_backup()
     result["pruned"] = backups.prune()
     get_run_logger().info("Backup %s by %s: %s", result["name"], actor, result)
+    result["copy"] = backup_copy.copy_backup(result["name"])
+    get_run_logger().info("Backup copy of %s: %s", result["name"], result["copy"])
     return result
 
 
 @flow(name="property-platform-restore-check", retries=0)
-def restore_check(actor: str = "scheduled"):
-    """Restore the newest dump into a throwaway database and compare row counts."""
-    from . import backups
+def restore_check(actor: str = "scheduled", source: str = "local"):
+    """Restore the newest dump into a throwaway database and compare row counts.
 
-    result = backups.restore_check()
-    get_run_logger().info("Restore check by %s: %s", actor, result)
+    `source="copy"` restores the newest backup of the copy destination instead (A30).
+    """
+    from . import backup_copy, backups
+
+    if source not in {"local", "copy"}:
+        raise ValueError("source must be 'local' or 'copy'")
+    result = backup_copy.restore_check_from_copy() if source == "copy" else backups.restore_check()
+    get_run_logger().info("Restore check (%s) by %s: %s", source, actor, result)
     if not result["ok"]:
         raise IngestionFailure({"status": "failed", "error": "RestoreMismatch", **result})
     return result
