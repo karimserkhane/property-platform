@@ -3,7 +3,7 @@
 services:
   prefect-db:
     profiles: [ingestion]
-    image: postgres:18.6-trixie
+    image: postgres:18.6-trixie@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
     environment:
       POSTGRES_DB: prefect
       POSTGRES_USER: prefect
