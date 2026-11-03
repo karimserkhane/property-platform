@@ -1,4 +1,4 @@
-FROM ghcr.io/valhalla/valhalla-scripted@sha256:eaad372b8ef31e3e4592c442875aeb1375fbf5aeaa0d259b469e3b46583ab10d
+FROM ghcr.io/valhalla/valhalla-scripted@sha256:e2078b638205fba6ef246d8ae731d7f197b346a0ebc74fb5f41b01db50504c90
 RUN mkdir -p /routing && chown 1000:1000 /routing
 COPY infra/local/routing/server.py /opt/platform/routing-server.py
 USER 1000:1000
