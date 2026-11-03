@@ -26,7 +26,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A18](A18.md) | A | Captures sous licence non qualifiée dans le dépôt public | 1 | A13 | non (décidée le 27/10 : retrait d'Aldar) | done | claude |
 | [A19](A19.md) | A | Droits et licences de chaque source | 1 | A18 | non (décidée le 27/10) | done | claude |
 | [A20](A20.md) | A | Licences et attributions affichées sur le site | 2 | A19 | non | done | claude |
-| [A21](A21.md) | A | Qualifier les conditions des sources non relues | 2 | A19 | si une source interdit la collecte | todo | unassigned |
+| [A21](A21.md) | A | Qualifier les conditions des sources non relues | 2 | A19 | non (décidée le 28/10 : option a) | in-progress | claude |
 | [A22](A22.md) | A | Tout collecter et afficher, droits enregistrés et appliqués par interrupteur | 1 | A19 | non (décidée le 27/10) | done | claude |
 | [A23](A23.md) | A | Statut de droits de chaque ligne de la base | 1 | A22 | non (décidée le 29/10) | done | claude |
 | [A24](A24.md) | A | Droits de chaque source dans toute l'API et sur la carte | 1 | A22 | non (décidée le 29/10) | done | claude |
@@ -34,7 +34,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A26](A26.md) | A | Runner Prefect libéré des files minute et des exécutions orphelines | 1 | — | non | done | claude |
 | [A27](A27.md) | A | Interrupteur de collecte respecté par le script d'imagerie manuel | 2 | A25 | non | done | claude |
 | [A28](A28.md) | A | Contrôle de reconstruction réel sur main après l'émirat et les droits | 1 | A15, A23, F06 | non | todo | unassigned |
-| [A29](A29.md) | A | Captures déplacées vers le stockage objet sur la base partagée | 2 | A10 | oui (exécuter `relocate` sur la base partagée) | todo | unassigned |
+| [A29](A29.md) | A | Captures déplacées vers le stockage objet sur la base partagée | 2 | A10 | non (décidée le 03/11 : relocate autorisé) | done | claude |
 | [A30](A30.md) | A | Copie des sauvegardes hors de la machine | 2 | A03 | non (décidée le 03/11 : local, modulable vers le cloud) | in-progress | claude |
 | [A31](A31.md) | A | Parcours e2e instable du signal satellite | 1 | A13, B07 | non | todo | unassigned |
 | [A32](A32.md) | A | Fraîcheur par famille de sources et alertes d'exploitation | 2 | A26 | non (si une alerte sort de Prefect) | todo | unassigned |
@@ -43,8 +43,9 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A35](A35.md) | A | Provenance publiée une fois par réponse dans les lectures de carte | 3 | A07, A24 | non | todo | unassigned |
 | [A36](A36.md) | A | Images satellite servies comme fichiers cachables | 3 | A08 | non | todo | unassigned |
 | [A37](A37.md) | A | État des composants carte regroupé en hooks et reducers | 3 | A07 | non | todo | unassigned |
-| [A38](A38.md) | A | Chaîne d'approvisionnement figée par digest et analysée | 3 | — | oui (outil de mises à jour) | todo | unassigned |
+| [A38](A38.md) | A | Chaîne d'approvisionnement figée par digest et analysée | 3 | — | non (décidée le 03/11 : Dependabot) | done | claude |
 | [A39](A39.md) | A | Contrôles Docker lançables en parallèle depuis plusieurs worktrees | 1 | — | non | todo | unassigned |
+| [A40](A40.md) | A | Corriger les vulnérabilités critiques relevées par la première analyse | 1 | A38 | non | todo | unassigned |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
@@ -77,6 +78,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [F05](F05.md) | F | Fin des imports de l'émirat : Madinat Al Riyad et AAM | 3 | F04 | non | done | claude |
 | [F06](F06.md) | F | Réimports des derniers districts de l'émirat et mesures | 3 | F05 | non | done | claude |
 | [F07](F07.md) | F | Index des identifiants officiels de parcelles pour les imports de district | 3 | F05 | non | done | claude |
+| [F08](F08.md) | F | Couches AD-SDI depuis la plateforme ouverte data.abudhabi | 2 | A19 | non | todo | unassigned |
 | [F09](F09.md) | F | Fiches projet hors des trois îles d'Abu Dhabi | 3 | B02, F06 | oui (communautés à ajouter) | todo | unassigned |
 | [F10](F10.md) | F | Bâtiments, rues et lieux sur la carte au-delà des trois îles | 3 | F06, A07 | non | todo | unassigned |
 | [F11](F11.md) | F | Retrouver les jeux ouverts de Dubai sur Data.Dubai | 3 | F02 | si un compte ou une demande officielle est exigé | todo | unassigned |

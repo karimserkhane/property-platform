@@ -29,6 +29,16 @@ Les identifiants de la base passent aux outils PostgreSQL par l'environnement (`
 
 Mesures du premier essai réel (23 octobre 2026) : sauvegarde de 468 Mo en 2 min 30 (49 tables, 196 521 lignes) et première copie de 1 208 reçus (682 Mo) ; restauration contrôlée en 1 min 40, sans écart.
 
+Mesures du 3 novembre 2026, avant et après le déplacement des corps de captures hors de PostgreSQL ([A29](../tasks/A29.md)) :
+
+| | Avant (15:43 UTC) | Après (16:04 UTC) |
+| --- | --- | --- |
+| Dump | 1 144,7 Mo, 5 min 12 avec le miroir | **438,1 Mo** (−62 %), 7 min 09 dont la première copie de 2 984 objets (1,28 Go) dans `files/media` |
+| Tables, lignes | 58, 2 782 609 | 58, 2 801 028 |
+| `restore-check` | 4 min 54, sans écart, 1 objet vérifié | 8 min 04, sans écart, **2 985 objets** vérifiés par taille et SHA-256 |
+
+Les nuits suivantes ne recopient que les nouveaux objets. Chaque dump conservé (7 jours, 4 semaines) pèse donc environ 700 Mo de moins ; le miroir garde une seule copie des objets.
+
 ## Copie vers une seconde destination (A30)
 
 **Décision de Karim (3 novembre 2026)** : les sauvegardes restent en local pour le moment ; la copie doit pouvoir passer plus tard à une solution cloud sans réécriture. Le module `backup_copy.py` d'`apps/ingestion` copie chaque sauvegarde réussie vers la destination choisie par `PROPERTY_PLATFORM_BACKUP_COPY_TARGET` (fichier `infra/local/.env`, ignoré par Git) :
@@ -49,7 +59,7 @@ Mesures du premier essai réel (23 octobre 2026) : sauvegarde de 468 Mo en 2 min
 
 **Essai réel du 3 novembre 2026** (image de la branche, conteneur à part, sans toucher au runner) : copie de la sauvegarde `property_platform-20261103T160444Z` vers `.cache/backup-copy` en 14 min 09 (dump de 438 Mo et 6 153 fichiers du miroir, 2,94 Go) ; deuxième passage sans rien recopier ; `restore-check` depuis la copie vert en 6 min 51 (58 tables, 2 801 028 lignes, 2 985 objets vérifiés par taille et SHA-256). Le mode S3 est testé sans réseau (stub botocore), jamais contre un fournisseur réel.
 
-**Passer au cloud plus tard.** Choisir le fournisseur et son budget (décision de Karim), créer un compartiment privé et une clé limitée à ce compartiment, remplir `BACKUP_COPY_S3_*` dans `.env`, puis `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=s3`. Avant d'y copier des preuves privées, décider aussi du chiffrement côté poste (non fait : le chiffrement au repos du fournisseur ne protège pas d'un accès au compte). Les objets de plus de 5 Gio demanderont un envoi en plusieurs parties, non écrit (dump actuel : environ 1 Go).
+**Passer au cloud plus tard.** Choisir le fournisseur et son budget (décision de Karim), créer un compartiment privé et une clé limitée à ce compartiment, remplir `BACKUP_COPY_S3_*` dans `.env`, puis `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=s3`. Avant d'y copier des preuves privées, décider aussi du chiffrement côté poste (non fait : le chiffrement au repos du fournisseur ne protège pas d'un accès au compte). Les objets de plus de 5 Gio demanderont un envoi en plusieurs parties, non écrit (dump actuel : environ 440 Mo).
 
 ## Restaurer manuellement
 

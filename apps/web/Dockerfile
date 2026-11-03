@@ -1,4 +1,4 @@
-FROM node:26.11.1-trixie-slim AS base
+FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS base
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 # Optional public CA already approved by the operator; TLS verification stays enabled.
