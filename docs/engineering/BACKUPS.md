@@ -29,6 +29,16 @@ Les identifiants de la base passent aux outils PostgreSQL par l'environnement (`
 
 Mesures du premier essai réel (23 octobre 2026) : sauvegarde de 468 Mo en 2 min 30 (49 tables, 196 521 lignes) et première copie de 1 208 reçus (682 Mo) ; restauration contrôlée en 1 min 40, sans écart.
 
+Mesures du 3 novembre 2026, avant et après le déplacement des corps de captures hors de PostgreSQL ([A29](../tasks/A29.md)) :
+
+| | Avant (15:43 UTC) | Après (16:04 UTC) |
+| --- | --- | --- |
+| Dump | 1 144,7 Mo, 5 min 12 avec le miroir | **438,1 Mo** (−62 %), 7 min 09 dont la première copie de 2 984 objets (1,28 Go) dans `files/media` |
+| Tables, lignes | 58, 2 782 609 | 58, 2 801 028 |
+| `restore-check` | 4 min 54, sans écart, 1 objet vérifié | 8 min 04, sans écart, **2 985 objets** vérifiés par taille et SHA-256 |
+
+Les nuits suivantes ne recopient que les nouveaux objets. Chaque dump conservé (7 jours, 4 semaines) pèse donc environ 700 Mo de moins ; le miroir garde une seule copie des objets.
+
 ## Restaurer manuellement
 
 À réserver à une perte réelle de données, avec l'accord du propriétaire. Ne jamais restaurer par-dessus la base en service : restaurer dans une nouvelle base, vérifier, puis basculer.

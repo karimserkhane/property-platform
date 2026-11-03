@@ -34,7 +34,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A26](A26.md) | A | Runner Prefect libéré des files minute et des exécutions orphelines | 1 | — | non | done | claude |
 | [A27](A27.md) | A | Interrupteur de collecte respecté par le script d'imagerie manuel | 2 | A25 | non | done | claude |
 | [A28](A28.md) | A | Contrôle de reconstruction réel sur main après l'émirat et les droits | 1 | A15, A23, F06 | non | todo | unassigned |
-| [A29](A29.md) | A | Captures déplacées vers le stockage objet sur la base partagée | 2 | A10 | non (décidée le 03/11 : relocate autorisé) | in-progress | claude |
+| [A29](A29.md) | A | Captures déplacées vers le stockage objet sur la base partagée | 2 | A10 | non (décidée le 03/11 : relocate autorisé) | done | claude |
 | [A30](A30.md) | A | Copie des sauvegardes hors de la machine | 2 | A03 | oui (destination et rétention) | todo | unassigned |
 | [A31](A31.md) | A | Parcours e2e instable du signal satellite | 1 | A13, B07 | non | todo | unassigned |
 | [A32](A32.md) | A | Fraîcheur par famille de sources et alertes d'exploitation | 2 | A26 | non (si une alerte sort de Prefect) | todo | unassigned |
