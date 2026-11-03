@@ -22,6 +22,8 @@ Deux tables portent ce que la plateforme sait du statut officiel d'un projet. Au
 2. Ajouter la ligne dans `project_verification_links.json`.
 3. `pytest apps/api/tests/test_project_verification_links.py` valide le registre ; le prochain passage du pipeline de fiches (ou la commande) crée le lien.
 
+**Relevé du 3 novembre 2026 ([B08](../tasks/B08.md)).** 60 liens, un par numéro ADREC des 42 projets enregistrés de Saadiyat, aucun numéro sans fiche. Décision de Karim : consultation par un agent, page par page, dans le navigateur intégré, sans script ni appel à l'API DARI. Pour chaque numéro : recherche dans l'annuaire (`/en/app/directory?category=projects&name=<numéro>`), ouverture de la fiche trouvée, vérification que la fiche affiche ce numéro ; seule l'URL est notée. Les anciens numéros (`2017/62427`) se cherchent comme les nouveaux. Trois projets sont enregistrés sous un autre nom que leur nom commercial (Mandarin Oriental Residences, Vida Residences, Four Seasons Private Residences) : le lien repose sur le numéro de la source ADREC, pas sur le nom. Un projet peut avoir plusieurs fiches, une par enregistrement (Saadiyat Beach Residences : 6).
+
 ## Retenue en cas d'annulation (B04)
 
 `publication/cancellation_retention.py` lit, pour un avancement déclaré, la part du prix
