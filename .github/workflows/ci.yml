@@ -87,6 +87,15 @@ jobs:
       - run: $E2E_COMPOSE build
       - name: Replay the demonstration package and start the API
         run: $E2E_COMPOSE up -d --wait api
+      # TEMPORARY (A31): keep-alive probe, default gunicorn (2 s) then a second server at 30 s.
+      - name: A31 keep-alive probe
+        run: |
+          probe="$E2E_COMPOSE run --rm --no-deps --entrypoint node checks-e2e /repo/apps/web/e2e/keepalive-probe.mjs"
+          $E2E_COMPOSE exec -d api gunicorn property_platform.config.wsgi:application --bind 0.0.0.0:8001 --workers 1 --threads 4 --keep-alive 30
+          sleep 5
+          $probe http://api:8000/api/v1/health/ready 40 150 1900-3200 &
+          $probe http://api:8001/api/v1/health/ready 40 150 1900-3200 &
+          wait
       - run: $E2E_COMPOSE run --rm checks-e2e
       - name: API and replay logs
         if: failure()

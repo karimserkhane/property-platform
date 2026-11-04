@@ -43,6 +43,30 @@ export async function readPreviewBytes(
   ) {
     return { status: 403, bytes: null, contentType: null, etag: null };
   }
+  try {
+    return await fetchPreviewBytes(path, search, accept, ifNoneMatch);
+  } catch (error) {
+    // Callers answer a bare 503; the server log keeps why the API read failed (A31).
+    // Only the API path is logged, never the visitor's query.
+    console.warn(`API read ${path} failed: ${failureCause(error)}`);
+    throw error;
+  }
+}
+
+function failureCause(error: unknown) {
+  if (!(error instanceof Error)) return String(error);
+  const cause = error.cause as { code?: string; message?: string } | undefined;
+  return [error.name, error.message, cause?.code, cause?.message]
+    .filter(Boolean)
+    .join(" / ");
+}
+
+async function fetchPreviewBytes(
+  path: string,
+  search: string,
+  accept: string,
+  ifNoneMatch: string | null,
+) {
   const origin =
     process.env.PROPERTY_PLATFORM_API_ORIGIN ?? "http://127.0.0.1:8000";
   const response = await fetch(
