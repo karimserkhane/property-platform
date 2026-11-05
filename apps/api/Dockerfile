@@ -21,4 +21,7 @@ RUN uv sync --frozen --no-dev && useradd --create-home --uid 1000 property_platf
 USER property_platform
 ENV PATH="/app/.venv/bin:$PATH" AWS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
 EXPOSE 8000
-CMD ["gunicorn", "property_platform.config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--access-logfile", "-"]
+# Idle connections stay open longer than the web server's fetch keeps them (undici: 4 s),
+# so the client always closes first. At gunicorn's 2 s default, a read sent on an expired
+# connection just as the worker closed it was reset before reaching Django (A31).
+CMD ["gunicorn", "property_platform.config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "4", "--keep-alive", "30", "--access-logfile", "-"]

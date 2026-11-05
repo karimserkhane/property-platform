@@ -81,6 +81,18 @@ sur deux processeurs, dont 10 fois saturés par une charge égale à celle du na
 43 lectures annulées et `parcel_features` jusqu'à 1,98 s sous `runserver`, aucune
 annulation et 0,87 s au plus sous gunicorn ([A17](../tasks/A17.md)).
 
+Gunicorn garde une connexion inactive **30 s** (`--keep-alive 30`, ici comme dans le
+`CMD` de l'image), plus longtemps que le `fetch` de Node (undici : 4 s) avec lequel le
+serveur web lit l'API : c'est toujours le client qui ferme le premier. Avec le défaut de
+gunicorn (2 s), le worker `gthread` ne ferme une connexion expirée qu'au réveil suivant
+de sa boucle. Quand ce réveil vient de la première lecture d'une rafale (les deux
+lectures d'une fiche projet, les trois du relais de la carte), une lecture partie
+quelques millisecondes plus tard sur une connexion expirée est coupée avant Django
+(`ECONNRESET` ou `other side closed`). La fiche affichait alors « Project unavailable »
+et le relais renvoyait un 503 ; trois parcours ont échoué ainsi en CI
+([A31](../tasks/A31.md)). Si une lecture de l'API échoue encore, le serveur web
+journalise son chemin et sa cause (`API read … failed: …`) dans la sortie du parcours.
+
 Le paquet se régénère depuis la base locale de référence avec `export_demo_package`
 (lecture seule) ; la sélection, les raisons et les licences sont dans
 `fixtures/demo-replay/selection.json`. Une source n'y entre que si sa copie peut

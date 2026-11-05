@@ -36,7 +36,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A28](A28.md) | A | Contrôle de reconstruction réel sur main après l'émirat et les droits | 1 | A15, A23, F06 | non | todo | unassigned |
 | [A29](A29.md) | A | Captures déplacées vers le stockage objet sur la base partagée | 2 | A10 | non (décidée le 03/11 : relocate autorisé) | done | claude |
 | [A30](A30.md) | A | Copie des sauvegardes hors de la machine | 2 | A03 | non (décidée le 03/11 : local, modulable vers le cloud) | in-progress | claude |
-| [A31](A31.md) | A | Parcours e2e instable du signal satellite | 1 | A13, B07 | non | todo | unassigned |
+| [A31](A31.md) | A | Parcours e2e instables du signal satellite et de la carte | 1 | A13, B07 | non | done | claude |
 | [A32](A32.md) | A | Fraîcheur par famille de sources et alertes d'exploitation | 2 | A26 | non (si une alerte sort de Prefect) | todo | unassigned |
 | [A33](A33.md) | A | Budgets de performance en CI | 2 | A13 | non | todo | unassigned |
 | [A34](A34.md) | A | Contours simplifiés en SQL et requêtes de map-context regroupées | 3 | A08 | non | todo | unassigned |
