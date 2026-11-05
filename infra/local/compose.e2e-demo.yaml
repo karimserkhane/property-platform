@@ -48,6 +48,7 @@ services:
       - ../../fixtures/demo-replay:/demo-replay:ro
     tmpfs:
       - /media:size=512m,uid=1000,gid=1000
+    # Same server settings as the image CMD (apps/api/Dockerfile), keep-alive included (A31).
     command:
       - sh
       - -c
@@ -55,7 +56,7 @@ services:
         python manage.py migrate --noinput
         && python manage.py load_demo_package --package /demo-replay --actor e2e-demo
         && exec gunicorn property_platform.config.wsgi:application --bind 0.0.0.0:8000
-        --workers 1 --threads 4 --access-logfile -
+        --workers 1 --threads 4 --keep-alive 30 --access-logfile -
         --access-logformat '%(h)s "%(r)s" %(s)s %(b)s %(M)sms'
     depends_on:
       db:
