@@ -40,7 +40,7 @@ jobs:
     timeout-minutes: 15
     services:
       postgres:
-        image: postgis/postgis:18-3.6@sha256:60f6ad1d21ea86a67d47780b9a0d1e1d200500f62b19293fa834d0dea80b8677
+        image: postgis/postgis:18-3.6@sha256:4a43e3c3e5d55b9208240fc71db543b79c638766280c625a425bd0a2390989c4
         env:
           POSTGRES_DB: property_platform
           POSTGRES_USER: property_platform
@@ -55,10 +55,15 @@ jobs:
       PROPERTY_PLATFORM_TEST_POSTGIS: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # uv 0.13.0 cannot download Python 3.14.10 (its list stops at 3.14.8): the interpreter comes
+      # from setup-python and uv finds it on the PATH (A40).
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14.10"
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           version: "0.13.0"
-          python-version: "3.14.8"
+          python-version: "3.14.10"
       - run: sudo apt-get update && sudo apt-get install -y libgdal-dev
       - run: uv sync --project apps/api --frozen
       - run: uv run --project apps/api ruff check apps/api
@@ -108,10 +113,15 @@ jobs:
       PREFECT_SERVER_ALLOW_EPHEMERAL_MODE: "false"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # uv 0.13.0 cannot download Python 3.14.10 (its list stops at 3.14.8): the interpreter comes
+      # from setup-python and uv finds it on the PATH (A40).
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14.10"
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
           version: "0.13.0"
-          python-version: "3.14.8"
+          python-version: "3.14.10"
       - run: uv lock --project apps/ingestion --check
       - run: uv sync --project apps/ingestion --frozen
       - run: uv run --project apps/ingestion ruff check apps/ingestion
@@ -143,9 +153,8 @@ jobs:
         run: node scripts/check-supply-chain-pins.mjs --github-output
 
   # Grype (Apache-2.0, no account). Policy: a critical vulnerability with a published fix fails
-  # the job; everything else is listed in the job summary without blocking. The first scan
-  # (3 November 2026) found such vulnerabilities in the current images and lockfiles: until
-  # A40 fixes them, the blocking step is reported (orange) without failing the job.
+  # the job; everything else is listed in the job summary without blocking. Dated exceptions,
+  # one vulnerability in one package version each, live in .grype.yaml (A40).
   vulnerabilities:
     needs: supply-chain-pins
     runs-on: ubuntu-latest
@@ -155,11 +164,9 @@ jobs:
       matrix:
         target: ${{ fromJSON(needs.supply-chain-pins.outputs.targets) }}
     steps:
+      # Every target needs the checkout: Grype reads its exceptions from .grype.yaml.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: matrix.target == 'lockfiles'
       - id: blocking
-        # A40 removes this line once the findings of 3 November are fixed.
-        continue-on-error: true
         uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
         with:
           path: ${{ matrix.target == 'lockfiles' && '.' || '' }}

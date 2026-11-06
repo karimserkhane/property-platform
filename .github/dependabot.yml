@@ -40,9 +40,10 @@ updates:
       - dependency-name: python
         versions: [">=3.15"]
       # The Playwright image follows @playwright/test by hand (E2E.md): same version on both.
-      - dependency-name: mcr.microsoft.com/playwright
+      # Dependabot names images without their registry (mcr.microsoft.com, ghcr.io).
+      - dependency-name: playwright
       # Pinned by digest without a tag; updated by hand with its graph rebuild (MAP_ANALYSIS.md).
-      - dependency-name: ghcr.io/valhalla/valhalla-scripted
+      - dependency-name: valhalla/valhalla-scripted
 
   - package-ecosystem: docker-compose
     directory: /infra/local
@@ -63,7 +64,7 @@ updates:
       - dependency-name: postgres
         update-types: [version-update:semver-major]
       # Pinned by digest without a tag; updated by hand with the frozen model (EVIDENCE_SEARCH.md).
-      - dependency-name: ghcr.io/huggingface/text-embeddings-inference
+      - dependency-name: huggingface/text-embeddings-inference
 
   - package-ecosystem: uv
     directories:

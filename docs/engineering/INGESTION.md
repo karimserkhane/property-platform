@@ -305,7 +305,7 @@ docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml
 
 ## Validation et limites actuelles
 
-Prefect **3.8.8**, HTTPX **0.28.1**, Python **3.14.8** et uv **0.13.0** sont verrouillés ; les nouvelles versions ont été vérifiées sur les sources officielles le 13 octobre 2026. Les compatibilités conservées du site et de ses compilateurs sont décrites dans [TOOLCHAIN.md](TOOLCHAIN.md). Dernière version stable compatible ne signifie pas suppression des contraintes nécessaires au projet.
+Prefect **3.8.8**, HTTPX **0.28.1**, Python **3.14.10** (correctif de sécurité du 6 novembre 2026, [A40](../tasks/A40.md)) et uv **0.13.0** sont verrouillés ; les autres versions ont été vérifiées sur les sources officielles le 13 octobre 2026. Les compatibilités conservées du site et de ses compilateurs sont décrites dans [TOOLCHAIN.md](TOOLCHAIN.md). Dernière version stable compatible ne signifie pas suppression des contraintes nécessaires au projet.
 
 Validation locale : construction Linux avec TLS vérifié, **77 tests ingestion Linux**, **185 tests backend vérifiés sur PostgreSQL/PostGIS** (suite complète de 184, puis quatre tests ciblés après le dernier ajout), contrôles de formatage et registre de neuf déploiements. La compilation du web, ses 19 tests, le compilateur TypeScript 7, les contrats et le smoke HTTP des quinze langues passent dans Docker avec Node 26. Le workflow CI possède désormais un job ingestion séparé ; ces vérifications locales ne constituent pas une preuve d'exécution réussie sur GitHub Actions.
 

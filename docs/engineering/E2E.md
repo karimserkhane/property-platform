@@ -24,7 +24,7 @@ Arguments Playwright : `... run --rm --no-deps checks-e2e node node_modules/@pla
 ## Ce qui tourne
 
 - Image `mcr.microsoft.com/playwright:v1.64.0-noble`, fixée par digest, avec Node
-  26.11.1 copié de l'image web et le serveur Next autonome compilé.
+  26.12.1 copié de l'image web et le serveur Next autonome compilé.
 - Le serveur web est démarré **dans le conteneur**, sur `127.0.0.1:3101`, sans contrôle
   d'accès (`PROPERTY_PLATFORM_PREVIEW_ACCESS_REQUIRED=0`). Aucun identifiant de
   prévisualisation n'est lu ni nécessaire ; le conteneur `web` de Karim n'est pas utilisé.
