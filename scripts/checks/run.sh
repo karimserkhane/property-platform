@@ -29,6 +29,8 @@ main_checkout=$(cd "$(git rev-parse --git-common-dir)/.." && pwd)
 for ca in "$root/.cache/validation/ingestion-trusted-ca.crt" \
   "$main_checkout/.cache/validation/ingestion-trusted-ca.crt"; do
   if [ -s "$ca" ]; then
+    # Docker Desktop on Windows needs C:/... rather than Git Bash's /c/... paths.
+    if command -v cygpath >/dev/null 2>&1; then ca=$(cygpath -m "$ca"); fi
     export PLATFORM_EXTRA_CA_FILE="$ca"
     break
   fi
