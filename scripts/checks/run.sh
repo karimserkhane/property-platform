@@ -24,17 +24,21 @@ fi
 export CHECKS_TAG="$slug"
 export CHECKS_VOLUMES="property-platform-checks-$slug"
 
-# The authority is an ignored file of the main checkout; worktrees share it.
-main_checkout=$(cd "$(git rev-parse --git-common-dir)/.." && pwd)
-for ca in "$root/.cache/validation/ingestion-trusted-ca.crt" \
-  "$main_checkout/.cache/validation/ingestion-trusted-ca.crt"; do
-  if [ -s "$ca" ]; then
-    # Docker Desktop on Windows needs C:/... rather than Git Bash's /c/... paths.
-    if command -v cygpath >/dev/null 2>&1; then ca=$(cygpath -m "$ca"); fi
-    export PLATFORM_EXTRA_CA_FILE="$ca"
-    break
-  fi
-done
+# The approved authority (a public certificate, TOOLCHAIN.md) is an ignored file of the main
+# checkout. Compose builds through bake, which reads a secret file outside the build context
+# only with an --allow flag that "compose build" cannot forward: a worktree gets its own
+# ignored copy under .cache/validation/.
+ca="$root/.cache/validation/ingestion-trusted-ca.crt"
+main_ca="$(cd "$(git rev-parse --git-common-dir)/.." && pwd)/.cache/validation/ingestion-trusted-ca.crt"
+if [ ! -s "$ca" ] && [ -s "$main_ca" ]; then
+  mkdir -p "$(dirname "$ca")"
+  cp "$main_ca" "$ca"
+fi
+if [ -s "$ca" ]; then
+  # Docker Desktop on Windows needs C:/... rather than the /c/... paths of Git Bash.
+  if command -v cygpath >/dev/null 2>&1; then ca=$(cygpath -m "$ca"); fi
+  export PLATFORM_EXTRA_CA_FILE="$ca"
+fi
 
 checks=(docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks)
 case "${1:-}" in
