@@ -2,15 +2,15 @@
   {
     "host": "adgm.com",
     "publisher": "Abu Dhabi Global Market",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.adgm.com/information/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms (section 8.3) forbid data mining, web scraping, automated querying and crawling, and republishing content without ADGM's written consent. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "admobility.gov.ae",
@@ -41,28 +41,28 @@
   {
     "host": "aiph.org",
     "publisher": "AIPH",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use found (only privacy and cookie policies) and a copyright notice: no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "alainam.ae",
     "publisher": "ALAIN",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.alainam.ae/terms-of-use/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms limit the content to personal, non-commercial use, forbid storing any part of it electronically and require permission to copy or publish it; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "aldar.com",
@@ -93,15 +93,15 @@
   {
     "host": "arup.com",
     "publisher": "Arup",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.arup.com/about-us/corporate-reports/legal/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Its legal page carries a copyright notice only: no terms of use and no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "bayut.com",
@@ -132,28 +132,28 @@
   {
     "host": "burtville.com",
     "publisher": "Burtville Developments",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://burtville.com/en/terms-conditions/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms say nothing on automated access or reuse; copyright notice only. Dated facts with a link, no copy of its content."
   },
   {
     "host": "by-mholding.com",
     "publisher": "By M Holding",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://by-mholding.com/index.php/termsandconditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid downloading content with any electronic retrieval system, storing it in a database and reproducing project images; personal, non-commercial use only. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "c15-alreem.com",
@@ -161,25 +161,25 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Single-plot sales page with no terms of use, only a footer disclaimer (introduction purposes only); no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "cdn.prod.website-files.com",
     "publisher": "File hosted on cdn.prod.website-files.com",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.tarafholding.com/en/terms-of-use",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Webflow file CDN: the only file used is Taraf's W Residences brochure, which follows Taraf's terms (scraping and automated harvesting forbidden, personal use only). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "charterschools.abudhabi",
@@ -197,15 +197,15 @@
   {
     "host": "crystal-projects.com",
     "publisher": "Crystal Projects",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.crystal-projects.com/terms-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid reproducing the content except for personal use and storing it in any other website or retrieval system; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "dari.ae",
@@ -223,28 +223,28 @@
   {
     "host": "deyaar.ae",
     "publisher": "Deyaar",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.deyaar.ae/en/terms-conditions/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms claim ownership of the pages and protect trademarks, with no clause on automated access or reuse limits. Dated facts with a link, no copy of its content."
   },
   {
     "host": "doh.gov.ae",
     "publisher": "Department of Health Abu Dhabi",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.doh.gov.ae/en/term-of-use",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "The public facility map page publishes no terms; doh.gov.ae refused connections on 2026-10-28, so its site terms are still to be read (A21)."
+    "basis": "Terms forbid page-scraping, robots, crawling, spidering and data mining, and incorporating content into databases; personal, non-commercial use only.  The facility map comes from stem.doh.gov.ae; DoH open data offers dashboards only, with no licence, and no open copy of the facility list was found (6 Nov). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "earth-search.aws.element84.com",
@@ -262,80 +262,80 @@
   {
     "host": "emiratesdevelopments.com",
     "publisher": "Emirates Developments",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://emiratesdevelopments.com/terms-and-conditions/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid access by bots or scripts, data mining and data extraction tools, and compiling a database from the site; personal, non-commercial use only. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "etihadrail.ae",
     "publisher": "Etihad Rail",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.etihadrail.ae/terms-and-conditions?tab=terms-of-use&lang=en",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid automated scripts and bots and any crawling, spidering, scraping or harvesting of content; personal, non-commercial use only, no copying without written consent. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "ewp.ae",
     "publisher": "EWP",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use found (only a privacy policy) and a copyright notice; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "fosterdevelopers.com",
     "publisher": "Foster Developers",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Its terms link opens a privacy policy only: no terms of use and no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "fourseasons.com",
     "publisher": "Four Seasons",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.fourseasons.com/legal/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid robots, spiders, crawlers and data mining tools and any scraping, downloading or copying of the site; content licensed for personal, non-commercial use only. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "gafproperty.com",
     "publisher": "GAF Property",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://gafproperty.com/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms limit the website to personal, non-commercial use and forbid reproducing or distributing its content unless expressly permitted; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "geofabrik.de",
@@ -366,15 +366,15 @@
   {
     "host": "gulfnews.com",
     "publisher": "Gulf News",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://gulfnews.com/about-gulf-news/term-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms limit access to personal, non-commercial use and restrict copying, downloading or republishing without written permission; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "housebook.deals",
@@ -392,41 +392,41 @@
   {
     "host": "imkan.ae",
     "publisher": "IMKAN",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://imkan.ae/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid any robot, spider or other automatic means to access the website, and reproducing or republishing its material. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "jre.ae",
     "publisher": "jre.ae",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.jre.ae/terms",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid bots and scrapers that harvest content and any copying or republishing without written consent; short extracts for personal, non-commercial use only. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "jumeirah.com",
     "publisher": "Jumeirah",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://mediahub.jumeirah.com/terms-of-use/?lang=eng",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Media hub terms forbid automated scripting tools and reproducing or publishing material without prior written consent; content may be shared unmodified. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "linkedin.com",
@@ -444,67 +444,67 @@
   {
     "host": "maam.ae",
     "publisher": "MAAM Group",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use found and a copyright notice only; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "mediaoffice.abudhabi",
     "publisher": "Abu Dhabi Media Office",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.mediaoffice.abudhabi/en/terms-conditions/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms (4.1.13) forbid collecting content with spiders, scrapers, bots or robots without the Media Office's express permission, and republishing without its written consent. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "mered.ae",
     "publisher": "Mered",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://mered.ae/assets/docs/terms-and-conditions.pdf",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms (PDF) state that re-use of any content is strictly prohibited unless otherwise stated; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "modon.com",
     "publisher": "Modon",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.modon.com/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms grant a limited right to access and display the site and claim copyright, with no clause on automated access or reuse limits. Dated facts with a link, no copy of its content."
   },
   {
     "host": "mubadala.com",
     "publisher": "Mubadala",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.mubadala.com/en/terms-of-use",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid using any content of the website in any way without written permission; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "nord.ae",
@@ -512,25 +512,25 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use or legal page found on the site; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "nrec.com.kw",
     "publisher": "NREC",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.nrec.com.kw/terms",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms allow viewing, downloading and printing for personal, non-commercial use only and require written permission to reproduce or distribute; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "object-1.com",
@@ -538,38 +538,38 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use found (only a privacy policy); no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "ohana.ae",
     "publisher": "Ohana Development",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.ohana.ae/privacy-policy/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Its Terms of Use link opens a privacy policy with no clause on automated access or reuse; copyright notice only. Dated facts with a link, no copy of its content."
   },
   {
     "host": "oneuae.com",
     "publisher": "Government of the UAE (beta portal)",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.oneuae.com/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid copying, reproducing, publishing or commercially exploiting any content of the platform; no clause on automated access (same case as Aldar). beta.oneuae.com did not answer on 6 Nov. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "onwani.abudhabi.ae",
@@ -694,12 +694,12 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Redirects to radiantrealestate.ae, whose site has no terms of use or legal page; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "radiantrealestate.ae",
@@ -707,12 +707,12 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use or legal page found (copyright line only); no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "railjournal.com",
@@ -730,41 +730,41 @@
   {
     "host": "rakproperties.ae",
     "publisher": "RAK Properties",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.rakproperties.ae/disclaimer/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Its disclaimer licenses one temporary download for individual, non-business use and forbids copying, commercial use or mirroring of the materials; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "rcalmaryahisland.com",
     "publisher": "The Ritz-Carlton Residences, Al Maryah Island",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://saasproperties.com/en/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Project site of SAAS Properties without terms of its own; the SAAS terms say nothing on automated access or reuse. Dated facts with a link, no copy of its content."
   },
   {
     "host": "rdhuae.com",
     "publisher": "Royal Development Holding",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use or legal page found (copyright line only); no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "reddit.com",
@@ -782,15 +782,15 @@
   {
     "host": "rendr.ae",
     "publisher": "Rendr",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://rendr.ae/terms",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms forbid bulk copying, scraping and republishing its data; reading, linking and quoting are allowed with credit to Rendr. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "reportagegroup.com",
@@ -808,15 +808,15 @@
   {
     "host": "reportageuae.com",
     "publisher": "Reportage (UAE site)",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://reportagegroup.com/terms/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Redirects to reportagegroup.com, whose terms permit personal, non-commercial viewing only and forbid copying, reproducing or publishing any content without authorisation; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "rightcapital.ae",
@@ -824,64 +824,64 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use or legal page found on the site; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "rimal.ae",
     "publisher": "Rimal",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use or legal page found (copyright line only); no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "rixosalreemresidences.com",
     "publisher": "Rixos Al Reem Residences",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.rixosalreemresidences.com/disclaimer",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Project site of East & West Properties: its disclaimer covers the brand licence only, with no terms of use and no clause on automated access or reuse. Dated facts with a link, no copy of its content."
   },
   {
     "host": "rosewoodhotels.com",
     "publisher": "Rosewood Hotels",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No website terms of use linked (only privacy, cookie and gift card terms) and a copyright line; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "saasproperties.com",
     "publisher": "SAAS Properties",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://saasproperties.com/en/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms say nothing on automated access or reuse; copyright notice only. Dated facts with a link, no copy of its content."
   },
   {
     "host": "scad.gov.ae",
@@ -912,28 +912,28 @@
   {
     "host": "skyscrapercity.com",
     "publisher": "SkyscraperCity forum",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.skyscrapercity.com/help/terms/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Automated requests, even from a browser driven by an agent, are sent to tollbit.skyscrapercity.com, which answers 402 without a paid TollBit token: the forum charges automated access; terms text not readable that way. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "skyscraperpage.com",
     "publisher": "SkyscraperPage forum",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://skyscraperpage.com/site/copyright/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms say no content may be reproduced, copied or downloaded, for personal or commercial use, without written permission or purchased publishing rights; no clause on automated access. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "squareyards.ae",
@@ -951,28 +951,28 @@
   {
     "host": "sralmaryahisland.com",
     "publisher": "The St. Regis Residences, Al Maryah Island",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://saasproperties.com/en/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Project site of SAAS Properties without terms of its own; the SAAS terms say nothing on automated access or reuse. Dated facts with a link, no copy of its content."
   },
   {
     "host": "tarafholding.com",
     "publisher": "Taraf",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.tarafholding.com/en/terms-of-use",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms (section 4) forbid scraping and automated harvesting and copying or republishing content; personal, non-commercial viewing and printing only. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "terrascope.be",
@@ -993,38 +993,38 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "No terms of use or legal page found on the site; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "tigerproperties.ae",
     "publisher": "Tiger Properties",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://tigerproperties.ae/terms-of-service/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms allow viewing and printing pages for personal use only and require written permission for any other use; no clause on automated access (same case as Aldar). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "tradingview.com",
     "publisher": "TradingView",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.tradingview.com/policies/",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms (12a) forbid robots, scrapers, crawlers and data mining tools to access or extract content or market data, except public search engines and official APIs; chart snapshots may be used with visible attribution. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "uaetoday.com",
@@ -1032,51 +1032,51 @@
     "licence": "unknown",
     "licence_url": "",
     "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "News portal with no terms of use or legal page linked; no clause on automated access. Dated facts with a link, no copy of its content."
   },
   {
     "host": "vazeno.files.cmp.optimizely.com",
     "publisher": "File hosted on vazeno.files.cmp.optimizely.com",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.aldar.com/en/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Optimizely file CDN: the only file used is Aldar's FY 2025 results presentation, which follows Aldar's terms (personal, non-commercial use; reproduction forbidden). Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "vimeo.com",
     "publisher": "Vimeo",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://vimeo.com/terms",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms (5.4) forbid access by robots or scrapers outside its APIs and copying or redistributing content; its player may be embedded on third-party sites. Collection kept allowed until the owner decides (A21)."
   },
   {
     "host": "wam.ae",
     "publisher": "Emirates News Agency (WAM)",
-    "licence": "unknown",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
+    "terms_url": "https://www.wam.ae/en/terms-and-conditions",
+    "reviewed_on": "2026-11-06",
+    "reviewed_by": "claude",
     "collection": "allowed",
     "publication": "facts",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "Terms protect WAM's marks and logos and forbid harmful or illegal use, with no clause on automated access or on quoting its news. Dated facts with a link, no copy of its content."
   },
   {
     "host": "wikimedia.org",

@@ -184,8 +184,8 @@ def test_withheld_sites_leave_no_fact_pin_link_or_project_behind(catalogue):
     assert renad["parent"] is None
     # An agency page is never shown as the project's site, whatever its rights.
     assert renad["website_url"] == DEVELOPER_PAGE
-    # Each published source states its reviewed rights (unknown: not qualified yet).
-    assert renad["sources"][0]["rights"]["licence"] == "unknown"
+    # Each published source states its reviewed rights (Tiger Properties, reviewed in A21).
+    assert renad["sources"][0]["rights"]["licence"] == "proprietary"
     assert renad["sources"][0]["rights"]["publication"] == "facts"
     assert project_detail("sky-tower") is None
     items = {row["slug"]: row for row in project_directory()["items"]}
