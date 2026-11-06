@@ -2,7 +2,7 @@
 name = "property-platform-api"
 version = "0.0.0"
 description = "Property Platform domain API and worker runtime"
-requires-python = ">=3.14.8,<3.15"
+requires-python = ">=3.14.10,<3.15"
 dependencies = [
   "django==6.1.2",
   "django-ninja==1.7.1",

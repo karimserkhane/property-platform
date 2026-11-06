@@ -1,4 +1,4 @@
-FROM node:26.11.1-trixie-slim@sha256:193fe51b64e77981119c98c2002c9e32a70e2f006fb4d25068ce0558998917f0 AS base
+FROM node:26.12.1-trixie-slim@sha256:94816674c62774da0d099a947bf4613b9e1972a2733abd0d0cd80e795f8411d0 AS base
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 # Optional public CA already approved by the operator; TLS verification stays enabled.
@@ -32,7 +32,7 @@ RUN pnpm --filter @property-platform/web typecheck \
 # digest; the same Node runtime and compiled server as the preview. Journey files are
 # mounted at run time (excluded from this build context), so editing them never
 # invalidates the Next build cache. Declared before `runtime`, which stays the default.
-FROM mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f AS e2e
+FROM mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d AS e2e
 COPY --from=base /usr/local/bin/node /usr/local/bin/node
 WORKDIR /repo
 COPY --from=build /repo /repo
