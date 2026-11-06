@@ -923,6 +923,21 @@ def test_row_differences_are_explained_only_by_their_exact_rule(monkeypatch):
     assert not explain(reviewed, created, reference={})[1]["matches"]
     assert not explain(reviewed, {**created, **unchanged}, reference=absent)[1]["matches"]
     assert explain(step("district-references-v3", {}, run="r8"), created) is None
+    # Created in the reference by a later recollection of the same scope and version
+    # (A28): only the observation of the reviewed run is extra.
+    key = "|".join(identity)
+    held = {key: {"active": True, "observations": [["district-references-v3", "created"]]}}
+    recollection = step("district-references-v3", created, sha="b", run="r10")
+    name, detail = explain(reviewed, created, steps=[recollection], reference=held)
+    assert name == "reviewed_reinterpretation" and detail["matches"]
+    assert detail["created_later_by"] == "r10"
+    assert not explain(reviewed, created, reference=held)[1]["matches"]
+    other_version = step("district-references-v4", created, sha="b", run="r10")
+    assert not explain(reviewed, created, steps=[other_version], reference=held)[1]["matches"]
+    twice = {key: {"active": True, "observations": [["district-references-v3", "created"]] * 2}}
+    assert not explain(reviewed, created, steps=[recollection], reference=twice)[1]["matches"]
+    inactive = {key: held[key] | {"active": False}}
+    assert not explain(reviewed, created, steps=[recollection], reference=inactive)[1]["matches"]
 
 
 def test_presentations_must_describe_the_same_provider_identities():

@@ -86,6 +86,21 @@ def test_canonical_drops_database_identities_and_ingestion_clocks_only():
     assert canonical(reversed_line) != value
 
 
+def test_canonical_drops_the_clock_of_a_recomputed_measurement():
+    parcel = {
+        "source_record_id": "1",
+        "latest": {
+            "level": "moderate",
+            "after_acquired_at": datetime(2026, 11, 1, tzinfo=UTC),
+            "measured_at": datetime(2026, 11, 5, tzinfo=UTC),
+        },
+    }
+    value = canonical({"construction_activity": {"parcels": [parcel]}})
+    latest = value["construction_activity"]["parcels"][0]["latest"]
+    # The scene dates and the level are compared; when the signal was computed is not.
+    assert latest == {"after_acquired_at": "2026-11-01T00:00:00+00:00", "level": "moderate"}
+
+
 def test_canonical_register_values_are_exact_json_text():
     # B05 verification facts are decimals; the manifest is JSON and keeps their text.
     value = canonical({"verification": [{"progress_percent": Decimal("42.50")}, {"x": 1}]})

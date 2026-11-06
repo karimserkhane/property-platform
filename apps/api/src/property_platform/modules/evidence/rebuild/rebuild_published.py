@@ -30,8 +30,10 @@ HISTORY_TABLES = {
     "evidence.project_identity_link": "Revocations are operator decisions (A03); "
     "active links are compared",
 }
-# Database identities and this execution's clock, never source facts.
-VOLATILE = frozenset({"id", "ingested_at"})
+# Database identities and this execution's clock, never source facts. `measured_at` is
+# when a construction activity signal was computed (B07, its row's creation): the replay
+# recomputes it from the same windows and compares the values (B06), not the clock (A28).
+VOLATILE = frozenset({"id", "ingested_at", "measured_at"})
 # Published fields an operator decision kept only by A03 can change; None means any.
 DECISION_FIELDS = {
     "history_exclusion": None,

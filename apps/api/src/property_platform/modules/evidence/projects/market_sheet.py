@@ -117,7 +117,9 @@ def project_market(project):
             "territory": snapshot.territory,
             "period_start": snapshot.period_start,
             "period_end": snapshot.period_end,
-            "collected_at": snapshot.created_at,
+            # When the register was read (its last page), a source time a rebuild keeps;
+            # the snapshot row is written afterwards, at ingestion (A28).
+            "collected_at": snapshot.run.captures.aggregate(at=Max("fetched_at"))["at"],
             "captures": captures,
         },
         "groups": groups,
