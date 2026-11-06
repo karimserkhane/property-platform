@@ -1,0 +1,64 @@
+# Grype exceptions (A40, docs/engineering/TOOLCHAIN.md#chaîne-dapprovisionnement). Each rule names one
+# vulnerability in one package at one exact version, so the same CVE stays blocking anywhere else
+# (another image, another package version). Remove a rule as soon as the image it covers is updated.
+ignore:
+  # text-embeddings-inference cpu-1.9.3 (infra/local/compose.embeddings.yaml), Debian 12 packages.
+  # Checked on 6 November 2026: the latest release, cpu-1.9.4, still ships fixable critical Debian
+  # packages, and only the unreleased nightly cpu-latest is rebuilt on a patched base. The image is
+  # pinned with the E01 model, runs only under the optional "embeddings" profile, publishes no port
+  # and drops every capability; its only outbound call fetches the model weights once. Revisit at the
+  # next text-embeddings-inference release.
+  - vulnerability: CVE-2026-111497
+    package: {name: libbrotli1, version: "1.0.9-2+b6", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-33845
+    package: {name: libgnutls30, version: "3.7.9-2+deb12u6", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-42010
+    package: {name: libgnutls30, version: "3.7.9-2+deb12u6", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-7598
+    package: {name: libssh2-1, version: "1.10.0-3+b1", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-31789
+    package: {name: libssl-dev, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-34182
+    package: {name: libssl-dev, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-75803
+    package: {name: libssl-dev, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-31789
+    package: {name: libssl3, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-34182
+    package: {name: libssl3, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-75803
+    package: {name: libssl3, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-31789
+    package: {name: openssl, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-34182
+    package: {name: openssl, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-75803
+    package: {name: openssl, version: "3.0.18-1~deb12u2", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-12087
+    package: {name: perl-base, version: "5.36.0-7+deb12u3", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-13221
+    package: {name: perl-base, version: "5.36.0-7+deb12u3", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-42496
+    package: {name: perl-base, version: "5.36.0-7+deb12u3", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-57433
+    package: {name: perl-base, version: "5.36.0-7+deb12u3", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
+  - vulnerability: CVE-2026-8376
+    package: {name: perl-base, version: "5.36.0-7+deb12u3", type: deb}
+    reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
