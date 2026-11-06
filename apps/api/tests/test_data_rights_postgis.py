@@ -73,8 +73,8 @@ def test_each_row_reads_the_reviewed_rights_of_its_site(enforce_rights):
     # Collected and shown although the terms forbid it, as Karim decided (A22).
     assert withheld["collected_against_terms"]
     assert withheld["shown_beyond_terms"]
-    # Tiger Properties was reviewed in A21 (personal use only, collection kept allowed until
-    # the owner decides): qualified, still collected and shown within its recorded rights.
+    # The developer page (Modon, reviewed in A21) allows dated facts: qualified, collected and
+    # shown within its recorded rights.
     listed = rows[developer.capture_id]
     assert (listed["licence"], listed["publication"], listed["qualified"]) == (
         "proprietary",
