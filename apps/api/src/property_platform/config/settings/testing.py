@@ -1,4 +1,5 @@
 import os
+import re
 
 os.environ.setdefault("DJANGO_SECRET_KEY", "isolated-tests-only-key")
 
@@ -16,3 +17,12 @@ if os.environ.get("PROPERTY_PLATFORM_TEST_POSTGIS") != "1":
         for app in INSTALLED_APPS  # noqa: F405
         if app != "django.contrib.gis" and not app.startswith("property_platform.modules.")
     ]
+else:
+    # A39: scripts/checks/api.sh names a test database per run on the shared server, so two
+    # worktrees never create or drop each other's. Without it, Django's default name is used
+    # (CI). Only a test_property_platform_* name is accepted: never the service database.
+    test_name = os.environ.get("PROPERTY_PLATFORM_TEST_DB_NAME", "")
+    if test_name:
+        if not re.fullmatch(r"test_property_platform_[a-z0-9]{1,40}", test_name):
+            raise ValueError("PROPERTY_PLATFORM_TEST_DB_NAME must be test_property_platform_<id>")
+        DATABASES["default"]["TEST"] = {"NAME": test_name}  # noqa: F405
