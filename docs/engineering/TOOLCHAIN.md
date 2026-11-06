@@ -43,6 +43,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | Base des images applicatives | Debian Trixie | Node 26.12.1-trixie-slim / Python 3.14.10-slim-trixie |
 | GitHub checkout / setup-node | 7.0.1 / 7.1.0 | Releases stables vérifiées |
 | pnpm action-setup / setup-uv | 6.1.0 / 10.3.0 | Releases stables vérifiées via l'API GitHub |
+| setup-python | 7.1.0 | Python 3.14.10 des jobs CI API et ingestion, que uv 0.13.0 ne sait pas télécharger (A40) |
 
 Les versions npm proviennent du dist-tag latest du registre officiel ; les versions Python des métadonnées PyPI. Les lockfiles ont été régénérés avec pnpm 12 et uv, sans assouplir le contrôle des peers. L'exception d'âge de publication ajoutée par pnpm concerne uniquement @types/node@26.6.5, pas toutes les futures dépendances.
 
