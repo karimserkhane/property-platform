@@ -34,4 +34,4 @@ L'interface utilise l'anglais par défaut, des routes par langue et des traducti
 
 Le socle exécutable a été actualisé pour Node 26 et les outils stables vérifiés le 10 octobre 2026. Les [versions et exceptions de compatibilité](docs/engineering/TOOLCHAIN.md) précisent les écarts avec les anciennes études de stack et la transition PostgreSQL 17 → 18.
 
-L'application d'ingestion ajoutée le 13 octobre utilise Python 3.14.8, comme l'API et le fichier `.python-version` de racine. [Le guide Prefect](docs/engineering/INGESTION.md) explique la première installation, l'interface, les exécutions manuelles, les calendriers et l'arrêt des services sans perdre les données.
+L'application d'ingestion ajoutée le 13 octobre utilise Python 3.14.10 (depuis le 6 novembre), comme l'API et le fichier `.python-version` de racine. [Le guide Prefect](docs/engineering/INGESTION.md) explique la première installation, l'interface, les exécutions manuelles, les calendriers et l'arrêt des services sans perdre les données.

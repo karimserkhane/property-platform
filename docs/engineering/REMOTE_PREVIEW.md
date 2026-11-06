@@ -4,7 +4,7 @@ Le parcours par défaut donne un **accès privé de développement** au site Doc
 
 ## Solution retenue
 
-Le fichier `C:\Users\Karim\Repositories\property-platform\infra\local\compose.remote-preview.yaml` ajoute un connecteur facultatif **remote-preview**, avec l'image officielle Tailscale 1.104.1 fixée par empreinte. Il fonctionne en mode userspace : aucun pilote VPN Windows, mode Docker privilégié, périphérique TUN, route de sous-réseau ou sortie Internet ne lui est nécessaire.
+Le fichier `C:\Users\Karim\Repositories\property-platform\infra\local\compose.remote-preview.yaml` ajoute un connecteur facultatif **remote-preview**, avec l'image officielle Tailscale 1.104.2 fixée par empreinte (1.104.1 jusqu'au 6 novembre 2026, A40). Il fonctionne en mode userspace : aucun pilote VPN Windows, mode Docker privilégié, périphérique TUN, route de sous-réseau ou sortie Internet ne lui est nécessaire.
 
 Le connecteur partage l'espace réseau du conteneur web. **Tailscale Serve** relaie HTTPS vers `http://127.0.0.1:3000` dans cet espace. Prefect peut être ajouté séparément sur le port HTTPS privé 8443, selon la procédure ci-dessous. Les ports Windows PostgreSQL, Django et Prefect restent liés à `127.0.0.1`. Le mode privé reste le défaut : ne pas remplacer Serve par **Funnel** sans demande explicite d'accès sans VPN et sans protéger l'aperçu. Les permissions du réseau Tailscale déterminent quels appareils/membres peuvent accéder au site ; ce n'est pas une authentification applicative par utilisateur.
 
