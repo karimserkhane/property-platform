@@ -9,13 +9,15 @@ qu'un enchaînement réel fonctionne de bout en bout avec les données locales.
 Depuis la racine du dépôt ou d'un worktree, avec l'API locale démarrée :
 
 ```bash
-docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks build checks-e2e
-docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks run --rm --no-deps checks-e2e
+bash scripts/checks/run.sh build checks-e2e
+bash scripts/checks/run.sh checks-e2e
 ```
 
+Le script ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md#4-contrôles-en-une-commande)) étiquette l'image du nom du worktree (`property-platform-checks-e2e:<dossier>`) et passe l'autorité HTTPS approuvée à la construction.
+
 La construction recompile le site à partir des sources du dossier courant (même
-`Dockerfile` et même cache que la prévisualisation, étape `e2e`) ; elle ne remplace pas
-l'image `property-platform-web-preview`. Les fichiers de parcours sont montés au
+`Dockerfile` et même cache que la prévisualisation, étape `e2e`) ; elle ne remplace ni
+l'image `property-platform-web-preview`, ni celle d'un autre worktree. Les fichiers de parcours sont montés au
 lancement : les modifier ne nécessite pas de reconstruire. Un changement du site
 (`apps/web/src/`, messages, lockfile) nécessite la commande `build`.
 
@@ -48,6 +50,17 @@ docker compose -f infra/local/compose.e2e-demo.yaml up -d --wait api
 docker compose -f infra/local/compose.e2e-demo.yaml run --rm checks-e2e
 docker compose -f infra/local/compose.e2e-demo.yaml down
 ```
+
+Le nom de projet fixe ne permet qu'une pile à la fois. Pour en lancer une par worktree (deux agents en parallèle, [A39](../tasks/A39.md)), passer par `scripts/checks/run.sh`, qui ajoute `-p property-platform-e2e-demo-<dossier>` à chaque commande :
+
+```bash
+bash scripts/checks/run.sh e2e-demo build
+bash scripts/checks/run.sh e2e-demo up -d --wait api
+bash scripts/checks/run.sh e2e-demo run --rm checks-e2e
+bash scripts/checks/run.sh e2e-demo down
+```
+
+La pile ne publie aucun port sur l'hôte ; seul `.cache/e2e/` du worktree reçoit les rapports. La CI garde le projet `property-platform-e2e-demo`.
 
 Au démarrage, l'API applique les migrations puis `load_demo_package` rejoue
 `fixtures/demo-replay/` avec les importateurs actuels (aucun dump : 6 acquisitions

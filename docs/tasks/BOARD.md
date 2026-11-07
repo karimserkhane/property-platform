@@ -44,7 +44,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A36](A36.md) | A | Images satellite servies comme fichiers cachables | 3 | A08 | non | todo | unassigned |
 | [A37](A37.md) | A | État des composants carte regroupé en hooks et reducers | 3 | A07 | non | todo | unassigned |
 | [A38](A38.md) | A | Chaîne d'approvisionnement figée par digest et analysée | 3 | — | non (décidée le 03/11 : Dependabot) | done | claude |
-| [A39](A39.md) | A | Contrôles Docker lançables en parallèle depuis plusieurs worktrees | 1 | — | non | todo | unassigned |
+| [A39](A39.md) | A | Contrôles Docker lançables en parallèle depuis plusieurs worktrees | 1 | — | non | done | claude |
 | [A40](A40.md) | A | Corriger les vulnérabilités critiques relevées par la première analyse | 1 | A38 | non | done | claude |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |

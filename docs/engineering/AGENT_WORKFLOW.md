@@ -28,22 +28,31 @@ Une réservation sans commit depuis plus de 3 jours peut être reprise : l'indiq
 
 ## 4. Contrôles en une commande
 
-Les mêmes contrôles que la CI tournent dans Docker, sous Linux, sans toucher aux services partagés (`--no-deps`). La base locale doit être démarrée. Depuis la racine du dépôt ou du worktree :
+Les mêmes contrôles que la CI tournent dans Docker, sous Linux, sans toucher aux services partagés (`--no-deps`). La base locale doit être démarrée. Depuis la racine du dépôt ou du worktree, dans Git Bash :
 
 ```bash
-docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks run --rm --no-deps checks-api
-docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks run --rm --no-deps checks-ingestion
-docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks run --rm --no-deps checks-web
+bash scripts/checks/run.sh checks-api
+bash scripts/checks/run.sh checks-ingestion
+bash scripts/checks/run.sh checks-web
 ```
+
+`scripts/checks/run.sh` lance `docker compose -f infra/local/compose.yaml -f infra/local/compose.checks.yaml --profile checks run --rm --no-deps <service>` en séparant chaque worktree ([A39](../tasks/A39.md)) : deux agents peuvent lancer les trois contrôles en même temps depuis deux worktrees.
+
+- **Images** étiquetées du nom du dossier (`property-platform-checks-api:pp-a39b`) : la construction d'un worktree ne remplace pas l'image qu'un autre exécute. Le premier lancement d'un nouveau worktree construit ses images.
+- **Volumes de `checks-web`** (dépendances Linux, sortie Next.js, magasin pnpm) préfixés `property-platform-checks-<dossier>-` ; le premier lancement réinstalle tout.
+- **Base de test** propre à chaque exécution de `checks-api` : `test_property_platform_<identifiant du conteneur>`, créée puis supprimée par les tests, même en échec. Une exécution tuée en laisse une : `bash scripts/checks/clean-test-databases.sh` les liste (aucune connexion ouverte, jamais `property_platform`, `rebuild_check_*` ni `restore_check_*`), `--drop` les supprime.
+- **Certificat** : si le dossier principal contient l'autorité approuvée de [TOOLCHAIN.md](TOOLCHAIN.md#autorité-https-supplémentaire-dans-docker), elle est passée aux constructions (secret `platform_extra_ca`) ; l'installation npm de `checks-web` passe alors malgré l'inspection HTTPS d'Avast.
+
+Sans le script, les commandes `docker compose` directes utilisent les anciens noms partagés (`:latest`, volumes `property-platform-local_checks-*`) : une seule exécution à la fois. Après la suppression d'un worktree, ses volumes (`docker volume ls --filter name=property-platform-checks-<dossier>-`) et ses images (`docker image ls 'property-platform-checks-*:<dossier>'`) restent : les supprimer seulement avec l'accord de Karim, comme les anciens volumes `property-platform-local_checks-*`.
 
 | Service | Contrôles |
 | --- | --- |
 | `checks-api` | Ruff, frontières de modules, `manage.py check`, migrations manquantes, contrat OpenAPI à jour, tests PostGIS (base `test_property_platform` créée et supprimée par les tests) |
 | `checks-ingestion` | Ruff et tests d'ingestion |
 | `checks-web` | Installation Linux des dépendances dans des volumes, Biome, contrats, TypeScript, tests web, liens Markdown ; `CHECK_BUILD=1` ajoute la compilation et le smoke HTTP |
-| `checks-e2e` | Parcours navigateur Playwright (explorateur, recherche, RTL, mobile, fiche projet) contre l'API locale en lecture, sans identifiants de prévisualisation ; construire d'abord avec `... --profile checks build checks-e2e`. Voir [E2E.md](E2E.md) |
+| `checks-e2e` | Parcours navigateur Playwright (explorateur, recherche, RTL, mobile, fiche projet) contre l'API locale en lecture, sans identifiants de prévisualisation ; construire d'abord avec `bash scripts/checks/run.sh build checks-e2e`. Voir [E2E.md](E2E.md) |
 
-Arguments pytest : `... run --rm --no-deps checks-api bash scripts/checks/api.sh -k parcel_tiles`. Après un changement de lockfile, reconstruire l'image avec `... --profile checks build checks-api` (ou `checks-ingestion`, `checks-web`). Dans un worktree, `docs:check` est sauté dans le conteneur : le lancer sur l'hôte avec `pnpm docs:check`.
+Arguments pytest : `bash scripts/checks/run.sh checks-api bash scripts/checks/api.sh -k parcel_tiles`. Après un changement de lockfile, reconstruire l'image avec `bash scripts/checks/run.sh build checks-api` (ou `checks-ingestion`, `checks-web`). Dans un worktree, `docs:check` est sauté dans le conteneur : le lancer sur l'hôte avec `pnpm docs:check`.
 
 ## 5. Données reproductibles
 

@@ -4,6 +4,12 @@
 set -euo pipefail
 cd /workspace
 
+# A39: a test database of its own for this run (the container's hostname is unique), so
+# checks from two worktrees never drop each other's. Django removes it at the end, also
+# when tests fail; a run killed midway leaves it behind: scripts/checks/clean-test-databases.sh.
+export PROPERTY_PLATFORM_TEST_DB_NAME="${PROPERTY_PLATFORM_TEST_DB_NAME:-test_property_platform_$(hostname | tr -cd 'a-z0-9' | cut -c1-24)}"
+echo "== test database: $PROPERTY_PLATFORM_TEST_DB_NAME"
+
 echo "== ruff"
 ruff check --no-cache apps/api
 ruff format --check --no-cache apps/api
