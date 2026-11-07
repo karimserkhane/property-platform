@@ -716,16 +716,16 @@
   },
   {
     "host": "railjournal.com",
-    "publisher": "International Railway Journal",
-    "licence": "unknown",
+    "publisher": "International Railway Journal (Simmons-Boardman Publishing)",
+    "licence": "proprietary",
     "licence_url": "",
-    "terms_url": "",
-    "reviewed_on": null,
-    "reviewed_by": "",
-    "collection": "allowed",
-    "publication": "facts",
+    "terms_url": "https://www.railjournal.com/irj-terms-conditions/",
+    "reviewed_on": "2026-11-07",
+    "reviewed_by": "claude",
+    "collection": "forbidden",
+    "publication": "link",
     "attribution": "",
-    "basis": "Terms not reviewed yet (A21): dated facts with a link to the page, no copy of its media."
+    "basis": "The terms page sits behind an anti-bot check that is not bypassed; its search-engine summary reserves copyright and database rights and forbids commercial reproduction or distribution. Treated like the other press sites (Gulf News): collection forbidden and links kept, a cautious default decided on Karim's delegation (A21, 7 Nov 2026)."
   },
   {
     "host": "rakproperties.ae",

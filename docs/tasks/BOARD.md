@@ -26,7 +26,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A18](A18.md) | A | Captures sous licence non qualifiée dans le dépôt public | 1 | A13 | non (décidée le 27/10 : retrait d'Aldar) | done | claude |
 | [A19](A19.md) | A | Droits et licences de chaque source | 1 | A18 | non (décidée le 27/10) | done | claude |
 | [A20](A20.md) | A | Licences et attributions affichées sur le site | 2 | A19 | non | done | claude |
-| [A21](A21.md) | A | Qualifier les conditions des sources non relues | 2 | A19 | non (décidée le 28/10 : option a) | in-progress | claude |
+| [A21](A21.md) | A | Qualifier les conditions des sources non relues | 2 | A19 | non (décidée le 28/10 : option a) | done | claude |
 | [A22](A22.md) | A | Tout collecter et afficher, droits enregistrés et appliqués par interrupteur | 1 | A19 | non (décidée le 27/10) | done | claude |
 | [A23](A23.md) | A | Statut de droits de chaque ligne de la base | 1 | A22 | non (décidée le 29/10) | done | claude |
 | [A24](A24.md) | A | Droits de chaque source dans toute l'API et sur la carte | 1 | A22 | non (décidée le 29/10) | done | claude |
