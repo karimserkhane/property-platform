@@ -1,14 +1,14 @@
 {
   "collection": {
-    "enforced": false,
-    "decided_on": "2026-10-27",
-    "decided_by": "Karim",
-    "basis": "Every pipeline collects again, including sites whose terms forbid automated access; their rights stay recorded, so turning this on stops those collectors at once (A22)."
+    "enforced": true,
+    "decided_on": "2026-11-07",
+    "decided_by": "claude, on Karim's delegation",
+    "basis": "Delegated by Karim on 7 Nov 2026: collecting again from sites whose reviewed terms forbid it (Property Finder, Bayut, PSI, Aldar, LinkedIn, Reddit...) is a legal risk with no use before launch. Every collector skips them from now on; the rows already collected stay, with their rights recorded (A22)."
   },
   "publication": {
     "enforced": false,
-    "decided_on": "2026-10-27",
-    "decided_by": "Karim",
-    "basis": "The private preview shows every collected source; each one keeps its reviewed rights and licence, so turning this on hides at once what the terms do not allow (A22)."
+    "decided_on": "2026-11-07",
+    "decided_by": "claude, on Karim's delegation",
+    "basis": "Re-examined on Karim's delegation (7 Nov 2026): the preview stays private to Karim, so it keeps showing every collected source with its reviewed rights. Switch this on before the platform is shown to anyone else: B13 user sessions, public opening (A22)."
   }
 }

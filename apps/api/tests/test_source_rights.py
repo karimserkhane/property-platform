@@ -165,13 +165,15 @@ def test_the_owner_decisions_are_recorded():
     }
 
 
-def test_the_owner_collects_and_shows_every_source_with_its_rights_recorded():
+def test_collection_follows_the_terms_and_the_private_preview_shows_every_source():
+    # Decided on Karim's delegation on 7 November (A22): forbidden sites are no longer
+    # collected; what was collected stays visible in his private preview, with its rights.
     decisions = enforcement()
+    assert decisions["collection"]["enforced"] is True
     assert decisions["publication"]["enforced"] is False
-    assert decisions["collection"]["enforced"] is False
-    assert {decision["decided_by"] for decision in decisions.values()} == {"Karim"}
+    assert {decision["decided_on"] for decision in decisions.values()} == {"2026-11-07"}
     url = "https://psinv.net/en/projects/abu-dhabi/x-1"
-    assert collection_allowed(url) and facts_allowed(url)
+    assert not collection_allowed(url) and facts_allowed(url)
     assert rights_for(url)["collection"] == "forbidden"
 
 
