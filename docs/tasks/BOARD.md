@@ -35,7 +35,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A27](A27.md) | A | Interrupteur de collecte respecté par le script d'imagerie manuel | 2 | A25 | non | done | claude |
 | [A28](A28.md) | A | Contrôle de reconstruction réel sur main après l'émirat et les droits | 1 | A15, A23, F06 | non | done | claude |
 | [A29](A29.md) | A | Captures déplacées vers le stockage objet sur la base partagée | 2 | A10 | non (décidée le 03/11 : relocate autorisé) | done | claude |
-| [A30](A30.md) | A | Copie des sauvegardes hors de la machine | 2 | A03 | non (décidée le 03/11 : local, modulable vers le cloud) | in-progress | claude |
+| [A30](A30.md) | A | Copie des sauvegardes hors de la machine | 2 | A03 | non (décidée le 07/11 : S3 hors poste, chiffré côté poste) | in-progress | claude |
 | [A31](A31.md) | A | Parcours e2e instables du signal satellite et de la carte | 1 | A13, B07 | non | done | claude |
 | [A32](A32.md) | A | Fraîcheur par famille de sources et alertes d'exploitation | 2 | A26 | non (si une alerte sort de Prefect) | todo | unassigned |
 | [A33](A33.md) | A | Budgets de performance en CI | 2 | A13 | non | todo | unassigned |
@@ -53,21 +53,21 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [B05](B05.md) | B | Fiche « Vérification » d'un projet | 1 | B02, B03, B04 | non | done | claude |
 | [B06](B06.md) | B | Indice d'activité de chantier par satellite | 2 | A02 | non (décidée le 26/10 : option 3) | done | claude |
 | [B07](B07.md) | B | Signal d'activité satellite sur la fiche projet | 2 | B06 | non | done | claude |
-| [B08](B08.md) | B | Liens de vérification officielle DARI des projets enregistrés | 1 | B02 | non (décidée le 03/11 : consultation par un agent) | in-progress | claude |
+| [B08](B08.md) | B | Liens de vérification officielle DARI des projets enregistrés | 1 | B02 | non (décidée le 03/11 : consultation par un agent) | done | claude |
 | [B09](B09.md) | B | Liens de parcelle relus des projets sur plan | 2 | B06, A02 | non | todo | unassigned |
 | [B10](B10.md) | B | Qualifier les permis de construire et QR de chantier d'Abu Dhabi | 2 | — | si ambiguïté | todo | unassigned |
 | [B11](B11.md) | B | Frise d'avancement d'un projet sur sa fiche | 2 | B05, B07, B03 | non | todo | unassigned |
 | [B12](B12.md) | B | Complétude du dossier et nature de chaque valeur affichée | 2 | B05 | non | todo | unassigned |
-| [B13](B13.md) | B | Démonstration sur téléphone et essais avec cinq utilisateurs cibles | 1 | B05 | oui (recrutement et consentement) | todo | unassigned |
+| [B13](B13.md) | B | Démonstration sur téléphone et essais avec cinq utilisateurs cibles | 1 | B05 | non (décidée le 07/11 : protocole ; recrutement par Karim) | todo | unassigned |
 | [C01](C01.md) | C | Prix observés contre prix demandés | 2 | A01 | non (décidée le 28/10 : découpage vers C03) | done | claude |
 | [C02](C02.md) | C | Simulateur d'échéancier et coût total | 2 | B02 | non (décidée le 28/10 : découpage vers C04, C05) | done | claude |
 | [C03](C03.md) | C | Prix demandés d'annonces à permis Madhmoun vérifié | 2 | C01, A19 | si aucune source autorisée | todo | unassigned |
 | [C04](C04.md) | C | Frais officiels d'enregistrement d'Abu Dhabi cités | 2 | C02, A19 | si aucun texte officiel trouvé | todo | unassigned |
 | [C05](C05.md) | C | Plans de paiement des promoteurs sourcés | 2 | C02, A19 | non | todo | unassigned |
 | [C06](C06.md) | C | Comparer deux ou trois projets côte à côte | 2 | C01, C02, B05 | non | todo | unassigned |
-| [D01](D01.md) | D | Comptes utilisateurs | 2 | — | oui | todo | unassigned |
+| [D01](D01.md) | D | Comptes utilisateurs | 2 | — | non (décidée le 07/11 : passkeys, code e-mail en secours) | todo | unassigned |
 | [D02](D02.md) | D | Liste de suivi et alertes explicables | 2 | D01, D03 | non | todo | unassigned |
-| [D03](D03.md) | D | Canal d'envoi des alertes | 2 | D01 | oui (canal, fournisseur, budget) | todo | unassigned |
+| [D03](D03.md) | D | Canal d'envoi des alertes | 2 | D01 | non (décidée le 07/11 : notification web, puis e-mail SES) | todo | unassigned |
 | [E01](E01.md) | E | Index de recherche des preuves | 3 | A01 | non (décidée le 28/10 : option 2, mesure en E02) | done | claude |
 | [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | oui | todo | unassigned |
 | [E03](E03.md) | E | Recherche dans les preuves sur le site | 2 | E01 | non | todo | unassigned |
@@ -79,7 +79,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [F06](F06.md) | F | Réimports des derniers districts de l'émirat et mesures | 3 | F05 | non | done | claude |
 | [F07](F07.md) | F | Index des identifiants officiels de parcelles pour les imports de district | 3 | F05 | non | done | claude |
 | [F08](F08.md) | F | Couches AD-SDI depuis la plateforme ouverte data.abudhabi | 2 | A19 | non | todo | unassigned |
-| [F09](F09.md) | F | Fiches projet hors des trois îles d'Abu Dhabi | 3 | B02, F06 | oui (communautés à ajouter) | todo | unassigned |
+| [F09](F09.md) | F | Fiches projet hors des trois îles d'Abu Dhabi | 3 | B02, F06 | non (décidée le 07/11 : Al Hidayriyyat et Yas d'abord) | todo | unassigned |
 | [F10](F10.md) | F | Bâtiments, rues et lieux sur la carte au-delà des trois îles | 3 | F06, A07 | non | todo | unassigned |
 | [F11](F11.md) | F | Retrouver les jeux ouverts de Dubai sur Data.Dubai | 3 | F02 | si un compte ou une demande officielle est exigé | todo | unassigned |
 | [F12](F12.md) | F | District SA' depuis une source ouverte | 3 | F08 (PR #47) | non | todo | unassigned |
