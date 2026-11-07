@@ -53,7 +53,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [B05](B05.md) | B | Fiche « Vérification » d'un projet | 1 | B02, B03, B04 | non | done | claude |
 | [B06](B06.md) | B | Indice d'activité de chantier par satellite | 2 | A02 | non (décidée le 26/10 : option 3) | done | claude |
 | [B07](B07.md) | B | Signal d'activité satellite sur la fiche projet | 2 | B06 | non | done | claude |
-| [B08](B08.md) | B | Liens de vérification officielle DARI des projets enregistrés | 1 | B02 | non (décidée le 03/11 : consultation par un agent) | in-progress | claude |
+| [B08](B08.md) | B | Liens de vérification officielle DARI des projets enregistrés | 1 | B02 | non (décidée le 03/11 : consultation par un agent) | done | claude |
 | [B09](B09.md) | B | Liens de parcelle relus des projets sur plan | 2 | B06, A02 | non | todo | unassigned |
 | [B10](B10.md) | B | Qualifier les permis de construire et QR de chantier d'Abu Dhabi | 2 | — | si ambiguïté | todo | unassigned |
 | [B11](B11.md) | B | Frise d'avancement d'un projet sur sa fiche | 2 | B05, B07, B03 | non | todo | unassigned |
