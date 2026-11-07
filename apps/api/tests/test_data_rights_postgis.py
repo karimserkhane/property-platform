@@ -73,11 +73,13 @@ def test_each_row_reads_the_reviewed_rights_of_its_site(enforce_rights):
     # Collected and shown although the terms forbid it, as Karim decided (A22).
     assert withheld["collected_against_terms"]
     assert withheld["shown_beyond_terms"]
+    # The developer page (Modon, reviewed in A21) allows dated facts: qualified, collected and
+    # shown within its recorded rights.
     listed = rows[developer.capture_id]
     assert (listed["licence"], listed["publication"], listed["qualified"]) == (
-        "unknown",
+        "proprietary",
         "facts",
-        False,
+        True,
     )
     assert not listed["collected_against_terms"] and not listed["shown_beyond_terms"]
     # A catalogue row has one rights row per capture it was read from.

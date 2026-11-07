@@ -100,12 +100,55 @@ def test_every_source_and_connector_has_an_explicit_review_entry():
     assert {row["host"] for row in source_rights()} == used
 
 
-def test_the_owner_decisions_of_27_and_28_october_are_recorded():
+# Owner decision of 6 November 2026 (A21, option a): terms that forbid automated access
+# or limit use to personal purposes stop collection; links to their pages stay.
+DECIDED_6_NOVEMBER = {
+    # Terms that forbid automated access.
+    "adgm.com",
+    "by-mholding.com",
+    "cdn.prod.website-files.com",
+    "doh.gov.ae",
+    "emiratesdevelopments.com",
+    "etihadrail.ae",
+    "fourseasons.com",
+    "imkan.ae",
+    "jre.ae",
+    "jumeirah.com",
+    "mediaoffice.abudhabi",
+    "rendr.ae",
+    "skyscrapercity.com",
+    "tarafholding.com",
+    "tradingview.com",
+    "vimeo.com",
+    # Personal, non-commercial use only, as for Aldar.
+    "alainam.ae",
+    "crystal-projects.com",
+    "gafproperty.com",
+    "gulfnews.com",
+    "mered.ae",
+    "mubadala.com",
+    "nrec.com.kw",
+    "oneuae.com",
+    "rakproperties.ae",
+    "reportageuae.com",
+    "skyscraperpage.com",
+    "tigerproperties.ae",
+    "vazeno.files.cmp.optimizely.com",
+}
+
+
+def test_the_owner_decisions_are_recorded():
     decided = {
         row["host"]: (row["collection"], row["publication"])
         for row in source_rights()
-        if row["collection"] == "forbidden"
+        if row["collection"] == "forbidden" and row["host"] not in DECIDED_6_NOVEMBER
     }
+    later = [row for row in source_rights() if row["host"] in DECIDED_6_NOVEMBER]
+    assert len(later) == len(DECIDED_6_NOVEMBER)
+    assert {(row["collection"], row["publication"], row["reviewed_by"]) for row in later} == {
+        ("forbidden", "link", "Karim")
+    }
+    # Decisions of 27 and 28 October.
     assert decided == {
         "aldar.com": ("forbidden", "link"),
         "bayut.com": ("forbidden", "none"),

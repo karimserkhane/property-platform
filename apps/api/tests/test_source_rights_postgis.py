@@ -37,8 +37,10 @@ from property_platform.modules.evidence.projects.queries import (  # noqa: E402
 pytestmark = [pytest.mark.postgis, pytest.mark.django_db(transaction=True)]
 
 ACTOR = "source-rights-test"
-DEVELOPER = "https://tigerproperties.ae/"
-DEVELOPER_PAGE = "https://tigerproperties.ae/renad-tower/"
+# A developer whose reviewed terms allow dated facts with a link (Modon, A21). Tiger Properties,
+# the real developer of Renad Tower, has been forbidden since the owner decision of 6 November.
+DEVELOPER = "https://www.modon.com/"
+DEVELOPER_PAGE = "https://www.modon.com/renad-tower/"
 PSI_PAGE = "https://psinv.net/en/projects/abu-dhabi/abu-dhabi-district/al-reem-island/renad-tower-1"
 ALDAR_PAGE = "https://www.aldar.com/properties/en/uae/reem-island/gate"
 REDDIT_PAGE = "https://www.reddit.com/r/AbuDhabi_Real_Estate/comments/x/"
@@ -66,7 +68,7 @@ def capture(url):
 
 def project(slug, website_url=""):
     developer, _ = Developer.objects.get_or_create(
-        key="tiger-properties", defaults={"name": "Tiger Properties", "website_url": DEVELOPER}
+        key="modon", defaults={"name": "Modon", "website_url": DEVELOPER}
     )
     return Project.objects.create(
         slug=slug,
@@ -103,7 +105,7 @@ def place(name, namespace, kind="publisher_project_marker"):
 @pytest.fixture
 def catalogue():
     renad = project("renad-tower", website_url=PSI_PAGE)
-    snapshot(renad, DEVELOPER_PAGE, source_kind="developer", source_name="Tiger Properties")
+    snapshot(renad, DEVELOPER_PAGE, source_kind="developer", source_name="Modon")
     snapshot(
         renad,
         PSI_PAGE,
@@ -184,8 +186,8 @@ def test_withheld_sites_leave_no_fact_pin_link_or_project_behind(catalogue):
     assert renad["parent"] is None
     # An agency page is never shown as the project's site, whatever its rights.
     assert renad["website_url"] == DEVELOPER_PAGE
-    # Each published source states its reviewed rights (unknown: not qualified yet).
-    assert renad["sources"][0]["rights"]["licence"] == "unknown"
+    # Each published source states its reviewed rights (Modon, reviewed in A21).
+    assert renad["sources"][0]["rights"]["licence"] == "proprietary"
     assert renad["sources"][0]["rights"]["publication"] == "facts"
     assert project_detail("sky-tower") is None
     items = {row["slug"]: row for row in project_directory()["items"]}
