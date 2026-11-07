@@ -162,7 +162,11 @@ def test_the_owner_decisions_are_recorded():
         "psinv.net": ("forbidden", "none"),
         "reddit.com": ("forbidden", "none"),
         "squareyards.ae": ("forbidden", "none"),
+        # 7 November, delegated by Karim: terms behind an anti-bot check, the cautious
+        # default of the other press sites (A21).
+        "railjournal.com": ("forbidden", "link"),
     }
+    assert {row["host"] for row in source_rights() if row["reviewed_on"] is None} == set()
 
 
 def test_the_owner_collects_and_shows_every_source_with_its_rights_recorded():
