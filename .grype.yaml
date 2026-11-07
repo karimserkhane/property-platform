@@ -71,3 +71,11 @@ ignore:
   # Playwright moves to 1.65.0 or later (npm package and image together, E2E.md).
   - package: {name: firefox, version: "157.0", type: binary, location: "/ms-playwright/firefox-1555/**"}
     reason: unused Firefox of the Playwright 1.64.0 e2e image (Chromium only); exception of 2026-11-06 (A40)
+  # zlib of the Alpine 3.22.7 base of tailscale/tailscale:v1.104.4 (infra/local/compose.remote-preview.yaml).
+  # CVE-2026-4738 appeared in the database on 7 November 2026, fixed in Alpine zlib 1.4-r0. Checked that
+  # day: tailscaled is a static Go binary that never loads libz (only apk-tools, never run in the
+  # container, links it), and Tailscale publishes no newer image yet (v1.104.5 is not on Docker Hub).
+  # Remove this rule as soon as the image moves past v1.104.4.
+  - vulnerability: CVE-2026-4738
+    package: {name: zlib, version: "1.3.2-r1", type: apk}
+    reason: Alpine zlib of tailscale/tailscale v1.104.4, not loaded by the static tailscaled; exception of 2026-11-07 (A40)
