@@ -30,6 +30,9 @@ docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml
 Ne pas lancer un deuxième contrôle identique en parallèle (rien ne l'empêche
 techniquement). Prévoir au moins quelques Go libres pendant le contrôle : les octets
 dédupliqués des captures et une base de travail s'ajoutent à la base en service.
+Mesure sur l'émirat ([A28](#contrôle-réel-sur-main-après-lémirat-a28--6-novembre-2026)) :
+environ 1 h 30, 1,2 Go de captures copiées et une base de travail de 3,1 Go, soit
+4 Go de moins sur le disque de l'hôte au premier passage.
 Les octets copiés sont supprimés à la fin du contrôle. Les originaux privés doivent être accessibles au même chemin que
 dans le runner ; un conteneur de contrôle les monte **en lecture seule**.
 
@@ -176,7 +179,7 @@ exacte (`matches`) ; sinon l'écart reste dans la comparaison de table et la fai
 | --- | --- | --- |
 | `reused_receipt` | Le rejeu réutilise l'exécution d'un reçu de fiche **identique** déjà importé (empreinte du reçu) : la relecture n'est pas recréée ([décision A12](#état-publié-a12)). L'étape n'écrit rien ; ses observations d'origine doivent être uniquement des confirmations (`unchanged`). | Observations non recréées reportées (`reused_receipts`) |
 | `superseded_interpretation` | Version non commitée du registre `SUPERSEDED_INTERPRETATIONS` : l'étape rejouée doit donner, par cible, ce qu'a donné la **première** relecture des mêmes octets sous la version qui l'a remplacée. Aucune règle de l'ancienne version n'est devinée. | Différence reportée (`superseded_interpretations`) |
-| `reviewed_reinterpretation` | Run du registre `REVIEWED_REINTERPRETATIONS` : captures, lignes d'origine (aucune) et lignes rejouées exactement listées ; l'identité citée est absente de la base de référence et active après le rejeu. | Observation et identité reportées (`reviewed_reinterpretations`) |
+| `reviewed_reinterpretation` | Run du registre `REVIEWED_REINTERPRETATIONS` : captures, lignes d'origine (aucune) et lignes rejouées exactement listées ; l'identité citée est active après le rejeu et absente de la base de référence, ou créée ensuite dans celle-ci par une recollecte de la même référence (même portée et même version, lignes d'origine égales aux lignes listées), avec une seule création et toujours active (`created_later_by`, A28). | Observation et identité reportées (`reviewed_reinterpretations`) ; observation seule quand l'identité a été créée ensuite |
 
 **Attributions retirées.** Le registre `WITHDRAWN_ATTRIBUTIONS` liste, identité par
 identité, des lieux qu'une interprétation non commitée a créés puis qu'une exécution
@@ -194,7 +197,7 @@ comparaison exacte.
 | `WITHDRAWN_ATTRIBUTIONS` | `project:{one-reem-island, reem-eight, reem-eleven, reem-five, reem-nine, saas-heights, seamont}` / `publisher-map` | `project-map-v1` non commitée prenait le centre de la vue de carte de l'éditeur pour la position du projet ; retirées par `review_project_locations` le 16 octobre (`4d2c51f`) |
 | `WITHDRAWN_ATTRIBUTIONS` | `research:d8fec783…` / `project-map-marker` (« Marlin 1 ») | Repère `reem-references-v1` non commité, retiré par `reem-references-v2` sur les mêmes octets (titre discordant) |
 | `SUPERSEDED_INTERPRETATIONS` | `reem-references-v1` → `reem-references-v2` | Non commitée (antérieure à `087241d`) ; toutes ses captures relues 30 minutes plus tard (`stored_capture_reprocess`) |
-| `REVIEWED_REINTERPRETATIONS` | `a4ad9e09-6c40-4497-9522-f5732d35d8d5` (`research:601d9da4…`) | Analyseur `bloomholding.com` ajouté en `4d2c51f` sous la même version `district-references-v3` ; le run du 13 octobre est antérieur et la référence n'a jamais été relue |
+| `REVIEWED_REINTERPRETATIONS` | `a4ad9e09-6c40-4497-9522-f5732d35d8d5` (`research:601d9da4…`) | Analyseur `bloomholding.com` ajouté en `4d2c51f` sous la même version `district-references-v3` ; le run du 13 octobre est antérieur ; la recollecte du 25 octobre (`f06b8954…`, autres octets, même analyseur) a créé le repère dans la base en service (A28) |
 
 **Présentations.** Une présentation de bien est rattachée au rejeu à une identité OSM
 ou d'un autre fournisseur ; un nombre égal ne prouve pas le même rattachement. Le
@@ -237,9 +240,13 @@ reproduire **ce que le site publie** ; l'historique des lectures est une alerte.
 - L'export relève, sur le même instantané que les captures, la fiche de chaque projet
   publié (`project_detail`) et les liens d'identité actifs (projet, cible, espace de
   noms, identifiant source, motif). Les identifiants de base (UUID), l'emplacement
-  privé d'un média et l'heure d'ingestion sont retirés ; l'ordre des listes est
+  privé d'un média et l'heure d'ingestion sont retirés, comme l'heure de calcul d'un
+  signal de chantier (`measured_at`, recalculé par le rejeu, dont les valeurs sont
+  comparées par [B06](#mesures-dactivité-de-chantier-b06)) ; l'ordre des listes est
   ignoré, celui des coordonnées d'une géométrie conservé. Valeurs, sources (URL,
-  empreinte, date de collecte), positions et hiérarchie sont comparées.
+  empreinte, date de collecte), positions et hiérarchie sont comparées. Une date de
+  collecte publiée vient donc d'une capture, jamais de l'écriture d'une ligne : la
+  fenêtre des ventes ADREC (C01) donne l'heure de lecture de sa dernière page (A28).
 - Le rejeu recalcule le même état dans la base reconstruite (`rebuild_published.py`).
   Le rapport `published` liste chaque fiche différente avec ses chemins (`.summary`,
   `.typologies`…) ; `published_blocking` compte les différences bloquantes. Une fiche,
@@ -478,3 +485,71 @@ en lecture seule, base de travail créée puis supprimée par le contrôle.
   rejeu (1 236 → 804 lectures).
 - Écarts restants du rapport, hors A12 : `map_observation`, `place` et la divergence
   `d7b5f4bc`, suivis dans [A15](../tasks/A15.md).
+
+## Contrôle réel sur `main` après l'émirat (A28) — 6 novembre 2026
+
+Premier passage avec l'ingestion déployée depuis `main` (`00bee33`), run Prefect
+`925c1051-940b-4f32-aab1-3ad3b6a2fcf1`, instantané à `2026-11-06T17:54:15Z` :
+3 005 étapes (dont 215 imports de district AD-SDI), 58 tables, aucune étape échouée
+ni divergente (2 963 réussies, 25 quarantaines et 17 références indisponibles
+reproduites), mais **`ok: false`**. Durée 1 h 28 min 40 s : export 8 min (1,2 Go de
+captures), rejeu 79 min, dont environ 70 min pour les imports de district,
+comparaison 2 min. Base de travail de 3 063 Mo (3 570 Mo pour la base en service),
+paquet conservé de 17 Mo (`manifest.json`, `report.json`) ; 3,85 Go de moins sur `C:`
+au plus fort. Le rejeu reste sous le délai de 2 h d'un worker ; à remesurer si
+l'émirat grandit. La durée reste praticable : aucune réduction du périmètre comparé.
+
+Ce qui concorde au premier passage : les 407 027 parcelles actives et 69 zones
+administratives (politique `identity`), les 442 999 observations de parcelles et
+648 limites de district, les ventes et indices ADREC (27 959 et 6 000), les
+vérifications (240, liens 60), les mesures de chantier (14), les libellés de marché
+(53), l'index de recherche (873) et les deux interrupteurs de collecte.
+`source_rights` compte 84 droits actifs des deux côtés ; les 9 lignes de plus de la
+base en service sont des revues révoquées avant le registre actuel (A03). Les 156 liens
+d'identité actifs sont identiques ; les 7 révocations (163 lignes) sont des décisions
+sauvegardées par A03. Les tables d'historique des fiches suivent les règles de lecture
+d'[A12](#état-publié-a12).
+
+Trois écarts, tous des horloges d'ingestion ou une règle trop étroite, aucun une perte
+de source :
+
+- **Ventes observées, 52 fiches** : `observed_sales.window.collected_at` publiait
+  l'heure d'écriture de la fenêtre ADREC (`created_at`), donc l'heure du rejeu. La
+  fiche publie maintenant l'heure de lecture de la dernière page du registre (capture),
+  quelques secondes plus tôt que l'écriture en service.
+- **Activité de chantier, 7 fiches** : `measured_at` est l'heure de calcul du signal
+  (création de sa ligne). Il est retiré de la comparaison de l'état publié, comme
+  l'heure d'ingestion ; les niveaux et les dates des scènes restent comparés, et les
+  mesures elles-mêmes le sont par [B06](#mesures-dactivité-de-chantier-b06).
+- **`map_observation`, +1** : la recollecte du 25 octobre (`f06b8954…`, autres octets,
+  même version `district-references-v3`) a créé dans la base en service le repère Bloom
+  « Park View » (`research:601d9da4…`) que la réinterprétation revue de `a4ad9e09`
+  créait seule au rejeu. La règle `reviewed_reinterpretation` couvre maintenant ce cas
+  exact (`created_later_by`) : création unique, identité active, même portée, même
+  version et lignes d'origine listées. L'identité n'est alors plus reportée sur `place`.
+
+Second passage avec le code corrigé exécuté depuis une image temporaire de la branche
+A28 (sans déploiement ; base en service lue en lecture seule, base de travail créée
+puis supprimée par le contrôle), run `c7e861c6-b229-4fd1-bfd4-2f61f6b52b0e`, instantané
+à `2026-11-06T19:40:30Z` : **`ok: true`**, mêmes 3 005 étapes, aucune table en écart,
+**183 fiches sur 183 identiques, 156 liens sur 156, 0 différence bloquante**. Durée
+1 h 25 min 58 s (export 6 min, rejeu 78 min, comparaison 2 min), base de travail de
+3 067 Mo ; 2,83 Go de moins sur `C:`, le disque virtuel de Docker ayant déjà grandi au
+premier passage.
+
+| Règle | Étapes ou identités | Effet sur `map_observation` |
+| --- | --- | --- |
+| Divergence revue `d7b5f4bc` | 1 | +949 |
+| `legacy_selection` (OSM) | 3 | +578 |
+| `legacy_selection` (`project-details-v1`) | 3 | +3 |
+| `superseded_interpretation` (`reem-references-v1`) | 29 | +28 |
+| `reviewed_reinterpretation` (`601d9da4…`, `created_later_by` `f06b8954…`) | 1 | +1 |
+| `reused_receipt` | 150 | −143 |
+| `withdrawn_attributions` | 8 identités | −16 (et −8 `place`) |
+
+Total reporté : +1 400 observations (11 942 en service, 13 342 au rejeu) et −8 lieux
+(2 026 et 2 018). Depuis le contrôle vert du 24 octobre, 20 relectures d'un reçu
+identique de plus (−20) ; le repère Bloom n'est plus un lieu en plus. Les 230 étapes
+à comptes différents relèvent toutes d'une règle ou ne diffèrent que par leurs
+actions. Entre les deux passages, les tables d'audit (`ingestion_run`, `row_revision`)
+ont grandi avec les collectes en service ; elles ne sont pas comparées exactement.

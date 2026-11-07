@@ -441,17 +441,49 @@ def explain_rows(step, rows, expected, compared, reused, steps, index, reference
     review = REVIEWED_REINTERPRETATIONS.get(step["run"])
     if review is not None:
         key = "|".join(review["identity"])
-        return "reviewed_reinterpretation", {
-            "reason": review["reason"],
-            "matches": reference is not None
+        held = (reference or {}).get(key)
+        later = None if held is None else created_later(step, steps, index, review, held)
+        detail = {"reason": review["reason"]}
+        if later is not None:
+            detail["created_later_by"] = later
+        detail["matches"] = (
+            reference is not None
             and key in reference
-            and reference[key] is None
+            and (held is None or later is not None)
             and (reviewed_identities().get(key) or {}).get("active", False)
             and tuple(sorted(c["sha256"] for c in step["captures"])) == review["captures"]
             and not expected
-            and rows == review["rows"],
-        }
+            and rows == review["rows"]
+        )
+        return "reviewed_reinterpretation", detail
     return None
+
+
+def created_later(step, steps, index, review, held):
+    """Later run of the same scope that created a reviewed identity, or None (A28).
+
+    A recollection read by the current code can create in the reference the identity
+    that the replay already creates at the reviewed run: the reference then holds it
+    active, with a single creation under the same version, and that later run created
+    exactly the reviewed rows. The replay sees it unchanged there; only the observation
+    of the reviewed run is extra, and the identity itself is in both databases.
+    """
+    actions = [action for _, action in held["observations"]]
+    if not held["active"] or actions.count("created") != 1:
+        return None
+    if [step["original_version"], "created"] not in [list(row) for row in held["observations"]]:
+        return None
+    return next(
+        (
+            later["run"]
+            for later in steps[index + 1 :]
+            if later["operation"] == step["operation"]
+            and later["scope"] == step["scope"]
+            and later.get("original_version") == step["original_version"]
+            and later.get("original_rows") == review["rows"]
+        ),
+        None,
+    )
 
 
 def legacy_rows(rows, run_ids, selected):
@@ -1230,8 +1262,9 @@ def replay_archive(
                         {"reviewed_divergence", "diverged_from"} & set(outcome)
                     ):
                         deltas = table_deltas(rows, expected)
-                        if name == "reviewed_reinterpretation":
-                            # The identity it creates is checked by explain_rows.
+                        if name == "reviewed_reinterpretation" and "created_later_by" not in detail:
+                            # The identity it creates is checked by explain_rows; created
+                            # later in the reference too, it is no difference of its table.
                             target = REVIEWED_REINTERPRETATIONS[step["run"]]["identity"][0]
                             deltas[f"real_estate.{target}"] = 1
                         for table, delta in deltas.items():

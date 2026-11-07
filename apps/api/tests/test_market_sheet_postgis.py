@@ -14,7 +14,10 @@ from test_adrec_protocol import sale  # noqa: E402
 
 from property_platform.modules.catalog.models import Developer, Project  # noqa: E402
 from property_platform.modules.evidence import source_rights  # noqa: E402
-from property_platform.modules.evidence.models import ProjectMarketLabel  # noqa: E402
+from property_platform.modules.evidence.models import (  # noqa: E402
+    AdrecMarketSnapshot,
+    ProjectMarketLabel,
+)
 from property_platform.modules.evidence.projects.market_sheet import project_market  # noqa: E402
 from property_platform.modules.evidence.source_rights import public_rights  # noqa: E402
 from property_platform.modules.evidence.sources import adrec  # noqa: E402
@@ -73,6 +76,10 @@ def test_only_the_newest_window_is_read_and_partial_shares_stay_out_of_ranges(la
     window = sheet["window"]
     assert (window["period_start"], window["period_end"]) == (date(2026, 7, 22), date(2026, 10, 19))
     assert window["captures"] and all(c["url"].startswith(adrec.SALES) for c in window["captures"])
+    # Collected when its last page was fetched, not when the snapshot row was written.
+    snapshot = AdrecMarketSnapshot.objects.get(dataset="sales", period_end=date(2026, 10, 19))
+    last_page = snapshot.run.captures.order_by("-fetched_at").first()
+    assert window["collected_at"] == last_page.fetched_at < snapshot.created_at
     two_beds, studios = sheet["groups"]
     assert (two_beds["property_layout"], studios["property_layout"]) == ("2 beds", "studio")
     assert (two_beds["sales_count"], two_beds["full_share_count"]) == (3, 2)
