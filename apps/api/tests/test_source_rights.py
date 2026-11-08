@@ -169,15 +169,15 @@ def test_the_owner_decisions_are_recorded():
     assert {row["host"] for row in source_rights() if row["reviewed_on"] is None} == set()
 
 
-def test_collection_follows_the_terms_and_the_private_preview_shows_every_source():
-    # Decided on Karim's delegation on 7 November (A22): forbidden sites are no longer
-    # collected; what was collected stays visible in his private preview, with its rights.
+def test_the_private_site_collects_and_shows_every_source_with_its_rights():
+    # Karim's decision of 8 November (A22): the site is his alone, so everything is collected
+    # and shown, and each source keeps the rights its terms give.
     decisions = enforcement()
-    assert decisions["collection"]["enforced"] is True
+    assert decisions["collection"]["enforced"] is False
     assert decisions["publication"]["enforced"] is False
-    assert {decision["decided_on"] for decision in decisions.values()} == {"2026-11-07"}
+    assert {decision["decided_by"] for decision in decisions.values()} == {"Karim"}
     url = "https://psinv.net/en/projects/abu-dhabi/x-1"
-    assert not collection_allowed(url) and facts_allowed(url)
+    assert collection_allowed(url) and facts_allowed(url)
     assert rights_for(url)["collection"] == "forbidden"
 
 
