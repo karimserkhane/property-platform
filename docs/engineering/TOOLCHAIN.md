@@ -10,7 +10,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 
 | Outil | Version | Emplacement / rôle |
 |---|---|---|
-| Node.js | 26.12.1 | .node-version, CI, images web ; engines >=26.12.1 <27 (26.11.1 : faille exploitée activement, A40) |
+| Node.js | 26.13.0 | .node-version, CI, images web ; engines >=26.12.1 <27 (26.11.1 : faille exploitée activement, A40) |
 | pnpm | 12.10.1 | packageManager, image de build et instructions |
 | npm | 12.2.0 | Installation des outils et image de build web ; pnpm gère les dépendances du projet |
 | TypeScript | 7.0.2 | Compilateur natif de typecheck web et contrats, alias @typescript/compiler |
@@ -40,7 +40,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | PostgreSQL / PostGIS | Tag 18-3.6 | Dernier couple stable fourni par l'image PostGIS ; versions mineures du tag évolutives |
 | Client PostgreSQL de l'ingestion | postgresql-client-18 (dépôt PGDG `trixie-pgdg`, clé vérifiée par empreinte) | `pg_dump`/`pg_restore` de même version majeure que le serveur, pour les [sauvegardes](BACKUPS.md) |
 | PostgreSQL des métadonnées Prefect | Image 18.6-trixie | Base distincte `prefect`, sans PostGIS ni port publié vers l'hôte |
-| Base des images applicatives | Debian Trixie | Node 26.12.1-trixie-slim / Python 3.14.10-slim-trixie |
+| Base des images applicatives | Debian Trixie | Node 26.13.0-trixie-slim / Python 3.14.10-slim-trixie |
 | GitHub checkout / setup-node | 7.0.1 / 7.1.0 | Releases stables vérifiées |
 | pnpm action-setup / setup-uv | 6.1.0 / 10.3.0 | Releases stables vérifiées via l'API GitHub |
 | setup-python | 7.1.0 | Python 3.14.10 des jobs CI API et ingestion, que uv 0.13.0 ne sait pas télécharger (A40) |
