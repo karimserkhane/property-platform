@@ -64,11 +64,11 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [B10](B10.md) | B | Qualifier les permis de construire et QR de chantier d'Abu Dhabi | 2 | — | si ambiguïté | todo | unassigned |
 | [B11](B11.md) | B | Frise d'avancement d'un projet sur sa fiche | 2 | B05, B07, B03 | non | todo | unassigned |
 | [B12](B12.md) | B | Complétude du dossier et nature de chaque valeur affichée | 2 | B05 | non | todo | unassigned |
-| [B13](B13.md) | B | Démonstration sur téléphone et essais avec cinq utilisateurs cibles | 1 | B05 | non (décidée le 07/11 : protocole ; recrutement par Karim) | todo | unassigned |
-| [B14](B14.md) | B | Sources autorisées pour les projets qui dépendent de sites interdits | 1 | A22 | non | todo | unassigned |
+| [B13](B13.md) | B | Démonstration sur téléphone et essais avec cinq utilisateurs cibles | 3 | B05 | non (décidée le 07/11 : protocole ; recrutement par Karim) | todo | unassigned |
+| [B14](B14.md) | B | Avant d'ouvrir le site : sources autorisées pour les projets qui dépendent de sites interdits | 3 | A22 | non | todo | unassigned |
 | [C01](C01.md) | C | Prix observés contre prix demandés | 2 | A01 | non (décidée le 28/10 : découpage vers C03) | done | claude |
 | [C02](C02.md) | C | Simulateur d'échéancier et coût total | 2 | B02 | non (décidée le 28/10 : découpage vers C04, C05) | done | claude |
-| [C03](C03.md) | C | Prix demandés d'annonces à permis Madhmoun vérifié | 2 | C01, A19 | si aucune source autorisée | todo | unassigned |
+| [C03](C03.md) | C | Prix demandés d'annonces à permis Madhmoun vérifié | 2 | C01, A19 | non (décidée le 08/11 : collecte libre, droits enregistrés) | todo | unassigned |
 | [C04](C04.md) | C | Frais officiels d'enregistrement d'Abu Dhabi cités | 2 | C02, A19 | si aucun texte officiel trouvé | todo | unassigned |
 | [C05](C05.md) | C | Plans de paiement des promoteurs sourcés | 2 | C02, A19 | non | todo | unassigned |
 | [C06](C06.md) | C | Comparer deux ou trois projets côte à côte | 2 | C01, C02, B05 | non | todo | unassigned |
@@ -77,7 +77,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [D03](D03.md) | D | Canal d'envoi des alertes | 3 | D01 | non (décidée le 07/11 : notification web, puis e-mail SES) | todo | unassigned |
 | [E01](E01.md) | E | Index de recherche des preuves | 3 | A01 | non (décidée le 28/10 : option 2, mesure en E02) | done | claude |
 | [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | oui | todo | unassigned |
-| [E03](E03.md) | E | Recherche dans les preuves sur le site | 3 | E01 | non | todo | unassigned |
+| [E03](E03.md) | E | Recherche dans les preuves sur le site | 2 | E01 | non | todo | unassigned |
 | [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | done | claude |
 | [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | done | claude |
 | [F03](F03.md) | F | Charge des parcelles de l'émirat sur les tuiles et l'index par zone | 3 | F01 | non | done | claude |
