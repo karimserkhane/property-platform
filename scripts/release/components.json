@@ -1,0 +1,105 @@
+[
+  {
+    "name": "Node.js",
+    "file": ".node-version",
+    "pattern": "^(\\d+\\.\\d+\\.\\d+)",
+    "source": "node",
+    "by": "hand",
+    "note": "Aussi dans la CI et les images web"
+  },
+  {
+    "name": "Python",
+    "file": ".python-version",
+    "pattern": "^(\\d+\\.\\d+\\.\\d+)",
+    "source": "endoflife:python",
+    "by": "hand",
+    "note": "Django limite à 3.14 ; aussi dans la CI et les images"
+  },
+  {
+    "name": "pnpm",
+    "file": "package.json",
+    "pattern": "\"packageManager\": \"pnpm@(\\d+\\.\\d+\\.\\d+)\"",
+    "source": "npm:pnpm",
+    "by": "hand",
+    "note": "Aussi dans la CI et les images"
+  },
+  {
+    "name": "uv",
+    "file": "apps/api/Dockerfile",
+    "pattern": "astral-sh/uv:(\\d+\\.\\d+\\.\\d+)",
+    "source": "github:astral-sh/uv",
+    "by": "dependabot",
+    "note": "À aligner à la main : setup-uv de la CI, TOOLCHAIN, DEVELOPMENT, INGESTION"
+  },
+  {
+    "name": "Django",
+    "file": "apps/api/pyproject.toml",
+    "pattern": "\"django==(\\d+\\.\\d+\\.\\d+)\"",
+    "source": "pypi:django",
+    "by": "dependabot"
+  },
+  {
+    "name": "Prefect",
+    "file": "apps/ingestion/pyproject.toml",
+    "pattern": "\"prefect==(\\d+\\.\\d+\\.\\d+)\"",
+    "source": "pypi:prefect",
+    "by": "dependabot",
+    "note": "Serveur et ingestion ensemble"
+  },
+  {
+    "name": "Next.js",
+    "file": "apps/web/package.json",
+    "pattern": "\"next\": \"(\\d+\\.\\d+\\.\\d+)\"",
+    "source": "npm:next",
+    "by": "dependabot"
+  },
+  {
+    "name": "React",
+    "file": "apps/web/package.json",
+    "pattern": "\"react\": \"(\\d+\\.\\d+\\.\\d+)\"",
+    "source": "npm:react",
+    "by": "dependabot"
+  },
+  {
+    "name": "Playwright",
+    "file": "apps/web/package.json",
+    "pattern": "\"@playwright/test\": \"(\\d+\\.\\d+\\.\\d+)\"",
+    "source": "npm:@playwright/test",
+    "by": "hand",
+    "note": "Paquet et image à la même version (E2E.md)"
+  },
+  {
+    "name": "PostgreSQL (majeure)",
+    "file": "infra/local/compose.yaml",
+    "pattern": "postgis/postgis:(\\d+)-",
+    "source": "endoflife:postgresql:major",
+    "by": "hand",
+    "note": "Sauvegarde puis restauration du volume partagé"
+  },
+  {
+    "name": "Tailscale",
+    "file": "infra/local/compose.remote-preview.yaml",
+    "pattern": "tailscale/tailscale:v(\\d+\\.\\d+\\.\\d+)",
+    "source": "github:tailscale/tailscale",
+    "by": "dependabot"
+  },
+  {
+    "name": "Grype",
+    "file": ".github/workflows/ci.yml",
+    "pattern": "grype-version: v(\\d+\\.\\d+\\.\\d+)",
+    "source": "github:anchore/grype",
+    "by": "hand"
+  },
+  {
+    "name": "Valhalla",
+    "source": "github:valhalla/valhalla",
+    "by": "hand",
+    "note": "Figé par empreinte, avec la reconstruction du graphe (MAP_ANALYSIS.md)"
+  },
+  {
+    "name": "Modèle d'embeddings (TEI)",
+    "source": "github:huggingface/text-embeddings-inference",
+    "by": "hand",
+    "note": "Figé par empreinte, avec le modèle (EVIDENCE_SEARCH.md)"
+  }
+]

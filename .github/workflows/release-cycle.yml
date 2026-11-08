@@ -1,0 +1,41 @@
+# A42: every Monday, after the Dependabot pull requests of 06:00 Dubai, one issue is rewritten
+# with the state of every pinned component (docs/engineering/RELEASE_CYCLE.md).
+name: Release cycle
+
+on:
+  schedule:
+    - cron: "30 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare the pinned versions with upstream
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/release/inventory.mjs --output report.md
+      - name: Publish the report in the release-cycle issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+          title="Cycle de mises à jour"
+          number=$(gh issue list --state open --search "\"$title\" in:title" --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file report.md
+          else
+            gh issue create --title "$title" --body-file report.md
+          fi
