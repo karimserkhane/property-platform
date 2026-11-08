@@ -1,0 +1,49 @@
+# A41: docs/tasks/BOARD.md is generated from the task files, here and only here, so pull requests
+# no longer conflict on it. A push made with GITHUB_TOKEN does not start another workflow.
+name: Task board
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/tasks/*.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: task-board
+  cancel-in-progress: false
+
+jobs:
+  board:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Regenerate the board
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch --quiet origin main
+            git reset --quiet --hard origin/main
+            node scripts/tasks/tasks.mjs board --write
+            if git diff --quiet -- docs/tasks/BOARD.md; then
+              echo "Board already up to date."
+              exit 0
+            fi
+            git commit --quiet -m "Regenerate the task board" -- docs/tasks/BOARD.md
+            if git push --quiet origin HEAD:main; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+      - name: Remove the claims of finished tasks
+        run: node scripts/tasks/tasks.mjs prune-claims

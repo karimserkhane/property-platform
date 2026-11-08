@@ -151,6 +151,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - id: pins
         run: node scripts/check-supply-chain-pins.mjs --github-output
+      - name: Task files and claims (A41)
+        run: |
+          node scripts/tasks/tasks.mjs validate
+          node --test scripts/tasks/tasks.test.mjs
 
   # Grype (Apache-2.0, no account). Policy: a critical vulnerability with a published fix fails
   # the job; everything else is listed in the job summary without blocking. Dated exceptions,

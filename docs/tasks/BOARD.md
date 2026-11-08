@@ -1,6 +1,6 @@
 # Tableau des tâches
 
-Tâches issues du [plan concurrentiel](../product/PLAN_CONCURRENTIEL_20261023.md) et de la [feuille de route technique](../engineering/ENGINEERING_ROADMAP.md). A28 à A38, B08 à B13, C06, D03, E03 et F09 à F15 viennent de l'audit du 31/10 (plans comparés au code, aux tâches et à l'historique de `main`). Règles d'usage : [AGENT_WORKFLOW.md](../engineering/AGENT_WORKFLOW.md). Le fichier de chaque tâche fait foi ; ce tableau en est le résumé et se met à jour dans la même PR. Les branches partent de `main` et les PR la visent (branche de référence depuis le 28/10).
+Tâches issues du [plan concurrentiel](../product/PLAN_CONCURRENTIEL_20261023.md) et de la [feuille de route technique](../engineering/ENGINEERING_ROADMAP.md). A28 à A38, B08 à B13, C06, D03, E03 et F09 à F15 viennent de l'audit du 31/10 (plans comparés au code, aux tâches et à l'historique de `main`). Règles d'usage : [AGENT_WORKFLOW.md](../engineering/AGENT_WORKFLOW.md). Le fichier de chaque tâche fait foi ; ce tableau en est le résumé, **généré après chaque fusion** par `scripts/tasks/tasks.mjs` : ne pas le modifier à la main ([A41](A41.md)). Les branches partent de `main` et les PR la visent (branche de référence depuis le 28/10).
 
 Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si toutes ses dépendances sont `done` et si aucune décision du propriétaire n'est en attente.
 
@@ -46,7 +46,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A38](A38.md) | A | Chaîne d'approvisionnement figée par digest et analysée | 3 | — | non (décidée le 03/11 : Dependabot) | done | claude |
 | [A39](A39.md) | A | Contrôles Docker lançables en parallèle depuis plusieurs worktrees | 1 | — | non | done | claude |
 | [A40](A40.md) | A | Corriger les vulnérabilités critiques relevées par la première analyse | 1 | A38 | non | done | claude |
-| [A41](A41.md) | A | Plusieurs agents en parallèle : tableau généré et réservation atomique | 1 | — | non | todo | unassigned |
+| [A41](A41.md) | A | Plusieurs agents en parallèle : tableau généré et réservation atomique | 1 | — | non | done | claude |
 | [A42](A42.md) | A | Cycle de mises à jour de toutes les applications et de tous les outils | 1 | — | non | todo | unassigned |
 | [A43](A43.md) | A | Déploiement scripté, version étiquetée et retour arrière | 2 | A42 | non | todo | unassigned |
 | [A44](A44.md) | A | Files Prefect qui ne tournent plus à vide | 2 | A26 | non | todo | unassigned |
@@ -89,7 +89,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [F09](F09.md) | F | Fiches projet hors des trois îles d'Abu Dhabi | 3 | B02, F06 | non (décidée le 07/11 : Al Hidayriyyat et Yas d'abord) | todo | unassigned |
 | [F10](F10.md) | F | Bâtiments, rues et lieux sur la carte au-delà des trois îles | 3 | F06, A07 | non | todo | unassigned |
 | [F11](F11.md) | F | Retrouver les jeux ouverts de Dubai sur Data.Dubai | 3 | F02 | si un compte ou une demande officielle est exigé | todo | unassigned |
-| [F12](F12.md) | F | District SA' depuis une source ouverte | 3 | F08 (PR #47) | non | todo | unassigned |
+| [F12](F12.md) | F | District SA' depuis une source ouverte | 3 | F08 | non | todo | unassigned |
 | [F13](F13.md) | F | Ce qui va changer autour d'un bien | 3 | F06, B09 | non | todo | unassigned |
 | [F14](F14.md) | F | Deux adresses côte à côte et trajet vers un lieu saisi | 3 | — | non | todo | unassigned |
 | [F15](F15.md) | F | Ensoleillement d'un étage donné | 3 | — | non | todo | unassigned |

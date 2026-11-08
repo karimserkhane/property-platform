@@ -12,18 +12,21 @@ Guide opérationnel commun à toute IA (ou personne) qui modifie le dépôt. Les
 
 Une tâche est **prenable** si son statut est `todo`, si toutes ses dépendances sont `done` et si `needs_owner_decision` vaut `no` (ou si la décision est notée dans son journal). Prendre la plus petite priorité, puis l'identifiant le plus petit.
 
-Réserver avant de coder, pour que l'autre agent le voie sur GitHub :
+`node scripts/tasks/tasks.mjs next` liste les tâches prenables, sans celles déjà réservées.
 
+Réserver avant de coder, pour que l'autre agent le voie sur GitHub ([A41](../tasks/A41.md)) :
+
+0. `node scripts/tasks/tasks.mjs claim <id> --agent <agent>`. La réservation est une référence Git `claims/<id>` : si deux agents essaient en même temps, un seul réussit. `claims` les liste, `release <id>` en rend une.
 1. Branche `<agent>/<id>-<sujet>` depuis la branche de référence à jour : `main`. Depuis le 28 octobre 2026 (PR #37), `main` contient tout `codex/abu-dhabi-context-ingestion`, qui n'est plus la référence et ne reçoit plus de PR.
-2. Dans le fichier de la tâche et dans `BOARD.md` : `status: in-progress`, `owner: <agent>`, `branch: <branche>`.
+2. Dans le fichier de la tâche : `status: in-progress`, `owner: <agent>`, `branch: <branche>`. **Ne jamais modifier `BOARD.md` à la main** : le workflow `Task board` le regénère sur `main` après chaque fusion.
 3. Commit `Claim <id>: <titre>`, push, puis **PR en brouillon** vers `main` ; noter son numéro dans `pr:`.
 
-Une réservation sans commit depuis plus de 3 jours peut être reprise : l'indiquer dans le journal de la tâche et dans la PR.
+Une réservation sans commit depuis plus de 3 jours peut être reprise (`claim <id> --agent <agent> --takeover`) : l'indiquer dans le journal de la tâche et dans la PR.
 
 ## 3. Pendant le travail
 
 - Commits petits et cohérents. Le journal de la tâche (en tête du fichier) et la description de PR disent : fait, reste à faire, contrôles lancés, contrôles non lancés et pourquoi.
-- Une tâche = une PR. Si la tâche est trop grande, la découper en nouvelles tâches (nouveaux fichiers, `BOARD.md` à jour) plutôt que de livrer une PR géante.
+- Une tâche = une PR. Si la tâche est trop grande, la découper en nouvelles tâches (nouveaux fichiers) plutôt que de livrer une PR géante.
 - Ne jamais modifier la branche d'un autre agent ; faire une revue en commentaire de PR.
 
 ## 4. Contrôles en une commande
@@ -86,6 +89,6 @@ La troisième commande est **obligatoire** après la recréation du site : le co
 ## 8. Terminer
 
 1. Contrôles de la section 4 verts ; résultats copiés dans la PR.
-2. Critères d'acceptation cochés dans le fichier de la tâche ; `status: done` dans le fichier et `BOARD.md` (dans la PR elle-même).
+2. Critères d'acceptation cochés dans le fichier de la tâche ; `status: done` dans le fichier (dans la PR elle-même) ; `BOARD.md` suit après la fusion, et la réservation est retirée.
 3. PR sortie du brouillon. Fusion par l'agent seulement si le propriétaire l'a délégué et si la CI GitHub est verte ; sinon, demander la revue.
 4. Si la PR est abandonnée, remettre la tâche en `todo` et expliquer pourquoi dans son journal.
