@@ -34,6 +34,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | SQLAlchemy | 2.0.55 | Compatibilité du planificateur Prefect 3.8.8 ; uniquement dans `apps/ingestion` |
 | HTTPX | 0.28.1 | Transport HTTPS borné des collecteurs ; uniquement dans `apps/ingestion` |
 | boto3 / botocore | 1.43.114 / 1.43.114 | SDK S3/R2, ajouté le 15 octobre ; API et ingestion, aucune dépendance web |
+| age | 1.2.1-1+b5 (paquet Debian trixie) | Chiffrement côté poste de la copie des sauvegardes (A30) ; image d'ingestion et contrôles d'ingestion, jamais l'API ni le web. Paquet Debian plutôt qu'un binaire téléchargé ou une liaison Python : dépôt signé déjà utilisé par l'image, format standard relisible avec l'outil officiel. Une version figée retirée de Debian fait échouer la construction : prendre alors la nouvelle version du paquet, aux deux Dockerfile |
 | pytest / pytest-django | 9.1.1 / 4.14.0 | Dernières versions stables vérifiées |
 | Ruff / Import Linter | 0.17.0 / 2.15 | Dernières versions stables vérifiées |
 | Hatchling | 1.32.4 | Backend de construction Python fixé |
