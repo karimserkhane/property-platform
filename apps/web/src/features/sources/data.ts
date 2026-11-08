@@ -1,11 +1,13 @@
 import type { components } from "@property-platform/contracts";
 
 export type SourceSite = components["schemas"]["SourceSiteRightsResponse"];
-// `reviewedCount` takes values, so the page formats it.
+export type SourceFamily =
+  components["schemas"]["SourceFamilyFreshnessResponse"];
+// These take values, so the page formats them.
 export type SourcesLabels = Record<
   Exclude<
     keyof typeof import("../../../messages/en.json").Sources,
-    "reviewedCount"
+    "reviewedCount" | "behindSources"
   >,
   string
 >;
@@ -41,6 +43,82 @@ export async function readSourceSitesData(read: PreviewReader) {
   } catch {
     return { status: 503, sites: null };
   }
+}
+
+const familyLabels = {
+  "developer-pages": "familyDeveloperPages",
+  "adrec-register": "familyAdrecRegister",
+  "adrec-market": "familyAdrecMarket",
+  "parcels-onwani": "familyParcelsOnwani",
+  "parcels-adsdi": "familyParcelsAdsdi",
+  osm: "familyOsm",
+  overture: "familyOverture",
+  "public-context": "familyPublicContext",
+  "sentinel-2": "familySentinel",
+  "evidence-search": "familyEvidenceSearch",
+} as const;
+
+export type KnownFamily = SourceFamily & { family: keyof typeof familyLabels };
+
+function isKnownFamily(row: SourceFamily): row is KnownFamily {
+  return Object.hasOwn(familyLabels, row.family);
+}
+
+const optionalDate = (value: unknown) =>
+  value === null || value === undefined || typeof value === "string";
+
+function isFamily(row: unknown): row is SourceFamily {
+  const family = row as SourceFamily | null;
+  return (
+    !!family &&
+    typeof family.family === "string" &&
+    typeof family.sources_total === "number" &&
+    typeof family.sources_behind === "number" &&
+    optionalDate(family.last_success_at) &&
+    optionalDate(family.late_from) &&
+    optionalDate(family.review_from)
+  );
+}
+
+/** Freshness of each reviewed family; the sources page stays useful without it. */
+export async function readSourceFreshnessData(read: PreviewReader) {
+  try {
+    const result = await read("source-freshness");
+    const families = (result.data as { families?: unknown } | null)?.families;
+    if (
+      result.status !== 200 ||
+      !Array.isArray(families) ||
+      !families.every(isFamily)
+    )
+      return { families: null };
+    // A family this build has no label for is left out rather than shown untranslated.
+    return { families: families.filter(isKnownFamily) };
+  } catch {
+    return { families: null };
+  }
+}
+
+export function familyLabelKey(family: KnownFamily["family"]) {
+  return familyLabels[family];
+}
+
+const stateKeys = {
+  current: "freshnessCurrent",
+  late: "freshnessLate",
+  review: "freshnessReview",
+  never: "freshnessNever",
+} as const;
+
+/** Read against the reader's clock: the API's answer stays valid while time passes. */
+export function freshnessState(family: SourceFamily, now: Date) {
+  if (!family.last_success_at || !family.late_from || !family.review_from)
+    return "never";
+  if (now >= new Date(family.review_from)) return "review";
+  return now >= new Date(family.late_from) ? "late" : "current";
+}
+
+export function freshnessLabelKey(state: keyof typeof stateKeys) {
+  return stateKeys[state];
 }
 
 const publicationKeys = {

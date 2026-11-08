@@ -1,9 +1,11 @@
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 from ninja import Router, Schema
+from ninja.decorators import decorate_view
 
 from .parcels import Error
+from .read_cache import cached_read
 
 router = Router(tags=["local-preview"])
 
@@ -45,3 +47,57 @@ def source_rights(request):
             for row in registry()
         ]
     }
+
+
+class SourceFamilyFreshnessResponse(Schema):
+    """Latest success of one family and the moments it becomes late, then to be reviewed.
+
+    The reader compares these with its own clock (A32), so the state of a family never
+    goes stale in the read cache while no run is written.
+    """
+
+    family: str
+    cadence_days: int
+    last_success_at: datetime | None = None
+    late_from: datetime | None = None
+    review_from: datetime | None = None
+    sources_total: int
+    sources_behind: int
+
+
+class FailingDeploymentResponse(Schema):
+    deployment: str
+    failures: int
+    last_failed_at: datetime
+
+
+class LateQueueResponse(Schema):
+    deployment: str
+    runs: int
+    oldest_expected_at: datetime
+
+
+class OperationsReportResponse(Schema):
+    generated_at: datetime
+    failing_deployments: list[FailingDeploymentResponse]
+    late_queues: list[LateQueueResponse]
+
+
+class SourceFreshnessResponse(Schema):
+    families: list[SourceFamilyFreshnessResponse]
+    operations: OperationsReportResponse | None = None
+
+
+@router.get(
+    "/source-freshness",
+    response={200: SourceFreshnessResponse, 403: Error},
+    operation_id="previewSourceFreshness",
+)
+@decorate_view(cached_read)
+def source_freshness(request):
+    from property_platform.modules.evidence.history.source_freshness import (
+        family_freshness,
+        latest_report,
+    )
+
+    return {"families": family_freshness(), "operations": latest_report()}

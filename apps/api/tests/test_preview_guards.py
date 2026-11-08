@@ -29,6 +29,7 @@ PREVIEW_PATHS = [
     "market-map",
     "evidence-search?q=penthouse",
     "source-rights",
+    "source-freshness",
 ]
 
 

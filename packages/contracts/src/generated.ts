@@ -481,6 +481,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/preview/source-freshness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Source Freshness */
+        get: operations["previewSourceFreshness"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2787,6 +2804,71 @@ export interface components {
             /** Reviewed On */
             reviewed_on?: string | null;
         };
+        /** FailingDeploymentResponse */
+        FailingDeploymentResponse: {
+            /** Deployment */
+            deployment: string;
+            /** Failures */
+            failures: number;
+            /**
+             * Last Failed At
+             * Format: date-time
+             */
+            last_failed_at: string;
+        };
+        /** LateQueueResponse */
+        LateQueueResponse: {
+            /** Deployment */
+            deployment: string;
+            /** Runs */
+            runs: number;
+            /**
+             * Oldest Expected At
+             * Format: date-time
+             */
+            oldest_expected_at: string;
+        };
+        /** OperationsReportResponse */
+        OperationsReportResponse: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Failing Deployments */
+            failing_deployments: components["schemas"]["FailingDeploymentResponse"][];
+            /** Late Queues */
+            late_queues: components["schemas"]["LateQueueResponse"][];
+        };
+        /**
+         * SourceFamilyFreshnessResponse
+         * @description Latest success of one family and the moments it becomes late, then to be reviewed.
+         *
+         *     The reader compares these with its own clock (A32), so the state of a family never
+         *     goes stale in the read cache while no run is written.
+         */
+        SourceFamilyFreshnessResponse: {
+            /** Family */
+            family: string;
+            /** Cadence Days */
+            cadence_days: number;
+            /** Last Success At */
+            last_success_at?: string | null;
+            /** Late From */
+            late_from?: string | null;
+            /** Review From */
+            review_from?: string | null;
+            /** Sources Total */
+            sources_total: number;
+            /** Sources Behind */
+            sources_behind: number;
+        };
+        /** SourceFreshnessResponse */
+        SourceFreshnessResponse: {
+            /** Families */
+            families: components["schemas"]["SourceFamilyFreshnessResponse"][];
+            operations?: components["schemas"]["OperationsReportResponse"] | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -4220,6 +4302,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SourceRightsRegistryResponse"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    previewSourceFreshness: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceFreshnessResponse"];
                 };
             };
             /** @description Forbidden */

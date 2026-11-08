@@ -127,6 +127,13 @@ DATASETS += (
         "0 1 * * *",
     ),
     Dataset(
+        "source-freshness",
+        "property-platform-source-freshness",
+        "Report late source families, repeatedly failing deployments and late queues.",
+        {},
+        "15 6 * * *",
+    ),
+    Dataset(
         "backup-database",
         "property-platform-backup",
         "Snapshot dump, private file mirror and retention under BACKUP_DIR; never in Git.",

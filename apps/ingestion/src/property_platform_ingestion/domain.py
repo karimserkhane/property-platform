@@ -124,6 +124,16 @@ def execute(request):
             return check_history(
                 actor=request["actor"], run_key=f"history:{request['prefect_flow_run_id']}"
             )
+        if request.get("operation") == "source_freshness":
+            from property_platform.modules.evidence.history.source_freshness import record_report
+
+            if set(request) != {"operation", "actor", "prefect_flow_run_id", "operations"}:
+                raise ValueError("Freshness report requires a Prefect run and its findings")
+            return record_report(
+                actor=request["actor"],
+                run_key=f"source-freshness:{request['prefect_flow_run_id']}",
+                operations=request["operations"],
+            )
         if request.get("operation") == "evidence_search":
             from property_platform.modules.evidence.search.index import rebuild_search_index
 

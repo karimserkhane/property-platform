@@ -6,6 +6,10 @@ import {
 import project from "../projects/project.module.css";
 import type { ProjectLabels } from "../projects/types";
 import {
+  familyLabelKey,
+  freshnessLabelKey,
+  freshnessState,
+  type KnownFamily,
   publicationLabelKey,
   type SourceSite,
   type SourcesLabels,
@@ -107,18 +111,100 @@ function Site({
   );
 }
 
+function Dated({
+  label,
+  value,
+  locale,
+}: {
+  label: string;
+  value: string;
+  locale: string;
+}) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>
+        <time dateTime={value}>{formatProjectDate(value, locale)}</time>
+      </dd>
+    </div>
+  );
+}
+
+function Freshness({
+  families,
+  now,
+  locale,
+  labels,
+  behindSources,
+}: {
+  families: KnownFamily[];
+  now: Date;
+  locale: string;
+  labels: SourcesLabels;
+  behindSources: (behind: number, total: number) => string;
+}) {
+  return (
+    <section className={styles.freshness} aria-labelledby="source-freshness">
+      <h2 id="source-freshness">{labels.freshnessTitle}</h2>
+      <p>{labels.freshnessIntro}</p>
+      <ul>
+        {families.map((row) => {
+          const state = freshnessState(row, now);
+          return (
+            <li
+              key={row.family}
+              data-source-family={row.family}
+              data-freshness={state}
+            >
+              <h3>{labels[familyLabelKey(row.family)]}</h3>
+              <p className={styles.state}>{labels[freshnessLabelKey(state)]}</p>
+              <dl className={styles.facts}>
+                {row.last_success_at && (
+                  <Dated
+                    label={labels.freshnessLastSuccess}
+                    value={row.last_success_at}
+                    locale={locale}
+                  />
+                )}
+                {row.late_from && state !== "current" && (
+                  <Dated
+                    label={labels.freshnessOverdueSince}
+                    value={row.late_from}
+                    locale={locale}
+                  />
+                )}
+              </dl>
+              {row.sources_behind > 0 && (
+                <p className={styles.count}>
+                  {behindSources(row.sources_behind, row.sources_total)}
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export function SourcesView({
   sites,
   count,
   locale,
   labels,
   licenceLabels,
+  families,
+  now,
+  behindSources,
 }: {
   sites: SourceSite[];
   count: string;
   locale: string;
   labels: SourcesLabels;
   licenceLabels: LicenceLabels;
+  families: KnownFamily[] | null;
+  now: Date;
+  behindSources: (behind: number, total: number) => string;
 }) {
   const sorted = sortSourceSites(sites, locale);
   return (
@@ -133,6 +219,15 @@ export function SourcesView({
         <p className={project.description}>{labels.intro}</p>
         <p className={styles.count}>{count}</p>
       </header>
+      {families && (
+        <Freshness
+          families={families}
+          now={now}
+          locale={locale}
+          labels={labels}
+          behindSources={behindSources}
+        />
+      )}
       <div className={styles.sites}>
         {sorted.map((site) => (
           <Site

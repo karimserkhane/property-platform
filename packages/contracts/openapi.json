@@ -2263,6 +2263,38 @@
           "local-preview"
         ]
       }
+    },
+    "/api/v1/preview/source-freshness": {
+      "get": {
+        "operationId": "previewSourceFreshness",
+        "summary": "Source Freshness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceFreshnessResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "local-preview"
+        ]
+      }
     }
   },
   "components": {
@@ -8687,6 +8719,175 @@
           "publication"
         ],
         "title": "SourceSiteRightsResponse",
+        "type": "object"
+      },
+      "FailingDeploymentResponse": {
+        "properties": {
+          "deployment": {
+            "title": "Deployment",
+            "type": "string"
+          },
+          "failures": {
+            "title": "Failures",
+            "type": "integer"
+          },
+          "last_failed_at": {
+            "format": "date-time",
+            "title": "Last Failed At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deployment",
+          "failures",
+          "last_failed_at"
+        ],
+        "title": "FailingDeploymentResponse",
+        "type": "object"
+      },
+      "LateQueueResponse": {
+        "properties": {
+          "deployment": {
+            "title": "Deployment",
+            "type": "string"
+          },
+          "runs": {
+            "title": "Runs",
+            "type": "integer"
+          },
+          "oldest_expected_at": {
+            "format": "date-time",
+            "title": "Oldest Expected At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deployment",
+          "runs",
+          "oldest_expected_at"
+        ],
+        "title": "LateQueueResponse",
+        "type": "object"
+      },
+      "OperationsReportResponse": {
+        "properties": {
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "failing_deployments": {
+            "items": {
+              "$ref": "#/components/schemas/FailingDeploymentResponse"
+            },
+            "title": "Failing Deployments",
+            "type": "array"
+          },
+          "late_queues": {
+            "items": {
+              "$ref": "#/components/schemas/LateQueueResponse"
+            },
+            "title": "Late Queues",
+            "type": "array"
+          }
+        },
+        "required": [
+          "generated_at",
+          "failing_deployments",
+          "late_queues"
+        ],
+        "title": "OperationsReportResponse",
+        "type": "object"
+      },
+      "SourceFamilyFreshnessResponse": {
+        "description": "Latest success of one family and the moments it becomes late, then to be reviewed.\n\nThe reader compares these with its own clock (A32), so the state of a family never\ngoes stale in the read cache while no run is written.",
+        "properties": {
+          "family": {
+            "title": "Family",
+            "type": "string"
+          },
+          "cadence_days": {
+            "title": "Cadence Days",
+            "type": "integer"
+          },
+          "last_success_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Success At"
+          },
+          "late_from": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Late From"
+          },
+          "review_from": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review From"
+          },
+          "sources_total": {
+            "title": "Sources Total",
+            "type": "integer"
+          },
+          "sources_behind": {
+            "title": "Sources Behind",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "family",
+          "cadence_days",
+          "sources_total",
+          "sources_behind"
+        ],
+        "title": "SourceFamilyFreshnessResponse",
+        "type": "object"
+      },
+      "SourceFreshnessResponse": {
+        "properties": {
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/SourceFamilyFreshnessResponse"
+            },
+            "title": "Families",
+            "type": "array"
+          },
+          "operations": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OperationsReportResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "families"
+        ],
+        "title": "SourceFreshnessResponse",
         "type": "object"
       }
     }
