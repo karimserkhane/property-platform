@@ -1,14 +1,14 @@
 {
   "collection": {
-    "enforced": true,
-    "decided_on": "2026-11-07",
-    "decided_by": "claude, on Karim's delegation",
-    "basis": "Delegated by Karim on 7 Nov 2026: collecting again from sites whose reviewed terms forbid it (Property Finder, Bayut, PSI, Aldar, LinkedIn, Reddit...) is a legal risk with no use before launch. Every collector skips them from now on; the rows already collected stay, with their rights recorded (A22)."
+    "enforced": false,
+    "decided_on": "2026-11-08",
+    "decided_by": "Karim",
+    "basis": "Karim's decision of 8 Nov 2026, replacing the delegated one of 7 Nov: the site is for him alone, so sources are collected even where their terms forbid it, as long as every row keeps its licence and rights (evidence.data_rights). Anti-bot checks, logins and other technical barriers are still never bypassed, and nothing from these sites enters the public repository (A22)."
   },
   "publication": {
     "enforced": false,
-    "decided_on": "2026-11-07",
-    "decided_by": "claude, on Karim's delegation",
-    "basis": "Re-examined on Karim's delegation (7 Nov 2026): the preview stays private to Karim, so it keeps showing every collected source with its reviewed rights. Switch this on before the platform is shown to anyone else: B13 user sessions, public opening (A22)."
+    "decided_on": "2026-11-08",
+    "decided_by": "Karim",
+    "basis": "Karim's decision of 8 Nov 2026: he is the only person with access, so the site shows every collected source with its rights. Switch this on, or replace the sources (B14), before anyone else sees the platform: user sessions, public opening (A22)."
   }
 }

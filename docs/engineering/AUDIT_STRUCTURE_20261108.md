@@ -2,10 +2,12 @@
 
 Fait par Claude Code à la demande de Karim, sur `main` (`6affd08`) et sur la pile locale en service. Les mesures viennent du dépôt, de PostgreSQL, de l'API Prefect, de Docker et de GitHub, en lecture seule. **Non couvert** : relecture ligne à ligne du code, temps de réponse réels, poids des pages web.
 
+> **Mise à jour du même jour, décision de Karim.** Le site reste à lui seul pour le moment : la collecte n'est plus limitée aux sources autorisées, tant que chaque donnée garde sa licence et son autorisation en base ([A22](../tasks/A22.md)). B13 et B14 attendent donc qu'il veuille ouvrir le site à d'autres.
+
 ## Verdict
 
 - **La technologie reste la bonne.** Monolithe modulaire, PostGIS, Prefect, Next.js : aucune mesure ne justifie d'en changer ni de découper en services.
-- **Le plan reste juste, mais son ordre doit changer.** Il prévoit des essais avec cinq utilisateurs à la fin de chaque phase ; aucun n'a eu lieu. Il manque aussi une tâche pour rendre montrable ce qui vient de sites interdits.
+- **Le plan reste juste, mais son ordre doit changer.** Les fondations de fiabilité passent avant la largeur fonctionnelle ; les essais à cinq utilisateurs et les comptes attendent que le site s'ouvre à d'autres.
 - **Le travail en parallèle est possible à 2 ou 3 agents sur ce PC**, à condition de lever le blocage du tableau partagé. Le vrai goulot n'est pas technique : chaque fusion attend Karim.
 - **Il manquait un cycle de mises à jour complet.** Dependabot couvre ce qu'il sait lire ; le reste n'a aucun rappel.
 
@@ -42,8 +44,8 @@ Fait par Claude Code à la demande de Karim, sur `main` (`6affd08`) et sur la pi
 
 ## Corrections du plan
 
-- **B13 redevient la porte d'entrée.** Le critère de la phase B (« statut, avancement et séquestre retrouvés en moins de 2 minutes, avec la preuve ») n'a jamais été mesuré. Tant qu'il ne l'est pas, élargir le produit revient à construire sans savoir si l'idée tient. D01, D03 et E03 descendent en priorité 3, derrière les tâches de vérification et de prix. Ce n'est pas un blocage : les agents peuvent les prendre une fois le reste épuisé.
-- **Nouvelle tâche [B14](../tasks/B14.md).** 103 projets sur 183 tirent leurs faits uniquement de sites qui interdisent la collecte ; avant tout tiers, l'interrupteur de publication les masquerait. Sans sources autorisées, B13 montrerait une plateforme à moitié vide.
+- **B13 attend une ouverture du site.** Le critère de la phase B (« statut, avancement et séquestre retrouvés en moins de 2 minutes, avec la preuve ») n'a jamais été mesuré ; il le sera quand Karim voudra montrer le site. D01 et D03 descendent en priorité 3 : des comptes et des canaux d'envoi ne servent pas à un seul utilisateur.
+- **Nouvelle tâche [B14](../tasks/B14.md), pour plus tard.** 103 projets sur 183 tirent leurs faits uniquement de sites qui interdisent la collecte ; le jour d'une ouverture, l'interrupteur de publication les masquerait.
 - **[A30](../tasks/A30.md) reste la première priorité technique** : un seul disque, aucune copie hors du PC.
 
 ## Plusieurs IA en parallèle
