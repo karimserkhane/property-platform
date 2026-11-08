@@ -37,7 +37,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A29](A29.md) | A | Captures déplacées vers le stockage objet sur la base partagée | 2 | A10 | non (décidée le 03/11 : relocate autorisé) | done | claude |
 | [A30](A30.md) | A | Copie des sauvegardes hors de la machine | 2 | A03 | non (décidée le 07/11 : S3 hors poste, chiffré côté poste) | in-progress | claude |
 | [A31](A31.md) | A | Parcours e2e instables du signal satellite et de la carte | 1 | A13, B07 | non | done | claude |
-| [A32](A32.md) | A | Fraîcheur par famille de sources et alertes d'exploitation | 2 | A26 | non (si une alerte sort de Prefect) | todo | unassigned |
+| [A32](A32.md) | A | Fraîcheur par famille de sources et alertes d'exploitation | 1 | A26 | non (si une alerte sort de Prefect) | todo | unassigned |
 | [A33](A33.md) | A | Budgets de performance en CI | 2 | A13 | non | todo | unassigned |
 | [A34](A34.md) | A | Contours simplifiés en SQL et requêtes de map-context regroupées | 3 | A08 | non | todo | unassigned |
 | [A35](A35.md) | A | Provenance publiée une fois par réponse dans les lectures de carte | 3 | A07, A24 | non | todo | unassigned |
@@ -46,6 +46,12 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A38](A38.md) | A | Chaîne d'approvisionnement figée par digest et analysée | 3 | — | non (décidée le 03/11 : Dependabot) | done | claude |
 | [A39](A39.md) | A | Contrôles Docker lançables en parallèle depuis plusieurs worktrees | 1 | — | non | done | claude |
 | [A40](A40.md) | A | Corriger les vulnérabilités critiques relevées par la première analyse | 1 | A38 | non | done | claude |
+| [A41](A41.md) | A | Plusieurs agents en parallèle : tableau généré et réservation atomique | 1 | — | non | todo | unassigned |
+| [A42](A42.md) | A | Cycle de mises à jour de toutes les applications et de tous les outils | 1 | — | non | todo | unassigned |
+| [A43](A43.md) | A | Déploiement scripté, version étiquetée et retour arrière | 2 | A42 | non | todo | unassigned |
+| [A44](A44.md) | A | Files Prefect qui ne tournent plus à vide | 2 | A26 | non | todo | unassigned |
+| [A45](A45.md) | A | Rôles PostgreSQL séparés et base d'essai par agent | 2 | — | non | todo | unassigned |
+| [A46](A46.md) | A | Réglages PostgreSQL et place disque | 3 | — | non | todo | unassigned |
 | [B01](B01.md) | B | Qualifier l'accès au registre des projets ADREC | 1 | — | si ambiguïté | done | claude |
 | [B02](B02.md) | B | Modèle et collecte de la vérification de projet | 1 | B01, A01 | non | done | claude |
 | [B03](B03.md) | B | Historique de livraison des promoteurs | 1 | A01 | non | done | claude |
@@ -59,18 +65,19 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [B11](B11.md) | B | Frise d'avancement d'un projet sur sa fiche | 2 | B05, B07, B03 | non | todo | unassigned |
 | [B12](B12.md) | B | Complétude du dossier et nature de chaque valeur affichée | 2 | B05 | non | todo | unassigned |
 | [B13](B13.md) | B | Démonstration sur téléphone et essais avec cinq utilisateurs cibles | 1 | B05 | non (décidée le 07/11 : protocole ; recrutement par Karim) | todo | unassigned |
+| [B14](B14.md) | B | Sources autorisées pour les projets qui dépendent de sites interdits | 1 | A22 | non | todo | unassigned |
 | [C01](C01.md) | C | Prix observés contre prix demandés | 2 | A01 | non (décidée le 28/10 : découpage vers C03) | done | claude |
 | [C02](C02.md) | C | Simulateur d'échéancier et coût total | 2 | B02 | non (décidée le 28/10 : découpage vers C04, C05) | done | claude |
 | [C03](C03.md) | C | Prix demandés d'annonces à permis Madhmoun vérifié | 2 | C01, A19 | si aucune source autorisée | todo | unassigned |
 | [C04](C04.md) | C | Frais officiels d'enregistrement d'Abu Dhabi cités | 2 | C02, A19 | si aucun texte officiel trouvé | todo | unassigned |
 | [C05](C05.md) | C | Plans de paiement des promoteurs sourcés | 2 | C02, A19 | non | todo | unassigned |
 | [C06](C06.md) | C | Comparer deux ou trois projets côte à côte | 2 | C01, C02, B05 | non | todo | unassigned |
-| [D01](D01.md) | D | Comptes utilisateurs | 2 | — | non (décidée le 07/11 : passkeys, code e-mail en secours) | todo | unassigned |
+| [D01](D01.md) | D | Comptes utilisateurs | 3 | — | non (décidée le 07/11 : passkeys, code e-mail en secours) | todo | unassigned |
 | [D02](D02.md) | D | Liste de suivi et alertes explicables | 2 | D01, D03 | non | todo | unassigned |
-| [D03](D03.md) | D | Canal d'envoi des alertes | 2 | D01 | non (décidée le 07/11 : notification web, puis e-mail SES) | todo | unassigned |
+| [D03](D03.md) | D | Canal d'envoi des alertes | 3 | D01 | non (décidée le 07/11 : notification web, puis e-mail SES) | todo | unassigned |
 | [E01](E01.md) | E | Index de recherche des preuves | 3 | A01 | non (décidée le 28/10 : option 2, mesure en E02) | done | claude |
 | [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | oui | todo | unassigned |
-| [E03](E03.md) | E | Recherche dans les preuves sur le site | 2 | E01 | non | todo | unassigned |
+| [E03](E03.md) | E | Recherche dans les preuves sur le site | 3 | E01 | non | todo | unassigned |
 | [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | done | claude |
 | [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | done | claude |
 | [F03](F03.md) | F | Charge des parcelles de l'émirat sur les tuiles et l'index par zone | 3 | F01 | non | done | claude |
