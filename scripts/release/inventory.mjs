@@ -13,7 +13,10 @@ const DAY = 86_400_000;
 
 export function compareVersions(left, right) {
   const parts = (version) =>
-    String(version).match(/\d+(\.\d+)*/)[0].split(".").map(Number);
+    String(version)
+      .match(/\d+(\.\d+)*/)[0]
+      .split(".")
+      .map(Number);
   const a = parts(left);
   const b = parts(right);
   for (let index = 0; index < Math.max(a.length, b.length); index += 1) {
