@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Scheduled acquisition and ingestion using the platform domain services"
 requires-python = ">=3.14.10,<3.15"
 dependencies = [
-  "prefect==3.9.0",
+  "prefect==3.9.1",
   # Prefect's scheduled-run bulk inserts are incompatible with SQLAlchemy 2.1 hybrids.
   "sqlalchemy[asyncio]==2.0.55",
   "httpx==0.28.1",
