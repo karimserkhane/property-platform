@@ -330,7 +330,7 @@ Une **image Docker** est un environnement préparé avec les programmes nécessa
 
 | Objectif | Prérequis | Étapes |
 |---|---|---|
-| Voir et modifier le site | Git, Node.js 26.12.1, pnpm 12.10.1 | 2 à 4 |
+| Voir et modifier le site | Git, Node.js 26.13.0, pnpm 12.10.1 | 2 à 4 |
 | Lancer aussi l'API et PostGIS | Prérequis web + Docker Desktop avec Compose | 2 à 5 ; compte facultatif en section 7 |
 | Exécuter les outils Python et tests isolés sur Windows | uv 0.13.0 et Python 3.14.10 géré par uv | 10 |
 | Programmer et superviser les ingestions avec une UI | Docker Desktop, base préparée et image d'ingestion | 6.9 et [INGESTION.md](INGESTION.md) |
@@ -347,7 +347,7 @@ Le fichier `C:\Users\Karim\Repositories\property-platform\.python-version` de ra
 
 **Ce que cette étape fait :** elle installe les programmes Git et Node.js sur Windows. Node.js apporte aussi npm. Cela ne télécharge pas encore les bibliothèques du site et ne crée aucune base. Les commandes --version ci-dessous affichent seulement la version de chaque programme.
 
-Installer Git si nécessaire depuis [Git pour Windows](https://git-scm.com/download/win) et **Node.js 26.12.1** depuis [Node.js](https://nodejs.org/en/download). Le dépôt accepte Node.js `>=26.12.1 <27` ; la CI et les images web utilisent précisément 26.12.1 (26.11.1 a une faille exploitée activement, corrigée en 26.12.1 : A40).
+Installer Git si nécessaire depuis [Git pour Windows](https://git-scm.com/download/win) et **Node.js 26.13.0** depuis [Node.js](https://nodejs.org/en/download). Le dépôt accepte Node.js `>=26.12.1 <27` ; la CI et les images web utilisent précisément 26.13.0 (26.11.1 a une faille exploitée activement, corrigée en 26.12.1 : A40).
 
 Fermer puis rouvrir PowerShell après installation pour actualiser le PATH. Vérifier :
 
@@ -357,7 +357,7 @@ node --version
 npm.cmd --version
 ```
 
-Git et npm doivent afficher leur version ; Node doit afficher **v26.12.1** (ou un correctif 26 plus récent autorisé). Une version 24/25 ou 26 antérieure à 26.12.1 ne satisfait pas les contraintes.
+Git et npm doivent afficher leur version ; Node doit afficher **v26.13.0** (ou une autre version 26 autorisée, à partir de 26.12.1). Une version 24/25 ou 26 antérieure à 26.12.1 ne satisfait pas les contraintes.
 
 ### 2.2. pnpm
 
@@ -480,7 +480,7 @@ node --version
 pnpm.cmd --version
 ```
 
-Résultats attendus : **True**, **True**, **v26.12.1** (ou correctif 26 ultérieur autorisé), puis **12.10.1**. Si un Test-Path répond False, vérifier le dossier sélectionné. Si node ou pnpm.cmd n'est pas reconnu, reprendre l'installation de l'étape 2, puis fermer et rouvrir PowerShell ; revenir ensuite au dossier du projet avec Set-Location.
+Résultats attendus : **True**, **True**, **v26.13.0** (ou une autre version 26 autorisée, à partir de 26.12.1), puis **12.10.1**. Si un Test-Path répond False, vérifier le dossier sélectionné. Si node ou pnpm.cmd n'est pas reconnu, reprendre l'installation de l'étape 2, puis fermer et rouvrir PowerShell ; revenir ensuite au dossier du projet avec Set-Location.
 
 #### 3.3.4. Lancer l'installation
 
