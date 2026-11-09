@@ -76,7 +76,25 @@ Autorisé si elle sert une tâche et respecte la modularité :
 
 ## 7. Mettre à jour la prévisualisation de Karim
 
-Seulement après fusion (ou à la demande de Karim), depuis le dossier principal, sur `main` à jour (`git pull --ff-only origin main`) :
+Seulement après fusion (ou à la demande de Karim), depuis le dossier principal, sans modification en cours ([A43](../tasks/A43.md)) :
+
+```bash
+node scripts/deploy/preview.mjs deploy          # affiche le plan, ne change rien
+node scripts/deploy/preview.mjs deploy --yes    # déploie
+node scripts/deploy/preview.mjs rollback        # affiche le retour arrière
+node scripts/deploy/preview.mjs rollback --yes  # revient aux images d'avant le dernier déploiement
+node scripts/deploy/preview.mjs history         # derniers déploiements de ce poste
+```
+
+`deploy --yes` vérifie le dossier (`main`, propre, sans divergence, 12 Go libres), récupère `main`, garde les images en place sous `<image>:<version>-before`, construit avec l'autorité approuvée si elle existe, recrée l'API, applique les migrations, recrée le site puis `remote-preview`, et enfin l'ingestion si son image peut avoir changé (`--ingestion auto|yes|no`). Il vérifie ensuite : API en bonne santé, site en `401` sans identifiants, Tailscale `Running`. Si tout est bon, il crée et pousse l'étiquette Git annotée `preview-AAAA-MM-JJ-HHmm`, dont le message est la note de version. Si un contrôle échoue, il n'y a pas d'étiquette et le script indique la commande de retour arrière.
+
+L'ingestion n'est recréée qu'à un instant où Prefect n'a aucune course en cours, ce qui laisse passer les courses de quelques secondes qui reviennent chaque minute. Le script attend 30 minutes (`--wait-runs`). Passé ce délai, le site est à jour mais l'ingestion reste en place, avec le code de sortie 3 ; relancer plus tard avec `deploy --yes --force --ingestion yes`. `--interrupt-runs` recrée quand même et nomme les courses interrompues. Prefect injoignable ne compte jamais comme « rien en cours ».
+
+Après une erreur de certificat sur une image dont la base vient de changer, ajouter `--rebuild-base` : le cache BuildKit ignore le secret. Les images gardées ne sont pas supprimées par le script : les retirer seulement avec l'accord de Karim, car le disque Docker ne rétrécit jamais seul.
+
+Les commandes détaillées ci-dessous restent la référence si le script ne peut pas servir.
+
+Depuis le dossier principal, sur `main` à jour (`git pull --ff-only origin main`) :
 
 ```bash
 docker compose -f infra/local/compose.yaml -f infra/local/compose.remote-preview.yaml --profile web-preview --profile remote-preview build api web
