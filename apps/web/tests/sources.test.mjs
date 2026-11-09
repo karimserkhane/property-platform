@@ -1,10 +1,68 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  familyLabelKey,
+  freshnessState,
   publicationLabelKey,
+  readSourceFreshnessData,
   readSourceSitesData,
   sortSourceSites,
 } from "../src/features/sources/data.ts";
+
+const family = Object.freeze({
+  family: "osm",
+  cadence_days: 7,
+  last_success_at: "2026-11-01T00:00:00Z",
+  late_from: "2026-11-10T00:00:00Z",
+  review_from: "2026-12-01T00:00:00Z",
+  sources_total: 3,
+  sources_behind: 1,
+});
+
+test("a family's state is read against the reader's clock", () => {
+  const at = (date) => freshnessState(family, new Date(date));
+  assert.equal(at("2026-11-09T23:59:59Z"), "current");
+  assert.equal(at("2026-11-10T00:00:00Z"), "late");
+  assert.equal(at("2026-12-01T00:00:00Z"), "review");
+  assert.equal(
+    freshnessState(
+      {
+        ...family,
+        last_success_at: null,
+        late_from: null,
+        review_from: null,
+      },
+      new Date("2026-11-10T00:00:00Z"),
+    ),
+    "never",
+  );
+});
+
+test("freshness is checked, and its loss leaves the rest of the page", async () => {
+  const unknown = { ...family, family: "tomorrow" };
+  const read = (data, status = 200) =>
+    readSourceFreshnessData(async () => ({ status, data }));
+  assert.deepEqual(await read({ families: [family, unknown] }), {
+    families: [family],
+  });
+  assert.equal(familyLabelKey("sentinel-2"), "familySentinel");
+  for (const data of [
+    null,
+    {},
+    { families: [{ ...family, sources_total: "3" }] },
+    { families: [{ ...family, late_from: 1 }] },
+  ])
+    assert.deepEqual(await read(data), { families: null });
+  assert.deepEqual(await read({ families: [family] }, 403), {
+    families: null,
+  });
+  assert.deepEqual(
+    await readSourceFreshnessData(async () => {
+      throw new Error("offline");
+    }),
+    { families: null },
+  );
+});
 
 const site = Object.freeze({
   host: "openstreetmap.org",

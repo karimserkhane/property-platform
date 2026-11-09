@@ -9,9 +9,11 @@ from zoneinfo import ZoneInfo
 
 from prefect import flow, get_run_logger, task
 from prefect.cache_policies import NO_CACHE
+from prefect.client.orchestration import get_client
 from prefect.runtime import flow_run
 from property_platform.modules.evidence.source_rights import collection_allowed
 
+from .operations import operations_report
 from .registry import (
     TERRITORY,
     Territory,
@@ -395,6 +397,46 @@ def data_history(actor: str = "scheduled"):
     return result
 
 
+@flow(name="property-platform-source-freshness", retries=0)
+def source_freshness(actor: str = "scheduled"):
+    """Report late source families, failing deployments and late queues; collects nothing.
+
+    The report stays in Prefect and the API: any alert leaving them needs the owner (A32).
+    """
+    run_id = flow_run.id
+    if run_id is None or not 1 <= len(actor.strip()) <= 80:
+        raise ValueError("An active Prefect run and operator are required")
+    with get_client(sync_client=True) as client:
+        operations, totals = operations_report(client)
+    result = invoke_domain(
+        {
+            "operation": "source_freshness",
+            "actor": f"Prefect/{run_id}/{actor.strip()}",
+            "prefect_flow_run_id": run_id,
+            "operations": operations,
+        }
+    )
+    if result["status"] == "failed":
+        raise IngestionFailure(result)
+    logger = get_run_logger()
+    for row in result["summary"]["families"]:
+        if row["state"] != "current":
+            logger.warning(
+                "Source family %s is %s; last success %s, %s of %s sources behind",
+                row["family"],
+                row["state"],
+                row["last_success_at"],
+                row["sources_behind"],
+                row["sources_total"],
+            )
+    for item in operations["failing_deployments"]:
+        logger.warning("Deployment %s failed its last runs", item["deployment"])
+    for item in operations["late_queues"]:
+        logger.warning("Deployment %s has %s late runs", item["deployment"], item["runs"])
+    logger.info("Failing deployments and late queues: %s", totals)
+    return result
+
+
 @flow(name="property-platform-basemap-archive", retries=0)
 def basemap_archive(
     provider: Literal[
@@ -562,6 +604,7 @@ FLOWS = {
         basemap_archive,
         source_rights,
         data_history,
+        source_freshness,
         routing_graph,
         walking_areas,
         construction_activity,

@@ -15,6 +15,55 @@
   color: #596a6e;
   font-size: 13px;
 }
+.freshness {
+  margin-block-end: 32px;
+}
+.freshness h2 {
+  margin-block: 0 8px;
+  font-size: 20px;
+  font-weight: 650;
+}
+.freshness > p {
+  max-width: 800px;
+  margin-block: 0 16px;
+  color: #596a6e;
+}
+.freshness ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.freshness li {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid #dfe3dc;
+  border-inline-start: 4px solid #4d7c5e;
+  border-radius: 8px;
+  background: #fffdf8;
+}
+.freshness li[data-freshness="late"] {
+  border-inline-start-color: #ae844a;
+}
+.freshness li[data-freshness="review"],
+.freshness li[data-freshness="never"] {
+  border-inline-start-color: #a34a3f;
+}
+.freshness h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.state {
+  margin-block: 2px 8px;
+  font-weight: 600;
+}
+.freshness .count {
+  margin-block-start: 8px;
+}
 .sites {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));

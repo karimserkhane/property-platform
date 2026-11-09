@@ -30,6 +30,8 @@ racine (`evidence.<module>`) n'existent plus : une branche ouverte avant A09 imp
 le nouveau chemin (`evidence.<sous-paquet>.<module>`, `evidence.history.journals` pour
 `audit_context`, `context_rows` et `observation_history`).
 
+**Fraîcheur des sources — A32, 9 novembre 2026.** `evidence/source_families.py` (socle, sans ORM, partagé avec l’ingestion) possède le registre des familles ; `evidence/history/source_freshness.py` le calcul depuis `ingestion_run` et le rapport quotidien, sans table ni migration ; `ingestion/operations.py` la lecture de Prefect (échecs répétés, files en retard). Direction : ingestion → evidence ; API → evidence/history. Côté web, `features/sources/data.ts` compare les dates reçues à l’horloge du lecteur. Voir [INGESTION.md](INGESTION.md).
+
 **Contrôle de reconstruction — A04.** `evidence/rebuild/rebuild_archive.py` possède le paquet
 privé de captures, le rejeu par les importateurs typés et la comparaison exhaustive
 des tables. `ingestion/rebuilds.py` possède la création/suppression d'une base jetable ;

@@ -4,7 +4,10 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { getTranslations } from "next-intl/server";
 import type { SourcesLabels } from "@/features/sources/data";
-import { readSourceSites } from "@/features/sources/server";
+import {
+  readSourceFreshness,
+  readSourceSites,
+} from "@/features/sources/server";
 import { SourcesView } from "@/features/sources/sources-view";
 import { isLocale } from "@/i18n/locales";
 import { Link } from "@/i18n/navigation";
@@ -29,7 +32,10 @@ export default async function SourcesPage({ params }: SourcesPageProps) {
   await connection();
   const project = await getTranslations({ locale, namespace: "Project" });
   const t = await getTranslations({ locale, namespace: "Sources" });
-  const result = await readSourceSites();
+  const [result, freshness] = await Promise.all([
+    readSourceSites(),
+    readSourceFreshness(),
+  ]);
   if (!result.sites)
     return (
       <main className="explore-shell">
@@ -42,7 +48,7 @@ export default async function SourcesPage({ params }: SourcesPageProps) {
     );
   const labels = Object.fromEntries(
     Object.keys(english.Sources)
-      .filter((name) => name !== "reviewedCount")
+      .filter((name) => name !== "reviewedCount" && name !== "behindSources")
       .map((name) => [name, t(name as keyof SourcesLabels)]),
   ) as SourcesLabels;
   return (
@@ -54,6 +60,9 @@ export default async function SourcesPage({ params }: SourcesPageProps) {
       })}
       locale={locale}
       labels={labels}
+      families={freshness.families}
+      now={new Date()}
+      behindSources={(behind, total) => t("behindSources", { behind, total })}
       licenceLabels={{
         projects: project("projects"),
         navigation: project("navigation"),
