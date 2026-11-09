@@ -5,12 +5,21 @@ move to the cloud later without a rewrite. `BACKUP_COPY_TARGET` picks the destin
 means no copy. A target only stores, lists and returns bytes: what is copied, in which order,
 retention and verification live here, so a cloud destination is one class plus settings.
 Credentials come from the environment, never from Git or an image.
+
+`EncryptedTarget` wraps any target with age: bytes are encrypted on this machine before they
+leave it, and S3 refuses to run without it. This machine only needs the public recipient; the
+private key is handed over for a restore and is never stored here (decision of 7 November).
 """
 
 import base64
 import json
 import os
+import re
 import shutil
+import subprocess
+import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 
 from . import backups
@@ -18,6 +27,11 @@ from . import backups
 FILES = "files"
 # Objects above this size need a multipart upload, which the S3 target does not do yet.
 S3_SINGLE_PUT_LIMIT = 5 * 1024**3
+AGE_SUFFIX = ".age"
+AGE_RECIPIENT = re.compile(r"age1[02-9ac-hj-np-z]{58}")
+# age encrypts in chunks of 64 KiB, each followed by a 16-byte authentication tag.
+AGE_CHUNK = 64 * 1024
+AGE_TAG = 16
 
 
 class CopyError(RuntimeError):
@@ -157,6 +171,101 @@ class S3Target:
         return None
 
 
+class EncryptedTarget:
+    """Another target, holding only age ciphertext: `<key>.age` for each key.
+
+    Seen from the copy logic nothing changes: keys and sizes are those of the clear files, so
+    retention and "already copied" work as for a plain target. Encrypting needs the public
+    recipient only; reading back needs the private key (`identity_file`), and `describe`
+    downloads and decrypts, so a restore check proves that the key really opens the copy and
+    the provider never receives a hash of the clear bytes.
+    """
+
+    def __init__(self, inner, recipient: str, identity_file: str | None = None, work_root=None):
+        if not AGE_RECIPIENT.fullmatch(recipient):
+            raise CopyError("BACKUP_COPY_AGE_RECIPIENT is not an age public key (age1...)")
+        self.inner, self.recipient, self.identity_file = inner, recipient, identity_file
+        self.work_root = work_root
+        self.kind = f"{inner.kind}+age"
+        self._header_size: int | None = None
+
+    @contextmanager
+    def _workspace(self) -> Iterator[Path]:
+        """A scratch folder on the backup mount, never in the Docker layer."""
+        root = self.work_root or backups.backup_root()
+        with tempfile.TemporaryDirectory(prefix=".copy-age-", dir=root) as folder:
+            yield Path(folder)
+
+    @staticmethod
+    def _age(*arguments: str) -> None:
+        try:
+            subprocess.run(
+                ["age", *arguments],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=backups.DUMP_TIMEOUT,
+            )
+        except FileNotFoundError as error:
+            raise CopyError("The age tool is not installed in this image") from error
+        except subprocess.CalledProcessError as error:
+            raise CopyError(f"age failed: {error.stderr.strip()}") from error
+
+    def _encrypt(self, source: Path, destination: Path) -> None:
+        self._age("--encrypt", "--recipient", self.recipient, "-o", str(destination), str(source))
+
+    def _decrypt(self, source: Path, destination: Path) -> None:
+        if not self.identity_file or not Path(self.identity_file).is_file():
+            raise CopyError("Reading the encrypted copy needs BACKUP_COPY_AGE_IDENTITY_FILE")
+        key = self.identity_file
+        self._age("--decrypt", "--identity", key, "-o", str(destination), str(source))
+
+    def _clear_size(self, stored: int) -> int:
+        """Size of the clear file, from a listing: no download for each of thousands of keys."""
+        if self._header_size is None:
+            with self._workspace() as work:
+                (work / "empty").touch()
+                self._encrypt(work / "empty", work / "sealed")
+                self._header_size = (work / "sealed").stat().st_size - AGE_TAG
+        payload = stored - self._header_size
+        chunks = max(1, -(-payload // (AGE_CHUNK + AGE_TAG)))
+        return payload - AGE_TAG * chunks
+
+    def inventory(self, prefix: str) -> dict[str, int]:
+        return {
+            key.removesuffix(AGE_SUFFIX): self._clear_size(size)
+            for key, size in self.inner.inventory(prefix).items()
+            if key.endswith(AGE_SUFFIX)
+        }
+
+    def put(self, source: Path, key: str, sha256: str) -> None:
+        if backups._sha256(source) != sha256:
+            raise CopyError(f"{key} differs from its SHA-256 before encryption")
+        with self._workspace() as work:
+            sealed = work / "sealed"
+            self._encrypt(source, sealed)
+            self.inner.put(sealed, key + AGE_SUFFIX, backups._sha256(sealed))
+
+    def describe(self, key: str) -> tuple[int, str] | None:
+        if self.inner.describe(key + AGE_SUFFIX) is None:
+            return None
+        with self._workspace() as work:
+            self.fetch(key, work / "clear")
+            return (work / "clear").stat().st_size, backups._sha256(work / "clear")
+
+    def fetch(self, key: str, destination: Path) -> None:
+        with self._workspace() as work:
+            self.inner.fetch(key + AGE_SUFFIX, work / "sealed")
+            self._decrypt(work / "sealed", work / "clear")
+            shutil.move(work / "clear", destination)
+
+    def remove(self, key: str) -> None:
+        self.inner.remove(key + AGE_SUFFIX)
+
+    def local_root(self) -> Path | None:
+        return None
+
+
 def copy_target():
     kind = os.environ.get("BACKUP_COPY_TARGET", "").strip()
     if not kind:
@@ -165,10 +274,18 @@ def copy_target():
         root = Path(os.environ.get("BACKUP_COPY_DIR", "/backup-copy"))
         if not root.is_dir():
             raise CopyError(f"Backup copy folder {root} is not mounted")
-        return DirectoryTarget(root)
+        target = DirectoryTarget(root)
+    elif kind == "s3":
+        target = S3Target.from_environment()
+    else:
+        raise CopyError(f"Unknown BACKUP_COPY_TARGET {kind!r}")
+    recipient = os.environ.get("BACKUP_COPY_AGE_RECIPIENT", "").strip()
+    if recipient:
+        identity = os.environ.get("BACKUP_COPY_AGE_IDENTITY_FILE", "").strip()
+        return EncryptedTarget(target, recipient, identity or None)
     if kind == "s3":
-        return S3Target.from_environment()
-    raise CopyError(f"Unknown BACKUP_COPY_TARGET {kind!r}")
+        raise CopyError("Nothing leaves this machine unencrypted: set BACKUP_COPY_AGE_RECIPIENT")
+    return target
 
 
 def copied_backups(target) -> list[tuple]:

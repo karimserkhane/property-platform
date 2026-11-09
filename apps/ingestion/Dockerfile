@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 UV_LINK_MODE=copy \
     UV_SYSTEM_CERTS=true PREFECT_HOME=/home/property_platform/.prefect
 WORKDIR /workspace/apps/ingestion
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates libgdal36 libgeos-c1t64 libproj25 \
+    ca-certificates libgdal36 libgeos-c1t64 libproj25 age=1.2.1-1+b5 \
     && rm -rf /var/lib/apt/lists/*
 # Optional public CA already approved by the operator (e.g. local antivirus HTTPS scanning).
 # TLS verification stays enabled; never pass an unverified issuer certificate.

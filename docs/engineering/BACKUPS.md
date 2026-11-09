@@ -47,7 +47,7 @@ Les nuits suivantes ne recopient que les nouveaux objets. Chaque dump conservé 
 | --- | --- | --- |
 | vide (défaut) | aucune copie | actif sur le poste de Karim |
 | `directory` | dossier de l'hôte `PROPERTY_PLATFORM_BACKUP_COPY_DIR`, monté sur `/backup-copy` : disque externe, dossier synchronisé, partage réseau | prêt, essayé le 3 novembre |
-| `s3` | compartiment privé compatible S3 (R2, B2, S3…), variables `BACKUP_COPY_S3_*` | prêt, testé sans réseau ; aucun fournisseur choisi, aucun compte ni coût sans accord de Karim |
+| `s3` | compartiment privé compatible S3 (R2, B2, S3…), variables `BACKUP_COPY_S3_*`, **chiffrement obligatoire** (voir plus bas) | prêt, testé sans réseau ; aucun compte ni coût sans accord de Karim |
 
 **Ce qui est copié et dans quel ordre.** Le miroir `files/` (médias privés, corps de captures déplacés par A10/A29, reçus), puis le dump, puis son manifeste : un manifeste présent dans la copie garantit que son dump et les fichiers qu'il référence y sont aussi. Chaque fichier est vérifié après écriture (taille et SHA-256 ; en S3, le fournisseur contrôle aussi la somme `ChecksumSHA256` envoyée et l'objet porte son SHA-256 en métadonnée). Un fichier déjà présent avec la même taille n'est pas recopié : les objets du miroir sont nommés par leur SHA-256 et les reçus ne sont jamais réécrits. La rotation de la copie est celle du dossier local (7 jours, 4 semaines) ; les fichiers du miroir n'y sont jamais supprimés.
 
@@ -59,7 +59,28 @@ Les nuits suivantes ne recopient que les nouveaux objets. Chaque dump conservé 
 
 **Essai réel du 3 novembre 2026** (image de la branche, conteneur à part, sans toucher au runner) : copie de la sauvegarde `property_platform-20261103T160444Z` vers `.cache/backup-copy` en 14 min 09 (dump de 438 Mo et 6 153 fichiers du miroir, 2,94 Go) ; deuxième passage sans rien recopier ; `restore-check` depuis la copie vert en 6 min 51 (58 tables, 2 801 028 lignes, 2 985 objets vérifiés par taille et SHA-256). Le mode S3 est testé sans réseau (stub botocore), jamais contre un fournisseur réel.
 
-**Passer au cloud plus tard.** Choisir le fournisseur et son budget (décision de Karim), créer un compartiment privé et une clé limitée à ce compartiment, remplir `BACKUP_COPY_S3_*` dans `.env`, puis `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=s3`. Avant d'y copier des preuves privées, décider aussi du chiffrement côté poste (non fait : le chiffrement au repos du fournisseur ne protège pas d'un accès au compte). Les objets de plus de 5 Gio demanderont un envoi en plusieurs parties, non écrit (dump actuel : environ 440 Mo).
+**Chiffrement sur le poste ([A30](../tasks/A30.md), décision du 7 novembre 2026).** Avec `BACKUP_COPY_AGE_RECIPIENT` (la clé **publique** [age](https://age-encryption.org), `age1…`), chaque fichier (miroir, dump, manifeste) est chiffré sur le poste avant de partir et stocké sous `<nom>.age`. La cible `s3` refuse de démarrer sans cette clé ; la cible `directory` reste en clair si elle est vide, mais se chiffre de la même façon si elle est remplie (utile pour un dossier synchronisé).
+
+- **Ce que voit le fournisseur** : uniquement du chiffré. Restent visibles les noms de fichiers (dont l'empreinte SHA-256 des objets du miroir, qui permet seulement de confirmer qu'un fichier déjà connu y figure), leur taille approximative et les dates d'envoi.
+- **La clé privée ne reste pas sur le poste.** Le poste chiffre avec la clé publique seule : un vol du poste ou des identifiants S3 n'ouvre pas la copie. La clé privée vit dans le gestionnaire de mots de passe de Karim et sur papier, jamais dans Git, une image, `.env` ou un chat. **Sans elle, la copie est perdue** : d'où le contrôle de restauration ci-dessous, à faire dès la première copie.
+- **Déjà copié ?** La taille du fichier en clair se déduit de la taille stockée (format age : en-tête fixe, 16 octets par bloc de 64 Kio) : la liste du compartiment suffit, sans téléchargement ni requête par fichier.
+- **Changer de clé** : les fichiers déjà envoyés restent lisibles seulement avec l'ancienne clé. Utiliser un nouveau `BACKUP_COPY_S3_PREFIX` avec la nouvelle clé et garder l'ancienne jusqu'à la fin de la rotation.
+- **Fichiers temporaires** : un fichier à la fois, dans `BACKUP_DIR/.copy-age-*` (l'hôte, pas la couche Docker), effacé après usage.
+
+**Activer la copie chiffrée vers S3 (Karim, après fusion et redéploiement de l'image d'ingestion).**
+
+1. Créer le compartiment privé et versionné et une clé limitée à ce compartiment chez le fournisseur retenu (Backblaze B2 proposé le 7 novembre).
+2. Créer la paire de clés, dans un terminal du poste : `docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion run --rm --no-deps ingestion age-keygen`. Noter la ligne `AGE-SECRET-KEY-…` dans le gestionnaire de mots de passe et sur papier. Ne pas la coller ailleurs.
+3. Dans `infra/local/.env` : `BACKUP_COPY_S3_*`, `BACKUP_COPY_AGE_RECIPIENT=age1…` (la clé publique), puis `PROPERTY_PLATFORM_BACKUP_COPY_TARGET=s3`. Recréer le seul conteneur d'ingestion avec `--env-file infra/local/.env`.
+4. Après la première sauvegarde copiée, contrôler la restauration en donnant la clé privée à un conteneur temporaire seulement. Enregistrer la clé dans un fichier hors du dépôt, puis :
+
+```bash
+docker compose --env-file infra/local/.env -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion run --rm --no-deps -v "C:/chemin/cle-age.txt:/run/secrets/backup-age-key:ro" -e BACKUP_COPY_AGE_IDENTITY_FILE=/run/secrets/backup-age-key ingestion python -c "from property_platform_ingestion import backup_copy; print(backup_copy.restore_check_from_copy())"
+```
+
+Commande pour PowerShell ; dans Git Bash, la préfixer par `MSYS_NO_PATHCONV=1`. Le résultat doit contenir `'ok': True`. Supprimer ensuite ce fichier. Ce contrôle télécharge et déchiffre le dump et chaque objet référencé : il prouve que la clé ouvre vraiment la copie. Le flow Prefect `restore-check` avec `source="copy"` échoue volontairement avec un message clair sur une copie chiffrée, puisque le runner n'a pas la clé.
+
+Les objets de plus de 5 Gio demanderont un envoi en plusieurs parties, non écrit (dump actuel : environ 440 Mo).
 
 ## Restaurer manuellement
 
@@ -70,6 +91,8 @@ docker compose -f infra/local/compose.yaml exec db createdb -U property_platform
 docker compose -f infra/local/compose.yaml cp .cache/backups/property_platform-<horodatage>.dump db:/tmp/restore.dump
 docker compose -f infra/local/compose.yaml exec db pg_restore -U property_platform --no-owner --no-privileges --exit-on-error -d property_platform_restored /tmp/restore.dump
 ```
+
+Depuis une copie chiffrée, déchiffrer d'abord chaque fichier : `age --decrypt -i <fichier de clé> -o <nom> <nom>.age` (le binaire officiel d'age suffit, sans ce dépôt).
 
 Comparer ensuite les comptes avec le manifeste (le flow `restore-check` fait la même vérification). Les fichiers de `files/media` et `files/receipts` se recopient dans les volumes `media-data` et `ingestion-data` par un conteneur temporaire qui monte ces volumes.
 

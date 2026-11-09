@@ -126,6 +126,7 @@ jobs:
       - run: uv sync --project apps/ingestion --frozen
       - run: uv run --project apps/ingestion ruff check apps/ingestion
       - run: uv run --project apps/ingestion ruff format --check apps/ingestion
+      - run: sudo apt-get update && sudo apt-get install -y age
       - run: uv run --project apps/ingestion pytest apps/ingestion/tests -c apps/ingestion/pyproject.toml
       - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml --profile ingestion config --quiet
       - run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml -f infra/local/compose.map-analysis.yaml --profile ingestion --profile map-analysis config --quiet
@@ -139,6 +140,7 @@ jobs:
         run: docker compose -f infra/local/compose.yaml -f infra/local/compose.ingestion.yaml -f infra/local/compose.storage.s3.yaml --profile ingestion config --quiet
       - run: docker build -t property-platform-ingestion-ci -f apps/ingestion/Dockerfile .
       - run: docker run --rm --network none property-platform-ingestion-ci python -m property_platform_ingestion datasets
+      - run: docker run --rm --network none property-platform-ingestion-ci age --version
 
   # A38 (docs/engineering/TOOLCHAIN.md#chaîne-dapprovisionnement): every action and image is
   # pinned by digest, one digest per image tag, and the pinned images are scanned below.

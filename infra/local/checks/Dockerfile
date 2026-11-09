@@ -24,6 +24,9 @@ RUN --mount=type=cache,target=/root/.cache/uv uv sync --frozen --no-install-proj
 WORKDIR /workspace
 
 FROM python AS ingestion
+# Same pinned age as apps/ingestion/Dockerfile: the backup copy tests encrypt for real.
+RUN apt-get update && apt-get install -y --no-install-recommends age=1.2.1-1+b5 \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /deps/apps/ingestion
 COPY apps/ingestion/pyproject.toml apps/ingestion/uv.lock ./
 COPY apps/api/pyproject.toml ../api/pyproject.toml
