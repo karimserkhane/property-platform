@@ -141,7 +141,7 @@ l'eau et les routes ne sont pas des parcelles, mais une parcelle doit être trou
 | Sources | 157 Ko, 8 requêtes | 173 Ko, 10 requêtes |
 | Explorateur | 493 Ko, 17 requêtes | 543 Ko, 19 requêtes |
 | Lectures de la carte au chargement (`/api/atlas/*`) | 390 Ko, 11 requêtes | 429 Ko, 13 requêtes |
-| Carte utilisable, téléphone en 4G (médiane de 3) | 6,1 à 6,6 s sur portable | 15 s |
+| Carte utilisable, téléphone en 4G (médiane de 3) | 6,1 à 6,6 s sur portable, 4,3 s sur runner GitHub | 15 s |
 
 Octets et requêtes sont stables d'un passage à l'autre (quatre passages identiques), d'où une marge d'environ 10 %. Le temps varie avec le runner : son budget est large et ne détecte que les fortes régressions. Si un changement a vraiment besoin de plus, il relève le budget dans la même PR et dit pourquoi.
 
