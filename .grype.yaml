@@ -62,15 +62,6 @@ ignore:
   - vulnerability: CVE-2026-8376
     package: {name: perl-base, version: "5.36.0-7+deb12u3", type: deb}
     reason: text-embeddings-inference cpu-1.9.3, optional local service; exception of 2026-11-06 (A40)
-  # Firefox 157.0 bundled in mcr.microsoft.com/playwright:v1.64.0-noble (apps/web/Dockerfile, e2e
-  # stage). The journeys run Chromium only (apps/web/playwright.config.ts: Desktop Chrome, Pixel 7),
-  # so this browser is never started, and the image only runs CI and local e2e checks against a test
-  # server. Checked on 6 November 2026: Playwright 1.64.1 ships the same Firefox and 1.65.0, whose
-  # Firefox is fixed, was published on 5 November, inside the release-age delay. One rule for the
-  # whole unused binary, limited to its version and its location in the image. Remove it when
-  # Playwright moves to 1.65.0 or later (npm package and image together, E2E.md).
-  - package: {name: firefox, version: "157.0", type: binary, location: "/ms-playwright/firefox-1555/**"}
-    reason: unused Firefox of the Playwright 1.64.0 e2e image (Chromium only); exception of 2026-11-06 (A40)
   # zlib of the Alpine 3.22.7 base of tailscale/tailscale:v1.104.4 (infra/local/compose.remote-preview.yaml).
   # CVE-2026-4738 appeared in the database on 7 November 2026, fixed in Alpine zlib 1.4-r0. Checked that
   # day: tailscaled is a static Go binary that never loads libz (only apk-tools, never run in the
