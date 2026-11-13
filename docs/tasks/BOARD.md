@@ -38,7 +38,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A30](A30.md) | A | Copie des sauvegardes hors de la machine | 2 | A03 | non (décidée le 07/11 : S3 hors poste, chiffré côté poste) | in-progress | claude |
 | [A31](A31.md) | A | Parcours e2e instables du signal satellite et de la carte | 1 | A13, B07 | non | done | claude |
 | [A32](A32.md) | A | Fraîcheur par famille de sources et alertes d'exploitation | 1 | A26 | non (si une alerte sort de Prefect) | done | claude |
-| [A33](A33.md) | A | Budgets de performance en CI | 2 | A13 | non | todo | unassigned |
+| [A33](A33.md) | A | Budgets de performance en CI | 2 | A13 | non | done | claude |
 | [A34](A34.md) | A | Contours simplifiés en SQL et requêtes de map-context regroupées | 3 | A08 | non | todo | unassigned |
 | [A35](A35.md) | A | Provenance publiée une fois par réponse dans les lectures de carte | 3 | A07, A24 | non | todo | unassigned |
 | [A36](A36.md) | A | Images satellite servies comme fichiers cachables | 3 | A08 | non | todo | unassigned |
