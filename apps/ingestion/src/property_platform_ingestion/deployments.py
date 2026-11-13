@@ -227,6 +227,12 @@ async def serve_datasets():
             )
             deployment_id = await runner.add_deployment(deployment)
             deployment_ids.append(deployment_id)
+            for item in existing.schedules if existing is not None else ():
+                if _cadence(dataset, item) is None:
+                    # Registering fewer schedules leaves the others in place: a retired drain
+                    # cadence kept running every two minutes after A44 until removed here.
+                    await client.delete_deployment_schedule(deployment_id, item.id)
+                    logger.info("Removed retired schedule %s of %s", item.slug, dataset.name)
             if dataset.drain:
                 drains[dataset.name] = deployment_id
         crashed = await crash_orphaned_runs(client, deployment_ids, started)

@@ -398,3 +398,64 @@ def test_emirate_district_imports_are_manual_per_municipality():
     flow = FLOWS["property-platform-sdi-district-parcels"]
     parameter = flow.parameters.model_dump()["properties"]["municipality"]
     assert set(parameter["enum"]) == {"ADM", "AAM", "WRM"}
+
+
+def test_registration_deletes_a_retired_drain_schedule_and_keeps_an_operator_one(monkeypatch):
+    from property_platform_ingestion import deployments
+
+    walking = next(row for row in DATASETS if row.name == "walking-areas")
+    retired = SimpleNamespace(
+        id=uuid4(),
+        schedule=CronSchedule(cron="1-59/2 * * * *", timezone="Asia/Dubai"),
+        active=True,
+        slug="initial-cadence",
+        parameters={},
+        max_scheduled_runs=None,
+    )
+    operator = SimpleNamespace(**{**vars(retired), "id": uuid4(), "slug": "operator"})
+    deleted, registered = [], []
+    deployment_id = uuid4()
+
+    class Client:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+        async def read_deployment_by_name(self, name):
+            return SimpleNamespace(schedules=[retired, operator], parameters={}, paused=False)
+
+        async def read_flow_runs(self, **kwargs):
+            return []
+
+        async def delete_deployment_schedule(self, deployment, schedule):
+            deleted.append((deployment, schedule))
+
+    class Flow:
+        async def ato_deployment(self, **kwargs):
+            registered.append(kwargs["schedules"])
+            return SimpleNamespace(**kwargs)
+
+    class Runner:
+        def __init__(self, **kwargs):
+            pass
+
+        async def add_deployment(self, deployment):
+            return deployment_id
+
+        async def start(self):
+            await asyncio.sleep(0)
+
+    async def keep_drains_current(drains):
+        await asyncio.Event().wait()
+
+    monkeypatch.setattr(deployments, "invoke_domain", lambda request: {"status": "succeeded"})
+    monkeypatch.setattr(deployments, "Runner", Runner)
+    monkeypatch.setattr(deployments, "get_client", lambda: Client())
+    monkeypatch.setattr(deployments, "keep_drains_current", keep_drains_current)
+    monkeypatch.setattr(deployments, "DATASETS", (walking,))
+    monkeypatch.setattr(deployments, "FLOWS", defaultdict(Flow))
+    asyncio.run(deployments.serve_datasets())
+    assert [item.slug for item in registered[0]] == ["operator"]
+    assert deleted == [(deployment_id, retired.id)]
