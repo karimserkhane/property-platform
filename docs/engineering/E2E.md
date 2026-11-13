@@ -120,12 +120,34 @@ rester dans un dépôt public.
 | `locales.spec.ts` | Arabe, persan et ourdou en `dir="rtl"` sans défilement horizontal, accueil et fiche ; anglais et français en `ltr` | ordinateur |
 | `context-tiles.spec.ts` | Explorateur de Reem en 3D catalogue → tuiles `context-tiles` et index `context-index` lus, aucun `map-context` → un clic près du centre ouvre une fiche sans erreur | ordinateur |
 | `mobile.spec.ts` | Accueil, annuaire, fiche et carte sur un écran Pixel 7, sans défilement horizontal | mobile |
+| `performance.spec.ts` | Budgets de performance, seulement contre le paquet de démonstration (voir ci-dessous) | ordinateur et mobile |
 
 Les parcours découvrent leurs données (premier projet de l'annuaire, première carte
 portant un parent) au lieu de figer des noms. Si les données locales ne contiennent
 aucune hiérarchie relue, le parcours correspondant est **marqué ignoré avec sa raison**,
 jamais compté comme réussi ; c'est toujours le cas en CI (voir plus haut). Le clic sur la carte sonde une grille autour du centre :
 l'eau et les routes ne sont pas des parcelles, mais une parcelle doit être trouvée.
+
+## Budgets de performance (A33)
+
+`performance.spec.ts` compare chaque passage aux budgets de `e2e/performance-budgets.ts` ; un dépassement fait échouer le job `e2e` et donne la valeur mesurée et le budget. Ces budgets ne valent que pour le paquet de démonstration, dont les données sont fixes (`E2E_PERFORMANCE_BUDGETS=1` dans `compose.e2e-demo.yaml`) : contre la base locale, le parcours est ignoré avec sa raison.
+
+| Mesure | Départ (09/11/2026) | Budget |
+| --- | --- | --- |
+| JavaScript compressé, accueil | 156 Ko, 7 requêtes | 172 Ko, 9 requêtes |
+| Annuaire | 156 Ko, 8 requêtes | 172 Ko, 10 requêtes |
+| Fiche projet | 167 Ko, 9 requêtes | 184 Ko, 11 requêtes |
+| Marché | 453 Ko, 12 requêtes | 499 Ko, 14 requêtes |
+| Sources | 157 Ko, 8 requêtes | 173 Ko, 10 requêtes |
+| Explorateur | 493 Ko, 17 requêtes | 543 Ko, 19 requêtes |
+| Lectures de la carte au chargement (`/api/atlas/*`) | 390 Ko, 11 requêtes | 429 Ko, 13 requêtes |
+| Carte utilisable, téléphone en 4G (médiane de 3) | 6,1 à 6,6 s sur portable, 4,3 s sur runner GitHub | 15 s |
+
+Octets et requêtes sont stables d'un passage à l'autre (quatre passages identiques), d'où une marge d'environ 10 %. Le temps varie avec le runner : son budget est large et ne détecte que les fortes régressions. Si un changement a vraiment besoin de plus, il relève le budget dans la même PR et dit pourquoi.
+
+Le temps est mesuré sur un Pixel 7 émulé, en « Fast 4G » de Chrome (9 Mbit/s, 165 ms) et processeur ralenti 4 fois. La carte compte comme utilisable quand son canvas est affiché, qu'au moins une tuile de parcelles est reçue et qu'aucune lecture n'est en cours depuis 2 s (attente non comptée). L'événement `idle` de MapLibre n'est pas utilisable : l'animation du halo des projets ne s'arrête jamais.
+
+**Ce temps ne valide pas l'objectif du plan** (carte interactive en moins de 2 s sur 4G) : le rendu WebGL est logiciel et le paquet ne couvre que Reem. Il sert à voir une régression.
 
 ## Limites
 

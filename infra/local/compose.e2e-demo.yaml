@@ -78,6 +78,8 @@ services:
       E2E_API_ORIGIN: http://api:8000
       # The package holds every journey's data: a journey without it fails, never skips.
       E2E_REQUIRE_DATA: "1"
+      # The budgets of apps/web/e2e/performance-budgets.ts hold for this fixed package only.
+      E2E_PERFORMANCE_BUDGETS: "1"
     volumes:
       - ../../apps/web/e2e:/repo/apps/web/e2e:ro
       - ../../apps/web/playwright.config.ts:/repo/apps/web/playwright.config.ts:ro
