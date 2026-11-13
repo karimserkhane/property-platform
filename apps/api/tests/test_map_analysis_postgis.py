@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -20,10 +21,17 @@ from property_platform.modules.evidence.maps.accessibility import (  # noqa: E40
     StoredGraphReceipt,
     archive_graph,
     archive_walking,
+    pending_walking,
     walking_area,
+)
+from property_platform.modules.evidence.maps.basemap_archive import (  # noqa: E402
+    pending_basemap,
+    seed_area,
+    seed_tiles,
 )
 from property_platform.modules.evidence.models import (  # noqa: E402
     AdrecMarketSnapshot,
+    BasemapRequest,
     Capture,
     RoutingGraph,
     RowRevision,
@@ -142,6 +150,36 @@ def test_walking_queue_computes_archived_postgis_geometry_then_retains_previous_
         == 1
     )
     assert walking_area(54.4, 24.5, 10)["ingested_at"] == result["ingested_at"]
+
+
+def test_pending_walking_counts_only_work_a_run_would_do():
+    walking_area(54.4, 24.5, 10)
+    # Without a ready graph a run computes nothing, so the runner starts none (A44).
+    assert pending_walking() == 0
+    store_graph()
+    walking_area(54.4, 24.5, 10)
+    assert WalkingRequest.objects.count() == 1
+    assert pending_walking() == 1
+    archive_walking(actor="test-walking", compute=lambda *_: contour(), run_key="test")
+    assert pending_walking() == 0
+
+
+def test_pending_basemap_counts_unseeded_coverage_and_due_tiles_without_writing():
+    area, provider = (54.38, 24.48, 54.42, 24.52), "sentinel-worldcover-2020"
+    tiles = seed_tiles(provider, area)
+    assert pending_basemap(provider, [area]) == len(tiles)
+    assert not BasemapRequest.objects.exists()
+    seed_area(provider, area)
+    assert pending_basemap(provider, [area]) == len(tiles)
+    now = timezone.now()
+    BasemapRequest.objects.update(available=True, last_attempt_at=now)
+    assert pending_basemap(provider, [area]) == 0
+    BasemapRequest.objects.update(available=False, last_attempt_at=now - timedelta(minutes=10))
+    # Tried less than an hour ago: the next run would skip them too.
+    assert pending_basemap(provider, [area]) == 0
+    BasemapRequest.objects.update(available=True, last_attempt_at=now - timedelta(days=8))
+    assert pending_basemap(provider, [area]) == len(tiles)
+    assert pending_basemap("openfreemap", [area]) == len(seed_tiles("openfreemap", area))
 
 
 @override_settings(DEBUG=True, PROPERTY_PLATFORM_PARCEL_PREVIEW=True)

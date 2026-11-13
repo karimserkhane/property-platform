@@ -32,6 +32,10 @@ services:
       PREFECT_SERVER_ANALYTICS_ENABLED: "false"
       PREFECT_SERVER_DATABASE_SQLALCHEMY_POOL_SIZE: "5"
       PREFECT_SERVER_DATABASE_SQLALCHEMY_MAX_OVERFLOW: "5"
+      # Finished runs and their logs are deleted 90 days after they end; events after the
+      # default 7 days (A44, INGESTION.md).
+      PREFECT_SERVER_SERVICES_DB_VACUUM_ENABLED: "events,flow_runs"
+      PREFECT_SERVER_SERVICES_DB_VACUUM_RETENTION_PERIOD: "7776000"
     ports:
       - "127.0.0.1:4200:4200"
     # A bridge for the loopback UI port, plus the isolated metadata network.

@@ -47,7 +47,7 @@ def archived_tile(provider, z, x, y):
     return None
 
 
-def seed_area(provider, bounds):
+def seed_tiles(provider, bounds):
     """Reviewed coverage only; never prefetch the planet or silently exceed provider budgets."""
     west, south, east, north = bounds
 
@@ -57,19 +57,42 @@ def seed_area(provider, bounds):
             (1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * n
         )
 
-    rows = []
+    tiles = []
     for z in range(0 if provider == "openfreemap" else 8, 15):
         left, top = coordinate(west, north, z)
         right, bottom = coordinate(east, south, z)
-        rows.extend(
-            BasemapRequest(provider=provider, z=z, x=x, y=y)
-            for x in range(left, right + 1)
-            for y in range(top, bottom + 1)
-        )
-    if len(rows) > 1000:
+        tiles.extend((z, x, y) for x in range(left, right + 1) for y in range(top, bottom + 1))
+    if len(tiles) > 1000:
         raise ValueError("Area exceeds the reviewed download budget")
+    return tiles
+
+
+def seed_area(provider, bounds):
+    rows = [
+        BasemapRequest(provider=provider, z=z, x=x, y=y) for z, x, y in seed_tiles(provider, bounds)
+    ]
     BasemapRequest.objects.bulk_create(rows, ignore_conflicts=True)
     return len(rows)
+
+
+def pending_requests(provider, now):
+    """Tiles a drain would fetch now: never archived, or stale, and not tried in the last hour."""
+    return (
+        BasemapRequest.objects.filter(provider=provider)
+        .filter(Q(available=False) | Q(last_attempt_at__lt=now - timedelta(days=7)))
+        .filter(Q(last_attempt_at__isnull=True) | Q(last_attempt_at__lt=now - timedelta(hours=1)))
+    )
+
+
+def pending_basemap(provider, areas, now=None):
+    """Read-only count of the work one drain run would do; 0 means no run is needed (A44).
+
+    Seeded coverage that is not yet a request counts too, since the run seeds it first.
+    """
+    now = now or timezone.now()
+    wanted = {tile for bounds in areas for tile in seed_tiles(provider, bounds)}
+    known = set(BasemapRequest.objects.filter(provider=provider).values_list("z", "x", "y"))
+    return len(wanted - known) + pending_requests(provider, now).count()
 
 
 def validate_tile(provider, payload):

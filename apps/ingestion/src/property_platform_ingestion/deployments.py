@@ -29,15 +29,24 @@ from .runtime import invoke_domain
 
 logger = get_logger("property_platform_ingestion.runner")
 PAGE = 200
+# Queues are read every minute: work waits at most about as long as with the former
+# two-minute drains (A44).
 DRAIN_CHECK_SECONDS = 60
+PENDING_TIMEOUT = 50
+IN_FLIGHT = frozenset(
+    {StateType.SCHEDULED, StateType.PENDING, StateType.RUNNING, StateType.CANCELLING}
+)
 
 
 def _cadence(dataset, item):
-    # An initial schedule left on a retired default follows the reviewed cadence; an
-    # operator edit (another cron or slug) is kept, and so is the active flag.
+    # An initial schedule left on a retired default follows the reviewed cadence, or goes
+    # when the dataset no longer has one (queue drains, A44); an operator edit (another cron
+    # or slug) is kept, and so is the active flag.
     if item.slug == "initial-cadence" and getattr(item.schedule, "cron", None) in (
         dataset.retired_crons
     ):
+        if dataset.cron is None:
+            return None
         return CronSchedule(cron=dataset.cron, timezone=item.schedule.timezone)
     return item.schedule
 
@@ -47,13 +56,14 @@ def schedules_for(dataset, existing):
         # An empty list also matters: removing a schedule in the UI stays removed.
         return [
             DeploymentScheduleCreate(
-                schedule=_cadence(dataset, item),
+                schedule=schedule,
                 active=item.active,
                 slug=item.slug,
                 parameters=item.parameters,
                 max_scheduled_runs=item.max_scheduled_runs,
             )
             for item in existing.schedules
+            if (schedule := _cadence(dataset, item)) is not None
         ]
     if dataset.cron is None:
         return []
@@ -136,16 +146,53 @@ async def cancel_superseded_drains(client, deployment_ids, now=None):
     return cancelled
 
 
-async def keep_drains_current(deployment_ids):
+async def dispatch_drains(client, drains, pending):
+    """Start one run of each drain whose queue holds work and that has none in flight.
+
+    A drain used to run every two minutes, empty or not: 2,880 runs a day, each with its
+    execution row and logs, and none for walking areas that had no graph (A44). The queue is
+    now read first, in a domain subprocess that writes nothing, so an empty queue leaves no
+    trace in Prefect. A paused deployment is left alone, as its schedule would be.
+    """
+    in_flight = await _flow_runs(
+        client,
+        FlowRunFilter(
+            deployment_id=FlowRunFilterDeploymentId(any_=list(drains.values())),
+            state=FlowRunFilterState(type=FlowRunFilterStateType(any_=list(IN_FLIGHT))),
+        ),
+    )
+    busy = {run.deployment_id for run in in_flight}
+    started = []
+    for name, deployment_id in drains.items():
+        if not pending.get(name) or deployment_id in busy:
+            continue
+        if (await client.read_deployment(deployment_id)).paused:
+            continue
+        await client.create_flow_run_from_deployment(deployment_id, tags=["queue-work"])
+        started.append(name)
+    return started
+
+
+def pending_work():
+    result = invoke_domain({"operation": "pending_work"}, timeout=PENDING_TIMEOUT)
+    return {name: int(count) for name, count in result["summary"].items()}
+
+
+async def keep_drains_current(drains):
     while True:
         try:
+            # The domain subprocess blocks; it runs off the runner's event loop.
+            pending = await asyncio.to_thread(pending_work)
             async with get_client() as client:
-                cancelled = await cancel_superseded_drains(client, deployment_ids)
+                cancelled = await cancel_superseded_drains(client, list(drains.values()))
+                started = await dispatch_drains(client, drains, pending)
             if cancelled:
                 logger.info("Cancelled %d superseded queue drain runs", cancelled)
+            if started:
+                logger.info("Started queue drains with pending work: %s", ", ".join(started))
         except Exception:
-            # A failed pass leaves the runs for the next one; the runner keeps serving.
-            logger.exception("Superseded queue drain check failed")
+            # A failed pass leaves the work for the next one; the runner keeps serving.
+            logger.exception("Queue drain check failed")
         await asyncio.sleep(DRAIN_CHECK_SECONDS)
 
 
@@ -155,7 +202,7 @@ async def serve_datasets():
     runner = Runner(
         name="property-platform-ingestion", limit=1, pause_on_shutdown=False, webserver=True
     )
-    deployment_ids, drain_ids = [], []
+    deployment_ids, drains = [], {}
     async with get_client() as client:
         for dataset in DATASETS:
             try:
@@ -181,16 +228,16 @@ async def serve_datasets():
             deployment_id = await runner.add_deployment(deployment)
             deployment_ids.append(deployment_id)
             if dataset.drain:
-                drain_ids.append(deployment_id)
+                drains[dataset.name] = deployment_id
         crashed = await crash_orphaned_runs(client, deployment_ids, started)
         if crashed:
             logger.info("Crashed %d runs left open by a previous runner process", crashed)
-    drains = asyncio.create_task(keep_drains_current(drain_ids)) if drain_ids else None
+    watcher = asyncio.create_task(keep_drains_current(drains)) if drains else None
     try:
         await runner.start()
     finally:
-        if drains:
-            drains.cancel()
+        if watcher:
+            watcher.cancel()
 
 
 def serve():

@@ -8,7 +8,7 @@ import os
 import sys
 from pathlib import Path
 
-from .registry import TERRITORIES
+from .registry import BASEMAP_PROVIDERS, TERRITORIES
 from .runtime import MAX_REQUEST, checked_receipt_path
 from .storage import stored_property_receipt
 
@@ -155,40 +155,40 @@ def execute(request):
             with audit_context(actor=request["actor"]):
                 summary = apply_source_rights(actor=request["actor"])
             return {"status": "succeeded", "summary": summary}
-        if request.get("operation") == "basemap":
-            from datetime import timedelta
+        if request.get("operation") == "pending_work":
+            from property_platform.modules.catalog.territories import TERRITORY_BY_ID
+            from property_platform.modules.evidence.maps.accessibility import pending_walking
+            from property_platform.modules.evidence.maps.basemap_archive import pending_basemap
 
-            from django.db.models import Q
+            # Read-only: lets the runner skip a queue drain that would find nothing (A44).
+            if set(request) != {"operation"}:
+                raise ValueError("Pending work takes no parameters")
+            areas = [TERRITORY_BY_ID[territory].bounds for territory in TERRITORIES]
+            pending = {
+                f"basemap-{provider}": pending_basemap(provider, areas)
+                for provider in BASEMAP_PROVIDERS
+            }
+            pending["walking-areas"] = pending_walking()
+            return {"status": "succeeded", "summary": pending}
+        if request.get("operation") == "basemap":
             from django.utils import timezone
             from property_platform.modules.catalog.territories import TERRITORY_BY_ID
             from property_platform.modules.evidence.maps.basemap_archive import (
                 archive_pending,
+                pending_requests,
                 seed_area,
             )
-            from property_platform.modules.evidence.models import BasemapRequest
 
             from .collectors.basemaps import BasemapCollector
 
             if set(request) != {"operation", "scope", "actor", "prefect_flow_run_id"}:
                 raise ValueError("Basemap archive requires an audited provider scope")
             provider = request["scope"]
-            if provider not in {
-                "openfreemap",
-                "sentinel-worldcover-2020",
-                "sentinel-worldcover-2021",
-            }:
+            if provider not in BASEMAP_PROVIDERS:
                 raise ValueError("Unregistered basemap provider")
             for territory in TERRITORIES:
                 seed_area(provider, TERRITORY_BY_ID[territory].bounds)
-            now = timezone.now()
-            pending = (
-                BasemapRequest.objects.filter(provider=provider)
-                .filter(Q(available=False) | Q(last_attempt_at__lt=now - timedelta(days=7)))
-                .filter(
-                    Q(last_attempt_at__isnull=True)
-                    | Q(last_attempt_at__lt=now - timedelta(hours=1))
-                )
-            )
+            pending = pending_requests(provider, timezone.now())
             if not pending.exists():
                 return {"status": "succeeded", "summary": {"saved": 0, "pending": 0}}
             queued = list(

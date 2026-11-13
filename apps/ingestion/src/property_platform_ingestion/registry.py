@@ -12,6 +12,7 @@ TERRITORY = DEFAULT_TERRITORY
 Territory = Literal["al-reem-island", "saadiyat-island", "al-maryah-island"]
 TERRITORIES = get_args(Territory)
 TIMEZONE = "Asia/Dubai"
+BASEMAP_PROVIDERS = ("openfreemap", "sentinel-worldcover-2020", "sentinel-worldcover-2021")
 
 
 @dataclass(frozen=True)
@@ -22,7 +23,8 @@ class Dataset:
     parameters: dict
     cron: str | None
     # A queue drain: a later run does everything an earlier one would, so the runner keeps
-    # only the latest overdue run (`deployments.cancel_superseded_drains`).
+    # only the latest overdue run (`deployments.cancel_superseded_drains`). It has no cron:
+    # the runner starts a run only when the queue holds work (`deployments.dispatch_drains`).
     drain: bool = False
     # Earlier default cadences; an initial schedule still on one moves to `cron`.
     retired_crons: tuple[str, ...] = ()
@@ -97,12 +99,13 @@ DATASETS += tuple(
         "property-platform-basemap-archive",
         "Archive demanded/covered tiles with exact acquisition times; preserve every version.",
         {"provider": provider},
-        # The map waits up to three minutes for a first acquisition (DATA_HISTORY.md).
-        "*/2 * * * *",
+        # The map waits up to three minutes for a first acquisition (DATA_HISTORY.md): the
+        # runner checks the queue every minute instead of a run every two minutes (A44).
+        None,
         drain=True,
-        retired_crons=("* * * * *",),
+        retired_crons=("* * * * *", "*/2 * * * *"),
     )
-    for provider in ("openfreemap", "sentinel-worldcover-2020", "sentinel-worldcover-2021")
+    for provider in BASEMAP_PROVIDERS
 )
 DATASETS += (
     Dataset(
@@ -171,10 +174,9 @@ DATASETS += (
         "property-platform-walking-areas",
         "Compute and archive queued walking areas, with source graph and exact ingestion time.",
         {},
-        # Odd minutes, between the basemap passes on even ones.
-        "1-59/2 * * * *",
+        None,
         drain=True,
-        retired_crons=("* * * * *",),
+        retired_crons=("* * * * *", "1-59/2 * * * *"),
     ),
     Dataset(
         "construction-activity",
