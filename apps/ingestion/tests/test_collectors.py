@@ -287,6 +287,50 @@ def test_domain_source_failure_passes_only_real_complete_responses_to_audit(monk
     db.connections.close_all.assert_called_once()
 
 
+def test_domain_accepts_the_source_freshness_request_the_flow_sends(monkeypatch):
+    import django
+    import property_platform.modules.evidence as evidence
+    import property_platform.modules.evidence.projects as projects
+    import property_platform.modules.evidence.rebuild as rebuild
+
+    from property_platform_ingestion.domain import execute
+
+    stubs = (
+        (rebuild, "orchestration"),
+        (projects, "property_import"),
+        (evidence, "models"),
+    )
+    db = ModuleType("django.db")
+    db.connections = SimpleNamespace(close_all=Mock())
+    monkeypatch.setattr(django, "setup", lambda: None)
+    monkeypatch.setitem(sys.modules, "django.db", db)
+    for package, name in stubs:
+        module = ModuleType(f"{package.__name__}.{name}")
+        module.IngestionExecution = object
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+        monkeypatch.setattr(package, name, module, raising=False)
+    history = ModuleType("property_platform.modules.evidence.history")
+    report = ModuleType("property_platform.modules.evidence.history.source_freshness")
+    report.record_report = Mock(return_value={"status": "succeeded", "summary": {}})
+    history.source_freshness = report
+    monkeypatch.setitem(sys.modules, history.__name__, history)
+    monkeypatch.setitem(sys.modules, report.__name__, report)
+
+    operations = {"failing_deployments": [], "late_queues": []}
+    request = {
+        "operation": "source_freshness",
+        "actor": "Prefect/run/scheduled",
+        "prefect_flow_run_id": "run",
+        "operations": operations,
+    }
+    assert execute(request) == {"status": "succeeded", "summary": {}}
+    report.record_report.assert_called_once_with(
+        actor="Prefect/run/scheduled",
+        run_key="source-freshness:run",
+        operations=operations,
+    )
+
+
 @pytest.mark.parametrize("announced", [True, False])
 def test_both_announced_and_streamed_oversize_responses_fail(announced):
     headers = {"Content-Length": "101"} if announced else {}

@@ -51,6 +51,7 @@ def execute(request):
             "action",
             "error",
             "archive_key",
+            "operations",
         }
         if not isinstance(request, dict) or set(request) - allowed:
             raise ValueError("Unexpected domain request parameters")
