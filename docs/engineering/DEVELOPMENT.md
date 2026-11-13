@@ -330,7 +330,7 @@ Une **image Docker** est un environnement préparé avec les programmes nécessa
 
 | Objectif | Prérequis | Étapes |
 |---|---|---|
-| Voir et modifier le site | Git, Node.js 26.13.0, pnpm 12.10.1 | 2 à 4 |
+| Voir et modifier le site | Git, Node.js 26.13.0, pnpm 12.18.0 | 2 à 4 |
 | Lancer aussi l'API et PostGIS | Prérequis web + Docker Desktop avec Compose | 2 à 5 ; compte facultatif en section 7 |
 | Exécuter les outils Python et tests isolés sur Windows | uv 0.13.7 et Python 3.14.10 géré par uv | 10 |
 | Programmer et superviser les ingestions avec une UI | Docker Desktop, base préparée et image d'ingestion | 6.9 et [INGESTION.md](INGESTION.md) |
@@ -367,11 +367,11 @@ Installer la version fixée dans le dépôt :
 
 ```powershell
 npm.cmd install --global npm@12.2.0
-npm.cmd install --global pnpm@12.10.1 --allow-scripts=pnpm
+npm.cmd install --global pnpm@12.18.0 --allow-scripts=pnpm
 pnpm.cmd --version
 ```
 
-Résultat attendu : **12.10.1**. Les exemples utilisent `pnpm.cmd` pour éviter les blocages du wrapper PowerShell .ps1, sans changer la politique d'exécution Windows. Il s'agit du même outil que pnpm. Voir [son installation officielle](https://pnpm.io/installation).
+Résultat attendu : **12.18.0**. Les exemples utilisent `pnpm.cmd` pour éviter les blocages du wrapper PowerShell .ps1, sans changer la politique d'exécution Windows. Il s'agit du même outil que pnpm. Voir [son installation officielle](https://pnpm.io/installation).
 
 npm 12 bloque par défaut les scripts d'installation non autorisés. pnpm 12 en a besoin pour préparer son exécutable Windows. L'option `--allow-scripts=pnpm` autorise uniquement les scripts de pnpm pour cette commande ; elle ne modifie pas la configuration globale de npm.
 
@@ -382,7 +382,7 @@ npm.cmd rebuild --global pnpm --allow-scripts=pnpm
 pnpm.cmd --version
 ```
 
-La première commande exécute les scripts manquants du paquet déjà installé et recrée ses lanceurs. Attendre sa réussite, puis vérifier que la seconde affiche **12.10.1**. Reprendre ensuite l'étape 3.3. Ne pas activer tous les scripts de tous les paquets pour résoudre ce problème. Voir [npm rebuild](https://docs.npmjs.com/cli/v12/commands/npm-rebuild).
+La première commande exécute les scripts manquants du paquet déjà installé et recrée ses lanceurs. Attendre sa réussite, puis vérifier que la seconde affiche **12.18.0**. Reprendre ensuite l'étape 3.3. Ne pas activer tous les scripts de tous les paquets pour résoudre ce problème. Voir [npm rebuild](https://docs.npmjs.com/cli/v12/commands/npm-rebuild).
 
 ### 2.3. Docker, pour l'API et PostGIS seulement
 
@@ -480,7 +480,7 @@ node --version
 pnpm.cmd --version
 ```
 
-Résultats attendus : **True**, **True**, **v26.13.0** (ou une autre version 26 autorisée, à partir de 26.12.1), puis **12.10.1**. Si un Test-Path répond False, vérifier le dossier sélectionné. Si node ou pnpm.cmd n'est pas reconnu, reprendre l'installation de l'étape 2, puis fermer et rouvrir PowerShell ; revenir ensuite au dossier du projet avec Set-Location.
+Résultats attendus : **True**, **True**, **v26.13.0** (ou une autre version 26 autorisée, à partir de 26.12.1), puis **12.18.0**. Si un Test-Path répond False, vérifier le dossier sélectionné. Si node ou pnpm.cmd n'est pas reconnu, reprendre l'installation de l'étape 2, puis fermer et rouvrir PowerShell ; revenir ensuite au dossier du projet avec Set-Location.
 
 #### 3.3.4. Lancer l'installation
 
@@ -1249,7 +1249,7 @@ Revoir puis enregistrer **OpenAPI, les types TypeScript, `packages/contracts/ter
 | node, pnpm ou uv introuvable | Rouvrir PowerShell après installation ; vérifier Get-Command node, Get-Command pnpm.cmd ou Get-Command uv |
 | pnpm.ps1 bloqué | Utiliser pnpm.cmd comme dans ce guide |
 | pnpm.cmd cite un chemin node_modules\pnpm\pnpm non reconnu après installation npm | Réparer les scripts bloqués avec npm.cmd rebuild --global pnpm --allow-scripts=pnpm, puis pnpm.cmd --version ; voir l'étape 2.2 |
-| Erreur de version/engine | Vérifier Node 26 et pnpm 12.10.1 ; ne pas contourner engineStrict |
+| Erreur de version/engine | Vérifier Node 26 et pnpm 12.18.0 ; ne pas contourner engineStrict |
 | ERR_PNPM_UNEXPECTED_STORE | Vérifier storeDir dans le dépôt ; réinstaller avec pnpm.cmd install --force --frozen-lockfile si les paquets locaux provenaient d'un autre store |
 | Docker ne joint pas son moteur | Ouvrir Docker Desktop, attendre son démarrage et vérifier les conteneurs Linux avec docker info |
 | Port 8000 ou 5432 occupé | Identifier le programme avec Get-NetTCPConnection -LocalPort 8000,5432 -ErrorAction SilentlyContinue ; arrêter seulement un service reconnu ou adapter les ports locaux dans Compose |

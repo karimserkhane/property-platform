@@ -11,7 +11,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | Outil | Version | Emplacement / rôle |
 |---|---|---|
 | Node.js | 26.13.0 | .node-version, CI, images web ; engines >=26.12.1 <27 (26.11.1 : faille exploitée activement, A40) |
-| pnpm | 12.10.1 | packageManager, image de build et instructions |
+| pnpm | 12.18.0 | packageManager, image de build et instructions ; 12.18.0 depuis le 13 novembre 2026 (cycle de mises à jour, publiée le 5 novembre). engines garde `>=12.10.1 <13` : un pnpm 12 plus ancien sur le poste bascule seul sur la version de packageManager |
 | npm | 12.2.0 | Installation des outils et image de build web ; pnpm gère les dépendances du projet |
 | TypeScript | 7.0.2 | Compilateur natif de typecheck web et contrats, alias @typescript/compiler |
 | Paquet de compatibilité TypeScript pour Next.js | 6.0.2 | Alias typescript → @typescript/typescript6 ; l'API embarquée annonce 6.0.3 |
