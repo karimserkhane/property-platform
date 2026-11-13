@@ -211,6 +211,24 @@ def archive_graph(*, actor, acquire, build, run_key, from_history=False):
             cursor.execute("SELECT pg_advisory_unlock(8473302)")
 
 
+def pending_walking_requests(graph, now):
+    """Requests without an area on this graph, past the five-minute retry delay."""
+    return WalkingRequest.objects.exclude(versions__graph=graph).filter(
+        Q(last_attempt_at__isnull=True) | Q(last_attempt_at__lt=now - timedelta(minutes=5))
+    )
+
+
+def pending_walking(now=None):
+    """Read-only count of the work one drain run would do; 0 means no run is needed (A44).
+
+    Without a ready graph a run computes nothing, so nothing is pending.
+    """
+    graph = RoutingGraph.objects.filter(ready=True).order_by("-ingested_at").first()
+    if graph is None:
+        return 0
+    return pending_walking_requests(graph, now or timezone.now()).count()
+
+
 def archive_walking(*, actor, compute, run_key):
     graph = RoutingGraph.objects.filter(ready=True).order_by("-ingested_at").first()
     if graph is None:
@@ -224,10 +242,7 @@ def archive_walking(*, actor, compute, run_key):
     )
     with audit_context(actor=actor):
         run = IngestionRun.objects.create(source=source, actor=actor, connector_version=run_key)
-        now = timezone.now()
-        pending = WalkingRequest.objects.exclude(versions__graph=graph).filter(
-            Q(last_attempt_at__isnull=True) | Q(last_attempt_at__lt=now - timedelta(minutes=5))
-        )
+        pending = pending_walking_requests(graph, timezone.now())
         saved = failed = 0
         for request in pending.order_by("created_at")[:10]:
             started = timezone.now()

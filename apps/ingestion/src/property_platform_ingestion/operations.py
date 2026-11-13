@@ -14,7 +14,7 @@ from prefect.client.schemas.objects import StateType
 from prefect.client.schemas.sorting import FlowRunSort
 
 REPEATED_FAILURES = 3
-# A queue is late past this delay: the two-minute drains are often a minute or two behind.
+# A queue is late past this delay: drains start within about a minute of new work (A44).
 LATE_AFTER = timedelta(minutes=30)
 PAGE = 200
 # Keeps the report inside the domain request budget; more than this is already an outage.

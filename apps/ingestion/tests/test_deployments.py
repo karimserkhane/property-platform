@@ -195,7 +195,7 @@ class Runs:
         return SimpleNamespace(status=self.status)
 
 
-def test_queue_drains_run_every_two_minutes_and_follow_from_the_retired_minute_cadence():
+def test_queue_drains_have_no_cron_and_drop_their_retired_initial_schedules():
     drains = {row.name: row for row in DATASETS if row.drain}
     assert set(drains) == {
         "walking-areas",
@@ -203,23 +203,103 @@ def test_queue_drains_run_every_two_minutes_and_follow_from_the_retired_minute_c
         "basemap-sentinel-worldcover-2020",
         "basemap-sentinel-worldcover-2021",
     }
-    assert drains["walking-areas"].cron == "1-59/2 * * * *"
-    assert drains["basemap-openfreemap"].cron == "*/2 * * * *"
-    activated = SimpleNamespace(
-        schedule=CronSchedule(cron="* * * * *", timezone="Asia/Dubai"),
-        active=True,
-        slug="initial-cadence",
-        parameters={},
-        max_scheduled_runs=None,
-    )
-    moved = schedules_for(drains["walking-areas"], SimpleNamespace(schedules=[activated]))
-    assert moved[0].schedule.cron == "1-59/2 * * * *"
-    assert moved[0].schedule.timezone == "Asia/Dubai"
-    assert moved[0].active is True and moved[0].slug == "initial-cadence"
-    # An operator's own minute schedule is theirs to change.
+    assert all(row.cron is None and schedules_for(row, None) == [] for row in drains.values())
+    for name, cron in (("walking-areas", "1-59/2 * * * *"), ("basemap-openfreemap", "*/2 * * * *")):
+        for retired in ("* * * * *", cron):
+            activated = SimpleNamespace(
+                schedule=CronSchedule(cron=retired, timezone="Asia/Dubai"),
+                active=True,
+                slug="initial-cadence",
+                parameters={},
+                max_scheduled_runs=None,
+            )
+            assert schedules_for(drains[name], SimpleNamespace(schedules=[activated])) == []
+    # An operator's own schedule is theirs to change, even on a drain.
     edited = SimpleNamespace(**{**vars(activated), "slug": "operator"})
-    kept = schedules_for(drains["walking-areas"], SimpleNamespace(schedules=[edited]))
-    assert kept[0].schedule.cron == "* * * * *"
+    kept = schedules_for(drains["basemap-openfreemap"], SimpleNamespace(schedules=[edited]))
+    assert kept[0].schedule.cron == "*/2 * * * *" and kept[0].active is True
+
+
+class Dispatch(Runs):
+    """Prefect client double that also records the runs it is asked to create."""
+
+    def __init__(self, runs, paused=()):
+        super().__init__(runs)
+        self.paused, self.created = set(paused), []
+
+    async def read_deployment(self, deployment_id):
+        return SimpleNamespace(paused=deployment_id in self.paused)
+
+    async def create_flow_run_from_deployment(self, deployment_id, **kwargs):
+        self.created.append(deployment_id)
+
+
+def test_an_empty_queue_starts_no_run_and_writes_nothing():
+    from property_platform_ingestion.deployments import dispatch_drains
+
+    drains = {"walking-areas": uuid4(), "basemap-openfreemap": uuid4()}
+    client = Dispatch([])
+    pending = {"walking-areas": 0, "basemap-openfreemap": 0}
+    assert asyncio.run(dispatch_drains(client, drains, pending)) == []
+    assert client.created == [] and client.proposed == []
+
+
+def test_pending_work_starts_one_run_unless_one_is_in_flight_or_paused():
+    from property_platform_ingestion.deployments import IN_FLIGHT, dispatch_drains
+
+    walking, openfreemap, worldcover, paused = uuid4(), uuid4(), uuid4(), uuid4()
+    drains = {
+        "walking-areas": walking,
+        "basemap-openfreemap": openfreemap,
+        "basemap-sentinel-worldcover-2020": worldcover,
+        "basemap-sentinel-worldcover-2021": paused,
+    }
+    client = Dispatch([run(openfreemap, 1, state=StateType.RUNNING)], paused=[paused])
+    pending = {name: 3 for name in drains}
+    started = asyncio.run(dispatch_drains(client, drains, pending))
+    assert started == ["walking-areas", "basemap-sentinel-worldcover-2020"]
+    assert client.created == [walking, worldcover]
+    assert set(client.filters[0].state.type.any_) == IN_FLIGHT
+    assert StateType.SCHEDULED in IN_FLIGHT
+
+
+def test_the_watcher_reads_the_queues_off_the_event_loop_and_survives_a_failure(monkeypatch):
+    from property_platform_ingestion import deployments
+
+    requests, calls = [], []
+
+    def invoke(request, *, timeout):
+        requests.append((request, timeout))
+        if len(requests) == 1:
+            raise RuntimeError("database restarting")
+        return {"status": "succeeded", "summary": {"walking-areas": 2}}
+
+    class Client(Dispatch):
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *args):
+            pass
+
+    client = Client([])
+
+    async def sleep(seconds):
+        calls.append(seconds)
+        if len(calls) == 2:
+            raise asyncio.CancelledError
+
+    monkeypatch.setattr(deployments, "invoke_domain", invoke)
+    monkeypatch.setattr(deployments, "get_client", lambda: client)
+    monkeypatch.setattr(deployments.asyncio, "sleep", sleep)
+    walking = uuid4()
+    try:
+        asyncio.run(deployments.keep_drains_current({"walking-areas": walking}))
+    except asyncio.CancelledError:
+        pass
+    assert [request for request, _ in requests] == [{"operation": "pending_work"}] * 2
+    assert requests[0][1] < deployments.DRAIN_CHECK_SECONDS
+    assert client.created == [walking]
+    assert calls == [deployments.DRAIN_CHECK_SECONDS] * 2
 
 
 def test_runs_left_open_by_a_previous_runner_are_crashed_and_new_ones_kept():
@@ -306,7 +386,7 @@ def test_runner_checks_superseded_drains_while_it_serves(monkeypatch):
     monkeypatch.setattr(deployments, "DATASETS", (DATASETS[0], *drains))
     monkeypatch.setattr(deployments, "FLOWS", defaultdict(Flow))
     asyncio.run(deployments.serve_datasets())
-    assert checked == [[ids[row.name] for row in drains]]
+    assert checked == [{row.name: ids[row.name] for row in drains}]
 
 
 def test_emirate_district_imports_are_manual_per_municipality():
