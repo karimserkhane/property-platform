@@ -24,7 +24,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | Playwright (`@playwright/test`, image `mcr.microsoft.com/playwright:v1.64.0-noble` par digest) | 1.64.0 | Parcours navigateur `checks-e2e` uniquement, jamais dans le runtime web ; version stable de plus de deux semaines au 23 octobre 2026. Le Firefox embarqué (157.0) a des failles critiques corrigées en 1.65.0, publiée le 5 novembre, trop récente au 6 novembre : exception dans `.grype.yaml`, car les parcours n'utilisent que Chromium (A40). Le paquet npm et l'image doivent rester à la même version. Voir [E2E.md](E2E.md) |
 | openapi-typescript | 7.13.0 | Déjà dernière version stable vérifiée |
 | Python | 3.14.10 | Version compatible Django la plus récente ; .python-version, CI et image API ; correctif de sécurité de 3.14.8 (A40) |
-| uv | 0.13.0 | Déjà dernière version stable vérifiée |
+| uv | 0.13.7 | Images API, ingestion et contrôles, CI ; connaît Python 3.14.10, ce qui retire `setup-python` de la CI (13 novembre 2026) |
 | Django | 6.1.2 | Mise à jour du framework, désormais hors branche 5.2 LTS |
 | Django Ninja | 1.7.1 | Dernière version stable vérifiée |
 | dj-database-url | 3.1.2 | Dernière version stable vérifiée |
@@ -44,7 +44,6 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | Base des images applicatives | Debian Trixie | Node 26.13.0-trixie-slim / Python 3.14.10-slim-trixie |
 | GitHub checkout / setup-node | 7.0.1 / 7.1.0 | Releases stables vérifiées |
 | pnpm action-setup / setup-uv | 6.1.0 / 10.3.0 | Releases stables vérifiées via l'API GitHub |
-| setup-python | 7.1.0 | Python 3.14.10 des jobs CI API et ingestion, que uv 0.13.0 ne sait pas télécharger (A40) |
 
 Les versions npm proviennent du dist-tag latest du registre officiel ; les versions Python des métadonnées PyPI. Les lockfiles ont été régénérés avec pnpm 12 et uv, sans assouplir le contrôle des peers. L'exception d'âge de publication ajoutée par pnpm concerne uniquement @types/node@26.6.5, pas toutes les futures dépendances.
 
@@ -72,7 +71,7 @@ Le passage de 17 à 18 est une migration majeure, pas une simple mise à jour de
 
 **Prefect 3.8.8 et HTTPX 0.28.1** sont les dernières versions stables vérifiées dans les métadonnées officielles PyPI pour cet ajout. Elles sont fixées dans [apps/ingestion/pyproject.toml](../../apps/ingestion/pyproject.toml) et résolues avec leurs dépendances dans [apps/ingestion/uv.lock](../../apps/ingestion/uv.lock). Prefect annonce Python `>=3.10,<3.15`, dont Python 3.14 ; le runtime reste **Python 3.14.10** pour respecter aussi la compatibilité Django. Cet ajout ne remplace pas les compilateurs et leurs dépendances de compatibilité web. Sources : [Prefect 3.8.8](https://pypi.org/project/prefect/3.8.8/), [HTTPX 0.28.1](https://pypi.org/project/httpx/0.28.1/).
 
-L'image [apps/ingestion/Dockerfile](../../apps/ingestion/Dockerfile) utilise `python:3.14.10-slim-trixie` et `ghcr.io/astral-sh/uv:0.13.0`. Elle installe le paquet API local comme dépendance, ainsi que les bibliothèques système GDAL/GEOS/PROJ nécessaires à ses services géographiques. Prefect et HTTPX ne sont pas ajoutés au runtime web/API. Rasterio, OCR et rendu 3D restent hors de cette image.
+L'image [apps/ingestion/Dockerfile](../../apps/ingestion/Dockerfile) utilise `python:3.14.10-slim-trixie` et `ghcr.io/astral-sh/uv:0.13.7`. Elle installe le paquet API local comme dépendance, ainsi que les bibliothèques système GDAL/GEOS/PROJ nécessaires à ses services géographiques. Prefect et HTTPX ne sont pas ajoutés au runtime web/API. Rasterio, OCR et rendu 3D restent hors de cette image.
 
 Le profil [infra/local/compose.ingestion.yaml](../../infra/local/compose.ingestion.yaml) utilise cette image pour le serveur Prefect et le runner, ainsi que `postgres:18.6-trixie` pour leurs métadonnées séparées. La base métier garde son image PostGIS et son volume existant. L'accès UI local est [localhost:4200](http://localhost:4200) ; aucune instance Prefect Cloud ni ressource S3 n'est créée. Le guide [INGESTION.md](INGESTION.md) distingue enregistrement des jobs, activation d'un horaire et véritable exécution d'un import.
 
