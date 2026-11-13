@@ -48,7 +48,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [A40](A40.md) | A | Corriger les vulnérabilités critiques relevées par la première analyse | 1 | A38 | non | done | claude |
 | [A41](A41.md) | A | Plusieurs agents en parallèle : tableau généré et réservation atomique | 1 | — | non | done | claude |
 | [A42](A42.md) | A | Cycle de mises à jour de toutes les applications et de tous les outils | 1 | — | non | done | claude |
-| [A43](A43.md) | A | Déploiement scripté, version étiquetée et retour arrière | 2 | A42 | non | todo | unassigned |
+| [A43](A43.md) | A | Déploiement scripté, version étiquetée et retour arrière | 2 | A42 | non | in-progress | claude |
 | [A44](A44.md) | A | Files Prefect qui ne tournent plus à vide | 2 | A26 | non | todo | unassigned |
 | [A45](A45.md) | A | Rôles PostgreSQL séparés et base d'essai par agent | 2 | — | non | todo | unassigned |
 | [A46](A46.md) | A | Réglages PostgreSQL et place disque | 3 | — | non | todo | unassigned |
