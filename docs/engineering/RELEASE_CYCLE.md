@@ -42,4 +42,4 @@ node --use-system-ca scripts/release/inventory.mjs --host
 
 ## Revenir en arrière
 
-Annuler la PR fautive (`git revert`), puis mettre à jour la prévisualisation. Le déploiement scripté, les versions étiquetées et le retour arrière en une commande arrivent avec [A43](../tasks/A43.md). Une migration n'est jamais annulée sur la base partagée : la correction part vers l'avant.
+En urgence, `node scripts/deploy/preview.mjs rollback --yes` remet les images d'avant le dernier déploiement, ou celles d'une version précise avec `--to <étiquette>` ([AGENT_WORKFLOW.md](AGENT_WORKFLOW.md), section 7). Ensuite, annuler la PR fautive (`git revert`) et redéployer, sinon le déploiement suivant remettra le même code. Une migration n'est jamais annulée sur la base partagée : le script la signale, l'ancien code tourne sur le schéma récent et la correction part vers l'avant.
