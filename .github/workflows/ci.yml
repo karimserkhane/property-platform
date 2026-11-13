@@ -55,14 +55,9 @@ jobs:
       PROPERTY_PLATFORM_TEST_POSTGIS: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # uv 0.13.0 cannot download Python 3.14.10 (its list stops at 3.14.8): the interpreter comes
-      # from setup-python and uv finds it on the PATH (A40).
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: "3.14.10"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: "0.13.0"
+          version: "0.13.7"
           python-version: "3.14.10"
       - run: sudo apt-get update && sudo apt-get install -y libgdal-dev
       - run: uv sync --project apps/api --frozen
@@ -113,14 +108,9 @@ jobs:
       PREFECT_SERVER_ALLOW_EPHEMERAL_MODE: "false"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # uv 0.13.0 cannot download Python 3.14.10 (its list stops at 3.14.8): the interpreter comes
-      # from setup-python and uv finds it on the PATH (A40).
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: "3.14.10"
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: "0.13.0"
+          version: "0.13.7"
           python-version: "3.14.10"
       - run: uv lock --project apps/ingestion --check
       - run: uv sync --project apps/ingestion --frozen

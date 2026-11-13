@@ -332,7 +332,7 @@ Une **image Docker** est un environnement préparé avec les programmes nécessa
 |---|---|---|
 | Voir et modifier le site | Git, Node.js 26.13.0, pnpm 12.10.1 | 2 à 4 |
 | Lancer aussi l'API et PostGIS | Prérequis web + Docker Desktop avec Compose | 2 à 5 ; compte facultatif en section 7 |
-| Exécuter les outils Python et tests isolés sur Windows | uv 0.13.0 et Python 3.14.10 géré par uv | 10 |
+| Exécuter les outils Python et tests isolés sur Windows | uv 0.13.7 et Python 3.14.10 géré par uv | 10 |
 | Programmer et superviser les ingestions avec une UI | Docker Desktop, base préparée et image d'ingestion | 6.9 et [INGESTION.md](INGESTION.md) |
 
 Python et uv ne sont pas nécessaires sur Windows pour lancer l'API Docker : l'image contient leur environnement et les bibliothèques GIS. Le web actuel fonctionne seul, sans API ni compte Supabase, cartographique ou IA. Aucun service payant n'est requis pour ce lancement local.
@@ -1194,10 +1194,10 @@ Elles contrôlent respectivement qualité/style, types, traductions, liens Markd
 
 Cette option sert à travailler sur les outils Python directement depuis Windows. Elle est distincte du parcours Docker : uv télécharge ici l'interpréteur Python et prépare un environnement local au projet. Une **.venv** contient les bibliothèques Python isolées pour ce projet ; elle évite de les mélanger avec celles d'autres applications.
 
-Pour les outils de qualité, l'export OpenAPI et les tests HTTP isolés, installer [uv 0.13.0 avec son installateur officiel](https://docs.astral.sh/uv/getting-started/installation/) :
+Pour les outils de qualité, l'export OpenAPI et les tests HTTP isolés, installer [uv 0.13.7 avec son installateur officiel](https://docs.astral.sh/uv/getting-started/installation/) :
 
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/0.13.0/install.ps1 | iex"
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/0.13.7/install.ps1 | iex"
 ```
 
 Cette commande exécute l'installateur officiel dans un processus distinct. Fermer puis rouvrir PowerShell, revenir à la racine et lancer :
@@ -1208,7 +1208,7 @@ uv python install 3.14.10
 uv sync --project apps/api --frozen --python 3.14.10
 ```
 
-Résultat attendu : uv **0.13.0** et un environnement Python **3.14.10** sous apps/api/.venv avec les dépendances de apps/api/uv.lock. uv run --project apps/api sélectionne cet environnement ; aucune activation manuelle n'est requise.
+Résultat attendu : uv **0.13.7** et un environnement Python **3.14.10** sous apps/api/.venv avec les dépendances de apps/api/uv.lock. uv run --project apps/api sélectionne cet environnement ; aucune activation manuelle n'est requise.
 
 Dans un terminal dédié aux tests isolés, retirer les éventuelles variables de configuration héritées :
 
