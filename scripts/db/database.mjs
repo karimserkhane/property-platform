@@ -11,8 +11,9 @@
 // (default property_platform), --min-free-gb (default 12, for scratch create), --secrets (default .cache/db/roles.local.json in the main checkout).
 // Passwords are generated once, kept in the git-ignored secrets file and passed to psql through
 // the environment: never on a command line, never printed (DATABASE_ROLES.md).
-import { randomBytes } from "node:crypto";
+
 import { spawnSync } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import {
   chmodSync,
   existsSync,
@@ -43,12 +44,14 @@ export const ROLES = {
   scratch: {
     name: "pp_agent_scratch",
     env: "PP_SCRATCH_PASSWORD",
-    purpose: "agents : propriétaire des bases d'essai, aucun accès à la base partagée",
+    purpose:
+      "agents : propriétaire des bases d'essai, aucun accès à la base partagée",
   },
   app: {
     name: "pp_app",
     env: "PP_APP_PASSWORD",
-    purpose: "API et ingestion : sans super-utilisateur (adoption après essai à part)",
+    purpose:
+      "API et ingestion : sans super-utilisateur (adoption après essai à part)",
   },
 };
 
@@ -134,7 +137,10 @@ export function completeSecrets(secrets, generate = generatePassword) {
   const result = { ...secrets };
   let changed = false;
   for (const role of Object.values(ROLES)) {
-    if (typeof result[role.name] !== "string" || result[role.name].length < 16) {
+    if (
+      typeof result[role.name] !== "string" ||
+      result[role.name].length < 16
+    ) {
       result[role.name] = generate();
       changed = true;
     }
@@ -170,14 +176,17 @@ function gb(bytes) {
 export async function roles(rt, opts) {
   const loaded = rt.loadSecrets();
   const { secrets, changed } = completeSecrets(loaded);
-  rt.log(`Serveur : ${opts.container}. Rôles appliqués (procédure rejouable) :`);
+  rt.log(
+    `Serveur : ${opts.container}. Rôles appliqués (procédure rejouable) :`,
+  );
   for (const role of Object.values(ROLES)) {
     rt.log(`- ${role.name} : ${role.purpose}`);
   }
   rt.log(
     `- ${SHARED_DATABASE} : connexion retirée à PUBLIC, accordée à ${ROLES.readonly.name} et ${ROLES.app.name}.`,
   );
-  if (changed) rt.log(`Mots de passe manquants générés dans ${rt.secretsPath}.`);
+  if (changed)
+    rt.log(`Mots de passe manquants générés dans ${rt.secretsPath}.`);
   if (!opts.yes) {
     rt.log("Plan seulement : relancer avec --yes pour appliquer.");
     return 0;
@@ -242,14 +251,22 @@ export async function psql(rt, opts) {
   if (!role || opts.as === "app") {
     throw new DatabaseError("--as readonly ou --as scratch.");
   }
-  const database = opts.db ?? (opts.as === "readonly" ? SHARED_DATABASE : undefined);
-  if (!database) throw new DatabaseError("--db scratch_<agent> est requis avec --as scratch.");
+  const database =
+    opts.db ?? (opts.as === "readonly" ? SHARED_DATABASE : undefined);
+  if (!database)
+    throw new DatabaseError(
+      "--db scratch_<agent> est requis avec --as scratch.",
+    );
   if (opts.as === "scratch" && !isScratchName(database)) {
-    throw new DatabaseError(`Le rôle scratch ne se connecte qu'aux bases scratch_* (reçu ${database}).`);
+    throw new DatabaseError(
+      `Le rôle scratch ne se connecte qu'aux bases scratch_* (reçu ${database}).`,
+    );
   }
   const password = rt.loadSecrets()[role.name];
   if (!password) {
-    throw new DatabaseError(`Aucun mot de passe pour ${role.name} : lancer d'abord « roles --yes ».`);
+    throw new DatabaseError(
+      `Aucun mot de passe pour ${role.name} : lancer d'abord « roles --yes ».`,
+    );
   }
   return rt.rolePsql(role.name, password, database, opts.rest);
 }
@@ -270,7 +287,13 @@ export function parseCli(argv) {
     },
   });
   const separator = argv.indexOf("--");
-  const head = separator === -1 ? positionals : positionals.slice(0, positionals.length - (argv.length - separator - 1));
+  const head =
+    separator === -1
+      ? positionals
+      : positionals.slice(
+          0,
+          positionals.length - (argv.length - separator - 1),
+        );
   const [command, action, agent] = head;
   return {
     command,
@@ -278,41 +301,70 @@ export function parseCli(argv) {
     agent: command === "scratch" ? agent : undefined,
     rest: separator === -1 ? [] : argv.slice(separator + 1),
     ...values,
-    minFreeGb: values["min-free-gb"] === undefined ? undefined : Number(values["min-free-gb"]),
+    minFreeGb:
+      values["min-free-gb"] === undefined
+        ? undefined
+        : Number(values["min-free-gb"]),
   };
 }
 
 function mainCheckout() {
-  const result = spawnSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {
-    cwd: ROOT,
-    encoding: "utf8",
-  });
+  const result = spawnSync(
+    "git",
+    ["rev-parse", "--path-format=absolute", "--git-common-dir"],
+    {
+      cwd: ROOT,
+      encoding: "utf8",
+    },
+  );
   return result.status === 0 ? path.dirname(result.stdout.trim()) : ROOT;
 }
 
 function realRuntime(opts) {
-  const secretsPath = path.resolve(opts.secrets ?? path.join(mainCheckout(), SECRETS_PATH));
+  const secretsPath = path.resolve(
+    opts.secrets ?? path.join(mainCheckout(), SECRETS_PATH),
+  );
   const exec = (args, { input, envVars = {}, stdio } = {}) => {
     const passed = Object.keys(envVars).flatMap((name) => ["-e", name]);
-    return spawnSync("docker", ["exec", "-i", ...passed, opts.container, ...args], {
-      input,
-      encoding: "utf8",
-      env: { ...process.env, ...envVars, MSYS_NO_PATHCONV: "1" },
-      stdio: stdio ?? ["pipe", "pipe", "pipe"],
-    });
+    return spawnSync(
+      "docker",
+      ["exec", "-i", ...passed, opts.container, ...args],
+      {
+        input,
+        encoding: "utf8",
+        env: { ...process.env, ...envVars, MSYS_NO_PATHCONV: "1" },
+        stdio: stdio ?? ["pipe", "pipe", "pipe"],
+      },
+    );
   };
   const query = (sql) => {
-    const result = exec(["psql", "-X", "-At", "-U", opts.superuser, "-d", "postgres", "-c", sql]);
-    if (result.status !== 0) throw new DatabaseError(result.stderr.trim() || "psql a échoué.");
+    const result = exec([
+      "psql",
+      "-X",
+      "-At",
+      "-U",
+      opts.superuser,
+      "-d",
+      "postgres",
+      "-c",
+      sql,
+    ]);
+    if (result.status !== 0)
+      throw new DatabaseError(result.stderr.trim() || "psql a échoué.");
     return result.stdout.trim();
   };
   return {
     secretsPath,
     log: (line) => console.log(line),
-    loadSecrets: () => (existsSync(secretsPath) ? JSON.parse(readFileSync(secretsPath, "utf8")) : {}),
+    loadSecrets: () =>
+      existsSync(secretsPath)
+        ? JSON.parse(readFileSync(secretsPath, "utf8"))
+        : {},
     saveSecrets(secrets) {
       mkdirSync(path.dirname(secretsPath), { recursive: true });
-      writeFileSync(secretsPath, `${JSON.stringify(secrets, null, 2)}\n`, { mode: 0o600 });
+      writeFileSync(secretsPath, `${JSON.stringify(secrets, null, 2)}\n`, {
+        mode: 0o600,
+      });
       try {
         chmodSync(secretsPath, 0o600);
       } catch {
@@ -321,20 +373,40 @@ function realRuntime(opts) {
     },
     superuserSql(sql, envVars, database) {
       const result = exec(
-        ["psql", "-X", "-q", "-U", opts.superuser, "-d", database, "-v", "ON_ERROR_STOP=1", "-f", "-"],
+        [
+          "psql",
+          "-X",
+          "-q",
+          "-U",
+          opts.superuser,
+          "-d",
+          database,
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-f",
+          "-",
+        ],
         { input: sql, envVars },
       );
       if (result.stdout.trim()) console.log(result.stdout.trim());
-      if (result.status !== 0) throw new DatabaseError(result.stderr.trim() || "psql a échoué.");
+      if (result.status !== 0)
+        throw new DatabaseError(result.stderr.trim() || "psql a échoué.");
     },
-    databaseExists: (name) => query(`SELECT 1 FROM pg_database WHERE datname = '${name}'`) === "1",
-    roleExists: (name) => query(`SELECT 1 FROM pg_roles WHERE rolname = '${name}'`) === "1",
+    databaseExists: (name) =>
+      query(`SELECT 1 FROM pg_database WHERE datname = '${name}'`) === "1",
+    roleExists: (name) =>
+      query(`SELECT 1 FROM pg_roles WHERE rolname = '${name}'`) === "1",
     hostFreeBytes() {
       const stats = statfsSync(ROOT);
       return Number(stats.bavail) * Number(stats.bsize);
     },
     serverFreeBytes() {
-      const result = exec(["df", "-B1", "--output=avail", "/var/lib/postgresql"]);
+      const result = exec([
+        "df",
+        "-B1",
+        "--output=avail",
+        "/var/lib/postgresql",
+      ]);
       const value = Number(result.stdout.trim().split("\n").pop());
       return result.status === 0 && Number.isFinite(value) ? value : null;
     },
@@ -360,7 +432,10 @@ async function main() {
   );
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main().then(
     (code) => {
       process.exitCode = code;
