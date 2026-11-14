@@ -41,6 +41,21 @@ Table `evidence.construction_activity_measurement` (modèle `ConstructionActivit
 
 Ne sont jamais mesurés sans lien de parcelle relu : les points de courtier, d'éditeur ou déclarés ; une position sur une limite commune à deux parcelles ou hors de toute parcelle ; une parcelle de moins de 0,2 ha (trop peu de pixels) ou de plus de 10 ha (plan d'ensemble). Ces projets attendent un lien relu. Une mesure déduite reste une mesure de la parcelle, pas du projet : B07 doit afficher sa base (« parcelle qui contient le point du registre »). Code : `apps/api/src/property_platform/modules/evidence/projects/activity_import.py`.
 
+### Fiches sans parcelle mesurable (B09)
+
+```bash
+docker compose -f infra/local/compose.yaml exec api python manage.py project_parcel_gaps [--territory saadiyat-island]
+```
+
+La commande ne fait que lire. Elle liste, une ligne JSON par fiche, les fiches publiées qui ne sont pas une cible de `measurement_targets`, et le nombre de cibles et de raisons en fin de sortie (sortie d'erreur). Elle applique exactement la même règle que le choix des parcelles (même fonction `_derive`), donc une fiche sort de la liste dès qu'elle devient une cible.
+
+- **Priorité 1** : une lecture ADREC acceptée déclare une vente sur plan (`project_verification.off_plan`). **Priorité 2** : les autres.
+- **Raison, pour chaque lien de position actif** : `unreliable_position` (point de courtier, d'éditeur ou déclaré), `no_parcel` (hors de toute parcelle courante), `several_parcels` (sur une limite commune), `parcel_area_out_of_range` (parcelle hors de 0,2–10 ha, avec sa surface), `parcel_superseded` (parcelle relue remplacée depuis au cadastre). `no_position` : aucun lien de position.
+
+Ce qui en sort est une liste de relecture, pas un lien : un lien projet ↔ parcelle ne s'ajoute que par la commande auditée des rapprochements, avec sa source (plan de masse, registre, emprise), jamais par simple proximité ([PROJECT_POSITIONS.md](PROJECT_POSITIONS.md)).
+
+État du 14 novembre 2026 (base partagée, lecture seule) : **7 cibles**, **176 fiches** à relire sur 183, dont **27 ventes sur plan déclarées par ADREC**, toutes à Saadiyat. Raisons (une fiche peut en avoir plusieurs) : 128 points non fiables (123 points de courtier, 5 d'éditeur), 43 sans position, 8 sur une limite commune, 7 parcelles hors bornes, 1 hors parcelle. Parmi les 27 : 22 points non fiables, 6 sur une limite commune, 5 parcelles hors bornes, 3 sans position, 1 hors parcelle. Les 5 parcelles hors bornes sont une seule parcelle de 25 ha qui porte The Source, The Source II, The Source Terraces, The Arthouse et Louvre Abu Dhabi Residences : il faut une emprise ou un plan de masse par projet, la parcelle d'ensemble ne mesure aucun d'eux.
+
 ## Exécution
 
 Flow Prefect `property-platform-construction-activity`, déploiement `construction-activity` (paramètre `territory` : `all` ou un territoire enregistré), horaire `0 4 5 * *` (Asia/Dubai) enregistré inactif, activé sur le Prefect partagé le 30 octobre 2026. L'opération de domaine `construction_activity` ouvre un `ActivityCollector` (`collectors/sentinel_measure.py`) et appelle `activity_import.measure_activity` :

@@ -35,4 +35,6 @@ La commande liste les fiches publiées sans position visible, une ligne JSON par
 - **Priorité 2 (24)** : Al Maryah Vista 1, One&Only Private Residences, Rosewood Residences, Ritz-Carlton Residences, St. Regis Residences (Al Maryah) ; Bab Al Qasr Residence 77, Canal Residence, Leaf Tower, Marafid, Marlin 1, Radiant Atrium, Radiant Elite, Radiant Square, Radiant Terrace, Reem Eleven, Reem Five, Rixos Al Reem, Seamont, The Artery (Reem) ; Baccarat Residences, Faya Al Saadiyat I et II, Four Seasons Private Residences, Talay Marsa (Saadiyat).
 - **Priorité 3 (13)** : JOUD Residence, Marlin Icon, Missoni Residences, One Residence, Parkside Residence B, Reem Diamond, Rotana Residences (programme, tours nord et sud), Sea View Tower, Seamont Phase 2, Global Gate, Talay Beach.
 
+Les fiches localisées dont la position ne désigne aucune parcelle mesurable (point non fiable, limite commune, parcelle hors 0,2–10 ha) sont listées par `project_parcel_gaps` ([CONSTRUCTION_ACTIVITY.md](CONSTRUCTION_ACTIVITY.md#fiches-sans-parcelle-mesurable-b09)).
+
 Une position s'ajoute toujours par une source collectée (pipeline) ou un lien relu dans `project_registry.json`, jamais par une saisie directe en base.
