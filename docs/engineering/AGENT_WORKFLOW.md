@@ -63,6 +63,7 @@ Toute donnée métier doit pouvoir être reconstruite par les migrations et les 
 
 - Une donnée entre par un collecteur ou une commande documentée qui crée sa capture, son exécution et son audit. Pas de SQL manuel dans la base partagée, pas de valeur saisie sans source.
 - Une nouvelle table est rattachée à ses flows dans `evidence/history/pipeline_inventory.py` et appelle `evidence.install_row_journals(false)` dans sa migration ([DATA_HISTORY.md](DATA_HISTORY.md)).
+- Pour lire la base partagée, préférer le rôle en lecture seule ; pour essayer une donnée réelle, une base d'essai `scratch_<agent>` ([DATABASE_ROLES.md](DATABASE_ROLES.md), A45).
 - Une décision humaine (exclusion, rapprochement) passe par une commande auditée et réversible, sauvegardée (tâche A03).
 - Les migrations sont additives ; ne jamais renuméroter une migration d'une autre branche sans le dire dans la PR.
 
