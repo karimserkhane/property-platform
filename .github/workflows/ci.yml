@@ -169,7 +169,7 @@ jobs:
         with:
           path: ${{ matrix.target == 'lockfiles' && '.' || '' }}
           image: ${{ matrix.target != 'lockfiles' && matrix.target || '' }}
-          grype-version: v0.121.0
+          grype-version: v0.121.2
           cache-db: true
           severity-cutoff: critical
           only-fixed: true
@@ -181,7 +181,7 @@ jobs:
         with:
           path: ${{ matrix.target == 'lockfiles' && '.' || '' }}
           image: ${{ matrix.target != 'lockfiles' && matrix.target || '' }}
-          grype-version: v0.121.0
+          grype-version: v0.121.2
           cache-db: true
           fail-build: false
           output-format: table

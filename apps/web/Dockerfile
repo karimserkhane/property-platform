@@ -12,7 +12,7 @@ ENV NODE_USE_SYSTEM_CA=1 SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 FROM base AS build
 WORKDIR /repo
 RUN npm install --global npm@12.2.0
-RUN npm install --global pnpm@12.10.1 --allow-scripts=pnpm
+RUN npm install --global pnpm@12.18.0 --allow-scripts=pnpm
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/contracts/package.json ./packages/contracts/package.json
