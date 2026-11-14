@@ -32,7 +32,7 @@ RUN pnpm --filter @property-platform/web typecheck \
 # digest; the same Node runtime and compiled server as the preview. Journey files are
 # mounted at run time (excluded from this build context), so editing them never
 # invalidates the Next build cache. Declared before `runtime`, which stays the default.
-FROM mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f AS e2e
+FROM mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe AS e2e
 COPY --from=base /usr/local/bin/node /usr/local/bin/node
 WORKDIR /repo
 COPY --from=build /repo /repo
