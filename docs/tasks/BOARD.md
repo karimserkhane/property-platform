@@ -76,7 +76,7 @@ Priorité : 1 = d'abord. Une tâche est prenable si son statut est `todo`, si to
 | [D02](D02.md) | D | Liste de suivi et alertes explicables | 2 | D01, D03 | non | todo | unassigned |
 | [D03](D03.md) | D | Canal d'envoi des alertes | 3 | D01 | non (décidée le 07/11 : notification web, puis e-mail SES) | todo | unassigned |
 | [E01](E01.md) | E | Index de recherche des preuves | 3 | A01 | non (décidée le 28/10 : option 2, mesure en E02) | done | claude |
-| [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | oui | todo | unassigned |
+| [E02](E02.md) | E | Assistant IA qui cite ses preuves | 3 | E01 | non (décidée le 03/11 : modèles open source locaux) | in-progress | claude |
 | [E03](E03.md) | E | Recherche dans les preuves sur le site | 2 | E01 | non | todo | unassigned |
 | [F01](F01.md) | F | Parcelles de tout l'émirat d'Abu Dhabi | 3 | A06, B01 | non | done | claude |
 | [F02](F02.md) | F | Qualifier les sources de Dubai | 3 | — | non | done | claude |
