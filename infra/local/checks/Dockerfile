@@ -46,6 +46,6 @@ RUN --mount=type=secret,id=platform_extra_ca \
 ENV NODE_USE_SYSTEM_CA=1 SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
     NEXT_TELEMETRY_DISABLED=1 npm_config_store_dir=/pnpm-store
 RUN npm install --global npm@12.2.0 \
-    && npm install --global pnpm@12.10.1 --allow-scripts=pnpm \
+    && npm install --global pnpm@12.18.0 --allow-scripts=pnpm \
     && git config --system --add safe.directory '*'
 WORKDIR /workspace
