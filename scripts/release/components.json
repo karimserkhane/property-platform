@@ -101,5 +101,12 @@
     "source": "github:huggingface/text-embeddings-inference",
     "by": "hand",
     "note": "Figé par empreinte, avec le modèle (EVIDENCE_SEARCH.md)"
+  },
+  {
+    "name": "Garage (S3 local des sauvegardes)",
+    "file": "infra/local/compose.backup-s3.yaml",
+    "pattern": "dxflrs/garage:v(d+.d+.d+)",
+    "source": "dockerhub:dxflrs/garage",
+    "by": "dependabot"
   }
 ]

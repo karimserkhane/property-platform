@@ -53,6 +53,20 @@ async function getJson(url) {
   return response.json();
 }
 
+// Highest plain release tag (v1.2.3 or 1.2.3) among the most recent tags of a Docker Hub image,
+// for projects that publish their releases outside GitHub (Garage).
+export function latestTag(tags) {
+  const releases = tags.filter((tag) => /^v?\d+\.\d+\.\d+$/.test(tag.name));
+  if (!releases.length) return undefined;
+  const best = releases.reduce((a, b) =>
+    compareVersions(a.name, b.name) >= 0 ? a : b,
+  );
+  return {
+    version: best.name.replace(/^v/, ""),
+    publishedAt: best.last_updated,
+  };
+}
+
 async function latestFrom(source, pinned) {
   const [kind, id, mode] = source.split(":");
   if (kind === "node") {
@@ -85,6 +99,12 @@ async function latestFrom(source, pinned) {
       version: data.tag_name.replace(/^[^\d]*/, ""),
       publishedAt: data.published_at,
     };
+  }
+  if (kind === "dockerhub") {
+    const data = await getJson(
+      `https://hub.docker.com/v2/repositories/${id}/tags?page_size=100&ordering=last_updated`,
+    );
+    return latestTag(data.results);
   }
   if (kind === "endoflife") {
     const cycles = await getJson(`https://endoflife.date/api/${id}.json`);

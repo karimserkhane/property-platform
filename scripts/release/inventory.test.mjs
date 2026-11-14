@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { classify, compareVersions, renderReport } from "./inventory.mjs";
+import {
+  classify,
+  compareVersions,
+  latestTag,
+  renderReport,
+} from "./inventory.mjs";
 
 const NOW = new Date("2026-11-08T12:00:00Z");
 
@@ -53,4 +58,20 @@ test("separates what needs a person from what Dependabot handles", () => {
   );
   assert.ok(report.indexOf("Hand") < report.indexOf("Dependabot"));
   assert.ok(report.indexOf("Bot") < report.indexOf("Fine"));
+});
+
+test("takes the highest release tag from Docker Hub, ignoring commit tags", () => {
+  assert.deepEqual(
+    latestTag([
+      {
+        name: "ed3befd8d70eac09795e973a9477f60440de1a3e",
+        last_updated: "2026-11-14T00:00:00Z",
+      },
+      { name: "v2.5.0", last_updated: "2026-10-24T00:00:00Z" },
+      { name: "v2.10.0", last_updated: "2026-10-20T00:00:00Z" },
+      { name: "latest", last_updated: "2026-11-14T00:00:00Z" },
+    ]),
+    { version: "2.10.0", publishedAt: "2026-10-20T00:00:00Z" },
+  );
+  assert.equal(latestTag([{ name: "dev", last_updated: "x" }]), undefined);
 });
