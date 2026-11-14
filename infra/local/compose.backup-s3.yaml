@@ -1,0 +1,25 @@
+# A30: optional local S3-compatible server (Garage) receiving the encrypted backup copy, so the
+# copy already speaks S3 and moving to a hosted provider later only changes infra/local/.env
+# (BACKUPS.md). No published port: only containers of this project reach it. Objects are stored
+# in a host folder ignored by Git, outside the Docker disk. It is on the same machine as the
+# backups: it does not protect against losing the PC.
+# Combine after compose.yaml and compose.ingestion.yaml, with --profile backup-s3.
+services:
+  backup-s3:
+    profiles: [backup-s3]
+    # Garage v2.5.0
+    image: dxflrs/garage:v2.5.0@sha256:677e5b758e4425a325b811c425c026bf35a4bf42f7ddbaa773de3f4fd779a5a5
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
+    environment:
+      GARAGE_RPC_SECRET: ${BACKUP_S3_LOCAL_RPC_SECRET:?Generate it once (BACKUPS.md)}
+      GARAGE_DEFAULT_ACCESS_KEY: ${BACKUP_COPY_S3_ACCESS_KEY_ID:?Generate it once (BACKUPS.md)}
+      GARAGE_DEFAULT_SECRET_KEY: ${BACKUP_COPY_S3_SECRET_ACCESS_KEY:?Generate it once (BACKUPS.md)}
+      GARAGE_DEFAULT_BUCKET: ${BACKUP_COPY_S3_BUCKET:?Name the bucket (BACKUPS.md)}
+    volumes:
+      - ./backup-s3/garage.toml:/etc/garage.toml:ro
+      - ${PROPERTY_PLATFORM_BACKUP_S3_DIR:-../../.cache/backup-s3}:/var/lib/garage
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1

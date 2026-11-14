@@ -35,6 +35,7 @@ La demande de mise à jour porte sur les dernières versions stables des outils 
 | HTTPX | 0.28.1 | Transport HTTPS borné des collecteurs ; uniquement dans `apps/ingestion` |
 | boto3 / botocore | 1.43.114 / 1.43.114 | SDK S3/R2, ajouté le 15 octobre ; API et ingestion, aucune dépendance web |
 | age | 1.2.1-1+b5 (paquet Debian trixie) | Chiffrement côté poste de la copie des sauvegardes (A30) ; image d'ingestion et contrôles d'ingestion, jamais l'API ni le web. Paquet Debian plutôt qu'un binaire téléchargé ou une liaison Python : dépôt signé déjà utilisé par l'image, format standard relisible avec l'outil officiel. Une version figée retirée de Debian fait échouer la construction : prendre alors la nouvelle version du paquet, aux deux Dockerfile |
+| Garage (image `dxflrs/garage` par digest) | 2.5.0 | Serveur S3 local facultatif qui reçoit la copie chiffrée des sauvegardes (A30, choix de Karim du 14 novembre 2026), profil `backup-s3` de `infra/local/compose.backup-s3.yaml`, jamais dans l'API, le web ou l'ingestion. Projet libre (AGPL) fait pour l'auto-hébergement, un seul binaire, configuration d'un nœud par variables d'environnement ; MinIO n'est plus publié en image. Version publiée le 24 octobre 2026. Suivi par Dependabot (Compose) et l'inventaire des versions (source Docker Hub) |
 | pytest / pytest-django | 9.1.1 / 4.14.0 | Dernières versions stables vérifiées |
 | Ruff / Import Linter | 0.17.0 / 2.15 | Dernières versions stables vérifiées |
 | Hatchling | 1.32.4 | Backend de construction Python fixé |
