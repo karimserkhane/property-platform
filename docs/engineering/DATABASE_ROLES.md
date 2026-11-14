@@ -10,7 +10,7 @@ Tâche [A45](../tasks/A45.md), commencée le 14 novembre 2026. Jusqu'ici l'API, 
 | --- | --- | --- |
 | `pp_agent_readonly` | Agents qui lisent la base partagée | Connexion à `property_platform` ; lecture de toutes les tables (`pg_read_all_data`) ; transactions en lecture seule par défaut, requêtes limitées à 120 s. Aucun droit d'écriture : même en repassant la session en écriture, PostgreSQL refuse (`permission denied`). |
 | `pp_agent_scratch` | Agents qui essaient une donnée réelle | Propriétaire des bases `scratch_*` ; **aucune connexion** à `property_platform`. |
-| `pp_app` | API et ingestion, plus tard | Ni super-utilisateur ni création de rôle ; peut créer des bases (contrôles `restore-check`, `rebuild-check`, bases de test). Lecture de toutes les tables (`pg_read_all_data`), pour que `pg_dump` lise aussi les tables des extensions PostGIS (`tiger`, `topology`). Connexion à `property_platform`, mais pas encore propriétaire des schémas : voir « Reste à faire ». |
+| `pp_app` | API et ingestion, plus tard | Ni super-utilisateur ni création de rôle ; peut créer des bases (contrôles `restore-check`, `rebuild-check`, bases de test). Lecture de toutes les tables (`pg_read_all_data`), pour que `pg_dump` lise aussi les tables des extensions PostGIS (`tiger`, `topology`). Connexion à `property_platform` ; propriétaire des schémas et objets métier après `ownership --yes` (ci-dessous). |
 
 La procédure retire aussi la connexion à `property_platform` au rôle `PUBLIC` : seuls le propriétaire, les super-utilisateurs, `pp_agent_readonly` et `pp_app` s'y connectent. Les autres bases du serveur ne changent pas.
 
@@ -74,8 +74,38 @@ D'où, dans le code de l'ingestion (`scratch_template.py`) :
 
 Essai complet sous `pp_app` (image de l'ingestion, code de la branche, conteneur à part) : procédure `roles --yes`, schémas métier possédés par `pp_app`, `create_backup` puis `restore_check` verts (2 tables, 252 lignes, aucun écart), base `rebuild_check_*` créée, PostGIS accepté par `CREATE EXTENSION IF NOT EXISTS`, cible reconnue vide, puis supprimée. Le serveur jetable a été supprimé ensuite.
 
+## Propriété des objets métier
+
+```bash
+node scripts/db/database.mjs ownership          # plan
+node scripts/db/database.mjs ownership --yes    # applique, rejouable
+```
+
+`REASSIGN OWNED` n'est pas possible depuis le rôle de création du serveur (il possède aussi les objets système). La commande transfère donc à `pp_app`, objet par objet, dans `property_platform` (ou une base `scratch_*`, `--db`) :
+
+- les schémas `real_estate` et `evidence` ;
+- les tables, vues, vues matérialisées et séquences autonomes de `public`, `real_estate` et `evidence` ; les séquences liées à une colonne suivent leur table ;
+- les fonctions et les types (énumérations, domaines, intervalles) de ces schémas ;
+- jamais les objets d'une extension (`spatial_ref_sys` et les vues de PostGIS restent au super-utilisateur) ;
+- `CREATE` sur la base (les migrations font `CREATE SCHEMA IF NOT EXISTS`, qui vérifie ce droit avant de voir que le schéma existe) et `USAGE, CREATE` sur `public` (nouvelles tables Django).
+
+Elle finit par un décompte par schéma : objets à `pp_app`, autres objets métier (doit être 0), objets d'extension.
+
+**Bases de test.** `scripts/checks/api.sh` et la CI créent la base de test de Django depuis `template_postgis` (`PROPERTY_PLATFORM_TEST_DB_TEMPLATE`, réglage `TEST.TEMPLATE` ; seule cette valeur est acceptée), comme le demandera `pp_app`, qui ne peut pas installer PostGIS. Sous le super-utilisateur, rien ne change : la migration trouve PostGIS déjà là.
+
+## Essai du changement d'identité (14 novembre 2026, 3ᵉ étape)
+
+Serveur PostGIS jetable (même image figée, données en mémoire, réseau interne sans sortie, aucun volume), jamais sur la base partagée :
+
+- schéma complet de la dernière sauvegarde réelle (13 novembre, 21 h 30 UTC) restauré par le super-utilisateur, avec le journal des migrations : même état de propriété que le serveur partagé. Les lignes ne sont pas restaurées (3,6 Go, plus que la mémoire disponible pour un serveur en mémoire) ;
+- `roles --yes`, puis `ownership --yes` deux fois : 70 tables et vues métier à `pp_app` (53 dans `evidence`, 10 dans `public`, 7 dans `real_estate`), 0 restante à un autre rôle, 3 objets de PostGIS inchangés ; le second passage ne change rien ;
+- sous `pp_app` : `migrate` (rien à appliquer, signaux de fin de migration acceptés) ; dans une transaction annulée, `CREATE SCHEMA IF NOT EXISTS`, ajout de colonne et d'index sur une table de `real_estate`, création d'une table géométrique dans `evidence` ;
+- sous `pp_app` : `checks-api` complet, base de test copiée de `template_postgis` : 765 tests verts ;
+- sous `pp_app`, code de la branche : `create_backup` puis `restore_check` verts (58 tables, aucun écart).
+
+Le conteneur et son réseau ont été supprimés ensuite.
+
 ## Reste à faire (A45)
 
-1. **Propriété des objets métier.** Transférer à `pp_app` la propriété des schémas et objets métier (`real_estate`, `evidence`, tables Django), sans toucher aux objets des extensions ; `REASSIGN OWNED` est impossible depuis le rôle de création du serveur. Faire créer les bases de test de `checks-api` depuis `template_postgis` (réglage `TEST` de Django).
-2. **Essai à part** de ce changement d'identité : restauration de la dernière sauvegarde réelle dans un serveur jetable, transfert de propriété, migrations, `checks-api`, sauvegarde, `restore-check` et `rebuild-check` complet sous `pp_app`, avant de le proposer.
-3. **Après fusion, avec Karim** : `roles --yes` sur le serveur partagé, puis bascule des fichiers Compose vers `pp_app`.
+1. **Avec les lignes** : `restore-check` et `rebuild-check` complets sous `pp_app` sur les vraies données, dans un serveur jetable sur disque (quelques Go du disque de Docker, qui ne rétrécit pas : à faire avec Karim ou au moment de la bascule).
+2. **Après fusion, avec Karim** : `roles --yes` puis `ownership --yes` sur le serveur partagé, mot de passe de `pp_app` dans les secrets du déploiement, bascule des fichiers Compose de l'API et de l'ingestion vers `pp_app`, puis `restore-check` et `rebuild-check` réels.

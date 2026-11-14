@@ -2,6 +2,7 @@
 // Without --yes nothing changes: the plan is printed and the script stops.
 //
 //   node scripts/db/database.mjs roles [--yes]
+//   node scripts/db/database.mjs ownership [--db property_platform|scratch_<agent>] [--yes]
 //   node scripts/db/database.mjs scratch list
 //   node scripts/db/database.mjs scratch create <agent> [--name <suffix>] [--yes]
 //   node scripts/db/database.mjs scratch drop <agent> [--name <suffix>] [--yes]
@@ -127,6 +128,68 @@ DROP DATABASE IF EXISTS ${name} WITH (FORCE);
 `;
 }
 
+// Schemas whose non-extension objects belong to the application (Django tables live in public).
+export const BUSINESS_SCHEMAS = ["public", "real_estate", "evidence"];
+const OWNED_SCHEMAS = ["real_estate", "evidence"];
+
+export function isOwnershipTarget(name) {
+  return name === SHARED_DATABASE || isScratchName(name);
+}
+
+// Idempotent transfer of the business objects to pp_app, run as the bootstrap superuser in the
+// target database. Objects that belong to an extension (PostGIS, topology, tiger) are left alone
+// (pg_depend deptype 'e'), and so are sequences owned by a table column, which follow their table.
+export function ownershipSql(database) {
+  if (!isOwnershipTarget(database)) throw new DatabaseError(`Refusé : ${database}`);
+  const app = ROLES.app.name;
+  const schemas = BUSINESS_SCHEMAS.map((s) => `'${s}'`).join(", ");
+  const owned = OWNED_SCHEMAS.map((s) => `'${s}'`).join(", ");
+  return `\\set ON_ERROR_STOP on
+-- Migrations run CREATE SCHEMA IF NOT EXISTS, which checks CREATE on the database first.
+GRANT CONNECT, CREATE, TEMPORARY ON DATABASE ${database} TO ${app};
+GRANT USAGE, CREATE ON SCHEMA public TO ${app};
+SELECT format('ALTER SCHEMA %I OWNER TO ${app}', n.nspname)
+  FROM pg_namespace n WHERE n.nspname IN (${owned})
+   AND n.nspowner <> '${app}'::regrole \\gexec
+SELECT format('ALTER %s %I.%I OWNER TO ${app}',
+         CASE c.relkind WHEN 'v' THEN 'VIEW' WHEN 'm' THEN 'MATERIALIZED VIEW'
+                        WHEN 'S' THEN 'SEQUENCE' WHEN 'f' THEN 'FOREIGN TABLE' ELSE 'TABLE' END,
+         n.nspname, c.relname)
+  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+ WHERE n.nspname IN (${schemas})
+   AND c.relkind IN ('r', 'p', 'v', 'm', 'S', 'f')
+   AND c.relowner <> '${app}'::regrole
+   AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.classid = 'pg_class'::regclass
+                     AND d.objid = c.oid AND d.deptype = 'e')
+   AND NOT (c.relkind = 'S' AND EXISTS (SELECT 1 FROM pg_depend d
+                     WHERE d.classid = 'pg_class'::regclass AND d.objid = c.oid
+                       AND d.refclassid = 'pg_class'::regclass AND d.deptype IN ('a', 'i')))
+ ORDER BY c.relkind = 'S', n.nspname, c.relname \\gexec
+SELECT format('ALTER ROUTINE %s OWNER TO ${app}', p.oid::regprocedure)
+  FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+ WHERE n.nspname IN (${schemas})
+   AND p.proowner <> '${app}'::regrole
+   AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.classid = 'pg_proc'::regclass
+                     AND d.objid = p.oid AND d.deptype = 'e') \\gexec
+SELECT format('ALTER TYPE %s OWNER TO ${app}', t.oid::regtype)
+  FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+ WHERE n.nspname IN (${schemas})
+   AND t.typtype IN ('e', 'd', 'r')
+   AND t.typowner <> '${app}'::regrole
+   AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.classid = 'pg_type'::regclass
+                     AND d.objid = t.oid AND d.deptype = 'e') \\gexec
+-- What is left to someone else: only extension objects should remain.
+SELECT n.nspname AS schema,
+       count(*) FILTER (WHERE c.relowner = '${app}'::regrole) AS owned_by_app,
+       count(*) FILTER (WHERE c.relowner <> '${app}'::regrole AND e.objid IS NULL) AS other_business,
+       count(*) FILTER (WHERE e.objid IS NOT NULL) AS extension
+  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+  LEFT JOIN pg_depend e ON e.classid = 'pg_class'::regclass AND e.objid = c.oid AND e.deptype = 'e'
+ WHERE n.nspname IN (${schemas}) AND c.relkind IN ('r', 'p', 'v', 'm', 'f')
+ GROUP BY 1 ORDER BY 1;
+`;
+}
+
 const LIST_SQL = `SELECT datname, pg_size_pretty(pg_database_size(datname)), pg_get_userbyid(datdba)
   FROM pg_database WHERE datname LIKE 'scratch\\_%' ORDER BY 1;`;
 
@@ -246,6 +309,33 @@ export async function scratch(rt, opts) {
     return 0;
   }
   throw new DatabaseError("Actions : list, create, drop.");
+}
+
+export async function ownership(rt, opts) {
+  const database = opts.db ?? SHARED_DATABASE;
+  if (!isOwnershipTarget(database)) {
+    throw new DatabaseError(
+      `Refusé : ${database} (seulement ${SHARED_DATABASE} ou une base scratch_*).`,
+    );
+  }
+  if (!rt.databaseExists(database)) {
+    throw new DatabaseError(`${database} n'existe pas.`);
+  }
+  if (!rt.roleExists(ROLES.app.name)) {
+    throw new DatabaseError(
+      `Le rôle ${ROLES.app.name} n'existe pas : lancer d'abord « roles --yes ».`,
+    );
+  }
+  rt.log(
+    `${database} : schémas ${OWNED_SCHEMAS.join(", ")} et objets métier de ${BUSINESS_SCHEMAS.join(", ")} transférés à ${ROLES.app.name} (procédure rejouable). Les objets des extensions ne changent pas.`,
+  );
+  if (!opts.yes) {
+    rt.log("Plan seulement : relancer avec --yes pour appliquer.");
+    return 0;
+  }
+  rt.superuserSql(ownershipSql(database), {}, database);
+  rt.log("Propriété à jour.");
+  return 0;
 }
 
 export async function psql(rt, opts) {
@@ -428,9 +518,10 @@ async function main() {
   const rt = realRuntime(opts);
   if (opts.command === "roles") return roles(rt, opts);
   if (opts.command === "scratch") return scratch(rt, opts);
+  if (opts.command === "ownership") return ownership(rt, opts);
   if (opts.command === "psql") return psql(rt, opts);
   throw new DatabaseError(
-    "Commandes : roles, scratch list|create|drop, psql (voir docs/engineering/DATABASE_ROLES.md).",
+    "Commandes : roles, ownership, scratch list|create|drop, psql (voir docs/engineering/DATABASE_ROLES.md).",
   );
 }
 

@@ -8,7 +8,9 @@ cd /workspace
 # checks from two worktrees never drop each other's. Django removes it at the end, also
 # when tests fail; a run killed midway leaves it behind: scripts/checks/clean-test-databases.sh.
 export PROPERTY_PLATFORM_TEST_DB_NAME="${PROPERTY_PLATFORM_TEST_DB_NAME:-test_property_platform_$(hostname | tr -cd 'a-z0-9' | cut -c1-24)}"
-echo "== test database: $PROPERTY_PLATFORM_TEST_DB_NAME"
+# A45: copied from template_postgis, as a role without superuser rights will need (DATABASE_ROLES.md).
+export PROPERTY_PLATFORM_TEST_DB_TEMPLATE="${PROPERTY_PLATFORM_TEST_DB_TEMPLATE:-template_postgis}"
+echo "== test database: $PROPERTY_PLATFORM_TEST_DB_NAME (from $PROPERTY_PLATFORM_TEST_DB_TEMPLATE)"
 
 echo "== ruff"
 ruff check --no-cache apps/api
