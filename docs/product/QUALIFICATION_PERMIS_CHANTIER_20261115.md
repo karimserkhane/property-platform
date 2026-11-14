@@ -24,8 +24,10 @@ D'après l'annonce DMT et les guides du secteur : numéro de permis, type (fonda
 
 ## Conditions de réutilisation
 
-- `dmt.gov.ae` : conditions limitées à la vie privée et aux statistiques de visite ; aucune licence, aucune interdiction. Entrée ajoutée au registre : collecte permise, publication en faits datés avec lien.
-- `tamm.abudhabi` : tous droits réservés, reCAPTCHA, connexion pour les permis. Entrée ajoutée : collecte permise par les conditions, mais rien n'est lisible sans contournement ; publication en lien seulement.
+Le registre des droits n'accepte que les hôtes qu'un pipeline ou un connecteur lit. Aucun ne lit encore ces sites : les revues sont donc écrites ici, prêtes à reporter dans `evidence/source_rights.json` par [B15](../tasks/B15.md) avec la première adresse lue.
+
+- `dmt.gov.ae` — DMT ; licence inconnue ; [conditions](https://www.dmt.gov.ae/en/terms-and-conditions) limitées à la vie privée et aux statistiques de visite, sans licence ni clause sur la lecture automatisée. Collecte : permise. Publication : faits datés avec lien.
+- `tamm.abudhabi` — Department of Government Enablement ; propriétaire (tous droits réservés) ; [conditions](https://www.tamm.abudhabi/en/terms-and-conditions) interdisant l'accès non autorisé et la charge excessive, sans clause sur la lecture automatisée ; reCAPTCHA, connexion UAE PASS pour les permis. Collecte : permise par les conditions, mais rien n'est lisible sans contournement. Publication : lien seulement.
 - L'hôte réel ouvert par un QR de chantier sera qualifié à la première lecture (B15), avec sa propre entrée dans le registre avant toute lecture automatisée.
 
 ## Exemples sur trois chantiers réels
