@@ -140,7 +140,8 @@ export function isOwnershipTarget(name) {
 // target database. Objects that belong to an extension (PostGIS, topology, tiger) are left alone
 // (pg_depend deptype 'e'), and so are sequences owned by a table column, which follow their table.
 export function ownershipSql(database) {
-  if (!isOwnershipTarget(database)) throw new DatabaseError(`Refusé : ${database}`);
+  if (!isOwnershipTarget(database))
+    throw new DatabaseError(`Refusé : ${database}`);
   const app = ROLES.app.name;
   const schemas = BUSINESS_SCHEMAS.map((s) => `'${s}'`).join(", ");
   const owned = OWNED_SCHEMAS.map((s) => `'${s}'`).join(", ");

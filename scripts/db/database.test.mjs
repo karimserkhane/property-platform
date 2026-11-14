@@ -247,15 +247,24 @@ test("parseCli separates psql arguments after --", () => {
 test("ownership transfers business objects only, on allowed databases", () => {
   const text = ownershipSql("property_platform");
   assert.match(text, /ON_ERROR_STOP on/);
-  assert.match(text, /GRANT CONNECT, CREATE, TEMPORARY ON DATABASE property_platform TO pp_app/);
+  assert.match(
+    text,
+    /GRANT CONNECT, CREATE, TEMPORARY ON DATABASE property_platform TO pp_app/,
+  );
   assert.match(text, /ALTER SCHEMA %I OWNER TO pp_app/);
   // Extension members and column-owned sequences are skipped.
   assert.match(text, /d\.deptype = 'e'/);
   assert.match(text, /deptype IN \('a', 'i'\)/);
-  for (const schema of BUSINESS_SCHEMAS) assert.ok(text.includes(`'${schema}'`));
+  for (const schema of BUSINESS_SCHEMAS)
+    assert.ok(text.includes(`'${schema}'`));
   assert.doesNotMatch(text, /REASSIGN|DROP /);
   assert.ok(ownershipSql("scratch_claude_a45").includes("scratch_claude_a45"));
-  for (const bad of ["postgres", "template_postgis", "restore_check_1", "x; drop"]) {
+  for (const bad of [
+    "postgres",
+    "template_postgis",
+    "restore_check_1",
+    "x; drop",
+  ]) {
     assert.throws(() => ownershipSql(bad), DatabaseError);
   }
 });
@@ -269,7 +278,10 @@ test("ownership prints a plan without --yes and applies with it", async () => {
   assert.equal(state.sql.length, 1);
   assert.equal(state.sql[0].database, "property_platform");
   await assert.rejects(ownership(rt, { db: "postgres", yes: true }), /Refusé/);
-  await assert.rejects(ownership(rt, { db: "scratch_claude", yes: true }), /n'existe pas/);
+  await assert.rejects(
+    ownership(rt, { db: "scratch_claude", yes: true }),
+    /n'existe pas/,
+  );
   const missing = fakeRuntime({ roles: new Set() });
   await assert.rejects(ownership(missing.rt, { yes: true }), /roles --yes/);
 });
