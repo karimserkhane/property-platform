@@ -234,6 +234,19 @@
     "basis": "Terms claim ownership of the pages and protect trademarks, with no clause on automated access or reuse limits. Dated facts with a link, no copy of its content."
   },
   {
+    "host": "dmt.gov.ae",
+    "publisher": "Department of Municipalities and Transport (DMT)",
+    "licence": "unknown",
+    "licence_url": "",
+    "terms_url": "https://www.dmt.gov.ae/en/terms-and-conditions",
+    "reviewed_on": "2026-11-15",
+    "reviewed_by": "claude",
+    "collection": "allowed",
+    "publication": "facts",
+    "attribution": "",
+    "basis": "Terms page read on 15 Nov 2026 covers privacy and visit statistics only: no reuse licence and no clause on automated access. News and guides only; MePS permit pages behind site QR codes were not found in public (B10)."
+  },
+  {
     "host": "doh.gov.ae",
     "publisher": "Department of Health Abu Dhabi",
     "licence": "proprietary",
@@ -960,6 +973,19 @@
     "publication": "facts",
     "attribution": "",
     "basis": "Project site of SAAS Properties without terms of its own; the SAAS terms say nothing on automated access or reuse. Dated facts with a link, no copy of its content."
+  },
+  {
+    "host": "tamm.abudhabi",
+    "publisher": "Department of Government Enablement (TAMM)",
+    "licence": "proprietary",
+    "licence_url": "",
+    "terms_url": "https://www.tamm.abudhabi/en/terms-and-conditions",
+    "reviewed_on": "2026-11-15",
+    "reviewed_by": "claude",
+    "collection": "allowed",
+    "publication": "link",
+    "attribution": "",
+    "basis": "Terms forbid unauthorised access and disproportionate load but have no clause on automated reading; all rights reserved. Pages need JavaScript and reCAPTCHA, permit services need UAE PASS: nothing collectable without a bypass, links only (B10)."
   },
   {
     "host": "tarafholding.com",
