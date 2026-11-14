@@ -5,11 +5,16 @@ from contextlib import contextmanager
 from uuid import uuid4
 
 import pytest
+from psycopg import sql
 
 from property_platform_ingestion import rebuilds
 from property_platform_ingestion.registry import DATASETS
 
 URL = "postgresql://user:p%40ss@db:5432/property_platform"
+
+
+def template0(admin, fallback=None):
+    return sql.SQL(" TEMPLATE {}").format(sql.Identifier(fallback))
 
 
 @pytest.mark.parametrize(
@@ -72,6 +77,7 @@ def test_only_the_database_created_by_this_run_is_dropped(tmp_path, monkeypatch,
 
     monkeypatch.setattr(rebuilds, "worker", worker)
     monkeypatch.setattr(rebuilds.psycopg, "connect", connect)
+    monkeypatch.setattr(rebuilds, "template_clause", template0)
     if failure:
         with pytest.raises(RuntimeError):
             rebuilds.rebuild_check(actor="test", run_id=str(uuid4()), url=URL)
@@ -84,6 +90,7 @@ def test_only_the_database_created_by_this_run_is_dropped(tmp_path, monkeypatch,
     if expected_sql == 2:
         name = sql_statements[0].split('"')[1]
         assert rebuilds.SCRATCH.fullmatch(name)
+        assert sql_statements[0] == f'CREATE DATABASE "{name}" TEMPLATE "template0"'
         assert sql_statements[-1] == f'DROP DATABASE "{name}"'
     if len(actions) == 2:
         assert actions[0][1] == URL
@@ -175,6 +182,7 @@ def test_private_capture_copies_do_not_outlive_their_check(tmp_path, monkeypatch
 
     monkeypatch.setattr(rebuilds, "worker", worker)
     monkeypatch.setattr(rebuilds.psycopg, "connect", connect)
+    monkeypatch.setattr(rebuilds, "template_clause", template0)
     if failure:
         with pytest.raises(RuntimeError):
             rebuilds.rebuild_check(actor="test", run_id=run_id, url=URL)

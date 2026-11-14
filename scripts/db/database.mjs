@@ -98,6 +98,8 @@ ALTER ROLE ${readonly.name} SET idle_in_transaction_session_timeout = '300s';
 GRANT pg_read_all_data TO ${readonly.name};
 ALTER ROLE ${scratch.name} WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS CONNECTION LIMIT 10 PASSWORD :'scratch_password';
 ALTER ROLE ${app.name} WITH LOGIN NOSUPERUSER CREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD :'app_password';
+-- pg_dump of the whole database also reads the PostGIS extension tables (tiger, topology).
+GRANT pg_read_all_data TO ${app.name};
 REVOKE CONNECT, TEMPORARY ON DATABASE ${SHARED_DATABASE} FROM PUBLIC;
 GRANT CONNECT ON DATABASE ${SHARED_DATABASE} TO ${readonly.name}, ${app.name};
 REVOKE ALL ON DATABASE ${SHARED_DATABASE} FROM ${scratch.name};

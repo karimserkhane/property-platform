@@ -100,6 +100,7 @@ test("roles SQL is idempotent and never contains a password", () => {
     /WHERE NOT EXISTS \(SELECT 1 FROM pg_roles WHERE rolname = r\) \\gexec/,
   );
   assert.match(sql, /GRANT pg_read_all_data TO pp_agent_readonly;/);
+  assert.match(sql, /GRANT pg_read_all_data TO pp_app;/);
   assert.match(
     sql,
     /ALTER ROLE pp_agent_readonly SET default_transaction_read_only = on;/,

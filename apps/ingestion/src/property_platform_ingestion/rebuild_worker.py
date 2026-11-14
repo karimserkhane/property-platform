@@ -11,8 +11,13 @@ def require_empty_target(database, expected_name):
     """Check the actual SQL connection too; environment parsing alone is insufficient."""
     with database.cursor() as cursor:
         cursor.execute(
-            "SELECT current_database(), EXISTS(SELECT 1 FROM information_schema.tables "
-            "WHERE table_schema IN ('public','real_estate','evidence'))"
+            # Extension tables (spatial_ref_sys from template_postgis) are not business data.
+            "SELECT current_database(), EXISTS(SELECT 1 FROM pg_class c "
+            "JOIN pg_namespace n ON n.oid = c.relnamespace "
+            "WHERE c.relkind IN ('r', 'p', 'v', 'm', 'f') "
+            "AND n.nspname IN ('public','real_estate','evidence') "
+            "AND NOT EXISTS(SELECT 1 FROM pg_depend d WHERE d.classid = 'pg_class'::regclass "
+            "AND d.objid = c.oid AND d.deptype = 'e'))"
         )
         actual_name, has_tables = cursor.fetchone()
         if actual_name != expected_name or has_tables:
@@ -44,7 +49,8 @@ def main():
             if digest != os.environ["REBUILD_MANIFEST_SHA256"]:
                 raise ValueError("Replay manifest changed after export")
             require_empty_target(connections["default"], name)
-            # The controller created an empty template0 database. Migrate explicitly;
+            # The controller created an empty database (template_postgis or template0).
+            # Migrate explicitly;
             # this is never a startup hook and is never run against the source.
             call_command("migrate", interactive=False, verbosity=0)
             from .collectors.sentinel_measure import replay_signal

@@ -20,6 +20,7 @@ import psycopg
 from psycopg import sql
 
 from .backups import backup_root, database_url
+from .scratch_template import template_clause
 
 TIMEOUT = 7200
 SCRATCH = re.compile(r"rebuild_check_[0-9a-f]{32}")
@@ -82,8 +83,12 @@ def rebuild_check(*, actor: str, run_id: str, url: str | None = None) -> dict:
     created = False
     try:
         with psycopg.connect(source, autocommit=True) as admin:
+            # A45: template_postgis when present (PostGIS preinstalled, so a role without
+            # superuser rights can migrate); otherwise the empty template0 as before.
             admin.execute(
-                sql.SQL("CREATE DATABASE {} TEMPLATE template0").format(sql.Identifier(name))
+                sql.SQL("CREATE DATABASE {}{}").format(
+                    sql.Identifier(name), template_clause(admin, "template0")
+                )
             )
         created = True
         worker("replay", root, target, actor=actor, run_id=run_id, manifest_hash=manifest_hash)
