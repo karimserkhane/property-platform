@@ -41,6 +41,49 @@ Table `evidence.construction_activity_measurement` (modèle `ConstructionActivit
 
 Ne sont jamais mesurés sans lien de parcelle relu : les points de courtier, d'éditeur ou déclarés ; une position sur une limite commune à deux parcelles ou hors de toute parcelle ; une parcelle de moins de 0,2 ha (trop peu de pixels) ou de plus de 10 ha (plan d'ensemble). Ces projets attendent un lien relu. Une mesure déduite reste une mesure de la parcelle, pas du projet : B07 doit afficher sa base (« parcelle qui contient le point du registre »). Code : `apps/api/src/property_platform/modules/evidence/projects/activity_import.py`.
 
+### Fiches sans parcelle mesurable (B09)
+
+```bash
+docker compose -f infra/local/compose.yaml exec api python manage.py project_parcel_gaps [--territory saadiyat-island]
+```
+
+La commande ne fait que lire. Elle liste, une ligne JSON par fiche, les fiches publiées qui ne sont pas une cible de `measurement_targets`, et le nombre de cibles et de raisons en fin de sortie (sortie d'erreur). Elle applique exactement la même règle que le choix des parcelles (même fonction `_derive`), donc une fiche sort de la liste dès qu'elle devient une cible.
+
+- **Priorité 1** : une lecture ADREC acceptée déclare une vente sur plan (`project_verification.off_plan`). **Priorité 2** : les autres.
+- **Raison, pour chaque lien de position actif** : `unreliable_position` (point de courtier, d'éditeur ou déclaré), `no_parcel` (hors de toute parcelle courante), `several_parcels` (sur une limite commune), `parcel_area_out_of_range` (parcelle hors de 0,2–10 ha, avec sa surface), `parcel_superseded` (parcelle relue remplacée depuis au cadastre). `no_position` : aucun lien de position.
+
+Ce qui en sort est une liste de relecture, pas un lien : un lien projet ↔ parcelle ne s'ajoute que par la commande auditée des rapprochements, avec sa source (plan de masse, registre, emprise), jamais par simple proximité ([PROJECT_POSITIONS.md](PROJECT_POSITIONS.md)).
+
+État du 14 novembre 2026 (base partagée, lecture seule) : **7 cibles**, **176 fiches** à relire sur 183, dont **27 ventes sur plan déclarées par ADREC**, toutes à Saadiyat. Raisons (une fiche peut en avoir plusieurs) : 128 points non fiables (123 points de courtier, 5 d'éditeur), 43 sans position, 8 sur une limite commune, 7 parcelles hors bornes, 1 hors parcelle. Parmi les 27 : 22 points non fiables, 6 sur une limite commune, 5 parcelles hors bornes, 3 sans position, 1 hors parcelle. Les 5 parcelles hors bornes sont une seule parcelle de 25 ha qui porte The Source, The Source II, The Source Terraces, The Arthouse et Louvre Abu Dhabi Residences : il faut une emprise ou un plan de masse par projet, la parcelle d'ensemble ne mesure aucun d'eux.
+
+Ce que disent les sources déjà collectées (relevé du 14 novembre 2026, lecture seule) :
+
+- **« Plusieurs parcelles » n'est presque jamais une limite commune.** Le cadastre Onwani publie, à côté des lots, des périmètres de projet (`land_use` `ProjectLimits`, `Residential Complex`, codes `…_TMP_PL…`) qui les recouvrent. Le point ADREC tombe alors dans un lot et dans un périmètre à la fois. Saadiyat Lagoons (Al Sidr, Ethir, Wilds 1 et 2) : un lot de villa de 850 à 1 500 m² dans un ensemble de 618 ha ; Bloom Arjaan : un périmètre de 97 ha et un lot de 508 ha ; Saadiyat Reserve The Dunes : un lot de villa et un périmètre de 42 ha ; Murjan Al Saadiyat : deux périmètres qui se chevauchent (10,1 et 4,4 ha) ; C3 Garden : un lot d'hôtel de 5,6 ha dans un périmètre de 155 ha. Aucune parcelle de 0,2 à 10 ha ne désigne sans ambiguïté l'un de ces projets.
+- **Aucune page collectée ne cite de numéro de lot.** Sur 7 715 captures en texte, une seule mention « PLOT » suivie d'un numéro, sans rapport avec un projet suivi. Les fiches ADREC (`ProjectDetail`) donnent `Plots: 0` et aucun identifiant de lot.
+- **Les fiches ADREC des ventes sur plan qui n'ont qu'un point d'agence n'ont pas de coordonnées** : 11 sur 13 vérifiées ont `Latitude`/`Longitude` vides. Les deux autres (Nobu Residences, Saadiyat Grove) tombent dans un lot de musée de 40 ha et dans le lot de 25 ha du district culturel.
+- **Les couches officielles 207 et 828 de l'AD-SDI** décrivent des plans d'ensemble (île, district, « Saadiyat Marina & Promenade District MP »), pas les projets un par un.
+- **Les fiches DCR de la DMT ne nomment pas les projets** (relevé du 14 novembre 2026, soir). 2 958 observations Onwani de Saadiyat portent un lien `DMT_DCR_URL` (`geosmart.dmt.gov.ae/dcr/<code>.pdf`) ; aucune n'a de `Permit_LastType`. Trois fiches lues (SDN2_P38, SDN1_11, SDN3_10) : règles d'urbanisme du lot (reculs, hauteur, surface constructible, accès, « Aldar Properties PJSC as master developer »), codes du plan d'ensemble Arcadis, aucun nom de projet commercial ni de promoteur du lot. Elles confirment un lot, pas son projet.
+- **Les recherches publiques** (pages de promoteurs, courtiers, presse, appels d'offres) ne citent pas de code de lot pour les ventes sur plan suivies ; la seule mention trouvée (« Manarat Al Saadiyat SDN8-P1 », liste de références d'un bureau d'études) vise un équipement, pas une vente sur plan.
+- **Les périmètres de projet du cadastre ne portent pas de nom** (relevé du 14 novembre 2026, nuit). Les 33 observations `ProjectLimits` n'ont qu'un code de secteur (`RR7_TMP_PL1`…), un statut et une surface : rien ne dit quel projet commercial un périmètre porte.
+- **Les plans de masse publiés ne donnent pas de numéro de lot.** Pages de plan de masse de courtiers (Murjan Al Saadiyat, Saadiyat Grove, The Row) et annonces de lancement : texte d'ambiance et dessin, sans code de lot ni coordonnées. Saadiyat Grove couvre 242 000 m² (communiqué d'Aldar), soit le lot de 25 ha du district culturel : la parcelle d'ensemble, pas celle de The Source ou de The Arthouse. Comparer à l'œil un dessin de brochure au cadastre serait un choix par ressemblance, que la règle exclut, et la brochure ne peut pas entrer dans le dépôt public.
+
+Conséquence : un lien relu demande une source par projet qui situe sa parcelle (plan de masse du promoteur, brochure avec numéro de lot, permis), à enregistrer comme page du projet puis à citer, daté, dans `project_registry.json` (cible `parcel`, espace de noms et identifiant de la parcelle, `reviewed_on`, `source_url`). Le lien n'agit qu'une fois la page capturée par le pipeline.
+
+### Bilan de la relecture (B09, 14 novembre 2026)
+
+**Aucun lien de parcelle ajouté. Cibles du flow `construction-activity` : 7 avant, 7 après.** Décision déléguée par Karim : clore la relecture sur ce constat plutôt que de choisir des parcelles sans source qui les nomme. Options écartées : lien par proximité ou par ressemblance avec un dessin (interdit par la règle du 26 octobre) ; mesurer le lot d'ensemble (25 ha, 97 ha, 618 ha : il mesure plusieurs projets à la fois, le signal serait faux). La source attendue est le permis de construire ou le QR de chantier, qui nomme le lot et le projet : [B10](../tasks/B10.md). Un lien relu s'ajoutera alors par `project_registry.json`, sans code nouveau, et `project_parcel_gaps` montrera la fiche sortir de la liste.
+
+Raison de l'échec, fiche par fiche (les 27 ventes sur plan ADREC, puis les premières fiches de priorité 2) :
+
+- **Lot d'ensemble seulement** (le point ADREC tombe dans un lot de villa et un périmètre de projet sans nom, aucune source ne situe le projet) : Bloom Arjaan, Murjan Al Saadiyat, Saadiyat Lagoons – Al Sidr, Saadiyat Lagoons – Ethir, Saadiyat Lagoons – Wilds Phase 1, Saadiyat Lagoons – Wilds Phase 2.
+- **Parcelle de 25 ha du district culturel partagée par plusieurs projets**, aucune emprise par projet publiée : Louvre Abu Dhabi Residences, The Arthouse, The Source, The Source II, The Source Terraces.
+- **Point ADREC hors de toute parcelle courante**, point de courtier seulement ailleurs : Jawaher Al Saadiyat.
+- **Point de courtier ou d'éditeur seulement**, fiche ADREC sans coordonnées ni numéro de lot, aucune page ne cite de lot : Henge Residences, Mamsha Garden, Mamsha Palm, Manarat Living III, Mandarin Oriental Residences Saadiyat Cultural District, Nobu Residences Abu Dhabi, Saadiyat Grove, Sei Saadiyat, Sensi, Solea, The Row Saadiyat, Vida Residences (V Residences).
+- **Aucune position** (ni ADREC, ni courtier) : Faya Al Saadiyat, Faya Al Saadiyat II, Four Seasons Private Residences at Saadiyat Beach.
+- **Priorité 2, Al Maryah** (point de courtier ou aucune position, aucune page ne cite de lot) : Al Maryah Vista 1, Al Maryah Vista 2, Four Seasons Private Residences Al Maryah Island, Jumeirah Residences Al Maryah Island, One&Only Private Residences Al Maryah Island, Rosewood Residences Abu Dhabi, The Ritz-Carlton Residences Al Maryah Island.
+
+Les 142 autres fiches de la liste ont les mêmes raisons (`project_parcel_gaps` les donne une par une) ; aucune n'a de source qui nomme son lot.
+
 ## Exécution
 
 Flow Prefect `property-platform-construction-activity`, déploiement `construction-activity` (paramètre `territory` : `all` ou un territoire enregistré), horaire `0 4 5 * *` (Asia/Dubai) enregistré inactif, activé sur le Prefect partagé le 30 octobre 2026. L'opération de domaine `construction_activity` ouvre un `ActivityCollector` (`collectors/sentinel_measure.py`) et appelle `activity_import.measure_activity` :

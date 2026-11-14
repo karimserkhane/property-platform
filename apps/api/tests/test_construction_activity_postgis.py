@@ -26,6 +26,8 @@ from property_platform.modules.evidence.models import (  # noqa: E402
     IngestionRun,
     MapObservation,
     ProjectIdentityLink,
+    ProjectSnapshot,
+    ProjectVerification,
     Source,
 )
 from property_platform.modules.evidence.projects import activity_import  # noqa: E402
@@ -207,6 +209,75 @@ def test_a_reliable_point_stands_for_the_single_parcel_that_contains_it(linked):
         reason="Reviewed project point",
     )
     assert len(activity_import.measurement_targets()) == 2
+
+
+def published(link, *, off_plan=None):
+    """An accepted reading of the project page, with an ADREC reading when off_plan is set."""
+    snapshot = ProjectSnapshot.objects.create(
+        project=link.project,
+        capture=link.capture,
+        receipt_key=hashlib.sha256(link.project.slug.encode()).hexdigest(),
+        extractor_version="test",
+        source_role="project",
+        title=link.project.name,
+        actor=ACTOR,
+    )
+    if off_plan is not None:
+        ProjectVerification.objects.create(
+            snapshot=snapshot,
+            authority="adrec",
+            record_id=link.project.slug,
+            fact_scope="project",
+            registration_number="P-" + link.project.slug,
+            off_plan=off_plan,
+            evidence_pointer="/Data/0",
+        )
+
+
+def test_projects_without_a_parcel_to_measure_are_queued_with_their_reason(linked):
+    registered = "authority_registered_project_coordinates"
+    published(linked)
+    published(located("measured", (54.4005, 24.4905), registered), off_plan=True)
+    published(located("brokered", (54.4005, 24.4905), "broker_project_coordinates"))
+    plot("west", (54.41, 24.49, 54.411, 24.491))
+    plot("east", (54.411, 24.49, 54.412, 24.491))
+    published(located("boundary", (54.411, 24.4905), registered), off_plan=True)
+    master = plot("master", (54.42, 24.49, 54.43, 24.50))
+    published(located("master", (54.425, 24.495), registered), off_plan=False)
+    published(located("sea", (54.5, 24.6), registered))
+    unplaced = Project.objects.create(
+        slug="unplaced",
+        name="unplaced",
+        territory_id="al-reem-island",
+        developer=linked.project.developer,
+        website_url="https://x.ae/unplaced",
+    )
+    published(
+        ProjectIdentityLink(
+            project=unplaced, capture=capture(finished_run("project:unplaced"), "https://x.ae/u")
+        )
+    )
+    # Not published: no accepted reading, so no dossier to review.
+    located("hidden", (54.5, 24.6), registered)
+    queue = activity_import.parcel_review_queue()
+    assert [(row["slug"], row["priority"], row["reasons"]) for row in queue] == [
+        ("boundary", 1, ["several_parcels"]),
+        ("brokered", 2, ["unreliable_position"]),
+        ("master", 2, ["parcel_area_out_of_range"]),
+        ("sea", 2, ["no_parcel"]),
+        ("unplaced", 2, ["no_position"]),
+    ]
+    detail = queue[2]["links"][0]
+    assert (detail["method"], detail["parcel"]) == ("authority_point", str(master.pk))
+    assert detail["area_m2"] > activity_import.DERIVED_AREA_M2[1]
+    assert queue[1]["links"][0]["method"] == "broker_point"
+    assert activity_import.parcel_review_queue("saadiyat-island") == []
+    # A reviewed parcel later replaced in the cadastre needs a new review.
+    replacement = plot("tower-2026", (54.40, 24.49, 54.401, 24.491))
+    linked.parcel.superseded_by = replacement
+    linked.parcel.save(update_fields=["superseded_by"])
+    [tower] = [row for row in activity_import.parcel_review_queue() if row["slug"] == "tower"]
+    assert tower["reasons"] == ["parcel_superseded"]
 
 
 def test_a_measurement_is_stored_once_per_scene_pair_and_journalled(linked):

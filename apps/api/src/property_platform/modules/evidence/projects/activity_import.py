@@ -13,11 +13,11 @@ from datetime import datetime
 from decimal import Decimal
 
 from django.db import connection, transaction
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.db.models.expressions import RawSQL
 from django.utils import timezone
 
-from property_platform.modules.catalog.models import Parcel
+from property_platform.modules.catalog.models import Parcel, Project
 from property_platform.object_storage.core import MAX_BYTES as OBJECT_MAX_BYTES
 
 from ..activity_models import (
@@ -30,8 +30,8 @@ from ..activity_models import (
 )
 from ..history.journals import audit_context
 from ..media_storage import read_capture
-from ..models import Capture, IngestionRun, ProjectIdentityLink, Source
-from .project_queries import location_method
+from ..models import Capture, IngestionRun, ProjectIdentityLink, ProjectVerification, Source
+from .project_queries import _accepted_snapshots, location_method
 from .queries import map_provenances
 
 logger = logging.getLogger(__name__)
@@ -88,6 +88,52 @@ def _parcels(**filters):
     )
 
 
+def _active_links(territory=None):
+    links = (
+        ProjectIdentityLink.objects.filter(active=True, capture__run__status="succeeded")
+        .filter(Q(parcel__isnull=False) | Q(place__active=True) | Q(building__active=True))
+        .select_related("project", "place", "building", "parcel")
+        .order_by("id")
+    )
+    if territory:
+        links = links.filter(project__territory_id=territory)
+    return list(links)
+
+
+@dataclass(frozen=True)
+class Derivation:
+    """What a reviewed position link says about the plot: one parcel, or why none."""
+
+    method: str
+    parcel: Parcel | None = None
+    area_m2: int | None = None
+    reason: str | None = None
+
+
+def _derive(link, points):
+    if link.place_id is not None:
+        method = location_method("place", points.get(str(link.place_id), {}).get("_method"))
+        position = link.place.geometry
+    else:
+        method, position = "building_footprint", link.building.geometry.point_on_surface
+    if method not in DERIVING_METHODS:
+        return Derivation(method, reason="unreliable_position")
+    # A position on a shared boundary, or outside every parcel, has no single plot.
+    found = list(_parcels(geometry__intersects=position)[:2])
+    if len(found) != 1:
+        return Derivation(method, reason="several_parcels" if found else "no_parcel")
+    parcel, area = found[0], round(found[0].area_m2)
+    if not DERIVED_AREA_M2[0] <= area <= DERIVED_AREA_M2[1]:
+        return Derivation(method, parcel, area, "parcel_area_out_of_range")
+    return Derivation(method, parcel, area)
+
+
+def _points(links):
+    return map_provenances(
+        "place", [link.place_id for link in links if link.place_id], include_method=True
+    )
+
+
 def measurement_targets(territory=None):
     """Project parcels to measure, in the order of the links that justify them.
 
@@ -96,19 +142,11 @@ def measurement_targets(territory=None):
     footprint, when that parcel is between 0.2 and 10 ha (owner decision of 25 October
     2026). Broker, publisher and declared points never stand for a plot.
     """
-    links = (
-        ProjectIdentityLink.objects.filter(active=True, capture__run__status="succeeded")
-        .filter(
-            Q(parcel__isnull=False, parcel__superseded_by__isnull=True)
-            | Q(place__active=True)
-            | Q(building__active=True)
-        )
-        .select_related("project", "place", "building")
-        .order_by("id")
-    )
-    if territory:
-        links = links.filter(project__territory_id=territory)
-    links = list(links)
+    links = [
+        link
+        for link in _active_links(territory)
+        if link.parcel_id is None or link.parcel.superseded_by_id is None
+    ]
     targets, reviewed = {}, set()
     for link in links:
         if link.parcel_id is not None:
@@ -118,31 +156,78 @@ def measurement_targets(territory=None):
                 (link.project_id, parcel.pk),
                 Target(link, parcel, "reviewed_parcel", "cadastral_parcel", round(parcel.area_m2)),
             )
-    points = map_provenances(
-        "place", [link.place_id for link in links if link.place_id], include_method=True
-    )
+    points = _points(links)
     for link in links:
         if link.parcel_id is not None or link.project_id in reviewed:
             continue
-        if link.place_id is not None:
-            method = location_method("place", points.get(str(link.place_id), {}).get("_method"))
-            position = link.place.geometry
-        else:
-            method, position = "building_footprint", link.building.geometry.point_on_surface
-        if method not in DERIVING_METHODS:
-            continue
-        # A position on a shared boundary, or outside every parcel, has no single plot.
-        found = list(_parcels(geometry__intersects=position)[:2])
-        if len(found) != 1:
-            continue
-        parcel, area = found[0], round(found[0].area_m2)
-        if not DERIVED_AREA_M2[0] <= area <= DERIVED_AREA_M2[1]:
-            continue
-        targets.setdefault(
-            (link.project_id, parcel.pk),
-            Target(link, parcel, "parcel_containing_position", method, area),
-        )
+        derived = _derive(link, points)
+        if derived.reason is None:
+            targets.setdefault(
+                (link.project_id, derived.parcel.pk),
+                Target(
+                    link,
+                    derived.parcel,
+                    "parcel_containing_position",
+                    derived.method,
+                    derived.area_m2,
+                ),
+            )
     return sorted(targets.values(), key=lambda target: (target.link.id, str(target.parcel.pk)))
+
+
+def parcel_review_queue(territory=None):
+    """Published projects with no parcel to measure, and why, for link review (B09).
+
+    Priority 1 is a project whose accepted ADREC reading declares an off-plan sale,
+    priority 2 any other. Each active link gives its reason: a reviewed parcel since
+    replaced, a position that does not stand for a plot, or a position whose parcel
+    is missing, shared or outside 0.2 to 10 ha. A project without position links
+    waits for one. Read-only: links are added by the audited review commands only.
+    """
+    accepted = _accepted_snapshots()
+    projects = Project.objects.filter(Exists(accepted.filter(project_id=OuterRef("pk"))))
+    if territory:
+        projects = projects.filter(territory_id=territory)
+    projects = projects.annotate(
+        adrec_off_plan=Exists(
+            ProjectVerification.objects.filter(
+                snapshot__in=accepted, snapshot__project_id=OuterRef("pk"), off_plan=True
+            )
+        )
+    ).values("id", "slug", "name", "territory_id", "adrec_off_plan")
+    measured = {target.project_id for target in measurement_targets(territory)}
+    links = {}
+    for link in _active_links(territory):
+        links.setdefault(link.project_id, []).append(link)
+    points = _points([link for project in links.values() for link in project])
+    rows = []
+    for project in projects:
+        if project["id"] in measured:
+            continue
+        details = []
+        for link in links.get(project["id"], []):
+            if link.parcel_id is not None:
+                details.append(
+                    {"link": link.id, "method": "cadastral_parcel", "reason": "parcel_superseded"}
+                )
+                continue
+            derived = _derive(link, points)
+            detail = {"link": link.id, "method": derived.method, "reason": derived.reason}
+            if derived.parcel is not None:
+                detail |= {"parcel": str(derived.parcel.pk), "area_m2": derived.area_m2}
+            details.append(detail)
+        rows.append(
+            {
+                "slug": project["slug"],
+                "name": project["name"],
+                "territory_id": project["territory_id"],
+                "adrec_off_plan": project["adrec_off_plan"],
+                "priority": 1 if project["adrec_off_plan"] else 2,
+                "reasons": sorted({detail["reason"] for detail in details}) or ["no_position"],
+                "links": details,
+            }
+        )
+    return sorted(rows, key=lambda row: (row["priority"], row["territory_id"], row["name"]))
 
 
 def _scene(window):
