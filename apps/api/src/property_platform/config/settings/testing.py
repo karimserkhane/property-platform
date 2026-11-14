@@ -26,3 +26,10 @@ else:
         if not re.fullmatch(r"test_property_platform_[a-z0-9]{1,40}", test_name):
             raise ValueError("PROPERTY_PLATFORM_TEST_DB_NAME must be test_property_platform_<id>")
         DATABASES["default"]["TEST"] = {"NAME": test_name}  # noqa: F405
+    # A45: a role without superuser rights cannot CREATE EXTENSION postgis, so its test database
+    # is copied from the PostGIS image template, where the extension is already installed.
+    test_template = os.environ.get("PROPERTY_PLATFORM_TEST_DB_TEMPLATE", "")
+    if test_template:
+        if test_template != "template_postgis":
+            raise ValueError("PROPERTY_PLATFORM_TEST_DB_TEMPLATE must be template_postgis")
+        DATABASES["default"].setdefault("TEST", {})["TEMPLATE"] = test_template  # noqa: F405

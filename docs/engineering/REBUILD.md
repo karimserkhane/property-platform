@@ -43,8 +43,11 @@ Ordre du flow :
    pipelines/triggers sur le même instantané que les captures exportées.
 2. Écrire un paquet privé sous `BACKUP_DIR/rebuild-checks/<UUID Prefect>/` :
    `manifest.json`, octets sous `blobs/<SHA-256>`. Aucun dump SQL ni secret.
-3. Créer une nouvelle base `rebuild_check_<UUID aléatoire>` depuis `template0`.
-   Refuser une cible existante/non vide ; exécuter les migrations explicites.
+3. Créer une nouvelle base `rebuild_check_<UUID aléatoire>` depuis `template_postgis`
+   (PostGIS déjà installé, pour qu'un rôle sans super-utilisateur puisse migrer, voir
+   [DATABASE_ROLES.md](DATABASE_ROLES.md)), ou depuis `template0` si le serveur ne l'a pas.
+   Refuser une cible existante/non vide (les tables des extensions, comme
+   `spatial_ref_sys`, ne comptent pas) ; exécuter les migrations explicites.
 4. Rejouer les acquisitions par dépendance : parcelles, comparaison AD-SDI,
    géographie/OSM, références, présentations, projets, catalogues, contexte/marché.
    L'ordre des exécutions originales est préservé dans chaque phase.

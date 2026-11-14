@@ -12,12 +12,15 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 import psycopg
 from psycopg import sql
+
+from .scratch_template import provided_objects, restore_list, template_available, template_clause
 
 PREFIX = "property_platform-"
 STAMP = "%Y%m%dT%H%M%SZ"
@@ -286,22 +289,45 @@ def restore_check(
         return {"name": name, "ok": False, "mismatches": ["dump checksum differs from manifest"]}
     scratch = f"restore_check_{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
     with psycopg.connect(url, autocommit=True) as admin:
-        admin.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(scratch)))
-    try:
-        subprocess.run(
-            [
-                "pg_restore",
-                "--no-owner",
-                "--no-privileges",
-                "--exit-on-error",
-                f"--dbname={scratch}",
-                str(dump),
-            ],
-            env=pg_environment(url, scratch),
-            check=True,
-            timeout=DUMP_TIMEOUT,
+        # A45: from template_postgis when the server has it, so a role without superuser
+        # rights can restore; the extensions it provides are then skipped below.
+        from_template = template_available(admin)
+        admin.execute(
+            sql.SQL("CREATE DATABASE {}{}").format(sql.Identifier(scratch), template_clause(admin))
         )
+    try:
         parts = urlsplit(url)
+        options = []
+        with tempfile.TemporaryDirectory() as folder:
+            if from_template:
+                with psycopg.connect(parts._replace(path=f"/{scratch}").geturl()) as fresh:
+                    with fresh.cursor() as cursor:
+                        provided = provided_objects(cursor)
+                toc = subprocess.run(
+                    ["pg_restore", "--list", str(dump)],
+                    env=pg_environment(url, scratch),
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    timeout=DUMP_TIMEOUT,
+                ).stdout
+                listing = Path(folder) / "restore.list"
+                listing.write_text(restore_list(toc, provided)[0], encoding="utf-8")
+                options = [f"--use-list={listing}"]
+            subprocess.run(
+                [
+                    "pg_restore",
+                    "--no-owner",
+                    "--no-privileges",
+                    "--exit-on-error",
+                    *options,
+                    f"--dbname={scratch}",
+                    str(dump),
+                ],
+                env=pg_environment(url, scratch),
+                check=True,
+                timeout=DUMP_TIMEOUT,
+            )
         with psycopg.connect(parts._replace(path=f"/{scratch}").geturl()) as restored:
             with restored.cursor() as cursor:
                 counts = table_counts(cursor)
