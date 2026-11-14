@@ -64,8 +64,25 @@ Ce que disent les sources déjà collectées (relevé du 14 novembre 2026, lectu
 - **Les couches officielles 207 et 828 de l'AD-SDI** décrivent des plans d'ensemble (île, district, « Saadiyat Marina & Promenade District MP »), pas les projets un par un.
 - **Les fiches DCR de la DMT ne nomment pas les projets** (relevé du 14 novembre 2026, soir). 2 958 observations Onwani de Saadiyat portent un lien `DMT_DCR_URL` (`geosmart.dmt.gov.ae/dcr/<code>.pdf`) ; aucune n'a de `Permit_LastType`. Trois fiches lues (SDN2_P38, SDN1_11, SDN3_10) : règles d'urbanisme du lot (reculs, hauteur, surface constructible, accès, « Aldar Properties PJSC as master developer »), codes du plan d'ensemble Arcadis, aucun nom de projet commercial ni de promoteur du lot. Elles confirment un lot, pas son projet.
 - **Les recherches publiques** (pages de promoteurs, courtiers, presse, appels d'offres) ne citent pas de code de lot pour les ventes sur plan suivies ; la seule mention trouvée (« Manarat Al Saadiyat SDN8-P1 », liste de références d'un bureau d'études) vise un équipement, pas une vente sur plan.
+- **Les périmètres de projet du cadastre ne portent pas de nom** (relevé du 14 novembre 2026, nuit). Les 33 observations `ProjectLimits` n'ont qu'un code de secteur (`RR7_TMP_PL1`…), un statut et une surface : rien ne dit quel projet commercial un périmètre porte.
+- **Les plans de masse publiés ne donnent pas de numéro de lot.** Pages de plan de masse de courtiers (Murjan Al Saadiyat, Saadiyat Grove, The Row) et annonces de lancement : texte d'ambiance et dessin, sans code de lot ni coordonnées. Saadiyat Grove couvre 242 000 m² (communiqué d'Aldar), soit le lot de 25 ha du district culturel : la parcelle d'ensemble, pas celle de The Source ou de The Arthouse. Comparer à l'œil un dessin de brochure au cadastre serait un choix par ressemblance, que la règle exclut, et la brochure ne peut pas entrer dans le dépôt public.
 
 Conséquence : un lien relu demande une source par projet qui situe sa parcelle (plan de masse du promoteur, brochure avec numéro de lot, permis), à enregistrer comme page du projet puis à citer, daté, dans `project_registry.json` (cible `parcel`, espace de noms et identifiant de la parcelle, `reviewed_on`, `source_url`). Le lien n'agit qu'une fois la page capturée par le pipeline.
+
+### Bilan de la relecture (B09, 14 novembre 2026)
+
+**Aucun lien de parcelle ajouté. Cibles du flow `construction-activity` : 7 avant, 7 après.** Décision déléguée par Karim : clore la relecture sur ce constat plutôt que de choisir des parcelles sans source qui les nomme. Options écartées : lien par proximité ou par ressemblance avec un dessin (interdit par la règle du 26 octobre) ; mesurer le lot d'ensemble (25 ha, 97 ha, 618 ha : il mesure plusieurs projets à la fois, le signal serait faux). La source attendue est le permis de construire ou le QR de chantier, qui nomme le lot et le projet : [B10](../tasks/B10.md). Un lien relu s'ajoutera alors par `project_registry.json`, sans code nouveau, et `project_parcel_gaps` montrera la fiche sortir de la liste.
+
+Raison de l'échec, fiche par fiche (les 27 ventes sur plan ADREC, puis les premières fiches de priorité 2) :
+
+- **Lot d'ensemble seulement** (le point ADREC tombe dans un lot de villa et un périmètre de projet sans nom, aucune source ne situe le projet) : Bloom Arjaan, Murjan Al Saadiyat, Saadiyat Lagoons – Al Sidr, Saadiyat Lagoons – Ethir, Saadiyat Lagoons – Wilds Phase 1, Saadiyat Lagoons – Wilds Phase 2.
+- **Parcelle de 25 ha du district culturel partagée par plusieurs projets**, aucune emprise par projet publiée : Louvre Abu Dhabi Residences, The Arthouse, The Source, The Source II, The Source Terraces.
+- **Point ADREC hors de toute parcelle courante**, point de courtier seulement ailleurs : Jawaher Al Saadiyat.
+- **Point de courtier ou d'éditeur seulement**, fiche ADREC sans coordonnées ni numéro de lot, aucune page ne cite de lot : Henge Residences, Mamsha Garden, Mamsha Palm, Manarat Living III, Mandarin Oriental Residences Saadiyat Cultural District, Nobu Residences Abu Dhabi, Saadiyat Grove, Sei Saadiyat, Sensi, Solea, The Row Saadiyat, Vida Residences (V Residences).
+- **Aucune position** (ni ADREC, ni courtier) : Faya Al Saadiyat, Faya Al Saadiyat II, Four Seasons Private Residences at Saadiyat Beach.
+- **Priorité 2, Al Maryah** (point de courtier ou aucune position, aucune page ne cite de lot) : Al Maryah Vista 1, Al Maryah Vista 2, Four Seasons Private Residences Al Maryah Island, Jumeirah Residences Al Maryah Island, One&Only Private Residences Al Maryah Island, Rosewood Residences Abu Dhabi, The Ritz-Carlton Residences Al Maryah Island.
+
+Les 142 autres fiches de la liste ont les mêmes raisons (`project_parcel_gaps` les donne une par une) ; aucune n'a de source qui nomme son lot.
 
 ## Exécution
 
