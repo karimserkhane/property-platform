@@ -10,7 +10,7 @@ Tâche [A45](../tasks/A45.md), commencée le 14 novembre 2026. Jusqu'ici l'API, 
 | --- | --- | --- |
 | `pp_agent_readonly` | Agents qui lisent la base partagée | Connexion à `property_platform` ; lecture de toutes les tables (`pg_read_all_data`) ; transactions en lecture seule par défaut, requêtes limitées à 120 s. Aucun droit d'écriture : même en repassant la session en écriture, PostgreSQL refuse (`permission denied`). |
 | `pp_agent_scratch` | Agents qui essaient une donnée réelle | Propriétaire des bases `scratch_*` ; **aucune connexion** à `property_platform`. |
-| `pp_app` | API et ingestion, plus tard | Ni super-utilisateur ni création de rôle ; peut créer des bases (contrôles `restore-check`, `rebuild-check`, bases de test). Connexion à `property_platform`, mais pas encore propriétaire des schémas : voir « Reste à faire ». |
+| `pp_app` | API et ingestion, plus tard | Ni super-utilisateur ni création de rôle ; peut créer des bases (contrôles `restore-check`, `rebuild-check`, bases de test). Lecture de toutes les tables (`pg_read_all_data`), pour que `pg_dump` lise aussi les tables des extensions PostGIS (`tiger`, `topology`). Connexion à `property_platform`, mais pas encore propriétaire des schémas : voir « Reste à faire ». |
 
 La procédure retire aussi la connexion à `property_platform` au rôle `PUBLIC` : seuls le propriétaire, les super-utilisateurs, `pp_agent_readonly` et `pp_app` s'y connectent. Les autres bases du serveur ne changent pas.
 
@@ -58,8 +58,24 @@ Sur un serveur PostGIS jetable (même image figée, données en mémoire, sans r
 - `pp_app` se connecte mais ne lit pas encore `real_estate` (pas propriétaire) ;
 - création refusée avec 0,9 Go libres ; création, recréation (rien à faire), suppression, re-suppression (rien à faire).
 
+## Sauvegarde et contrôles sous `pp_app` (essai du 14 novembre 2026)
+
+PostGIS n'est pas une extension « de confiance » : seul un super-utilisateur peut l'installer. Mesuré sur un serveur jetable (même image, réseau interne sans sortie, données en mémoire) :
+
+- `pg_restore` d'une sauvegarde complète par `pp_app` dans une base vide : refusé (`permission denied to create extension "postgis"`) ;
+- dans une base créée depuis `template_postgis` : refusé aussi, car le modèle a déjà les schémas `tiger` et `topology` (`schema "tiger" already exists`), les commentaires des extensions et les lignes de leurs tables, qui appartiennent au super-utilisateur ;
+- `pg_dump` complet par `pp_app` : refusé sur `tiger` tant qu'il n'a pas `pg_read_all_data`.
+
+D'où, dans le code de l'ingestion (`scratch_template.py`) :
+
+- `restore-check` crée sa base depuis `template_postgis` quand le serveur l'a, relit dans cette base neuve ce que le modèle fournit (extensions, schémas, tables des extensions), puis restaure avec une liste `pg_restore --use-list` qui saute exactement ces objets. Les schémas métier (`real_estate`, `evidence`, tables Django) sont restaurés en entier ; seules les lignes ajoutées à la main dans une table d'extension (un SRID personnalisé dans `spatial_ref_sys`, par exemple) ne le seraient pas, et le projet n'en ajoute pas.
+- `rebuild-check` crée sa base depuis `template_postgis` (sinon `template0`, comme avant) ; la migration de Django trouve PostGIS déjà là (`CREATE EXTENSION IF NOT EXISTS` ne fait rien). Le contrôle « base vide » ignore les tables des extensions.
+- Sans `template_postgis`, tout se passe comme avant.
+
+Essai complet sous `pp_app` (image de l'ingestion, code de la branche, conteneur à part) : procédure `roles --yes`, schémas métier possédés par `pp_app`, `create_backup` puis `restore_check` verts (2 tables, 252 lignes, aucun écart), base `rebuild_check_*` créée, PostGIS accepté par `CREATE EXTENSION IF NOT EXISTS`, cible reconnue vide, puis supprimée. Le serveur jetable a été supprimé ensuite.
+
 ## Reste à faire (A45)
 
-1. **Adoption par l'API et l'ingestion.** Transférer à `pp_app` la propriété des schémas et objets métier (`real_estate`, `evidence`, tables Django), sans toucher aux objets des extensions ; `REASSIGN OWNED` est impossible depuis le rôle de création du serveur. Puis faire créer les bases jetables de `restore-check`, `rebuild-check` et des tests depuis `template_postgis`, puisque PostGIS n'est pas une extension « de confiance ».
-2. **Essai à part** de ce changement d'identité : restauration de la dernière sauvegarde dans un serveur jetable, migrations, `checks-api`, sauvegarde, `restore-check` et `rebuild-check` sous `pp_app`, avant de le proposer.
+1. **Propriété des objets métier.** Transférer à `pp_app` la propriété des schémas et objets métier (`real_estate`, `evidence`, tables Django), sans toucher aux objets des extensions ; `REASSIGN OWNED` est impossible depuis le rôle de création du serveur. Faire créer les bases de test de `checks-api` depuis `template_postgis` (réglage `TEST` de Django).
+2. **Essai à part** de ce changement d'identité : restauration de la dernière sauvegarde réelle dans un serveur jetable, transfert de propriété, migrations, `checks-api`, sauvegarde, `restore-check` et `rebuild-check` complet sous `pp_app`, avant de le proposer.
 3. **Après fusion, avec Karim** : `roles --yes` sur le serveur partagé, puis bascule des fichiers Compose vers `pp_app`.
