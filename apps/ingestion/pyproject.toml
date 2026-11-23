@@ -4,13 +4,13 @@ version = "0.1.0"
 description = "Scheduled acquisition and ingestion using the platform domain services"
 requires-python = ">=3.14.10,<3.15"
 dependencies = [
-  "prefect==3.9.0",
+  "prefect==3.9.3",
   # Prefect's scheduled-run bulk inserts are incompatible with SQLAlchemy 2.1 hybrids.
-  "sqlalchemy[asyncio]==2.0.55",
+  "sqlalchemy[asyncio]==2.0.57",
   "httpx==0.28.1",
-  "pyarrow==26.0.0",
+  "pyarrow==26.0.1",
   # Raster arithmetic of the Sentinel-2 activity signal (B06); never in the API runtime.
-  "numpy==2.5.4",
+  "numpy==2.5.5",
   # Bounded COG window reads of the same signal (B06); GDAL ships inside the wheel.
   "rasterio==1.5.2",
   "property-platform-api",
@@ -20,7 +20,7 @@ dependencies = [
 property-platform-api = { path = "../api", editable = true }
 
 [dependency-groups]
-dev = ["pytest==9.2.0", "pytest-django==4.14.0", "ruff==0.17.3"]
+dev = ["pytest==9.2.0", "pytest-django==4.14.0", "ruff==0.17.5"]
 
 [build-system]
 requires = ["hatchling==1.33.0"]
